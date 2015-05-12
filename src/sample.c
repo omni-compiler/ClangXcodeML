@@ -17,6 +17,13 @@ main()
 
   printf("z=(%f,%f)\n",z.real,z.img);
 }
+
+typedef struct dummy {
+  int dummy_int;
+  unsigned dummy_unsigned;
+  double dummy_double;
+} dummy_t;
+
 complex_t complex_add(complex_t x, double y)
 {
   x.real += y;
