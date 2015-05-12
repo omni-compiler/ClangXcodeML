@@ -3,17 +3,43 @@
 #include <libxml/encoding.h>
 #include <libxml/xmlwriter.h>
 
+typedef struct {
+  xmlNodePtr curNode;
+  xmlNodePtr curBlock;
+  xmlNodePtr curTypeTable;
+  xmlDocPtr xmlDoc;
+} MyClientData;
+
+void getLocation(CXCursor cursor, CXString *filename, unsigned *lineno, unsigned *column)
+{
+  CXSourceLocation loc = clang_getCursorLocation(cursor);
+  CXString dummy_filename;
+  unsigned dummy_lineno;
+  unsigned dummy_column;
+
+  if (filename == NULL) {
+    filename = &dummy_filename;
+  }
+  if (lineno == NULL) {
+    lineno = &dummy_lineno;
+  }
+  if (column == NULL) {
+    column = &dummy_column;
+  }
+
+  clang_getPresumedLocation(loc, filename, lineno, column);
+}
+
 xmlChar *getLocationAsString(CXCursor cursor)
 {
   xmlChar locStr[BUFSIZ];
   xmlChar *ret = NULL;
 
   // get filename, line # and column #.
-  CXSourceLocation loc = clang_getCursorLocation(cursor);
   CXString filename;
   unsigned lineno;
   unsigned column;
-  clang_getPresumedLocation(loc, &filename, &lineno, &column);
+  getLocation(cursor, &filename, &lineno, &column);
 
   xmlStrPrintf(locStr, BUFSIZ-1,
                BAD_CAST "%s:%d:%d",
@@ -27,23 +53,43 @@ xmlChar *getLocationAsString(CXCursor cursor)
   return ret;
 }
 
+xmlNodePtr getTypeTable(MyClientData *myclientdata)
+{
+  if (myclientdata->curTypeTable == NULL) {
+    myclientdata->curTypeTable = xmlNewChild(myclientdata->curBlock, NULL,
+					     BAD_CAST "typeTable", NULL);
+  }
+  return myclientdata->curTypeTable;
+}
+
+
 CXChildVisitResult visitChildrenCallback(CXCursor cursor, CXCursor parent, CXClientData client_data)
 {
-  xmlTextWriterPtr xmlWriter = static_cast<xmlTextWriterPtr>(client_data);
+  MyClientData *parentclientdata = static_cast<MyClientData*>(client_data);
+  MyClientData myclientdata = {NULL, NULL, NULL, NULL};
   enum CXCursorKind kind = clang_getCursorKind(cursor);
   CXString kindStr = clang_getCursorKindSpelling(kind);
   xmlChar *kindname = BAD_CAST clang_getCString (kindStr);
+  xmlNodePtr parentnode = parentclientdata->curNode;
 
   switch (kind) {
   case CXCursor_UnexposedDecl: break;
-  case CXCursor_StructDecl: kindname = BAD_CAST "structType"; break;
+  case CXCursor_StructDecl:
+    kindname = BAD_CAST "structType";
+    parentnode = getTypeTable(parentclientdata);
+    break;
   case CXCursor_UnionDecl: break;
   case CXCursor_ClassDecl: break;
   case CXCursor_EnumDecl: break;
   case CXCursor_FieldDecl: break;
   case CXCursor_EnumConstantDecl: break;
-  case CXCursor_FunctionDecl: kindname = BAD_CAST "functionDefinition"; break;
-  case CXCursor_VarDecl: kindname = BAD_CAST "varDecl"; break;
+  case CXCursor_FunctionDecl:
+    kindname = BAD_CAST "functionDefinition";
+    break;
+  case CXCursor_VarDecl:
+    kindname = BAD_CAST "varDecl";
+    parentnode = getTypeTable(parentclientdata);
+    break;
   case CXCursor_ParmDecl: break;
   case CXCursor_ObjCInterfaceDecl: break;
   case CXCursor_ObjCCategoryDecl: break;
@@ -146,7 +192,11 @@ CXChildVisitResult visitChildrenCallback(CXCursor cursor, CXCursor parent, CXCli
     //case CXCursor_FirstStmt:
   case CXCursor_UnexposedStmt: break;
   case CXCursor_LabelStmt: break;
-  case CXCursor_CompoundStmt: kindname = BAD_CAST "compoundStatement"; break;
+  case CXCursor_CompoundStmt:
+    kindname = BAD_CAST "compoundStatement";
+    myclientdata.curBlock = myclientdata.curNode;
+    myclientdata.curTypeTable = NULL;
+    break;
   case CXCursor_CaseStmt: break;
   case CXCursor_DefaultStmt: break;
   case CXCursor_IfStmt: break;
@@ -239,17 +289,13 @@ CXChildVisitResult visitChildrenCallback(CXCursor cursor, CXCursor parent, CXCli
 #endif
   }
 
-  xmlTextWriterStartElement(xmlWriter, kindname);
+  xmlNodePtr node = xmlNewChild(parentnode, NULL, kindname, NULL);
   clang_disposeString(kindStr);
 
   xmlChar *location = getLocationAsString(cursor);
   CXString displayNameStr = clang_getCursorDisplayName(cursor);
-  xmlTextWriterWriteAttribute(xmlWriter,
-                              BAD_CAST "src",
-                              location);
-  xmlTextWriterWriteAttribute(xmlWriter,
-                              BAD_CAST "displayname",
-                              BAD_CAST clang_getCString(displayNameStr));
+  xmlNewProp(node, BAD_CAST "src", location);
+  xmlNewProp(node, BAD_CAST "displayname", BAD_CAST clang_getCString(displayNameStr));
   clang_disposeString(displayNameStr);
   free(location);
 
@@ -264,11 +310,9 @@ CXChildVisitResult visitChildrenCallback(CXCursor cursor, CXCursor parent, CXCli
 
  end:
   // visit children recursively.
-  clang_visitChildren(cursor,
-                      visitChildrenCallback,
-                      xmlWriter);
-  // emit a closing tag corresponds to the header emitted above
-  xmlTextWriterEndElement(xmlWriter);
+  myclientdata = *parentclientdata;
+  myclientdata.curNode = node;
+  clang_visitChildren(cursor, visitChildrenCallback, &myclientdata);
 
   return CXChildVisit_Continue;
 }
@@ -278,28 +322,35 @@ int main(int argc, char *argv[])
   // create index w/ excludeDeclsFromPCH = 1, displayDiagnostics=1.
   CXIndex index = clang_createIndex(1 /* excludeDeclarationFromPCH */,
 				    1 /* displayDiagnostics */);
+  MyClientData myclientdata = {NULL, NULL, NULL, NULL};
 
   // load a *.ast file.
   CXTranslationUnit tu = clang_createTranslationUnit(index, argv[1]);
   if (tu != NULL) {
     //xmlBufferPtr xmlBuffer = xmlBufferCreate();
-    xmlDocPtr xmlDoc = xmlNewDoc(BAD_CAST "1.0");
-    xmlTextWriterPtr xmlWriter = xmlNewTextWriterDoc(&xmlDoc, 0);
+    xmlDocPtr doc = xmlNewDoc(BAD_CAST "1.0");
+    xmlNodePtr node;
+    CXCursor cursor = clang_getTranslationUnitCursor(tu);
+    CXString filename;
 
-    xmlTextWriterStartDocument(xmlWriter, NULL, "UTF-8", NULL);
-    xmlTextWriterStartElement(xmlWriter, BAD_CAST "XcodeProgram");
+    getLocation(cursor, &filename, NULL, NULL);
 
-    clang_visitChildren(clang_getTranslationUnitCursor(tu),
-                        visitChildrenCallback,
-                        xmlWriter);
+    node = xmlNewNode(NULL, BAD_CAST "XcodeProgram");
+    xmlNewProp(node, BAD_CAST "source", BAD_CAST clang_getCString(filename));
+    xmlNewProp(node, BAD_CAST "language", BAD_CAST "C");
+    xmlNewProp(node, BAD_CAST "time", BAD_CAST "1970-01-01 00:00:00");
+    clang_disposeString(filename);
 
-    xmlTextWriterEndElement(xmlWriter); // XcodeProgram
-    xmlTextWriterEndDocument(xmlWriter);
-    xmlFreeTextWriter(xmlWriter);
+    xmlDocSetRootElement(doc, node);
+    myclientdata.xmlDoc = doc;
+    myclientdata.curBlock = node;
+    myclientdata.curTypeTable = NULL;
+    myclientdata.curNode = node;
+    clang_visitChildren(cursor, visitChildrenCallback, &myclientdata);
 
     // print the XML text to the standard output.
-    xmlDocFormatDump(stdout, xmlDoc, 1);
-    xmlFreeDoc(xmlDoc);
+    xmlSaveFormatFileEnc("-", doc, "UTF-8", 1);
+    xmlFreeDoc(doc);
 
     clang_disposeTranslationUnit(tu);
   } else {
