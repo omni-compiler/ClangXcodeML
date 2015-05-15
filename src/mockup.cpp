@@ -2,93 +2,170 @@
 #include <clang-c/Index.h>
 #include <libxml/encoding.h>
 #include <libxml/xmlwriter.h>
+#include <time.h>
+#include <getopt.h>
+
+int opt_debug = 0;
+int opt_location = 0;
 
 typedef struct {
   xmlNodePtr curNode;
   xmlNodePtr curBlock;
-  xmlNodePtr curTypeTable;
+  xmlNodePtr typeTable;
+  xmlNodePtr globalSymbols;
+  xmlNodePtr globalDeclarations;
   xmlDocPtr xmlDoc;
 } MyClientData;
 
-void getLocation(CXCursor cursor, CXString *filename, unsigned *lineno, unsigned *column)
+void insertLocationInfo(CXCursor cursor, xmlNodePtr node,
+			xmlChar *prop_filename,
+			xmlChar *prop_lineno,
+			xmlChar *prop_column,
+			xmlChar *prop_range)
 {
   CXSourceLocation loc = clang_getCursorLocation(cursor);
-  CXString dummy_filename;
-  unsigned dummy_lineno;
-  unsigned dummy_column;
-
-  if (filename == NULL) {
-    filename = &dummy_filename;
-  }
-  if (lineno == NULL) {
-    lineno = &dummy_lineno;
-  }
-  if (column == NULL) {
-    column = &dummy_column;
-  }
-
-  clang_getPresumedLocation(loc, filename, lineno, column);
-}
-
-xmlChar *getLocationAsString(CXCursor cursor)
-{
-  xmlChar locStr[BUFSIZ];
-  xmlChar *ret = NULL;
-
-  // get filename, line # and column #.
+  CXSourceRange range = clang_getCursorExtent(cursor);
   CXString filename;
   unsigned lineno;
   unsigned column;
-  getLocation(cursor, &filename, &lineno, &column);
 
-  xmlStrPrintf(locStr, BUFSIZ-1,
-               BAD_CAST "%s:%d:%d",
-               clang_getCString(filename),
-               lineno,
-               column);
-  ret = xmlStrdup(locStr);
-
-  clang_disposeString(filename);
-
-  return ret;
-}
-
-xmlNodePtr getTypeTable(MyClientData *myclientdata)
-{
-  if (myclientdata->curTypeTable == NULL) {
-    myclientdata->curTypeTable = xmlNewChild(myclientdata->curBlock, NULL,
-					     BAD_CAST "typeTable", NULL);
+  // location
+  clang_getPresumedLocation(loc, &filename, &lineno, &column);
+  if (prop_column != NULL) {
+    xmlChar columnStr[BUFSIZ];
+    xmlStrPrintf(columnStr, BUFSIZ, BAD_CAST "%d", column);
+    xmlNewProp(node, prop_column, columnStr);
   }
-  return myclientdata->curTypeTable;
+  if (prop_lineno != NULL) {
+    xmlChar linenoStr[BUFSIZ];
+    xmlStrPrintf(linenoStr, BUFSIZ, BAD_CAST "%d", lineno);
+    xmlNewProp(node, prop_lineno, linenoStr);
+  }
+  if (prop_filename != NULL) {
+    xmlNewProp(node, prop_filename, BAD_CAST clang_getCString(filename));
+  }
+
+  // range
+  if (prop_range != NULL && !clang_Range_isNull(range)) {
+    xmlChar rangeStr[BUFSIZ];
+
+    CXSourceLocation start = clang_getRangeStart(range);
+    CXSourceLocation end = clang_getRangeEnd(range);
+    CXString start_filename;
+    unsigned start_lineno;
+    unsigned start_column;
+    CXString end_filename;
+    unsigned end_lineno;
+    unsigned end_column;
+    xmlChar *filenameStr;
+    xmlChar *start_filenameStr;
+    xmlChar *end_filenameStr;
+
+    clang_getPresumedLocation(start, &start_filename, &start_lineno, &start_column);
+    clang_getPresumedLocation(end, &end_filename, &end_lineno, &end_column);
+
+    filenameStr = BAD_CAST clang_getCString(filename);
+    start_filenameStr = BAD_CAST clang_getCString(start_filename);
+    end_filenameStr = BAD_CAST clang_getCString(end_filename);
+
+    if (xmlStrcmp(start_filenameStr, filenameStr) != 0
+	|| xmlStrcmp(end_filenameStr, filenameStr) != 0) {
+      xmlStrPrintf(rangeStr, BUFSIZ, BAD_CAST "%s:%d:%d - %s:%d:%d",
+		   start_filenameStr, start_lineno, start_column,
+		   end_filenameStr, end_lineno, end_column);
+    } else if (start_lineno != end_lineno) {
+      xmlStrPrintf(rangeStr, BUFSIZ, BAD_CAST "%d:%d - %d:%d",
+		   start_lineno, start_column,
+		   end_lineno, end_column);
+    } else {
+      xmlStrPrintf(rangeStr, BUFSIZ, BAD_CAST "%d:%d-%d",
+		   start_lineno, start_column, end_column);
+    }
+    clang_disposeString(end_filename);
+    clang_disposeString(start_filename);
+    xmlNewProp(node, prop_range, rangeStr);
+  }
+  clang_disposeString(filename);
 }
 
+void insertCXCursorInfo(xmlNodePtr parentnode, CXCursor cursor)
+{
+  xmlChar commentStr[BUFSIZ];
+  int offset = 0;
+
+  enum CXCursorKind kind = clang_getCursorKind(cursor);
+  CXString kindSpelling = clang_getCursorKindSpelling(kind);
+  xmlChar *kindSpellingStr = BAD_CAST clang_getCString(kindSpelling);
+
+  offset += xmlStrPrintf(commentStr + offset, BUFSIZ - offset,
+			 BAD_CAST " kind=%s", kindSpellingStr);
+  clang_disposeString(kindSpelling);
+
+  CXString displayName = clang_getCursorDisplayName(cursor);
+  xmlChar *displayNameStr = BAD_CAST clang_getCString(displayName);
+  if (xmlStrlen(displayNameStr) > 0) {
+    offset += xmlStrPrintf(commentStr + offset, BUFSIZ - offset,
+			   BAD_CAST ", displayName=%s", displayNameStr); 
+  }
+  clang_disposeString(displayName);
+
+  CXString usr = clang_getCursorUSR(cursor);
+  xmlChar *usrStr = BAD_CAST clang_getCString(usr);
+  if (xmlStrlen(usrStr) > 0) {
+    offset += xmlStrPrintf(commentStr + offset, BUFSIZ - offset,
+			   BAD_CAST ", USR=%s", usrStr);
+  }
+  clang_disposeString(usr);
+
+  CXString spelling = clang_getCursorSpelling(cursor);
+  xmlChar *spellingStr = BAD_CAST clang_getCString(spelling);
+  if (xmlStrlen(spellingStr) > 0) {
+    offset += xmlStrPrintf(commentStr + offset, BUFSIZ - offset,
+			   BAD_CAST ", spelling=%s", spellingStr);
+  }
+  clang_disposeString(spelling);
+
+  xmlStrPrintf(commentStr + offset, BUFSIZ - offset, BAD_CAST " ");
+
+  xmlAddChild(parentnode, xmlNewComment(commentStr));
+}
 
 CXChildVisitResult visitChildrenCallback(CXCursor cursor, CXCursor parent, CXClientData client_data)
 {
   MyClientData *parentclientdata = static_cast<MyClientData*>(client_data);
-  MyClientData myclientdata = {NULL, NULL, NULL, NULL};
+  MyClientData myclientdata = *parentclientdata;
   enum CXCursorKind kind = clang_getCursorKind(cursor);
-  CXString kindStr = clang_getCursorKindSpelling(kind);
-  xmlChar *kindname = BAD_CAST clang_getCString (kindStr);
+  CXString kindSpelling = clang_getCursorKindSpelling(kind);
+  xmlChar *kindStr = BAD_CAST clang_getCString(kindSpelling);
   xmlNodePtr parentnode = parentclientdata->curNode;
+
+  if (opt_debug) {
+    insertCXCursorInfo(parentnode, cursor);
+  }
 
   switch (kind) {
   case CXCursor_UnexposedDecl: break;
   case CXCursor_StructDecl:
-    kindname = BAD_CAST "structType";
-    parentnode = getTypeTable(parentclientdata);
+    kindStr = BAD_CAST "structType";
+    parentnode = myclientdata.typeTable;
     break;
   case CXCursor_UnionDecl: break;
+    kindStr = BAD_CAST "unionType";
+    parentnode = myclientdata.typeTable;
+    break;
   case CXCursor_ClassDecl: break;
   case CXCursor_EnumDecl: break;
+    kindStr = BAD_CAST "enumType";
+    parentnode = myclientdata.typeTable;
+    break;
   case CXCursor_FieldDecl: break;
   case CXCursor_EnumConstantDecl: break;
   case CXCursor_FunctionDecl:
-    kindname = BAD_CAST "functionDefinition";
+    kindStr = BAD_CAST "functionDefinition";
     break;
   case CXCursor_VarDecl:
-    kindname = BAD_CAST "varDecl";
-    parentnode = getTypeTable(parentclientdata);
+    kindStr = BAD_CAST "varDecl";
+    parentnode = myclientdata.typeTable;
     break;
   case CXCursor_ParmDecl: break;
   case CXCursor_ObjCInterfaceDecl: break;
@@ -141,16 +218,30 @@ CXChildVisitResult visitChildrenCallback(CXCursor cursor, CXCursor parent, CXCli
   case CXCursor_InvalidCode: break;
     //case CXCursor_LastInvalid:
     //case CXCursor_FirstExpr:
-  case CXCursor_UnexposedExpr: break;
-  case CXCursor_DeclRefExpr: break;
+  case CXCursor_UnexposedExpr:
+    kindStr = NULL;
+    break;
+  case CXCursor_DeclRefExpr:
+    kindStr = BAD_CAST "Var";
+    break;
   case CXCursor_MemberRefExpr: break;
   case CXCursor_CallExpr: break;
   case CXCursor_ObjCMessageExpr: break;
   case CXCursor_BlockExpr: break;
-  case CXCursor_IntegerLiteral: break;
-  case CXCursor_FloatingLiteral: break;
+  case CXCursor_IntegerLiteral:
+    kindStr = BAD_CAST "intConstant";
+    parentnode = xmlNewChild(parentnode, NULL, BAD_CAST "value", NULL);
+    
+    break;
+  case CXCursor_FloatingLiteral:
+    kindStr = BAD_CAST "floatConstant";
+    parentnode = xmlNewChild(parentnode, NULL, BAD_CAST "value", NULL);
+    break;
   case CXCursor_ImaginaryLiteral: break;
-  case CXCursor_StringLiteral: break;
+  case CXCursor_StringLiteral:
+    kindStr = BAD_CAST "stringConstant";
+    parentnode = xmlNewChild(parentnode, NULL, BAD_CAST "value", NULL);
+    break;
   case CXCursor_CharacterLiteral: break;
   case CXCursor_ParenExpr: break;
   case CXCursor_UnaryOperator: break;
@@ -160,7 +251,9 @@ CXChildVisitResult visitChildrenCallback(CXCursor cursor, CXCursor parent, CXCli
   case CXCursor_ConditionalOperator: break;
   case CXCursor_CStyleCastExpr: break;
   case CXCursor_CompoundLiteralExpr: break;
-  case CXCursor_InitListExpr: break;
+  case CXCursor_InitListExpr:
+    kindStr = BAD_CAST "value";
+    break;
   case CXCursor_AddrLabelExpr: break;
   case CXCursor_StmtExpr: break;
   case CXCursor_GenericSelectionExpr: break;
@@ -193,9 +286,8 @@ CXChildVisitResult visitChildrenCallback(CXCursor cursor, CXCursor parent, CXCli
   case CXCursor_UnexposedStmt: break;
   case CXCursor_LabelStmt: break;
   case CXCursor_CompoundStmt:
-    kindname = BAD_CAST "compoundStatement";
+    kindStr = BAD_CAST "compoundStatement";
     myclientdata.curBlock = myclientdata.curNode;
-    myclientdata.curTypeTable = NULL;
     break;
   case CXCursor_CaseStmt: break;
   case CXCursor_DefaultStmt: break;
@@ -289,29 +381,41 @@ CXChildVisitResult visitChildrenCallback(CXCursor cursor, CXCursor parent, CXCli
 #endif
   }
 
-  xmlNodePtr node = xmlNewChild(parentnode, NULL, kindname, NULL);
-  clang_disposeString(kindStr);
-
-  xmlChar *location = getLocationAsString(cursor);
-  CXString displayNameStr = clang_getCursorDisplayName(cursor);
-  xmlNewProp(node, BAD_CAST "src", location);
-  xmlNewProp(node, BAD_CAST "displayname", BAD_CAST clang_getCString(displayNameStr));
-  clang_disposeString(displayNameStr);
-  free(location);
-
-#if 0
-  CXString usrStr = clang_getCursorUSR(cursor);
-
-  xmlTextWriterWriteAttribute(xmlWriter,
-                              BAD_CAST "usr",
-                              BAD_CAST clang_getCString(usrStr));
-  clang_disposeString(usrStr);
-#endif
-
- end:
-  // visit children recursively.
   myclientdata = *parentclientdata;
-  myclientdata.curNode = node;
+  if (kindStr != NULL) {
+    xmlNodePtr node = xmlNewChild(parentnode, NULL, kindStr, NULL);
+
+    if (opt_location) {
+      xmlChar *fileStr = NULL;
+      xmlChar *linenoStr = NULL;
+      xmlChar *columnStr = NULL;
+      xmlChar *rangeStr = NULL;
+      if (opt_location >= 1) {
+	linenoStr = BAD_CAST "lineno";
+      }
+      if (opt_location >= 2) {
+	fileStr = BAD_CAST "file";
+      }
+      if (opt_location >= 3) {
+	columnStr = BAD_CAST "column";
+      }
+      if (opt_location >= 4) {
+	rangeStr = BAD_CAST "range";
+      }
+      insertLocationInfo(cursor, node, fileStr, linenoStr, columnStr, rangeStr);
+    }
+
+    CXType typ = clang_getCursorType(cursor);
+    CXString typSpelling = clang_getTypeSpelling(typ);
+    xmlChar *typSpellingStr = BAD_CAST clang_getCString(typSpelling);
+
+    xmlNewProp(node, BAD_CAST "type", typSpellingStr);
+
+    myclientdata.curNode = node;
+  }
+  clang_disposeString(kindSpelling);
+
+  // visit children recursively.
   clang_visitChildren(cursor, visitChildrenCallback, &myclientdata);
 
   return CXChildVisit_Continue;
@@ -319,34 +423,70 @@ CXChildVisitResult visitChildrenCallback(CXCursor cursor, CXCursor parent, CXCli
 
 int main(int argc, char *argv[])
 {
+  int opt;
+
+  while ((opt = getopt(argc, argv, "dl")) != -1) {
+    switch (opt) {
+    case 'd':
+      opt_debug++;
+      break;
+    case 'l':
+      opt_location++;
+      break;
+    default:
+      fprintf(stderr,
+	      "unknown option: -%c\n"
+	      "Usage: %s [-dl] <filename.ast>\n"
+	      "\t-d: output debugging info\n"
+	      "\t-l: output source-code location info\n",
+	      opt, argv[0]);
+      return 1;
+    }
+  }
+  if (optind >= argc) {
+      fprintf(stderr,
+	      "Missing input filename.\n"
+	      "Usage: %s [options] <filename.ast>\n",
+	      argv[0]);
+      return 1;
+  }
+  argv += optind;
+  argc -= optind;
+
   // create index w/ excludeDeclsFromPCH = 1, displayDiagnostics=1.
   CXIndex index = clang_createIndex(1 /* excludeDeclarationFromPCH */,
 				    1 /* displayDiagnostics */);
   MyClientData myclientdata = {NULL, NULL, NULL, NULL};
 
   // load a *.ast file.
-  CXTranslationUnit tu = clang_createTranslationUnit(index, argv[1]);
+  CXTranslationUnit tu = clang_createTranslationUnit(index, argv[0]);
   if (tu != NULL) {
     //xmlBufferPtr xmlBuffer = xmlBufferCreate();
     xmlDocPtr doc = xmlNewDoc(BAD_CAST "1.0");
-    xmlNodePtr node;
-    CXCursor cursor = clang_getTranslationUnitCursor(tu);
-    CXString filename;
+    xmlNodePtr rootnode = xmlNewNode(NULL, BAD_CAST "XcodeProgram");
+    char strftimebuf[BUFSIZ];
+    time_t t = time(NULL);
 
-    getLocation(cursor, &filename, NULL, NULL);
+    strftime(strftimebuf, sizeof strftimebuf, "%F %T", localtime(&t));
 
-    node = xmlNewNode(NULL, BAD_CAST "XcodeProgram");
-    xmlNewProp(node, BAD_CAST "source", BAD_CAST clang_getCString(filename));
-    xmlNewProp(node, BAD_CAST "language", BAD_CAST "C");
-    xmlNewProp(node, BAD_CAST "time", BAD_CAST "1970-01-01 00:00:00");
-    clang_disposeString(filename);
+    CXString tuSpelling = clang_getTranslationUnitSpelling(tu);
+    xmlNewProp(rootnode, BAD_CAST "source", BAD_CAST clang_getCString(tuSpelling));
+    clang_disposeString(tuSpelling);
+    xmlNewProp(rootnode, BAD_CAST "language", BAD_CAST "C");
+	     xmlNewProp(rootnode, BAD_CAST "time", BAD_CAST strftimebuf);
 
-    xmlDocSetRootElement(doc, node);
+    xmlDocSetRootElement(doc, rootnode);
+    myclientdata.curNode = rootnode;
+    myclientdata.curBlock = rootnode;
+    myclientdata.typeTable
+      = xmlNewChild(rootnode, NULL, BAD_CAST "typeTable", NULL);
+    myclientdata.globalSymbols
+      = xmlNewChild(rootnode, NULL, BAD_CAST "globalSymbols", NULL);
+    myclientdata.globalDeclarations
+      = xmlNewChild(rootnode, NULL, BAD_CAST "globalDeclarations", NULL);
     myclientdata.xmlDoc = doc;
-    myclientdata.curBlock = node;
-    myclientdata.curTypeTable = NULL;
-    myclientdata.curNode = node;
-    clang_visitChildren(cursor, visitChildrenCallback, &myclientdata);
+    clang_visitChildren(clang_getTranslationUnitCursor(tu),
+			visitChildrenCallback, &myclientdata);
 
     // print the XML text to the standard output.
     xmlSaveFormatFileEnc("-", doc, "UTF-8", 1);
