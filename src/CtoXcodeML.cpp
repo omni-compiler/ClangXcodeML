@@ -3,6 +3,8 @@
 #include "clang/AST/ASTContext.h"
 #include "clang/AST/ASTConsumer.h"
 #include "clang/AST/RecursiveASTVisitor.h"
+#include "clang/AST/DeclVisitor.h"
+#include "clang/AST/TypeLocVisitor.h"
 #include "clang/Frontend/ASTConsumers.h"
 #include "clang/Frontend/FrontendActions.h"
 #include "clang/Frontend/CompilerInstance.h"
@@ -14,8 +16,8 @@
 #include <libxml/encoding.h>
 #include <libxml/xmlwriter.h>
 #include <time.h>
+#include <tuple>
 
-using namespace std;
 using namespace clang;
 using namespace clang::driver;
 using namespace clang::tooling;
@@ -27,130 +29,149 @@ static cl::extrahelp CommonHelp(CommonOptionsParser::HelpMessage);
 static cl::OptionCategory C2XcodeMLCategory("CtoXcodeML options");
 static std::unique_ptr<opt::OptTable> Options(createDriverOptTable());
 static cl::opt<bool>
-EmitSourceFileName("file", cl::desc("emit 'file'"),
+optEmitSourceFileName("file", cl::desc("emit 'file'"),
+                      cl::cat(C2XcodeMLCategory));
+static cl::opt<bool>
+optEmitSourceLineNo("lineno", cl::desc("emit 'lineno'"),
+                    cl::cat(C2XcodeMLCategory));
+static cl::opt<bool>
+optEmitSourceColumn("column", cl::desc("emit 'column'"),
+                    cl::cat(C2XcodeMLCategory));
+static cl::opt<bool>
+optEmitSourceRange("range", cl::desc("emit 'range'"),
                    cl::cat(C2XcodeMLCategory));
-static cl::opt<bool>
-EmitSourceLineNo("lineno", cl::desc("emit 'lineno'"),
-                 cl::cat(C2XcodeMLCategory));
-static cl::opt<bool>
-EmitSourceColumn("column", cl::desc("emit 'column'"),
-                 cl::cat(C2XcodeMLCategory));
-static cl::opt<bool>
-EmitSourceRange("range", cl::desc("emit 'range'"),
-                cl::cat(C2XcodeMLCategory));
 
 class XcodeMlTypeTableVisitor
-    : public RecursiveASTVisitor<XcodeMlTypeTableVisitor> {
+    : public ConstDeclVisitor<XcodeMlTypeTableVisitor, xmlNodePtr> {
 private:
-    ASTContext *astContext; // used for getting additional AST info
-    xmlDocPtr xmlDoc;
-    xmlNodePtr typeTable;
+    const ASTContext &astContext; // used for getting additional AST info
 
 public:
-    XcodeMlTypeTableVisitor(CompilerInstance &CI, xmlDocPtr xmlDoc_,
-                            xmlNodePtr typeTable_)
-        : astContext(&(CI.getASTContext())),
-          xmlDoc(xmlDoc_),
-          typeTable(typeTable_) {}
+    XcodeMlTypeTableVisitor() = delete;
+    explicit XcodeMlTypeTableVisitor(const ASTContext &astContext_)
+        : astContext(astContext_) {}
 };
 
 class XcodeMlSymbolsVisitor
-    : public RecursiveASTVisitor<XcodeMlSymbolsVisitor> {
+    : public ConstDeclVisitor<XcodeMlSymbolsVisitor, xmlNodePtr> {
 private:
-    ASTContext *astContext; // used for getting additional AST info
-    xmlDocPtr xmlDoc;
-    xmlNodePtr symbolTable;
+    const ASTContext &astContext; // used for getting additional AST info
 
 public:
-    XcodeMlSymbolsVisitor(CompilerInstance &CI, xmlDocPtr xmlDoc_,
-                          xmlNodePtr symbolTable_)
-        : astContext(&(CI.getASTContext())),
-          xmlDoc(xmlDoc_),
-          symbolTable(symbolTable_) {}
+    XcodeMlSymbolsVisitor() = delete;
+    explicit XcodeMlSymbolsVisitor(const ASTContext &astContext_)
+        : astContext(astContext_) {}
 };
 
 class XcodeMlDeclarationsVisitor
-    : public RecursiveASTVisitor<XcodeMlDeclarationsVisitor> {
+    : public ConstDeclVisitor<XcodeMlDeclarationsVisitor, xmlNodePtr> {
 private:
-    ASTContext *astContext; // used for getting additional AST info
-    xmlDocPtr xmlDoc;
-    xmlNodePtr declTable;
+    const ASTContext &astContext; // used for getting additional AST info
+
+    xmlNodePtr newNode(const char *name, SourceLocation loc) {
+        xmlNodePtr curNode = xmlNewNode(nullptr, BAD_CAST name);
+        FullSourceLoc fullloc = astContext.getFullLoc(loc);
+        if (fullloc.isValid()) {
+            PresumedLoc ploc = fullloc.getManager().getPresumedLoc(fullloc);
+
+            if (optEmitSourceColumn) {
+                xmlChar columnStr[BUFSIZ];
+                xmlStrPrintf(columnStr, BUFSIZ, BAD_CAST "%d", ploc.getColumn());
+                xmlNewProp(curNode, BAD_CAST "column", columnStr);
+            }
+
+            if (optEmitSourceLineNo) {
+                xmlChar linenoStr[BUFSIZ];
+                xmlStrPrintf(linenoStr, BUFSIZ, BAD_CAST "%d", ploc.getLine());
+                xmlNewProp(curNode, BAD_CAST "lineno", linenoStr);
+            }
+
+            if (optEmitSourceFileName) {
+                xmlNewProp(curNode, BAD_CAST "file", BAD_CAST ploc.getFilename());
+            }
+        }
+        return curNode;
+    }
 
 public:
-    XcodeMlDeclarationsVisitor(CompilerInstance &CI, xmlDocPtr xmlDoc_,
-                               xmlNodePtr declTable_)
-        : astContext(&(CI.getASTContext())),
-          xmlDoc(xmlDoc_),
-          declTable(declTable_) {}
+    XcodeMlDeclarationsVisitor() = delete;
+    explicit XcodeMlDeclarationsVisitor(const ASTContext &astContext_)
+        : astContext(astContext_) {}
+
+    xmlNodePtr VisitDecl(const Decl *decl) {
+        xmlNodePtr curNode = newNode(decl->getDeclKindName(),
+                                     decl->getLocation());
+        const DeclContext *declContext = dyn_cast<DeclContext>(decl);
+        if (declContext) {
+            for (auto i = declContext->decls_begin();
+                 i != declContext->decls_end();
+                 ++i) {
+                xmlAddChild(curNode, Visit(*i));
+            }
+        }
+        return curNode;
+    }
+#if 0
+    xmlNodePtr VisitFunctionDecl(const FunctionDecl *decl) {
+        xmlNodePtr curNode = newNode("HOGEE",
+                                     decl->getLocation());
+        const DeclContext *declContext = dyn_cast<DeclContext>(decl);
+        if (declContext) {
+            for (auto i = declContext->decls_begin();
+                 i != declContext->decls_end();
+                 ++i) {
+                xmlAddChild(curNode, Visit(*i));
+            }
+        }
+        return curNode;
+    }
+#endif
 
 #if 0
-    virtual bool VisitFunctionDecl(FunctionDecl *func) {
-        numFunctions++;
-        string funcName = func->getNameInfo().getName().getAsString();
-
-        errs() << "found function def: " << ":" << funcName << "\n";
-
-        return true;
+    xmlNodePtr VisitExpr(const Expr *expr) {
+        return newChild("Expr", expr->getExprLoc());
     }
 
-    virtual bool VisitStmt(Stmt *st) {
-        if (ReturnStmt *ret = dyn_cast<ReturnStmt>(st)) {
-            rewriter.ReplaceText(ret->getRetValue()->getLocStart(), 6, "val");
-            errs() << "** Rewrote ReturnStmt\n";
-        }
-        if (CallExpr *call = dyn_cast<CallExpr>(st)) {
-            rewriter.ReplaceText(call->getLocStart(), 7, "add5");
-            errs() << "** Rewrote function call\n";
-        }
-        return true;
-    }
-
-    virtual bool VisitReturnStmt(ReturnStmt *ret) {
-        rewriter.ReplaceText(ret->getRetValue()->getLocStart(), 6, "val");
-        errs() << "** Rewrote ReturnStmt\n";
-        return true;
-    }
-    virtual bool VisitCallExpr(CallExpr *call) {
-        rewriter.ReplaceText(call->getLocStart(), 7, "add5");
-        errs() << "** Rewrote function call\n";
-        return true;
+    xmlNodePtr VisitStmt(const Stmt *stmt) {
+        errs() << "VisitStmt\n";
+        //return newChild("Stmt", SourceLocation());
+        return nullptr;
     }
 #endif
 };
 
 class XcodeMlASTConsumer : public ASTConsumer {
-    xmlDocPtr xmlDoc;
-    XcodeMlTypeTableVisitor *typeTableVisitor;
-    XcodeMlSymbolsVisitor *globalSymbolsVisitor;
-    XcodeMlDeclarationsVisitor *globalDeclarationsVisitor;
+    const ASTContext &astContext;
+    xmlNodePtr typeTable;
+    xmlNodePtr globalSymbols;
+    xmlNodePtr globalDeclarations;
 
 public:
-    explicit XcodeMlASTConsumer(xmlDocPtr xmlDoc_,
-                                XcodeMlTypeTableVisitor *typeTableVisitor_,
-                                XcodeMlSymbolsVisitor *globalSymbolsVisitor_,
-                                XcodeMlDeclarationsVisitor *globalDeclarationsVisitor_)
-        : xmlDoc(xmlDoc_),
-          typeTableVisitor(typeTableVisitor_),
-          globalSymbolsVisitor(globalSymbolsVisitor_),
-          globalDeclarationsVisitor(globalDeclarationsVisitor_) {};
+    explicit XcodeMlASTConsumer(clang::CompilerInstance &CI, xmlNodePtr rootnode)
+        : astContext(CI.getASTContext()),
+          typeTable(xmlNewChild(rootnode, nullptr,
+                                BAD_CAST "typeTable", nullptr)),
+          globalSymbols(xmlNewChild(rootnode, nullptr,
+                                    BAD_CAST "globalSymbols", nullptr)),
+          globalDeclarations(xmlNewChild(rootnode, nullptr,
+                                         BAD_CAST "globalDeclarations", nullptr)) {}
 
-    virtual void HandleTranslationUnit(ASTContext &Context) override {
-        /* we can use ASTContext to get the TranslationUnitDecl, which is
-           a single Decl that collectively represents the entire source file */
-        typeTableVisitor->TraverseDecl(Context.getTranslationUnitDecl());
-        globalSymbolsVisitor->TraverseDecl(Context.getTranslationUnitDecl());
-        globalDeclarationsVisitor->TraverseDecl(Context.getTranslationUnitDecl());
-    }
-#if 0
     virtual bool HandleTopLevelDecl(DeclGroupRef DG) override {
+        std::unique_ptr<XcodeMlTypeTableVisitor>typeTableVisitor
+            (new XcodeMlTypeTableVisitor(astContext));
+        std::unique_ptr<XcodeMlSymbolsVisitor>globalSymbolsVisitor
+            (new XcodeMlSymbolsVisitor(astContext));
+        std::unique_ptr<XcodeMlDeclarationsVisitor>globalDeclarationsVisitor
+            (new XcodeMlDeclarationsVisitor(astContext));
+
         // a DeclGroupRef may have multiple Decls, so we iterate through each one
-        for (DeclGroupRef::iterator i = DG.begin(), e = DG.end(); i != e; i++) {
-            Decl *D = *i;
-            visitor->TraverseDecl(D); // recursively visit each AST node in Decl "D"
+        for (Decl *D : DG) {
+            xmlAddChild(typeTable, typeTableVisitor->Visit(D));
+            xmlAddChild(globalSymbols, globalSymbolsVisitor->Visit(D));
+            xmlAddChild(globalDeclarations, globalDeclarationsVisitor->Visit(D));
         }
         return true;
     }
-#endif
 };
 
 class XcodeMlASTDumpAction : public ASTFrontendAction {
@@ -162,11 +183,11 @@ public:
                              StringRef Filename) override {
         xmlDoc = xmlNewDoc(BAD_CAST "1.0");
         xmlNodePtr rootnode
-            = xmlNewNode(NULL, BAD_CAST "XcodeProgram");
+            = xmlNewNode(nullptr, BAD_CAST "XcodeProgram");
         xmlDocSetRootElement(xmlDoc, rootnode);
 
         char strftimebuf[BUFSIZ];
-        time_t t = time(NULL);
+        time_t t = time(nullptr);
 
         strftime(strftimebuf, sizeof strftimebuf, "%F %T", localtime(&t));
 
@@ -179,25 +200,7 @@ public:
 
     virtual ASTConsumer *CreateASTConsumer(CompilerInstance &CI,
                                            StringRef file) override {
-        xmlNodePtr rootnode = xmlDocGetRootElement(xmlDoc);
-
-        xmlNodePtr typeTable
-            = xmlNewChild(rootnode, NULL, BAD_CAST "typeTable", NULL);
-        xmlNodePtr globalSymbols
-            = xmlNewChild(rootnode, NULL, BAD_CAST "globalSymbols", NULL);
-        xmlNodePtr globalDeclarations
-            = xmlNewChild(rootnode, NULL, BAD_CAST "globalDeclarations", NULL);
-        XcodeMlTypeTableVisitor *typeTableVisitor
-            = new XcodeMlTypeTableVisitor(CI, xmlDoc, typeTable);
-        XcodeMlSymbolsVisitor *globalSymbolsVisitor
-            = new XcodeMlSymbolsVisitor(CI, xmlDoc, globalSymbols);
-        XcodeMlDeclarationsVisitor *globalDeclarationsVisitor
-            = new XcodeMlDeclarationsVisitor(CI, xmlDoc, globalDeclarations);
-
-        return new XcodeMlASTConsumer(xmlDoc,
-                                      typeTableVisitor,
-                                      globalSymbolsVisitor,
-                                      globalDeclarationsVisitor);
+        return new XcodeMlASTConsumer(CI, xmlDocGetRootElement(xmlDoc));
     }
 
     void EndSourceFileAction(void) override {
