@@ -1,7 +1,7 @@
-#LLVM_CONFIG = /usr/local/bin/llvm-config
-#CXX = /usr/local/bin/clang++
-LLVM_CONFIG = /usr/bin/llvm-config-3.5
-CXX = /usr/bin/clang++-3.5
+LLVM_CONFIG = /usr/local/bin/llvm-config
+CXX = /usr/local/bin/clang++
+#LLVM_CONFIG = /usr/bin/llvm-config-3.5
+#CXX = /usr/bin/clang++-3.5
 CXXFLAGS = -O2 -g `pkg-config --cflags --libs libxml-2.0` -lclang
 
 USEDLIBS = -L$(shell $(LLVM_CONFIG) --libdir)
