@@ -14,10 +14,10 @@ USEDLIBS += $(shell $(LLVM_CONFIG) --libs mcparser bitreader support mc option)
 USEDLIBS += -lpthread -ldl -lz -ltinfo
 USEDLIBS += $(OTHERLIBS)
 
-CtoXcodeML: CtoXcodeML.cpp XcodeMlVisitorBase.h
+CtoXcodeML: CtoXcodeML.cpp
 	$(CXX) $(CXXFLAGS) CtoXcodeML.cpp $(USEDLIBS) -o CtoXcodeML
 
-CtoXcodeML.ast: CtoXcodeML.cpp XcodeMlVisitorBase.h
+CtoXcodeML.ast: CtoXcodeML.cpp
 	$(CXX) $(CXXFLAGS) -Xclang -ast-dump CtoXcodeML.cpp -o CtoXcodeML.ast 
 
 test:
