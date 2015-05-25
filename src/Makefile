@@ -14,10 +14,10 @@ USEDLIBS += $(shell $(LLVM_CONFIG) --libs mcparser bitreader support mc option)
 USEDLIBS += -lpthread -ldl -lz -ltinfo
 USEDLIBS += $(OTHERLIBS)
 
-CtoXcodeML: CtoXcodeML.cpp
+CtoXcodeML: CtoXcodeML.cpp XcodeMlVisitorBase.h
 	$(CXX) $(CXXFLAGS) CtoXcodeML.cpp $(USEDLIBS) -o CtoXcodeML
 
-CtoXcodeML.ast: CtoXcodeML.cpp
+CtoXcodeML.ast: CtoXcodeML.cpp XcodeMlVisitorBase.h
 	$(CXX) $(CXXFLAGS) -Xclang -ast-dump CtoXcodeML.cpp -o CtoXcodeML.ast 
 
 test:
@@ -27,3 +27,6 @@ mockup: mockup.cpp
 
 clean:
 	rm -f CtoXcodeML mockup
+
+RAV.i: RAV.cpp
+	$(CXX) $(CXXFLAGS) -E RAV.cpp -o RAV.i
