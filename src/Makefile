@@ -26,7 +26,7 @@ test:
 mockup: mockup.cpp
 
 clean:
-	rm -f CtoXcodeML mockup
+	rm -f CtoXcodeML mockup RAV.i
 
 RAV.i: RAV.cpp
 	$(CXX) $(CXXFLAGS) -E RAV.cpp -o RAV.i
