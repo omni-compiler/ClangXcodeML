@@ -1,8 +1,5 @@
 #include "clang/Driver/Options.h"
-#include "clang/AST/AST.h"
-#include "clang/AST/ASTContext.h"
 #include "clang/AST/ASTConsumer.h"
-#include "clang/AST/RecursiveASTVisitor.h"
 #include "clang/Frontend/ASTConsumers.h"
 #include "clang/Frontend/FrontendActions.h"
 #include "clang/Frontend/CompilerInstance.h"
@@ -15,27 +12,11 @@
 #include <time.h>
 #include <string>
 
-using namespace clang;
-using namespace clang::driver;
-using namespace clang::tooling;
-using namespace llvm;
+#include "XcodeMlVisitorBase.h"
 
+cl::OptionCategory C2XcodeMLCategory("CtoXcodeML options");
 static cl::extrahelp CommonHelp(CommonOptionsParser::HelpMessage);
-
-static cl::OptionCategory C2XcodeMLCategory("CtoXcodeML options");
 static std::unique_ptr<opt::OptTable> Options(createDriverOptTable());
-static cl::opt<bool>
-OptEmitSourceFileName("file", cl::desc("emit 'file'"),
-                      cl::cat(C2XcodeMLCategory));
-static cl::opt<bool>
-OptEmitSourceLineNo("lineno", cl::desc("emit 'lineno'"),
-                    cl::cat(C2XcodeMLCategory));
-static cl::opt<bool>
-OptEmitSourceColumn("column", cl::desc("emit 'column'"),
-                    cl::cat(C2XcodeMLCategory));
-static cl::opt<bool>
-OptEmitSourceRange("range", cl::desc("emit 'range'"),
-                   cl::cat(C2XcodeMLCategory));
 
 static cl::opt<bool>
 OptTraceXTTV("trace-xttv",
@@ -62,198 +43,48 @@ OptDisableXDV("disable-xdv",
               cl::desc("disable XcodeMlDeclarationsVisitor"),
               cl::cat(C2XcodeMLCategory));
 
-// use CRTP (Curiously Recurring Template Pattern)
-template <class Derived> class XcodeMlVisitorBase
-    : public RecursiveASTVisitor<Derived> {
-protected:
-    static const char *visitorName;
-    const ASTContext &astContext;
-    const xmlNodePtr rootNode;    // the current root node.
-    xmlNodePtr curNode;           // a candidate of the new chlid.
-    bool addCurNodeAsChildOfRootNode;
-    typedef RecursiveASTVisitor<Derived> Base;
-
-    void setName(const char *Name) {
-        xmlNodeSetName(curNode, BAD_CAST Name);
-    }
-    void avoidChild() {
-        if (curNode != rootNode) {
-            xmlFreeNode(curNode);
-        }
-        curNode = rootNode;
-        addCurNodeAsChildOfRootNode = false;
-    }
-    void newProp(const char *Name, int Val, xmlNodePtr N = nullptr) {
-        if (!N) N = curNode;
-        xmlChar Buf[BUFSIZ];
-        xmlStrPrintf(Buf, BUFSIZ, BAD_CAST "%d", Val);
-        xmlNewProp(N, BAD_CAST Name, Buf);
-    }
-    void newProp(const char *Name, const char *Val, xmlNodePtr N = nullptr) {
-        if (!N) N = curNode;
-        xmlNewProp(N, BAD_CAST Name, BAD_CAST Val);
-    }
-
-    void newComment(const char *str, xmlNodePtr RN = nullptr) {
-        if (!RN) RN = rootNode;
-        xmlChar Buf[BUFSIZ];
-        const char *VN = static_cast<Derived &>(*this).getVisitorName();
-        if (VN) {
-            xmlStrPrintf(Buf, BUFSIZ,
-                         BAD_CAST "%s::%s", BAD_CAST VN, BAD_CAST str);
-            xmlNodePtr Comment = xmlNewComment(Buf);
-            xmlAddChild(RN, Comment);
-        }
-    }
-
-    void setLocation(SourceLocation Loc, xmlNodePtr N = nullptr) {
-        if (!N) N = curNode;
-        FullSourceLoc FLoc = astContext.getFullLoc(Loc);
-        if (FLoc.isValid()) {
-            PresumedLoc PLoc = FLoc.getManager().getPresumedLoc(FLoc);
-
-            if (OptEmitSourceColumn) {
-                newProp("column", PLoc.getColumn(), N);
-            }
-            if (OptEmitSourceLineNo) {
-                newProp("lineno", PLoc.getLine(), N);
-            }
-            if (OptEmitSourceFileName) {
-                newProp("file", PLoc.getFilename(), N);
-            }
-        }
-    }
-    void setLocation(const Decl *D, xmlNodePtr N = nullptr) {
-        setLocation(D->getLocation(), N);
-    }
-    void setLocation(const Expr *E, xmlNodePtr N = nullptr) {
-        setLocation(E->getExprLoc(), N);
-    }
-
-public:
-    XcodeMlVisitorBase() = delete;
-    XcodeMlVisitorBase(const XcodeMlVisitorBase&) = delete;
-    XcodeMlVisitorBase(XcodeMlVisitorBase&&) = delete;
-    XcodeMlVisitorBase& operator =(const XcodeMlVisitorBase&) = delete;
-    XcodeMlVisitorBase& operator =(XcodeMlVisitorBase&&) = delete;
-
-    explicit XcodeMlVisitorBase(const ASTContext &CXT, xmlNodePtr N,
-                                const char *Name = nullptr)
-        : astContext(CXT), rootNode(N),
-          curNode(Name ? xmlNewNode(nullptr, BAD_CAST Name) : N),
-          addCurNodeAsChildOfRootNode(true) {}
-    explicit XcodeMlVisitorBase(const XcodeMlVisitorBase *p,
-                                const char *Name = nullptr)
-        : astContext(p->astContext),
-          rootNode(p->curNode),
-          curNode(Name ? xmlNewNode(nullptr, BAD_CAST Name) : p->curNode),
-          addCurNodeAsChildOfRootNode(true) {
-        if (Name) {
-            newComment(Name);
-        }
-    };
-    ~XcodeMlVisitorBase() {
-        if (addCurNodeAsChildOfRootNode) {
-            xmlAddChild(rootNode, curNode);
-        }
-    }
-
-    const char *getVisitorName() const { return nullptr; }
-
-    bool shouldVisitImplicitCode() const { return true; }
-
-    // avoid data-recursion (force traversing with hardware stack)
-    bool shouldUseDataRecursionFor(Stmt *S) const { return false; }
-
-#define ABSTRACT_STMT(STMT)
-#define STMT(CLASS, PARENT)                               \
-    bool Traverse##CLASS(CLASS *S) {                      \
-        Derived V(this, "Traverse" #CLASS);               \
-        return static_cast<Base &>(V).Traverse##CLASS(S); \
-    }
-#include "clang/AST/StmtNodes.inc"
-
-#define ABSTRACT_TYPE(CLASS, BASE)
-#define TYPE(CLASS, BASE)                                       \
-    bool Traverse##CLASS##Type(CLASS##Type *T) {                \
-        Derived V(this, "Traverse" #CLASS "Type");              \
-        return static_cast<Base &>(V).Traverse##CLASS##Type(T); \
-    }
-#include "clang/AST/TypeNodes.def"
-
-    bool TraverseDecl(Decl *D) {
-        Derived V(this, "TraverseDecl");
-        return static_cast<Base &>(V).TraverseDecl(D);
-    }
-#define ABSTRACT_DECL(DECL)
-#define DECL(CLASS, BASE)                                           \
-    bool Traverse##CLASS##Decl(CLASS##Decl *D) {                    \
-        setName("Traverse" #CLASS "Decl");                          \
-        return static_cast<Base &>(*this).Traverse##CLASS##Decl(D); \
-    }
-#include "clang/AST/DeclNodes.inc"
-};
-
-
-template <class Derived>
-const char *XcodeMlVisitorBase<Derived>::visitorName = "XVBase";
 
 class XcodeMlTypeTableVisitor
     : public XcodeMlVisitorBase<XcodeMlTypeTableVisitor> {
-protected:
-    static const char *visitorName;
 public:
     // use base constructors
     using XcodeMlVisitorBase::XcodeMlVisitorBase;
 
-    const char *getVisitorName() const {
-        return OptTraceXTTV ? visitorName : nullptr;
+    const char *getVisitorName() const override {
+        return OptTraceXTTV ? "XTTV" : nullptr;
     }
 
-    bool VisitStmt(const Stmt *S) {
-        newComment("VisitStmt");
-        avoidChild();
+    bool PostVisitStmt(const Stmt *S) {
+        // do not add me as a child of the root node
         return true;
     }
-    bool VisitType(const Type *D) {
-        newComment("VisitType");
-        return true;
-    }
-    bool VisitDecl(const Decl *D) {
-        newComment("VisitDecl");
-        avoidChild();
+    bool PostVisitDecl(const Decl *D) {
+        // do not add me as a child of the root node
         return true;
     }
 };
-const char *XcodeMlTypeTableVisitor::visitorName = "XTTV";
-
 class XcodeMlSymbolsVisitor
     : public XcodeMlVisitorBase<XcodeMlSymbolsVisitor> {
-protected:
-    static const char *visitorName;
 public:
     // use base constructors
     using XcodeMlVisitorBase<XcodeMlSymbolsVisitor>::XcodeMlVisitorBase;
 
-    const char *getVisitorName() const {
-        return OptTraceXSV ? visitorName : nullptr;
+    const char *getVisitorName() const override {
+        return OptTraceXSV ? "XSV" : nullptr;
     }
 };
-const char *XcodeMlSymbolsVisitor::visitorName = "XSV";
 
 class XcodeMlDeclarationsVisitor
     : public XcodeMlVisitorBase<XcodeMlDeclarationsVisitor> {
-protected:
-    static const char *visitorName;
 public:
     // use base constructors
     using XcodeMlVisitorBase::XcodeMlVisitorBase;
 
-    const char *getVisitorName() const {
-        return OptTraceXDV ? visitorName : nullptr;
+    const char *getVisitorName() const override {
+        return OptTraceXDV ? "XDV" : nullptr;
     }
 
-    bool VisitUnaryOperator(const UnaryOperator *UnOp) {
+    const char *NameForUnaryOperator(const UnaryOperator *UnOp) const {
         // XcodeML-C-0.9J.pdf 7.2(varAddr), 7.3(pointerRef), 7.8, 7.11
         const char *Nam;
 
@@ -272,13 +103,15 @@ public:
         case UO_Imag:      Nam = "UNDEF_UO_Imag"; break;
         case UO_Extension: Nam = "UNDEF_UO_Extension"; break;
         }
-        newComment((std::string("VisitUnaryOperator ") + std::string(Nam)).c_str());
-        setName(Nam);
-        setLocation(UnOp);
-        return true;
+        //newComment((std::string("VisitUnaryOperator ")
+        //           + std::string(Nam)).c_str());
+        //setName(Nam);
+        //setLocation(UnOp);
+        //return true;
+        return Nam;
     }
 
-    bool VisitBinaryOperator(const BinaryOperator *BinOp) {
+    const char *NameForBinaryOperator(const BinaryOperator *BinOp) const {
         // XcodeML-C-0.9J.pdf: 7.6(assignExpr), 7.7, 7.10(commmaExpr)
         const char *Nam;
 
@@ -296,7 +129,7 @@ public:
         case BO_GT:        Nam = "logGTExpr"; break;
         case BO_LE:        Nam = "logLEExpr"; break;
         case BO_GE:        Nam = "logGEExpr"; break;
-        case BO_EQ:        Nam = "ogEQExpr"; break;   // og? l is missing?
+        case BO_EQ:        Nam = "logEQExpr"; break;
         case BO_NE:        Nam = "logNEQExpr"; break;
         case BO_And:       Nam = "bitAndExpr"; break;
         case BO_Xor:       Nam = "bitXorExpr"; break;
@@ -316,38 +149,72 @@ public:
         case BO_OrAssign:  Nam = "asgBitOrExpr"; break;
         case BO_XorAssign: Nam = "asgBitXorExpr"; break;
         }
-        newComment((std::string("VisitBinaryOperator ") + std::string(Nam)).c_str());
-        setName(Nam);
-        setLocation(BinOp);
-        return true;
+        //newComment((std::string("VisitBinaryOperator ")
+        //           + std::string(Nam)).c_str());
+        //setName(Nam);
+        //setLocation(BinOp);
+        //return true;
+        return Nam;
     }
 
-    bool VisitBinaryConditionalOperator(const BinaryConditionalOperator *ConOp) {
-        setName("UNDEF_BinaryConditionalOperator");
-        setLocation(ConOp);
+    const char *
+    NameForBinaryConditionalOperator(const BinaryConditionalOperator *ConOp)
+        const {
+        //newComment("VisitBinaryConditionalOperator");
+        //setName("UNDEF_BinaryConditionalOperator");
+        //setLocation(ConOp);
+        //return true;
+        return "UNDEF_BinaryConditionalOperator";
+    }
+    bool
+    PostVisitBinaryConditionalOperator(const BinaryConditionalOperator *ConOp)
+    {
+        newComment("PostVisitBinaryConditionalOperator");
+        newComment(curNode->name);
+        // x ?: y  ->  desugar to x ? x : y
+        xmlNodePtr lhs = curNode->xmlChildrenNode;
+        while (lhs && lhs->type == XML_COMMENT_NODE) {
+            lhs = lhs->next;
+        }
+        if (lhs) {
+            newComment("PVBCO: desugar: x ?: y -> x ? x : y");
+            xmlNodePtr mid = xmlCopyNode(lhs, 1);
+            if (mid) {
+                newComment("PVBCO: copied node", mid);
+                xmlAddNextSibling(lhs, mid);
+            }
+        }
+        xmlAddChild(rootNode, curNode);
         return true;
     }
-    bool VisitConditionalOperator(const ConditionalOperator *ConOp) {
+    const char *NameForConditionalOperator(const ConditionalOperator *ConOp)
+        const {
+        //newComment("VisitConditionalOperator");
+
         // XcodeML-C-0.9J.pdf 7.13
-        setName("condExpr");
-        setLocation(ConOp);
-        return true;
+        //setName("condExpr");
+        //setLocation(ConOp);
+        //return true;
+        return "condExpr";
     }
-    bool VisitCompoundStmt(CompoundStmt *S) {
+    const char *NameForCompoundStmt(CompoundStmt *S) {
+        return "compoundStatement";
+    }
+#if 0
+    bool PostVisitCompoundStmt(CompoundStmt *S) {
+        newComment("VisitCompoundStmt");
+
         // XcodeML-C-0.9J.pdf 6.2
         XcodeMlSymbolsVisitor SV(this->astContext, this->curNode, "symbols");
         if (!OptDisableXSV) {
-            SV.TraverseCompoundStmt(S);
+            SV.XcodeMlTraverseCompoundStmt(S);
         }
         //XcodeMlDeclarationsVisitor DV(this->astContext, this->curNode,
         //                              "Declarations");
-        //DV.TraverseCompoundStmt(S);
-
-        setName("compoundStatement");
+        //DV.XcodeMlTraverseCompoundStmt(S);
+        //setName("compoundStatement");
         return true;
     }
-
-
     bool VisitExpr(const Expr *E) {
         newComment("VisitExpr");
         //setName("zExpr");
@@ -386,18 +253,21 @@ public:
 
         XcodeMlSymbolsVisitor SV(this->astContext, this->curNode, "symbols");
         if (!OptDisableXSV) {
-            SV.TraverseFunctionDecl(D);
+            SV.XcodeMlTraverseFunctionDecl(D);
         }
 
         // should be handle <param> properly
 
         xmlAddChild(rootNode, curNode);
         curNode = xmlNewChild(curNode, nullptr, BAD_CAST "body", nullptr);
-        addCurNodeAsChildOfRootNode = false;
         return true;
     }
+    bool PostVisitFunctionDecl(FunctionDecl *D) {
+        // do not add me as a child of the root node
+        return true;
+    }
+#endif
 };
-const char *XcodeMlDeclarationsVisitor::visitorName = "XDV";
 
 
 class XcodeMlASTConsumer : public ASTConsumer {
@@ -418,13 +288,13 @@ public:
         Decl *D = CXT.getTranslationUnitDecl();
 
         if (!OptDisableXTTV) {
-            TTV.TraverseDecl(D);
+            TTV.XcodeMlTraverseDecl(D);
         }
         if (!OptDisableXSV) {
-            SV.TraverseDecl(D);
+            SV.XcodeMlTraverseDecl(D);
         }
         if (!OptDisableXDV) {
-            DV.TraverseDecl(D);
+            DV.XcodeMlTraverseDecl(D);
         }
     }
 #if 0
