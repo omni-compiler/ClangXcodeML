@@ -171,6 +171,62 @@ bool XcodeMlRAV::XcodeMlTraverseDecl(Decl *D) {
     }
 #include "clang/AST/DeclNodes.inc"
 
+#define OPERATOR(NAME)                                                  \
+    bool XcodeMlRAV::TraverseUnary##NAME(UnaryOperator *UO) {           \
+        const char *VN = otherside->getVisitorName();                   \
+        if (OptTraceRAV && VN) {                                        \
+            errs() << VN << "::       TraverseUnary" #NAME "\n";        \
+        }                                                               \
+        return otherside->XcodeMlTraverseUnary##NAME(UO);               \
+    }                                                                   \
+    bool XcodeMlRAV::XcodeMlTraverseUnary##NAME(UnaryOperator *UO) {    \
+        const char *VN = otherside->getVisitorName();                   \
+        if (OptTraceRAV && VN) {                                        \
+            errs() << VN << "::XcodeMlTraverseUnary" #NAME "\n";        \
+        }                                                               \
+        return static_cast<RAV*>(this)->TraverseUnary##NAME(UO);        \
+    }
+    UNARYOP_LIST()
+#undef OPERATOR
+
+#define OPERATOR(NAME)                                                  \
+    bool XcodeMlRAV::TraverseBin##NAME(BinaryOperator *BO) {            \
+        const char *VN = otherside->getVisitorName();                   \
+        if (OptTraceRAV && VN) {                                        \
+            errs() << VN << "::       TraverseBin" #NAME "\n";          \
+        }                                                               \
+        return otherside->XcodeMlTraverseBin##NAME(BO);                 \
+    }                                                                   \
+    bool XcodeMlRAV::XcodeMlTraverseBin##NAME(BinaryOperator *BO) {     \
+        const char *VN = otherside->getVisitorName();                   \
+        if (OptTraceRAV && VN) {                                        \
+            errs() << VN << "::XcodeMlTraverseBin" #NAME "\n";          \
+        }                                                               \
+        return static_cast<RAV*>(this)->TraverseBin##NAME(BO);          \
+    }
+    BINOP_LIST()
+#undef OPERATOR
+
+#define OPERATOR(NAME)                                                  \
+    bool XcodeMlRAV::                                                   \
+    TraverseBin##NAME##Assign(CompoundAssignOperator *CAO) {            \
+        const char *VN = otherside->getVisitorName();                   \
+        if (OptTraceRAV && VN) {                                        \
+            errs() << VN << "::       TraverseBin" #NAME "Assign\n";    \
+        }                                                               \
+        return otherside->XcodeMlTraverseBin##NAME##Assign(CAO);        \
+    }                                                                   \
+    bool XcodeMlRAV::                                                   \
+    XcodeMlTraverseBin##NAME##Assign(CompoundAssignOperator *CAO) {     \
+        const char *VN = otherside->getVisitorName();                   \
+        if (OptTraceRAV && VN) {                                        \
+            errs() << VN << "::XcodeMlTraverseBin" #NAME "Assign\n";    \
+        }                                                               \
+        return static_cast<RAV*>(this)->TraverseBin##NAME##Assign(CAO); \
+    }
+    CAO_LIST()
+#undef OPERATOR
+
 ///
 /// Local Variables:
 /// indent-tabs-mode: nil

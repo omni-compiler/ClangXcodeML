@@ -200,6 +200,12 @@ public:
     const char *NameForCompoundStmt(CompoundStmt *S) {
         return "compoundStatement";
     }
+    bool PostVisitParenExpr(ParenExpr *E) {
+        errs() << "HOGEHOGEHOGEHOGEHOGEEEEEEE!!!!!!\n";
+        xmlAddChild(rootNode, curNode);
+        return true;
+    }
+
 #if 0
     bool PostVisitCompoundStmt(CompoundStmt *S) {
         newComment("VisitCompoundStmt");

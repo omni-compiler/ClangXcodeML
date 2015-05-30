@@ -7,6 +7,21 @@ using namespace clang::driver;
 using namespace clang::tooling;
 using namespace llvm;
 
+#define UNARYOP_LIST()                                                  \
+    OPERATOR(PostInc) OPERATOR(PostDec) OPERATOR(PreInc) OPERATOR(PreDec) \
+    OPERATOR(AddrOf) OPERATOR(Deref) OPERATOR(Plus) OPERATOR(Minus)     \
+    OPERATOR(Not) OPERATOR(LNot) OPERATOR(Real) OPERATOR(Imag)          \
+    OPERATOR(Extension)
+#define BINOP_LIST()                                                    \
+    OPERATOR(PtrMemD) OPERATOR(PtrMemI) OPERATOR(Mul) OPERATOR(Div)     \
+    OPERATOR(Rem) OPERATOR(Add) OPERATOR(Sub) OPERATOR(Shl) OPERATOR(Shr) \
+    OPERATOR(LT) OPERATOR(GT) OPERATOR(LE) OPERATOR(GE) OPERATOR(EQ)    \
+    OPERATOR(NE) OPERATOR(And) OPERATOR(Xor) OPERATOR(Or) OPERATOR(LAnd) \
+    OPERATOR(LOr) OPERATOR(Assign) OPERATOR(Comma)
+#define CAO_LIST()                                                      \
+    OPERATOR(Mul) OPERATOR(Div) OPERATOR(Rem) OPERATOR(Add) OPERATOR(Sub) \
+    OPERATOR(Shl) OPERATOR(Shr) OPERATOR(And) OPERATOR(Or) OPERATOR(Xor)
+
 // interface (abstract class)
 class XcodeMlVisitorBidirectionalBridge {
 private:
@@ -37,6 +52,22 @@ public:
 #define DECL(CLASS, BASE)                                               \
     virtual bool XcodeMlTraverse##CLASS##Decl(CLASS##Decl *D) = 0;
 #include "clang/AST/DeclNodes.inc"
+
+#define OPERATOR(NAME)                                          \
+    virtual bool XcodeMlTraverseUnary##NAME(UnaryOperator *UO) = 0;
+    UNARYOP_LIST()
+#undef OPERATOR
+
+#define OPERATOR(NAME)                                          \
+    virtual bool XcodeMlTraverseBin##NAME(BinaryOperator *BO) = 0;
+    BINOP_LIST()
+#undef OPERATOR
+
+#define OPERATOR(NAME)                                                  \
+    virtual bool                                                        \
+    XcodeMlTraverseBin##NAME##Assign(CompoundAssignOperator *CAO) = 0;
+    CAO_LIST()
+#undef OPERATOR
 
     virtual const char *getVisitorName() const = 0;
 };
@@ -83,6 +114,25 @@ public:
     bool Traverse##CLASS##Decl(CLASS##Decl *D);                 \
     bool XcodeMlTraverse##CLASS##Decl(CLASS##Decl *D) override;
 #include "clang/AST/DeclNodes.inc"
+
+#define OPERATOR(NAME)                                                  \
+    bool TraverseUnary##NAME(UnaryOperator *UO);                        \
+    bool XcodeMlTraverseUnary##NAME(UnaryOperator *UO) override;
+    UNARYOP_LIST()
+#undef OPERATOR
+
+#define OPERATOR(NAME)                                                  \
+    bool TraverseBin##NAME(BinaryOperator *BO);                         \
+    bool XcodeMlTraverseBin##NAME(BinaryOperator *BO) override;
+    BINOP_LIST()
+#undef OPERATOR
+
+#define OPERATOR(NAME)                                                  \
+    bool TraverseBin##NAME##Assign(CompoundAssignOperator *CAO);        \
+    bool XcodeMlTraverseBin##NAME##Assign(CompoundAssignOperator *CAO) override;
+    CAO_LIST()
+#undef OPERATOR
+
     const char *getVisitorName() const override { return "RAV"; }
 };
 
@@ -196,6 +246,57 @@ public:
         return getDerived().PostVisit##CLASS##Decl(D);          \
     }
 #include "clang/AST/DeclNodes.inc"
+
+#define OPERATOR(NAME)                                          \
+    bool PostVisitUnary##NAME(UnaryOperator *UO) {              \
+        setLocation(UO);                                        \
+        xmlAddChild(rootNode, curNode);                         \
+        return true;                                            \
+    }                                                           \
+    bool XcodeMlTraverseUnary##NAME(UnaryOperator *UO) {        \
+        newComment("XcodeMlTraverseUnary" #NAME);               \
+        setName(NameForUnaryOperator(UO));                      \
+        if (!otherside->XcodeMlTraverseUnary##NAME(UO)) {       \
+            return false;                                       \
+        }                                                       \
+        return getDerived().PostVisitUnary##NAME(UO);           \
+    }
+    UNARYOP_LIST()
+#undef OPERATOR
+
+#define OPERATOR(NAME)                                          \
+    bool PostVisitBin##NAME(BinaryOperator *BO) {               \
+        setLocation(BO);                                        \
+        xmlAddChild(rootNode, curNode);                         \
+        return true;                                            \
+    }                                                           \
+    bool XcodeMlTraverseBin##NAME(BinaryOperator *BO) {         \
+        newComment("XcodeMlTraverseBin" #NAME);                 \
+        setName(NameForBinaryOperator(BO));                     \
+        if (!otherside->XcodeMlTraverseBin##NAME(BO)) {         \
+            return false;                                       \
+        }                                                       \
+        return getDerived().PostVisitBin##NAME(BO);              \
+    }
+    BINOP_LIST()
+#undef OPERATOR
+
+#define OPERATOR(NAME)                                                   \
+    bool PostVisitBin##NAME##Assign(CompoundAssignOperator *CAO) {       \
+        setLocation(CAO);                                                \
+        xmlAddChild(rootNode, curNode);                                  \
+        return true;                                                     \
+    }                                                                    \
+    bool XcodeMlTraverseBin##NAME##Assign(CompoundAssignOperator *CAO) { \
+        newComment("XcodeMlTraverseBin" #NAME "Assign");                 \
+        setName(NameForBinaryOperator(CAO));                             \
+        if (!otherside->XcodeMlTraverseBin##NAME##Assign(CAO)) {         \
+            return false;                                                \
+        }                                                                \
+        return getDerived().PostVisitBin##NAME##Assign(CAO);             \
+    }
+    CAO_LIST()
+#undef OPERATOR
 };
 
 extern cl::OptionCategory C2XcodeMLCategory;
