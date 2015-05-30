@@ -1,18 +1,20 @@
-#include "clang/Driver/Options.h"
+#include "XcodeMlVisitorBase.h"
+
 #include "clang/AST/ASTConsumer.h"
 #include "clang/Frontend/ASTConsumers.h"
 #include "clang/Frontend/FrontendActions.h"
 #include "clang/Frontend/CompilerInstance.h"
-#include "clang/Tooling/CommonOptionsParser.h"
 #include "clang/Tooling/Tooling.h"
+#include "clang/Driver/Options.h"
 #include "llvm/Option/OptTable.h"
 #include "llvm/Support/Signals.h"
 
-#include <libxml/tree.h>
 #include <time.h>
 #include <string>
 
-#include "XcodeMlVisitorBase.h"
+using namespace clang::driver;
+using namespace clang::tooling;
+using namespace llvm;
 
 cl::OptionCategory C2XcodeMLCategory("CtoXcodeML options");
 static cl::extrahelp CommonHelp(CommonOptionsParser::HelpMessage);
@@ -294,13 +296,13 @@ public:
         Decl *D = CXT.getTranslationUnitDecl();
 
         if (!OptDisableXTTV) {
-            TTV.XcodeMlTraverseDecl(D);
+            TTV.BridgeDecl(D);
         }
         if (!OptDisableXSV) {
-            SV.XcodeMlTraverseDecl(D);
+            SV.BridgeDecl(D);
         }
         if (!OptDisableXDV) {
-            DV.XcodeMlTraverseDecl(D);
+            DV.BridgeDecl(D);
         }
     }
 #if 0

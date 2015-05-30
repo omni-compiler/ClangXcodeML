@@ -1,14 +1,11 @@
-#include "clang/Driver/Options.h"
-#include "clang/Tooling/CommonOptionsParser.h"
-#include "clang/Tooling/Tooling.h"
-#include "llvm/Option/OptTable.h"
-
-#include <libxml/tree.h>
-#include <time.h>
-#include <string>
-
 #include "XcodeMlVisitorBase.h"
 
+#include "clang/Driver/Options.h"
+#include "clang/AST/RecursiveASTVisitor.h"
+
+#include <type_traits>
+
+using namespace llvm;
 
 static cl::opt<bool>
 OptEmitSourceFileName("file", cl::desc("emit 'file'"),
@@ -26,15 +23,66 @@ static cl::opt<bool>
 OptTraceRAV("trace-rav", cl::desc("trace Recursive AST Visitor"),
             cl::cat(C2XcodeMLCategory));
 
+// implement my RecursiveASTVisitor (which uses CRTP)
+class XcodeMlRAV : public RecursiveASTVisitor<XcodeMlRAV>,
+                   public RAVBidirBridge {
+private:
+    typedef RecursiveASTVisitor<XcodeMlRAV> RAV;
+public:
+    XcodeMlRAV() = delete;
+    XcodeMlRAV(const XcodeMlRAV&) = delete;
+    XcodeMlRAV(XcodeMlRAV&&) = delete;
+    XcodeMlRAV& operator =(const XcodeMlRAV&) = delete;
+    XcodeMlRAV& operator =(XcodeMlRAV&&) = delete;
+
+    explicit XcodeMlRAV(RAVBidirBridge *otherside)
+        : RAVBidirBridge(otherside) {};
+
+#define DISPATCHER(NAME, TYPE)                              \
+    bool Traverse##NAME(TYPE S) {                           \
+        const char *VN = otherside->getVisitorName();       \
+        if (OptTraceRAV && VN) {                            \
+            errs() << VN << "::       Traverse" #NAME "\n"; \
+        }                                                   \
+        return otherside->Bridge##NAME(S);                  \
+    }                                                       \
+    bool Bridge##NAME(TYPE S) {                             \
+        const char *VN = otherside->getVisitorName();       \
+        if (OptTraceRAV && VN) {                            \
+            errs() << VN << "::BridgeTraverse" #NAME "\n";  \
+        }                                                   \
+        return static_cast<RAV*>(this)->Traverse##NAME(S);  \
+    }
+
+    DISPATCHER(Stmt, Stmt *);
+    DISPATCHER(Type, QualType);
+    DISPATCHER(TypeLoc, TypeLoc);
+    DISPATCHER(Attr, Attr *);
+    DISPATCHER(Decl, Decl *);
+    DISPATCHER(NestedNameSpecifier, NestedNameSpecifier *);
+    DISPATCHER(NestedNameSpecifierLoc, NestedNameSpecifierLoc);
+    DISPATCHER(DeclarationNameInfo, DeclarationNameInfo);
+    DISPATCHER(TemplateName, TemplateName);
+    DISPATCHER(TemplateArgument, const TemplateArgument &);
+    DISPATCHER(TemplateArgumentLoc, const TemplateArgumentLoc &);
+    DISPATCHER(ConstructorInitializer, CXXCtorInitializer *);
+
+    const char *getVisitorName() const override { return "RAV"; }
+};
+class RAVpoolSizeChecker {
+    static_assert(sizeof(XcodeMlRAV)
+                  <= sizeof(XcodeMlVisitorBaseImpl::RAVpool),
+                  "XcodeMlVisitorBaseImpl::RAVpool is too small");
+};
+
 // implementation of XcodeMlVisitorBaseImpl
 
 XcodeMlVisitorBaseImpl::
 XcodeMlVisitorBaseImpl(const ASTContext &CXT, xmlNodePtr N, const char *Name)
-    : XcodeMlVisitorBidirectionalBridge(&RAV),
-      RAV(this), astContext(CXT), rootNode(N),
+    : astContext(CXT), rootNode(N),
       curNode(Name ? xmlNewNode(nullptr, BAD_CAST Name) : N),
       isLocationAlreadySet(false) {
-    // do nothing
+    RAV = new(RAVpool) XcodeMlRAV(this);
 }
 
 void XcodeMlVisitorBaseImpl::setName(const char *Name) {
@@ -99,133 +147,6 @@ void XcodeMlVisitorBaseImpl::setLocation(const Decl *D, xmlNodePtr N) {
 void XcodeMlVisitorBaseImpl::setLocation(const Expr *E, xmlNodePtr N) {
     setLocation(E->getExprLoc(), N);
 }
-
-// implementation of XcodeMlRAV
-
-#define ABSTRACT_STMT(STMT)
-#define STMT(CLASS, PARENT)                                        \
-    bool XcodeMlRAV::Traverse##CLASS(CLASS *S) {                   \
-        const char *VN = otherside->getVisitorName();              \
-        if (OptTraceRAV && VN) {                                   \
-            errs() << VN << "::       Traverse" #CLASS "\n";       \
-        }                                                          \
-        return otherside->XcodeMlTraverse##CLASS(S);               \
-    }                                                              \
-    bool XcodeMlRAV::XcodeMlTraverse##CLASS(CLASS *S) {            \
-        const char *VN = otherside->getVisitorName();              \
-        if (OptTraceRAV && VN) {                                   \
-            errs() << VN << "::XcodeMlTraverse" #CLASS "\n";       \
-        }                                                          \
-        return static_cast<RAV*>(this)->Traverse##CLASS(S);        \
-    }
-#include "clang/AST/StmtNodes.inc"
-
-#define ABSTRACT_TYPE(CLASS, BASE)
-#define TYPE(CLASS, BASE)                                            \
-    bool XcodeMlRAV::Traverse##CLASS##Type(CLASS##Type *T) {         \
-        const char *VN = otherside->getVisitorName();              \
-        if (OptTraceRAV && VN) {                                     \
-            errs() << VN << "::       Traverse" #CLASS "Type\n";     \
-        }                                                            \
-        return otherside->XcodeMlTraverse##CLASS##Type(T);           \
-    }                                                                \
-    bool XcodeMlRAV::XcodeMlTraverse##CLASS##Type(CLASS##Type *T) {  \
-        const char *VN = otherside->getVisitorName();              \
-        if (OptTraceRAV && VN) {                                     \
-            errs() << VN << "::XcodeMlTraverse" #CLASS "Type\n";     \
-        }                                                            \
-        return static_cast<RAV*>(this)->Traverse##CLASS##Type(T);    \
-    }
-#include "clang/AST/TypeNodes.def"
-
-bool XcodeMlRAV::TraverseDecl(Decl *D) {
-    const char *VN = otherside->getVisitorName();
-    if (OptTraceRAV && VN) {
-        errs() << VN << "::       TraverseDecl\n";
-    }
-    return otherside->XcodeMlTraverseDecl(D);
-}
-bool XcodeMlRAV::XcodeMlTraverseDecl(Decl *D) {
-    const char *VN = otherside->getVisitorName();
-    if (OptTraceRAV && VN) {
-            errs() << VN << "::XcodeMlTraverseDecl\n";
-    }
-    return static_cast<RAV*>(this)->TraverseDecl(D);
-}
-
-#define ABSTRACT_DECL(DECL)
-#define DECL(CLASS, BASE)                                            \
-    bool XcodeMlRAV::Traverse##CLASS##Decl(CLASS##Decl *D) {         \
-        const char *VN = otherside->getVisitorName();                \
-        if (OptTraceRAV && VN) {                                     \
-            errs() << VN << "::       Traverse" #CLASS "Decl\n";     \
-        }                                                            \
-        return otherside->XcodeMlTraverse##CLASS##Decl(D);           \
-    }                                                                \
-    bool XcodeMlRAV::XcodeMlTraverse##CLASS##Decl(CLASS##Decl *D) {  \
-        const char *VN = otherside->getVisitorName();                \
-        if (OptTraceRAV && VN) {                                     \
-            errs() << VN << "::XcodeMlTraverse" #CLASS "Decl\n";     \
-        }                                                            \
-        return static_cast<RAV*>(this)->Traverse##CLASS##Decl(D);    \
-    }
-#include "clang/AST/DeclNodes.inc"
-
-#define OPERATOR(NAME)                                                  \
-    bool XcodeMlRAV::TraverseUnary##NAME(UnaryOperator *UO) {           \
-        const char *VN = otherside->getVisitorName();                   \
-        if (OptTraceRAV && VN) {                                        \
-            errs() << VN << "::       TraverseUnary" #NAME "\n";        \
-        }                                                               \
-        return otherside->XcodeMlTraverseUnary##NAME(UO);               \
-    }                                                                   \
-    bool XcodeMlRAV::XcodeMlTraverseUnary##NAME(UnaryOperator *UO) {    \
-        const char *VN = otherside->getVisitorName();                   \
-        if (OptTraceRAV && VN) {                                        \
-            errs() << VN << "::XcodeMlTraverseUnary" #NAME "\n";        \
-        }                                                               \
-        return static_cast<RAV*>(this)->TraverseUnary##NAME(UO);        \
-    }
-    UNARYOP_LIST()
-#undef OPERATOR
-
-#define OPERATOR(NAME)                                                  \
-    bool XcodeMlRAV::TraverseBin##NAME(BinaryOperator *BO) {            \
-        const char *VN = otherside->getVisitorName();                   \
-        if (OptTraceRAV && VN) {                                        \
-            errs() << VN << "::       TraverseBin" #NAME "\n";          \
-        }                                                               \
-        return otherside->XcodeMlTraverseBin##NAME(BO);                 \
-    }                                                                   \
-    bool XcodeMlRAV::XcodeMlTraverseBin##NAME(BinaryOperator *BO) {     \
-        const char *VN = otherside->getVisitorName();                   \
-        if (OptTraceRAV && VN) {                                        \
-            errs() << VN << "::XcodeMlTraverseBin" #NAME "\n";          \
-        }                                                               \
-        return static_cast<RAV*>(this)->TraverseBin##NAME(BO);          \
-    }
-    BINOP_LIST()
-#undef OPERATOR
-
-#define OPERATOR(NAME)                                                  \
-    bool XcodeMlRAV::                                                   \
-    TraverseBin##NAME##Assign(CompoundAssignOperator *CAO) {            \
-        const char *VN = otherside->getVisitorName();                   \
-        if (OptTraceRAV && VN) {                                        \
-            errs() << VN << "::       TraverseBin" #NAME "Assign\n";    \
-        }                                                               \
-        return otherside->XcodeMlTraverseBin##NAME##Assign(CAO);        \
-    }                                                                   \
-    bool XcodeMlRAV::                                                   \
-    XcodeMlTraverseBin##NAME##Assign(CompoundAssignOperator *CAO) {     \
-        const char *VN = otherside->getVisitorName();                   \
-        if (OptTraceRAV && VN) {                                        \
-            errs() << VN << "::XcodeMlTraverseBin" #NAME "Assign\n";    \
-        }                                                               \
-        return static_cast<RAV*>(this)->TraverseBin##NAME##Assign(CAO); \
-    }
-    CAO_LIST()
-#undef OPERATOR
 
 ///
 /// Local Variables:
