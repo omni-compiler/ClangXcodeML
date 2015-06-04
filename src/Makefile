@@ -11,7 +11,7 @@ USEDLIBS += -lclangTooling -lclangFrontend -lclangSerialization -lclangDriver \
             -lclangParse -lclangSema -lclangAnalysis \
             -lclangAST -lclangASTMatchers -lclangEdit -lclangLex -lclangBasic
 USEDLIBS += $(shell $(LLVM_CONFIG) --libs mcparser bitreader support mc option)
-USEDLIBS += -lpthread -ldl -ltinfo
+USEDLIBS += -lpthread -ldl -ltinfo -lz
 USEDLIBS += `pkg-config --libs libxml-2.0` -lclang
 USEDLIBS += $(OTHERLIBS)
 
