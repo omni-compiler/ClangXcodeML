@@ -81,9 +81,8 @@ XcodeMlVisitorBaseImpl::
 XcodeMlVisitorBaseImpl(const ASTContext &CXT, xmlNodePtr N, const char *Name)
     : astContext(CXT), rootNode(N),
       curNode(Name ? xmlNewNode(nullptr, BAD_CAST Name) : N),
-      isLocationAlreadySet(false) {
-    RAV = new(RAVpool) XcodeMlRAV(this);
-}
+      isLocationAlreadySet(false),
+      RAVBidirBridge(new(RAVpool) XcodeMlRAV(this)) {};
 
 void XcodeMlVisitorBaseImpl::setName(const char *Name) {
     xmlNodeSetName(curNode, BAD_CAST Name);

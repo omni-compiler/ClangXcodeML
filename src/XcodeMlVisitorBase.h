@@ -46,8 +46,6 @@ public:
 class XcodeMlVisitorBaseImpl : public RAVBidirBridge {
     friend class RAVpoolSizeChecker;
 private:
-    // class XcodeMlRAV : public RecursiveASTVisitor<XcodeMlRAV>
-    RAVBidirBridge *RAV;
     // memory pool for XcodeMlRAV: hide implemantation completely
     char RAVpool[sizeof(RAVBidirBridge)]; //enough?
 protected:
@@ -85,7 +83,7 @@ class XcodeMlVisitorBase : public XcodeMlVisitorBaseImpl {
 public:
     using XcodeMlVisitorBaseImpl::XcodeMlVisitorBaseImpl;
 
-    Derived &getDerived() { return static_cast<Derived &>(*this); }
+    Derived &getDerived() { return *static_cast<Derived *>(this); }
 
 #define DISPATCHER(NAME, TYPE)                    \
     const char *NameFor##NAME(TYPE S) const {     \
