@@ -46,7 +46,7 @@ public:
         }                                                   \
         return otherside->Bridge##NAME(S);                  \
     }                                                       \
-    bool Bridge##NAME(TYPE S) {                             \
+    bool Bridge##NAME(TYPE S) override {                    \
         const char *VN = otherside->getVisitorName();       \
         if (OptTraceRAV && VN) {                            \
             errs() << VN << "::BridgeTraverse" #NAME "\n";  \

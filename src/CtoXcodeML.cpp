@@ -339,9 +339,11 @@ public:
         return true;
     };
 
-    virtual ASTConsumer *CreateASTConsumer(CompilerInstance &CI,
-                                           StringRef file) override {
-        return new XcodeMlASTConsumer(xmlDocGetRootElement(xmlDoc));
+    virtual std::unique_ptr<ASTConsumer>
+    CreateASTConsumer(CompilerInstance &CI, StringRef file) override {
+        std::unique_ptr<ASTConsumer>
+            C(new XcodeMlASTConsumer(xmlDocGetRootElement(xmlDoc)));
+        return C;
     }
 
     void EndSourceFileAction(void) override {
@@ -355,7 +357,12 @@ int main(int argc, const char **argv) {
     CommonOptionsParser OptionsParser(argc, argv, C2XcodeMLCategory);
     ClangTool Tool(OptionsParser.getCompilations(),
                    OptionsParser.getSourcePathList());
+#if 0
     Tool.setArgumentsAdjuster(new clang::tooling::ClangSyntaxOnlyAdjuster());
+#else
+    Tool.appendArgumentsAdjuster(clang::tooling::getClangSyntaxOnlyAdjuster());
+    //new clang::tooling::getClangSyntaxOnlyAdjuster());
+#endif
 
     std::unique_ptr<FrontendActionFactory> FrontendFactory
         = newFrontendActionFactory<XcodeMlASTDumpAction>();
