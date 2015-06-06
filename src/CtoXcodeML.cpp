@@ -213,7 +213,7 @@ public:
         newComment("VisitCompoundStmt");
 
         // XcodeML-C-0.9J.pdf 6.2
-        XcodeMlSymbolsVisitor SV(this->astContext, this->curNode, "symbols");
+        XcodeMlSymbolsVisitor SV(this, "symbols");
         if (!OptDisableXSV) {
             SV.XcodeMlTraverseCompoundStmt(S);
         }
@@ -398,7 +398,7 @@ public:
         case Stmt::WhileStmtClass: return "";
         }
     }
-
+#if 0
     bool VisitType(const Type *T) {
         newComment("VisitType");
         //setName("zType");
@@ -423,7 +423,7 @@ public:
         const char *FuncName = DNI.getName().getAsString().c_str();
         xmlNewChild(curNode, nullptr, BAD_CAST "name", BAD_CAST FuncName);
 
-        XcodeMlSymbolsVisitor SV(this->astContext, this->curNode, "symbols");
+        XcodeMlSymbolsVisitor SV(this, "symbols");
         if (!OptDisableXSV) {
             SV.BridgeDecl(D);
         }
@@ -438,23 +438,20 @@ public:
         // do not add me as a child of the root node
         return true;
     }
+#endif
 };
 
 
 class XcodeMlASTConsumer : public ASTConsumer {
     const xmlNodePtr rootNode;
 
-    xmlNodePtr addNewChild(const char *Name) {
-        return xmlNewChild(rootNode, nullptr, BAD_CAST Name, nullptr);
-    }
-
 public:
     explicit XcodeMlASTConsumer(xmlNodePtr N) : rootNode(N) {};
 
     virtual void HandleTranslationUnit(ASTContext &CXT) override {
-        XcodeMlTypeTableVisitor TTV(CXT, addNewChild("TypeTable"));
-        XcodeMlSymbolsVisitor SV(CXT, addNewChild("globalSymbols"));
-        XcodeMlDeclarationsVisitor DV(CXT, addNewChild("globalDeclarations"));
+        XcodeMlTypeTableVisitor TTV(CXT, rootNode, "TypeTable");
+        XcodeMlSymbolsVisitor SV(CXT, rootNode, "globalSymbols");
+        XcodeMlDeclarationsVisitor DV(CXT, rootNode, "globalDeclarations");
 
         Decl *D = CXT.getTranslationUnitDecl();
 

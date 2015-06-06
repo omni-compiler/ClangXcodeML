@@ -49,10 +49,10 @@ private:
     // memory pool for XcodeMlRAV: hide implemantation completely
     char RAVpool[sizeof(RAVBidirBridge)]; //enough?
 protected:
+    const ASTContext &astContext;
     const xmlNodePtr rootNode;    // the current root node.
     xmlNodePtr curNode;           // a candidate of the new chlid.
     bool isLocationAlreadySet;
-    const ASTContext &astContext;
 public:
     XcodeMlVisitorBaseImpl() = delete;
     XcodeMlVisitorBaseImpl(const XcodeMlVisitorBaseImpl&) = delete;
@@ -60,11 +60,10 @@ public:
     XcodeMlVisitorBaseImpl& operator =(const XcodeMlVisitorBaseImpl&) = delete;
     XcodeMlVisitorBaseImpl& operator =(XcodeMlVisitorBaseImpl&&) = delete;
 
-    explicit XcodeMlVisitorBaseImpl(const ASTContext &CXT, xmlNodePtr N,
-                                    const char *Name = nullptr);
-    explicit XcodeMlVisitorBaseImpl(const XcodeMlVisitorBaseImpl *p,
-                                    const char *Name = nullptr)
-        : XcodeMlVisitorBaseImpl(p->astContext, p->curNode, Name) {}
+    explicit XcodeMlVisitorBaseImpl(const ASTContext &CXT,
+                                    xmlNodePtr RootNode,
+                                    xmlNodePtr CurNode,
+                                    bool IsLocationAlreadySet);
 
     void setName(const char *Name);
     void newProp(const char *Name, int Val, xmlNodePtr N = nullptr);
@@ -81,7 +80,18 @@ public:
 template <class Derived>
 class XcodeMlVisitorBase : public XcodeMlVisitorBaseImpl {
 public:
-    using XcodeMlVisitorBaseImpl::XcodeMlVisitorBaseImpl;
+    XcodeMlVisitorBase() = delete;
+    XcodeMlVisitorBase(const XcodeMlVisitorBase&) = delete;
+    XcodeMlVisitorBase(XcodeMlVisitorBase&&) = delete;
+    XcodeMlVisitorBase& operator =(const XcodeMlVisitorBase&) = delete;
+    XcodeMlVisitorBase& operator =(XcodeMlVisitorBase&&) = delete;
+
+    explicit XcodeMlVisitorBase(const ASTContext &CXT, xmlNodePtr RootNode,
+                                const char *Name)
+        : XcodeMlVisitorBaseImpl(CXT, RootNode,
+                                 xmlNewNode(nullptr, BAD_CAST Name), false) {};
+    explicit XcodeMlVisitorBase(const XcodeMlVisitorBase *p, const char *Name)
+        : XcodeMlVisitorBase(p->astContext, p->curNode, Name) {};
 
     Derived &getDerived() { return *static_cast<Derived *>(this); }
 
@@ -97,7 +107,7 @@ public:
         return true;                              \
     }                                             \
     bool Bridge##NAME(TYPE S) override {          \
-        Derived V(this, NameFor##NAME(S));        \
+        Derived V(this, getDerived().NameFor##NAME(S)); \
         newComment("Bridge" #NAME);               \
         if (!V.getDerived().PreVisit##NAME(S)) {  \
             return false;                         \
