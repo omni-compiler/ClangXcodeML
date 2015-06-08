@@ -55,13 +55,12 @@ public:
     const char *getVisitorName() const override {
         return OptTraceXTTV ? "XTTV" : nullptr;
     }
-
-    bool PostVisitStmt(const Stmt *S) {
-        // do not add me as a child of the root node
+    bool PreVisitStmt(const Stmt *S) {
+        // do not create a new child
         return true;
     }
-    bool PostVisitDecl(const Decl *D) {
-        // do not add me as a child of the root node
+    bool PreVisitDecl(const Decl *D) {
+        // do not create a new child
         return true;
     }
 };
@@ -86,158 +85,66 @@ public:
         return OptTraceXDV ? "XDV" : nullptr;
     }
 
-    const char *NameForUnaryOperator(const UnaryOperator *UnOp) const {
-        // XcodeML-C-0.9J.pdf 7.2(varAddr), 7.3(pointerRef), 7.8, 7.11
-        const char *Nam;
-
-        switch (UnOp->getOpcode()) {
-        case UO_PostInc:   Nam = "postIncrExpr"; break;
-        case UO_PostDec:   Nam = "postDecrExpr"; break;
-        case UO_PreInc:    Nam = "preIncrExpr"; break;
-        case UO_PreDec:    Nam = "preDecrExpr"; break;
-        case UO_AddrOf:    Nam = "varAddr"; break;
-        case UO_Deref:     Nam = "pointerRef"; break;
-        case UO_Plus:      Nam = "UNDEF_UO_Plus"; break;
-        case UO_Minus:     Nam = "unaryMinusExpr"; break;
-        case UO_Not:       Nam = "bitNotExpr"; break;
-        case UO_LNot:      Nam = "logNotExpr"; break;
-        case UO_Real:      Nam = "UNDEF_UO_Real"; break;
-        case UO_Imag:      Nam = "UNDEF_UO_Imag"; break;
-        case UO_Extension: Nam = "UNDEF_UO_Extension"; break;
-        }
-        //newComment((std::string("VisitUnaryOperator ")
-        //           + std::string(Nam)).c_str());
-        //setName(Nam);
-        //setLocation(UnOp);
-        //return true;
-        return Nam;
-    }
-
-    const char *NameForBinaryOperator(const BinaryOperator *BinOp) const {
-        // XcodeML-C-0.9J.pdf: 7.6(assignExpr), 7.7, 7.10(commmaExpr)
-        const char *Nam;
-
-        switch (BinOp->getOpcode()) {
-        case BO_PtrMemD:   Nam = "UNDEF_BO_PtrMemD"; break;
-        case BO_PtrMemI:   Nam = "UNDEF_BO_PtrMemI"; break;
-        case BO_Mul:       Nam = "mulExpr"; break;
-        case BO_Div:       Nam = "divExpr"; break;
-        case BO_Rem:       Nam = "modExpr"; break;
-        case BO_Add:       Nam = "plusExpr"; break;
-        case BO_Sub:       Nam = "minusExpr"; break;
-        case BO_Shl:       Nam = "LshiftExpr"; break;
-        case BO_Shr:       Nam = "RshiftExpr"; break;
-        case BO_LT:        Nam = "logLTExpr"; break;
-        case BO_GT:        Nam = "logGTExpr"; break;
-        case BO_LE:        Nam = "logLEExpr"; break;
-        case BO_GE:        Nam = "logGEExpr"; break;
-        case BO_EQ:        Nam = "logEQExpr"; break;
-        case BO_NE:        Nam = "logNEQExpr"; break;
-        case BO_And:       Nam = "bitAndExpr"; break;
-        case BO_Xor:       Nam = "bitXorExpr"; break;
-        case BO_Or:        Nam = "bitOrExpr"; break;
-        case BO_LAnd:      Nam = "logAndExpr"; break;
-        case BO_LOr:       Nam = "logOrExpr"; break;
-        case BO_Assign:    Nam = "assignExpr"; break;
-        case BO_Comma:     Nam = "commaExpr"; break;
-        case BO_MulAssign: Nam = "asgMulExpr"; break;
-        case BO_DivAssign: Nam = "asgDivExpr"; break;
-        case BO_RemAssign: Nam = "asgModExpr"; break;
-        case BO_AddAssign: Nam = "asgPlusExpr"; break;
-        case BO_SubAssign: Nam = "asgMinusExpr"; break;
-        case BO_ShlAssign: Nam = "asgLshiftExpr"; break;
-        case BO_ShrAssign: Nam = "asgRshiftExpr"; break;
-        case BO_AndAssign: Nam = "asgBitAndExpr"; break;
-        case BO_OrAssign:  Nam = "asgBitOrExpr"; break;
-        case BO_XorAssign: Nam = "asgBitXorExpr"; break;
-        }
-        //newComment((std::string("VisitBinaryOperator ")
-        //           + std::string(Nam)).c_str());
-        //setName(Nam);
-        //setLocation(BinOp);
-        //return true;
-        return Nam;
-    }
-
-    const char *
-    NameForBinaryConditionalOperator(const BinaryConditionalOperator *ConOp)
-        const {
-        //newComment("VisitBinaryConditionalOperator");
-        //setName("UNDEF_BinaryConditionalOperator");
-        //setLocation(ConOp);
-        //return true;
-        return "UNDEF_BinaryConditionalOperator";
-    }
-    bool
-    PostVisitBinaryConditionalOperator(const BinaryConditionalOperator *ConOp)
-    {
-        newComment("PostVisitBinaryConditionalOperator");
-        newComment(curNode->name);
-        // x ?: y  ->  desugar to x ? x : y
-        xmlNodePtr lhs = curNode->xmlChildrenNode;
-        while (lhs && lhs->type == XML_COMMENT_NODE) {
-            lhs = lhs->next;
-        }
-        if (lhs) {
-            newComment("PVBCO: desugar: x ?: y -> x ? x : y");
-            xmlNodePtr mid = xmlCopyNode(lhs, 1);
-            if (mid) {
-                newComment("PVBCO: copied node", mid);
-                xmlAddNextSibling(lhs, mid);
-            }
-        }
-        xmlAddChild(rootNode, curNode);
-        return true;
-    }
-    const char *NameForConditionalOperator(const ConditionalOperator *ConOp)
-        const {
-        //newComment("VisitConditionalOperator");
-
-        // XcodeML-C-0.9J.pdf 7.13
-        //setName("condExpr");
-        //setLocation(ConOp);
-        //return true;
-        return "condExpr";
-    }
-    const char *NameForCompoundStmt(CompoundStmt *S) {
-        return "compoundStatement";
-    }
-    bool PostVisitParenExpr(ParenExpr *E) {
-        errs() << "HOGEHOGEHOGEHOGEHOGEEEEEEE!!!!!!\n";
-        xmlAddChild(rootNode, curNode);
-        return true;
-    }
-
-#if 0
-    bool PostVisitCompoundStmt(CompoundStmt *S) {
-        newComment("VisitCompoundStmt");
-
-        // XcodeML-C-0.9J.pdf 6.2
-        XcodeMlSymbolsVisitor SV(this, "symbols");
-        if (!OptDisableXSV) {
-            SV.XcodeMlTraverseCompoundStmt(S);
-        }
-        //XcodeMlDeclarationsVisitor DV(this->astContext, this->curNode,
-        //                              "Declarations");
-        //DV.XcodeMlTraverseCompoundStmt(S);
-        //setName("compoundStatement");
-        return true;
-    }
-    bool VisitExpr(const Expr *E) {
-        newComment("VisitExpr");
-        //setName("zExpr");
-        //setLocation(E);
-        return true;
-    }
-#endif
     const char *NameForStmt(const Stmt *S) const {
+        if (!S) {
+            return "Stmt_UNKNOWN";
+        }
         const BinaryOperator *BO = dyn_cast<const BinaryOperator>(S);
         if (BO) {
-            return NameForBinaryOperator(BO);
+            // XcodeML-C-0.9J.pdf: 7.6(assignExpr), 7.7, 7.10(commmaExpr)
+            switch (BO->getOpcode()) {
+            case BO_PtrMemD:   return "UNDEF_BO_PtrMemD";
+            case BO_PtrMemI:   return "UNDEF_BO_PtrMemI";
+            case BO_Mul:       return "mulExpr";
+            case BO_Div:       return "divExpr";
+            case BO_Rem:       return "modExpr";
+            case BO_Add:       return "plusExpr";
+            case BO_Sub:       return "minusExpr";
+            case BO_Shl:       return "LshiftExpr";
+            case BO_Shr:       return "RshiftExpr";
+            case BO_LT:        return "logLTExpr";
+            case BO_GT:        return "logGTExpr";
+            case BO_LE:        return "logLEExpr";
+            case BO_GE:        return "logGEExpr";
+            case BO_EQ:        return "logEQExpr";
+            case BO_NE:        return "logNEQExpr";
+            case BO_And:       return "bitAndExpr";
+            case BO_Xor:       return "bitXorExpr";
+            case BO_Or:        return "bitOrExpr";
+            case BO_LAnd:      return "logAndExpr";
+            case BO_LOr:       return "logOrExpr";
+            case BO_Assign:    return "assignExpr";
+            case BO_Comma:     return "commaExpr";
+            case BO_MulAssign: return "asgMulExpr";
+            case BO_DivAssign: return "asgDivExpr";
+            case BO_RemAssign: return "asgModExpr";
+            case BO_AddAssign: return "asgPlusExpr";
+            case BO_SubAssign: return "asgMinusExpr";
+            case BO_ShlAssign: return "asgLshiftExpr";
+            case BO_ShrAssign: return "asgRshiftExpr";
+            case BO_AndAssign: return "asgBitAndExpr";
+            case BO_OrAssign:  return "asgBitOrExpr";
+            case BO_XorAssign: return "asgBitXorExpr";
+            }
         }
         const UnaryOperator *UO = dyn_cast<const UnaryOperator>(S);
         if (UO) {
-            return NameForUnaryOperator(UO);
+            // XcodeML-C-0.9J.pdf 7.2(varAddr), 7.3(pointerRef), 7.8, 7.11
+            switch (UO->getOpcode()) {
+            case UO_PostInc:   return "postIncrExpr";
+            case UO_PostDec:   return "postDecrExpr";
+            case UO_PreInc:    return "preIncrExpr";
+            case UO_PreDec:    return "preDecrExpr";
+            case UO_AddrOf:    return "varAddr";
+            case UO_Deref:     return "pointerRef";
+            case UO_Plus:      return "UNDEF_UO_Plus";
+            case UO_Minus:     return "unaryMinusExpr";
+            case UO_Not:       return "bitNotExpr";
+            case UO_LNot:      return "logNotExpr";
+            case UO_Real:      return "UNDEF_UO_Real";
+            case UO_Imag:      return "UNDEF_UO_Imag";
+            case UO_Extension: return "UNDEF_UO_Extension";
+            }
         }
         switch (S->getStmtClass()) {
         case Stmt::NoStmtClass:     return "Stmt_NoStmtClass";
@@ -245,200 +152,159 @@ public:
         case Stmt::MSAsmStmtClass:  return "Stmt_MSAsmStmtClass";
         case Stmt::AttributedStmtClass: return "Stmt_AttributedStmtClass";
         case Stmt::BreakStmtClass: return "Stmt_BreakStmtClass";
-        case Stmt::CXXCatchStmtClass: return "";
-        case Stmt::CXXForRangeStmtClass: return "";
-        case Stmt::CXXTryStmtClass: return "";
-        case Stmt::CapturedStmtClass: return "";
-        case Stmt::CompoundStmtClass: return "";
-        case Stmt::ContinueStmtClass: return "";
-        case Stmt::DeclStmtClass: return "";
-        case Stmt::DoStmtClass: return "";
-        case Stmt::BinaryConditionalOperatorClass: return "";
-        case Stmt::ConditionalOperatorClass: return "";
-        case Stmt::AddrLabelExprClass: return "";
-        case Stmt::ArraySubscriptExprClass: return "";
-        case Stmt::ArrayTypeTraitExprClass: return "";
-        case Stmt::AsTypeExprClass: return "";
-        case Stmt::AtomicExprClass: return "";
-        case Stmt::BinaryOperatorClass: return "";
-        case Stmt::CompoundAssignOperatorClass: return "";
-        case Stmt::BlockExprClass: return "";
-        case Stmt::CXXBindTemporaryExprClass: return "";
-        case Stmt::CXXBoolLiteralExprClass: return "";
-        case Stmt::CXXConstructExprClass: return "";
-        case Stmt::CXXTemporaryObjectExprClass: return "";
-        case Stmt::CXXDefaultArgExprClass: return "";
-        case Stmt::CXXDefaultInitExprClass: return "";
-        case Stmt::CXXDeleteExprClass: return "";
-        case Stmt::CXXDependentScopeMemberExprClass: return "";
-        case Stmt::CXXFoldExprClass: return "";
-        case Stmt::CXXNewExprClass: return "";
-        case Stmt::CXXNoexceptExprClass: return "";
-        case Stmt::CXXNullPtrLiteralExprClass: return "";
-        case Stmt::CXXPseudoDestructorExprClass: return "";
-        case Stmt::CXXScalarValueInitExprClass: return "";
-        case Stmt::CXXStdInitializerListExprClass: return "";
-        case Stmt::CXXThisExprClass: return "";
-        case Stmt::CXXThrowExprClass: return "";
-        case Stmt::CXXTypeidExprClass: return "";
-        case Stmt::CXXUnresolvedConstructExprClass: return "";
-        case Stmt::CXXUuidofExprClass: return "";
-        case Stmt::CallExprClass: return "";
-        case Stmt::CUDAKernelCallExprClass: return "";
-        case Stmt::CXXMemberCallExprClass: return "";
-        case Stmt::CXXOperatorCallExprClass: return "";
-        case Stmt::UserDefinedLiteralClass: return "";
-        case Stmt::CStyleCastExprClass: return "";
-        case Stmt::CXXFunctionalCastExprClass: return "";
-        case Stmt::CXXConstCastExprClass: return "";
-        case Stmt::CXXDynamicCastExprClass: return "";
-        case Stmt::CXXReinterpretCastExprClass: return "";
-        case Stmt::CXXStaticCastExprClass: return "";
-        case Stmt::ObjCBridgedCastExprClass: return "";
-        case Stmt::ImplicitCastExprClass: return "";
-        case Stmt::CharacterLiteralClass: return "";
-        case Stmt::ChooseExprClass: return "";
-        case Stmt::CompoundLiteralExprClass: return "";
-        case Stmt::ConvertVectorExprClass: return "";
-        case Stmt::DeclRefExprClass: return "";
-        case Stmt::DependentScopeDeclRefExprClass: return "";
-        case Stmt::DesignatedInitExprClass: return "";
-        case Stmt::ExprWithCleanupsClass: return "";
-        case Stmt::ExpressionTraitExprClass: return "";
-        case Stmt::ExtVectorElementExprClass: return "";
-        case Stmt::FloatingLiteralClass: return "";
-        case Stmt::FunctionParmPackExprClass: return "";
-        case Stmt::GNUNullExprClass: return "";
-        case Stmt::GenericSelectionExprClass: return "";
-        case Stmt::ImaginaryLiteralClass: return "";
-        case Stmt::ImplicitValueInitExprClass: return "";
-        case Stmt::InitListExprClass: return "";
-        case Stmt::IntegerLiteralClass: return "";
-        case Stmt::LambdaExprClass: return "";
-        case Stmt::MSPropertyRefExprClass: return "";
-        case Stmt::MaterializeTemporaryExprClass: return "";
-        case Stmt::MemberExprClass: return "";
-        case Stmt::ObjCArrayLiteralClass: return "";
-        case Stmt::ObjCBoolLiteralExprClass: return "";
-        case Stmt::ObjCBoxedExprClass: return "";
-        case Stmt::ObjCDictionaryLiteralClass: return "";
-        case Stmt::ObjCEncodeExprClass: return "";
-        case Stmt::ObjCIndirectCopyRestoreExprClass: return "";
-        case Stmt::ObjCIsaExprClass: return "";
-        case Stmt::ObjCIvarRefExprClass: return "";
-        case Stmt::ObjCMessageExprClass: return "";
-        case Stmt::ObjCPropertyRefExprClass: return "";
-        case Stmt::ObjCProtocolExprClass: return "";
-        case Stmt::ObjCSelectorExprClass: return "";
-        case Stmt::ObjCStringLiteralClass: return "";
-        case Stmt::ObjCSubscriptRefExprClass: return "";
-        case Stmt::OffsetOfExprClass: return "";
-        case Stmt::OpaqueValueExprClass: return "";
-        case Stmt::UnresolvedLookupExprClass: return "";
-        case Stmt::UnresolvedMemberExprClass: return "";
-        case Stmt::PackExpansionExprClass: return "";
-        case Stmt::ParenExprClass: return "";
-        case Stmt::ParenListExprClass: return "";
-        case Stmt::PredefinedExprClass: return "";
-        case Stmt::PseudoObjectExprClass: return "";
-        case Stmt::ShuffleVectorExprClass: return "";
-        case Stmt::SizeOfPackExprClass: return "";
-        case Stmt::StmtExprClass: return "";
-        case Stmt::StringLiteralClass: return "";
-        case Stmt::SubstNonTypeTemplateParmExprClass: return "";
-        case Stmt::SubstNonTypeTemplateParmPackExprClass: return "";
-        case Stmt::TypeTraitExprClass: return "";
-        case Stmt::TypoExprClass: return "";
-        case Stmt::UnaryExprOrTypeTraitExprClass: return "";
-        case Stmt::UnaryOperatorClass: return "";
-        case Stmt::VAArgExprClass: return "";
-        case Stmt::ForStmtClass: return "";
-        case Stmt::GotoStmtClass: return "";
-        case Stmt::IfStmtClass: return "";
-        case Stmt::IndirectGotoStmtClass: return "";
-        case Stmt::LabelStmtClass: return "";
-        case Stmt::MSDependentExistsStmtClass: return "";
-        case Stmt::NullStmtClass: return "";
-        case Stmt::OMPAtomicDirectiveClass: return "";
-        case Stmt::OMPBarrierDirectiveClass: return "";
-        case Stmt::OMPCriticalDirectiveClass: return "";
-        case Stmt::OMPFlushDirectiveClass: return "";
-        case Stmt::OMPForDirectiveClass: return "";
-        case Stmt::OMPForSimdDirectiveClass: return "";
-        case Stmt::OMPParallelForDirectiveClass: return "";
-        case Stmt::OMPParallelForSimdDirectiveClass: return "";
-        case Stmt::OMPSimdDirectiveClass: return "";
-        case Stmt::OMPMasterDirectiveClass: return "";
-        case Stmt::OMPOrderedDirectiveClass: return "";
-        case Stmt::OMPParallelDirectiveClass: return "";
-        case Stmt::OMPParallelSectionsDirectiveClass: return "";
-        case Stmt::OMPSectionDirectiveClass: return "";
-        case Stmt::OMPSectionsDirectiveClass: return "";
-        case Stmt::OMPSingleDirectiveClass: return "";
-        case Stmt::OMPTargetDirectiveClass: return "";
-        case Stmt::OMPTaskDirectiveClass: return "";
-        case Stmt::OMPTaskwaitDirectiveClass: return "";
-        case Stmt::OMPTaskyieldDirectiveClass: return "";
-        case Stmt::OMPTeamsDirectiveClass: return "";
-        case Stmt::ObjCAtCatchStmtClass: return "";
-        case Stmt::ObjCAtFinallyStmtClass: return "";
-        case Stmt::ObjCAtSynchronizedStmtClass: return "";
-        case Stmt::ObjCAtThrowStmtClass: return "";
-        case Stmt::ObjCAtTryStmtClass: return "";
-        case Stmt::ObjCAutoreleasePoolStmtClass: return "";
-        case Stmt::ObjCForCollectionStmtClass: return "";
-        case Stmt::ReturnStmtClass: return "";
-        case Stmt::SEHExceptStmtClass: return "";
-        case Stmt::SEHFinallyStmtClass: return "";
-        case Stmt::SEHLeaveStmtClass: return "";
-        case Stmt::SEHTryStmtClass: return "";
-        case Stmt::CaseStmtClass: return "";
-        case Stmt::DefaultStmtClass: return "";
-        case Stmt::SwitchStmtClass: return "";
-        case Stmt::WhileStmtClass: return "";
+        case Stmt::CXXCatchStmtClass: return "Stmt_CXXCatchStmtClass";
+        case Stmt::CXXForRangeStmtClass: return "Stmt_CXXForRangeStmtClass";
+        case Stmt::CXXTryStmtClass: return "Stmt_CXXTryStmtClass";
+        case Stmt::CapturedStmtClass: return "Stmt_CapturedStmtClass";
+        case Stmt::CompoundStmtClass: return "Stmt_CompoundStmtClass";
+        case Stmt::ContinueStmtClass: return "Stmt_ContinueStmtClass";
+        case Stmt::DeclStmtClass: return "Stmt_DeclStmtClass";
+        case Stmt::DoStmtClass: return "Stmt_DoStmtClass";
+        case Stmt::BinaryConditionalOperatorClass: return "condExpr"; //7.13
+        case Stmt::ConditionalOperatorClass: return "condExpr"; //7.13
+        case Stmt::AddrLabelExprClass: return "Stmt_AddrLabelExprClass";
+        case Stmt::ArraySubscriptExprClass: return "Stmt_ArraySubscriptExprClass";
+        case Stmt::ArrayTypeTraitExprClass: return "Stmt_ArrayTypeTraitExprClass";
+        case Stmt::AsTypeExprClass: return "Stmt_AsTypeExprClass";
+        case Stmt::AtomicExprClass: return "Stmt_AtomicExprClass";
+        case Stmt::BinaryOperatorClass: return "Stmt_BinaryOperatorClass";
+        case Stmt::CompoundAssignOperatorClass: return "Stmt_CompoundAssignOperatorClass";
+        case Stmt::BlockExprClass: return "Stmt_BlockExprClass";
+        case Stmt::CXXBindTemporaryExprClass: return "Stmt_CXXBindTemporaryExprClass";
+        case Stmt::CXXBoolLiteralExprClass: return "Stmt_CXXBoolLiteralExprClass";
+        case Stmt::CXXConstructExprClass: return "Stmt_CXXConstructExprClass";
+        case Stmt::CXXTemporaryObjectExprClass: return "Stmt_CXXTemporaryObjectExprClass";
+        case Stmt::CXXDefaultArgExprClass: return "Stmt_CXXDefaultArgExprClass";
+        case Stmt::CXXDefaultInitExprClass: return "Stmt_CXXDefaultInitExprClass";
+        case Stmt::CXXDeleteExprClass: return "Stmt_CXXDeleteExprClass";
+        case Stmt::CXXDependentScopeMemberExprClass: return "Stmt_CXXDependentScopeMemberExprClass";
+        case Stmt::CXXFoldExprClass: return "Stmt_CXXFoldExprClass";
+        case Stmt::CXXNewExprClass: return "Stmt_CXXNewExprClass";
+        case Stmt::CXXNoexceptExprClass: return "Stmt_CXXNoexceptExprClass";
+        case Stmt::CXXNullPtrLiteralExprClass: return "Stmt_CXXNullPtrLiteralExprClass";
+        case Stmt::CXXPseudoDestructorExprClass: return "Stmt_CXXPseudoDestructorExprClass";
+        case Stmt::CXXScalarValueInitExprClass: return "Stmt_CXXScalarValueInitExprClass";
+        case Stmt::CXXStdInitializerListExprClass: return "Stmt_CXXStdInitializerListExprClass";
+        case Stmt::CXXThisExprClass: return "Stmt_CXXThisExprClass";
+        case Stmt::CXXThrowExprClass: return "Stmt_CXXThrowExprClass";
+        case Stmt::CXXTypeidExprClass: return "Stmt_CXXTypeidExprClass";
+        case Stmt::CXXUnresolvedConstructExprClass: return "Stmt_CXXUnresolvedConstructExprClass";
+        case Stmt::CXXUuidofExprClass: return "Stmt_CXXUuidofExprClass";
+        case Stmt::CallExprClass: return "Stmt_CallExprClass";
+        case Stmt::CUDAKernelCallExprClass: return "Stmt_CUDAKernelCallExprClass";
+        case Stmt::CXXMemberCallExprClass: return "Stmt_CXXMemberCallExprClass";
+        case Stmt::CXXOperatorCallExprClass: return "Stmt_CXXOperatorCallExprClass";
+        case Stmt::UserDefinedLiteralClass: return "Stmt_UserDefinedLiteralClass";
+        case Stmt::CStyleCastExprClass: return "Stmt_CStyleCastExprClass";
+        case Stmt::CXXFunctionalCastExprClass: return "Stmt_CXXFunctionalCastExprClass";
+        case Stmt::CXXConstCastExprClass: return "Stmt_CXXConstCastExprClass";
+        case Stmt::CXXDynamicCastExprClass: return "Stmt_CXXDynamicCastExprClass";
+        case Stmt::CXXReinterpretCastExprClass: return "Stmt_CXXReinterpretCastExprClass";
+        case Stmt::CXXStaticCastExprClass: return "Stmt_CXXStaticCastExprClass";
+        case Stmt::ObjCBridgedCastExprClass: return "Stmt_ObjCBridgedCastExprClass";
+        case Stmt::ImplicitCastExprClass: return "Stmt_ImplicitCastExprClass";
+        case Stmt::CharacterLiteralClass: return "Stmt_CharacterLiteralClass";
+        case Stmt::ChooseExprClass: return "Stmt_ChooseExprClass";
+        case Stmt::CompoundLiteralExprClass: return "Stmt_CompoundLiteralExprClass";
+        case Stmt::ConvertVectorExprClass: return "Stmt_ConvertVectorExprClass";
+        case Stmt::DeclRefExprClass: return "Stmt_DeclRefExprClass";
+        case Stmt::DependentScopeDeclRefExprClass: return "Stmt_DependentScopeDeclRefExprClass";
+        case Stmt::DesignatedInitExprClass: return "Stmt_DesignatedInitExprClass";
+        case Stmt::ExprWithCleanupsClass: return "Stmt_ExprWithCleanupsClass";
+        case Stmt::ExpressionTraitExprClass: return "Stmt_ExpressionTraitExprClass";
+        case Stmt::ExtVectorElementExprClass: return "Stmt_ExtVectorElementExprClass";
+        case Stmt::FloatingLiteralClass: return "Stmt_FloatingLiteralClass";
+        case Stmt::FunctionParmPackExprClass: return "Stmt_FunctionParmPackExprClass";
+        case Stmt::GNUNullExprClass: return "Stmt_GNUNullExprClass";
+        case Stmt::GenericSelectionExprClass: return "Stmt_GenericSelectionExprClass";
+        case Stmt::ImaginaryLiteralClass: return "Stmt_ImaginaryLiteralClass";
+        case Stmt::ImplicitValueInitExprClass: return "Stmt_ImplicitValueInitExprClass";
+        case Stmt::InitListExprClass: return "Stmt_InitListExprClass";
+        case Stmt::IntegerLiteralClass: return "Stmt_IntegerLiteralClass";
+        case Stmt::LambdaExprClass: return "Stmt_LambdaExprClass";
+        case Stmt::MSPropertyRefExprClass: return "Stmt_MSPropertyRefExprClass";
+        case Stmt::MaterializeTemporaryExprClass: return "Stmt_MaterializeTemporaryExprClass";
+        case Stmt::MemberExprClass: return "Stmt_MemberExprClass";
+        case Stmt::ObjCArrayLiteralClass: return "Stmt_ObjCArrayLiteralClass";
+        case Stmt::ObjCBoolLiteralExprClass: return "Stmt_ObjCBoolLiteralExprClass";
+        case Stmt::ObjCBoxedExprClass: return "Stmt_ObjCBoxedExprClass";
+        case Stmt::ObjCDictionaryLiteralClass: return "Stmt_ObjCDictionaryLiteralClass";
+        case Stmt::ObjCEncodeExprClass: return "Stmt_ObjCEncodeExprClass";
+        case Stmt::ObjCIndirectCopyRestoreExprClass: return "Stmt_ObjCIndirectCopyRestoreExprClass";
+        case Stmt::ObjCIsaExprClass: return "Stmt_ObjCIsaExprClass";
+        case Stmt::ObjCIvarRefExprClass: return "Stmt_ObjCIvarRefExprClass";
+        case Stmt::ObjCMessageExprClass: return "Stmt_ObjCMessageExprClass";
+        case Stmt::ObjCPropertyRefExprClass: return "Stmt_ObjCPropertyRefExprClass";
+        case Stmt::ObjCProtocolExprClass: return "Stmt_ObjCProtocolExprClass";
+        case Stmt::ObjCSelectorExprClass: return "Stmt_ObjCSelectorExprClass";
+        case Stmt::ObjCStringLiteralClass: return "Stmt_ObjCStringLiteralClass";
+        case Stmt::ObjCSubscriptRefExprClass: return "Stmt_ObjCSubscriptRefExprClass";
+        case Stmt::OffsetOfExprClass: return "Stmt_OffsetOfExprClass";
+        case Stmt::OpaqueValueExprClass: return "Stmt_OpaqueValueExprClass";
+        case Stmt::UnresolvedLookupExprClass: return "Stmt_UnresolvedLookupExprClass";
+        case Stmt::UnresolvedMemberExprClass: return "Stmt_UnresolvedMemberExprClass";
+        case Stmt::PackExpansionExprClass: return "Stmt_PackExpansionExprClass";
+        case Stmt::ParenExprClass: return "Stmt_ParenExprClass";
+        case Stmt::ParenListExprClass: return "Stmt_ParenListExprClass";
+        case Stmt::PredefinedExprClass: return "Stmt_PredefinedExprClass";
+        case Stmt::PseudoObjectExprClass: return "Stmt_PseudoObjectExprClass";
+        case Stmt::ShuffleVectorExprClass: return "Stmt_ShuffleVectorExprClass";
+        case Stmt::SizeOfPackExprClass: return "Stmt_SizeOfPackExprClass";
+        case Stmt::StmtExprClass: return "Stmt_StmtExprClass";
+        case Stmt::StringLiteralClass: return "Stmt_StringLiteralClass";
+        case Stmt::SubstNonTypeTemplateParmExprClass: return "Stmt_SubstNonTypeTemplateParmExprClass";
+        case Stmt::SubstNonTypeTemplateParmPackExprClass: return "Stmt_SubstNonTypeTemplateParmPackExprClass";
+        case Stmt::TypeTraitExprClass: return "Stmt_TypeTraitExprClass";
+        case Stmt::TypoExprClass: return "Stmt_TypoExprClass";
+        case Stmt::UnaryExprOrTypeTraitExprClass: return "Stmt_UnaryExprOrTypeTraitExprClass";
+        case Stmt::UnaryOperatorClass: return "Stmt_UnaryOperatorClass";
+        case Stmt::VAArgExprClass: return "Stmt_VAArgExprClass";
+        case Stmt::ForStmtClass: return "Stmt_ForStmtClass";
+        case Stmt::GotoStmtClass: return "Stmt_GotoStmtClass";
+        case Stmt::IfStmtClass: return "Stmt_IfStmtClass";
+        case Stmt::IndirectGotoStmtClass: return "Stmt_IndirectGotoStmtClass";
+        case Stmt::LabelStmtClass: return "Stmt_LabelStmtClass";
+        case Stmt::MSDependentExistsStmtClass: return "Stmt_MSDependentExistsStmtClass";
+        case Stmt::NullStmtClass: return "Stmt_NullStmtClass";
+        case Stmt::OMPAtomicDirectiveClass: return "Stmt_OMPAtomicDirectiveClass";
+        case Stmt::OMPBarrierDirectiveClass: return "Stmt_OMPBarrierDirectiveClass";
+        case Stmt::OMPCriticalDirectiveClass: return "Stmt_OMPCriticalDirectiveClass";
+        case Stmt::OMPFlushDirectiveClass: return "Stmt_OMPFlushDirectiveClass";
+        case Stmt::OMPForDirectiveClass: return "Stmt_OMPForDirectiveClass";
+        case Stmt::OMPForSimdDirectiveClass: return "Stmt_OMPForSimdDirectiveClass";
+        case Stmt::OMPParallelForDirectiveClass: return "Stmt_OMPParallelForDirectiveClass";
+        case Stmt::OMPParallelForSimdDirectiveClass: return "Stmt_OMPParallelForSimdDirectiveClass";
+        case Stmt::OMPSimdDirectiveClass: return "Stmt_OMPSimdDirectiveClass";
+        case Stmt::OMPMasterDirectiveClass: return "Stmt_OMPMasterDirectiveClass";
+        case Stmt::OMPOrderedDirectiveClass: return "Stmt_OMPOrderedDirectiveClass";
+        case Stmt::OMPParallelDirectiveClass: return "Stmt_OMPParallelDirectiveClass";
+        case Stmt::OMPParallelSectionsDirectiveClass: return "Stmt_OMPParallelSectionsDirectiveClass";
+        case Stmt::OMPSectionDirectiveClass: return "Stmt_OMPSectionDirectiveClass";
+        case Stmt::OMPSectionsDirectiveClass: return "Stmt_OMPSectionsDirectiveClass";
+        case Stmt::OMPSingleDirectiveClass: return "Stmt_OMPSingleDirectiveClass";
+        case Stmt::OMPTargetDirectiveClass: return "Stmt_OMPTargetDirectiveClass";
+        case Stmt::OMPTaskDirectiveClass: return "Stmt_OMPTaskDirectiveClass";
+        case Stmt::OMPTaskwaitDirectiveClass: return "Stmt_OMPTaskwaitDirectiveClass";
+        case Stmt::OMPTaskyieldDirectiveClass: return "Stmt_OMPTaskyieldDirectiveClass";
+        case Stmt::OMPTeamsDirectiveClass: return "Stmt_OMPTeamsDirectiveClass";
+        case Stmt::ObjCAtCatchStmtClass: return "Stmt_ObjCAtCatchStmtClass";
+        case Stmt::ObjCAtFinallyStmtClass: return "Stmt_ObjCAtFinallyStmtClass";
+        case Stmt::ObjCAtSynchronizedStmtClass: return "Stmt_ObjCAtSynchronizedStmtClass";
+        case Stmt::ObjCAtThrowStmtClass: return "Stmt_ObjCAtThrowStmtClass";
+        case Stmt::ObjCAtTryStmtClass: return "Stmt_ObjCAtTryStmtClass";
+        case Stmt::ObjCAutoreleasePoolStmtClass: return "Stmt_ObjCAutoreleasePoolStmtClass";
+        case Stmt::ObjCForCollectionStmtClass: return "Stmt_ObjCForCollectionStmtClass";
+        case Stmt::ReturnStmtClass: return "Stmt_ReturnStmtClass";
+        case Stmt::SEHExceptStmtClass: return "Stmt_SEHExceptStmtClass";
+        case Stmt::SEHFinallyStmtClass: return "Stmt_SEHFinallyStmtClass";
+        case Stmt::SEHLeaveStmtClass: return "Stmt_SEHLeaveStmtClass";
+        case Stmt::SEHTryStmtClass: return "Stmt_SEHTryStmtClass";
+        case Stmt::CaseStmtClass: return "Stmt_CaseStmtClass";
+        case Stmt::DefaultStmtClass: return "Stmt_DefaultStmtClass";
+        case Stmt::SwitchStmtClass: return "Stmt_SwitchStmtClass";
+        case Stmt::WhileStmtClass: return "Stmt_WhileStmtClass";
         }
     }
-#if 0
-    bool VisitType(const Type *T) {
-        newComment("VisitType");
-        //setName("zType");
-        return true;
-    }
-
-    bool VisitDecl(const Decl *D) {
-        const char *Nam = D->getDeclKindName();
-        newComment((std::string("VisitDecl ") + std::string(Nam)).c_str());
-        //setName((std::string("Decl") + std::string(Nam)).c_str());
-        setLocation(D);
-        return true;
-    }
-
-    bool VisitFunctionDecl(FunctionDecl *D) {
-        // XcodeML-C-0.9J.pdf 5.1
-        newComment("VisitFunctionDecl");
-        setName("functionDefinition");
-        DeclarationNameInfo DNI = D->getNameInfo();
-        //setLocation(DNI.getLoc());
-
-        const char *FuncName = DNI.getName().getAsString().c_str();
-        xmlNewChild(curNode, nullptr, BAD_CAST "name", BAD_CAST FuncName);
-
-        XcodeMlSymbolsVisitor SV(this, "symbols");
-        if (!OptDisableXSV) {
-            SV.BridgeDecl(D);
-        }
-
-        // should be handle <param> properly
-
-        xmlAddChild(rootNode, curNode);
-        curNode = xmlNewChild(curNode, nullptr, BAD_CAST "body", nullptr);
-        return true;
-    }
-    bool PostVisitFunctionDecl(FunctionDecl *D) {
-        // do not add me as a child of the root node
-        return true;
-    }
-#endif
 };
 
 
@@ -449,19 +315,18 @@ public:
     explicit XcodeMlASTConsumer(xmlNodePtr N) : rootNode(N) {};
 
     virtual void HandleTranslationUnit(ASTContext &CXT) override {
-        XcodeMlTypeTableVisitor TTV(CXT, rootNode, "TypeTable");
-        XcodeMlSymbolsVisitor SV(CXT, rootNode, "globalSymbols");
-        XcodeMlDeclarationsVisitor DV(CXT, rootNode, "globalDeclarations");
-
         Decl *D = CXT.getTranslationUnitDecl();
 
         if (!OptDisableXTTV) {
+            XcodeMlTypeTableVisitor TTV(CXT, rootNode, "TypeTable");
             TTV.BridgeDecl(D);
         }
         if (!OptDisableXSV) {
+            XcodeMlSymbolsVisitor SV(CXT, rootNode, "Symbols");
             SV.BridgeDecl(D);
         }
         if (!OptDisableXDV) {
+            XcodeMlDeclarationsVisitor DV(CXT, rootNode, "globalDeclarations");
             DV.BridgeDecl(D);
         }
     }
@@ -517,12 +382,7 @@ int main(int argc, const char **argv) {
     CommonOptionsParser OptionsParser(argc, argv, C2XcodeMLCategory);
     ClangTool Tool(OptionsParser.getCompilations(),
                    OptionsParser.getSourcePathList());
-#if 0
-    Tool.setArgumentsAdjuster(new clang::tooling::ClangSyntaxOnlyAdjuster());
-#else
     Tool.appendArgumentsAdjuster(clang::tooling::getClangSyntaxOnlyAdjuster());
-    //new clang::tooling::getClangSyntaxOnlyAdjuster());
-#endif
 
     std::unique_ptr<FrontendActionFactory> FrontendFactory
         = newFrontendActionFactory<XcodeMlASTDumpAction>();

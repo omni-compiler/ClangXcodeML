@@ -62,8 +62,7 @@ public:
 
     explicit XcodeMlVisitorBaseImpl(const ASTContext &CXT,
                                     xmlNodePtr RootNode,
-                                    xmlNodePtr CurNode,
-                                    bool IsLocationAlreadySet);
+                                    xmlNodePtr CurNode);
 
     void setName(const char *Name);
     void newProp(const char *Name, int Val, xmlNodePtr N = nullptr);
@@ -87,35 +86,43 @@ public:
     XcodeMlVisitorBase& operator =(XcodeMlVisitorBase&&) = delete;
 
     explicit XcodeMlVisitorBase(const ASTContext &CXT, xmlNodePtr RootNode,
-                                const char *Name)
+                                const char *ChildName)
         : XcodeMlVisitorBaseImpl(CXT, RootNode,
-                                 xmlNewNode(nullptr, BAD_CAST Name), false) {};
-    explicit XcodeMlVisitorBase(const XcodeMlVisitorBase *p, const char *Name)
-        : XcodeMlVisitorBase(p->astContext, p->curNode, Name) {};
+                                 (ChildName
+                                  ? xmlNewChild(RootNode, nullptr,
+                                                BAD_CAST ChildName, nullptr)
+                                  : RootNode)) {};
+    explicit XcodeMlVisitorBase(const XcodeMlVisitorBase *p)
+        : XcodeMlVisitorBaseImpl(p->astContext, p->curNode, p->curNode) {};
 
     Derived &getDerived() { return *static_cast<Derived *>(this); }
 
-#define DISPATCHER(NAME, TYPE)                    \
-    const char *NameFor##NAME(TYPE S) const {     \
-        return "Traverse" #NAME;                  \
-    }                                             \
-    bool PreVisit##NAME(TYPE S) {                 \
-        return true;                              \
-    }                                             \
-    bool PostVisit##NAME(TYPE S) {                \
-        xmlAddChild(rootNode, curNode);           \
-        return true;                              \
-    }                                             \
-    bool Bridge##NAME(TYPE S) override {          \
-        Derived V(this, getDerived().NameFor##NAME(S)); \
-        newComment("Bridge" #NAME);               \
-        if (!V.getDerived().PreVisit##NAME(S)) {  \
-            return false;                         \
-        }                                         \
-        if (!V.otherside->Bridge##NAME(S)) {      \
-            return false;                         \
-        }                                         \
-        return V.getDerived().PostVisit##NAME(S); \
+#define DISPATCHER(NAME, TYPE)                                          \
+    const char *NameFor##NAME(TYPE S) const {                           \
+        return "Traverse" #NAME;                                        \
+    }                                                                   \
+    const char *ContentsFor##NAME(TYPE S) const {                       \
+        return nullptr;                                                 \
+    }                                                                   \
+    bool PreVisit##NAME(TYPE S) {                                       \
+        const char *Name = getDerived().NameFor##NAME(S);               \
+        if (!Name) {                                                    \
+            return false;                                               \
+        }                                                               \
+        const char *Contents = getDerived().ContentsFor##NAME(S);       \
+        curNode = xmlNewChild(rootNode, nullptr, BAD_CAST Name,         \
+                              BAD_CAST Contents);                       \
+        return true;                                                    \
+    }                                                                   \
+    bool PostVisit##NAME(TYPE S) {                                      \
+        return true;							\
+    }                                                                   \
+    bool Bridge##NAME(TYPE S) override {                                \
+        Derived V(this);                                                \
+        newComment("Bridge" #NAME);                                     \
+        return (V.getDerived().PreVisit##NAME(S)                        \
+                && V.otherside->Bridge##NAME(S)                         \
+                && V.getDerived().PostVisit##NAME(S));                  \
     }
 
     DISPATCHER(Stmt, Stmt *);
