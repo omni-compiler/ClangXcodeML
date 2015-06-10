@@ -19,6 +19,7 @@ XcodeMlTypeTableVisitor::getVisitorName() const {
 
 const char *
 XcodeMlTypeTableVisitor::NameForStmt(Stmt *S) const {
+  (void)S;
   return ""; // do not create a new child
 }
 

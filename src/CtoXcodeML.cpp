@@ -57,6 +57,7 @@ private:
 public:
     bool BeginSourceFileAction(clang::CompilerInstance& CI,
                              StringRef Filename) override {
+        (void)CI; // suppress warnings
         xmlDoc = xmlNewDoc(BAD_CAST "1.0");
         xmlNodePtr rootnode
             = xmlNewNode(nullptr, BAD_CAST "XcodeProgram");
@@ -76,6 +77,9 @@ public:
 
     virtual std::unique_ptr<ASTConsumer>
     CreateASTConsumer(CompilerInstance &CI, StringRef file) override {
+        (void)CI; // suppress warnings
+        (void)file; // suppress warnings
+
         std::unique_ptr<ASTConsumer>
             C(new XcodeMlASTConsumer(xmlDocGetRootElement(xmlDoc)));
         return C;

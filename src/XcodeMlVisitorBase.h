@@ -99,9 +99,11 @@ public:
 
 #define DISPATCHER(NAME, TYPE)                                          \
     const char *NameFor##NAME(TYPE S) const {                           \
+        (void)S;                                                        \
         return "Traverse" #NAME;                                        \
     }                                                                   \
     const char *ContentsFor##NAME(TYPE S) const {                       \
+        (void)S;                                                        \
         return nullptr;                                                 \
     }                                                                   \
     bool PreVisit##NAME(TYPE S) {                                       \
@@ -118,6 +120,7 @@ public:
         return true;                                                    \
     }                                                                   \
     bool PostVisit##NAME(TYPE S) {                                      \
+        (void)S;                                                        \
         return true;							\
     }                                                                   \
     bool Bridge##NAME(TYPE S) override {                                \

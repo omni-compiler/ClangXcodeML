@@ -2,8 +2,8 @@ LLVM_CONFIG = /usr/local/bin/llvm-config
 CXX = /usr/local/bin/clang++
 #LLVM_CONFIG = /usr/bin/llvm-config-3.6
 #CXX = /usr/bin/clang++-3.6
-CXXFLAGS = -O2 -g `pkg-config --cflags libxml-2.0` \
-	-fno-rtti -std=c++11 -pedantic \
+CXXFLAGS = -O2 -g -Wall -Wextra -fno-rtti -std=c++11 -pedantic \
+	`pkg-config --cflags libxml-2.0` \
 	-D__STDC_LIMIT_MACROS -D__STDC_CONSTANT_MACROS
 
 USEDLIBS = -L$(shell $(LLVM_CONFIG) --libdir)
@@ -56,3 +56,7 @@ RAV.i: RAV.cpp
 
 CtoXcodeML.i: CtoXcodeML.cpp
 	$(CXX) $(CXXFLAGS) -E CtoXcodeML.cpp -o CtoXcodeML.i
+
+.PHONY: check-syntax
+check-syntax:
+	$(CXX) $(CXXFLAGS) -Wall -Wextra -pedantic -fsyntax-only $(CHK_SOURCES)

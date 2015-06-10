@@ -642,7 +642,6 @@ XcodeMlDeclarationsVisitor::NameForDeclarationNameInfo(DeclarationNameInfo NameI
   case DeclarationName::CXXOperatorName: return "DeclarationName_CXXOperatorName";
   case DeclarationName::CXXLiteralOperatorName: return "DeclarationName_CXXLiteralOperatorName";
   case DeclarationName::CXXUsingDirective: return "DeclarationName_CXXUsingDirective";
-    break;
   }
 }
 
