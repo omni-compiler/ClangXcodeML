@@ -107,8 +107,11 @@ public:
     bool PreVisit##NAME(TYPE S) {                                       \
         const char *Name = getDerived().NameFor##NAME(S);               \
         if (!Name) {                                                    \
-            return true;                                                \
+            return false; /* stop traverse */				\
         }                                                               \
+        if (Name[0] == '\0') {						\
+	    return true; /* no need to create a child */		\
+	}								\
         const char *Contents = getDerived().ContentsFor##NAME(S);       \
         curNode = xmlNewChild(rootNode, nullptr, BAD_CAST Name,         \
                               BAD_CAST Contents);                       \

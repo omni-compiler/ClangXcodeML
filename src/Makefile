@@ -15,16 +15,30 @@ USEDLIBS += -lpthread -ldl -ltinfo -lz
 USEDLIBS += `pkg-config --libs libxml-2.0` -lclang
 USEDLIBS += $(OTHERLIBS)
 
-OBJS = CtoXcodeML.o XcodeMlVisitorBase.o
+OBJS = CtoXcodeML.o \
+	XcodeMlVisitorBase.o \
+	XcodeMlSymbolsVisitor.o \
+	XcodeMlTypeTableVisitor.o \
+	XcodeMlDeclarationsVisitor.o
 
 CtoXcodeML: $(OBJS)
 	$(CXX) $(CXXFLAGS) $(OBJS) $(USEDLIBS) -o CtoXcodeML
 
-CtoXcodeML.o: CtoXcodeML.cpp XcodeMlVisitorBase.h
-	$(CXX) -c $(CXXFLAGS) CtoXcodeML.cpp -o CtoXcodeML.o
+CtoXcodeML.o: CtoXcodeML.cpp XcodeMlVisitorBase.h \
+	XcodeMlSymbolsVisitor.h \
+	XcodeMlTypeTableVisitor.h \
+	XcodeMlDeclarationsVisitor.h
 
 XcodeMlVisitorBase.o: XcodeMlVisitorBase.cpp XcodeMlVisitorBase.h
-	$(CXX) -c $(CXXFLAGS) XcodeMlVisitorBase.cpp -o XcodeMlVisitorBase.o
+
+XcodeMlSymbolsVisitor.o: XcodeMlSymbolsVisitor.cpp \
+	XcodeMlSymbolsVisitor.h XcodeMlVisitorBase.h
+
+XcodeMlTypeTableVisitor.o: XcodeMlTypeTableVisitor.cpp \
+	XcodeMlTypeTableVisitor.h XcodeMlVisitorBase.h
+
+XcodeMlDeclarationsVisitor.o: XcodeMlDeclarationsVisitor.cpp \
+	XcodeMlDeclarationsVisitor.h XcodeMlVisitorBase.h
 
 CtoXcodeML.ast: CtoXcodeML.cpp
 	$(CXX) $(CXXFLAGS) -Xclang -ast-dump CtoXcodeML.cpp -o CtoXcodeML.ast 
@@ -35,7 +49,7 @@ test:
 mockup: mockup.cpp
 
 clean:
-	rm -f CtoXcodeML mockup RAV.i CtoXcodeML.i  $(OBJS)
+	rm -f CtoXcodeML mockup RAV.i CtoXcodeML.i  $(OBJS) *~
 
 RAV.i: RAV.cpp
 	$(CXX) $(CXXFLAGS) -E RAV.cpp -o RAV.i
