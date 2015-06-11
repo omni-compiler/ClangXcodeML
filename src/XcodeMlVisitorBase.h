@@ -109,7 +109,7 @@ public:
     bool PreVisit##NAME(TYPE S) {                                       \
         const char *Name = getDerived().NameFor##NAME(S);               \
         if (!Name) {                                                    \
-            return false; /* stop traverse */				\
+            return false; /* avoid traverse children */                 \
         }                                                               \
         if (Name[0] == '\0') {						\
 	    return true; /* no need to create a child */		\
@@ -121,14 +121,16 @@ public:
     }                                                                   \
     bool PostVisit##NAME(TYPE S) {                                      \
         (void)S;                                                        \
-        return true;							\
+        return true; /* continue traversing */                          \
     }                                                                   \
     bool Bridge##NAME(TYPE S) override {                                \
         Derived V(this);                                                \
         newComment("Bridge" #NAME);                                     \
-        return (V.getDerived().PreVisit##NAME(S)                        \
-                && V.otherside->Bridge##NAME(S)                         \
-                && V.getDerived().PostVisit##NAME(S));                  \
+        if (!V.getDerived().PreVisit##NAME(S)) {                        \
+            return true; /* avoid traverse children */                  \
+        }                                                               \
+        bool childresult = V.otherside->Bridge##NAME(S);                \
+        return V.getDerived().PostVisit##NAME(S) && childresult;        \
     }
 
     DISPATCHER(Stmt, Stmt *);

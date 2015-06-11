@@ -84,15 +84,15 @@ XcodeMlDeclarationsVisitor::NameForStmt(Stmt *S) const {
   case Stmt::GCCAsmStmtClass: return "Stmt_GCCAsmStmtClass";
   case Stmt::MSAsmStmtClass:  return "Stmt_MSAsmStmtClass";
   case Stmt::AttributedStmtClass: return "Stmt_AttributedStmtClass";
-  case Stmt::BreakStmtClass: return "Stmt_BreakStmtClass";
+  case Stmt::BreakStmtClass: return "breakStatement"; //6.7
   case Stmt::CXXCatchStmtClass: return "Stmt_CXXCatchStmtClass";
   case Stmt::CXXForRangeStmtClass: return "Stmt_CXXForRangeStmtClass";
   case Stmt::CXXTryStmtClass: return "Stmt_CXXTryStmtClass";
   case Stmt::CapturedStmtClass: return "Stmt_CapturedStmtClass";
-  case Stmt::CompoundStmtClass: return "Stmt_CompoundStmtClass";
-  case Stmt::ContinueStmtClass: return "Stmt_ContinueStmtClass";
+  case Stmt::CompoundStmtClass: return "compoundStatement"; //6.2 XXX
+  case Stmt::ContinueStmtClass: return "continueStatement"; //6.8
   case Stmt::DeclStmtClass: return "Stmt_DeclStmtClass";
-  case Stmt::DoStmtClass: return "Stmt_DoStmtClass";
+  case Stmt::DoStmtClass: return "doStatement"; //6.5 XXX
   case Stmt::BinaryConditionalOperatorClass: return "condExpr"; //7.13
   case Stmt::ConditionalOperatorClass: return "condExpr"; //7.13
   case Stmt::AddrLabelExprClass: return "Stmt_AddrLabelExprClass";
@@ -123,12 +123,12 @@ XcodeMlDeclarationsVisitor::NameForStmt(Stmt *S) const {
   case Stmt::CXXTypeidExprClass: return "Stmt_CXXTypeidExprClass";
   case Stmt::CXXUnresolvedConstructExprClass: return "Stmt_CXXUnresolvedConstructExprClass";
   case Stmt::CXXUuidofExprClass: return "Stmt_CXXUuidofExprClass";
-  case Stmt::CallExprClass: return "Stmt_CallExprClass";
+  case Stmt::CallExprClass: return "functionCall"; //7.9 XXX
   case Stmt::CUDAKernelCallExprClass: return "Stmt_CUDAKernelCallExprClass";
   case Stmt::CXXMemberCallExprClass: return "Stmt_CXXMemberCallExprClass";
   case Stmt::CXXOperatorCallExprClass: return "Stmt_CXXOperatorCallExprClass";
   case Stmt::UserDefinedLiteralClass: return "Stmt_UserDefinedLiteralClass";
-  case Stmt::CStyleCastExprClass: return "Stmt_CStyleCastExprClass";
+  case Stmt::CStyleCastExprClass: return "castExpr"; //7.12
   case Stmt::CXXFunctionalCastExprClass: return "Stmt_CXXFunctionalCastExprClass";
   case Stmt::CXXConstCastExprClass: return "Stmt_CXXConstCastExprClass";
   case Stmt::CXXDynamicCastExprClass: return "Stmt_CXXDynamicCastExprClass";
@@ -157,7 +157,7 @@ XcodeMlDeclarationsVisitor::NameForStmt(Stmt *S) const {
   case Stmt::LambdaExprClass: return "Stmt_LambdaExprClass";
   case Stmt::MSPropertyRefExprClass: return "Stmt_MSPropertyRefExprClass";
   case Stmt::MaterializeTemporaryExprClass: return "Stmt_MaterializeTemporaryExprClass";
-  case Stmt::MemberExprClass: return "Stmt_MemberExprClass";
+  case Stmt::MemberExprClass: return "memberRef"; //7.5 XXX
   case Stmt::ObjCArrayLiteralClass: return "Stmt_ObjCArrayLiteralClass";
   case Stmt::ObjCBoolLiteralExprClass: return "Stmt_ObjCBoolLiteralExprClass";
   case Stmt::ObjCBoxedExprClass: return "Stmt_ObjCBoxedExprClass";
@@ -192,11 +192,11 @@ XcodeMlDeclarationsVisitor::NameForStmt(Stmt *S) const {
   case Stmt::UnaryExprOrTypeTraitExprClass: return "Stmt_UnaryExprOrTypeTraitExprClass";
   case Stmt::UnaryOperatorClass: return "Stmt_UnaryOperatorClass";
   case Stmt::VAArgExprClass: return "Stmt_VAArgExprClass";
-  case Stmt::ForStmtClass: return "Stmt_ForStmtClass";
-  case Stmt::GotoStmtClass: return "Stmt_GotoStmtClass";
-  case Stmt::IfStmtClass: return "Stmt_IfStmtClass";
+  case Stmt::ForStmtClass: return "forStatement"; //6.6 XXX
+  case Stmt::GotoStmtClass: return "gotoStatement"; //6.10 XXX
+  case Stmt::IfStmtClass: return "ifStatement"; //6.3 XXX
   case Stmt::IndirectGotoStmtClass: return "Stmt_IndirectGotoStmtClass";
-  case Stmt::LabelStmtClass: return "Stmt_LabelStmtClass";
+  case Stmt::LabelStmtClass: return "statementLabel"; //6.11 XXX
   case Stmt::MSDependentExistsStmtClass: return "Stmt_MSDependentExistsStmtClass";
   case Stmt::NullStmtClass: return "Stmt_NullStmtClass";
   case Stmt::OMPAtomicDirectiveClass: return "Stmt_OMPAtomicDirectiveClass";
