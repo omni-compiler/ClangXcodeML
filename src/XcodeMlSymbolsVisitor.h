@@ -1,8 +1,8 @@
-class XcodeMlSymbolsVisitor
-    : public XcodeMlVisitorBase<XcodeMlSymbolsVisitor> {
+class SymbolsVisitor
+    : public XcodeMlVisitorBase<SymbolsVisitor> {
 public:
     // use base constructors
-    using XcodeMlVisitorBase<XcodeMlSymbolsVisitor>::XcodeMlVisitorBase;
+    using XcodeMlVisitorBase::XcodeMlVisitorBase;
 
     const char *getVisitorName() const override;
     const char *NameForDecl(Decl *) const;

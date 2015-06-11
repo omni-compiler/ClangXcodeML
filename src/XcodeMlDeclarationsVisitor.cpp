@@ -1,24 +1,24 @@
 #include "XcodeMlVisitorBase.h"
-#include "XcodeMlDeclarationsVisitor.h"
+#include "DeclarationsVisitor.h"
 
 using namespace llvm;
 
 static cl::opt<bool>
-OptTraceXDV("trace-xdv",
-            cl::desc("emit traces on XcodeMlDeclarationsVisitor"),
+OptTraceXDV("trace-declarations",
+            cl::desc("emit traces on <globalDeclarations>, <declarations>"),
             cl::cat(C2XcodeMLCategory));
 static cl::opt<bool>
-OptDisableXDV("disable-xdv",
-              cl::desc("disable XcodeMlDeclarationsVisitor"),
+OptDisableXDV("disable-declarations",
+              cl::desc("disable  <globalDeclarations>, <declarations>"),
               cl::cat(C2XcodeMLCategory));
 
 const char *
-XcodeMlDeclarationsVisitor::getVisitorName() const {
+DeclarationsVisitor::getVisitorName() const {
   return OptTraceXDV ? "XDV" : nullptr;
 }
 
 const char *
-XcodeMlDeclarationsVisitor::NameForStmt(Stmt *S) const {
+DeclarationsVisitor::NameForStmt(Stmt *S) const {
   if (!S) {
     return "Stmt_NULL";
   }
@@ -227,20 +227,20 @@ XcodeMlDeclarationsVisitor::NameForStmt(Stmt *S) const {
   case Stmt::ObjCAtTryStmtClass: return "Stmt_ObjCAtTryStmtClass";
   case Stmt::ObjCAutoreleasePoolStmtClass: return "Stmt_ObjCAutoreleasePoolStmtClass";
   case Stmt::ObjCForCollectionStmtClass: return "Stmt_ObjCForCollectionStmtClass";
-  case Stmt::ReturnStmtClass: return "Stmt_ReturnStmtClass";
+  case Stmt::ReturnStmtClass: return "returnStatement"; //6.9
   case Stmt::SEHExceptStmtClass: return "Stmt_SEHExceptStmtClass";
   case Stmt::SEHFinallyStmtClass: return "Stmt_SEHFinallyStmtClass";
   case Stmt::SEHLeaveStmtClass: return "Stmt_SEHLeaveStmtClass";
   case Stmt::SEHTryStmtClass: return "Stmt_SEHTryStmtClass";
-  case Stmt::CaseStmtClass: return "Stmt_CaseStmtClass";
-  case Stmt::DefaultStmtClass: return "Stmt_DefaultStmtClass";
-  case Stmt::SwitchStmtClass: return "Stmt_SwitchStmtClass";
-  case Stmt::WhileStmtClass: return "Stmt_WhileStmtClass";
+  case Stmt::CaseStmtClass: return "caseLabel"; //6.13 XXX
+  case Stmt::DefaultStmtClass: return "defaultLabel"; //6.15
+  case Stmt::SwitchStmtClass: return "switchStatement"; //6.12
+  case Stmt::WhileStmtClass: return "whileStatement"; //6.4 XXX
   }
 }
 
 const char *
-XcodeMlDeclarationsVisitor::NameForType(QualType T) const {
+DeclarationsVisitor::NameForType(QualType T) const {
   if (T.isNull()) {
     return "Type_NULL";
   }
@@ -291,7 +291,7 @@ XcodeMlDeclarationsVisitor::NameForType(QualType T) const {
 }
 
 const char *
-XcodeMlDeclarationsVisitor::NameForTypeLoc(TypeLoc TL) const {
+DeclarationsVisitor::NameForTypeLoc(TypeLoc TL) const {
   if (TL.isNull()) {
     return "TypeLoc_NULL";
   }
@@ -343,7 +343,7 @@ XcodeMlDeclarationsVisitor::NameForTypeLoc(TypeLoc TL) const {
 }
 
 const char *
-XcodeMlDeclarationsVisitor::NameForAttr(Attr *A) const {
+DeclarationsVisitor::NameForAttr(Attr *A) const {
   if (!A) {
     return "Attr_NULL";
   }
@@ -524,7 +524,7 @@ XcodeMlDeclarationsVisitor::NameForAttr(Attr *A) const {
 }
 
 const char *
-XcodeMlDeclarationsVisitor::NameForDecl(Decl *D) const {
+DeclarationsVisitor::NameForDecl(Decl *D) const {
   if (!D) {
     return "Decl_NULL";
   }
@@ -598,7 +598,7 @@ XcodeMlDeclarationsVisitor::NameForDecl(Decl *D) const {
 }
 
 const char *
-XcodeMlDeclarationsVisitor::NameForNestedNameSpecifier(NestedNameSpecifier *NNS) const {
+DeclarationsVisitor::NameForNestedNameSpecifier(NestedNameSpecifier *NNS) const {
   if (!NNS) {
     return "NestedNameSpecifier_NULL";
   }
@@ -614,9 +614,9 @@ XcodeMlDeclarationsVisitor::NameForNestedNameSpecifier(NestedNameSpecifier *NNS)
 }
 
 const char *
-XcodeMlDeclarationsVisitor::NameForNestedNameSpecifierLoc(NestedNameSpecifierLoc NNS) const {
+DeclarationsVisitor::NameForNestedNameSpecifierLoc(NestedNameSpecifierLoc NNS) const {
   if (!NNS) {
-    return "NestedNameSpecifierLOC_NULL";
+    return ""; //"NestedNameSpecifierLoc_NULL"
   }
   switch (NNS.getNestedNameSpecifier()->getKind()) {
   case NestedNameSpecifier::Identifier: return "NestedNameSpecifierLoc_Identifier";
@@ -630,7 +630,7 @@ XcodeMlDeclarationsVisitor::NameForNestedNameSpecifierLoc(NestedNameSpecifierLoc
 }
 
 const char *
-XcodeMlDeclarationsVisitor::NameForDeclarationNameInfo(DeclarationNameInfo NameInfo) const {
+DeclarationsVisitor::NameForDeclarationNameInfo(DeclarationNameInfo NameInfo) const {
   switch (NameInfo.getName().getNameKind()) {
   case DeclarationName::CXXConstructorName: return "DeclarationName_CXXConstructorName";
   case DeclarationName::CXXDestructorName: return "DeclarationName_CXXDestructorName";
@@ -642,6 +642,17 @@ XcodeMlDeclarationsVisitor::NameForDeclarationNameInfo(DeclarationNameInfo NameI
   case DeclarationName::CXXOperatorName: return "DeclarationName_CXXOperatorName";
   case DeclarationName::CXXLiteralOperatorName: return "DeclarationName_CXXLiteralOperatorName";
   case DeclarationName::CXXUsingDirective: return "DeclarationName_CXXUsingDirective";
+  }
+}
+
+const char *
+DeclarationsVisitor::ContentsForDeclarationNameInfo(DeclarationNameInfo NameInfo) const {
+  DeclarationName DN = NameInfo.getName();
+  IdentifierInfo *II = DN.getAsIdentifierInfo();
+  if (II) {
+    return II->getNameStart();
+  } else {
+    return nullptr;
   }
 }
 

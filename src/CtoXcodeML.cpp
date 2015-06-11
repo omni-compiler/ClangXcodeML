@@ -1,8 +1,8 @@
 #include "XcodeMlVisitorBase.h"
 
-#include "XcodeMlSymbolsVisitor.h"
-#include "XcodeMlTypeTableVisitor.h"
-#include "XcodeMlDeclarationsVisitor.h"
+#include "SymbolsVisitor.h"
+#include "TypeTableVisitor.h"
+#include "DeclarationsVisitor.h"
 
 #include "clang/AST/ASTConsumer.h"
 #include "clang/Frontend/ASTConsumers.h"
@@ -31,9 +31,9 @@ public:
     explicit XcodeMlASTConsumer(xmlNodePtr N) : rootNode(N) {};
 
     virtual void HandleTranslationUnit(ASTContext &CXT) override {
-        XcodeMlTypeTableVisitor TTV(CXT, rootNode, "TypeTable");
-        XcodeMlSymbolsVisitor SV(CXT, rootNode, "Symbols");
-        XcodeMlDeclarationsVisitor DV(CXT, rootNode, "globalDeclarations");
+        TypeTableVisitor TTV(CXT, rootNode, "TypeTable");
+        SymbolsVisitor SV(CXT, rootNode, "globalSymbols");
+        DeclarationsVisitor DV(CXT, rootNode, "globalDeclarations");
         Decl *D = CXT.getTranslationUnitDecl();
 
         TTV.BridgeDecl(D);

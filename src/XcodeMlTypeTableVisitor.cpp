@@ -1,30 +1,30 @@
 #include "XcodeMlVisitorBase.h"
-#include "XcodeMlTypeTableVisitor.h"
+#include "TypeTableVisitor.h"
 
 using namespace llvm;
 
 static cl::opt<bool>
-OptTraceXTTV("trace-xttv",
-             cl::desc("emit traces on XcodeMlTypeTableVisitor"),
+OptTraceXTTV("trace-typeTable",
+             cl::desc("emit traces on <typeTable>"),
              cl::cat(C2XcodeMLCategory));
 static cl::opt<bool>
-OptDisableXTTV("disable-xttv",
-               cl::desc("disable XcodeMlTypeTableVisitor"),
+OptDisableXTTV("disable-typeTable",
+               cl::desc("disable <typeTable>"),
                cl::cat(C2XcodeMLCategory));
 
 const char *
-XcodeMlTypeTableVisitor::getVisitorName() const {
+TypeTableVisitor::getVisitorName() const {
   return OptTraceXTTV ? "XTTV" : nullptr;
 }
 
 const char *
-XcodeMlTypeTableVisitor::NameForStmt(Stmt *S) const {
+TypeTableVisitor::NameForStmt(Stmt *S) const {
   (void)S;
   return ""; // do not create a new child
 }
 
 const char *
-XcodeMlTypeTableVisitor::NameForDecl(Decl *D) const {
+TypeTableVisitor::NameForDecl(Decl *D) const {
   if (D->getKind() == Decl::TranslationUnit) {
     if (OptDisableXTTV) {
       return nullptr; // stop traverse

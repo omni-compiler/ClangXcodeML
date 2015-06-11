@@ -1,5 +1,5 @@
-class XcodeMlTypeTableVisitor
-    : public XcodeMlVisitorBase<XcodeMlTypeTableVisitor> {
+class TypeTableVisitor
+    : public XcodeMlVisitorBase<TypeTableVisitor> {
 public:
     // use base constructors
     using XcodeMlVisitorBase::XcodeMlVisitorBase;

@@ -1,5 +1,5 @@
-class XcodeMlDeclarationsVisitor
-    : public XcodeMlVisitorBase<XcodeMlDeclarationsVisitor> {
+class DeclarationsVisitor
+    : public XcodeMlVisitorBase<DeclarationsVisitor> {
 public:
     // use base constructors
     using XcodeMlVisitorBase::XcodeMlVisitorBase;
@@ -13,6 +13,7 @@ public:
     const char *NameForNestedNameSpecifier(NestedNameSpecifier *) const;
     const char *NameForNestedNameSpecifierLoc(NestedNameSpecifierLoc) const;
     const char *NameForDeclarationNameInfo(DeclarationNameInfo) const;
+    const char *ContentsForDeclarationNameInfo(DeclarationNameInfo) const;
 };
 
 ///

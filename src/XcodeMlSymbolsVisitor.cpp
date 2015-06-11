@@ -1,24 +1,24 @@
 #include "XcodeMlVisitorBase.h"
-#include "XcodeMlSymbolsVisitor.h"
+#include "SymbolsVisitor.h"
 
 using namespace llvm;
 
 static cl::opt<bool>
-OptTraceXSV("trace-xsv",
-            cl::desc("emit traces on XcodeMlSymbolVisitor"),
+OptTraceXSV("trace-symbols",
+            cl::desc("emit traces on <globalSymbols>, <symbols>"),
             cl::cat(C2XcodeMLCategory));
 static cl::opt<bool>
-OptDisableXSV("disable-xsv",
-              cl::desc("disable XcodeMlSymbolsVisitor"),
+OptDisableXSV("disable-symbols",
+              cl::desc("disable <globalSymbols>, <symbols>"),
               cl::cat(C2XcodeMLCategory));
 
 const char *
-XcodeMlSymbolsVisitor::getVisitorName() const {
+SymbolsVisitor::getVisitorName() const {
   return OptTraceXSV ? "XSV" : nullptr;
 }
 
 const char *
-XcodeMlSymbolsVisitor::NameForDecl(Decl *D) const {
+SymbolsVisitor::NameForDecl(Decl *D) const {
   if (D->getKind() == Decl::TranslationUnit) {
     if (OptDisableXSV) {
       return nullptr; // stop traverse
