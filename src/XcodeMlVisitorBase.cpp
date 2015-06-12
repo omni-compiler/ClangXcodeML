@@ -38,6 +38,11 @@ public:
     explicit XcodeMlRAV(RAVBidirBridge *otherside)
         : RAVBidirBridge(otherside) {};
 
+    bool shouldUseDataRecursionFor(Stmt *S) const {
+        (void)S;
+        return false;
+    }
+
 #define DISPATCHER(NAME, TYPE)                              \
     bool Traverse##NAME(TYPE S) {                           \
         const char *VN = otherside->getVisitorName();       \
@@ -84,11 +89,16 @@ XcodeMlVisitorBaseImpl(const ASTContext &CXT,
                        TypeTableInfo *TTI)
     : RAVBidirBridge(new(RAVpool) XcodeMlRAV(this)),
       astContext(CXT), rootNode(RootNode), curNode(CurNode),
-      isLocationAlreadySet(true),
       typetableinfo(TTI) {};
 
+#if 0
 void XcodeMlVisitorBaseImpl::setName(const char *Name) {
     xmlNodeSetName(curNode, BAD_CAST Name);
+}
+#endif
+
+void XcodeMlVisitorBaseImpl::newChild(const char *Name, const char *Contents) {
+    curNode = xmlNewChild(curNode, nullptr, BAD_CAST Name, BAD_CAST Contents);
 }
 
 void XcodeMlVisitorBaseImpl::newProp(const char *Name, int Val, xmlNodePtr N) {
@@ -122,8 +132,6 @@ void XcodeMlVisitorBaseImpl::newComment(const char *str, xmlNodePtr RN) {
 }
 
 void XcodeMlVisitorBaseImpl::setLocation(SourceLocation Loc, xmlNodePtr N) {
-    if (isLocationAlreadySet)
-        return;
     if (!N) N = curNode;
     FullSourceLoc FLoc = astContext.getFullLoc(Loc);
     if (FLoc.isValid()) {
@@ -139,15 +147,6 @@ void XcodeMlVisitorBaseImpl::setLocation(SourceLocation Loc, xmlNodePtr N) {
             newProp("file", PLoc.getFilename(), N);
         }
     }
-    isLocationAlreadySet = true;
-}
-
-void XcodeMlVisitorBaseImpl::setLocation(const Decl *D, xmlNodePtr N) {
-    setLocation(D->getLocation(), N);
-}
-
-void XcodeMlVisitorBaseImpl::setLocation(const Expr *E, xmlNodePtr N) {
-    setLocation(E->getExprLoc(), N);
 }
 
 ///

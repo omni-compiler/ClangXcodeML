@@ -4,23 +4,23 @@
 using namespace llvm;
 
 static cl::opt<bool>
-OptTraceXSV("trace-symbols",
-            cl::desc("emit traces on <globalSymbols>, <symbols>"),
-            cl::cat(C2XcodeMLCategory));
+OptTraceSymbols("trace-symbols",
+                cl::desc("emit traces on <globalSymbols>, <symbols>"),
+                cl::cat(C2XcodeMLCategory));
 static cl::opt<bool>
-OptDisableXSV("disable-symbols",
-              cl::desc("disable <globalSymbols>, <symbols>"),
-              cl::cat(C2XcodeMLCategory));
+OptDisableSymbols("disable-symbols",
+                  cl::desc("disable <globalSymbols>, <symbols>"),
+                  cl::cat(C2XcodeMLCategory));
 
 const char *
 SymbolsVisitor::getVisitorName() const {
-  return OptTraceXSV ? "XSV" : nullptr;
+  return OptTraceSymbols ? "Symbols" : nullptr;
 }
 
 const char *
 SymbolsVisitor::NameForDecl(Decl *D) {
   if (D->getKind() == Decl::TranslationUnit) {
-    if (OptDisableXSV) {
+    if (OptDisableSymbols) {
       return nullptr; // stop traverse
     } else {
       return ""; // no need to create a child

@@ -4,29 +4,34 @@
 using namespace llvm;
 
 static cl::opt<bool>
-OptTraceXDV("trace-declarations",
-            cl::desc("emit traces on <globalDeclarations>, <declarations>"),
-            cl::cat(C2XcodeMLCategory));
+OptTraceDeclarations("trace-declarations",
+                     cl::desc("emit traces on <globalDeclarations>, <declarations>"),
+                     cl::cat(C2XcodeMLCategory));
 static cl::opt<bool>
-OptDisableXDV("disable-declarations",
-              cl::desc("disable  <globalDeclarations>, <declarations>"),
-              cl::cat(C2XcodeMLCategory));
+OptDisableDeclarations("disable-declarations",
+                       cl::desc("disable  <globalDeclarations>, <declarations>"),
+                       cl::cat(C2XcodeMLCategory));
 
 const char *
 DeclarationsVisitor::getVisitorName() const {
-  return OptTraceXDV ? "XDV" : nullptr;
+  return OptTraceDeclarations ? "Declarations" : nullptr;
 }
 
 const char *
 DeclarationsVisitor::NameForStmt(Stmt *S) {
   if (!S) {
-    return "Stmt_NULL";
+    return nullptr;
+  }
+  if (!optContext.sibling.empty()) {
+    newChild(optContext.sibling.back());
+    optContext.sibling.pop_back();
+    optContext.isInExprStatement = true;
   }
   const BinaryOperator *BO = dyn_cast<const BinaryOperator>(S);
   if (BO) {
     if (!optContext.isInExprStatement) {
-      curNode = xmlNewChild(curNode, nullptr,
-                            BAD_CAST "exprStatement", nullptr);
+      newChild("exprStatement");
+      setLocation(BO->getExprLoc());
       optContext.isInExprStatement = true;
     }
     // XcodeML-C-0.9J.pdf: 7.6(assignExpr), 7.7, 7.10(commmaExpr)
@@ -68,8 +73,8 @@ DeclarationsVisitor::NameForStmt(Stmt *S) {
   const UnaryOperator *UO = dyn_cast<const UnaryOperator>(S);
   if (UO) {
     if (!optContext.isInExprStatement) {
-      curNode = xmlNewChild(curNode, nullptr,
-                            BAD_CAST "exprStatement", nullptr);
+      newChild("exprStatement");
+      setLocation(UO->getExprLoc());
       optContext.isInExprStatement = true;
     }
     // XcodeML-C-0.9J.pdf 7.2(varAddr), 7.3(pointerRef), 7.8, 7.11
@@ -158,14 +163,14 @@ DeclarationsVisitor::NameForStmt(Stmt *S) {
   case Stmt::ExprWithCleanupsClass: return "Stmt_ExprWithCleanupsClass";
   case Stmt::ExpressionTraitExprClass: return "Stmt_ExpressionTraitExprClass";
   case Stmt::ExtVectorElementExprClass: return "Stmt_ExtVectorElementExprClass";
-  case Stmt::FloatingLiteralClass: return "Stmt_FloatingLiteralClass";
+  case Stmt::FloatingLiteralClass: return "floatConstant"; //7.1
   case Stmt::FunctionParmPackExprClass: return "Stmt_FunctionParmPackExprClass";
   case Stmt::GNUNullExprClass: return "Stmt_GNUNullExprClass";
   case Stmt::GenericSelectionExprClass: return "Stmt_GenericSelectionExprClass";
   case Stmt::ImaginaryLiteralClass: return "Stmt_ImaginaryLiteralClass";
   case Stmt::ImplicitValueInitExprClass: return "Stmt_ImplicitValueInitExprClass";
   case Stmt::InitListExprClass: return "Stmt_InitListExprClass";
-  case Stmt::IntegerLiteralClass: return "Stmt_IntegerLiteralClass";
+  case Stmt::IntegerLiteralClass: return "intConstant"; //7.1 XXX
   case Stmt::LambdaExprClass: return "Stmt_LambdaExprClass";
   case Stmt::MSPropertyRefExprClass: return "Stmt_MSPropertyRefExprClass";
   case Stmt::MaterializeTemporaryExprClass: return "Stmt_MaterializeTemporaryExprClass";
@@ -189,14 +194,14 @@ DeclarationsVisitor::NameForStmt(Stmt *S) {
   case Stmt::UnresolvedLookupExprClass: return "Stmt_UnresolvedLookupExprClass";
   case Stmt::UnresolvedMemberExprClass: return "Stmt_UnresolvedMemberExprClass";
   case Stmt::PackExpansionExprClass: return "Stmt_PackExpansionExprClass";
-  case Stmt::ParenExprClass: return "Stmt_ParenExprClass";
+  case Stmt::ParenExprClass: return ""; // no explicit node
   case Stmt::ParenListExprClass: return "Stmt_ParenListExprClass";
   case Stmt::PredefinedExprClass: return "Stmt_PredefinedExprClass";
   case Stmt::PseudoObjectExprClass: return "Stmt_PseudoObjectExprClass";
   case Stmt::ShuffleVectorExprClass: return "Stmt_ShuffleVectorExprClass";
   case Stmt::SizeOfPackExprClass: return "Stmt_SizeOfPackExprClass";
   case Stmt::StmtExprClass: return "Stmt_StmtExprClass";
-  case Stmt::StringLiteralClass: return "Stmt_StringLiteralClass";
+  case Stmt::StringLiteralClass: return "stringConstant"; //7.1
   case Stmt::SubstNonTypeTemplateParmExprClass: return "Stmt_SubstNonTypeTemplateParmExprClass";
   case Stmt::SubstNonTypeTemplateParmPackExprClass: return "Stmt_SubstNonTypeTemplateParmPackExprClass";
   case Stmt::TypeTraitExprClass: return "Stmt_TypeTraitExprClass";
@@ -206,7 +211,11 @@ DeclarationsVisitor::NameForStmt(Stmt *S) {
   case Stmt::VAArgExprClass: return "Stmt_VAArgExprClass";
   case Stmt::ForStmtClass: return "forStatement"; //6.6 XXX
   case Stmt::GotoStmtClass: return "gotoStatement"; //6.10 XXX
-  case Stmt::IfStmtClass: return "ifStatement"; //6.3 XXX
+  case Stmt::IfStmtClass:
+    optContext.children.push_back("else");
+    optContext.children.push_back("then");
+    optContext.children.push_back("condition");
+    return "ifStatement"; //6.3 XXX
   case Stmt::IndirectGotoStmtClass: return "Stmt_IndirectGotoStmtClass";
   case Stmt::LabelStmtClass: return "statementLabel"; //6.11 XXX
   case Stmt::MSDependentExistsStmtClass: return "Stmt_MSDependentExistsStmtClass";
@@ -249,6 +258,76 @@ DeclarationsVisitor::NameForStmt(Stmt *S) {
   case Stmt::SwitchStmtClass: return "switchStatement"; //6.12
   case Stmt::WhileStmtClass: return "whileStatement"; //6.4 XXX
   }
+}
+
+const char *
+DeclarationsVisitor::ContentsForStmt(Stmt *S)
+{
+  if (!S) {
+    return nullptr;
+  }
+  switch (S->getStmtClass()) {
+  case Stmt::StringLiteralClass: {
+    StringRef Data = static_cast<StringLiteral*>(S)->getString();
+    raw_string_ostream OS(optContext.tmpstr);
+
+    for (unsigned i = 0, e = Data.size(); i != e; ++i) {
+      unsigned char C = Data[i];
+      if (C == '"' || C == '\\') {
+        OS << '\\' << (char)C;
+        continue;
+      }
+      if (isprint(C)) {
+        OS << (char)C;
+        continue;
+      }
+      switch (C) {
+      case '\b': OS << "\\b"; break;
+      case '\f': OS << "\\f"; break;
+      case '\n': OS << "\\n"; break;
+      case '\r': OS << "\\r"; break;
+      case '\t': OS << "\\t"; break;
+      default:
+        OS << '\\';
+        OS << ((C >> 6) & 0x7) + '0';
+        OS << ((C >> 3) & 0x7) + '0';        
+        OS << ((C >> 0) & 0x7) + '0';
+        break;
+      }
+    }
+    return OS.str().c_str();
+  }
+  case Stmt::IntegerLiteralClass: {
+    APInt Value = static_cast<IntegerLiteral*>(S)->getValue();
+    raw_string_ostream OS(optContext.tmpstr);
+
+    OS << *Value.getRawData();
+    return OS.str().c_str();
+  }
+
+  default:
+    return nullptr;
+  }
+}
+
+bool
+DeclarationsVisitor::PreVisitStmt(Stmt *S)
+{
+  if (!S) {
+    return true;
+  }
+  const BinaryOperator *BO = dyn_cast<const BinaryOperator>(S);
+  if (BO) {
+    TraverseType(BO->getType());
+    return true;
+  }
+  const UnaryOperator *UO = dyn_cast<const UnaryOperator>(S);
+  if (UO) {
+    TraverseType(UO->getType());
+    return true;
+  }
+  setLocation(S->getLocStart());
+  return true;
 }
 
 const char *
@@ -601,12 +680,19 @@ DeclarationsVisitor::NameForDecl(Decl *D) {
   case Decl::ObjCPropertyImpl: return "Decl_ObjCPropertyImpl";
   case Decl::StaticAssert: return "Decl_StaticAssert";
   case Decl::TranslationUnit:
-    if (OptDisableXDV) {
+    if (OptDisableDeclarations) {
       return nullptr; // stop traverse
     } else {
       return ""; // no need to create a child
     }
   }
+}
+
+bool
+DeclarationsVisitor::PreVisitDecl(Decl *D)
+{
+  setLocation(D->getLocation());
+  return true;
 }
 
 const char *

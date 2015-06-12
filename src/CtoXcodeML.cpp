@@ -37,9 +37,9 @@ public:
         DeclarationsVisitor DV(CXT, rootNode, "globalDeclarations", TTI);
         Decl *D = CXT.getTranslationUnitDecl();
 
-        TTV.BridgeDecl(D);
-        SV.BridgeDecl(D);
-        DV.BridgeDecl(D);
+        TTV.TraverseDecl(D);
+        SV.TraverseDecl(D);
+        DV.TraverseDecl(D);
     }
 #if 0
     virtual bool HandleTopLevelDecl(DeclGroupRef DG) override {

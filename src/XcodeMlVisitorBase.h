@@ -54,7 +54,6 @@ protected:
     const ASTContext &astContext;
     const xmlNodePtr rootNode;    // the current root node.
     xmlNodePtr curNode;           // a candidate of the new chlid.
-    bool isLocationAlreadySet;
     TypeTableInfo *typetableinfo;
 public:
     XcodeMlVisitorBaseImpl() = delete;
@@ -68,14 +67,12 @@ public:
                                     xmlNodePtr CurNode,
                                     TypeTableInfo *TTI);
 
-    void setName(const char *Name);
+    void newChild(const char *Name, const char *Contents = nullptr);
     void newProp(const char *Name, int Val, xmlNodePtr N = nullptr);
     void newProp(const char *Name, const char *Val, xmlNodePtr N = nullptr);
     void newComment(const xmlChar *str, xmlNodePtr RN = nullptr);
     void newComment(const char *str, xmlNodePtr RN = nullptr);
     void setLocation(SourceLocation Loc, xmlNodePtr N = nullptr);
-    void setLocation(const Decl *D, xmlNodePtr N = nullptr);
-    void setLocation(const Expr *E, xmlNodePtr N = nullptr);
 };
 
 // Main class: XcodeMlVisitorBase<Derived>
@@ -101,7 +98,7 @@ public:
                                   : RootNode),
                                  TTI),
           optContext() {};
-    explicit XcodeMlVisitorBase(const XcodeMlVisitorBase *p)
+    explicit XcodeMlVisitorBase(XcodeMlVisitorBase *p)
         : XcodeMlVisitorBaseImpl(p->astContext, p->curNode, p->curNode,
                                  p->typetableinfo),
           optContext(p->optContext) {};
@@ -117,7 +114,7 @@ public:
         (void)S;                                                        \
         return nullptr;                                                 \
     }                                                                   \
-    bool PreVisit##NAME(TYPE S) {                                       \
+    bool CreateNodeFor##NAME(TYPE S) {                                  \
         const char *Name = getDerived().NameFor##NAME(S);               \
         if (!Name) {                                                    \
             return false; /* avoid traverse children */                 \
@@ -126,8 +123,11 @@ public:
             return true; /* no need to create a child */                \
         }                                                               \
         const char *Contents = getDerived().ContentsFor##NAME(S);       \
-        curNode = xmlNewChild(curNode, nullptr, BAD_CAST Name,          \
-                              BAD_CAST Contents);                       \
+        newChild(Name, Contents);                                       \
+	return getDerived().PreVisit##NAME(S);                          \
+    }                                                                   \
+    bool PreVisit##NAME(TYPE S) {                                       \
+        (void)S;                                                        \
         return true;                                                    \
     }                                                                   \
     bool PostVisit##NAME(TYPE S) {                                      \
@@ -136,12 +136,15 @@ public:
     }                                                                   \
     bool Bridge##NAME(TYPE S) override {                                \
         Derived V(this);                                                \
-        newComment("Bridge" #NAME);                                     \
-        if (!V.getDerived().PreVisit##NAME(S)) {                        \
+        V.newComment("Bridge" #NAME);                                   \
+        if (!V.getDerived().CreateNodeFor##NAME(S)) {                   \
             return true; /* avoid traverse children */                  \
         }                                                               \
         bool childresult = V.otherside->Bridge##NAME(S);                \
         return V.getDerived().PostVisit##NAME(S) && childresult;        \
+    }                                                                   \
+    bool Traverse##NAME(TYPE S) {                                       \
+        return Bridge##NAME(S);                                         \
     }
 
     DISPATCHER(Stmt, Stmt *);
