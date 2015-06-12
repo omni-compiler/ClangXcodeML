@@ -31,9 +31,10 @@ public:
     explicit XcodeMlASTConsumer(xmlNodePtr N) : rootNode(N) {};
 
     virtual void HandleTranslationUnit(ASTContext &CXT) override {
-        TypeTableVisitor TTV(CXT, rootNode, "TypeTable");
-        SymbolsVisitor SV(CXT, rootNode, "globalSymbols");
-        DeclarationsVisitor DV(CXT, rootNode, "globalDeclarations");
+        TypeTableInfo *TTI = nullptr;
+        TypeTableVisitor TTV(CXT, rootNode, "TypeTable", TTI);
+        SymbolsVisitor SV(CXT, rootNode, "globalSymbols", TTI);
+        DeclarationsVisitor DV(CXT, rootNode, "globalDeclarations", TTI);
         Decl *D = CXT.getTranslationUnitDecl();
 
         TTV.BridgeDecl(D);

@@ -18,12 +18,17 @@ DeclarationsVisitor::getVisitorName() const {
 }
 
 const char *
-DeclarationsVisitor::NameForStmt(Stmt *S) const {
+DeclarationsVisitor::NameForStmt(Stmt *S) {
   if (!S) {
     return "Stmt_NULL";
   }
   const BinaryOperator *BO = dyn_cast<const BinaryOperator>(S);
   if (BO) {
+    if (!optContext.isInExprStatement) {
+      curNode = xmlNewChild(curNode, nullptr,
+                            BAD_CAST "exprStatement", nullptr);
+      optContext.isInExprStatement = true;
+    }
     // XcodeML-C-0.9J.pdf: 7.6(assignExpr), 7.7, 7.10(commmaExpr)
     switch (BO->getOpcode()) {
     case BO_PtrMemD:   return "UNDEF_BO_PtrMemD";
@@ -62,6 +67,11 @@ DeclarationsVisitor::NameForStmt(Stmt *S) const {
   }
   const UnaryOperator *UO = dyn_cast<const UnaryOperator>(S);
   if (UO) {
+    if (!optContext.isInExprStatement) {
+      curNode = xmlNewChild(curNode, nullptr,
+                            BAD_CAST "exprStatement", nullptr);
+      optContext.isInExprStatement = true;
+    }
     // XcodeML-C-0.9J.pdf 7.2(varAddr), 7.3(pointerRef), 7.8, 7.11
     switch (UO->getOpcode()) {
     case UO_PostInc:   return "postIncrExpr";
@@ -89,7 +99,9 @@ DeclarationsVisitor::NameForStmt(Stmt *S) const {
   case Stmt::CXXForRangeStmtClass: return "Stmt_CXXForRangeStmtClass";
   case Stmt::CXXTryStmtClass: return "Stmt_CXXTryStmtClass";
   case Stmt::CapturedStmtClass: return "Stmt_CapturedStmtClass";
-  case Stmt::CompoundStmtClass: return "compoundStatement"; //6.2 XXX
+  case Stmt::CompoundStmtClass: //6.2
+    optContext.isInCompoundStatement = true;
+    return "compoundStatement";
   case Stmt::ContinueStmtClass: return "continueStatement"; //6.8
   case Stmt::DeclStmtClass: return "Stmt_DeclStmtClass";
   case Stmt::DoStmtClass: return "doStatement"; //6.5 XXX
@@ -240,7 +252,7 @@ DeclarationsVisitor::NameForStmt(Stmt *S) const {
 }
 
 const char *
-DeclarationsVisitor::NameForType(QualType T) const {
+DeclarationsVisitor::NameForType(QualType T) {
   if (T.isNull()) {
     return "Type_NULL";
   }
@@ -291,7 +303,7 @@ DeclarationsVisitor::NameForType(QualType T) const {
 }
 
 const char *
-DeclarationsVisitor::NameForTypeLoc(TypeLoc TL) const {
+DeclarationsVisitor::NameForTypeLoc(TypeLoc TL) {
   if (TL.isNull()) {
     return "TypeLoc_NULL";
   }
@@ -343,7 +355,7 @@ DeclarationsVisitor::NameForTypeLoc(TypeLoc TL) const {
 }
 
 const char *
-DeclarationsVisitor::NameForAttr(Attr *A) const {
+DeclarationsVisitor::NameForAttr(Attr *A) {
   if (!A) {
     return "Attr_NULL";
   }
@@ -524,7 +536,7 @@ DeclarationsVisitor::NameForAttr(Attr *A) const {
 }
 
 const char *
-DeclarationsVisitor::NameForDecl(Decl *D) const {
+DeclarationsVisitor::NameForDecl(Decl *D) {
   if (!D) {
     return "Decl_NULL";
   }
@@ -598,7 +610,7 @@ DeclarationsVisitor::NameForDecl(Decl *D) const {
 }
 
 const char *
-DeclarationsVisitor::NameForNestedNameSpecifier(NestedNameSpecifier *NNS) const {
+DeclarationsVisitor::NameForNestedNameSpecifier(NestedNameSpecifier *NNS) {
   if (!NNS) {
     return "NestedNameSpecifier_NULL";
   }
@@ -614,7 +626,7 @@ DeclarationsVisitor::NameForNestedNameSpecifier(NestedNameSpecifier *NNS) const 
 }
 
 const char *
-DeclarationsVisitor::NameForNestedNameSpecifierLoc(NestedNameSpecifierLoc NNS) const {
+DeclarationsVisitor::NameForNestedNameSpecifierLoc(NestedNameSpecifierLoc NNS) {
   if (!NNS) {
     return ""; //"NestedNameSpecifierLoc_NULL"
   }
@@ -630,7 +642,7 @@ DeclarationsVisitor::NameForNestedNameSpecifierLoc(NestedNameSpecifierLoc NNS) c
 }
 
 const char *
-DeclarationsVisitor::NameForDeclarationNameInfo(DeclarationNameInfo NameInfo) const {
+DeclarationsVisitor::NameForDeclarationNameInfo(DeclarationNameInfo NameInfo) {
   switch (NameInfo.getName().getNameKind()) {
   case DeclarationName::CXXConstructorName: return "DeclarationName_CXXConstructorName";
   case DeclarationName::CXXDestructorName: return "DeclarationName_CXXDestructorName";
@@ -646,7 +658,7 @@ DeclarationsVisitor::NameForDeclarationNameInfo(DeclarationNameInfo NameInfo) co
 }
 
 const char *
-DeclarationsVisitor::ContentsForDeclarationNameInfo(DeclarationNameInfo NameInfo) const {
+DeclarationsVisitor::ContentsForDeclarationNameInfo(DeclarationNameInfo NameInfo) {
   DeclarationName DN = NameInfo.getName();
   IdentifierInfo *II = DN.getAsIdentifierInfo();
   if (II) {

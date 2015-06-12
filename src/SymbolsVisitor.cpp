@@ -18,7 +18,7 @@ SymbolsVisitor::getVisitorName() const {
 }
 
 const char *
-SymbolsVisitor::NameForDecl(Decl *D) const {
+SymbolsVisitor::NameForDecl(Decl *D) {
   if (D->getKind() == Decl::TranslationUnit) {
     if (OptDisableXSV) {
       return nullptr; // stop traverse

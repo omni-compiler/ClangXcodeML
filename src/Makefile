@@ -17,28 +17,34 @@ USEDLIBS += $(OTHERLIBS)
 
 OBJS = CtoXcodeML.o \
 	XcodeMlVisitorBase.o \
-	XcodeMlSymbolsVisitor.o \
-	XcodeMlTypeTableVisitor.o \
-	XcodeMlDeclarationsVisitor.o
+	SymbolsVisitor.o \
+	TypeTableVisitor.o \
+	DeclarationsVisitor.o
 
 CtoXcodeML: $(OBJS)
 	$(CXX) $(CXXFLAGS) $(OBJS) $(USEDLIBS) -o CtoXcodeML
 
-CtoXcodeML.o: CtoXcodeML.cpp XcodeMlVisitorBase.h \
-	XcodeMlSymbolsVisitor.h \
-	XcodeMlTypeTableVisitor.h \
-	XcodeMlDeclarationsVisitor.h
-
-XcodeMlVisitorBase.o: XcodeMlVisitorBase.cpp XcodeMlVisitorBase.h
-
-XcodeMlSymbolsVisitor.o: XcodeMlSymbolsVisitor.cpp \
-	XcodeMlSymbolsVisitor.h XcodeMlVisitorBase.h
-
-XcodeMlTypeTableVisitor.o: XcodeMlTypeTableVisitor.cpp \
-	XcodeMlTypeTableVisitor.h XcodeMlVisitorBase.h
-
-XcodeMlDeclarationsVisitor.o: XcodeMlDeclarationsVisitor.cpp \
-	XcodeMlDeclarationsVisitor.h XcodeMlVisitorBase.h
+CtoXcodeML.o: \
+	CtoXcodeML.cpp \
+	XcodeMlVisitorBase.h \
+	SymbolsVisitor.h \
+	TypeTableVisitor.h \
+	DeclarationsVisitor.h
+XcodeMlVisitorBase.o: \
+	XcodeMlVisitorBase.cpp \
+	XcodeMlVisitorBase.h
+SymbolsVisitor.o: \
+	SymbolsVisitor.cpp \
+	SymbolsVisitor.h \
+	XcodeMlVisitorBase.h
+TypeTableVisitor.o: \
+	TypeTableVisitor.cpp \
+	TypeTableVisitor.h \
+	XcodeMlVisitorBase.h
+DeclarationsVisitor.o: \
+	DeclarationsVisitor.cpp \
+	DeclarationsVisitor.h \
+	XcodeMlVisitorBase.h
 
 CtoXcodeML.ast: CtoXcodeML.cpp
 	$(CXX) $(CXXFLAGS) -Xclang -ast-dump CtoXcodeML.cpp -o CtoXcodeML.ast 

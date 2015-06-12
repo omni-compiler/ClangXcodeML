@@ -1,11 +1,12 @@
-class SymbolsVisitor
-    : public XcodeMlVisitorBase<SymbolsVisitor> {
+class TypeTableVisitor
+    : public XcodeMlVisitorBase<TypeTableVisitor> {
 public:
     // use base constructors
     using XcodeMlVisitorBase::XcodeMlVisitorBase;
 
     const char *getVisitorName() const override;
-    const char *NameForDecl(Decl *) const;
+    const char *NameForStmt(Stmt *);
+    const char *NameForDecl(Decl *);
 };
 
 ///

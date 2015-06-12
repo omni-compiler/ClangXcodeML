@@ -80,10 +80,12 @@ class RAVpoolSizeChecker {
 XcodeMlVisitorBaseImpl::
 XcodeMlVisitorBaseImpl(const ASTContext &CXT,
                        xmlNodePtr RootNode,
-                       xmlNodePtr CurNode)
+                       xmlNodePtr CurNode,
+                       TypeTableInfo *TTI)
     : RAVBidirBridge(new(RAVpool) XcodeMlRAV(this)),
       astContext(CXT), rootNode(RootNode), curNode(CurNode),
-      isLocationAlreadySet(true) {};
+      isLocationAlreadySet(true),
+      typetableinfo(TTI) {};
 
 void XcodeMlVisitorBaseImpl::setName(const char *Name) {
     xmlNodeSetName(curNode, BAD_CAST Name);

@@ -18,13 +18,13 @@ TypeTableVisitor::getVisitorName() const {
 }
 
 const char *
-TypeTableVisitor::NameForStmt(Stmt *S) const {
+TypeTableVisitor::NameForStmt(Stmt *S) {
   (void)S;
   return ""; // do not create a new child
 }
 
 const char *
-TypeTableVisitor::NameForDecl(Decl *D) const {
+TypeTableVisitor::NameForDecl(Decl *D) {
   if (D->getKind() == Decl::TranslationUnit) {
     if (OptDisableXTTV) {
       return nullptr; // stop traverse

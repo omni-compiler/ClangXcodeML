@@ -39,6 +39,8 @@ public:
     virtual const char *getVisitorName() const = 0;
 };
 
+class TypeTableInfo;
+
 // some members & methods of XcodeMlVisitorBase do not need the info
 // of deriving type <Derived>:
 // those members & methods are separated from XcodeMlvisitorBase.
@@ -53,6 +55,7 @@ protected:
     const xmlNodePtr rootNode;    // the current root node.
     xmlNodePtr curNode;           // a candidate of the new chlid.
     bool isLocationAlreadySet;
+    TypeTableInfo *typetableinfo;
 public:
     XcodeMlVisitorBaseImpl() = delete;
     XcodeMlVisitorBaseImpl(const XcodeMlVisitorBaseImpl&) = delete;
@@ -62,7 +65,8 @@ public:
 
     explicit XcodeMlVisitorBaseImpl(const ASTContext &CXT,
                                     xmlNodePtr RootNode,
-                                    xmlNodePtr CurNode);
+                                    xmlNodePtr CurNode,
+                                    TypeTableInfo *TTI);
 
     void setName(const char *Name);
     void newProp(const char *Name, int Val, xmlNodePtr N = nullptr);
@@ -76,8 +80,10 @@ public:
 
 // Main class: XcodeMlVisitorBase<Derived>
 // this is CRTP (Curiously Recurring Template Pattern)
-template <class Derived>
+template <class Derived, class OptContext = bool>
 class XcodeMlVisitorBase : public XcodeMlVisitorBaseImpl {
+protected:
+    OptContext optContext;
 public:
     XcodeMlVisitorBase() = delete;
     XcodeMlVisitorBase(const XcodeMlVisitorBase&) = delete;
@@ -86,23 +92,28 @@ public:
     XcodeMlVisitorBase& operator =(XcodeMlVisitorBase&&) = delete;
 
     explicit XcodeMlVisitorBase(const ASTContext &CXT, xmlNodePtr RootNode,
-                                const char *ChildName)
+                                const char *ChildName,
+                                TypeTableInfo *TTI = nullptr)
         : XcodeMlVisitorBaseImpl(CXT, RootNode,
                                  (ChildName
                                   ? xmlNewChild(RootNode, nullptr,
                                                 BAD_CAST ChildName, nullptr)
-                                  : RootNode)) {};
+                                  : RootNode),
+                                 TTI),
+          optContext() {};
     explicit XcodeMlVisitorBase(const XcodeMlVisitorBase *p)
-        : XcodeMlVisitorBaseImpl(p->astContext, p->curNode, p->curNode) {};
+        : XcodeMlVisitorBaseImpl(p->astContext, p->curNode, p->curNode,
+                                 p->typetableinfo),
+          optContext(p->optContext) {};
 
     Derived &getDerived() { return *static_cast<Derived *>(this); }
 
 #define DISPATCHER(NAME, TYPE)                                          \
-    const char *NameFor##NAME(TYPE S) const {                           \
+    const char *NameFor##NAME(TYPE S) {                                 \
         (void)S;                                                        \
         return "Traverse" #NAME;                                        \
     }                                                                   \
-    const char *ContentsFor##NAME(TYPE S) const {                       \
+    const char *ContentsFor##NAME(TYPE S) {                             \
         (void)S;                                                        \
         return nullptr;                                                 \
     }                                                                   \
@@ -111,11 +122,11 @@ public:
         if (!Name) {                                                    \
             return false; /* avoid traverse children */                 \
         }                                                               \
-        if (Name[0] == '\0') {						\
-	    return true; /* no need to create a child */		\
-	}								\
+        if (Name[0] == '\0') {                                          \
+            return true; /* no need to create a child */                \
+        }                                                               \
         const char *Contents = getDerived().ContentsFor##NAME(S);       \
-        curNode = xmlNewChild(rootNode, nullptr, BAD_CAST Name,         \
+        curNode = xmlNewChild(curNode, nullptr, BAD_CAST Name,          \
                               BAD_CAST Contents);                       \
         return true;                                                    \
     }                                                                   \
