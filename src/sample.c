@@ -15,7 +15,7 @@ main()
 
   z = complex_add(x,1.0);
 
-  printf("z=(%f,%f)\n",z.real,z.img);
+  printf("z=<%f,%f>\n",z.real,z.img);
 }
 
 typedef struct dummy {
@@ -28,4 +28,13 @@ complex_t complex_add(complex_t x, double y)
 {
   x.real += y;
   return x;
+}
+
+int iftest(int x, int y)
+{
+  if (x < y) {
+    return (x + y) * 3;
+  } else {
+    return y * x + 4;
+  }
 }
