@@ -730,7 +730,7 @@ DeclarationsVisitor::NameForAttr(Attr *A) {
 const char *
 DeclarationsVisitor::NameForDecl(Decl *D) {
   if (!D) {
-    return "Decl_NULL";
+    return nullptr;
   }
   if (!optContext.sibling.empty()) {
     const char *name = optContext.sibling.back();
@@ -812,6 +812,23 @@ bool
 DeclarationsVisitor::PreVisitDecl(Decl *D)
 {
   setLocation(D->getLocation());
+
+#if 0
+  switch (D->getKind()) {
+  case Decl::Function: {
+    const NamedDecl *ND = dyn_cast<const NamedDecl>(D);
+    if (ND) {
+      raw_string_ostream OS(optContext.tmpstr);
+      mangleContext->mangleName(ND, OS);
+      xmlNewChild(curNode, nullptr,
+                  BAD_CAST "name", BAD_CAST OS.str().c_str());
+    }
+    break;
+  }
+  default:
+    break;
+  }
+#endif
   return true;
 }
 

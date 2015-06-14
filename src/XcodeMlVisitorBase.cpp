@@ -83,12 +83,12 @@ class RAVpoolSizeChecker {
 // implementation of XcodeMlVisitorBaseImpl
 
 XcodeMlVisitorBaseImpl::
-XcodeMlVisitorBaseImpl(const ASTContext &CXT,
+XcodeMlVisitorBaseImpl(MangleContext *MC,
                        xmlNodePtr &RootNode,
                        xmlNodePtr CurNode,
                        TypeTableInfo *TTI)
     : RAVBidirBridge(new(RAVpool) XcodeMlRAV(this)),
-      astContext(CXT), rootNode(RootNode), curNode(CurNode),
+      mangleContext(MC), rootNode(RootNode), curNode(CurNode),
       typetableinfo(TTI) {};
 
 #if 0
@@ -133,7 +133,7 @@ void XcodeMlVisitorBaseImpl::newComment(const char *str, xmlNodePtr RN) {
 
 void XcodeMlVisitorBaseImpl::setLocation(SourceLocation Loc, xmlNodePtr N) {
     if (!N) N = curNode;
-    FullSourceLoc FLoc = astContext.getFullLoc(Loc);
+    FullSourceLoc FLoc = mangleContext->getASTContext().getFullLoc(Loc);
     if (FLoc.isValid()) {
         PresumedLoc PLoc = FLoc.getManager().getPresumedLoc(FLoc);
 

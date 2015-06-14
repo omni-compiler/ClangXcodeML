@@ -32,9 +32,10 @@ public:
 
     virtual void HandleTranslationUnit(ASTContext &CXT) override {
         TypeTableInfo *TTI = nullptr;
-        TypeTableVisitor TTV(CXT, rootNode, "TypeTable", TTI);
-        SymbolsVisitor SV(CXT, rootNode, "globalSymbols", TTI);
-        DeclarationsVisitor DV(CXT, rootNode, "globalDeclarations", TTI);
+        MangleContext *MC = CXT.createMangleContext();
+        TypeTableVisitor TTV(MC, rootNode, "TypeTable", TTI);
+        SymbolsVisitor SV(MC, rootNode, "globalSymbols", TTI);
+        DeclarationsVisitor DV(MC, rootNode, "globalDeclarations", TTI);
         Decl *D = CXT.getTranslationUnitDecl();
 
         TTV.TraverseDecl(D);

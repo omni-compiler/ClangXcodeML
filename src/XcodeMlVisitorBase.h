@@ -51,10 +51,11 @@ private:
     // memory pool for XcodeMlRAV: hide implemantation completely
     char RAVpool[sizeof(RAVBidirBridge)]; //enough?
 protected:
-    const ASTContext &astContext;
+    MangleContext *mangleContext;
     xmlNodePtr &rootNode;       // the root node (reference to root visitor).
     xmlNodePtr curNode;         // a candidate of the new chlid.
     TypeTableInfo *typetableinfo;
+    //SmallVector<std::function<void ()>, 8> childrenFacroty;
 public:
     XcodeMlVisitorBaseImpl() = delete;
     XcodeMlVisitorBaseImpl(const XcodeMlVisitorBaseImpl&) = delete;
@@ -62,7 +63,7 @@ public:
     XcodeMlVisitorBaseImpl& operator =(const XcodeMlVisitorBaseImpl&) = delete;
     XcodeMlVisitorBaseImpl& operator =(XcodeMlVisitorBaseImpl&&) = delete;
 
-    explicit XcodeMlVisitorBaseImpl(const ASTContext &CXT,
+    explicit XcodeMlVisitorBaseImpl(MangleContext *MC,
                                     xmlNodePtr &RootNode,
                                     xmlNodePtr CurNode,
                                     TypeTableInfo *TTI);
@@ -88,10 +89,10 @@ public:
     XcodeMlVisitorBase& operator =(const XcodeMlVisitorBase&) = delete;
     XcodeMlVisitorBase& operator =(XcodeMlVisitorBase&&) = delete;
 
-    explicit XcodeMlVisitorBase(const ASTContext &CXT, xmlNodePtr &RootNode,
+    explicit XcodeMlVisitorBase(MangleContext *MC, xmlNodePtr &RootNode,
                                 const char *ChildName,
                                 TypeTableInfo *TTI = nullptr)
-        : XcodeMlVisitorBaseImpl(CXT, RootNode,
+        : XcodeMlVisitorBaseImpl(MC, RootNode,
                                  (ChildName
                                   ? xmlNewChild(RootNode, nullptr,
                                                 BAD_CAST ChildName, nullptr)
@@ -99,7 +100,7 @@ public:
                                  TTI),
           optContext() {};
     explicit XcodeMlVisitorBase(XcodeMlVisitorBase *p)
-        : XcodeMlVisitorBaseImpl(p->astContext, p->curNode, p->curNode,
+        : XcodeMlVisitorBaseImpl(p->mangleContext, p->curNode, p->curNode,
                                  p->typetableinfo),
           optContext(p->optContext) {};
 
