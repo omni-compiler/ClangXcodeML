@@ -32,9 +32,16 @@ complex_t complex_add(complex_t x, double y)
 
 int iftest(int x, int y)
 {
-  if (x < y) {
-    return (x + y) * 3;
-  } else {
-    return y * x + 4;
+  for (int i = 0; i < 10; i++) {
+    if (x < y) {
+      return (x + y) * 3;
+    } else {
+      return y * x + 4;
+    }
   }
+}
+
+double get_real(complex_t *p)
+{
+  return p->real;
 }
