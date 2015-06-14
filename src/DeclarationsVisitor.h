@@ -1,20 +1,17 @@
 struct DeclarationsContext {
     explicit DeclarationsContext()
-	: isInCompoundStatement(false),
-	  isInExprStatement(false),
+	: isInExprStatement(false),
 	  children(),
 	  sibling(children),
 	  tmpstr() {};
     explicit DeclarationsContext(DeclarationsContext &DC) 
-	: isInCompoundStatement(DC.isInCompoundStatement),
-	  isInExprStatement(DC.isInExprStatement),
+	: isInExprStatement(DC.isInExprStatement),
 	  children(),
 	  sibling(DC.children),
 	  tmpstr() {};
     DeclarationsContext &operator =(const DeclarationsContext &) = delete;
     DeclarationsContext &operator =(DeclarationsContext &&) = delete;
 
-    bool isInCompoundStatement; // inherited to ancestors
     bool isInExprStatement;     // inherited to ancestors
     SmallVector<const char *, 8> children;
     SmallVector<const char *, 8> &sibling;

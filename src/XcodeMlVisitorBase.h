@@ -52,8 +52,8 @@ private:
     char RAVpool[sizeof(RAVBidirBridge)]; //enough?
 protected:
     const ASTContext &astContext;
-    const xmlNodePtr rootNode;    // the current root node.
-    xmlNodePtr curNode;           // a candidate of the new chlid.
+    xmlNodePtr &rootNode;       // the root node (reference to root visitor).
+    xmlNodePtr curNode;         // a candidate of the new chlid.
     TypeTableInfo *typetableinfo;
 public:
     XcodeMlVisitorBaseImpl() = delete;
@@ -63,7 +63,7 @@ public:
     XcodeMlVisitorBaseImpl& operator =(XcodeMlVisitorBaseImpl&&) = delete;
 
     explicit XcodeMlVisitorBaseImpl(const ASTContext &CXT,
-                                    xmlNodePtr RootNode,
+                                    xmlNodePtr &RootNode,
                                     xmlNodePtr CurNode,
                                     TypeTableInfo *TTI);
 
@@ -88,7 +88,7 @@ public:
     XcodeMlVisitorBase& operator =(const XcodeMlVisitorBase&) = delete;
     XcodeMlVisitorBase& operator =(XcodeMlVisitorBase&&) = delete;
 
-    explicit XcodeMlVisitorBase(const ASTContext &CXT, xmlNodePtr RootNode,
+    explicit XcodeMlVisitorBase(const ASTContext &CXT, xmlNodePtr &RootNode,
                                 const char *ChildName,
                                 TypeTableInfo *TTI = nullptr)
         : XcodeMlVisitorBaseImpl(CXT, RootNode,
@@ -123,7 +123,11 @@ public:
             return true; /* no need to create a child */                \
         }                                                               \
         const char *Contents = getDerived().ContentsFor##NAME(S);       \
-        newChild(Name, Contents);                                       \
+        if (Name[0] == '@') { /* property */                            \
+            newProp(Name + 1, Contents);                                \
+        } else {                                                        \
+            newChild(Name, Contents);                                   \
+        }                                                               \
 	return getDerived().PreVisit##NAME(S);                          \
     }                                                                   \
     bool PreVisit##NAME(TYPE S) {                                       \

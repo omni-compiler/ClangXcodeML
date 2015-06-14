@@ -1,4 +1,5 @@
 #include "XcodeMlVisitorBase.h"
+#include "SymbolsVisitor.h"
 #include "DeclarationsVisitor.h"
 
 using namespace llvm;
@@ -19,21 +20,29 @@ DeclarationsVisitor::getVisitorName() const {
 
 const char *
 DeclarationsVisitor::NameForStmt(Stmt *S) {
+  int NowInExprStatement = optContext.isInExprStatement;
+  optContext.isInExprStatement = false;
+
   if (!S) {
     return nullptr;
   }
   if (!optContext.sibling.empty()) {
-    newChild(optContext.sibling.back());
+    const char *name = optContext.sibling.back();
+    if (name[0] == '+') {
+      NowInExprStatement = true;
+      newChild(name + 1);
+    } else {
+      newChild(name);
+    }
     optContext.sibling.pop_back();
-    optContext.isInExprStatement = true;
   }
   const BinaryOperator *BO = dyn_cast<const BinaryOperator>(S);
   if (BO) {
-    if (!optContext.isInExprStatement) {
+    if (!NowInExprStatement) {
       newChild("exprStatement");
       setLocation(BO->getExprLoc());
-      optContext.isInExprStatement = true;
     }
+    optContext.isInExprStatement = true;
     // XcodeML-C-0.9J.pdf: 7.6(assignExpr), 7.7, 7.10(commmaExpr)
     switch (BO->getOpcode()) {
     case BO_PtrMemD:   return "UNDEF_BO_PtrMemD";
@@ -72,11 +81,11 @@ DeclarationsVisitor::NameForStmt(Stmt *S) {
   }
   const UnaryOperator *UO = dyn_cast<const UnaryOperator>(S);
   if (UO) {
-    if (!optContext.isInExprStatement) {
+    if (!NowInExprStatement) {
       newChild("exprStatement");
       setLocation(UO->getExprLoc());
-      optContext.isInExprStatement = true;
     }
+    optContext.isInExprStatement = true;
     // XcodeML-C-0.9J.pdf 7.2(varAddr), 7.3(pointerRef), 7.8, 7.11
     switch (UO->getOpcode()) {
     case UO_PostInc:   return "postIncrExpr";
@@ -94,6 +103,7 @@ DeclarationsVisitor::NameForStmt(Stmt *S) {
     case UO_Extension: return "UNDEF_UO_Extension";
     }
   }
+
   switch (S->getStmtClass()) {
   case Stmt::NoStmtClass:     return "Stmt_NoStmtClass";
   case Stmt::GCCAsmStmtClass: return "Stmt_GCCAsmStmtClass";
@@ -104,14 +114,38 @@ DeclarationsVisitor::NameForStmt(Stmt *S) {
   case Stmt::CXXForRangeStmtClass: return "Stmt_CXXForRangeStmtClass";
   case Stmt::CXXTryStmtClass: return "Stmt_CXXTryStmtClass";
   case Stmt::CapturedStmtClass: return "Stmt_CapturedStmtClass";
-  case Stmt::CompoundStmtClass: //6.2
-    optContext.isInCompoundStatement = true;
+  case Stmt::CompoundStmtClass: {
+    // 6.2
+    //SymbolsVisitor SV(astContext, curNode, "symbols", typetableinfo);
+    //SV.TraverseStmt(S);
+    optContext.children.push_back("body");
     return "compoundStatement";
-  case Stmt::ContinueStmtClass: return "continueStatement"; //6.8
+  }
+  case Stmt::ContinueStmtClass:
+    //6.8
+    return "continueStatement";
   case Stmt::DeclStmtClass: return "Stmt_DeclStmtClass";
-  case Stmt::DoStmtClass: return "doStatement"; //6.5 XXX
-  case Stmt::BinaryConditionalOperatorClass: return "condExpr"; //7.13
-  case Stmt::ConditionalOperatorClass: return "condExpr"; //7.13
+  case Stmt::DoStmtClass:
+    //6.5
+    optContext.children.push_back("+condition");    
+    optContext.children.push_back("body");
+    return "doStatement";
+  case Stmt::BinaryConditionalOperatorClass:
+    //7.13
+    if (!NowInExprStatement) {
+      newChild("exprStatement");
+      setLocation(static_cast<BinaryConditionalOperator*>(S)->getExprLoc());
+    }
+    optContext.isInExprStatement = true;
+    return "condExpr";
+  case Stmt::ConditionalOperatorClass:
+    //7.13
+    if (!NowInExprStatement) {
+      newChild("exprStatement");
+      setLocation(static_cast<ConditionalOperator*>(S)->getExprLoc());
+    }
+    optContext.isInExprStatement = true;
+    return "condExpr";
   case Stmt::AddrLabelExprClass: return "Stmt_AddrLabelExprClass";
   case Stmt::ArraySubscriptExprClass: return "Stmt_ArraySubscriptExprClass";
   case Stmt::ArrayTypeTraitExprClass: return "Stmt_ArrayTypeTraitExprClass";
@@ -163,18 +197,40 @@ DeclarationsVisitor::NameForStmt(Stmt *S) {
   case Stmt::ExprWithCleanupsClass: return "Stmt_ExprWithCleanupsClass";
   case Stmt::ExpressionTraitExprClass: return "Stmt_ExpressionTraitExprClass";
   case Stmt::ExtVectorElementExprClass: return "Stmt_ExtVectorElementExprClass";
-  case Stmt::FloatingLiteralClass: return "floatConstant"; //7.1
+  case Stmt::FloatingLiteralClass:
+    //7.1
+    if (!NowInExprStatement) {
+      newChild("exprStatement");
+      setLocation(static_cast<ConditionalOperator*>(S)->getExprLoc());
+    }
+    optContext.isInExprStatement = true;
+    return "floatConstant";
   case Stmt::FunctionParmPackExprClass: return "Stmt_FunctionParmPackExprClass";
   case Stmt::GNUNullExprClass: return "Stmt_GNUNullExprClass";
   case Stmt::GenericSelectionExprClass: return "Stmt_GenericSelectionExprClass";
   case Stmt::ImaginaryLiteralClass: return "Stmt_ImaginaryLiteralClass";
   case Stmt::ImplicitValueInitExprClass: return "Stmt_ImplicitValueInitExprClass";
   case Stmt::InitListExprClass: return "Stmt_InitListExprClass";
-  case Stmt::IntegerLiteralClass: return "intConstant"; //7.1 XXX
+  case Stmt::IntegerLiteralClass:
+    //7.1 XXX: long long should be treated specially
+    if (!NowInExprStatement) {
+      newChild("exprStatement");
+      setLocation(static_cast<ConditionalOperator*>(S)->getExprLoc());
+    }
+    optContext.isInExprStatement = true;
+    return "intConstant";
   case Stmt::LambdaExprClass: return "Stmt_LambdaExprClass";
   case Stmt::MSPropertyRefExprClass: return "Stmt_MSPropertyRefExprClass";
   case Stmt::MaterializeTemporaryExprClass: return "Stmt_MaterializeTemporaryExprClass";
-  case Stmt::MemberExprClass: return "memberRef"; //7.5 XXX
+  case Stmt::MemberExprClass:
+    //7.5
+    if (!NowInExprStatement) {
+      newChild("exprStatement");
+      setLocation(static_cast<ConditionalOperator*>(S)->getExprLoc());
+    }
+    optContext.isInExprStatement = true;
+    optContext.children.push_back("@member");
+    return "memberRef"; 
   case Stmt::ObjCArrayLiteralClass: return "Stmt_ObjCArrayLiteralClass";
   case Stmt::ObjCBoolLiteralExprClass: return "Stmt_ObjCBoolLiteralExprClass";
   case Stmt::ObjCBoxedExprClass: return "Stmt_ObjCBoxedExprClass";
@@ -209,15 +265,25 @@ DeclarationsVisitor::NameForStmt(Stmt *S) {
   case Stmt::UnaryExprOrTypeTraitExprClass: return "Stmt_UnaryExprOrTypeTraitExprClass";
   case Stmt::UnaryOperatorClass: return "Stmt_UnaryOperatorClass";
   case Stmt::VAArgExprClass: return "Stmt_VAArgExprClass";
-  case Stmt::ForStmtClass: return "forStatement"; //6.6 XXX
+  case Stmt::ForStmtClass:
+    //6.6
+    optContext.children.push_back("body");
+    optContext.children.push_back("iter");
+    optContext.children.push_back("+condition");
+    optContext.children.push_back("init");
+    return "forStatement";
   case Stmt::GotoStmtClass: return "gotoStatement"; //6.10 XXX
   case Stmt::IfStmtClass:
+    //6.3
     optContext.children.push_back("else");
     optContext.children.push_back("then");
-    optContext.children.push_back("condition");
-    return "ifStatement"; //6.3 XXX
+    optContext.children.push_back("+condition");
+    return "ifStatement";
   case Stmt::IndirectGotoStmtClass: return "Stmt_IndirectGotoStmtClass";
-  case Stmt::LabelStmtClass: return "statementLabel"; //6.11 XXX
+  case Stmt::LabelStmtClass:
+    //6.11
+    optContext.children.push_back("name");
+    return "statementLabel";
   case Stmt::MSDependentExistsStmtClass: return "Stmt_MSDependentExistsStmtClass";
   case Stmt::NullStmtClass: return "Stmt_NullStmtClass";
   case Stmt::OMPAtomicDirectiveClass: return "Stmt_OMPAtomicDirectiveClass";
@@ -248,15 +314,31 @@ DeclarationsVisitor::NameForStmt(Stmt *S) {
   case Stmt::ObjCAtTryStmtClass: return "Stmt_ObjCAtTryStmtClass";
   case Stmt::ObjCAutoreleasePoolStmtClass: return "Stmt_ObjCAutoreleasePoolStmtClass";
   case Stmt::ObjCForCollectionStmtClass: return "Stmt_ObjCForCollectionStmtClass";
-  case Stmt::ReturnStmtClass: return "returnStatement"; //6.9
+  case Stmt::ReturnStmtClass:
+    //6.9
+    optContext.isInExprStatement = true;
+    return "returnStatement";
   case Stmt::SEHExceptStmtClass: return "Stmt_SEHExceptStmtClass";
   case Stmt::SEHFinallyStmtClass: return "Stmt_SEHFinallyStmtClass";
   case Stmt::SEHLeaveStmtClass: return "Stmt_SEHLeaveStmtClass";
   case Stmt::SEHTryStmtClass: return "Stmt_SEHTryStmtClass";
-  case Stmt::CaseStmtClass: return "caseLabel"; //6.13 XXX
-  case Stmt::DefaultStmtClass: return "defaultLabel"; //6.15
-  case Stmt::SwitchStmtClass: return "switchStatement"; //6.12
-  case Stmt::WhileStmtClass: return "whileStatement"; //6.4 XXX
+  case Stmt::CaseStmtClass:
+    //6.13
+    optContext.children.push_back("value");
+    return "caseLabel";
+  case Stmt::DefaultStmtClass:
+    //6.15
+    return "defaultLabel";
+  case Stmt::SwitchStmtClass:
+    //6.12
+    optContext.children.push_back("body");
+    optContext.children.push_back("value");
+    return "switchStatement";
+  case Stmt::WhileStmtClass:
+    //6.4
+    optContext.children.push_back("body");
+    optContext.children.push_back("+condition");    
+    return "whileStatement";
   }
 }
 
@@ -305,6 +387,14 @@ DeclarationsVisitor::ContentsForStmt(Stmt *S)
     return OS.str().c_str();
   }
 
+  case Stmt::FloatingLiteralClass: {
+    double Value = static_cast<FloatingLiteral*>(S)->getValueAsApproximateDouble();
+    raw_string_ostream OS(optContext.tmpstr);
+
+    OS << Value;
+    return OS.str().c_str();
+  }
+
   default:
     return nullptr;
   }
@@ -326,9 +416,32 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S)
     TraverseType(UO->getType());
     return true;
   }
-  setLocation(S->getLocStart());
+  if (!optContext.isInExprStatement) {
+    setLocation(S->getLocStart());
+  }
   return true;
 }
+
+#if 0
+bool
+DeclarationsVisitor::PostVisitStmt(Stmt *S)
+{
+  if (!S) {
+    return true;
+  }
+  switch (S->getStmtClass()) {
+  case Stmt::MemberExprClass:
+    xmlNodePtr memberNode = ...;
+    xmlUnlinkNode(memberNode);
+    setProp("member", xmlNodeGetContent(memberNode));
+    xmlFreeNode(memberNode);
+    break;
+
+  default:
+    return true;
+  }
+}
+#endif
 
 const char *
 DeclarationsVisitor::NameForType(QualType T) {
@@ -619,6 +732,13 @@ DeclarationsVisitor::NameForDecl(Decl *D) {
   if (!D) {
     return "Decl_NULL";
   }
+  if (!optContext.sibling.empty()) {
+    const char *name = optContext.sibling.back();
+    if (name[0] == '@') {
+      optContext.sibling.pop_back();
+      return name;
+    }
+  }
   switch (D->getKind()) {
   case Decl::AccessSpec: return "Decl_AccessSpec";
   case Decl::Block: return "Decl_Block";
@@ -729,6 +849,14 @@ DeclarationsVisitor::NameForNestedNameSpecifierLoc(NestedNameSpecifierLoc NNS) {
 
 const char *
 DeclarationsVisitor::NameForDeclarationNameInfo(DeclarationNameInfo NameInfo) {
+  if (!optContext.sibling.empty()) {
+    const char *name = optContext.sibling.back();
+    if (name[0] == '@') {
+      optContext.sibling.pop_back();
+      return name;
+    }
+  }
+
   switch (NameInfo.getName().getNameKind()) {
   case DeclarationName::CXXConstructorName: return "DeclarationName_CXXConstructorName";
   case DeclarationName::CXXDestructorName: return "DeclarationName_CXXDestructorName";

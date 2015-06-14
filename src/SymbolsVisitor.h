@@ -6,6 +6,7 @@ public:
 
     const char *getVisitorName() const override;
     const char *NameForDecl(Decl *);
+    const char *NameForStmt(Stmt *);
 };
 
 ///

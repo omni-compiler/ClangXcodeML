@@ -29,6 +29,12 @@ SymbolsVisitor::NameForDecl(Decl *D) {
   return "TraverseDecl";
 }
 
+const char *
+SymbolsVisitor::NameForStmt(Stmt *S) {
+  (void)S;
+  return nullptr; // do not traverse childrens
+}
+
 ///
 /// Local Variables:
 /// indent-tabs-mode: nil

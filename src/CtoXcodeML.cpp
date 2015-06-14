@@ -25,7 +25,7 @@ static cl::extrahelp CommonHelp(CommonOptionsParser::HelpMessage);
 static std::unique_ptr<opt::OptTable> Options(createDriverOptTable());
 
 class XcodeMlASTConsumer : public ASTConsumer {
-    const xmlNodePtr rootNode;
+    xmlNodePtr rootNode;
 
 public:
     explicit XcodeMlASTConsumer(xmlNodePtr N) : rootNode(N) {};
