@@ -16,11 +16,11 @@
 #include <time.h>
 #include <string>
 
+using namespace clang;
 using namespace clang::driver;
 using namespace clang::tooling;
 using namespace llvm;
 
-cl::OptionCategory C2XcodeMLCategory("CtoXcodeML options");
 static cl::extrahelp CommonHelp(CommonOptionsParser::HelpMessage);
 static std::unique_ptr<opt::OptTable> Options(createDriverOptTable());
 

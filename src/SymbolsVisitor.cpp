@@ -1,6 +1,7 @@
 #include "XcodeMlVisitorBase.h"
 #include "SymbolsVisitor.h"
 
+using namespace clang;
 using namespace llvm;
 
 static cl::opt<bool>
@@ -17,22 +18,23 @@ SymbolsVisitor::getVisitorName() const {
   return OptTraceSymbols ? "Symbols" : nullptr;
 }
 
-const char *
-SymbolsVisitor::NameForDecl(Decl *D) {
-  if (D->getKind() == Decl::TranslationUnit) {
-    if (OptDisableSymbols) {
-      return nullptr; // stop traverse
-    } else {
-      return ""; // no need to create a child
-    }
-  }
-  return "TraverseDecl";
+bool
+SymbolsVisitor::PreVisitStmt(Stmt *S) {
+  (void)S;
+  return false; // do not traverse children
 }
 
-const char *
-SymbolsVisitor::NameForStmt(Stmt *S) {
-  (void)S;
-  return nullptr; // do not traverse childrens
+bool
+SymbolsVisitor::PreVisitDecl(Decl *D) {
+  if (D->getKind() == Decl::TranslationUnit) {
+    if (OptDisableSymbols) {
+      return false; // stop traverse
+    } else {
+      return true; // no need to create a child
+    }
+  }
+  newChild("TraverseDecl");
+  return true;
 }
 
 ///

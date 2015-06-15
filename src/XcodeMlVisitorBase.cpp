@@ -1,10 +1,9 @@
 #include "XcodeMlVisitorBase.h"
-
 #include "clang/Driver/Options.h"
-#include "clang/AST/RecursiveASTVisitor.h"
 
 #include <type_traits>
 
+using namespace clang;
 using namespace llvm;
 
 static cl::opt<bool>
@@ -19,83 +18,16 @@ OptEmitSourceColumn("column", cl::desc("emit 'column'"),
 static cl::opt<bool>
 OptEmitSourceRange("range", cl::desc("emit 'range'"),
                    cl::cat(C2XcodeMLCategory));
-static cl::opt<bool>
-OptTraceRAV("trace-rav", cl::desc("trace Recursive AST Visitor"),
-            cl::cat(C2XcodeMLCategory));
-
-// implement my RecursiveASTVisitor (which uses CRTP)
-class XcodeMlRAV : public RecursiveASTVisitor<XcodeMlRAV>,
-                   public RAVBidirBridge {
-private:
-    typedef RecursiveASTVisitor<XcodeMlRAV> RAV;
-public:
-    XcodeMlRAV() = delete;
-    XcodeMlRAV(const XcodeMlRAV&) = delete;
-    XcodeMlRAV(XcodeMlRAV&&) = delete;
-    XcodeMlRAV& operator =(const XcodeMlRAV&) = delete;
-    XcodeMlRAV& operator =(XcodeMlRAV&&) = delete;
-
-    explicit XcodeMlRAV(RAVBidirBridge *otherside)
-        : RAVBidirBridge(otherside) {};
-
-    bool shouldUseDataRecursionFor(Stmt *S) const {
-        (void)S;
-        return false;
-    }
-
-#define DISPATCHER(NAME, TYPE)                              \
-    bool Traverse##NAME(TYPE S) {                           \
-        const char *VN = otherside->getVisitorName();       \
-        if (OptTraceRAV && VN) {                            \
-            errs() << VN << "::       Traverse" #NAME "\n"; \
-        }                                                   \
-        return otherside->Bridge##NAME(S);                  \
-    }                                                       \
-    bool Bridge##NAME(TYPE S) override {                    \
-        const char *VN = otherside->getVisitorName();       \
-        if (OptTraceRAV && VN) {                            \
-            errs() << VN << "::BridgeTraverse" #NAME "\n";  \
-        }                                                   \
-        return static_cast<RAV*>(this)->Traverse##NAME(S);  \
-    }
-
-    DISPATCHER(Stmt, Stmt *);
-    DISPATCHER(Type, QualType);
-    DISPATCHER(TypeLoc, TypeLoc);
-    DISPATCHER(Attr, Attr *);
-    DISPATCHER(Decl, Decl *);
-    DISPATCHER(NestedNameSpecifier, NestedNameSpecifier *);
-    DISPATCHER(NestedNameSpecifierLoc, NestedNameSpecifierLoc);
-    DISPATCHER(DeclarationNameInfo, DeclarationNameInfo);
-    DISPATCHER(TemplateName, TemplateName);
-    DISPATCHER(TemplateArgument, const TemplateArgument &);
-    DISPATCHER(TemplateArgumentLoc, const TemplateArgumentLoc &);
-    DISPATCHER(ConstructorInitializer, CXXCtorInitializer *);
-
-    const char *getVisitorName() const override { return "RAV"; }
-};
-class RAVpoolSizeChecker {
-    static_assert(sizeof(XcodeMlRAV)
-                  <= sizeof(XcodeMlVisitorBaseImpl::RAVpool),
-                  "XcodeMlVisitorBaseImpl::RAVpool is too small");
-};
 
 // implementation of XcodeMlVisitorBaseImpl
 
-XcodeMlVisitorBaseImpl::
-XcodeMlVisitorBaseImpl(MangleContext *MC,
-                       xmlNodePtr &RootNode,
-                       xmlNodePtr CurNode,
-                       TypeTableInfo *TTI)
-    : RAVBidirBridge(new(RAVpool) XcodeMlRAV(this)),
+XcodeMlVisitorBaseImpl::XcodeMlVisitorBaseImpl(MangleContext *MC,
+                                               xmlNodePtr &RootNode,
+                                               xmlNodePtr CurNode,
+                                               TypeTableInfo *TTI)
+    : XcodeMlRAVpool(this),
       mangleContext(MC), rootNode(RootNode), curNode(CurNode),
       typetableinfo(TTI) {};
-
-#if 0
-void XcodeMlVisitorBaseImpl::setName(const char *Name) {
-    xmlNodeSetName(curNode, BAD_CAST Name);
-}
-#endif
 
 void XcodeMlVisitorBaseImpl::newChild(const char *Name, const char *Contents) {
     curNode = xmlNewChild(curNode, nullptr, BAD_CAST Name, BAD_CAST Contents);

@@ -13,8 +13,8 @@ struct DeclarationsContext {
     DeclarationsContext &operator =(DeclarationsContext &&) = delete;
 
     bool isInExprStatement;     // inherited to ancestors
-    SmallVector<const char *, 8> children;
-    SmallVector<const char *, 8> &sibling;
+    llvm::SmallVector<const char *, 8> children;
+    llvm::SmallVector<const char *, 8> &sibling;
     std::string tmpstr;
 };
 
@@ -25,18 +25,14 @@ public:
     using XcodeMlVisitorBase::XcodeMlVisitorBase;
 
     const char *getVisitorName() const override;
-    const char *NameForStmt(Stmt *);
-    bool PreVisitStmt(Stmt *);
-    const char *ContentsForStmt(Stmt *);
-    const char *NameForType(QualType);
-    const char *NameForTypeLoc(TypeLoc);
-    const char *NameForAttr(Attr *);
-    const char *NameForDecl(Decl *);
-    bool PreVisitDecl(Decl *);
-    const char *NameForNestedNameSpecifier(NestedNameSpecifier *);
-    const char *NameForNestedNameSpecifierLoc(NestedNameSpecifierLoc);
-    const char *NameForDeclarationNameInfo(DeclarationNameInfo);
-    const char *ContentsForDeclarationNameInfo(DeclarationNameInfo);
+    bool PreVisitStmt(clang::Stmt *);
+    bool PreVisitType(clang::QualType);
+    bool PreVisitTypeLoc(clang::TypeLoc);
+    bool PreVisitAttr(clang::Attr *);
+    bool PreVisitDecl(clang::Decl *);
+    bool PreVisitNestedNameSpecifier(clang::NestedNameSpecifier *);
+    bool PreVisitNestedNameSpecifierLoc(clang::NestedNameSpecifierLoc);
+    bool PreVisitDeclarationNameInfo(clang::DeclarationNameInfo);
 };
 
 ///

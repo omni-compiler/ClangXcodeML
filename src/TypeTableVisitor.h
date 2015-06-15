@@ -5,8 +5,8 @@ public:
     using XcodeMlVisitorBase::XcodeMlVisitorBase;
 
     const char *getVisitorName() const override;
-    const char *NameForStmt(Stmt *);
-    const char *NameForDecl(Decl *);
+    bool PreVisitStmt(clang::Stmt *);
+    bool PreVisitDecl(clang::Decl *);
 };
 
 ///

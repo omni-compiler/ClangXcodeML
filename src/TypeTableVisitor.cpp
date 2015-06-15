@@ -1,6 +1,7 @@
 #include "XcodeMlVisitorBase.h"
 #include "TypeTableVisitor.h"
 
+using namespace clang;
 using namespace llvm;
 
 static cl::opt<bool>
@@ -17,22 +18,22 @@ TypeTableVisitor::getVisitorName() const {
   return OptTraceTypeTable ? "TypeTable" : nullptr;
 }
 
-const char *
-TypeTableVisitor::NameForStmt(Stmt *S) {
+bool
+TypeTableVisitor::PreVisitStmt(Stmt *S) {
   (void)S;
-  return ""; // do not create a new child
+  return true; // do not create a new child
 }
 
-const char *
-TypeTableVisitor::NameForDecl(Decl *D) {
+bool
+TypeTableVisitor::PreVisitDecl(Decl *D) {
   if (D->getKind() == Decl::TranslationUnit) {
     if (OptDisableTypeTable) {
-      return nullptr; // stop traverse
+      return false; // stop traverse
     } else {
-      return ""; // no need to create a child
+      return true; // no need to create a child
     }
   }
-  return ""; // do not create a new child
+  return true; // do not create a new child
 }
 
 ///
