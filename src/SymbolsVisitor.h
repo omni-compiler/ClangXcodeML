@@ -1,3 +1,6 @@
+#ifndef SYMBOLVISITOR_H
+#define SYMBOLVISITOR_H
+
 class SymbolsVisitor
     : public XcodeMlVisitorBase<SymbolsVisitor> {
 public:
@@ -9,8 +12,11 @@ public:
     bool PreVisitDecl(clang::Decl *);
 };
 
+#endif /* !SYMBOLVISITOR_H */
+
 ///
 /// Local Variables:
+/// mode: c++
 /// indent-tabs-mode: nil
 /// c-basic-offset: 4
 /// End:

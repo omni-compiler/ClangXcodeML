@@ -38,6 +38,52 @@ DeclarationsVisitor::getVisitorName() const {
 
 #define ND(mes) do {newChild(mes); setLocation(D->getLocation()); return true;} while (0)
 
+void
+DeclarationsVisitor::WrapChild(const char *name1, const char *name2,
+                               const char *name3, const char *name4) {
+  if (name4) {
+    if (name4[0] == '+') {
+      hooks.push_back([name4](DeclarationsVisitor &V){
+          V.optContext.isInExprStatement = true;
+          V.newChild(name4 + 1);});
+    } else {
+      hooks.push_back([name4](DeclarationsVisitor &V){V.newChild(name4);});
+    }
+  }
+  if (name3) {
+    if (name3[0] == '+') {
+      hooks.push_back([name3](DeclarationsVisitor &V){
+          V.optContext.isInExprStatement = true;
+          V.newChild(name3 + 1);});
+    } else {
+      hooks.push_back([name3](DeclarationsVisitor &V){V.newChild(name3);});
+    }
+  }
+  if (name2) {
+    if (name2[0] == '+') {
+      hooks.push_back([name2](DeclarationsVisitor &V){
+          V.optContext.isInExprStatement = true;
+          V.newChild(name2 + 1);});
+    } else {
+      hooks.push_back([name2](DeclarationsVisitor &V){V.newChild(name2);});
+    }
+  }
+  if (name1) {
+    if (name1[0] == '+') {
+      hooks.push_back([name1](DeclarationsVisitor &V){
+          V.optContext.isInExprStatement = true;
+          V.newChild(name1 + 1);});
+    } else {
+      hooks.push_back([name1](DeclarationsVisitor &V){V.newChild(name1);});
+    }
+  }
+}
+
+void
+DeclarationsVisitor::PropChild(const char *name) {
+  hooks.push_back([name](DeclarationsVisitor &V){V.optContext.propname = name;});
+}
+
 bool
 DeclarationsVisitor::PreVisitStmt(Stmt *S) {
   int NowInExprStatement = optContext.isInExprStatement;
@@ -45,16 +91,6 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
 
   if (!S) {
     return false;
-  }
-  if (!optContext.sibling.empty()) {
-    const char *name = optContext.sibling.back();
-    if (name[0] == '+') {
-      NowInExprStatement = true;
-      newChild(name + 1);
-    } else {
-      newChild(name);
-    }
-    optContext.sibling.pop_back();
   }
   const BinaryOperator *BO = dyn_cast<const BinaryOperator>(S);
   if (BO) {
@@ -140,7 +176,7 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
     // 6.2
     //SymbolsVisitor SV(astContext, curNode, "symbols", typetableinfo);
     //SV.TraverseStmt(S);
-    optContext.children.push_back("body");
+    WrapChild("body");
     NS("compoundStatement");
   }
   case Stmt::ContinueStmtClass:
@@ -149,8 +185,7 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
   case Stmt::DeclStmtClass: NS("Stmt_DeclStmtClass");
   case Stmt::DoStmtClass:
     //6.5
-    optContext.children.push_back("+condition");    
-    optContext.children.push_back("body");
+    WrapChild("body", "+condition");
     NS("doStatement");
   case Stmt::BinaryConditionalOperatorClass:
     //7.13
@@ -235,7 +270,7 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
   case Stmt::MaterializeTemporaryExprClass: NS("Stmt_MaterializeTemporaryExprClass");
   case Stmt::MemberExprClass:
     //7.5
-    optContext.children.push_back("@member");
+    PropChild("member");
     NE("memberRef", nullptr); 
   case Stmt::ObjCArrayLiteralClass: NS("Stmt_ObjCArrayLiteralClass");
   case Stmt::ObjCBoolLiteralExprClass: NS("Stmt_ObjCBoolLiteralExprClass");
@@ -303,22 +338,17 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
   case Stmt::VAArgExprClass: NS("Stmt_VAArgExprClass");
   case Stmt::ForStmtClass:
     //6.6
-    optContext.children.push_back("body");
-    optContext.children.push_back("iter");
-    optContext.children.push_back("+condition");
-    optContext.children.push_back("init");
+    WrapChild("init", "+condition", "iter", "body");
     NS("forStatement");
   case Stmt::GotoStmtClass: NS("gotoStatement"); //6.10 XXX
   case Stmt::IfStmtClass:
     //6.3
-    optContext.children.push_back("else");
-    optContext.children.push_back("then");
-    optContext.children.push_back("+condition");
+    WrapChild("+condition", "then", "else");
     NS("ifStatement");
   case Stmt::IndirectGotoStmtClass: NS("Stmt_IndirectGotoStmtClass");
   case Stmt::LabelStmtClass:
     //6.11
-    optContext.children.push_back("name");
+    WrapChild("name");
     NS("statementLabel");
   case Stmt::MSDependentExistsStmtClass: NS("Stmt_MSDependentExistsStmtClass");
   case Stmt::NullStmtClass: NS("Stmt_NullStmtClass");
@@ -360,28 +390,25 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
   case Stmt::SEHTryStmtClass: NS("Stmt_SEHTryStmtClass");
   case Stmt::CaseStmtClass:
     //6.13
-    optContext.children.push_back("value");
+    WrapChild("value");
     NS("caseLabel");
   case Stmt::DefaultStmtClass:
     //6.15
     NS("defaultLabel");
   case Stmt::SwitchStmtClass:
     //6.12
-    optContext.children.push_back("body");
-    optContext.children.push_back("value");
+    WrapChild("value", "body");
     NS("switchStatement");
   case Stmt::WhileStmtClass:
     //6.4
-    optContext.children.push_back("body");
-    optContext.children.push_back("+condition");    
+    WrapChild("+condition", "body");
     NS("whileStatement");
   }
 }
 
 #if 0
 bool
-DeclarationsVisitor::PreVisitStmt(Stmt *S)
-{
+DeclarationsVisitor::PreVisitStmt(Stmt *S) {
   if (!S) {
     return true;
   }
@@ -402,8 +429,7 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S)
 }
 
 bool
-DeclarationsVisitor::PostVisitStmt(Stmt *S)
-{
+DeclarationsVisitor::PostVisitStmt(Stmt *S) {
   if (!S) {
     return true;
   }
@@ -710,13 +736,6 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
   if (!D) {
     return false;
   }
-  if (!optContext.sibling.empty()) {
-    const char *name = optContext.sibling.back();
-    if (name[0] == '@') {
-      optContext.sibling.pop_back();
-      return name;
-    }
-  }
   switch (D->getKind()) {
   case Decl::AccessSpec: ND("Decl_AccessSpec");
   case Decl::Block: ND("Decl_Block");
@@ -788,8 +807,7 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
 
 #if 0
 bool
-DeclarationsVisitor::PreVisitDecl(Decl *D)
-{
+DeclarationsVisitor::PreVisitDecl(Decl *D) {
   switch (D->getKind()) {
   case Decl::Function: {
     const NamedDecl *ND = dyn_cast<const NamedDecl>(D);
@@ -846,12 +864,9 @@ DeclarationsVisitor::PreVisitDeclarationNameInfo(DeclarationNameInfo NameInfo) {
   IdentifierInfo *II = DN.getAsIdentifierInfo();
   const char *Content = II ? II->getNameStart() : nullptr;
 
-  if (!optContext.sibling.empty()) {
-    const char *name = optContext.sibling.back();
-    if (name[0] == '@') {
-      optContext.sibling.pop_back();
-      NC(name, Content);
-    }
+  if (optContext.propname) {
+    newProp(optContext.propname, Content);
+    return true;
   }
 
   switch (NameInfo.getName().getNameKind()) {

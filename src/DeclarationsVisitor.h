@@ -1,20 +1,20 @@
+#ifndef DECLARATIONSVISITOR_H
+#define DECLARATIONSVISITOR_H
+
 struct DeclarationsContext {
     explicit DeclarationsContext()
 	: isInExprStatement(false),
-	  children(),
-	  sibling(children),
+          propname(nullptr),
 	  tmpstr() {};
     explicit DeclarationsContext(DeclarationsContext &DC) 
 	: isInExprStatement(DC.isInExprStatement),
-	  children(),
-	  sibling(DC.children),
+          propname(nullptr),
 	  tmpstr() {};
     DeclarationsContext &operator =(const DeclarationsContext &) = delete;
     DeclarationsContext &operator =(DeclarationsContext &&) = delete;
 
     bool isInExprStatement;     // inherited to ancestors
-    llvm::SmallVector<const char *, 8> children;
-    llvm::SmallVector<const char *, 8> &sibling;
+    const char *propname;
     std::string tmpstr;
 };
 
@@ -33,10 +33,17 @@ public:
     bool PreVisitNestedNameSpecifier(clang::NestedNameSpecifier *);
     bool PreVisitNestedNameSpecifierLoc(clang::NestedNameSpecifierLoc);
     bool PreVisitDeclarationNameInfo(clang::DeclarationNameInfo);
+
+    void WrapChild(const char *name1, const char *name2 = nullptr,
+                   const char *name3 = nullptr, const char *name4 = nullptr);
+    void PropChild(const char *name);
 };
+
+#endif /* !DECLARATIONSVISITOR_H */
 
 ///
 /// Local Variables:
+/// mode: c++
 /// indent-tabs-mode: nil
 /// c-basic-offset: 4
 /// End:

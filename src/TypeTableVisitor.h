@@ -1,3 +1,6 @@
+#ifndef TYPETABLEVISITOR_H
+#define TYPETABLEVISITOR_H
+
 class TypeTableVisitor
     : public XcodeMlVisitorBase<TypeTableVisitor> {
 public:
@@ -9,8 +12,11 @@ public:
     bool PreVisitDecl(clang::Decl *);
 };
 
+#endif /* !TYPETABLEVISITOR_H */
+
 ///
 /// Local Variables:
+/// mode: c++
 /// indent-tabs-mode: nil
 /// c-basic-offset: 4
 /// End:

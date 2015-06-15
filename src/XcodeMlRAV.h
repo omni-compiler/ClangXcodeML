@@ -1,3 +1,6 @@
+#ifndef XCODEMLRAV_H
+#define XCODEMLRAV_H
+
 #include "clang/AST/AST.h"
 #include "clang/Tooling/CommonOptionsParser.h"
 
@@ -56,3 +59,12 @@ public:
     XcodeMlRAVpool & operator =(XcodeMlRAVpool &&) = delete;
     explicit XcodeMlRAVpool(RAVBidirBridge *);
 };
+
+#endif /* !XCODEMLRAV_H */
+///
+/// Local Variables:
+/// mode: c++
+/// indent-tabs-mode: nil
+/// c-basic-offset: 4
+/// End:
+///

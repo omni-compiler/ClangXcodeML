@@ -1,7 +1,12 @@
-#include "XcodeMlRAV.h"
+#ifndef XCODEMLVISITORBASE_H
+#define XCODEMLVISITORBASE_H
 
+#include "XcodeMlRAV.h"
+#include "llvm/ADT/SmallVector.h"
 #include "clang/AST/Mangle.h"
+
 #include <libxml/tree.h>
+#include <functional>
 
 class TypeTableInfo;
 
@@ -41,6 +46,7 @@ template <class Derived, class OptContext = bool>
 class XcodeMlVisitorBase : public XcodeMlVisitorBaseImpl {
 protected:
     OptContext optContext;
+    llvm::SmallVector<std::function<void (Derived &)>, 5>hooks;
 public:
     XcodeMlVisitorBase() = delete;
     XcodeMlVisitorBase(const XcodeMlVisitorBase&) = delete;
@@ -57,11 +63,11 @@ public:
                                                 BAD_CAST ChildName, nullptr)
                                   : RootNode),
                                  TTI),
-          optContext() {};
+          optContext(), hooks() {};
     explicit XcodeMlVisitorBase(XcodeMlVisitorBase *p)
         : XcodeMlVisitorBaseImpl(p->mangleContext, p->curNode, p->curNode,
                                  p->typetableinfo),
-          optContext(p->optContext) {};
+          optContext(p->optContext), hooks() {};
 
     Derived &getDerived() { return *static_cast<Derived *>(this); }
 
@@ -76,6 +82,12 @@ public:
     }                                                                   \
     bool Traverse##NAME(TYPE S) {                                       \
         Derived V(this);                                                \
+        if (!hooks.empty()) {                                           \
+            auto Hook = hooks.back();                                   \
+            V.newComment("do Hook" #NAME);                              \
+            Hook(V);                                                    \
+            hooks.pop_back();                                           \
+        }                                                               \
         V.newComment("Traverse" #NAME);                                 \
         if (!V.PreVisit##NAME(S)) {                                     \
             return true; /* avoid traverse children */                  \
@@ -98,8 +110,11 @@ public:
 #undef DISPATCHER
 };
 
+#endif /* !XCODEMLVISITORBASE_H */
+
 ///
 /// Local Variables:
+/// mode: c++
 /// indent-tabs-mode: nil
 /// c-basic-offset: 4
 /// End:
