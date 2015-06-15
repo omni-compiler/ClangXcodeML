@@ -4,7 +4,8 @@ CXX = /usr/local/bin/clang++
 #CXX = /usr/bin/clang++-3.6
 CXXFLAGS = -O2 -g -Wall -Wextra -fno-rtti -std=c++11 -pedantic \
 	`pkg-config --cflags libxml-2.0` \
-	-D__STDC_LIMIT_MACROS -D__STDC_CONSTANT_MACROS
+	-D__STDC_LIMIT_MACROS -D__STDC_CONSTANT_MACROS $(PCHFLAGS)
+PCHFLAGS =
 
 USEDLIBS = -L$(shell $(LLVM_CONFIG) --libdir)
 USEDLIBS += -lclangTooling -lclangFrontend -lclangSerialization -lclangDriver \
@@ -67,13 +68,14 @@ distclean: clean
 	rm -f $(RAVOBJS)
 
 clean:
-	rm -f CtoXcodeML mockup RAV.i CtoXcodeML.i  $(OBJS) *~
+	rm -f CtoXcodeML mockup XcodeMlRAV.i CtoXcodeML.i  $(OBJS) *~
 
-RAV.i: RAV.cpp
-	$(CXX) $(CXXFLAGS) -E RAV.cpp -o RAV.i
+XcodeMlRAV.i: XcodeMlRAV.cpp
+	$(CXX) $(CXXFLAGS) -E XcodeMlRAV.cpp -o XcodeMlRAV.i
 
 CtoXcodeML.i: CtoXcodeML.cpp
 	$(CXX) $(CXXFLAGS) -E CtoXcodeML.cpp -o CtoXcodeML.i
+
 
 .PHONY: check-syntax
 check-syntax:
