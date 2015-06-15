@@ -46,7 +46,6 @@ template <class Derived, class OptContext = bool>
 class XcodeMlVisitorBase : public XcodeMlVisitorBaseImpl {
 protected:
     OptContext optContext;
-    llvm::SmallVector<std::function<void (Derived &)>, 5>hooks;
 public:
     XcodeMlVisitorBase() = delete;
     XcodeMlVisitorBase(const XcodeMlVisitorBase&) = delete;
@@ -63,15 +62,19 @@ public:
                                                 BAD_CAST ChildName, nullptr)
                                   : Parent),
                                  TTI),
-          optContext(), hooks() {};
+          optContext() {};
     explicit XcodeMlVisitorBase(XcodeMlVisitorBase *p)
         : XcodeMlVisitorBaseImpl(p->mangleContext, p->curNode, p->curNode,
                                  p->typetableinfo),
-          optContext(p->optContext), hooks() {};
+          optContext(p->optContext) {};
 
     Derived &getDerived() { return *static_cast<Derived *>(this); }
 
 #define DISPATCHER(NAME, TYPE)                                          \
+    protected:                                                          \
+    llvm::SmallVector<std::function<void (Derived &, TYPE)>, 3>         \
+    HooksFor##NAME;                                                     \
+    public:                                                             \
     bool PreVisit##NAME(TYPE S) {                                       \
         (void)S;                                                        \
         newChild("Traverse" #NAME);                                     \
@@ -82,11 +85,11 @@ public:
     }                                                                   \
     bool Traverse##NAME(TYPE S) {                                       \
         Derived V(this);                                                \
-        if (!hooks.empty()) {                                           \
-            auto Hook = hooks.back();                                   \
-            V.newComment("do Hook" #NAME);                              \
-            Hook(V);                                                    \
-            hooks.pop_back();                                           \
+        if (!HooksFor##NAME.empty()) {                                  \
+            auto Hook = HooksFor##NAME.back();                          \
+            V.newComment("do Hook " #NAME);                             \
+            Hook(V, S);                                                 \
+            HooksFor##NAME.pop_back();                                  \
         }                                                               \
         V.newComment("Traverse" #NAME);                                 \
         if (!V.PreVisit##NAME(S)) {                                     \

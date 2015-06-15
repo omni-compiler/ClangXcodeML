@@ -39,49 +39,44 @@ DeclarationsVisitor::getVisitorName() const {
 #define ND(mes) do {newChild(mes); setLocation(D->getLocation()); return true;} while (0)
 
 void
+DeclarationsVisitor::WrapChild(const char *name) {
+  (void)name;
+#if 0
+  if (name[0] == '+') {
+    HooksForStmt.push_back([name](DeclarationsVisitor &V, Stmt *S){
+        (void)S;
+        V.optContext.isInExprStatement = true;
+        V.newChild(name + 1);});
+  } else {
+    HooksForStmt.push_back([name](DeclarationsVisitor &V, Stmt *S){
+        (void)S;
+        V.newChild(name);});
+  }
+#endif
+}
+
+void
 DeclarationsVisitor::WrapChild(const char *name1, const char *name2,
                                const char *name3, const char *name4) {
   if (name4) {
-    if (name4[0] == '+') {
-      hooks.push_back([name4](DeclarationsVisitor &V){
-          V.optContext.isInExprStatement = true;
-          V.newChild(name4 + 1);});
-    } else {
-      hooks.push_back([name4](DeclarationsVisitor &V){V.newChild(name4);});
-    }
+    WrapChild(name4);
   }
   if (name3) {
-    if (name3[0] == '+') {
-      hooks.push_back([name3](DeclarationsVisitor &V){
-          V.optContext.isInExprStatement = true;
-          V.newChild(name3 + 1);});
-    } else {
-      hooks.push_back([name3](DeclarationsVisitor &V){V.newChild(name3);});
-    }
+    WrapChild(name3);
   }
-  if (name2) {
-    if (name2[0] == '+') {
-      hooks.push_back([name2](DeclarationsVisitor &V){
-          V.optContext.isInExprStatement = true;
-          V.newChild(name2 + 1);});
-    } else {
-      hooks.push_back([name2](DeclarationsVisitor &V){V.newChild(name2);});
-    }
-  }
-  if (name1) {
-    if (name1[0] == '+') {
-      hooks.push_back([name1](DeclarationsVisitor &V){
-          V.optContext.isInExprStatement = true;
-          V.newChild(name1 + 1);});
-    } else {
-      hooks.push_back([name1](DeclarationsVisitor &V){V.newChild(name1);});
-    }
-  }
+  WrapChild(name2);
+  WrapChild(name1);
 }
 
 void
 DeclarationsVisitor::PropChild(const char *name) {
-  hooks.push_back([name](DeclarationsVisitor &V){V.optContext.propname = name;});
+  (void)name;
+#if 0 
+  HooksForDeclarationNameInfo.push_back([name](DeclarationsVisitor &V,
+                                               DeclarationNameInfo NI){
+                                          (void)NI;
+                                          V.optContext.propname = name;});
+#endif
 }
 
 bool
