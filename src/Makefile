@@ -5,7 +5,7 @@ CXX = /usr/local/bin/clang++
 CXXFLAGS = -O2 -g -Wall -Wextra -fno-rtti -std=c++11 -pedantic \
 	`pkg-config --cflags libxml-2.0` \
 	-D__STDC_LIMIT_MACROS -D__STDC_CONSTANT_MACROS $(PCHFLAGS)
-PCHFLAGS = -include XcodeMlVisitorBase.h
+#PCHFLAGS = -include XcodeMlVisitorBase.h
 PCHFILES = XcodeMlVisitorBase.pch
 
 USEDLIBS = -L$(shell $(LLVM_CONFIG) --libdir)
