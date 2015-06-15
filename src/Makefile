@@ -5,7 +5,8 @@ CXX = /usr/local/bin/clang++
 CXXFLAGS = -O2 -g -Wall -Wextra -fno-rtti -std=c++11 -pedantic \
 	`pkg-config --cflags libxml-2.0` \
 	-D__STDC_LIMIT_MACROS -D__STDC_CONSTANT_MACROS $(PCHFLAGS)
-PCHFLAGS =
+PCHFLAGS = -include XcodeMlVisitorBase.h
+PCHFILES = XcodeMlVisitorBase.pch
 
 USEDLIBS = -L$(shell $(LLVM_CONFIG) --libdir)
 USEDLIBS += -lclangTooling -lclangFrontend -lclangSerialization -lclangDriver \
@@ -56,6 +57,9 @@ DeclarationsVisitor.o: \
 	XcodeMlRAV.h \
 	XcodeMlVisitorBase.h
 
+XcodeMlVisitorBase.pch: XcodeMlVisitorBase.h XcodeMlRAV.h
+	clang -x c++-header $(CXXFLAGS) XcodeMlVisitorBase.h -o XcodeMlVisitorBase.pch
+
 CtoXcodeML.ast: CtoXcodeML.cpp
 	$(CXX) $(CXXFLAGS) -Xclang -ast-dump CtoXcodeML.cpp -o CtoXcodeML.ast 
 
@@ -65,7 +69,7 @@ test:
 mockup: mockup.cpp
 
 distclean: clean
-	rm -f $(RAVOBJS)
+	rm -f $(RAVOBJS) $(PCHFILES)
 
 clean:
 	rm -f CtoXcodeML mockup XcodeMlRAV.i CtoXcodeML.i  $(OBJS) *~
