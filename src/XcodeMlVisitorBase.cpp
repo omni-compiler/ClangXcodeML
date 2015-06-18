@@ -1,5 +1,6 @@
 #include "XcodeMlVisitorBase.h"
 #include "clang/Driver/Options.h"
+#include "clang/Lex/Lexer.h"
 
 #include <type_traits>
 
@@ -27,10 +28,20 @@ XcodeMlVisitorBaseImpl::XcodeMlVisitorBaseImpl(MangleContext *MC,
                                                TypeTableInfo *TTI)
     : XcodeMlRAVpool(this),
       mangleContext(MC), parentNode(Parent), curNode(CurNode),
-      typetableinfo(TTI) {};
+      typetableinfo(TTI), contentString("") {};
 
-void XcodeMlVisitorBaseImpl::newChild(const char *Name, const char *Contents) {
-    curNode = xmlNewChild(curNode, nullptr, BAD_CAST Name, BAD_CAST Contents);
+void XcodeMlVisitorBaseImpl::addChild(const char *Name, const char *Content) {
+    if (!Content && contentString.length() > 0) {
+        Content = contentString.c_str();
+    }
+    xmlNewChild(curNode, nullptr, BAD_CAST Name, BAD_CAST Content);
+}
+
+void XcodeMlVisitorBaseImpl::newChild(const char *Name, const char *Content) {
+    if (!Content && contentString.length() > 0) {
+        Content = contentString.c_str();
+    }
+    curNode = xmlNewChild(curNode, nullptr, BAD_CAST Name, BAD_CAST Content);
 }
 
 void XcodeMlVisitorBaseImpl::newProp(const char *Name, int Val, xmlNodePtr N) {
@@ -79,6 +90,17 @@ void XcodeMlVisitorBaseImpl::setLocation(SourceLocation Loc, xmlNodePtr N) {
             newProp("file", PLoc.getFilename(), N);
         }
     }
+}
+
+void XcodeMlVisitorBaseImpl::setContentBySource(SourceLocation LocStart,
+                                                SourceLocation LocEnd) {
+    ASTContext &CXT = mangleContext->getASTContext();
+    SourceManager &SM = CXT.getSourceManager();
+    SourceLocation LocEndOfToken = Lexer::getLocForEndOfToken(LocEnd, 0, SM,
+                                                              CXT.getLangOpts());
+    const char *b = SM.getCharacterData(LocStart);
+    const char *e = SM.getCharacterData(LocEndOfToken);
+    contentString = std::string(b, e - b);
 }
 
 ///

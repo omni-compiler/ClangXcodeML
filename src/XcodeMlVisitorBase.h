@@ -20,6 +20,7 @@ protected:
     xmlNodePtr parentNode;     // the parent node
     xmlNodePtr curNode;        // a candidate of the new chlid.
     TypeTableInfo *typetableinfo;
+    std::string contentString; // a temporary holder of xmlNode content
 public:
     XcodeMlVisitorBaseImpl() = delete;
     XcodeMlVisitorBaseImpl(const XcodeMlVisitorBaseImpl&) = delete;
@@ -32,12 +33,15 @@ public:
                                     xmlNodePtr CurNode,
                                     TypeTableInfo *TTI);
 
-    void newChild(const char *Name, const char *Contents = nullptr);
+    void addChild(const char *Name, const char *Content = nullptr);
+    void newChild(const char *Name, const char *Content = nullptr);
     void newProp(const char *Name, int Val, xmlNodePtr N = nullptr);
     void newProp(const char *Name, const char *Val, xmlNodePtr N = nullptr);
     void newComment(const xmlChar *str, xmlNodePtr RN = nullptr);
     void newComment(const char *str, xmlNodePtr RN = nullptr);
     void setLocation(clang::SourceLocation Loc, xmlNodePtr N = nullptr);
+    void setContentBySource(clang::SourceLocation LocStart,
+                            clang::SourceLocation LocEnd);
 };
 
 // Main class: XcodeMlVisitorBase<Derived>
@@ -72,7 +76,7 @@ public:
 
 #define DISPATCHER(NAME, TYPE)                                          \
     protected:                                                          \
-    llvm::SmallVector<std::function<void (Derived &, TYPE)>, 3>         \
+    llvm::SmallVector<std::function<bool (TYPE)>, 3>                    \
     HooksFor##NAME;                                                     \
     public:                                                             \
     bool PreVisit##NAME(TYPE S) {                                       \
@@ -81,21 +85,25 @@ public:
         return true;                                                    \
     }                                                                   \
     bool Bridge##NAME(TYPE S) override {                                \
-        return Traverse##NAME(S);                                       \
+        if (!HooksFor##NAME.empty()) {                                  \
+            auto Hook = HooksFor##NAME.back();                          \
+            HooksFor##NAME.pop_back();                                  \
+            newComment("do Hook " #NAME);                               \
+            return Hook(S);                                             \
+        } else {                                                        \
+            return getDerived().Traverse##NAME(S);                      \
+        }                                                               \
     }                                                                   \
     bool Traverse##NAME(TYPE S) {                                       \
         Derived V(this);                                                \
-        if (!HooksFor##NAME.empty()) {                                  \
-            auto Hook = HooksFor##NAME.back();                          \
-            V.newComment("do Hook " #NAME);                             \
-            Hook(V, S);                                                 \
-            HooksFor##NAME.pop_back();                                  \
-        }                                                               \
-        V.newComment("Traverse" #NAME);                                 \
-        if (!V.PreVisit##NAME(S)) {                                     \
+        return V.TraverseMe##NAME(S);                                   \
+    }                                                                   \
+    bool TraverseMe##NAME(TYPE S) {                                     \
+        newComment("Traverse" #NAME);                                   \
+        if (!getDerived().PreVisit##NAME(S)) {                          \
             return true; /* avoid traverse children */                  \
         }                                                               \
-        return V.otherside->Bridge##NAME(S);                            \
+        return getDerived().otherside->Bridge##NAME(S);                 \
     }
 
     DISPATCHER(Stmt, clang::Stmt *);

@@ -11,7 +11,7 @@ OptTraceDeclarations("trace-declarations",
                      cl::cat(C2XcodeMLCategory));
 static cl::opt<bool>
 OptDisableDeclarations("disable-declarations",
-                       cl::desc("disable  <globalDeclarations>, <declarations>"),
+                       cl::desc("disable <globalDeclarations>, <declarations>"),
                        cl::cat(C2XcodeMLCategory));
 
 const char *
@@ -22,37 +22,54 @@ DeclarationsVisitor::getVisitorName() const {
 // helper macros
 
 #define N(mes) do {newChild(mes); return true;} while (0)
-#define NE(mes, content) do {                                           \
-  if (!NowInExprStatement) {                                            \
-    newChild("exprStatement");                                          \
-    setLocation(static_cast<Expr*>(S)->getExprLoc());                   \
-  }                                                                     \
-  optContext.isInExprStatement = true;                                  \
-  newChild(mes, content);                                               \
-  return true;                                                          \
-} while (0)
+#define NE(mes) do {                                                    \
+    if (NowInCompoundStatement) {                                       \
+      newChild("exprStatement", "");                                    \
+      setLocation(static_cast<Expr*>(S)->getExprLoc());                 \
+    }                                                                   \
+    newChild(mes);                                                      \
+    return true;                                                        \
+  } while (0)
 
-#define NC(mes, content) do {newChild(mes, content); return true;} while (0)
 #define NT(mes) do {newChild(mes); TraverseType(T); return true;} while (0)
-#define NS(mes) do {newChild(mes); if (!optContext.isInExprStatement) {setLocation(S->getLocStart());} return true;} while (0)
+#define NS(mes) do {newChild(mes); if (NowInCompoundStatement) {setLocation(S->getLocStart());} return true;} while (0)
 
 #define ND(mes) do {newChild(mes); setLocation(D->getLocation()); return true;} while (0)
 
+#define NTypeLoc(mes) do {                                      \
+    newChild(mes);                                              \
+    setContentBySource(TL.getLocStart(), TL.getLocEnd());       \
+    addChild("source");                                         \
+    return true;                                                \
+  } while (0)
+
+#define NAttr(mes) do {                                         \
+    newComment(mes);                                            \
+    setContentBySource(A->getLocation(), A->getLocation());     \
+    newChild("attribute");                                      \
+    return true;                                                \
+  } while (0)
+
+#define NDeclName(mes) do {                                     \
+    newComment(mes);                                            \
+    newChild("name");                                           \
+    return true;                                                \
+  } while (0)
+
 void
 DeclarationsVisitor::WrapChild(const char *name) {
-  (void)name;
-#if 0
   if (name[0] == '+') {
-    HooksForStmt.push_back([name](DeclarationsVisitor &V, Stmt *S){
-        (void)S;
-        V.optContext.isInExprStatement = true;
-        V.newChild(name + 1);});
+    HooksForStmt.push_back([this, name](Stmt *S){
+        DeclarationsVisitor V(this);
+        V.optContext.isInCompoundStatement = true;
+        V.newChild(name + 1);
+        return V.TraverseMeStmt(S);});
   } else {
-    HooksForStmt.push_back([name](DeclarationsVisitor &V, Stmt *S){
-        (void)S;
-        V.newChild(name);});
+    HooksForStmt.push_back([this, name](Stmt *S){
+        DeclarationsVisitor V(this);
+        V.newChild(name);
+        return V.TraverseMeStmt(S);});
   }
-#endif
 }
 
 void
@@ -70,30 +87,36 @@ DeclarationsVisitor::WrapChild(const char *name1, const char *name2,
 
 void
 DeclarationsVisitor::PropChild(const char *name) {
-  (void)name;
-#if 0 
-  HooksForDeclarationNameInfo.push_back([name](DeclarationsVisitor &V,
-                                               DeclarationNameInfo NI){
-                                          (void)NI;
-                                          V.optContext.propname = name;});
-#endif
+  HooksForDeclarationNameInfo.push_back([this, name](DeclarationNameInfo NI){
+      DeclarationsVisitor V(this);
+      V.optContext.propname = name;
+      return V.TraverseMeDeclarationNameInfo(NI);});
+}
+
+void
+DeclarationsVisitor::NameChild(const char *name) {
+  HooksForDeclarationNameInfo.push_back([this, name](DeclarationNameInfo NI){
+      DeclarationsVisitor V(this);
+      V.optContext.explicitname = name;
+      return V.TraverseMeDeclarationNameInfo(NI);});
 }
 
 bool
 DeclarationsVisitor::PreVisitStmt(Stmt *S) {
-  int NowInExprStatement = optContext.isInExprStatement;
-  optContext.isInExprStatement = false;
-
   if (!S) {
+    newComment("Stmt_NULL");
     return false;
   }
+  bool NowInCompoundStatement = optContext.isInCompoundStatement;
+  optContext.isInCompoundStatement = false;
+
   const BinaryOperator *BO = dyn_cast<const BinaryOperator>(S);
+
   if (BO) {
-    if (!NowInExprStatement) {
+    if (NowInCompoundStatement) {
       newChild("exprStatement");
       setLocation(BO->getExprLoc());
     }
-    optContext.isInExprStatement = true;
     // XcodeML-C-0.9J.pdf: 7.6(assignExpr), 7.7, 7.10(commmaExpr)
     QualType T = BO->getType();
     switch (BO->getOpcode()) {
@@ -133,11 +156,10 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
   }
   const UnaryOperator *UO = dyn_cast<const UnaryOperator>(S);
   if (UO) {
-    if (!NowInExprStatement) {
+    if (NowInCompoundStatement) {
       newChild("exprStatement");
       setLocation(UO->getExprLoc());
     }
-    optContext.isInExprStatement = true;
     // XcodeML-C-0.9J.pdf 7.2(varAddr), 7.3(pointerRef), 7.8, 7.11
     QualType T = UO->getType();
     switch (UO->getOpcode()) {
@@ -168,11 +190,12 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
   case Stmt::CXXTryStmtClass: NS("Stmt_CXXTryStmtClass");
   case Stmt::CapturedStmtClass: NS("Stmt_CapturedStmtClass");
   case Stmt::CompoundStmtClass: {
+    optContext.isInCompoundStatement = true;
+    newChild("compoundStatement");
     // 6.2
     //SymbolsVisitor SV(astContext, curNode, "symbols", typetableinfo);
     //SV.TraverseStmt(S);
-    WrapChild("body");
-    NS("compoundStatement");
+    NS("body");
   }
   case Stmt::ContinueStmtClass:
     //6.8
@@ -180,14 +203,14 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
   case Stmt::DeclStmtClass: NS("Stmt_DeclStmtClass");
   case Stmt::DoStmtClass:
     //6.5
-    WrapChild("body", "+condition");
+    WrapChild("+body", "condition");
     NS("doStatement");
   case Stmt::BinaryConditionalOperatorClass:
     //7.13
-    NE("condExpr", nullptr);
+    NE("condExpr");
   case Stmt::ConditionalOperatorClass:
     //7.13
-    NE("condExpr", nullptr);
+    NE("condExpr");
   case Stmt::AddrLabelExprClass: NS("Stmt_AddrLabelExprClass");
   case Stmt::ArraySubscriptExprClass: NS("Stmt_ArraySubscriptExprClass");
   case Stmt::ArrayTypeTraitExprClass: NS("Stmt_ArrayTypeTraitExprClass");
@@ -216,7 +239,21 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
   case Stmt::CXXTypeidExprClass: NS("Stmt_CXXTypeidExprClass");
   case Stmt::CXXUnresolvedConstructExprClass: NS("Stmt_CXXUnresolvedConstructExprClass");
   case Stmt::CXXUuidofExprClass: NS("Stmt_CXXUuidofExprClass");
-  case Stmt::CallExprClass: NS("functionCall"); //7.9 XXX
+  case Stmt::CallExprClass:
+    //7.9
+    if (NowInCompoundStatement) {
+      newChild("exprStatement");
+      setLocation(static_cast<Expr*>(S)->getExprLoc());
+    }
+    optContext.nameForDeclRefExpr = "function";
+    HooksForStmt.push_back([this](Stmt *S){
+        optContext.nameForDeclRefExpr = nullptr;
+        newChild("arguments");
+        return TraverseStmt(S);
+      });
+    HooksForStmt.push_back([this](Stmt *S){return TraverseStmt(S);});
+    newChild("functionCall");
+    return true;
   case Stmt::CUDAKernelCallExprClass: NS("Stmt_CUDAKernelCallExprClass");
   case Stmt::CXXMemberCallExprClass: NS("Stmt_CXXMemberCallExprClass");
   case Stmt::CXXOperatorCallExprClass: NS("Stmt_CXXOperatorCallExprClass");
@@ -228,12 +265,26 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
   case Stmt::CXXReinterpretCastExprClass: NS("Stmt_CXXReinterpretCastExprClass");
   case Stmt::CXXStaticCastExprClass: NS("Stmt_CXXStaticCastExprClass");
   case Stmt::ObjCBridgedCastExprClass: NS("Stmt_ObjCBridgedCastExprClass");
-  case Stmt::ImplicitCastExprClass: NS("Stmt_ImplicitCastExprClass");
+  case Stmt::ImplicitCastExprClass:
+    //NS("Stmt_ImplicitCastExprClass");
+    /// XXX : experimental
+    newComment("Stmt_ImplicitCastExprClass");
+    if (!optContext.nameForDeclRefExpr) {
+      optContext.nameForDeclRefExpr = "var";
+    }
+    return true;
   case Stmt::CharacterLiteralClass: NS("Stmt_CharacterLiteralClass");
   case Stmt::ChooseExprClass: NS("Stmt_ChooseExprClass");
   case Stmt::CompoundLiteralExprClass: NS("Stmt_CompoundLiteralExprClass");
   case Stmt::ConvertVectorExprClass: NS("Stmt_ConvertVectorExprClass");
-  case Stmt::DeclRefExprClass: NS("Stmt_DeclRefExprClass");
+  case Stmt::DeclRefExprClass:
+    if (optContext.nameForDeclRefExpr) {
+      NameChild(optContext.nameForDeclRefExpr);
+    } else {
+      NameChild("varAddr");
+    }
+    newComment("Stmt_DeclRefExprClass");
+    return true;
   case Stmt::DependentScopeDeclRefExprClass: NS("Stmt_DependentScopeDeclRefExprClass");
   case Stmt::DesignatedInitExprClass: NS("Stmt_DesignatedInitExprClass");
   case Stmt::ExprWithCleanupsClass: NS("Stmt_ExprWithCleanupsClass");
@@ -241,11 +292,16 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
   case Stmt::ExtVectorElementExprClass: NS("Stmt_ExtVectorElementExprClass");
   case Stmt::FloatingLiteralClass: {
     //7.1
+#if 0
     double Value = static_cast<FloatingLiteral*>(S)->getValueAsApproximateDouble();
-    raw_string_ostream OS(optContext.tmpstr);
+    raw_string_ostream OS(contentString);
 
     OS << Value;
-    NE("floatConstant", OS.str().c_str());
+    OS.str();
+#else
+    setContentBySource(S->getLocStart(), S->getLocEnd());
+#endif
+    NE("floatConstant");
   }
   case Stmt::FunctionParmPackExprClass: NS("Stmt_FunctionParmPackExprClass");
   case Stmt::GNUNullExprClass: NS("Stmt_GNUNullExprClass");
@@ -256,9 +312,10 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
   case Stmt::IntegerLiteralClass: {
     //7.1 XXX: long long should be treated specially
     APInt Value = static_cast<IntegerLiteral*>(S)->getValue();
-    raw_string_ostream OS(optContext.tmpstr);
+    raw_string_ostream OS(contentString);
     OS << *Value.getRawData();
-    NE("intConstant", OS.str().c_str());
+    OS.str();
+    NE("intConstant");
   }
   case Stmt::LambdaExprClass: NS("Stmt_LambdaExprClass");
   case Stmt::MSPropertyRefExprClass: NS("Stmt_MSPropertyRefExprClass");
@@ -266,7 +323,7 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
   case Stmt::MemberExprClass:
     //7.5
     PropChild("member");
-    NE("memberRef", nullptr); 
+    NE("memberRef"); 
   case Stmt::ObjCArrayLiteralClass: NS("Stmt_ObjCArrayLiteralClass");
   case Stmt::ObjCBoolLiteralExprClass: NS("Stmt_ObjCBoolLiteralExprClass");
   case Stmt::ObjCBoxedExprClass: NS("Stmt_ObjCBoxedExprClass");
@@ -296,7 +353,7 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
   case Stmt::StringLiteralClass: {
     //7.1
     StringRef Data = static_cast<StringLiteral*>(S)->getString();
-    raw_string_ostream OS(optContext.tmpstr);
+    raw_string_ostream OS(contentString);
 
     for (unsigned i = 0, e = Data.size(); i != e; ++i) {
       unsigned char C = Data[i];
@@ -322,7 +379,8 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
         break;
       }
     }
-    NE("stringConstant", OS.str().c_str());
+    OS.str();
+    NE("stringConstant");
   }
   case Stmt::SubstNonTypeTemplateParmExprClass: NS("Stmt_SubstNonTypeTemplateParmExprClass");
   case Stmt::SubstNonTypeTemplateParmPackExprClass: NS("Stmt_SubstNonTypeTemplateParmPackExprClass");
@@ -333,12 +391,12 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
   case Stmt::VAArgExprClass: NS("Stmt_VAArgExprClass");
   case Stmt::ForStmtClass:
     //6.6
-    WrapChild("init", "+condition", "iter", "body");
+    WrapChild("init", "condition", "iter", "+body");
     NS("forStatement");
   case Stmt::GotoStmtClass: NS("gotoStatement"); //6.10 XXX
   case Stmt::IfStmtClass:
     //6.3
-    WrapChild("+condition", "then", "else");
+    WrapChild("condition", "+then", "+else");
     NS("ifStatement");
   case Stmt::IndirectGotoStmtClass: NS("Stmt_IndirectGotoStmtClass");
   case Stmt::LabelStmtClass:
@@ -377,7 +435,6 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
   case Stmt::ObjCForCollectionStmtClass: NS("Stmt_ObjCForCollectionStmtClass");
   case Stmt::ReturnStmtClass:
     //6.9
-    optContext.isInExprStatement = true;
     NS("returnStatement");
   case Stmt::SEHExceptStmtClass: NS("Stmt_SEHExceptStmtClass");
   case Stmt::SEHFinallyStmtClass: NS("Stmt_SEHFinallyStmtClass");
@@ -392,60 +449,20 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
     NS("defaultLabel");
   case Stmt::SwitchStmtClass:
     //6.12
-    WrapChild("value", "body");
+    WrapChild("value", "+body");
     NS("switchStatement");
   case Stmt::WhileStmtClass:
     //6.4
-    WrapChild("+condition", "body");
+    WrapChild("condition", "+body");
     NS("whileStatement");
   }
 }
 
-#if 0
-bool
-DeclarationsVisitor::PreVisitStmt(Stmt *S) {
-  if (!S) {
-    return true;
-  }
-  const BinaryOperator *BO = dyn_cast<const BinaryOperator>(S);
-  if (BO) {
-    TraverseType(BO->getType());
-    return true;
-  }
-  const UnaryOperator *UO = dyn_cast<const UnaryOperator>(S);
-  if (UO) {
-    TraverseType(UO->getType());
-    return true;
-  }
-  if (!optContext.isInExprStatement) {
-    setLocation(S->getLocStart());
-  }
-  return true;
-}
-
-bool
-DeclarationsVisitor::PostVisitStmt(Stmt *S) {
-  if (!S) {
-    return true;
-  }
-  switch (S->getStmtClass()) {
-  case Stmt::MemberExprClass:
-    xmlNodePtr memberNode = ...;
-    xmlUnlinkNode(memberNode);
-    setProp("member", xmlNodeGetContent(memberNode));
-    xmlFreeNode(memberNode);
-    break;
-
-  default:
-    return true;
-  }
-}
-#endif
-
 bool
 DeclarationsVisitor::PreVisitType(QualType T) {
   if (T.isNull()) {
-    N("Type_NULL");
+    newComment("Type_NULL");
+    return false;
   }
   switch (T->getTypeClass()) {
   case Type::Builtin: N("Type_Builtin");
@@ -496,233 +513,241 @@ DeclarationsVisitor::PreVisitType(QualType T) {
 bool
 DeclarationsVisitor::PreVisitTypeLoc(TypeLoc TL) {
   if (TL.isNull()) {
-    N("TypeLoc_NULL");
+    newComment("TypeLoc_NULL");
+    return false;
   }
+
   switch (TL.getTypeLocClass()) {
-  case TypeLoc::Qualified: N("TypeLoc_Qualified");
-  case TypeLoc::Builtin: N("TypeLoc_Builtin");
-  case TypeLoc::Complex: N("TypeLoc_Complex");
-  case TypeLoc::Pointer: N("TypeLoc_Pointer");
-  case TypeLoc::BlockPointer: N("TypeLoc_BlockPointer");
-  case TypeLoc::LValueReference: N("TypeLoc_LValueReference");
-  case TypeLoc::RValueReference: N("TypeLoc_RValueReference");
-  case TypeLoc::MemberPointer: N("TypeLoc_MemberPointer");
-  case TypeLoc::ConstantArray: N("TypeLoc_ConstantArray");
-  case TypeLoc::IncompleteArray: N("TypeLoc_IncompleteArray");
-  case TypeLoc::VariableArray: N("TypeLoc_VariableArray");
-  case TypeLoc::DependentSizedArray: N("TypeLoc_DependentSizedArray");
-  case TypeLoc::DependentSizedExtVector: N("TypeLoc_DependentSizedExtVector");
-  case TypeLoc::Vector: N("TypeLoc_Vector");
-  case TypeLoc::ExtVector: N("TypeLoc_ExtVector");
-  case TypeLoc::FunctionProto: N("TypeLoc_FunctionProto");
-  case TypeLoc::FunctionNoProto: N("TypeLoc_FunctionNoProto");
-  case TypeLoc::UnresolvedUsing: N("TypeLoc_UnresolvedUsing");
-  case TypeLoc::Paren: N("TypeLoc_Paren");
-  case TypeLoc::Typedef: N("TypeLoc_Typedef");
-  case TypeLoc::Adjusted: N("TypeLoc_Adjusted");
-  case TypeLoc::Decayed: N("TypeLoc_Decayed");
-  case TypeLoc::TypeOfExpr: N("TypeLoc_TypeOfExpr");
-  case TypeLoc::TypeOf: N("TypeLoc_TypeOf");
-  case TypeLoc::Decltype: N("TypeLoc_Decltype");
-  case TypeLoc::UnaryTransform: N("TypeLoc_UnaryTransform");
-  case TypeLoc::Record: N("TypeLoc_Record");
-  case TypeLoc::Enum: N("TypeLoc_Enum");
-  case TypeLoc::Elaborated: N("TypeLoc_Elaborated");
-  case TypeLoc::Attributed: N("TypeLoc_Attributed");
-  case TypeLoc::TemplateTypeParm: N("TypeLoc_TemplateTypeParm");
-  case TypeLoc::SubstTemplateTypeParm: N("TypeLoc_SubstTemplateTypeParm");
-  case TypeLoc::SubstTemplateTypeParmPack: N("TypeLoc_SubstTemplateTypeParmPack");
-  case TypeLoc::TemplateSpecialization: N("TypeLoc_TemplateSpecialization");
-  case TypeLoc::Auto: N("TypeLoc_Auto");
-  case TypeLoc::InjectedClassName: N("TypeLoc_InjectedClassName");
-  case TypeLoc::DependentName: N("TypeLoc_DependentName");
-  case TypeLoc::DependentTemplateSpecialization: N("TypeLoc_DependentTemplateSpecialization");
-  case TypeLoc::PackExpansion: N("TypeLoc_PackExpansion");
-  case TypeLoc::ObjCObject: N("TypeLoc_ObjCObject");
-  case TypeLoc::ObjCInterface: N("TypeLoc_ObjCInterface");
-  case TypeLoc::ObjCObjectPointer: N("TypeLoc_ObjCObjectPointer");
-  case TypeLoc::Atomic: N("TypeLoc_Atomic");
+  case TypeLoc::Qualified: NTypeLoc("TypeLoc_Qualified");
+  case TypeLoc::Builtin: NTypeLoc("TypeLoc_Builtin");
+  case TypeLoc::Complex: NTypeLoc("TypeLoc_Complex");
+  case TypeLoc::Pointer: NTypeLoc("TypeLoc_Pointer");
+  case TypeLoc::BlockPointer: NTypeLoc("TypeLoc_BlockPointer");
+  case TypeLoc::LValueReference: NTypeLoc("TypeLoc_LValueReference");
+  case TypeLoc::RValueReference: NTypeLoc("TypeLoc_RValueReference");
+  case TypeLoc::MemberPointer: NTypeLoc("TypeLoc_MemberPointer");
+  case TypeLoc::ConstantArray: NTypeLoc("TypeLoc_ConstantArray");
+  case TypeLoc::IncompleteArray: NTypeLoc("TypeLoc_IncompleteArray");
+  case TypeLoc::VariableArray: NTypeLoc("TypeLoc_VariableArray");
+  case TypeLoc::DependentSizedArray: NTypeLoc("TypeLoc_DependentSizedArray");
+  case TypeLoc::DependentSizedExtVector: NTypeLoc("TypeLoc_DependentSizedExtVector");
+  case TypeLoc::Vector: NTypeLoc("TypeLoc_Vector");
+  case TypeLoc::ExtVector: NTypeLoc("TypeLoc_ExtVector");
+  case TypeLoc::FunctionProto: NTypeLoc("TypeLoc_FunctionProto");
+  case TypeLoc::FunctionNoProto: NTypeLoc("TypeLoc_FunctionNoProto");
+  case TypeLoc::UnresolvedUsing: NTypeLoc("TypeLoc_UnresolvedUsing");
+  case TypeLoc::Paren: NTypeLoc("TypeLoc_Paren");
+  case TypeLoc::Typedef: NTypeLoc("TypeLoc_Typedef");
+  case TypeLoc::Adjusted: NTypeLoc("TypeLoc_Adjusted");
+  case TypeLoc::Decayed: NTypeLoc("TypeLoc_Decayed");
+  case TypeLoc::TypeOfExpr: NTypeLoc("TypeLoc_TypeOfExpr");
+  case TypeLoc::TypeOf: NTypeLoc("TypeLoc_TypeOf");
+  case TypeLoc::Decltype: NTypeLoc("TypeLoc_Decltype");
+  case TypeLoc::UnaryTransform: NTypeLoc("TypeLoc_UnaryTransform");
+  case TypeLoc::Record: NTypeLoc("TypeLoc_Record");
+  case TypeLoc::Enum: NTypeLoc("TypeLoc_Enum");
+  case TypeLoc::Elaborated: NTypeLoc("TypeLoc_Elaborated");
+  case TypeLoc::Attributed: NTypeLoc("TypeLoc_Attributed");
+  case TypeLoc::TemplateTypeParm: NTypeLoc("TypeLoc_TemplateTypeParm");
+  case TypeLoc::SubstTemplateTypeParm: NTypeLoc("TypeLoc_SubstTemplateTypeParm");
+  case TypeLoc::SubstTemplateTypeParmPack: NTypeLoc("TypeLoc_SubstTemplateTypeParmPack");
+  case TypeLoc::TemplateSpecialization: NTypeLoc("TypeLoc_TemplateSpecialization");
+  case TypeLoc::Auto: NTypeLoc("TypeLoc_Auto");
+  case TypeLoc::InjectedClassName: NTypeLoc("TypeLoc_InjectedClassName");
+  case TypeLoc::DependentName: NTypeLoc("TypeLoc_DependentName");
+  case TypeLoc::DependentTemplateSpecialization: NTypeLoc("TypeLoc_DependentTemplateSpecialization");
+  case TypeLoc::PackExpansion: NTypeLoc("TypeLoc_PackExpansion");
+  case TypeLoc::ObjCObject: NTypeLoc("TypeLoc_ObjCObject");
+  case TypeLoc::ObjCInterface: NTypeLoc("TypeLoc_ObjCInterface");
+  case TypeLoc::ObjCObjectPointer: NTypeLoc("TypeLoc_ObjCObjectPointer");
+  case TypeLoc::Atomic: NTypeLoc("TypeLoc_Atomic");
   }
 }
 
 bool
 DeclarationsVisitor::PreVisitAttr(Attr *A) {
   if (!A) {
-    N("Attr_NULL");
+    newComment("Attr_NULL");
+    return false;
+  }
+  // XXX: should be inherited to SIBLING, not children!
+  if (!optContext.isInGccAttributes) {
+    newChild("gccAttributes");
+    optContext.isInGccAttributes = true; 
   }
   switch (A->getKind()) {
-  case attr::NUM_ATTRS: N("Attr_NUMATTRS"); // may not be used
-  case attr::AMDGPUNumSGPR: N("Attr_AMDGPUNumSGPR");
-  case attr::AMDGPUNumVGPR: N("Attr_AMDGPUNumVGPR");
-  case attr::ARMInterrupt: N("Attr_ARMInterrupt");
-  case attr::AcquireCapability: N("Attr_AcquireCapability");
-  case attr::AcquiredAfter: N("Attr_AcquiredAfter");
-  case attr::AcquiredBefore: N("Attr_AcquiredBefore");
-  case attr::Alias: N("Attr_Alias");
-  case attr::AlignMac68k: N("Attr_AlignMac68k");
-  case attr::AlignValue: N("Attr_AlignValue");
-  case attr::Aligned: N("Attr_Aligned");
-  case attr::AlwaysInline: N("Attr_AlwaysInline");
-  case attr::AnalyzerNoReturn: N("Attr_AnalyzerNoReturn");
-  case attr::Annotate: N("Attr_Annotate");
-  case attr::ArcWeakrefUnavailable: N("Attr_ArcWeakrefUnavailable");
-  case attr::ArgumentWithTypeTag: N("Attr_ArgumentWithTypeTag");
-  case attr::AsmLabel: N("Attr_AsmLabel");
-  case attr::AssertCapability: N("Attr_AssertCapability");
-  case attr::AssertExclusiveLock: N("Attr_AssertExclusiveLock");
-  case attr::AssertSharedLock: N("Attr_AssertSharedLock");
-  case attr::AssumeAligned: N("Attr_AssumeAligned");
-  case attr::Availability: N("Attr_Availability");
-  case attr::Blocks: N("Attr_Blocks");
-  case attr::C11NoReturn: N("Attr_C11NoReturn");
-  case attr::CDecl: N("Attr_CDecl");
-  case attr::CFAuditedTransfer: N("Attr_CFAuditedTransfer");
-  case attr::CFConsumed: N("Attr_CFConsumed");
-  case attr::CFReturnsNotRetained: N("Attr_CFReturnsNotRetained");
-  case attr::CFReturnsRetained: N("Attr_CFReturnsRetained");
-  case attr::CFUnknownTransfer: N("Attr_CFUnknownTransfer");
-  case attr::CUDAConstant: N("Attr_CUDAConstant");
-  case attr::CUDADevice: N("Attr_CUDADevice");
-  case attr::CUDAGlobal: N("Attr_CUDAGlobal");
-  case attr::CUDAHost: N("Attr_CUDAHost");
-  case attr::CUDAInvalidTarget: N("Attr_CUDAInvalidTarget");
-  case attr::CUDALaunchBounds: N("Attr_CUDALaunchBounds");
-  case attr::CUDAShared: N("Attr_CUDAShared");
-  case attr::CXX11NoReturn: N("Attr_CXX11NoReturn");
-  case attr::CallableWhen: N("Attr_CallableWhen");
-  case attr::Capability: N("Attr_Capability");
-  case attr::CapturedRecord: N("Attr_CapturedRecord");
-  case attr::CarriesDependency: N("Attr_CarriesDependency");
-  case attr::Cleanup: N("Attr_Cleanup");
-  case attr::Cold: N("Attr_Cold");
-  case attr::Common: N("Attr_Common");
-  case attr::Const: N("Attr_Const");
-  case attr::Constructor: N("Attr_Constructor");
-  case attr::Consumable: N("Attr_Consumable");
-  case attr::ConsumableAutoCast: N("Attr_ConsumableAutoCast");
-  case attr::ConsumableSetOnRead: N("Attr_ConsumableSetOnRead");
-  case attr::DLLExport: N("Attr_DLLExport");
-  case attr::DLLImport: N("Attr_DLLImport");
-  case attr::Deprecated: N("Attr_Deprecated");
-  case attr::Destructor: N("Attr_Destructor");
-  case attr::EnableIf: N("Attr_EnableIf");
-  case attr::ExclusiveTrylockFunction: N("Attr_ExclusiveTrylockFunction");
-  case attr::FallThrough: N("Attr_FallThrough");
-  case attr::FastCall: N("Attr_FastCall");
-  case attr::Final: N("Attr_Final");
-  case attr::Flatten: N("Attr_Flatten");
-  case attr::Format: N("Attr_Format");
-  case attr::FormatArg: N("Attr_FormatArg");
-  case attr::GNUInline: N("Attr_GNUInline");
-  case attr::GuardedBy: N("Attr_GuardedBy");
-  case attr::GuardedVar: N("Attr_GuardedVar");
-  case attr::Hot: N("Attr_Hot");
-  case attr::IBAction: N("Attr_IBAction");
-  case attr::IBOutlet: N("Attr_IBOutlet");
-  case attr::IBOutletCollection: N("Attr_IBOutletCollection");
-  case attr::InitPriority: N("Attr_InitPriority");
-  case attr::InitSeg: N("Attr_InitSeg");
-  case attr::IntelOclBicc: N("Attr_IntelOclBicc");
-  case attr::LockReturned: N("Attr_LockReturned");
-  case attr::LocksExcluded: N("Attr_LocksExcluded");
-  case attr::LoopHint: N("Attr_LoopHint");
-  case attr::MSABI: N("Attr_MSABI");
-  case attr::MSInheritance: N("Attr_MSInheritance");
-  case attr::MSP430Interrupt: N("Attr_MSP430Interrupt");
-  case attr::MSVtorDisp: N("Attr_MSVtorDisp");
-  case attr::Malloc: N("Attr_Malloc");
-  case attr::MaxFieldAlignment: N("Attr_MaxFieldAlignment");
-  case attr::MayAlias: N("Attr_MayAlias");
-  case attr::MinSize: N("Attr_MinSize");
-  case attr::Mips16: N("Attr_Mips16");
-  case attr::Mode: N("Attr_Mode");
-  case attr::MsStruct: N("Attr_MsStruct");
-  case attr::NSConsumed: N("Attr_NSConsumed");
-  case attr::NSConsumesSelf: N("Attr_NSConsumesSelf");
-  case attr::NSReturnsAutoreleased: N("Attr_NSReturnsAutoreleased");
-  case attr::NSReturnsNotRetained: N("Attr_NSReturnsNotRetained");
-  case attr::NSReturnsRetained: N("Attr_NSReturnsRetained");
-  case attr::Naked: N("Attr_Naked");
-  case attr::NoCommon: N("Attr_NoCommon");
-  case attr::NoDebug: N("Attr_NoDebug");
-  case attr::NoDuplicate: N("Attr_NoDuplicate");
-  case attr::NoInline: N("Attr_NoInline");
-  case attr::NoInstrumentFunction: N("Attr_NoInstrumentFunction");
-  case attr::NoMips16: N("Attr_NoMips16");
-  case attr::NoReturn: N("Attr_NoReturn");
-  case attr::NoSanitizeAddress: N("Attr_NoSanitizeAddress");
-  case attr::NoSanitizeMemory: N("Attr_NoSanitizeMemory");
-  case attr::NoSanitizeThread: N("Attr_NoSanitizeThread");
-  case attr::NoSplitStack: N("Attr_NoSplitStack");
-  case attr::NoThreadSafetyAnalysis: N("Attr_NoThreadSafetyAnalysis");
-  case attr::NoThrow: N("Attr_NoThrow");
-  case attr::NonNull: N("Attr_NonNull");
-  case attr::OMPThreadPrivateDecl: N("Attr_OMPThreadPrivateDecl");
-  case attr::ObjCBridge: N("Attr_ObjCBridge");
-  case attr::ObjCBridgeMutable: N("Attr_ObjCBridgeMutable");
-  case attr::ObjCBridgeRelated: N("Attr_ObjCBridgeRelated");
-  case attr::ObjCDesignatedInitializer: N("Attr_ObjCDesignatedInitializer");
-  case attr::ObjCException: N("Attr_ObjCException");
-  case attr::ObjCExplicitProtocolImpl: N("Attr_ObjCExplicitProtocolImpl");
-  case attr::ObjCMethodFamily: N("Attr_ObjCMethodFamily");
-  case attr::ObjCNSObject: N("Attr_ObjCNSObject");
-  case attr::ObjCPreciseLifetime: N("Attr_ObjCPreciseLifetime");
-  case attr::ObjCRequiresPropertyDefs: N("Attr_ObjCRequiresPropertyDefs");
-  case attr::ObjCRequiresSuper: N("Attr_ObjCRequiresSuper");
-  case attr::ObjCReturnsInnerPointer: N("Attr_ObjCReturnsInnerPointer");
-  case attr::ObjCRootClass: N("Attr_ObjCRootClass");
-  case attr::ObjCRuntimeName: N("Attr_ObjCRuntimeName");
-  case attr::OpenCLImageAccess: N("Attr_OpenCLImageAccess");
-  case attr::OpenCLKernel: N("Attr_OpenCLKernel");
-  case attr::OptimizeNone: N("Attr_OptimizeNone");
-  case attr::Overloadable: N("Attr_Overloadable");
-  case attr::Override: N("Attr_Override");
-  case attr::Ownership: N("Attr_Ownership");
-  case attr::Packed: N("Attr_Packed");
-  case attr::ParamTypestate: N("Attr_ParamTypestate");
-  case attr::Pascal: N("Attr_Pascal");
-  case attr::Pcs: N("Attr_Pcs");
-  case attr::PnaclCall: N("Attr_PnaclCall");
-  case attr::PtGuardedBy: N("Attr_PtGuardedBy");
-  case attr::PtGuardedVar: N("Attr_PtGuardedVar");
-  case attr::Pure: N("Attr_Pure");
-  case attr::ReleaseCapability: N("Attr_ReleaseCapability");
-  case attr::ReqdWorkGroupSize: N("Attr_ReqdWorkGroupSize");
-  case attr::RequiresCapability: N("Attr_RequiresCapability");
-  case attr::ReturnTypestate: N("Attr_ReturnTypestate");
-  case attr::ReturnsNonNull: N("Attr_ReturnsNonNull");
-  case attr::ReturnsTwice: N("Attr_ReturnsTwice");
-  case attr::ScopedLockable: N("Attr_ScopedLockable");
-  case attr::Section: N("Attr_Section");
-  case attr::SelectAny: N("Attr_SelectAny");
-  case attr::Sentinel: N("Attr_Sentinel");
-  case attr::SetTypestate: N("Attr_SetTypestate");
-  case attr::SharedTrylockFunction: N("Attr_SharedTrylockFunction");
-  case attr::StdCall: N("Attr_StdCall");
-  case attr::SysVABI: N("Attr_SysVABI");
-  case attr::TLSModel: N("Attr_TLSModel");
-  case attr::TestTypestate: N("Attr_TestTypestate");
-  case attr::ThisCall: N("Attr_ThisCall");
-  case attr::Thread: N("Attr_Thread");
-  case attr::TransparentUnion: N("Attr_TransparentUnion");
-  case attr::TryAcquireCapability: N("Attr_TryAcquireCapability");
-  case attr::TypeTagForDatatype: N("Attr_TypeTagForDatatype");
-  case attr::TypeVisibility: N("Attr_TypeVisibility");
-  case attr::Unavailable: N("Attr_Unavailable");
-  case attr::Unused: N("Attr_Unused");
-  case attr::Used: N("Attr_Used");
-  case attr::Uuid: N("Attr_Uuid");
-  case attr::VecReturn: N("Attr_VecReturn");
-  case attr::VecTypeHint: N("Attr_VecTypeHint");
-  case attr::VectorCall: N("Attr_VectorCall");
-  case attr::Visibility: N("Attr_Visibility");
-  case attr::WarnUnused: N("Attr_WarnUnused");
-  case attr::WarnUnusedResult: N("Attr_WarnUnusedResult");
-  case attr::Weak: N("Attr_Weak");
-  case attr::WeakImport: N("Attr_WeakImport");
-  case attr::WeakRef: N("Attr_WeakRef");
-  case attr::WorkGroupSizeHint: N("Attr_WorkGroupSizeHint");
-  case attr::X86ForceAlignArgPointer: N("Attr_X86ForceAlignArgPointer");
+  case attr::NUM_ATTRS: NAttr("NUMATTRS"); // may not be used
+  case attr::AMDGPUNumSGPR: NAttr("AMDGPUNumSGPR");
+  case attr::AMDGPUNumVGPR: NAttr("AMDGPUNumVGPR");
+  case attr::ARMInterrupt: NAttr("ARMInterrupt");
+  case attr::AcquireCapability: NAttr("AcquireCapability");
+  case attr::AcquiredAfter: NAttr("AcquiredAfter");
+  case attr::AcquiredBefore: NAttr("AcquiredBefore");
+  case attr::Alias: NAttr("Alias");
+  case attr::AlignMac68k: NAttr("AlignMac68k");
+  case attr::AlignValue: NAttr("AlignValue");
+  case attr::Aligned: NAttr("Aligned");
+  case attr::AlwaysInline: NAttr("AlwaysInline");
+  case attr::AnalyzerNoReturn: NAttr("AnalyzerNoReturn");
+  case attr::Annotate: NAttr("Annotate");
+  case attr::ArcWeakrefUnavailable: NAttr("ArcWeakrefUnavailable");
+  case attr::ArgumentWithTypeTag: NAttr("ArgumentWithTypeTag");
+  case attr::AsmLabel: NAttr("AsmLabel");
+  case attr::AssertCapability: NAttr("AssertCapability");
+  case attr::AssertExclusiveLock: NAttr("AssertExclusiveLock");
+  case attr::AssertSharedLock: NAttr("AssertSharedLock");
+  case attr::AssumeAligned: NAttr("AssumeAligned");
+  case attr::Availability: NAttr("Availability");
+  case attr::Blocks: NAttr("Blocks");
+  case attr::C11NoReturn: NAttr("C11NoReturn");
+  case attr::CDecl: NAttr("CDecl");
+  case attr::CFAuditedTransfer: NAttr("CFAuditedTransfer");
+  case attr::CFConsumed: NAttr("CFConsumed");
+  case attr::CFReturnsNotRetained: NAttr("CFReturnsNotRetained");
+  case attr::CFReturnsRetained: NAttr("CFReturnsRetained");
+  case attr::CFUnknownTransfer: NAttr("CFUnknownTransfer");
+  case attr::CUDAConstant: NAttr("CUDAConstant");
+  case attr::CUDADevice: NAttr("CUDADevice");
+  case attr::CUDAGlobal: NAttr("CUDAGlobal");
+  case attr::CUDAHost: NAttr("CUDAHost");
+  case attr::CUDAInvalidTarget: NAttr("CUDAInvalidTarget");
+  case attr::CUDALaunchBounds: NAttr("CUDALaunchBounds");
+  case attr::CUDAShared: NAttr("CUDAShared");
+  case attr::CXX11NoReturn: NAttr("CXX11NoReturn");
+  case attr::CallableWhen: NAttr("CallableWhen");
+  case attr::Capability: NAttr("Capability");
+  case attr::CapturedRecord: NAttr("CapturedRecord");
+  case attr::CarriesDependency: NAttr("CarriesDependency");
+  case attr::Cleanup: NAttr("Cleanup");
+  case attr::Cold: NAttr("Cold");
+  case attr::Common: NAttr("Common");
+  case attr::Const: NAttr("Const");
+  case attr::Constructor: NAttr("Constructor");
+  case attr::Consumable: NAttr("Consumable");
+  case attr::ConsumableAutoCast: NAttr("ConsumableAutoCast");
+  case attr::ConsumableSetOnRead: NAttr("ConsumableSetOnRead");
+  case attr::DLLExport: NAttr("DLLExport");
+  case attr::DLLImport: NAttr("DLLImport");
+  case attr::Deprecated: NAttr("Deprecated");
+  case attr::Destructor: NAttr("Destructor");
+  case attr::EnableIf: NAttr("EnableIf");
+  case attr::ExclusiveTrylockFunction: NAttr("ExclusiveTrylockFunction");
+  case attr::FallThrough: NAttr("FallThrough");
+  case attr::FastCall: NAttr("FastCall");
+  case attr::Final: NAttr("Final");
+  case attr::Flatten: NAttr("Flatten");
+  case attr::Format: NAttr("Format");
+  case attr::FormatArg: NAttr("FormatArg");
+  case attr::GNUInline: NAttr("GNUInline");
+  case attr::GuardedBy: NAttr("GuardedBy");
+  case attr::GuardedVar: NAttr("GuardedVar");
+  case attr::Hot: NAttr("Hot");
+  case attr::IBAction: NAttr("IBAction");
+  case attr::IBOutlet: NAttr("IBOutlet");
+  case attr::IBOutletCollection: NAttr("IBOutletCollection");
+  case attr::InitPriority: NAttr("InitPriority");
+  case attr::InitSeg: NAttr("InitSeg");
+  case attr::IntelOclBicc: NAttr("IntelOclBicc");
+  case attr::LockReturned: NAttr("LockReturned");
+  case attr::LocksExcluded: NAttr("LocksExcluded");
+  case attr::LoopHint: NAttr("LoopHint");
+  case attr::MSABI: NAttr("MSABI");
+  case attr::MSInheritance: NAttr("MSInheritance");
+  case attr::MSP430Interrupt: NAttr("MSP430Interrupt");
+  case attr::MSVtorDisp: NAttr("MSVtorDisp");
+  case attr::Malloc: NAttr("Malloc");
+  case attr::MaxFieldAlignment: NAttr("MaxFieldAlignment");
+  case attr::MayAlias: NAttr("MayAlias");
+  case attr::MinSize: NAttr("MinSize");
+  case attr::Mips16: NAttr("Mips16");
+  case attr::Mode: NAttr("Mode");
+  case attr::MsStruct: NAttr("MsStruct");
+  case attr::NSConsumed: NAttr("NSConsumed");
+  case attr::NSConsumesSelf: NAttr("NSConsumesSelf");
+  case attr::NSReturnsAutoreleased: NAttr("NSReturnsAutoreleased");
+  case attr::NSReturnsNotRetained: NAttr("NSReturnsNotRetained");
+  case attr::NSReturnsRetained: NAttr("NSReturnsRetained");
+  case attr::Naked: NAttr("Naked");
+  case attr::NoCommon: NAttr("NoCommon");
+  case attr::NoDebug: NAttr("NoDebug");
+  case attr::NoDuplicate: NAttr("NoDuplicate");
+  case attr::NoInline: NAttr("NoInline");
+  case attr::NoInstrumentFunction: NAttr("NoInstrumentFunction");
+  case attr::NoMips16: NAttr("NoMips16");
+  case attr::NoReturn: NAttr("NoReturn");
+  case attr::NoSanitizeAddress: NAttr("NoSanitizeAddress");
+  case attr::NoSanitizeMemory: NAttr("NoSanitizeMemory");
+  case attr::NoSanitizeThread: NAttr("NoSanitizeThread");
+  case attr::NoSplitStack: NAttr("NoSplitStack");
+  case attr::NoThreadSafetyAnalysis: NAttr("NoThreadSafetyAnalysis");
+  case attr::NoThrow: NAttr("NoThrow");
+  case attr::NonNull: NAttr("NonNull");
+  case attr::OMPThreadPrivateDecl: NAttr("OMPThreadPrivateDecl");
+  case attr::ObjCBridge: NAttr("ObjCBridge");
+  case attr::ObjCBridgeMutable: NAttr("ObjCBridgeMutable");
+  case attr::ObjCBridgeRelated: NAttr("ObjCBridgeRelated");
+  case attr::ObjCDesignatedInitializer: NAttr("ObjCDesignatedInitializer");
+  case attr::ObjCException: NAttr("ObjCException");
+  case attr::ObjCExplicitProtocolImpl: NAttr("ObjCExplicitProtocolImpl");
+  case attr::ObjCMethodFamily: NAttr("ObjCMethodFamily");
+  case attr::ObjCNSObject: NAttr("ObjCNSObject");
+  case attr::ObjCPreciseLifetime: NAttr("ObjCPreciseLifetime");
+  case attr::ObjCRequiresPropertyDefs: NAttr("ObjCRequiresPropertyDefs");
+  case attr::ObjCRequiresSuper: NAttr("ObjCRequiresSuper");
+  case attr::ObjCReturnsInnerPointer: NAttr("ObjCReturnsInnerPointer");
+  case attr::ObjCRootClass: NAttr("ObjCRootClass");
+  case attr::ObjCRuntimeName: NAttr("ObjCRuntimeName");
+  case attr::OpenCLImageAccess: NAttr("OpenCLImageAccess");
+  case attr::OpenCLKernel: NAttr("OpenCLKernel");
+  case attr::OptimizeNone: NAttr("OptimizeNone");
+  case attr::Overloadable: NAttr("Overloadable");
+  case attr::Override: NAttr("Override");
+  case attr::Ownership: NAttr("Ownership");
+  case attr::Packed: NAttr("Packed");
+  case attr::ParamTypestate: NAttr("ParamTypestate");
+  case attr::Pascal: NAttr("Pascal");
+  case attr::Pcs: NAttr("Pcs");
+  case attr::PnaclCall: NAttr("PnaclCall");
+  case attr::PtGuardedBy: NAttr("PtGuardedBy");
+  case attr::PtGuardedVar: NAttr("PtGuardedVar");
+  case attr::Pure: NAttr("Pure");
+  case attr::ReleaseCapability: NAttr("ReleaseCapability");
+  case attr::ReqdWorkGroupSize: NAttr("ReqdWorkGroupSize");
+  case attr::RequiresCapability: NAttr("RequiresCapability");
+  case attr::ReturnTypestate: NAttr("ReturnTypestate");
+  case attr::ReturnsNonNull: NAttr("ReturnsNonNull");
+  case attr::ReturnsTwice: NAttr("ReturnsTwice");
+  case attr::ScopedLockable: NAttr("ScopedLockable");
+  case attr::Section: NAttr("Section");
+  case attr::SelectAny: NAttr("SelectAny");
+  case attr::Sentinel: NAttr("Sentinel");
+  case attr::SetTypestate: NAttr("SetTypestate");
+  case attr::SharedTrylockFunction: NAttr("SharedTrylockFunction");
+  case attr::StdCall: NAttr("StdCall");
+  case attr::SysVABI: NAttr("SysVABI");
+  case attr::TLSModel: NAttr("TLSModel");
+  case attr::TestTypestate: NAttr("TestTypestate");
+  case attr::ThisCall: NAttr("ThisCall");
+  case attr::Thread: NAttr("Thread");
+  case attr::TransparentUnion: NAttr("TransparentUnion");
+  case attr::TryAcquireCapability: NAttr("TryAcquireCapability");
+  case attr::TypeTagForDatatype: NAttr("TypeTagForDatatype");
+  case attr::TypeVisibility: NAttr("TypeVisibility");
+  case attr::Unavailable: NAttr("Unavailable");
+  case attr::Unused: NAttr("Unused");
+  case attr::Used: NAttr("Used");
+  case attr::Uuid: NAttr("Uuid");
+  case attr::VecReturn: NAttr("VecReturn");
+  case attr::VecTypeHint: NAttr("VecTypeHint");
+  case attr::VectorCall: NAttr("VectorCall");
+  case attr::Visibility: NAttr("Visibility");
+  case attr::WarnUnused: NAttr("WarnUnused");
+  case attr::WarnUnusedResult: NAttr("WarnUnusedResult");
+  case attr::Weak: NAttr("Weak");
+  case attr::WeakImport: NAttr("WeakImport");
+  case attr::WeakRef: NAttr("WeakRef");
+  case attr::WorkGroupSizeHint: NAttr("WorkGroupSizeHint");
+  case attr::X86ForceAlignArgPointer: NAttr("X86ForceAlignArgPointer");
   }
 }
 
@@ -824,7 +849,8 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
 bool
 DeclarationsVisitor::PreVisitNestedNameSpecifier(NestedNameSpecifier *NNS) {
   if (!NNS) {
-    N("NestedNameSpecifier_NULL");
+    newComment("NestedNameSpecifier_NULL");
+    return false;
   }
   switch (NNS->getKind()) {
   case NestedNameSpecifier::Identifier: N("NestedNameSpecifier_Identifier");
@@ -840,7 +866,8 @@ DeclarationsVisitor::PreVisitNestedNameSpecifier(NestedNameSpecifier *NNS) {
 bool
 DeclarationsVisitor::PreVisitNestedNameSpecifierLoc(NestedNameSpecifierLoc NNS) {
   if (!NNS) {
-    N("NestedNameSpecifierLoc_NULL");
+    newComment("NestedNameSpecifierLoc_NULL");
+    return false;
   }
   switch (NNS.getNestedNameSpecifier()->getKind()) {
   case NestedNameSpecifier::Identifier: N("NestedNameSpecifierLoc_Identifier");
@@ -857,24 +884,29 @@ bool
 DeclarationsVisitor::PreVisitDeclarationNameInfo(DeclarationNameInfo NameInfo) {
   DeclarationName DN = NameInfo.getName();
   IdentifierInfo *II = DN.getAsIdentifierInfo();
-  const char *Content = II ? II->getNameStart() : nullptr;
+  if (II) {
+    contentString = II->getNameStart();
+  }
 
   if (optContext.propname) {
-    newProp(optContext.propname, Content);
+    newProp(optContext.propname, contentString.c_str());
     return true;
+  }
+  if (optContext.explicitname) {
+    N(optContext.explicitname);
   }
 
   switch (NameInfo.getName().getNameKind()) {
-  case DeclarationName::CXXConstructorName: NC("DeclarationName_CXXConstructorName", Content);
-  case DeclarationName::CXXDestructorName: NC("DeclarationName_CXXDestructorName", Content);
-  case DeclarationName::CXXConversionFunctionName: NC("DeclarationName_CXXConversionFunctionName", Content);
-  case DeclarationName::Identifier: NC("DeclarationName_Identifier", Content);
-  case DeclarationName::ObjCZeroArgSelector: NC("DeclarationName_ObjCZeroArgSelector", Content);
-  case DeclarationName::ObjCOneArgSelector: NC("DeclarationName_ObjCOneArgSelector", Content);
-  case DeclarationName::ObjCMultiArgSelector: NC("DeclarationName_ObjCMultiArgSelector", Content);
-  case DeclarationName::CXXOperatorName: NC("DeclarationName_CXXOperatorName", Content);
-  case DeclarationName::CXXLiteralOperatorName: NC("DeclarationName_CXXLiteralOperatorName", Content);
-  case DeclarationName::CXXUsingDirective: NC("DeclarationName_CXXUsingDirective", Content);
+  case DeclarationName::CXXConstructorName: NDeclName("CXXConstructorName");
+  case DeclarationName::CXXDestructorName: NDeclName("CXXDestructorName");
+  case DeclarationName::CXXConversionFunctionName: NDeclName("CXXConversionFunctionName");
+  case DeclarationName::Identifier: NDeclName("Identifier");
+  case DeclarationName::ObjCZeroArgSelector: NDeclName("ObjCZeroArgSelector");
+  case DeclarationName::ObjCOneArgSelector: NDeclName("ObjCOneArgSelector");
+  case DeclarationName::ObjCMultiArgSelector: NDeclName("ObjCMultiArgSelector");
+  case DeclarationName::CXXOperatorName: NDeclName("CXXOperatorName");
+  case DeclarationName::CXXLiteralOperatorName: NDeclName("CXXLiteralOperatorName");
+  case DeclarationName::CXXUsingDirective: NDeclName("CXXUsingDirective");
   }
 }
 

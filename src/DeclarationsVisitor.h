@@ -3,19 +3,25 @@
 
 struct DeclarationsContext {
     explicit DeclarationsContext()
-	: isInExprStatement(false),
-          propname(nullptr),
-	  tmpstr() {};
+	: isInCompoundStatement(false),
+          isInGccAttributes(false),
+          nameForDeclRefExpr(nullptr),
+          explicitname(nullptr),
+          propname(nullptr) {};
     explicit DeclarationsContext(DeclarationsContext &DC) 
-	: isInExprStatement(DC.isInExprStatement),
-          propname(nullptr),
-	  tmpstr() {};
+	: isInCompoundStatement(DC.isInCompoundStatement),
+          isInGccAttributes(DC.isInGccAttributes),
+          nameForDeclRefExpr(DC.nameForDeclRefExpr),
+          explicitname(nullptr),
+          propname(nullptr) {};
     DeclarationsContext &operator =(const DeclarationsContext &) = delete;
     DeclarationsContext &operator =(DeclarationsContext &&) = delete;
 
-    bool isInExprStatement;     // inherited to ancestors
+    bool isInCompoundStatement;     // inherited to ancestors
+    bool isInGccAttributes;         // inherited to ancestors
+    const char *nameForDeclRefExpr; // inherited to ancestors
+    const char *explicitname;
     const char *propname;
-    std::string tmpstr;
 };
 
 class DeclarationsVisitor
@@ -38,6 +44,7 @@ public:
     void WrapChild(const char *name1, const char *name2,
                    const char *name3 = nullptr, const char *name4 = nullptr);
     void PropChild(const char *name);
+    void NameChild(const char *name);
 };
 
 #endif /* !DECLARATIONSVISITOR_H */
