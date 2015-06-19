@@ -35,14 +35,15 @@ void XcodeMlVisitorBaseImpl::addChild(const char *Name, const char *Content) {
     if (!Content && contentString.length() > 0) {
         Content = contentString.c_str();
     }
-    xmlNewChild(curNode, nullptr, BAD_CAST Name, BAD_CAST Content);
+    xmlNewTextChild(curNode, nullptr, BAD_CAST Name, BAD_CAST Content);
 }
 
 void XcodeMlVisitorBaseImpl::newChild(const char *Name, const char *Content) {
     if (!Content && contentString.length() > 0) {
         Content = contentString.c_str();
     }
-    curNode = xmlNewChild(curNode, nullptr, BAD_CAST Name, BAD_CAST Content);
+    curNode = xmlNewTextChild(curNode, nullptr,
+                              BAD_CAST Name, BAD_CAST Content);
 }
 
 void XcodeMlVisitorBaseImpl::newProp(const char *Name, int Val, xmlNodePtr N) {

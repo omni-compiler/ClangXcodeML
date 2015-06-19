@@ -62,8 +62,9 @@ public:
                                 TypeTableInfo *TTI = nullptr)
         : XcodeMlVisitorBaseImpl(MC, Parent,
                                  (ChildName
-                                  ? xmlNewChild(Parent, nullptr,
-                                                BAD_CAST ChildName, nullptr)
+                                  ? xmlNewTextChild(Parent, nullptr,
+                                                    BAD_CAST ChildName,
+                                                    nullptr)
                                   : Parent),
                                  TTI),
           optContext() {};

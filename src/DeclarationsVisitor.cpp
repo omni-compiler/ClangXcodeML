@@ -875,8 +875,8 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
     if (ND) {
       raw_string_ostream OS(optContext.tmpstr);
       mangleContext->mangleName(ND, OS);
-      xmlNewChild(curNode, nullptr,
-                  BAD_CAST ")name", BAD_CAST OS.str().c_str());
+      xmlNewTextChild(curNode, nullptr,
+                      BAD_CAST ")name", BAD_CAST OS.str().c_str());
     }
     break;
   }
