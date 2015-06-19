@@ -113,9 +113,17 @@ void XcodeMlVisitorBaseImpl::setContentBySource(SourceLocation LocStart,
     SourceManager &SM = CXT.getSourceManager();
     SourceLocation LocEndOfToken = Lexer::getLocForEndOfToken(LocEnd, 0, SM,
                                                               CXT.getLangOpts());
-    const char *b = SM.getCharacterData(LocStart);
-    const char *e = SM.getCharacterData(LocEndOfToken);
-    contentString = std::string(b, e - b);
+    if (LocEndOfToken.isValid()) {
+        const char *b = SM.getCharacterData(LocStart);
+        const char *e = SM.getCharacterData(LocEndOfToken);
+        if (e > b && e < b + 256) {
+            contentString = std::string(b, e - b);
+        } else {
+            contentString = "";
+        }
+    } else {
+        contentString = "";
+    }
 }
 
 ///

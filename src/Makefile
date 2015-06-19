@@ -64,7 +64,7 @@ CtoXcodeML.ast: CtoXcodeML.cpp
 	$(CXX) $(CXXFLAGS) -Xclang -ast-dump CtoXcodeML.cpp -o CtoXcodeML.ast 
 
 test:
-	./CtoXcodeML --lineno CtoXcodeML.cpp -- $(CXXFLAGS)
+	./CtoXcodeML --lineno --trace-rav CtoXcodeML.cpp -- $(CXXFLAGS)
 
 mockup: mockup.cpp
 
