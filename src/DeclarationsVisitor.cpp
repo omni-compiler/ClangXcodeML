@@ -89,8 +89,10 @@ void
 DeclarationsVisitor::PropChild(const char *name) {
   HooksForDeclarationNameInfo.push_back([this, name](DeclarationNameInfo NI){
       DeclarationsVisitor V(this);
-      V.optContext.propname = name;
-      return V.TraverseMeDeclarationNameInfo(NI);});
+      DeclarationName DN = NI.getName();
+      IdentifierInfo *II = DN.getAsIdentifierInfo();
+      newProp(name, II ? II->getNameStart() : "");
+      return true;});
 }
 
 void
@@ -952,10 +954,6 @@ DeclarationsVisitor::PreVisitDeclarationNameInfo(DeclarationNameInfo NameInfo) {
     contentString = II->getNameStart();
   }
 
-  if (optContext.propname) {
-    newProp(optContext.propname, contentString.c_str());
-    return true;
-  }
   if (optContext.explicitname) {
     N(optContext.explicitname);
   }

@@ -4,18 +4,15 @@
 struct DeclarationsContext {
     explicit DeclarationsContext()
         : nameForDeclRefExpr(nullptr),
-          explicitname(nullptr),
-          propname(nullptr) {};
+          explicitname(nullptr) {};
     explicit DeclarationsContext(DeclarationsContext &DC) 
         : nameForDeclRefExpr(DC.nameForDeclRefExpr),
-          explicitname(nullptr),
-          propname(nullptr) {};
+          explicitname(nullptr) {};
     DeclarationsContext &operator =(const DeclarationsContext &) = delete;
     DeclarationsContext &operator =(DeclarationsContext &&) = delete;
 
     const char *nameForDeclRefExpr;  // inherited to ancestors
     const char *explicitname;
-    const char *propname;
 };
 
 class DeclarationsVisitor
