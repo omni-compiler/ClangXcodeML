@@ -23,7 +23,7 @@ DeclarationsVisitor::getVisitorName() const {
 
 #define N(mes) do {newChild(mes); return true;} while (0)
 #define NE(mes) do {                                                    \
-    if (NowInCompoundStatement) {                                       \
+    if (NowInCompoundStatementBody) {                                   \
       newChild("exprStatement", "");                                    \
       setLocation(static_cast<Expr*>(S)->getExprLoc());                 \
     }                                                                   \
@@ -32,7 +32,13 @@ DeclarationsVisitor::getVisitorName() const {
   } while (0)
 
 #define NT(mes) do {newChild(mes); TraverseType(T); return true;} while (0)
-#define NS(mes) do {newChild(mes); if (NowInCompoundStatement) {setLocation(S->getLocStart());} return true;} while (0)
+#define NS(mes) do {                                                    \
+    newChild(mes);                                                      \
+    if (NowInCompoundStatementBody) {                                   \
+      setLocation(S->getLocStart());                                    \
+    }                                                                   \
+    return true;                                                        \
+  } while (0)
 
 #define ND(mes) do {newChild(mes); setLocation(D->getLocation()); return true;} while (0)
 
@@ -61,7 +67,8 @@ DeclarationsVisitor::WrapChild(const char *name) {
   if (name[0] == '+') {
     HooksForStmt.push_back([this, name](Stmt *S){
         DeclarationsVisitor V(this);
-        V.optContext.isInCompoundStatement = true;
+        V.optContext.isInCompoundStatementDecls = true;
+        V.optContext.isInCompoundStatementBody  = false;
         V.newChild(name + 1);
         return V.TraverseMeStmt(S);});
   } else {
@@ -101,19 +108,49 @@ DeclarationsVisitor::NameChild(const char *name) {
       return V.TraverseMeDeclarationNameInfo(NI);});
 }
 
+void
+DeclarationsVisitor::WrapCompoundStatementBody(xmlNodePtr compoundStatement) {
+  HooksForStmt.push_back([this, compoundStatement](Stmt *S){
+      if (S->getStmtClass() == Stmt::DeclStmtClass) {
+        if (optContext.isInCompoundStatementDecls) {
+          newComment("Stmt::DeclStmtClass: isInCompoundStatementDecls=true");
+          WrapCompoundStatementBody(compoundStatement);
+        } else {
+          newComment("Stmt::DeclStmtClass: isInCompoundStatementDecls=false");
+          optContext.isInCompoundStatementDecls = true;
+          optContext.isInCompoundStatementBody  = false;
+          newChild("compoundStatement");
+          WrapCompoundStatementBody(curNode);
+          newChild("declarations");
+        }
+      } else {
+        if (optContext.isInCompoundStatementDecls) {
+          curNode = compoundStatement;
+          newChild("body");
+          optContext.isInCompoundStatementDecls = false;
+          optContext.isInCompoundStatementBody = true;
+        }
+        WrapCompoundStatementBody(compoundStatement);
+      }
+      DeclarationsVisitor V(this);
+      return V.TraverseMeStmt(S);
+    });
+}
+
 bool
 DeclarationsVisitor::PreVisitStmt(Stmt *S) {
   if (!S) {
     newComment("Stmt_NULL");
     return false;
   }
-  bool NowInCompoundStatement = optContext.isInCompoundStatement;
-  optContext.isInCompoundStatement = false;
+  bool NowInCompoundStatementBody  = optContext.isInCompoundStatementBody;
+  optContext.isInCompoundStatementDecls = false;
+  optContext.isInCompoundStatementBody  = false;
 
   const BinaryOperator *BO = dyn_cast<const BinaryOperator>(S);
 
   if (BO) {
-    if (NowInCompoundStatement) {
+    if (NowInCompoundStatementBody) {
       newChild("exprStatement");
       setLocation(BO->getExprLoc());
     }
@@ -156,7 +193,7 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
   }
   const UnaryOperator *UO = dyn_cast<const UnaryOperator>(S);
   if (UO) {
-    if (NowInCompoundStatement) {
+    if (NowInCompoundStatementBody) {
       newChild("exprStatement");
       setLocation(UO->getExprLoc());
     }
@@ -190,17 +227,20 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
   case Stmt::CXXTryStmtClass: NS("Stmt_CXXTryStmtClass");
   case Stmt::CapturedStmtClass: NS("Stmt_CapturedStmtClass");
   case Stmt::CompoundStmtClass: {
-    optContext.isInCompoundStatement = true;
+    optContext.isInCompoundStatementDecls = true;
+    optContext.isInCompoundStatementBody  = false;
     newChild("compoundStatement");
     // 6.2
     //SymbolsVisitor SV(astContext, curNode, "symbols", typetableinfo);
     //SV.TraverseStmt(S);
-    NS("body");
+    WrapCompoundStatementBody(curNode);
+    N("declarations");
   }
   case Stmt::ContinueStmtClass:
     //6.8
     NS("continueStatement");
-  case Stmt::DeclStmtClass: NS("Stmt_DeclStmtClass");
+  case Stmt::DeclStmtClass:
+    return true; // everything is performed by WrapCompoundStatementBody
   case Stmt::DoStmtClass:
     //6.5
     WrapChild("+body", "condition");
@@ -241,7 +281,7 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
   case Stmt::CXXUuidofExprClass: NS("Stmt_CXXUuidofExprClass");
   case Stmt::CallExprClass:
     //7.9
-    if (NowInCompoundStatement) {
+    if (NowInCompoundStatementBody) {
       newChild("exprStatement");
       setLocation(static_cast<Expr*>(S)->getExprLoc());
     }
@@ -323,6 +363,7 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
   case Stmt::MemberExprClass:
     //7.5
     PropChild("member");
+    optContext.nameForDeclRefExpr = nullptr;
     NE("memberRef"); 
   case Stmt::ObjCArrayLiteralClass: NS("Stmt_ObjCArrayLiteralClass");
   case Stmt::ObjCBoolLiteralExprClass: NS("Stmt_ObjCBoolLiteralExprClass");

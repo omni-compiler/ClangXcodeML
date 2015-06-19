@@ -3,7 +3,7 @@ typedef struct complex {
   double img;
 } complex_t;
 
-complex_t x;
+complex_t x __attribute__((aligned(64), unused));
 complex_t complex_add(complex_t x, double y);
 
 main()
@@ -44,4 +44,14 @@ int iftest(int x, int y)
 double get_real(complex_t *p)
 {
   return p->real;
+}
+
+int compoundstmtdecls(int x)
+{
+  int i = x + 1;
+  printf("%d\n", i);
+  int j = x + 2;
+  printf("%d\n", j);
+  int k = i + j;
+  return k;
 }

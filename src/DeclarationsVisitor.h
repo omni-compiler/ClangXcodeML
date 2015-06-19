@@ -3,13 +3,15 @@
 
 struct DeclarationsContext {
     explicit DeclarationsContext()
-	: isInCompoundStatement(false),
+	: isInCompoundStatementDecls(false),
+          isInCompoundStatementBody(false),
           isInGccAttributes(false),
           nameForDeclRefExpr(nullptr),
           explicitname(nullptr),
           propname(nullptr) {};
     explicit DeclarationsContext(DeclarationsContext &DC) 
-	: isInCompoundStatement(DC.isInCompoundStatement),
+	: isInCompoundStatementDecls(DC.isInCompoundStatementDecls),
+          isInCompoundStatementBody(DC.isInCompoundStatementBody),
           isInGccAttributes(DC.isInGccAttributes),
           nameForDeclRefExpr(DC.nameForDeclRefExpr),
           explicitname(nullptr),
@@ -17,9 +19,10 @@ struct DeclarationsContext {
     DeclarationsContext &operator =(const DeclarationsContext &) = delete;
     DeclarationsContext &operator =(DeclarationsContext &&) = delete;
 
-    bool isInCompoundStatement;     // inherited to ancestors
-    bool isInGccAttributes;         // inherited to ancestors
-    const char *nameForDeclRefExpr; // inherited to ancestors
+    bool isInCompoundStatementDecls; // inherited to ancestors
+    bool isInCompoundStatementBody;  // inherited to ancestors
+    bool isInGccAttributes;          // inherited to ancestors
+    const char *nameForDeclRefExpr;  // inherited to ancestors
     const char *explicitname;
     const char *propname;
 };
@@ -45,6 +48,7 @@ public:
                    const char *name3 = nullptr, const char *name4 = nullptr);
     void PropChild(const char *name);
     void NameChild(const char *name);
+    void WrapCompoundStatementBody(xmlNodePtr);
 };
 
 #endif /* !DECLARATIONSVISITOR_H */
