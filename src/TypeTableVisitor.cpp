@@ -26,6 +26,9 @@ TypeTableVisitor::PreVisitStmt(Stmt *S) {
 
 bool
 TypeTableVisitor::PreVisitDecl(Decl *D) {
+  if (!D) {
+    return false;
+  }
   if (D->getKind() == Decl::TranslationUnit) {
     if (OptDisableTypeTable) {
       return false; // stop traverse

@@ -26,6 +26,9 @@ SymbolsVisitor::PreVisitStmt(Stmt *S) {
 
 bool
 SymbolsVisitor::PreVisitDecl(Decl *D) {
+  if (!D) {
+    return false;
+  }
   if (D->getKind() == Decl::TranslationUnit) {
     if (OptDisableSymbols) {
       return false; // stop traverse
