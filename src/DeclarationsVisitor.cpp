@@ -135,10 +135,15 @@ DeclarationsVisitor::WrapCompoundStatementBody(xmlNodePtr compoundStatement,
           V.newChild("exprStatement");
           V.setLocation(E->getExprLoc());
         }
-      } else {
-        V.setLocation(S->getLocStart());
       }
-      return V.TraverseMeStmt(S);
+      if (V.TraverseMeStmt(S)) {
+        if (!E && S->getStmtClass() != Stmt::DeclStmtClass) {
+          V.setLocation(S->getLocStart());
+        }
+        return true;
+      } else {
+        return false;
+      }
     });
 }
 
