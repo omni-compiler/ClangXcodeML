@@ -3,22 +3,16 @@
 
 struct DeclarationsContext {
     explicit DeclarationsContext()
-	: isInCompoundStatementDecls(false),
-          isInCompoundStatementBody(false),
-          nameForDeclRefExpr(nullptr),
+        : nameForDeclRefExpr(nullptr),
           explicitname(nullptr),
           propname(nullptr) {};
     explicit DeclarationsContext(DeclarationsContext &DC) 
-	: isInCompoundStatementDecls(DC.isInCompoundStatementDecls),
-          isInCompoundStatementBody(DC.isInCompoundStatementBody),
-          nameForDeclRefExpr(DC.nameForDeclRefExpr),
+        : nameForDeclRefExpr(DC.nameForDeclRefExpr),
           explicitname(nullptr),
           propname(nullptr) {};
     DeclarationsContext &operator =(const DeclarationsContext &) = delete;
     DeclarationsContext &operator =(DeclarationsContext &&) = delete;
 
-    bool isInCompoundStatementDecls; // inherited to ancestors
-    bool isInCompoundStatementBody;  // inherited to ancestors
     const char *nameForDeclRefExpr;  // inherited to ancestors
     const char *explicitname;
     const char *propname;
@@ -45,7 +39,7 @@ public:
                    const char *name3 = nullptr, const char *name4 = nullptr);
     void PropChild(const char *name);
     void NameChild(const char *name);
-    void WrapCompoundStatementBody(xmlNodePtr);
+    void WrapCompoundStatementBody(xmlNodePtr, bool);
 };
 
 #endif /* !DECLARATIONSVISITOR_H */

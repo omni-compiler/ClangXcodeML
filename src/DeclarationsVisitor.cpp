@@ -23,10 +23,6 @@ DeclarationsVisitor::getVisitorName() const {
 
 #define N(mes) do {newChild(mes); return true;} while (0)
 #define NE(mes) do {                                                    \
-    if (NowInCompoundStatementBody) {                                   \
-      newChild("exprStatement", "");                                    \
-      setLocation(static_cast<Expr*>(S)->getExprLoc());                 \
-    }                                                                   \
     newChild(mes);                                                      \
     TraverseType(static_cast<Expr*>(S)->getType());                     \
     return true;                                                        \
@@ -35,9 +31,6 @@ DeclarationsVisitor::getVisitorName() const {
 #define NT(mes) do {newChild(mes); TraverseType(T); return true;} while (0)
 #define NS(mes) do {                                                    \
     newChild(mes);                                                      \
-    if (NowInCompoundStatementBody) {                                   \
-      setLocation(S->getLocStart());                                    \
-    }                                                                   \
     return true;                                                        \
   } while (0)
 
@@ -69,8 +62,6 @@ DeclarationsVisitor::WrapChild(const char *name) {
   if (name[0] == '+') {
     HooksForStmt.push_back([this, name](Stmt *S){
         DeclarationsVisitor V(this);
-        V.optContext.isInCompoundStatementDecls = true;
-        V.optContext.isInCompoundStatementBody  = false;
         V.newChild(name + 1);
         return V.TraverseMeStmt(S);});
   } else {
@@ -111,32 +102,42 @@ DeclarationsVisitor::NameChild(const char *name) {
 }
 
 void
-DeclarationsVisitor::WrapCompoundStatementBody(xmlNodePtr compoundStatement) {
-  HooksForStmt.push_back([this, compoundStatement](Stmt *S){
+DeclarationsVisitor::WrapCompoundStatementBody(xmlNodePtr compoundStatement,
+                                               bool nowInDeclPart) {
+  HooksForStmt.push_back([this, compoundStatement, nowInDeclPart](Stmt *S){
+      bool nowInBodyPart;
+
       if (S->getStmtClass() == Stmt::DeclStmtClass) {
-        if (optContext.isInCompoundStatementDecls) {
-          newComment("Stmt::DeclStmtClass: isInCompoundStatementDecls=true");
-          WrapCompoundStatementBody(compoundStatement);
+        if (nowInDeclPart) {
+          newComment("Stmt::DeclStmtClass: nowInDeclPart=true");
+          WrapCompoundStatementBody(compoundStatement, true);
         } else {
-          newComment("Stmt::DeclStmtClass: isInCompoundStatementDecls=false");
-          optContext.isInCompoundStatementDecls = true;
-          optContext.isInCompoundStatementBody  = false;
+          newComment("Stmt::DeclStmtClass: nowInDeclPart=false");
           newChild("compoundStatement");
           SymbolsVisitor SV(mangleContext, curNode, "symbols", typetableinfo);
           SV.TraverseChildOfStmt(S);
-          WrapCompoundStatementBody(curNode);
+          WrapCompoundStatementBody(curNode, true);
           newChild("declarations");
         }
+        nowInBodyPart = false;
       } else {
-        if (optContext.isInCompoundStatementDecls) {
+        if (nowInDeclPart) {
           curNode = compoundStatement;
           newChild("body");
-          optContext.isInCompoundStatementDecls = false;
-          optContext.isInCompoundStatementBody = true;
         }
-        WrapCompoundStatementBody(compoundStatement);
+        WrapCompoundStatementBody(compoundStatement, false);
+        nowInBodyPart = true;
       }
       DeclarationsVisitor V(this);
+      Expr *E = dyn_cast<Expr>(S);
+      if (E) {
+        if (nowInBodyPart) {
+          V.newChild("exprStatement");
+          V.setLocation(E->getExprLoc());
+        }
+      } else {
+        V.setLocation(S->getLocStart());
+      }
       return V.TraverseMeStmt(S);
     });
 }
@@ -147,10 +148,6 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
     newComment("Stmt_NULL");
     return false;
   }
-  bool NowInCompoundStatementBody  = optContext.isInCompoundStatementBody;
-  optContext.isInCompoundStatementDecls = false;
-  optContext.isInCompoundStatementBody  = false;
-
   HooksForAttr.push_back([this](Attr *A){
       contentString = "";
       newChild("gccAttributes");
@@ -160,10 +157,6 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
   const BinaryOperator *BO = dyn_cast<const BinaryOperator>(S);
 
   if (BO) {
-    if (NowInCompoundStatementBody) {
-      newChild("exprStatement");
-      setLocation(BO->getExprLoc());
-    }
     // XcodeML-C-0.9J.pdf: 7.6(assignExpr), 7.7, 7.10(commmaExpr)
     QualType T = BO->getType();
     switch (BO->getOpcode()) {
@@ -203,10 +196,6 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
   }
   const UnaryOperator *UO = dyn_cast<const UnaryOperator>(S);
   if (UO) {
-    if (NowInCompoundStatementBody) {
-      newChild("exprStatement");
-      setLocation(UO->getExprLoc());
-    }
     // XcodeML-C-0.9J.pdf 7.2(varAddr), 7.3(pointerRef), 7.8, 7.11
     QualType T = UO->getType();
     switch (UO->getOpcode()) {
@@ -238,12 +227,10 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
   case Stmt::CapturedStmtClass: NS("Stmt_CapturedStmtClass");
   case Stmt::CompoundStmtClass: {
     // 6.2
-    optContext.isInCompoundStatementDecls = true;
-    optContext.isInCompoundStatementBody  = false;
     newChild("compoundStatement");
     SymbolsVisitor SV(mangleContext, curNode, "symbols", typetableinfo);
     SV.TraverseChildOfStmt(S);
-    WrapCompoundStatementBody(curNode);
+    WrapCompoundStatementBody(curNode, true);
     N("declarations");
   }
   case Stmt::ContinueStmtClass:
@@ -291,10 +278,6 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
   case Stmt::CXXUuidofExprClass: NS("Stmt_CXXUuidofExprClass");
   case Stmt::CallExprClass:
     //7.9
-    if (NowInCompoundStatementBody) {
-      newChild("exprStatement");
-      setLocation(static_cast<Expr*>(S)->getExprLoc());
-    }
     optContext.nameForDeclRefExpr = "function";
     HooksForStmt.push_back([this](Stmt *S){
         optContext.nameForDeclRefExpr = nullptr;
