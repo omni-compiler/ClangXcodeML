@@ -104,6 +104,9 @@ public:
         if (!getDerived().PreVisit##NAME(S)) {                          \
             return true; /* avoid traverse children */                  \
         }                                                               \
+        return getDerived().TraverseChildOf##NAME(S);                   \
+    }                                                                   \
+    bool TraverseChildOf##NAME(TYPE S) {                                \
         return getDerived().otherside->Bridge##NAME(S);                 \
     }
 

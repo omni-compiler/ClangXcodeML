@@ -9,7 +9,11 @@ public:
 
     const char *getVisitorName() const override;
     bool PreVisitStmt(clang::Stmt *);
+    bool PreVisitTypeLoc(clang::TypeLoc);
+    bool PreVisitAttr(clang::Attr *);
     bool PreVisitDecl(clang::Decl *);
+    bool PreVisitNestedNameSpecifierLoc(clang::NestedNameSpecifierLoc);
+    bool PreVisitDeclarationNameInfo(clang::DeclarationNameInfo);
 };
 
 #endif /* !SYMBOLVISITOR_H */

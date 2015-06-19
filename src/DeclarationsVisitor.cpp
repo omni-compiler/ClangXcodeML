@@ -28,6 +28,7 @@ DeclarationsVisitor::getVisitorName() const {
       setLocation(static_cast<Expr*>(S)->getExprLoc());                 \
     }                                                                   \
     newChild(mes);                                                      \
+    TraverseType(static_cast<Expr*>(S)->getType());                     \
     return true;                                                        \
   } while (0)
 
@@ -49,11 +50,12 @@ DeclarationsVisitor::getVisitorName() const {
     return true;                                                \
   } while (0)
 
-#define NAttr(mes) do {                                         \
-    newComment(mes);                                            \
-    setContentBySource(A->getLocation(), A->getLocation());     \
-    newChild("attribute");                                      \
-    return true;                                                \
+#define NAttr(mes) newComment("Attr_" mes); break
+
+#define NType(mes) do {                          \
+    newProp("type", "Type_" mes);                \
+    newProp("pointer", contentString.c_str());   \
+    return true;                                 \
   } while (0)
 
 #define NDeclName(mes) do {                                     \
@@ -120,6 +122,8 @@ DeclarationsVisitor::WrapCompoundStatementBody(xmlNodePtr compoundStatement) {
           optContext.isInCompoundStatementDecls = true;
           optContext.isInCompoundStatementBody  = false;
           newChild("compoundStatement");
+          SymbolsVisitor SV(mangleContext, curNode, "symbols", typetableinfo);
+          SV.TraverseChildOfStmt(S);
           WrapCompoundStatementBody(curNode);
           newChild("declarations");
         }
@@ -146,6 +150,12 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
   bool NowInCompoundStatementBody  = optContext.isInCompoundStatementBody;
   optContext.isInCompoundStatementDecls = false;
   optContext.isInCompoundStatementBody  = false;
+
+  HooksForAttr.push_back([this](Attr *A){
+      contentString = "";
+      newChild("gccAttributes");
+      return TraverseAttr(A);
+    });
 
   const BinaryOperator *BO = dyn_cast<const BinaryOperator>(S);
 
@@ -227,12 +237,12 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
   case Stmt::CXXTryStmtClass: NS("Stmt_CXXTryStmtClass");
   case Stmt::CapturedStmtClass: NS("Stmt_CapturedStmtClass");
   case Stmt::CompoundStmtClass: {
+    // 6.2
     optContext.isInCompoundStatementDecls = true;
     optContext.isInCompoundStatementBody  = false;
     newChild("compoundStatement");
-    // 6.2
-    //SymbolsVisitor SV(astContext, curNode, "symbols", typetableinfo);
-    //SV.TraverseStmt(S);
+    SymbolsVisitor SV(mangleContext, curNode, "symbols", typetableinfo);
+    SV.TraverseChildOfStmt(S);
     WrapCompoundStatementBody(curNode);
     N("declarations");
   }
@@ -505,49 +515,68 @@ DeclarationsVisitor::PreVisitType(QualType T) {
     newComment("Type_NULL");
     return false;
   }
+  const Type *Tptr = T.getTypePtrOrNull();
+
+  // XXX experimental code
+  raw_string_ostream OS(contentString);
+  OS << (const void*)Tptr;
+  OS.str();
+
   switch (T->getTypeClass()) {
-  case Type::Builtin: N("Type_Builtin");
-  case Type::Complex: N("Type_Complex");
-  case Type::Pointer: N("Type_Pointer");
-  case Type::BlockPointer: N("Type_BlockPointer");
-  case Type::LValueReference: N("Type_LValueReference");
-  case Type::RValueReference: N("Type_RValueReference");
-  case Type::MemberPointer: N("Type_MemberPointer");
-  case Type::ConstantArray: N("Type_ConstantArray");
-  case Type::IncompleteArray: N("Type_IncompleteArray");
-  case Type::VariableArray: N("Type_VariableArray");
-  case Type::DependentSizedArray: N("Type_DependentSizedArray");
-  case Type::DependentSizedExtVector: N("Type_DependentSizedExtVector");
-  case Type::Vector: N("Type_Vector");
-  case Type::ExtVector: N("Type_ExtVector");
-  case Type::FunctionProto: N("Type_FunctionProto");
-  case Type::FunctionNoProto: N("Type_FunctionNoProto");
-  case Type::UnresolvedUsing: N("Type_UnresolvedUsing");
-  case Type::Paren: N("Type_Paren");
-  case Type::Typedef: N("Type_Typedef");
-  case Type::Adjusted: N("Type_Adjusted");
-  case Type::Decayed: N("Type_Decayed");
-  case Type::TypeOfExpr: N("Type_TypeOfExpr");
-  case Type::TypeOf: N("Type_TypeOf");
-  case Type::Decltype: N("Type_Decltype");
-  case Type::UnaryTransform: N("Type_UnaryTransform");
-  case Type::Record: N("Type_Record");
-  case Type::Enum: N("Type_Enum");
-  case Type::Elaborated: N("Type_Elaborated");
-  case Type::Attributed: N("Type_Attributed");
-  case Type::TemplateTypeParm: N("Type_TemplateTypeParm");
-  case Type::SubstTemplateTypeParm: N("Type_SubstTemplateTypeParm");
-  case Type::SubstTemplateTypeParmPack: N("Type_SubstTemplateTypeParmPack");
-  case Type::TemplateSpecialization: N("Type_TemplateSpecialization");
-  case Type::Auto: N("Type_Auto");
-  case Type::InjectedClassName: N("Type_InjectedClassName");
-  case Type::DependentName: N("Type_DependentName");
-  case Type::DependentTemplateSpecialization: N("Type_DependentTemplateSpecialization");
-  case Type::PackExpansion: N("Type_PackExpansion");
-  case Type::ObjCObject: N("Type_ObjCObject");
-  case Type::ObjCInterface: N("Type_ObjCInterface");
-  case Type::ObjCObjectPointer: N("Type_ObjCObjectPointer");
-  case Type::Atomic: N("Type_Atomic");
+  case Type::Builtin: {
+    ASTContext &CXT = mangleContext->getASTContext();
+    PrintingPolicy PP(CXT.getLangOpts());
+    newProp("type",
+            static_cast<const BuiltinType*>(Tptr)->getName(PP).str().c_str());
+    if (T.isConstQualified()) {
+      newProp("is_const", "1");
+    }
+    if (T.isVolatileQualified()) {
+      newProp("is_volatile", "1");
+    }
+    return true;
+  }
+  case Type::Complex: NType("Complex");
+  case Type::Pointer: NType("Pointer");
+  case Type::BlockPointer: NType("BlockPointer");
+  case Type::LValueReference: NType("LValueReference");
+  case Type::RValueReference: NType("RValueReference");
+  case Type::MemberPointer: NType("MemberPointer");
+  case Type::ConstantArray: NType("ConstantArray");
+  case Type::IncompleteArray: NType("IncompleteArray");
+  case Type::VariableArray: NType("VariableArray");
+  case Type::DependentSizedArray: NType("DependentSizedArray");
+  case Type::DependentSizedExtVector: NType("DependentSizedExtVector");
+  case Type::Vector: NType("Vector");
+  case Type::ExtVector: NType("ExtVector");
+  case Type::FunctionProto: NType("FunctionProto");
+  case Type::FunctionNoProto: NType("FunctionNoProto");
+  case Type::UnresolvedUsing: NType("UnresolvedUsing");
+  case Type::Paren: NType("Paren");
+  case Type::Typedef: NType("Typedef");
+  case Type::Adjusted: NType("Adjusted");
+  case Type::Decayed: NType("Decayed");
+  case Type::TypeOfExpr: NType("TypeOfExpr");
+  case Type::TypeOf: NType("TypeOf");
+  case Type::Decltype: NType("Decltype");
+  case Type::UnaryTransform: NType("UnaryTransform");
+  case Type::Record: NType("Record");
+  case Type::Enum: NType("Enum");
+  case Type::Elaborated: NType("Elaborated");
+  case Type::Attributed: NType("Attributed");
+  case Type::TemplateTypeParm: NType("TemplateTypeParm");
+  case Type::SubstTemplateTypeParm: NType("SubstTemplateTypeParm");
+  case Type::SubstTemplateTypeParmPack: NType("SubstTemplateTypeParmPack");
+  case Type::TemplateSpecialization: NType("TemplateSpecialization");
+  case Type::Auto: NType("Auto");
+  case Type::InjectedClassName: NType("InjectedClassName");
+  case Type::DependentName: NType("DependentName");
+  case Type::DependentTemplateSpecialization: NType("DependentTemplateSpecialization");
+  case Type::PackExpansion: NType("PackExpansion");
+  case Type::ObjCObject: NType("ObjCObject");
+  case Type::ObjCInterface: NType("ObjCInterface");
+  case Type::ObjCObjectPointer: NType("ObjCObjectPointer");
+  case Type::Atomic: NType("Atomic");
   }
 }
 
@@ -610,11 +639,6 @@ DeclarationsVisitor::PreVisitAttr(Attr *A) {
   if (!A) {
     newComment("Attr_NULL");
     return false;
-  }
-  // XXX: should be inherited to SIBLING, not children!
-  if (!optContext.isInGccAttributes) {
-    newChild("gccAttributes");
-    optContext.isInGccAttributes = true; 
   }
   switch (A->getKind()) {
   case attr::NUM_ATTRS: NAttr("NUMATTRS"); // may not be used
@@ -790,6 +814,17 @@ DeclarationsVisitor::PreVisitAttr(Attr *A) {
   case attr::WorkGroupSizeHint: NAttr("WorkGroupSizeHint");
   case attr::X86ForceAlignArgPointer: NAttr("X86ForceAlignArgPointer");
   }
+  newChild("gccAttribute");
+
+  setContentBySource(A->getLocation(), A->getLocation());
+  newProp("name", contentString.c_str());
+
+  raw_string_ostream OS(contentString);
+  ASTContext &CXT = mangleContext->getASTContext();
+  A->printPretty(OS, PrintingPolicy(CXT.getLangOpts()));
+  newComment(OS.str().c_str());
+
+  return true;
 }
 
 bool

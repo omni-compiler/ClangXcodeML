@@ -5,14 +5,12 @@ struct DeclarationsContext {
     explicit DeclarationsContext()
 	: isInCompoundStatementDecls(false),
           isInCompoundStatementBody(false),
-          isInGccAttributes(false),
           nameForDeclRefExpr(nullptr),
           explicitname(nullptr),
           propname(nullptr) {};
     explicit DeclarationsContext(DeclarationsContext &DC) 
 	: isInCompoundStatementDecls(DC.isInCompoundStatementDecls),
           isInCompoundStatementBody(DC.isInCompoundStatementBody),
-          isInGccAttributes(DC.isInGccAttributes),
           nameForDeclRefExpr(DC.nameForDeclRefExpr),
           explicitname(nullptr),
           propname(nullptr) {};
@@ -21,7 +19,6 @@ struct DeclarationsContext {
 
     bool isInCompoundStatementDecls; // inherited to ancestors
     bool isInCompoundStatementBody;  // inherited to ancestors
-    bool isInGccAttributes;          // inherited to ancestors
     const char *nameForDeclRefExpr;  // inherited to ancestors
     const char *explicitname;
     const char *propname;
