@@ -28,6 +28,7 @@ public:
     bool PreVisitNestedNameSpecifierLoc(clang::NestedNameSpecifierLoc);
     bool PreVisitDeclarationNameInfo(clang::DeclarationNameInfo);
 
+private:
     void WrapChild(const char *name);
     void WrapChild(const char *name1, const char *name2,
                    const char *name3 = nullptr, const char *name4 = nullptr);
