@@ -53,7 +53,7 @@ DeclarationsVisitor::getVisitorName() const {
 
 #define NDeclName(mes) do {                                     \
     newComment(mes);                                            \
-    newChild("name");                                           \
+    newChild("name", content);                                  \
     return true;                                                \
   } while (0)
 
@@ -99,8 +99,10 @@ void
 DeclarationsVisitor::NameChild(const char *name) {
   HooksForDeclarationNameInfo.push_back([this, name](DeclarationNameInfo NI){
       DeclarationsVisitor V(this);
-      V.optContext.explicitname = name;
-      return V.TraverseMeDeclarationNameInfo(NI);});
+      DeclarationName DN = NI.getName();
+      IdentifierInfo *II = DN.getAsIdentifierInfo();
+      newChild(name, II ? II->getNameStart() : nullptr);
+      return true;});
 }
 
 void
@@ -947,18 +949,12 @@ DeclarationsVisitor::PreVisitNestedNameSpecifierLoc(NestedNameSpecifierLoc NNS) 
 }
 
 bool
-DeclarationsVisitor::PreVisitDeclarationNameInfo(DeclarationNameInfo NameInfo) {
-  DeclarationName DN = NameInfo.getName();
+DeclarationsVisitor::PreVisitDeclarationNameInfo(DeclarationNameInfo NI) {
+  DeclarationName DN = NI.getName();
   IdentifierInfo *II = DN.getAsIdentifierInfo();
-  if (II) {
-    contentString = II->getNameStart();
-  }
+  const char *content = II ? II->getNameStart() : nullptr;
 
-  if (optContext.explicitname) {
-    N(optContext.explicitname);
-  }
-
-  switch (NameInfo.getName().getNameKind()) {
+  switch (DN.getNameKind()) {
   case DeclarationName::CXXConstructorName: NDeclName("CXXConstructorName");
   case DeclarationName::CXXDestructorName: NDeclName("CXXDestructorName");
   case DeclarationName::CXXConversionFunctionName: NDeclName("CXXConversionFunctionName");
