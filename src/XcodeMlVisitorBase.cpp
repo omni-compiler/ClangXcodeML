@@ -3,6 +3,7 @@
 #include "clang/Lex/Lexer.h"
 
 #include <type_traits>
+#include <unistd.h>
 
 using namespace clang;
 using namespace llvm;
@@ -87,7 +88,20 @@ void XcodeMlVisitorBaseImpl::setLocation(SourceLocation Loc, xmlNodePtr N) {
             newProp("lineno", PLoc.getLine(), N);
         }
         if (OptEmitSourceFileName) {
-            newProp("file", PLoc.getFilename(), N);
+            const char *filename = PLoc.getFilename();
+            static char cwd[BUFSIZ];
+            static size_t cwdlen;
+
+            if (cwdlen == 0) {
+                getcwd(cwd, sizeof(cwd));
+                cwdlen = strlen(cwd);
+            }
+            if (strncmp(filename, cwd, cwdlen) == 0
+                && filename[cwdlen] == '/') {
+                newProp("file", filename + cwdlen + 1, N);
+            } else {
+                newProp("file", filename, N);
+            }
         }
     }
 }

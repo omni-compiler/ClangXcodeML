@@ -13,6 +13,7 @@
 #include "llvm/Option/OptTable.h"
 #include "llvm/Support/Signals.h"
 
+#include <libxml/xmlsave.h>
 #include <time.h>
 #include <string>
 
@@ -88,7 +89,11 @@ public:
     }
 
     void EndSourceFileAction(void) override {
-        xmlSaveFormatFileEnc("-", xmlDoc, "UTF-8", 1);
+        //int saveopt = XML_SAVE_FORMAT | XML_SAVE_NO_EMPTY;
+        int saveopt = XML_SAVE_FORMAT;
+        xmlSaveCtxtPtr ctxt = xmlSaveToFilename("-",  "UTF-8", saveopt);
+        xmlSaveDoc(ctxt, xmlDoc);
+        xmlSaveClose(ctxt);
         xmlFreeDoc(xmlDoc);
     }
 };
