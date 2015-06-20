@@ -32,8 +32,9 @@ public:
     explicit XcodeMlASTConsumer(xmlNodePtr N) : rootNode(N) {};
 
     virtual void HandleTranslationUnit(ASTContext &CXT) override {
-        TypeTableInfo *TTI = nullptr;
         MangleContext *MC = CXT.createMangleContext();
+        TypeTableInfo typetableinfo(MC);
+        TypeTableInfo *TTI = &typetableinfo;
         TypeTableVisitor TTV(MC, rootNode, "TypeTable", TTI);
         SymbolsVisitor SV(MC, rootNode, "globalSymbols", TTI);
         DeclarationsVisitor DV(MC, rootNode, "globalDeclarations", TTI);

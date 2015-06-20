@@ -1,4 +1,5 @@
 #include "XcodeMlVisitorBase.h"
+#include "TypeTableVisitor.h"
 #include "SymbolsVisitor.h"
 #include "DeclarationsVisitor.h"
 
@@ -287,13 +288,15 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
   case Stmt::CXXUuidofExprClass: NS("Stmt_CXXUuidofExprClass");
   case Stmt::CallExprClass:
     //7.9
-    optContext.nameForDeclRefExpr = "function";
     HooksForStmt.push_back([this](Stmt *S){
         optContext.nameForDeclRefExpr = nullptr;
         newChild("arguments");
         return TraverseStmt(S);
       });
-    HooksForStmt.push_back([this](Stmt *S){return TraverseStmt(S);});
+    HooksForStmt.push_back([this](Stmt *S){
+        optContext.nameForDeclRefExpr = "function";
+        return TraverseStmt(S);
+      });
     newChild("functionCall");
     return true;
   case Stmt::CUDAKernelCallExprClass: NS("Stmt_CUDAKernelCallExprClass");
@@ -507,6 +510,17 @@ DeclarationsVisitor::PreVisitType(QualType T) {
     newComment("Type_NULL");
     return false;
   }
+
+  newProp("type", typetableinfo->getTypeName(T).c_str());
+  if (T.isConstQualified()) {
+    newProp("is_const", "1");
+  }
+  if (T.isVolatileQualified()) {
+    newProp("is_volatile", "1");
+  }
+  return false; // do not traverse children
+
+#if 0
   const Type *Tptr = T.getTypePtrOrNull();
 
   // XXX experimental code
@@ -570,6 +584,7 @@ DeclarationsVisitor::PreVisitType(QualType T) {
   case Type::ObjCObjectPointer: NType("ObjCObjectPointer");
   case Type::Atomic: NType("Atomic");
   }
+#endif
 }
 
 bool

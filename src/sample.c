@@ -55,3 +55,15 @@ int compoundstmtdecls(int x)
   int k = i + j;
   return k;
 }
+
+enum color {
+  black, brown, red, orange, yellow, green, blue, purple, grey, white
+};
+  
+union aho {
+  int i[2];
+  double d;
+  enum color c;
+};
+
+union aho baka[10];
