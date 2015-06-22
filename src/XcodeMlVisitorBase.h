@@ -33,7 +33,8 @@ public:
                                     xmlNodePtr CurNode,
                                     TypeTableInfo *TTI);
 
-    void addChild(const char *Name, const char *Content = nullptr);
+    xmlNodePtr addChild(const char *Name, const char *Content = nullptr);
+    xmlNodePtr addChild(const char *Name, xmlNodePtr N);
     void newChild(const char *Name, const char *Content = nullptr);
     void newProp(const char *Name, int Val, xmlNodePtr N = nullptr);
     void newProp(const char *Name, const char *Val, xmlNodePtr N = nullptr);

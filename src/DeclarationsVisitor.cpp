@@ -142,7 +142,32 @@ DeclarationsVisitor::WrapCompoundStatementBody(xmlNodePtr compoundStatement,
         }
       }
       if (V.TraverseMeStmt(S)) {
-        if (!E && S->getStmtClass() != Stmt::DeclStmtClass) {
+        if (!E
+            && S->getStmtClass() != Stmt::DeclStmtClass
+            && S->getStmtClass() != Stmt::NullStmtClass
+            && S->getStmtClass() != Stmt::LabelStmtClass) {
+          V.setLocation(S->getLocStart());
+        }
+        return true;
+      } else {
+        return false;
+      }
+    });
+}
+
+void
+DeclarationsVisitor::WrapLabelChild(void) {
+  HooksForStmt.push_back([this](Stmt *S){
+      DeclarationsVisitor V(this);
+      Expr *E = dyn_cast<Expr>(S);
+      if (E) {
+        V.newChild("exprStatement");
+        V.setLocation(E->getExprLoc());
+      }
+      if (V.TraverseMeStmt(S)) {
+        if (!E
+            && S->getStmtClass() != Stmt::NullStmtClass
+            && S->getStmtClass() != Stmt::LabelStmtClass) {
           V.setLocation(S->getLocStart());
         }
         return true;
@@ -259,7 +284,9 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
     //7.13
     NE("condExpr");
   case Stmt::AddrLabelExprClass: NS("Stmt_AddrLabelExprClass");
-  case Stmt::ArraySubscriptExprClass: NS("Stmt_ArraySubscriptExprClass");
+  case Stmt::ArraySubscriptExprClass:
+    //7.4 (this cannot support C++)
+    NS("Stmt_ArraySubscriptExprClass");
   case Stmt::ArrayTypeTraitExprClass: NS("Stmt_ArrayTypeTraitExprClass");
   case Stmt::AsTypeExprClass: NS("Stmt_AsTypeExprClass");
   case Stmt::AtomicExprClass: NS("Stmt_AtomicExprClass");
@@ -366,7 +393,7 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
   case Stmt::MSPropertyRefExprClass: NS("Stmt_MSPropertyRefExprClass");
   case Stmt::MaterializeTemporaryExprClass: NS("Stmt_MaterializeTemporaryExprClass");
   case Stmt::MemberExprClass:
-    //7.5
+    //7.5 (TBD: how to handle C++ "->" overloadding)
     PropChild("member");
     optContext.nameForDeclRefExpr = nullptr;
     NE("memberRef"); 
@@ -395,7 +422,9 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
   case Stmt::PseudoObjectExprClass: NS("Stmt_PseudoObjectExprClass");
   case Stmt::ShuffleVectorExprClass: NS("Stmt_ShuffleVectorExprClass");
   case Stmt::SizeOfPackExprClass: NS("Stmt_SizeOfPackExprClass");
-  case Stmt::StmtExprClass: NS("Stmt_StmtExprClass");
+  case Stmt::StmtExprClass:
+    // 7.14
+    NS("gccCompoundExpr");
   case Stmt::StringLiteralClass: {
     //7.1
     StringRef Data = static_cast<StringLiteral*>(S)->getString();
@@ -439,18 +468,33 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
     //6.6
     WrapChild("init", "condition", "iter", "+body");
     NS("forStatement");
-  case Stmt::GotoStmtClass: NS("gotoStatement"); //6.10 XXX
+  case Stmt::GotoStmtClass: {
+    //6.10
+    LabelDecl *LD = static_cast<GotoStmt*>(S)->getLabel();
+    newChild("gotoStatement");
+    newChild("name", LD->getNameAsString().c_str());
+    return false; // no need to traverse children recursively
+  }
   case Stmt::IfStmtClass:
     //6.3
     WrapChild("condition", "+then", "+else");
     NS("ifStatement");
   case Stmt::IndirectGotoStmtClass: NS("Stmt_IndirectGotoStmtClass");
-  case Stmt::LabelStmtClass:
+  case Stmt::LabelStmtClass: {
     //6.11
-    WrapChild("name");
-    NS("statementLabel");
+    LabelDecl *LD = static_cast<LabelStmt*>(S)->getDecl();
+    newChild("statementLabel");
+    setLocation(S->getLocStart());
+    newChild("name", LD->getNameAsString().c_str());
+    curNode = parentNode;
+    WrapLabelChild();
+    return true; // create children (statement) to my parent directly
+  }
   case Stmt::MSDependentExistsStmtClass: NS("Stmt_MSDependentExistsStmtClass");
-  case Stmt::NullStmtClass: NS("Stmt_NullStmtClass");
+  case Stmt::NullStmtClass:
+    // not explicitly defined in specification,
+    // but C_Front does not discard null statements silently.
+    return false; // do not traverse children
   case Stmt::OMPAtomicDirectiveClass: NS("Stmt_OMPAtomicDirectiveClass");
   case Stmt::OMPBarrierDirectiveClass: NS("Stmt_OMPBarrierDirectiveClass");
   case Stmt::OMPCriticalDirectiveClass: NS("Stmt_OMPCriticalDirectiveClass");

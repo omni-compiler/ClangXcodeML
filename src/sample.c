@@ -53,7 +53,7 @@ int compoundstmtdecls(int x)
   int j = x + 2;
   printf("%d\n", j);
   int k = i + j;
-  return k;
+  return ({static int tmp[10]; tmp[k % 10] = i; tmp[j];});
 }
 
 enum color {
@@ -67,3 +67,19 @@ union aho {
 };
 
 union aho baka[10];
+
+int gototest(int x)
+{
+  if (!x) {
+    goto end;
+  }
+  return x * x;
+  ;
+  ;
+  ;
+ end:
+  return 1024;
+ hoge:
+ moge: return -1;
+ hunya:;
+}

@@ -31,13 +31,16 @@ XcodeMlVisitorBaseImpl::XcodeMlVisitorBaseImpl(MangleContext *MC,
       mangleContext(MC), parentNode(Parent), curNode(CurNode),
       typetableinfo(TTI), contentString("") {};
 
-void XcodeMlVisitorBaseImpl::addChild(const char *Name, const char *Content) {
+xmlNodePtr XcodeMlVisitorBaseImpl::addChild(const char *Name, const char *Content) {
     if (!Content && contentString.length() > 0) {
         Content = contentString.c_str();
     }
-    xmlNewTextChild(curNode, nullptr, BAD_CAST Name, BAD_CAST Content);
+    return xmlNewTextChild(curNode, nullptr, BAD_CAST Name, BAD_CAST Content);
 }
 
+xmlNodePtr XcodeMlVisitorBaseImpl::addChild(const char *Name, xmlNodePtr N) {
+    return xmlNewTextChild(N, nullptr, BAD_CAST Name, nullptr);
+}
 void XcodeMlVisitorBaseImpl::newChild(const char *Name, const char *Content) {
     if (!Content && contentString.length() > 0) {
         Content = contentString.c_str();

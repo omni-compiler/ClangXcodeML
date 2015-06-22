@@ -35,6 +35,7 @@ private:
     void PropChild(const char *name);
     void NameChild(const char *name);
     void WrapCompoundStatementBody(xmlNodePtr, bool);
+    void WrapLabelChild(void);
 };
 
 #endif /* !DECLARATIONSVISITOR_H */
