@@ -41,6 +41,9 @@ TypeTableInfo::TypeTableInfo(MangleContext *MC) : mangleContext(MC)
 
 std::string TypeTableInfo::getTypeName(QualType T)
 {
+  if (T.isNull()) {
+    return "nullType";
+  };
   std::string name = mapFromQualTypeToName[T];
   if (!name.empty()) {
     return name;
@@ -111,12 +114,90 @@ TypeTableVisitor::PreVisitStmt(Stmt *S) {
   return true; // do not create a new child
 }
 
+#define DECLTYPE() return true //empty
 bool
 TypeTableVisitor::PreVisitDecl(Decl *D) {
   if (!D) {
     return false;
   }
-  if (D->getKind() == Decl::TranslationUnit) {
+  TypeDecl *TD = dyn_cast<TypeDecl>(D);
+  if (TD) {
+    QualType T(TD->getTypeForDecl(), 0);
+    const char *Name = typetableinfo->getTypeName(T).c_str();
+    switch (Name[0]) {
+    case 'P': newChild("pointerType"); newProp("type", Name); break;
+    case 'F': newChild("functionType"); newProp("type", Name); break;
+    case 'A': newChild("arrayType"); newProp("type", Name); break;
+    case 'S': newChild("structType"); newProp("type", Name); break;
+    case 'U': newChild("unionType"); newProp("type", Name); break;
+    case 'E': newChild("enumType"); newProp("type", Name); break;
+    case 'C': newChild("classType"); newProp("type", Name); break;
+    case 'O': newChild("otherType"); newProp("type", Name); break;
+    default: newChild("basicType"); newProp("type", Name); break;
+    }
+  }
+ 
+  switch (D->getKind()) {
+  case Decl::AccessSpec: return true;
+  case Decl::Block: return true;
+  case Decl::Captured: return true;
+  case Decl::ClassScopeFunctionSpecialization: return true;
+  case Decl::Empty: return true;
+  case Decl::FileScopeAsm: return true;
+  case Decl::Friend: return true;
+  case Decl::FriendTemplate: return true;
+  case Decl::Import: return true;
+  case Decl::LinkageSpec: return true;
+  case Decl::Label: return true;
+  case Decl::Namespace: return true;
+  case Decl::NamespaceAlias: return true;
+  case Decl::ObjCCompatibleAlias: return true;
+  case Decl::ObjCCategory: return true;
+  case Decl::ObjCCategoryImpl: return true;
+  case Decl::ObjCImplementation: return true;
+  case Decl::ObjCInterface: return true;
+  case Decl::ObjCProtocol: return true;
+  case Decl::ObjCMethod: return true;
+  case Decl::ObjCProperty: return true;
+  case Decl::ClassTemplate: return true;
+  case Decl::FunctionTemplate: return true;
+  case Decl::TypeAliasTemplate: return true;
+  case Decl::VarTemplate: return true;
+  case Decl::TemplateTemplateParm: return true;
+  case Decl::Enum: DECLTYPE();
+  case Decl::Record: DECLTYPE();
+  case Decl::CXXRecord: return true;
+  case Decl::ClassTemplateSpecialization: return true;
+  case Decl::ClassTemplatePartialSpecialization: return true;
+  case Decl::TemplateTypeParm: return true;
+  case Decl::TypeAlias: return true;
+  case Decl::Typedef: DECLTYPE();
+  case Decl::UnresolvedUsingTypename: return true;
+  case Decl::Using: return true;
+  case Decl::UsingDirective: return true;
+  case Decl::UsingShadow: return true;
+  case Decl::Field: return true;
+  case Decl::ObjCAtDefsField: return true;
+  case Decl::ObjCIvar: return true;
+  case Decl::Function: DECLTYPE();
+  case Decl::CXXMethod: return true;
+  case Decl::CXXConstructor: return true;
+  case Decl::CXXConversion: return true;
+  case Decl::CXXDestructor: return true;
+  case Decl::MSProperty: return true;
+  case Decl::NonTypeTemplateParm: return true;
+  case Decl::Var: DECLTYPE();
+  case Decl::ImplicitParam: return true;
+  case Decl::ParmVar: return true;
+  case Decl::VarTemplateSpecialization: return true;
+  case Decl::VarTemplatePartialSpecialization: return true;
+  case Decl::EnumConstant: return true;
+  case Decl::IndirectField: return true;
+  case Decl::UnresolvedUsingValue: return true;
+  case Decl::OMPThreadPrivate: return true;
+  case Decl::ObjCPropertyImpl: return true;
+  case Decl::StaticAssert: return true;
+  case Decl::TranslationUnit:
     if (OptDisableTypeTable) {
       return false; // stop traverse
     } else {
