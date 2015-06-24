@@ -29,6 +29,7 @@ public:
     bool PreVisitDeclarationNameInfo(clang::DeclarationNameInfo);
 
 private:
+    bool WrapExpr(clang::Stmt *);
     void WrapChild(const char **names);
     void PropChild(const char *name);
     void NameChild(const char *name);

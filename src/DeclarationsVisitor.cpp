@@ -22,69 +22,75 @@ DeclarationsVisitor::getVisitorName() const {
 
 // helper macros
 
-#define N(mes) do {newChild(mes); return true;} while (0)
-#define NE(mes, content) do {                                           \
-    newChild(mes, content);                                             \
-    TraverseType(static_cast<Expr*>(S)->getType());                     \
-    return true;                                                        \
-  } while (0)
-
-#define NT(mes) do {newChild(mes); TraverseType(T); return true;} while (0)
-#define NS(mes) do {                                                    \
-    newChild(mes);                                                      \
-    return true;                                                        \
-  } while (0)
-
-#define ND(mes) do {newChild(mes); setLocation(D->getLocation()); return true;} while (0)
-
-#define NTypeLoc(mes) do {                                       \
-    std::string content;                                         \
-    newChild(mes);                                               \
-    content = contentBySource(TL.getLocStart(), TL.getLocEnd()); \
-    addChild("source", content.c_str());                         \
-    return true;                                                 \
-  } while (0)
-
-#define NAttr(mes) newComment("Attr_" mes); break
-
 #define NType(mes) do {                          \
     newProp("type", "Type_" mes);                \
     newProp("pointer", typenamestr.c_str());     \
     return true;                                 \
   } while (0)
 
-#define NDeclName(mes) do {                                     \
-    newComment(mes);                                            \
-    newChild("name", content);                                  \
-    return true;                                                \
-  } while (0)
+bool
+DeclarationsVisitor::WrapExpr(Stmt *S) {
+  Expr *E = dyn_cast<Expr>(S);
+  if (E) {
+    newChild("exprStatement");
+    setLocation(E->getExprLoc());
+  }
+  if (TraverseMeStmt(S)) {
+    if (!E
+        && S->getStmtClass() != Stmt::DeclStmtClass
+        && S->getStmtClass() != Stmt::NullStmtClass
+        && S->getStmtClass() != Stmt::LabelStmtClass
+        && S->getStmtClass() != Stmt::CaseStmtClass
+        && S->getStmtClass() != Stmt::DefaultStmtClass
+        && S->getStmtClass() != Stmt::IndirectGotoStmtClass) {
+      setLocation(S->getLocStart());
+    }
+    return true;
+  } else {
+    return false;
+  }
+}
 
 void
 DeclarationsVisitor::WrapChild(const char **names) {
   HookForStmt = [this, names](Stmt *S){
       DeclarationsVisitor V(this);
-      if (!S) {
-        // ignore this nullptr
-        newComment("an ignored nullptr exists");
-      } else if (names[0][0] == '\0') {
-        // ignore this child
-        newComment("an ignored child exists");
-      } else if (names[0][0] == '+') {
-        V.newChild(names[0] + 1);
-        Expr *E = dyn_cast<Expr>(S);
-        if (E) {
-          V.newChild("exprStatement");
-          V.setLocation(E->getExprLoc());
-        }
-      } else {
-        V.newChild(names[0]);
-      }
+
       if (names[1]) {
         WrapChild(names + 1);
       } else {
         HookForStmt = nullptr;
       }
-      return V.TraverseMeStmt(S);
+
+      if (!S) {
+        // ignore this nullptr
+        newComment("an ignored nullptr exists");
+        return true;
+      } else if (names[0][0] == '-') {
+        // ignore this child
+        newComment("an ignored child exists");
+        return true;
+      } else if (names[0][0] == '+') {
+        if (names[0][1] != '\0') {
+          V.newChild(names[0] + 1);
+        }
+        return V.WrapExpr(S);
+      } else if (names[0][0] == '*') {
+        if (names[0][1] != '\0') {
+          V.newChild(names[0] + 1);
+        }
+        if (S->getStmtClass() == Stmt::CompoundStmtClass) {
+          V.WrapCompoundStatementBody(curNode, false);
+          return V.TraverseChildOfStmt(S);
+        } else {
+          return V.WrapExpr(S);
+        }
+      } else {
+        if (names[0][0] != '\0') {
+          V.newChild(names[0]);
+        }
+        return V.TraverseMeStmt(S);
+      }
   };
 }
 
@@ -140,24 +146,7 @@ DeclarationsVisitor::WrapCompoundStatementBody(xmlNodePtr compoundStatement,
         nowInBodyPart = true;
       }
       DeclarationsVisitor V(this);
-      Expr *E = dyn_cast<Expr>(S);
-      if (E) {
-        if (nowInBodyPart) {
-          V.newChild("exprStatement");
-          V.setLocation(E->getExprLoc());
-        }
-      }
-      if (V.TraverseMeStmt(S)) {
-        if (!E
-            && S->getStmtClass() != Stmt::DeclStmtClass
-            && S->getStmtClass() != Stmt::NullStmtClass
-            && S->getStmtClass() != Stmt::LabelStmtClass) {
-          V.setLocation(S->getLocStart());
-        }
-        return true;
-      } else {
-        return false;
-      }
+      return V.WrapExpr(S);
   };
 }
 
@@ -184,6 +173,13 @@ DeclarationsVisitor::WrapLabelChild(void) {
   };
 }
 
+#define NStmt(mes) do {newChild(mes); return true;} while (0)
+#define NStmtXXX(mes) NStmt("Stmt_" mes)
+#define NExpr(mes, content) do {                                        \
+    newChild(mes, content);                                             \
+    TraverseType(static_cast<Expr*>(S)->getType());                     \
+    return true;                                                        \
+  } while (0)
 bool
 DeclarationsVisitor::PreVisitStmt(Stmt *S) {
   if (!S) {
@@ -200,128 +196,128 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
 
   if (BO) {
     // XcodeML-C-0.9J.pdf: 7.6(assignExpr), 7.7, 7.10(commmaExpr)
-    QualType T = BO->getType();
+    //QualType T = BO->getType();
     switch (BO->getOpcode()) {
-    case BO_PtrMemD:   NT("UNDEF_BO_PtrMemD");
-    case BO_PtrMemI:   NT("UNDEF_BO_PtrMemI");
-    case BO_Mul:       NT("mulExpr");
-    case BO_Div:       NT("divExpr");
-    case BO_Rem:       NT("modExpr");
-    case BO_Add:       NT("plusExpr");
-    case BO_Sub:       NT("minusExpr");
-    case BO_Shl:       NT("LshiftExpr");
-    case BO_Shr:       NT("RshiftExpr");
-    case BO_LT:        NT("logLTExpr");
-    case BO_GT:        NT("logGTExpr");
-    case BO_LE:        NT("logLEExpr");
-    case BO_GE:        NT("logGEExpr");
-    case BO_EQ:        NT("logEQExpr");
-    case BO_NE:        NT("logNEQExpr");
-    case BO_And:       NT("bitAndExpr");
-    case BO_Xor:       NT("bitXorExpr");
-    case BO_Or:        NT("bitOrExpr");
-    case BO_LAnd:      NT("logAndExpr");
-    case BO_LOr:       NT("logOrExpr");
-    case BO_Assign:    NT("assignExpr");
-    case BO_Comma:     NT("commaExpr");
-    case BO_MulAssign: NT("asgMulExpr");
-    case BO_DivAssign: NT("asgDivExpr");
-    case BO_RemAssign: NT("asgModExpr");
-    case BO_AddAssign: NT("asgPlusExpr");
-    case BO_SubAssign: NT("asgMinusExpr");
-    case BO_ShlAssign: NT("asgLshiftExpr");
-    case BO_ShrAssign: NT("asgRshiftExpr");
-    case BO_AndAssign: NT("asgBitAndExpr");
-    case BO_OrAssign:  NT("asgBitOrExpr");
-    case BO_XorAssign: NT("asgBitXorExpr");
+    case BO_PtrMemD:   NExpr("UNDEF_BO_PtrMemD", nullptr);
+    case BO_PtrMemI:   NExpr("UNDEF_BO_PtrMemI", nullptr);
+    case BO_Mul:       NExpr("mulExpr", nullptr);
+    case BO_Div:       NExpr("divExpr", nullptr);
+    case BO_Rem:       NExpr("modExpr", nullptr);
+    case BO_Add:       NExpr("plusExpr", nullptr);
+    case BO_Sub:       NExpr("minusExpr", nullptr);
+    case BO_Shl:       NExpr("LshiftExpr", nullptr);
+    case BO_Shr:       NExpr("RshiftExpr", nullptr);
+    case BO_LT:        NExpr("logLTExpr", nullptr);
+    case BO_GT:        NExpr("logGTExpr", nullptr);
+    case BO_LE:        NExpr("logLEExpr", nullptr);
+    case BO_GE:        NExpr("logGEExpr", nullptr);
+    case BO_EQ:        NExpr("logEQExpr", nullptr);
+    case BO_NE:        NExpr("logNEQExpr", nullptr);
+    case BO_And:       NExpr("bitAndExpr", nullptr);
+    case BO_Xor:       NExpr("bitXorExpr", nullptr);
+    case BO_Or:        NExpr("bitOrExpr", nullptr);
+    case BO_LAnd:      NExpr("logAndExpr", nullptr);
+    case BO_LOr:       NExpr("logOrExpr", nullptr);
+    case BO_Assign:    NExpr("assignExpr", nullptr);
+    case BO_Comma:     NExpr("commaExpr", nullptr);
+    case BO_MulAssign: NExpr("asgMulExpr", nullptr);
+    case BO_DivAssign: NExpr("asgDivExpr", nullptr);
+    case BO_RemAssign: NExpr("asgModExpr", nullptr);
+    case BO_AddAssign: NExpr("asgPlusExpr", nullptr);
+    case BO_SubAssign: NExpr("asgMinusExpr", nullptr);
+    case BO_ShlAssign: NExpr("asgLshiftExpr", nullptr);
+    case BO_ShrAssign: NExpr("asgRshiftExpr", nullptr);
+    case BO_AndAssign: NExpr("asgBitAndExpr", nullptr);
+    case BO_OrAssign:  NExpr("asgBitOrExpr", nullptr);
+    case BO_XorAssign: NExpr("asgBitXorExpr", nullptr);
     }
   }
   const UnaryOperator *UO = dyn_cast<const UnaryOperator>(S);
   if (UO) {
     // XcodeML-C-0.9J.pdf 7.2(varAddr), 7.3(pointerRef), 7.8, 7.11
-    QualType T = UO->getType();
+    //QualType T = UO->getType();
     switch (UO->getOpcode()) {
-    case UO_PostInc:   NT("postIncrExpr");
-    case UO_PostDec:   NT("postDecrExpr");
-    case UO_PreInc:    NT("preIncrExpr");
-    case UO_PreDec:    NT("preDecrExpr");
-    case UO_AddrOf:    NT("varAddr");
-    case UO_Deref:     NT("pointerRef");
-    case UO_Plus:      NT("UNDEF_UO_Plus");
-    case UO_Minus:     NT("unaryMinusExpr");
-    case UO_Not:       NT("bitNotExpr");
-    case UO_LNot:      NT("logNotExpr");
-    case UO_Real:      NT("UNDEF_UO_Real");
-    case UO_Imag:      NT("UNDEF_UO_Imag");
-    case UO_Extension: NT("UNDEF_UO_Extension");
+    case UO_PostInc:   NExpr("postIncrExpr", nullptr);
+    case UO_PostDec:   NExpr("postDecrExpr", nullptr);
+    case UO_PreInc:    NExpr("preIncrExpr", nullptr);
+    case UO_PreDec:    NExpr("preDecrExpr", nullptr);
+    case UO_AddrOf:    NExpr("varAddr", nullptr);
+    case UO_Deref:     NExpr("pointerRef", nullptr);
+    case UO_Plus:      NExpr("UNDEF_UO_Plus", nullptr);
+    case UO_Minus:     NExpr("unaryMinusExpr", nullptr);
+    case UO_Not:       NExpr("bitNotExpr", nullptr);
+    case UO_LNot:      NExpr("logNotExpr", nullptr);
+    case UO_Real:      NExpr("UNDEF_UO_Real", nullptr);
+    case UO_Imag:      NExpr("UNDEF_UO_Imag", nullptr);
+    case UO_Extension: NExpr("UNDEF_UO_Extension", nullptr);
     }
   }
 
   switch (S->getStmtClass()) {
-  case Stmt::NoStmtClass:     NS("Stmt_NoStmtClass");
-  case Stmt::GCCAsmStmtClass: NS("Stmt_GCCAsmStmtClass");
-  case Stmt::MSAsmStmtClass:  NS("Stmt_MSAsmStmtClass");
-  case Stmt::AttributedStmtClass: NS("Stmt_AttributedStmtClass");
-  case Stmt::BreakStmtClass: NS("breakStatement"); //6.7
-  case Stmt::CXXCatchStmtClass: NS("Stmt_CXXCatchStmtClass");
-  case Stmt::CXXForRangeStmtClass: NS("Stmt_CXXForRangeStmtClass");
-  case Stmt::CXXTryStmtClass: NS("Stmt_CXXTryStmtClass");
-  case Stmt::CapturedStmtClass: NS("Stmt_CapturedStmtClass");
+  case Stmt::NoStmtClass:     NStmtXXX("NoStmtClass");
+  case Stmt::GCCAsmStmtClass: NStmtXXX("GCCAsmStmtClass");
+  case Stmt::MSAsmStmtClass:  NStmtXXX("MSAsmStmtClass");
+  case Stmt::AttributedStmtClass: NStmtXXX("AttributedStmtClass");
+  case Stmt::BreakStmtClass: NStmt("breakStatement"); //6.7
+  case Stmt::CXXCatchStmtClass: NStmtXXX("CXXCatchStmtClass");
+  case Stmt::CXXForRangeStmtClass: NStmtXXX("CXXForRangeStmtClass");
+  case Stmt::CXXTryStmtClass: NStmtXXX("CXXTryStmtClass");
+  case Stmt::CapturedStmtClass: NStmtXXX("CapturedStmtClass");
   case Stmt::CompoundStmtClass: {
     // 6.2
     newChild("compoundStatement");
     SymbolsVisitor SV(mangleContext, curNode, "symbols", typetableinfo);
     SV.TraverseChildOfStmt(S);
     WrapCompoundStatementBody(curNode, true);
-    N("declarations");
+    NStmt("declarations");
   }
   case Stmt::ContinueStmtClass:
     //6.8
-    NS("continueStatement");
+    NStmt("continueStatement");
   case Stmt::DeclStmtClass:
     return true; // everything is performed by WrapCompoundStatementBody
   case Stmt::DoStmtClass: {
     //6.5
     static const char *childnames[] = {"+body", "condition", nullptr};
     WrapChild(childnames);
-    NS("doStatement");
+    NStmt("doStatement");
   }
   case Stmt::BinaryConditionalOperatorClass:
     //7.13
-    NE("condExpr", nullptr);
+    NExpr("condExpr", nullptr);
   case Stmt::ConditionalOperatorClass:
     //7.13
-    NE("condExpr", nullptr);
-  case Stmt::AddrLabelExprClass: NS("Stmt_AddrLabelExprClass");
+    NExpr("condExpr", nullptr);
+  case Stmt::AddrLabelExprClass: NStmtXXX("AddrLabelExprClass");
   case Stmt::ArraySubscriptExprClass:
     //7.4 (this cannot support C++)
-    NS("Stmt_ArraySubscriptExprClass");
-  case Stmt::ArrayTypeTraitExprClass: NS("Stmt_ArrayTypeTraitExprClass");
-  case Stmt::AsTypeExprClass: NS("Stmt_AsTypeExprClass");
-  case Stmt::AtomicExprClass: NS("Stmt_AtomicExprClass");
-  case Stmt::BinaryOperatorClass: NS("Stmt_BinaryOperatorClass");
-  case Stmt::CompoundAssignOperatorClass: NS("Stmt_CompoundAssignOperatorClass");
-  case Stmt::BlockExprClass: NS("Stmt_BlockExprClass");
-  case Stmt::CXXBindTemporaryExprClass: NS("Stmt_CXXBindTemporaryExprClass");
-  case Stmt::CXXBoolLiteralExprClass: NS("Stmt_CXXBoolLiteralExprClass");
-  case Stmt::CXXConstructExprClass: NS("Stmt_CXXConstructExprClass");
-  case Stmt::CXXTemporaryObjectExprClass: NS("Stmt_CXXTemporaryObjectExprClass");
-  case Stmt::CXXDefaultArgExprClass: NS("Stmt_CXXDefaultArgExprClass");
-  case Stmt::CXXDefaultInitExprClass: NS("Stmt_CXXDefaultInitExprClass");
-  case Stmt::CXXDeleteExprClass: NS("Stmt_CXXDeleteExprClass");
-  case Stmt::CXXDependentScopeMemberExprClass: NS("Stmt_CXXDependentScopeMemberExprClass");
-  case Stmt::CXXFoldExprClass: NS("Stmt_CXXFoldExprClass");
-  case Stmt::CXXNewExprClass: NS("Stmt_CXXNewExprClass");
-  case Stmt::CXXNoexceptExprClass: NS("Stmt_CXXNoexceptExprClass");
-  case Stmt::CXXNullPtrLiteralExprClass: NS("Stmt_CXXNullPtrLiteralExprClass");
-  case Stmt::CXXPseudoDestructorExprClass: NS("Stmt_CXXPseudoDestructorExprClass");
-  case Stmt::CXXScalarValueInitExprClass: NS("Stmt_CXXScalarValueInitExprClass");
-  case Stmt::CXXStdInitializerListExprClass: NS("Stmt_CXXStdInitializerListExprClass");
-  case Stmt::CXXThisExprClass: NS("Stmt_CXXThisExprClass");
-  case Stmt::CXXThrowExprClass: NS("Stmt_CXXThrowExprClass");
-  case Stmt::CXXTypeidExprClass: NS("Stmt_CXXTypeidExprClass");
-  case Stmt::CXXUnresolvedConstructExprClass: NS("Stmt_CXXUnresolvedConstructExprClass");
-  case Stmt::CXXUuidofExprClass: NS("Stmt_CXXUuidofExprClass");
+    NStmtXXX("ArraySubscriptExprClass");
+  case Stmt::ArrayTypeTraitExprClass: NStmtXXX("ArrayTypeTraitExprClass");
+  case Stmt::AsTypeExprClass: NStmtXXX("AsTypeExprClass");
+  case Stmt::AtomicExprClass: NStmtXXX("AtomicExprClass");
+  case Stmt::BinaryOperatorClass: NStmtXXX("BinaryOperatorClass");
+  case Stmt::CompoundAssignOperatorClass: NStmtXXX("CompoundAssignOperatorClass");
+  case Stmt::BlockExprClass: NStmtXXX("BlockExprClass");
+  case Stmt::CXXBindTemporaryExprClass: NStmtXXX("CXXBindTemporaryExprClass");
+  case Stmt::CXXBoolLiteralExprClass: NStmtXXX("CXXBoolLiteralExprClass");
+  case Stmt::CXXConstructExprClass: NStmtXXX("CXXConstructExprClass");
+  case Stmt::CXXTemporaryObjectExprClass: NStmtXXX("CXXTemporaryObjectExprClass");
+  case Stmt::CXXDefaultArgExprClass: NStmtXXX("CXXDefaultArgExprClass");
+  case Stmt::CXXDefaultInitExprClass: NStmtXXX("CXXDefaultInitExprClass");
+  case Stmt::CXXDeleteExprClass: NStmtXXX("CXXDeleteExprClass");
+  case Stmt::CXXDependentScopeMemberExprClass: NStmtXXX("CXXDependentScopeMemberExprClass");
+  case Stmt::CXXFoldExprClass: NStmtXXX("CXXFoldExprClass");
+  case Stmt::CXXNewExprClass: NStmtXXX("CXXNewExprClass");
+  case Stmt::CXXNoexceptExprClass: NStmtXXX("CXXNoexceptExprClass");
+  case Stmt::CXXNullPtrLiteralExprClass: NStmtXXX("CXXNullPtrLiteralExprClass");
+  case Stmt::CXXPseudoDestructorExprClass: NStmtXXX("CXXPseudoDestructorExprClass");
+  case Stmt::CXXScalarValueInitExprClass: NStmtXXX("CXXScalarValueInitExprClass");
+  case Stmt::CXXStdInitializerListExprClass: NStmtXXX("CXXStdInitializerListExprClass");
+  case Stmt::CXXThisExprClass: NStmtXXX("CXXThisExprClass");
+  case Stmt::CXXThrowExprClass: NStmtXXX("CXXThrowExprClass");
+  case Stmt::CXXTypeidExprClass: NStmtXXX("CXXTypeidExprClass");
+  case Stmt::CXXUnresolvedConstructExprClass: NStmtXXX("CXXUnresolvedConstructExprClass");
+  case Stmt::CXXUuidofExprClass: NStmtXXX("CXXUuidofExprClass");
   case Stmt::CallExprClass:
     //7.9
     HookForStmt = [this](Stmt *S){
@@ -336,29 +332,29 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
     };
     newChild("functionCall");
     return true;
-  case Stmt::CUDAKernelCallExprClass: NS("Stmt_CUDAKernelCallExprClass");
-  case Stmt::CXXMemberCallExprClass: NS("Stmt_CXXMemberCallExprClass");
-  case Stmt::CXXOperatorCallExprClass: NS("Stmt_CXXOperatorCallExprClass");
-  case Stmt::UserDefinedLiteralClass: NS("Stmt_UserDefinedLiteralClass");
-  case Stmt::CStyleCastExprClass: NS("castExpr"); //7.12
-  case Stmt::CXXFunctionalCastExprClass: NS("Stmt_CXXFunctionalCastExprClass");
-  case Stmt::CXXConstCastExprClass: NS("Stmt_CXXConstCastExprClass");
-  case Stmt::CXXDynamicCastExprClass: NS("Stmt_CXXDynamicCastExprClass");
-  case Stmt::CXXReinterpretCastExprClass: NS("Stmt_CXXReinterpretCastExprClass");
-  case Stmt::CXXStaticCastExprClass: NS("Stmt_CXXStaticCastExprClass");
-  case Stmt::ObjCBridgedCastExprClass: NS("Stmt_ObjCBridgedCastExprClass");
+  case Stmt::CUDAKernelCallExprClass: NStmtXXX("CUDAKernelCallExprClass");
+  case Stmt::CXXMemberCallExprClass: NStmtXXX("CXXMemberCallExprClass");
+  case Stmt::CXXOperatorCallExprClass: NStmtXXX("CXXOperatorCallExprClass");
+  case Stmt::UserDefinedLiteralClass: NStmtXXX("UserDefinedLiteralClass");
+  case Stmt::CStyleCastExprClass: NStmt("castExpr"); //7.12
+  case Stmt::CXXFunctionalCastExprClass: NStmtXXX("CXXFunctionalCastExprClass");
+  case Stmt::CXXConstCastExprClass: NStmtXXX("CXXConstCastExprClass");
+  case Stmt::CXXDynamicCastExprClass: NStmtXXX("CXXDynamicCastExprClass");
+  case Stmt::CXXReinterpretCastExprClass: NStmtXXX("CXXReinterpretCastExprClass");
+  case Stmt::CXXStaticCastExprClass: NStmtXXX("CXXStaticCastExprClass");
+  case Stmt::ObjCBridgedCastExprClass: NStmtXXX("ObjCBridgedCastExprClass");
   case Stmt::ImplicitCastExprClass:
-    //NS("Stmt_ImplicitCastExprClass");
+    //NStmtXXX("ImplicitCastExprClass");
     /// XXX : experimental
     newComment("Stmt_ImplicitCastExprClass");
     if (!optContext.nameForDeclRefExpr) {
-      optContext.nameForDeclRefExpr = "var";
+      optContext.nameForDeclRefExpr = "Var";
     }
     return true;
-  case Stmt::CharacterLiteralClass: NS("Stmt_CharacterLiteralClass");
-  case Stmt::ChooseExprClass: NS("Stmt_ChooseExprClass");
-  case Stmt::CompoundLiteralExprClass: NS("Stmt_CompoundLiteralExprClass");
-  case Stmt::ConvertVectorExprClass: NS("Stmt_ConvertVectorExprClass");
+  case Stmt::CharacterLiteralClass: NStmtXXX("CharacterLiteralClass");
+  case Stmt::ChooseExprClass: NStmtXXX("ChooseExprClass");
+  case Stmt::CompoundLiteralExprClass: NStmtXXX("CompoundLiteralExprClass");
+  case Stmt::ConvertVectorExprClass: NStmtXXX("ConvertVectorExprClass");
   case Stmt::DeclRefExprClass:
     if (optContext.nameForDeclRefExpr) {
       NameChild(optContext.nameForDeclRefExpr);
@@ -367,11 +363,11 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
     }
     newComment("Stmt_DeclRefExprClass");
     return true;
-  case Stmt::DependentScopeDeclRefExprClass: NS("Stmt_DependentScopeDeclRefExprClass");
-  case Stmt::DesignatedInitExprClass: NS("Stmt_DesignatedInitExprClass");
-  case Stmt::ExprWithCleanupsClass: NS("Stmt_ExprWithCleanupsClass");
-  case Stmt::ExpressionTraitExprClass: NS("Stmt_ExpressionTraitExprClass");
-  case Stmt::ExtVectorElementExprClass: NS("Stmt_ExtVectorElementExprClass");
+  case Stmt::DependentScopeDeclRefExprClass: NStmtXXX("DependentScopeDeclRefExprClass");
+  case Stmt::DesignatedInitExprClass: NStmtXXX("DesignatedInitExprClass");
+  case Stmt::ExprWithCleanupsClass: NStmtXXX("ExprWithCleanupsClass");
+  case Stmt::ExpressionTraitExprClass: NStmtXXX("ExpressionTraitExprClass");
+  case Stmt::ExtVectorElementExprClass: NStmtXXX("ExtVectorElementExprClass");
   case Stmt::FloatingLiteralClass: {
     //7.1
     std::string valueAsString;
@@ -384,14 +380,14 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
 #else
     valueAsString = contentBySource(S->getLocStart(), S->getLocEnd());
 #endif
-    NE("floatConstant", valueAsString.c_str());
+    NExpr("floatConstant", valueAsString.c_str());
   }
-  case Stmt::FunctionParmPackExprClass: NS("Stmt_FunctionParmPackExprClass");
-  case Stmt::GNUNullExprClass: NS("Stmt_GNUNullExprClass");
-  case Stmt::GenericSelectionExprClass: NS("Stmt_GenericSelectionExprClass");
-  case Stmt::ImaginaryLiteralClass: NS("Stmt_ImaginaryLiteralClass");
-  case Stmt::ImplicitValueInitExprClass: NS("Stmt_ImplicitValueInitExprClass");
-  case Stmt::InitListExprClass: NS("Stmt_InitListExprClass");
+  case Stmt::FunctionParmPackExprClass: NStmtXXX("FunctionParmPackExprClass");
+  case Stmt::GNUNullExprClass: NStmtXXX("GNUNullExprClass");
+  case Stmt::GenericSelectionExprClass: NStmtXXX("GenericSelectionExprClass");
+  case Stmt::ImaginaryLiteralClass: NStmtXXX("ImaginaryLiteralClass");
+  case Stmt::ImplicitValueInitExprClass: NStmtXXX("ImplicitValueInitExprClass");
+  case Stmt::InitListExprClass: NStmtXXX("InitListExprClass");
   case Stmt::IntegerLiteralClass: {
     //7.1 XXX: long long should be treated specially
     APInt Value = static_cast<IntegerLiteral*>(S)->getValue();
@@ -399,44 +395,44 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
     raw_string_ostream OS(valueAsString);
     OS << *Value.getRawData();
     OS.str();
-    NE("intConstant", valueAsString.c_str());
+    NExpr("intConstant", valueAsString.c_str());
   }
-  case Stmt::LambdaExprClass: NS("Stmt_LambdaExprClass");
-  case Stmt::MSPropertyRefExprClass: NS("Stmt_MSPropertyRefExprClass");
-  case Stmt::MaterializeTemporaryExprClass: NS("Stmt_MaterializeTemporaryExprClass");
+  case Stmt::LambdaExprClass: NStmtXXX("LambdaExprClass");
+  case Stmt::MSPropertyRefExprClass: NStmtXXX("MSPropertyRefExprClass");
+  case Stmt::MaterializeTemporaryExprClass: NStmtXXX("MaterializeTemporaryExprClass");
   case Stmt::MemberExprClass:
     //7.5 (TBD: how to handle C++ "->" overloadding)
     PropChild("member");
     optContext.nameForDeclRefExpr = nullptr;
-    NE("memberRef", nullptr); 
-  case Stmt::ObjCArrayLiteralClass: NS("Stmt_ObjCArrayLiteralClass");
-  case Stmt::ObjCBoolLiteralExprClass: NS("Stmt_ObjCBoolLiteralExprClass");
-  case Stmt::ObjCBoxedExprClass: NS("Stmt_ObjCBoxedExprClass");
-  case Stmt::ObjCDictionaryLiteralClass: NS("Stmt_ObjCDictionaryLiteralClass");
-  case Stmt::ObjCEncodeExprClass: NS("Stmt_ObjCEncodeExprClass");
-  case Stmt::ObjCIndirectCopyRestoreExprClass: NS("Stmt_ObjCIndirectCopyRestoreExprClass");
-  case Stmt::ObjCIsaExprClass: NS("Stmt_ObjCIsaExprClass");
-  case Stmt::ObjCIvarRefExprClass: NS("Stmt_ObjCIvarRefExprClass");
-  case Stmt::ObjCMessageExprClass: NS("Stmt_ObjCMessageExprClass");
-  case Stmt::ObjCPropertyRefExprClass: NS("Stmt_ObjCPropertyRefExprClass");
-  case Stmt::ObjCProtocolExprClass: NS("Stmt_ObjCProtocolExprClass");
-  case Stmt::ObjCSelectorExprClass: NS("Stmt_ObjCSelectorExprClass");
-  case Stmt::ObjCStringLiteralClass: NS("Stmt_ObjCStringLiteralClass");
-  case Stmt::ObjCSubscriptRefExprClass: NS("Stmt_ObjCSubscriptRefExprClass");
-  case Stmt::OffsetOfExprClass: NS("Stmt_OffsetOfExprClass");
-  case Stmt::OpaqueValueExprClass: NS("Stmt_OpaqueValueExprClass");
-  case Stmt::UnresolvedLookupExprClass: NS("Stmt_UnresolvedLookupExprClass");
-  case Stmt::UnresolvedMemberExprClass: NS("Stmt_UnresolvedMemberExprClass");
-  case Stmt::PackExpansionExprClass: NS("Stmt_PackExpansionExprClass");
+    NExpr("memberRef", nullptr); 
+  case Stmt::ObjCArrayLiteralClass: NStmtXXX("ObjCArrayLiteralClass");
+  case Stmt::ObjCBoolLiteralExprClass: NStmtXXX("ObjCBoolLiteralExprClass");
+  case Stmt::ObjCBoxedExprClass: NStmtXXX("ObjCBoxedExprClass");
+  case Stmt::ObjCDictionaryLiteralClass: NStmtXXX("ObjCDictionaryLiteralClass");
+  case Stmt::ObjCEncodeExprClass: NStmtXXX("ObjCEncodeExprClass");
+  case Stmt::ObjCIndirectCopyRestoreExprClass: NStmtXXX("ObjCIndirectCopyRestoreExprClass");
+  case Stmt::ObjCIsaExprClass: NStmtXXX("ObjCIsaExprClass");
+  case Stmt::ObjCIvarRefExprClass: NStmtXXX("ObjCIvarRefExprClass");
+  case Stmt::ObjCMessageExprClass: NStmtXXX("ObjCMessageExprClass");
+  case Stmt::ObjCPropertyRefExprClass: NStmtXXX("ObjCPropertyRefExprClass");
+  case Stmt::ObjCProtocolExprClass: NStmtXXX("ObjCProtocolExprClass");
+  case Stmt::ObjCSelectorExprClass: NStmtXXX("ObjCSelectorExprClass");
+  case Stmt::ObjCStringLiteralClass: NStmtXXX("ObjCStringLiteralClass");
+  case Stmt::ObjCSubscriptRefExprClass: NStmtXXX("ObjCSubscriptRefExprClass");
+  case Stmt::OffsetOfExprClass: NStmtXXX("OffsetOfExprClass");
+  case Stmt::OpaqueValueExprClass: NStmtXXX("OpaqueValueExprClass");
+  case Stmt::UnresolvedLookupExprClass: NStmtXXX("UnresolvedLookupExprClass");
+  case Stmt::UnresolvedMemberExprClass: NStmtXXX("UnresolvedMemberExprClass");
+  case Stmt::PackExpansionExprClass: NStmtXXX("PackExpansionExprClass");
   case Stmt::ParenExprClass: return true;; // no explicit node
-  case Stmt::ParenListExprClass: NS("Stmt_ParenListExprClass");
-  case Stmt::PredefinedExprClass: NS("Stmt_PredefinedExprClass");
-  case Stmt::PseudoObjectExprClass: NS("Stmt_PseudoObjectExprClass");
-  case Stmt::ShuffleVectorExprClass: NS("Stmt_ShuffleVectorExprClass");
-  case Stmt::SizeOfPackExprClass: NS("Stmt_SizeOfPackExprClass");
+  case Stmt::ParenListExprClass: NStmtXXX("ParenListExprClass");
+  case Stmt::PredefinedExprClass: NStmtXXX("PredefinedExprClass");
+  case Stmt::PseudoObjectExprClass: NStmtXXX("PseudoObjectExprClass");
+  case Stmt::ShuffleVectorExprClass: NStmtXXX("ShuffleVectorExprClass");
+  case Stmt::SizeOfPackExprClass: NStmtXXX("SizeOfPackExprClass");
   case Stmt::StmtExprClass:
     // 7.14
-    NS("gccCompoundExpr");
+    NStmt("gccCompoundExpr");
   case Stmt::StringLiteralClass: {
     //7.1
     StringRef Data = static_cast<StringLiteral*>(S)->getString();
@@ -468,24 +464,24 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
       }
     }
     OS.str();
-    NE("stringConstant", literalAsString.c_str());
+    NExpr("stringConstant", literalAsString.c_str());
   }
-  case Stmt::SubstNonTypeTemplateParmExprClass: NS("Stmt_SubstNonTypeTemplateParmExprClass");
-  case Stmt::SubstNonTypeTemplateParmPackExprClass: NS("Stmt_SubstNonTypeTemplateParmPackExprClass");
-  case Stmt::TypeTraitExprClass: NS("Stmt_TypeTraitExprClass");
-  case Stmt::TypoExprClass: NS("Stmt_TypoExprClass");
-  case Stmt::UnaryExprOrTypeTraitExprClass: NS("Stmt_UnaryExprOrTypeTraitExprClass");
-  case Stmt::UnaryOperatorClass: NS("Stmt_UnaryOperatorClass");
-  case Stmt::VAArgExprClass: NS("Stmt_VAArgExprClass");
+  case Stmt::SubstNonTypeTemplateParmExprClass: NStmtXXX("SubstNonTypeTemplateParmExprClass");
+  case Stmt::SubstNonTypeTemplateParmPackExprClass: NStmtXXX("SubstNonTypeTemplateParmPackExprClass");
+  case Stmt::TypeTraitExprClass: NStmtXXX("TypeTraitExprClass");
+  case Stmt::TypoExprClass: NStmtXXX("TypoExprClass");
+  case Stmt::UnaryExprOrTypeTraitExprClass: NStmtXXX("UnaryExprOrTypeTraitExprClass");
+  case Stmt::UnaryOperatorClass: NStmtXXX("UnaryOperatorClass");
+  case Stmt::VAArgExprClass: NStmtXXX("VAArgExprClass");
   case Stmt::ForStmtClass: {
     //6.6
     static const char *childnames[] = {
       "init",
-      "", // Variable Declaration
+      "-", // Variable Declaration
       "condition", "iter", "+body", nullptr
     };
     WrapChild(childnames);
-    NS("forStatement");
+    NStmt("forStatement");
   }
   case Stmt::GotoStmtClass: {
     //6.10
@@ -497,13 +493,18 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
   case Stmt::IfStmtClass: {
     //6.3
     static const char *childnames[] = {
-      "", // Variable Declaration
+      "-", // Variable Declaration
       "condition", "+then", "+else", nullptr
     };
     WrapChild(childnames);
-    NS("ifStatement");
+    NStmt("ifStatement");
   }
-  case Stmt::IndirectGotoStmtClass: NS("Stmt_IndirectGotoStmtClass");
+  case Stmt::IndirectGotoStmtClass:
+    //6.10
+    newChild("gotoStatement");
+    setLocation(S->getLocStart());
+    newChild("pointerRef"); // XXX?
+    return true;
   case Stmt::LabelStmtClass: {
     //6.11
     LabelDecl *LD = static_cast<LabelStmt*>(S)->getDecl();
@@ -515,76 +516,116 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
     WrapLabelChild();
     return true; // create children (statement) to my parent directly
   }
-  case Stmt::MSDependentExistsStmtClass: NS("Stmt_MSDependentExistsStmtClass");
+  case Stmt::MSDependentExistsStmtClass: NStmtXXX("MSDependentExistsStmtClass");
   case Stmt::NullStmtClass:
     // not explicitly defined in specification,
     // but C_Front does not discard null statements silently.
     return false; // do not traverse children
-  case Stmt::OMPAtomicDirectiveClass: NS("Stmt_OMPAtomicDirectiveClass");
-  case Stmt::OMPBarrierDirectiveClass: NS("Stmt_OMPBarrierDirectiveClass");
-  case Stmt::OMPCriticalDirectiveClass: NS("Stmt_OMPCriticalDirectiveClass");
-  case Stmt::OMPFlushDirectiveClass: NS("Stmt_OMPFlushDirectiveClass");
-  case Stmt::OMPForDirectiveClass: NS("Stmt_OMPForDirectiveClass");
-  case Stmt::OMPForSimdDirectiveClass: NS("Stmt_OMPForSimdDirectiveClass");
-  case Stmt::OMPParallelForDirectiveClass: NS("Stmt_OMPParallelForDirectiveClass");
-  case Stmt::OMPParallelForSimdDirectiveClass: NS("Stmt_OMPParallelForSimdDirectiveClass");
-  case Stmt::OMPSimdDirectiveClass: NS("Stmt_OMPSimdDirectiveClass");
-  case Stmt::OMPMasterDirectiveClass: NS("Stmt_OMPMasterDirectiveClass");
-  case Stmt::OMPOrderedDirectiveClass: NS("Stmt_OMPOrderedDirectiveClass");
-  case Stmt::OMPParallelDirectiveClass: NS("Stmt_OMPParallelDirectiveClass");
-  case Stmt::OMPParallelSectionsDirectiveClass: NS("Stmt_OMPParallelSectionsDirectiveClass");
-  case Stmt::OMPSectionDirectiveClass: NS("Stmt_OMPSectionDirectiveClass");
-  case Stmt::OMPSectionsDirectiveClass: NS("Stmt_OMPSectionsDirectiveClass");
-  case Stmt::OMPSingleDirectiveClass: NS("Stmt_OMPSingleDirectiveClass");
-  case Stmt::OMPTargetDirectiveClass: NS("Stmt_OMPTargetDirectiveClass");
-  case Stmt::OMPTaskDirectiveClass: NS("Stmt_OMPTaskDirectiveClass");
-  case Stmt::OMPTaskwaitDirectiveClass: NS("Stmt_OMPTaskwaitDirectiveClass");
-  case Stmt::OMPTaskyieldDirectiveClass: NS("Stmt_OMPTaskyieldDirectiveClass");
-  case Stmt::OMPTeamsDirectiveClass: NS("Stmt_OMPTeamsDirectiveClass");
-  case Stmt::ObjCAtCatchStmtClass: NS("Stmt_ObjCAtCatchStmtClass");
-  case Stmt::ObjCAtFinallyStmtClass: NS("Stmt_ObjCAtFinallyStmtClass");
-  case Stmt::ObjCAtSynchronizedStmtClass: NS("Stmt_ObjCAtSynchronizedStmtClass");
-  case Stmt::ObjCAtThrowStmtClass: NS("Stmt_ObjCAtThrowStmtClass");
-  case Stmt::ObjCAtTryStmtClass: NS("Stmt_ObjCAtTryStmtClass");
-  case Stmt::ObjCAutoreleasePoolStmtClass: NS("Stmt_ObjCAutoreleasePoolStmtClass");
-  case Stmt::ObjCForCollectionStmtClass: NS("Stmt_ObjCForCollectionStmtClass");
+  case Stmt::OMPAtomicDirectiveClass: NStmtXXX("OMPAtomicDirectiveClass");
+  case Stmt::OMPBarrierDirectiveClass: NStmtXXX("OMPBarrierDirectiveClass");
+  case Stmt::OMPCriticalDirectiveClass: NStmtXXX("OMPCriticalDirectiveClass");
+  case Stmt::OMPFlushDirectiveClass: NStmtXXX("OMPFlushDirectiveClass");
+  case Stmt::OMPForDirectiveClass: NStmtXXX("OMPForDirectiveClass");
+  case Stmt::OMPForSimdDirectiveClass: NStmtXXX("OMPForSimdDirectiveClass");
+  case Stmt::OMPParallelForDirectiveClass: NStmtXXX("OMPParallelForDirectiveClass");
+  case Stmt::OMPParallelForSimdDirectiveClass: NStmtXXX("OMPParallelForSimdDirectiveClass");
+  case Stmt::OMPSimdDirectiveClass: NStmtXXX("OMPSimdDirectiveClass");
+  case Stmt::OMPMasterDirectiveClass: NStmtXXX("OMPMasterDirectiveClass");
+  case Stmt::OMPOrderedDirectiveClass: NStmtXXX("OMPOrderedDirectiveClass");
+  case Stmt::OMPParallelDirectiveClass: NStmtXXX("OMPParallelDirectiveClass");
+  case Stmt::OMPParallelSectionsDirectiveClass: NStmtXXX("OMPParallelSectionsDirectiveClass");
+  case Stmt::OMPSectionDirectiveClass: NStmtXXX("OMPSectionDirectiveClass");
+  case Stmt::OMPSectionsDirectiveClass: NStmtXXX("OMPSectionsDirectiveClass");
+  case Stmt::OMPSingleDirectiveClass: NStmtXXX("OMPSingleDirectiveClass");
+  case Stmt::OMPTargetDirectiveClass: NStmtXXX("OMPTargetDirectiveClass");
+  case Stmt::OMPTaskDirectiveClass: NStmtXXX("OMPTaskDirectiveClass");
+  case Stmt::OMPTaskwaitDirectiveClass: NStmtXXX("OMPTaskwaitDirectiveClass");
+  case Stmt::OMPTaskyieldDirectiveClass: NStmtXXX("OMPTaskyieldDirectiveClass");
+  case Stmt::OMPTeamsDirectiveClass: NStmtXXX("OMPTeamsDirectiveClass");
+  case Stmt::ObjCAtCatchStmtClass: NStmtXXX("ObjCAtCatchStmtClass");
+  case Stmt::ObjCAtFinallyStmtClass: NStmtXXX("ObjCAtFinallyStmtClass");
+  case Stmt::ObjCAtSynchronizedStmtClass: NStmtXXX("ObjCAtSynchronizedStmtClass");
+  case Stmt::ObjCAtThrowStmtClass: NStmtXXX("ObjCAtThrowStmtClass");
+  case Stmt::ObjCAtTryStmtClass: NStmtXXX("ObjCAtTryStmtClass");
+  case Stmt::ObjCAutoreleasePoolStmtClass: NStmtXXX("ObjCAutoreleasePoolStmtClass");
+  case Stmt::ObjCForCollectionStmtClass: NStmtXXX("ObjCForCollectionStmtClass");
   case Stmt::ReturnStmtClass:
     //6.9
-    NS("returnStatement");
-  case Stmt::SEHExceptStmtClass: NS("Stmt_SEHExceptStmtClass");
-  case Stmt::SEHFinallyStmtClass: NS("Stmt_SEHFinallyStmtClass");
-  case Stmt::SEHLeaveStmtClass: NS("Stmt_SEHLeaveStmtClass");
-  case Stmt::SEHTryStmtClass: NS("Stmt_SEHTryStmtClass");
+    NStmt("returnStatement");
+  case Stmt::SEHExceptStmtClass: NStmtXXX("SEHExceptStmtClass");
+  case Stmt::SEHFinallyStmtClass: NStmtXXX("SEHFinallyStmtClass");
+  case Stmt::SEHLeaveStmtClass: NStmtXXX("SEHLeaveStmtClass");
+  case Stmt::SEHTryStmtClass: NStmtXXX("SEHTryStmtClass");
   case Stmt::CaseStmtClass: {
-    //6.13
-    static const char *childnames[] = {"value", nullptr};
+    //6.13, 6.14
+    CaseStmt *CS = static_cast<CaseStmt *>(S);
+    Expr *LHS = CS->getLHS();
+    Expr *RHS = CS->getRHS();
+    xmlNodePtr origCurNode = curNode;
+    if (RHS) {
+      newChild("gccRangedCaseLabel");
+      setLocation(S->getLocStart());
+      xmlNodePtr labelNode = curNode;
+      newChild("value");
+      TraverseStmt(LHS);
+      curNode = labelNode;
+      newChild("value");
+      TraverseStmt(RHS);
+    } else {
+      newChild("caseLabel");
+      setLocation(S->getLocStart());
+      newChild("value");
+      TraverseStmt(LHS);
+    }
+    // ignore the first two children
+    static const char *childnames[] = {"-", "-", "+", nullptr};
     WrapChild(childnames);
-    NS("caseLabel");
+
+    // the child stmt should belongs to my parent directly
+    curNode = origCurNode;
+    return true; 
   }
-  case Stmt::DefaultStmtClass:
+  case Stmt::DefaultStmtClass: {
     //6.15
-    NS("defaultLabel");
+    xmlNodePtr origCurNode = curNode;
+    newChild("defaultLabel");
+    setLocation(S->getLocStart());
+    static const char *childnames[] = {"+", nullptr};
+    WrapChild(childnames);
+
+    // the child stmt should belongs to my parent directly
+    curNode = origCurNode;
+    return true;
+  }
   case Stmt::SwitchStmtClass: {
     //6.12
     static const char *childnames[] = {
-      "", // Variable Declaration
-      "value", "+body", nullptr
+      "-", // Variable Declaration
+      "value", "*body", nullptr
     };
     WrapChild(childnames);
-    NS("switchStatement");
+    NStmt("switchStatement");
   }
   case Stmt::WhileStmtClass: {
     //6.4
     static const char *childnames[] = {
-      "", // Variable Declaration
+      "-", // Variable Declaration
       "condition", "+body", nullptr
     };
     WrapChild(childnames);
-    NS("whileStatement");
+    NStmt("whileStatement");
   }
   }
 }
+#undef NStmt
+#undef NStmtXXX
+#undef NExpr
 
+#define NType(mes) do {                          \
+    newProp("type", "Type_" mes);                \
+    newProp("pointer", typenamestr.c_str());     \
+    return true;                                 \
+  } while (0)
 bool
 DeclarationsVisitor::PreVisitType(QualType T) {
   if (T.isNull()) {
@@ -668,7 +709,22 @@ DeclarationsVisitor::PreVisitType(QualType T) {
   }
 #endif
 }
+#undef NType
 
+#if 0
+#define NTypeLoc(mes) do {                                       \
+    std::string content;                                         \
+    newChild("TypeLoc_" mes);                                    \
+    content = contentBySource(TL.getLocStart(), TL.getLocEnd()); \
+    addChild("source", content.c_str());                         \
+    return true;                                                 \
+  } while (0)
+#else
+#define NTypeLoc(mes) do {                                       \
+    newComment("TypeLoc_" mes);                                  \
+    return true;                                                 \
+  } while (0)
+#endif
 bool
 DeclarationsVisitor::PreVisitTypeLoc(TypeLoc TL) {
   if (TL.isNull()) {
@@ -677,52 +733,54 @@ DeclarationsVisitor::PreVisitTypeLoc(TypeLoc TL) {
   }
 
   switch (TL.getTypeLocClass()) {
-  case TypeLoc::Qualified: NTypeLoc("TypeLoc_Qualified");
-  case TypeLoc::Builtin: NTypeLoc("TypeLoc_Builtin");
-  case TypeLoc::Complex: NTypeLoc("TypeLoc_Complex");
-  case TypeLoc::Pointer: NTypeLoc("TypeLoc_Pointer");
-  case TypeLoc::BlockPointer: NTypeLoc("TypeLoc_BlockPointer");
-  case TypeLoc::LValueReference: NTypeLoc("TypeLoc_LValueReference");
-  case TypeLoc::RValueReference: NTypeLoc("TypeLoc_RValueReference");
-  case TypeLoc::MemberPointer: NTypeLoc("TypeLoc_MemberPointer");
-  case TypeLoc::ConstantArray: NTypeLoc("TypeLoc_ConstantArray");
-  case TypeLoc::IncompleteArray: NTypeLoc("TypeLoc_IncompleteArray");
-  case TypeLoc::VariableArray: NTypeLoc("TypeLoc_VariableArray");
-  case TypeLoc::DependentSizedArray: NTypeLoc("TypeLoc_DependentSizedArray");
-  case TypeLoc::DependentSizedExtVector: NTypeLoc("TypeLoc_DependentSizedExtVector");
-  case TypeLoc::Vector: NTypeLoc("TypeLoc_Vector");
-  case TypeLoc::ExtVector: NTypeLoc("TypeLoc_ExtVector");
-  case TypeLoc::FunctionProto: NTypeLoc("TypeLoc_FunctionProto");
-  case TypeLoc::FunctionNoProto: NTypeLoc("TypeLoc_FunctionNoProto");
-  case TypeLoc::UnresolvedUsing: NTypeLoc("TypeLoc_UnresolvedUsing");
-  case TypeLoc::Paren: NTypeLoc("TypeLoc_Paren");
-  case TypeLoc::Typedef: NTypeLoc("TypeLoc_Typedef");
-  case TypeLoc::Adjusted: NTypeLoc("TypeLoc_Adjusted");
-  case TypeLoc::Decayed: NTypeLoc("TypeLoc_Decayed");
-  case TypeLoc::TypeOfExpr: NTypeLoc("TypeLoc_TypeOfExpr");
-  case TypeLoc::TypeOf: NTypeLoc("TypeLoc_TypeOf");
-  case TypeLoc::Decltype: NTypeLoc("TypeLoc_Decltype");
-  case TypeLoc::UnaryTransform: NTypeLoc("TypeLoc_UnaryTransform");
-  case TypeLoc::Record: NTypeLoc("TypeLoc_Record");
-  case TypeLoc::Enum: NTypeLoc("TypeLoc_Enum");
-  case TypeLoc::Elaborated: NTypeLoc("TypeLoc_Elaborated");
-  case TypeLoc::Attributed: NTypeLoc("TypeLoc_Attributed");
-  case TypeLoc::TemplateTypeParm: NTypeLoc("TypeLoc_TemplateTypeParm");
-  case TypeLoc::SubstTemplateTypeParm: NTypeLoc("TypeLoc_SubstTemplateTypeParm");
-  case TypeLoc::SubstTemplateTypeParmPack: NTypeLoc("TypeLoc_SubstTemplateTypeParmPack");
-  case TypeLoc::TemplateSpecialization: NTypeLoc("TypeLoc_TemplateSpecialization");
-  case TypeLoc::Auto: NTypeLoc("TypeLoc_Auto");
-  case TypeLoc::InjectedClassName: NTypeLoc("TypeLoc_InjectedClassName");
-  case TypeLoc::DependentName: NTypeLoc("TypeLoc_DependentName");
-  case TypeLoc::DependentTemplateSpecialization: NTypeLoc("TypeLoc_DependentTemplateSpecialization");
-  case TypeLoc::PackExpansion: NTypeLoc("TypeLoc_PackExpansion");
-  case TypeLoc::ObjCObject: NTypeLoc("TypeLoc_ObjCObject");
-  case TypeLoc::ObjCInterface: NTypeLoc("TypeLoc_ObjCInterface");
-  case TypeLoc::ObjCObjectPointer: NTypeLoc("TypeLoc_ObjCObjectPointer");
-  case TypeLoc::Atomic: NTypeLoc("TypeLoc_Atomic");
+  case TypeLoc::Qualified: NTypeLoc("Qualified");
+  case TypeLoc::Builtin: NTypeLoc("Builtin");
+  case TypeLoc::Complex: NTypeLoc("Complex");
+  case TypeLoc::Pointer: NTypeLoc("Pointer");
+  case TypeLoc::BlockPointer: NTypeLoc("BlockPointer");
+  case TypeLoc::LValueReference: NTypeLoc("LValueReference");
+  case TypeLoc::RValueReference: NTypeLoc("RValueReference");
+  case TypeLoc::MemberPointer: NTypeLoc("MemberPointer");
+  case TypeLoc::ConstantArray: NTypeLoc("ConstantArray");
+  case TypeLoc::IncompleteArray: NTypeLoc("IncompleteArray");
+  case TypeLoc::VariableArray: NTypeLoc("VariableArray");
+  case TypeLoc::DependentSizedArray: NTypeLoc("DependentSizedArray");
+  case TypeLoc::DependentSizedExtVector: NTypeLoc("DependentSizedExtVector");
+  case TypeLoc::Vector: NTypeLoc("Vector");
+  case TypeLoc::ExtVector: NTypeLoc("ExtVector");
+  case TypeLoc::FunctionProto: NTypeLoc("FunctionProto");
+  case TypeLoc::FunctionNoProto: NTypeLoc("FunctionNoProto");
+  case TypeLoc::UnresolvedUsing: NTypeLoc("UnresolvedUsing");
+  case TypeLoc::Paren: NTypeLoc("Paren");
+  case TypeLoc::Typedef: NTypeLoc("Typedef");
+  case TypeLoc::Adjusted: NTypeLoc("Adjusted");
+  case TypeLoc::Decayed: NTypeLoc("Decayed");
+  case TypeLoc::TypeOfExpr: NTypeLoc("TypeOfExpr");
+  case TypeLoc::TypeOf: NTypeLoc("TypeOf");
+  case TypeLoc::Decltype: NTypeLoc("Decltype");
+  case TypeLoc::UnaryTransform: NTypeLoc("UnaryTransform");
+  case TypeLoc::Record: NTypeLoc("Record");
+  case TypeLoc::Enum: NTypeLoc("Enum");
+  case TypeLoc::Elaborated: NTypeLoc("Elaborated");
+  case TypeLoc::Attributed: NTypeLoc("Attributed");
+  case TypeLoc::TemplateTypeParm: NTypeLoc("TemplateTypeParm");
+  case TypeLoc::SubstTemplateTypeParm: NTypeLoc("SubstTemplateTypeParm");
+  case TypeLoc::SubstTemplateTypeParmPack: NTypeLoc("SubstTemplateTypeParmPack");
+  case TypeLoc::TemplateSpecialization: NTypeLoc("TemplateSpecialization");
+  case TypeLoc::Auto: NTypeLoc("Auto");
+  case TypeLoc::InjectedClassName: NTypeLoc("InjectedClassName");
+  case TypeLoc::DependentName: NTypeLoc("DependentName");
+  case TypeLoc::DependentTemplateSpecialization: NTypeLoc("DependentTemplateSpecialization");
+  case TypeLoc::PackExpansion: NTypeLoc("PackExpansion");
+  case TypeLoc::ObjCObject: NTypeLoc("ObjCObject");
+  case TypeLoc::ObjCInterface: NTypeLoc("ObjCInterface");
+  case TypeLoc::ObjCObjectPointer: NTypeLoc("ObjCObjectPointer");
+  case TypeLoc::Atomic: NTypeLoc("Atomic");
   }
 }
+#undef NTypeLoc
 
+#define NAttr(mes) newComment("Attr_" mes); break
 bool
 DeclarationsVisitor::PreVisitAttr(Attr *A) {
   if (!A) {
@@ -915,72 +973,97 @@ DeclarationsVisitor::PreVisitAttr(Attr *A) {
 
   return true;
 }
+#undef NAttr
 
+#define NDeclXXX(mes) do {                      \
+    newChild("Decl_" mes);                      \
+    setLocation(D->getLocation());              \
+    return true;                                \
+  } while (0)
 bool
 DeclarationsVisitor::PreVisitDecl(Decl *D) {
   if (!D) {
     return false;
   }
   switch (D->getKind()) {
-  case Decl::AccessSpec: ND("Decl_AccessSpec");
-  case Decl::Block: ND("Decl_Block");
-  case Decl::Captured: ND("Decl_Captured");
-  case Decl::ClassScopeFunctionSpecialization: ND("Decl_ClassScopeFunctionSpecialization");
-  case Decl::Empty: ND("Decl_Empty");
-  case Decl::FileScopeAsm: ND("Decl_FileScopeAsm");
-  case Decl::Friend: ND("Decl_Friend");
-  case Decl::FriendTemplate: ND("Decl_FriendTemplate");
-  case Decl::Import: ND("Decl_Import");
-  case Decl::LinkageSpec: ND("Decl_LinkageSpec");
-  case Decl::Label: ND("Decl_Label");
-  case Decl::Namespace: ND("Decl_Namespace");
-  case Decl::NamespaceAlias: ND("Decl_NamespaceAlias");
-  case Decl::ObjCCompatibleAlias: ND("Decl_ObjCCompatibleAlias");
-  case Decl::ObjCCategory: ND("Decl_ObjCCategory");
-  case Decl::ObjCCategoryImpl: ND("Decl_ObjCCategoryImpl");
-  case Decl::ObjCImplementation: ND("Decl_ObjCImplementation");
-  case Decl::ObjCInterface: ND("Decl_ObjCInterface");
-  case Decl::ObjCProtocol: ND("Decl_ObjCProtocol");
-  case Decl::ObjCMethod: ND("Decl_ObjCMethod");
-  case Decl::ObjCProperty: ND("Decl_ObjCProperty");
-  case Decl::ClassTemplate: ND("Decl_ClassTemplate");
-  case Decl::FunctionTemplate: ND("Decl_FunctionTemplate");
-  case Decl::TypeAliasTemplate: ND("Decl_TypeAliasTemplate");
-  case Decl::VarTemplate: ND("Decl_VarTemplate");
-  case Decl::TemplateTemplateParm: ND("Decl_TemplateTemplateParm");
-  case Decl::Enum: ND("Decl_Enum");
-  case Decl::Record: ND("Decl_Record");
-  case Decl::CXXRecord: ND("Decl_CXXRecord");
-  case Decl::ClassTemplateSpecialization: ND("Decl_ClassTemplateSpecialization");
-  case Decl::ClassTemplatePartialSpecialization: ND("Decl_ClassTemplatePartialSpecialization");
-  case Decl::TemplateTypeParm: ND("Decl_TemplateTypeParm");
-  case Decl::TypeAlias: ND("Decl_TypeAlias");
-  case Decl::Typedef: ND("Decl_Typedef");
-  case Decl::UnresolvedUsingTypename: ND("Decl_UnresolvedUsingTypename");
-  case Decl::Using: ND("Decl_Using");
-  case Decl::UsingDirective: ND("Decl_UsingDirective");
-  case Decl::UsingShadow: ND("Decl_UsingShadow");
-  case Decl::Field: ND("Decl_Field");
-  case Decl::ObjCAtDefsField: ND("Decl_ObjCAtDefsField");
-  case Decl::ObjCIvar: ND("Decl_ObjCIvar");
-  case Decl::Function: ND("Decl_Function");
-  case Decl::CXXMethod: ND("Decl_CXXMethod");
-  case Decl::CXXConstructor: ND("Decl_CXXConstructor");
-  case Decl::CXXConversion: ND("Decl_CXXConversion");
-  case Decl::CXXDestructor: ND("Decl_CXXDestructor");
-  case Decl::MSProperty: ND("Decl_MSProperty");
-  case Decl::NonTypeTemplateParm: ND("Decl_NonTypeTemplateParm");
-  case Decl::Var: ND("Decl_Var");
-  case Decl::ImplicitParam: ND("Decl_ImplicitParam");
-  case Decl::ParmVar: ND("Decl_ParmVar");
-  case Decl::VarTemplateSpecialization: ND("Decl_VarTemplateSpecialization");
-  case Decl::VarTemplatePartialSpecialization: ND("Decl_VarTemplatePartialSpecialization");
-  case Decl::EnumConstant: ND("Decl_EnumConstant");
-  case Decl::IndirectField: ND("Decl_IndirectField");
-  case Decl::UnresolvedUsingValue: ND("Decl_UnresolvedUsingValue");
-  case Decl::OMPThreadPrivate: ND("Decl_OMPThreadPrivate");
-  case Decl::ObjCPropertyImpl: ND("Decl_ObjCPropertyImpl");
-  case Decl::StaticAssert: ND("Decl_StaticAssert");
+  case Decl::AccessSpec: NDeclXXX("AccessSpec");
+  case Decl::Block: NDeclXXX("Block");
+  case Decl::Captured: NDeclXXX("Captured");
+  case Decl::ClassScopeFunctionSpecialization: NDeclXXX("ClassScopeFunctionSpecialization");
+  case Decl::Empty: NDeclXXX("Empty");
+  case Decl::FileScopeAsm: NDeclXXX("FileScopeAsm");
+  case Decl::Friend: NDeclXXX("Friend");
+  case Decl::FriendTemplate: NDeclXXX("FriendTemplate");
+  case Decl::Import: NDeclXXX("Import");
+  case Decl::LinkageSpec: NDeclXXX("LinkageSpec");
+  case Decl::Label: NDeclXXX("Label");
+  case Decl::Namespace: NDeclXXX("Namespace");
+  case Decl::NamespaceAlias: NDeclXXX("NamespaceAlias");
+  case Decl::ObjCCompatibleAlias: NDeclXXX("ObjCCompatibleAlias");
+  case Decl::ObjCCategory: NDeclXXX("ObjCCategory");
+  case Decl::ObjCCategoryImpl: NDeclXXX("ObjCCategoryImpl");
+  case Decl::ObjCImplementation: NDeclXXX("ObjCImplementation");
+  case Decl::ObjCInterface: NDeclXXX("ObjCInterface");
+  case Decl::ObjCProtocol: NDeclXXX("ObjCProtocol");
+  case Decl::ObjCMethod: NDeclXXX("ObjCMethod");
+  case Decl::ObjCProperty: NDeclXXX("ObjCProperty");
+  case Decl::ClassTemplate: NDeclXXX("ClassTemplate");
+  case Decl::FunctionTemplate: NDeclXXX("FunctionTemplate");
+  case Decl::TypeAliasTemplate: NDeclXXX("TypeAliasTemplate");
+  case Decl::VarTemplate: NDeclXXX("VarTemplate");
+  case Decl::TemplateTemplateParm: NDeclXXX("TemplateTemplateParm");
+  case Decl::Enum:
+    newComment("Decl_Enum");
+    return false; // to be traversed in typeTable
+  case Decl::Record:
+    newComment("Decl_Record");
+    return false; // to be traversed in typeTable
+  case Decl::CXXRecord:
+    newComment("Decl_CXXRecord");
+    return false; // to be traversed in typeTable
+  case Decl::ClassTemplateSpecialization: NDeclXXX("ClassTemplateSpecialization");
+  case Decl::ClassTemplatePartialSpecialization: NDeclXXX("ClassTemplatePartialSpecialization");
+  case Decl::TemplateTypeParm: NDeclXXX("TemplateTypeParm");
+  case Decl::TypeAlias: NDeclXXX("TypeAlias");
+  case Decl::Typedef:
+    //
+    newComment("Decl_Typedef");
+    return false; // to be traversed in typeTable
+  case Decl::UnresolvedUsingTypename: NDeclXXX("UnresolvedUsingTypename");
+  case Decl::Using: NDeclXXX("Using");
+  case Decl::UsingDirective: NDeclXXX("UsingDirective");
+  case Decl::UsingShadow: NDeclXXX("UsingShadow");
+  case Decl::Field: NDeclXXX("Field");  // XXX?
+  case Decl::ObjCAtDefsField: NDeclXXX("ObjCAtDefsField");
+  case Decl::ObjCIvar: NDeclXXX("ObjCIvar");
+  case Decl::Function:
+    // 5.1, 5.4 XXX
+    if (static_cast<FunctionDecl*>(D)->hasBody()) {
+      newChild("functionDefinition");
+    } else {
+      newChild("functionDecl");
+    }
+    return true;
+  case Decl::CXXMethod: NDeclXXX("CXXMethod");
+  case Decl::CXXConstructor: NDeclXXX("CXXConstructor");
+  case Decl::CXXConversion: NDeclXXX("CXXConversion");
+  case Decl::CXXDestructor: NDeclXXX("CXXDestructor");
+  case Decl::MSProperty: NDeclXXX("MSProperty");
+  case Decl::NonTypeTemplateParm: NDeclXXX("NonTypeTemplateParm");
+  case Decl::Var:
+    // 5.3
+    newChild("varDecl");
+    return true;
+  case Decl::ImplicitParam: NDeclXXX("ImplicitParam");
+  case Decl::ParmVar: NDeclXXX("ParmVar");
+  case Decl::VarTemplateSpecialization: NDeclXXX("VarTemplateSpecialization");
+  case Decl::VarTemplatePartialSpecialization: NDeclXXX("VarTemplatePartialSpecialization");
+  case Decl::EnumConstant: NDeclXXX("EnumConstant"); // XXX?
+  case Decl::IndirectField: NDeclXXX("IndirectField");
+  case Decl::UnresolvedUsingValue: NDeclXXX("UnresolvedUsingValue");
+  case Decl::OMPThreadPrivate: NDeclXXX("OMPThreadPrivate");
+  case Decl::ObjCPropertyImpl: NDeclXXX("ObjCPropertyImpl");
+  case Decl::StaticAssert: NDeclXXX("StaticAssert");
   case Decl::TranslationUnit:
     if (OptDisableDeclarations) {
       return false; // stop traverse
@@ -989,6 +1072,8 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
     }
   }
 }
+#undef NDecl
+#undef NDeclXXX
 
 #if 0
 bool
@@ -1011,6 +1096,10 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
 }
 #endif
 
+#define NNNSXXX(mes) do {                       \
+    newChild("NestedNameSpecifier_" mes);       \
+    return true;                                \
+  } while (0)
 bool
 DeclarationsVisitor::PreVisitNestedNameSpecifier(NestedNameSpecifier *NNS) {
   if (!NNS) {
@@ -1018,16 +1107,21 @@ DeclarationsVisitor::PreVisitNestedNameSpecifier(NestedNameSpecifier *NNS) {
     return false;
   }
   switch (NNS->getKind()) {
-  case NestedNameSpecifier::Identifier: N("NestedNameSpecifier_Identifier");
-  case NestedNameSpecifier::Namespace: N("NestedNameSpecifier_Namespace");
-  case NestedNameSpecifier::NamespaceAlias: N("NestedNameSpecifier_NamespaceAlias");
-  case NestedNameSpecifier::Global: N("NestedNameSpecifier_Global");
-  case NestedNameSpecifier::Super: N("NestedNameSpecifier_Super");
-  case NestedNameSpecifier::TypeSpec: N("NestedNameSpecifier_TypeSpec");
-  case NestedNameSpecifier::TypeSpecWithTemplate: N("NestedNameSpecifier_TypeSpecWithTemplate");
+  case NestedNameSpecifier::Identifier: NNNSXXX("Identifier");
+  case NestedNameSpecifier::Namespace: NNNSXXX("Namespace");
+  case NestedNameSpecifier::NamespaceAlias: NNNSXXX("NamespaceAlias");
+  case NestedNameSpecifier::Global: NNNSXXX("Global");
+  case NestedNameSpecifier::Super: NNNSXXX("Super");
+  case NestedNameSpecifier::TypeSpec: NNNSXXX("TypeSpec");
+  case NestedNameSpecifier::TypeSpecWithTemplate: NNNSXXX("TypeSpecWithTemplate");
   }
 }
+#undef NNNSXXX
 
+#define NNNSLocXXX(mes) do {                    \
+    newChild("NestedNameSpecifier_" mes);       \
+    return true;                                \
+  } while (0)
 bool
 DeclarationsVisitor::PreVisitNestedNameSpecifierLoc(NestedNameSpecifierLoc NNS) {
   if (!NNS) {
@@ -1035,16 +1129,22 @@ DeclarationsVisitor::PreVisitNestedNameSpecifierLoc(NestedNameSpecifierLoc NNS) 
     return false;
   }
   switch (NNS.getNestedNameSpecifier()->getKind()) {
-  case NestedNameSpecifier::Identifier: N("NestedNameSpecifierLoc_Identifier");
-  case NestedNameSpecifier::Namespace: N("NestedNameSpecifierLoc_Namespace");
-  case NestedNameSpecifier::NamespaceAlias: N("NestedNameSpecifierLoc_NamespaceAlias");
-  case NestedNameSpecifier::Global: N("NestedNameSpecifierLoc_Global");
-  case NestedNameSpecifier::Super: N("NestedNameSpecifierLoc_Super");
-  case NestedNameSpecifier::TypeSpec: N("NestedNameSpecifierLoc_TypeSpec");
-  case NestedNameSpecifier::TypeSpecWithTemplate: N("NestedNameSpecifierLoc_TypeSpecWithTemplate");
+  case NestedNameSpecifier::Identifier: NNNSLocXXX("Identifier");
+  case NestedNameSpecifier::Namespace: NNNSLocXXX("Namespace");
+  case NestedNameSpecifier::NamespaceAlias: NNNSLocXXX("NamespaceAlias");
+  case NestedNameSpecifier::Global: NNNSLocXXX("Global");
+  case NestedNameSpecifier::Super: NNNSLocXXX("Super");
+  case NestedNameSpecifier::TypeSpec: NNNSLocXXX("TypeSpec");
+  case NestedNameSpecifier::TypeSpecWithTemplate: NNNSLocXXX("TypeSpecWithTemplate");
   }
 }
+#undef NNNSLocXXX
 
+#define NDeclName(mes) do {                                     \
+    newComment("DeclarationNameInfo_" mes);                     \
+    newChild("name", content);                                  \
+    return true;                                                \
+  } while (0)
 bool
 DeclarationsVisitor::PreVisitDeclarationNameInfo(DeclarationNameInfo NI) {
   DeclarationName DN = NI.getName();
@@ -1064,6 +1164,7 @@ DeclarationsVisitor::PreVisitDeclarationNameInfo(DeclarationNameInfo NI) {
   case DeclarationName::CXXUsingDirective: NDeclName("CXXUsingDirective");
   }
 }
+#undef NDeclName
 
 ///
 /// Local Variables:

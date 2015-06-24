@@ -70,11 +70,13 @@ union aho baka[10];
 
 int gototest(int x)
 {
+  void *p = &&hunya;
   if (!x) {
     goto end;
   }
   return x * x;
   ;
+  goto *p;
   ;
   ;
  end:
