@@ -27,12 +27,9 @@ XcodeMlVisitorBaseImpl::XcodeMlVisitorBaseImpl(MangleContext *MC,
                                                xmlNodePtr CurNode,
                                                TypeTableInfo *TTI)
     : XcodeMlRAVpool(this), mangleContext(MC), curNode(CurNode),
-      typetableinfo(TTI), contentString("") {};
+      typetableinfo(TTI) {};
 
 xmlNodePtr XcodeMlVisitorBaseImpl::addChild(const char *Name, const char *Content) {
-    if (!Content && contentString.length() > 0) {
-        Content = contentString.c_str();
-    }
     return xmlNewTextChild(curNode, nullptr, BAD_CAST Name, BAD_CAST Content);
 }
 
@@ -40,9 +37,6 @@ xmlNodePtr XcodeMlVisitorBaseImpl::addChild(const char *Name, xmlNodePtr N) {
     return xmlNewTextChild(N, nullptr, BAD_CAST Name, nullptr);
 }
 void XcodeMlVisitorBaseImpl::newChild(const char *Name, const char *Content) {
-    if (!Content && contentString.length() > 0) {
-        Content = contentString.c_str();
-    }
     curNode = xmlNewTextChild(curNode, nullptr,
                               BAD_CAST Name, BAD_CAST Content);
 }
@@ -108,8 +102,8 @@ void XcodeMlVisitorBaseImpl::setLocation(SourceLocation Loc, xmlNodePtr N) {
     }
 }
 
-void XcodeMlVisitorBaseImpl::setContentBySource(SourceLocation LocStart,
-                                                SourceLocation LocEnd) {
+std::string XcodeMlVisitorBaseImpl::contentBySource(SourceLocation LocStart,
+                                                    SourceLocation LocEnd) {
     ASTContext &CXT = mangleContext->getASTContext();
     SourceManager &SM = CXT.getSourceManager();
     SourceLocation LocEndOfToken = Lexer::getLocForEndOfToken(LocEnd, 0, SM,
@@ -118,12 +112,12 @@ void XcodeMlVisitorBaseImpl::setContentBySource(SourceLocation LocStart,
         const char *b = SM.getCharacterData(LocStart);
         const char *e = SM.getCharacterData(LocEndOfToken);
         if (e > b && e < b + 256) {
-            contentString = std::string(b, e - b);
+            return std::string(b, e - b);
         } else {
-            contentString = "";
+            return std::string("");
         }
     } else {
-        contentString = "";
+        return std::string("");
     }
 }
 

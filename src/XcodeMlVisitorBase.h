@@ -19,7 +19,6 @@ protected:
     clang::MangleContext *mangleContext;
     xmlNodePtr curNode;        // a candidate of the new chlid.
     TypeTableInfo *typetableinfo;
-    std::string contentString; // a temporary holder of xmlNode content
 public:
     XcodeMlVisitorBaseImpl() = delete;
     XcodeMlVisitorBaseImpl(const XcodeMlVisitorBaseImpl&) = delete;
@@ -39,8 +38,8 @@ public:
     void newComment(const xmlChar *str, xmlNodePtr RN = nullptr);
     void newComment(const char *str, xmlNodePtr RN = nullptr);
     void setLocation(clang::SourceLocation Loc, xmlNodePtr N = nullptr);
-    void setContentBySource(clang::SourceLocation LocStart,
-                            clang::SourceLocation LocEnd);
+    std::string contentBySource(clang::SourceLocation LocStart,
+                                clang::SourceLocation LocEnd);
 };
 
 // Main class: XcodeMlVisitorBase<Derived>

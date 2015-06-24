@@ -23,8 +23,8 @@ DeclarationsVisitor::getVisitorName() const {
 // helper macros
 
 #define N(mes) do {newChild(mes); return true;} while (0)
-#define NE(mes) do {                                                    \
-    newChild(mes);                                                      \
+#define NE(mes, content) do {                                           \
+    newChild(mes, content);                                             \
     TraverseType(static_cast<Expr*>(S)->getType());                     \
     return true;                                                        \
   } while (0)
@@ -37,18 +37,19 @@ DeclarationsVisitor::getVisitorName() const {
 
 #define ND(mes) do {newChild(mes); setLocation(D->getLocation()); return true;} while (0)
 
-#define NTypeLoc(mes) do {                                      \
-    newChild(mes);                                              \
-    setContentBySource(TL.getLocStart(), TL.getLocEnd());       \
-    addChild("source");                                         \
-    return true;                                                \
+#define NTypeLoc(mes) do {                                       \
+    std::string content;                                         \
+    newChild(mes);                                               \
+    content = contentBySource(TL.getLocStart(), TL.getLocEnd()); \
+    addChild("source", content.c_str());                         \
+    return true;                                                 \
   } while (0)
 
 #define NAttr(mes) newComment("Attr_" mes); break
 
 #define NType(mes) do {                          \
     newProp("type", "Type_" mes);                \
-    newProp("pointer", contentString.c_str());   \
+    newProp("pointer", typenamestr.c_str());     \
     return true;                                 \
   } while (0)
 
@@ -184,7 +185,6 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
     return false;
   }
   HooksForAttr.push_back([this](Attr *A){
-      contentString = "";
       newChild("gccAttributes");
       return TraverseAttr(A);
     });
@@ -279,10 +279,10 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
     NS("doStatement");
   case Stmt::BinaryConditionalOperatorClass:
     //7.13
-    NE("condExpr");
+    NE("condExpr", "");
   case Stmt::ConditionalOperatorClass:
     //7.13
-    NE("condExpr");
+    NE("condExpr", "");
   case Stmt::AddrLabelExprClass: NS("Stmt_AddrLabelExprClass");
   case Stmt::ArraySubscriptExprClass:
     //7.4 (this cannot support C++)
@@ -364,16 +364,17 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
   case Stmt::ExtVectorElementExprClass: NS("Stmt_ExtVectorElementExprClass");
   case Stmt::FloatingLiteralClass: {
     //7.1
+    std::string valueAsString;
 #if 0
     double Value = static_cast<FloatingLiteral*>(S)->getValueAsApproximateDouble();
-    raw_string_ostream OS(contentString);
+    raw_string_ostream OS(valueAsString);
 
     OS << Value;
     OS.str();
 #else
-    setContentBySource(S->getLocStart(), S->getLocEnd());
+    valueAsString = contentBySource(S->getLocStart(), S->getLocEnd());
 #endif
-    NE("floatConstant");
+    NE("floatConstant", valueAsString.c_str());
   }
   case Stmt::FunctionParmPackExprClass: NS("Stmt_FunctionParmPackExprClass");
   case Stmt::GNUNullExprClass: NS("Stmt_GNUNullExprClass");
@@ -384,10 +385,11 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
   case Stmt::IntegerLiteralClass: {
     //7.1 XXX: long long should be treated specially
     APInt Value = static_cast<IntegerLiteral*>(S)->getValue();
-    raw_string_ostream OS(contentString);
+    std::string valueAsString;
+    raw_string_ostream OS(valueAsString);
     OS << *Value.getRawData();
     OS.str();
-    NE("intConstant");
+    NE("intConstant", valueAsString.c_str());
   }
   case Stmt::LambdaExprClass: NS("Stmt_LambdaExprClass");
   case Stmt::MSPropertyRefExprClass: NS("Stmt_MSPropertyRefExprClass");
@@ -396,7 +398,7 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
     //7.5 (TBD: how to handle C++ "->" overloadding)
     PropChild("member");
     optContext.nameForDeclRefExpr = nullptr;
-    NE("memberRef"); 
+    NE("memberRef", ""); 
   case Stmt::ObjCArrayLiteralClass: NS("Stmt_ObjCArrayLiteralClass");
   case Stmt::ObjCBoolLiteralExprClass: NS("Stmt_ObjCBoolLiteralExprClass");
   case Stmt::ObjCBoxedExprClass: NS("Stmt_ObjCBoxedExprClass");
@@ -428,7 +430,8 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
   case Stmt::StringLiteralClass: {
     //7.1
     StringRef Data = static_cast<StringLiteral*>(S)->getString();
-    raw_string_ostream OS(contentString);
+    std::string literalAsString;
+    raw_string_ostream OS(literalAsString);
 
     for (unsigned i = 0, e = Data.size(); i != e; ++i) {
       unsigned char C = Data[i];
@@ -455,7 +458,7 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
       }
     }
     OS.str();
-    NE("stringConstant");
+    NE("stringConstant", literalAsString.c_str());
   }
   case Stmt::SubstNonTypeTemplateParmExprClass: NS("Stmt_SubstNonTypeTemplateParmExprClass");
   case Stmt::SubstNonTypeTemplateParmPackExprClass: NS("Stmt_SubstNonTypeTemplateParmPackExprClass");
@@ -569,7 +572,8 @@ DeclarationsVisitor::PreVisitType(QualType T) {
   const Type *Tptr = T.getTypePtrOrNull();
 
   // XXX experimental code
-  raw_string_ostream OS(contentString);
+  std::string typenamestr;
+  raw_string_ostream OS(typenamestr);
   OS << (const void*)Tptr;
   OS.str();
 
@@ -868,10 +872,10 @@ DeclarationsVisitor::PreVisitAttr(Attr *A) {
   }
   newChild("gccAttribute");
 
-  setContentBySource(A->getLocation(), A->getLocation());
-  newProp("name", contentString.c_str());
+  newProp("name", contentBySource(A->getLocation(), A->getLocation()).c_str());
 
-  raw_string_ostream OS(contentString);
+  std::string prettyprint;
+  raw_string_ostream OS(prettyprint);
   ASTContext &CXT = mangleContext->getASTContext();
   A->printPretty(OS, PrintingPolicy(CXT.getLangOpts()));
   newComment(OS.str().c_str());

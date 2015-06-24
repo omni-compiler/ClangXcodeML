@@ -16,7 +16,7 @@ OptDisableSymbols("disable-symbols",
 #define ND(mes) do {newComment(mes); return false;} while (0)
 #define NDeclName(mes) do {                                     \
     newComment(mes);                                            \
-    newChild("name");                                           \
+    newChild("name", nameString);                               \
     return true;                                                \
   } while (0)
 
@@ -221,10 +221,11 @@ SymbolsVisitor::PreVisitAttr(Attr *A) {
   }
   newChild("gccAttribute");
 
-  setContentBySource(A->getLocation(), A->getLocation());
-  newProp("name", contentString.c_str());
+  std::string attrName = contentBySource(A->getLocation(), A->getLocation());
+  newProp("name", attrName.c_str());
 
-  raw_string_ostream OS(contentString);
+  std::string prettyprint;
+  raw_string_ostream OS(prettyprint);
   ASTContext &CXT = mangleContext->getASTContext();
   A->printPretty(OS, PrintingPolicy(CXT.getLangOpts()));
   newComment(OS.str().c_str());
@@ -238,7 +239,6 @@ SymbolsVisitor::PreVisitDecl(Decl *D) {
     return false;
   }
   HooksForAttr.push_back([this](Attr *A){
-      contentString = "";
       newChild("gccAttributes");
       return TraverseAttr(A);
     });
@@ -279,8 +279,7 @@ SymbolsVisitor::PreVisitDecl(Decl *D) {
     if (RD) {
       IdentifierInfo *II = RD->getDeclName().getAsIdentifierInfo();
       if (II) {
-        contentString = II->getNameStart();
-        addChild("name");
+        addChild("name", II->getNameStart());
       }
     }
     return true;
@@ -298,8 +297,7 @@ SymbolsVisitor::PreVisitDecl(Decl *D) {
     if (TD) {
       IdentifierInfo *II = TD->getDeclName().getAsIdentifierInfo();
       if (II) {
-        contentString = II->getNameStart();
-        addChild("name");
+        addChild("name", II->getNameStart());
       }
     }
     return true;
@@ -319,8 +317,7 @@ SymbolsVisitor::PreVisitDecl(Decl *D) {
     if (FD) {
       IdentifierInfo *II = FD->getDeclName().getAsIdentifierInfo();
       if (II) {
-        contentString = II->getNameStart();
-        addChild("name");
+        addChild("name", II->getNameStart());
       }
     }
     return true;
@@ -350,8 +347,7 @@ SymbolsVisitor::PreVisitDecl(Decl *D) {
     if (VD) {
       IdentifierInfo *II = VD->getDeclName().getAsIdentifierInfo();
       if (II) {
-        contentString = II->getNameStart();
-        addChild("name");
+        addChild("name", II->getNameStart());
       }
     }
     return true;
@@ -386,8 +382,9 @@ SymbolsVisitor::PreVisitDeclarationNameInfo(DeclarationNameInfo NameInfo) {
 #if 0
   DeclarationName DN = NameInfo.getName();
   IdentifierInfo *II = DN.getAsIdentifierInfo();
+  const char *nameString = nullptr;
   if (II) {
-    contentString = II->getNameStart();
+    nameString = II->getNameStart().c_str();
   }
 
   switch (NameInfo.getName().getNameKind()) {
