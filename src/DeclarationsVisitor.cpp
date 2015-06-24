@@ -1036,14 +1036,31 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
   case Decl::Field: NDeclXXX("Field");  // XXX?
   case Decl::ObjCAtDefsField: NDeclXXX("ObjCAtDefsField");
   case Decl::ObjCIvar: NDeclXXX("ObjCIvar");
-  case Decl::Function:
+  case Decl::Function: {
     // 5.1, 5.4 XXX
-    if (static_cast<FunctionDecl*>(D)->hasBody()) {
+    if (static_cast<FunctionDecl*>(D)->isThisDeclarationADefinition()) {
       newChild("functionDefinition");
     } else {
       newChild("functionDecl");
     }
+    xmlNodePtr functionNode = curNode;
+    HookForDeclarationNameInfo = [this, D](DeclarationNameInfo NI) {
+      DeclarationsVisitor V(this);
+      if (V.TraverseDeclarationNameInfo(NI)) {
+        SymbolsVisitor SV(mangleContext, curNode, "symbols", typetableinfo);
+        SV.TraverseChildOfDecl(D);
+        newChild("params"); // create a new node to parent just after NameInfo
+        return true;
+      } else {
+        return false;
+      }
+    };
+    HookForStmt = [this, functionNode](Stmt *S) {
+      curNode = functionNode;
+      return TraverseStmt(S);
+    };
     return true;
+  }
   case Decl::CXXMethod: NDeclXXX("CXXMethod");
   case Decl::CXXConstructor: NDeclXXX("CXXConstructor");
   case Decl::CXXConversion: NDeclXXX("CXXConversion");
@@ -1055,7 +1072,12 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
     newChild("varDecl");
     return true;
   case Decl::ImplicitParam: NDeclXXX("ImplicitParam");
-  case Decl::ParmVar: NDeclXXX("ParmVar");
+  case Decl::ParmVar: {
+    ParmVarDecl *PVD = static_cast<ParmVarDecl*>(D);
+    // 5.2 XXX
+    newChild("name", PVD->getNameAsString().c_str());
+    return true;
+  }
   case Decl::VarTemplateSpecialization: NDeclXXX("VarTemplateSpecialization");
   case Decl::VarTemplatePartialSpecialization: NDeclXXX("VarTemplatePartialSpecialization");
   case Decl::EnumConstant: NDeclXXX("EnumConstant"); // XXX?

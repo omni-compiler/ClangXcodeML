@@ -36,7 +36,7 @@ SymbolsVisitor::PreVisitStmt(Stmt *S) {
 bool
 SymbolsVisitor::PreVisitTypeLoc(TypeLoc TL) {
   (void)TL;
-  return false; // do not traverse children
+  return true; // do not traverse children
 }
 
 bool
@@ -354,7 +354,20 @@ SymbolsVisitor::PreVisitDecl(Decl *D) {
     return true;
   }
   case Decl::ImplicitParam: ND("Decl_ImplicitParam");
-  case Decl::ParmVar: ND("Decl_ParmVar");
+  case Decl::ParmVar:  {
+    ParmVarDecl *PVD = dyn_cast<ParmVarDecl>(D);
+
+    newComment("Decl_ParmVar");
+    newChild("id");
+    newProp("sclass", "param");
+    if (PVD) {
+      IdentifierInfo *II = PVD->getDeclName().getAsIdentifierInfo();
+      if (II) {
+        addChild("name", II->getNameStart());
+      }
+    }
+    return true;
+  }
   case Decl::VarTemplateSpecialization: ND("Decl_VarTemplateSpecialization");
   case Decl::VarTemplatePartialSpecialization: ND("Decl_VarTemplatePartialSpecialization");
   case Decl::EnumConstant: ND("Decl_EnumConstant");
@@ -375,7 +388,7 @@ SymbolsVisitor::PreVisitDecl(Decl *D) {
 bool
 SymbolsVisitor::PreVisitNestedNameSpecifierLoc(NestedNameSpecifierLoc NNSL) {
   (void)NNSL;
-  return false; // do not traverse children
+  return true;
 }
 
 bool
