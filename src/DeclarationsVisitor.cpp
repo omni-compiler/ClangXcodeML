@@ -60,31 +60,29 @@ DeclarationsVisitor::getVisitorName() const {
   } while (0)
 
 void
-DeclarationsVisitor::WrapChild(const char *name) {
-  if (name[0] == '+') {
-    HooksForStmt.push_back([this, name](Stmt *S){
-        DeclarationsVisitor V(this);
-        V.newChild(name + 1);
-        return V.TraverseMeStmt(S);});
-  } else {
-    HooksForStmt.push_back([this, name](Stmt *S){
-        DeclarationsVisitor V(this);
-        V.newChild(name);
-        return V.TraverseMeStmt(S);});
-  }
-}
-
-void
-DeclarationsVisitor::WrapChild(const char *name1, const char *name2,
-                               const char *name3, const char *name4) {
-  if (name4) {
-    WrapChild(name4);
-  }
-  if (name3) {
-    WrapChild(name3);
-  }
-  WrapChild(name2);
-  WrapChild(name1);
+DeclarationsVisitor::WrapChild(const char **names) {
+  HooksForStmt.push_back([this, names](Stmt *S){
+      DeclarationsVisitor V(this);
+      if (!S) {
+        // ignore this nullptr
+        newComment("an ignored nullptr exists");
+      } else if (names[0][0] == '\0') {
+        // ignore this child
+        newComment("an ignored child exists");
+      } else if (names[0][0] == '+') {
+        V.newChild(names[0] + 1);
+        Expr *E = dyn_cast<Expr>(S);
+        if (E) {
+          V.newChild("exprStatement");
+          V.setLocation(E->getExprLoc());
+        }
+      } else {
+        V.newChild(names[0]);
+      }
+      if (names[1]) {
+        WrapChild(names + 1);
+      }
+      return V.TraverseMeStmt(S);});
 }
 
 void
@@ -273,16 +271,18 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
     NS("continueStatement");
   case Stmt::DeclStmtClass:
     return true; // everything is performed by WrapCompoundStatementBody
-  case Stmt::DoStmtClass:
+  case Stmt::DoStmtClass: {
     //6.5
-    WrapChild("+body", "condition");
+    static const char *childnames[] = {"+body", "condition", nullptr};
+    WrapChild(childnames);
     NS("doStatement");
+  }
   case Stmt::BinaryConditionalOperatorClass:
     //7.13
-    NE("condExpr", "");
+    NE("condExpr", nullptr);
   case Stmt::ConditionalOperatorClass:
     //7.13
-    NE("condExpr", "");
+    NE("condExpr", nullptr);
   case Stmt::AddrLabelExprClass: NS("Stmt_AddrLabelExprClass");
   case Stmt::ArraySubscriptExprClass:
     //7.4 (this cannot support C++)
@@ -398,7 +398,7 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
     //7.5 (TBD: how to handle C++ "->" overloadding)
     PropChild("member");
     optContext.nameForDeclRefExpr = nullptr;
-    NE("memberRef", ""); 
+    NE("memberRef", nullptr); 
   case Stmt::ObjCArrayLiteralClass: NS("Stmt_ObjCArrayLiteralClass");
   case Stmt::ObjCBoolLiteralExprClass: NS("Stmt_ObjCBoolLiteralExprClass");
   case Stmt::ObjCBoxedExprClass: NS("Stmt_ObjCBoxedExprClass");
@@ -467,10 +467,16 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
   case Stmt::UnaryExprOrTypeTraitExprClass: NS("Stmt_UnaryExprOrTypeTraitExprClass");
   case Stmt::UnaryOperatorClass: NS("Stmt_UnaryOperatorClass");
   case Stmt::VAArgExprClass: NS("Stmt_VAArgExprClass");
-  case Stmt::ForStmtClass:
+  case Stmt::ForStmtClass: {
     //6.6
-    WrapChild("init", "condition", "iter", "+body");
+    static const char *childnames[] = {
+      "init",
+      "", // Variable Declaration
+      "condition", "iter", "+body", nullptr
+    };
+    WrapChild(childnames);
     NS("forStatement");
+  }
   case Stmt::GotoStmtClass: {
     //6.10
     LabelDecl *LD = static_cast<GotoStmt*>(S)->getLabel();
@@ -478,10 +484,15 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
     newChild("name", LD->getNameAsString().c_str());
     return false; // no need to traverse children recursively
   }
-  case Stmt::IfStmtClass:
+  case Stmt::IfStmtClass: {
     //6.3
-    WrapChild("condition", "+then", "+else");
+    static const char *childnames[] = {
+      "", // Variable Declaration
+      "condition", "+then", "+else", nullptr
+    };
+    WrapChild(childnames);
     NS("ifStatement");
+  }
   case Stmt::IndirectGotoStmtClass: NS("Stmt_IndirectGotoStmtClass");
   case Stmt::LabelStmtClass: {
     //6.11
@@ -534,21 +545,33 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
   case Stmt::SEHFinallyStmtClass: NS("Stmt_SEHFinallyStmtClass");
   case Stmt::SEHLeaveStmtClass: NS("Stmt_SEHLeaveStmtClass");
   case Stmt::SEHTryStmtClass: NS("Stmt_SEHTryStmtClass");
-  case Stmt::CaseStmtClass:
+  case Stmt::CaseStmtClass: {
     //6.13
-    WrapChild("value");
+    static const char *childnames[] = {"value", nullptr};
+    WrapChild(childnames);
     NS("caseLabel");
+  }
   case Stmt::DefaultStmtClass:
     //6.15
     NS("defaultLabel");
-  case Stmt::SwitchStmtClass:
+  case Stmt::SwitchStmtClass: {
     //6.12
-    WrapChild("value", "+body");
+    static const char *childnames[] = {
+      "", // Variable Declaration
+      "value", "+body", nullptr
+    };
+    WrapChild(childnames);
     NS("switchStatement");
-  case Stmt::WhileStmtClass:
+  }
+  case Stmt::WhileStmtClass: {
     //6.4
-    WrapChild("condition", "+body");
+    static const char *childnames[] = {
+      "", // Variable Declaration
+      "condition", "+body", nullptr
+    };
+    WrapChild(childnames);
     NS("whileStatement");
+  }
   }
 }
 

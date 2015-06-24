@@ -29,9 +29,7 @@ public:
     bool PreVisitDeclarationNameInfo(clang::DeclarationNameInfo);
 
 private:
-    void WrapChild(const char *name);
-    void WrapChild(const char *name1, const char *name2,
-                   const char *name3 = nullptr, const char *name4 = nullptr);
+    void WrapChild(const char **names);
     void PropChild(const char *name);
     void NameChild(const char *name);
     void WrapCompoundStatementBody(xmlNodePtr, bool);
