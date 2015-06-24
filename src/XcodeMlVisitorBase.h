@@ -17,7 +17,6 @@ class TypeTableInfo;
 class XcodeMlVisitorBaseImpl : public XcodeMlRAVpool {
 protected:
     clang::MangleContext *mangleContext;
-    xmlNodePtr parentNode;     // the parent node
     xmlNodePtr curNode;        // a candidate of the new chlid.
     TypeTableInfo *typetableinfo;
     std::string contentString; // a temporary holder of xmlNode content
@@ -29,7 +28,6 @@ public:
     XcodeMlVisitorBaseImpl& operator =(XcodeMlVisitorBaseImpl&&) = delete;
 
     explicit XcodeMlVisitorBaseImpl(clang::MangleContext *MC,
-                                    xmlNodePtr Parent,
                                     xmlNodePtr CurNode,
                                     TypeTableInfo *TTI);
 
@@ -61,16 +59,15 @@ public:
     explicit XcodeMlVisitorBase(clang::MangleContext *MC, xmlNodePtr Parent,
                                 const char *ChildName,
                                 TypeTableInfo *TTI = nullptr)
-        : XcodeMlVisitorBaseImpl(MC, Parent,
-                                 (ChildName
-                                  ? xmlNewTextChild(Parent, nullptr,
-                                                    BAD_CAST ChildName,
-                                                    nullptr)
-                                  : Parent),
+        : XcodeMlVisitorBaseImpl(MC, (ChildName
+                                      ? xmlNewTextChild(Parent, nullptr,
+                                                        BAD_CAST ChildName,
+                                                        nullptr)
+                                      : Parent),
                                  TTI),
           optContext() {};
     explicit XcodeMlVisitorBase(XcodeMlVisitorBase *p)
-        : XcodeMlVisitorBaseImpl(p->mangleContext, p->curNode, p->curNode,
+        : XcodeMlVisitorBaseImpl(p->mangleContext, p->curNode,
                                  p->typetableinfo),
           optContext(p->optContext) {};
 

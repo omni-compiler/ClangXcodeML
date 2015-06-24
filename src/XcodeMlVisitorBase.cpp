@@ -24,11 +24,9 @@ OptEmitSourceRange("range", cl::desc("emit 'range'"),
 // implementation of XcodeMlVisitorBaseImpl
 
 XcodeMlVisitorBaseImpl::XcodeMlVisitorBaseImpl(MangleContext *MC,
-                                               xmlNodePtr Parent,
                                                xmlNodePtr CurNode,
                                                TypeTableInfo *TTI)
-    : XcodeMlRAVpool(this),
-      mangleContext(MC), parentNode(Parent), curNode(CurNode),
+    : XcodeMlRAVpool(this), mangleContext(MC), curNode(CurNode),
       typetableinfo(TTI), contentString("") {};
 
 xmlNodePtr XcodeMlVisitorBaseImpl::addChild(const char *Name, const char *Content) {
@@ -62,21 +60,21 @@ void XcodeMlVisitorBaseImpl::newProp(const char *Name, const char *Val,
     xmlNewProp(N, BAD_CAST Name, BAD_CAST Val);
 }
 
-void XcodeMlVisitorBaseImpl::newComment(const xmlChar *str, xmlNodePtr PN) {
-    if (!PN) PN = parentNode;
+void XcodeMlVisitorBaseImpl::newComment(const xmlChar *str, xmlNodePtr N) {
+    if (!N) N = curNode;
     xmlChar Buf[BUFSIZ];
     const char *VN = getVisitorName();
     if (VN) {
         xmlStrPrintf(Buf, BUFSIZ,
                      BAD_CAST "%s::%s", BAD_CAST VN, str);
         xmlNodePtr Comment = xmlNewComment(Buf);
-        xmlAddChild(PN, Comment);
+        xmlAddChild(N, Comment);
         //errs() << (const char *)Buf << "\n";
     }
 }
 
-void XcodeMlVisitorBaseImpl::newComment(const char *str, xmlNodePtr PN) {
-    newComment(BAD_CAST str, PN);
+void XcodeMlVisitorBaseImpl::newComment(const char *str, xmlNodePtr N) {
+    newComment(BAD_CAST str, N);
 }
 
 void XcodeMlVisitorBaseImpl::setLocation(SourceLocation Loc, xmlNodePtr N) {

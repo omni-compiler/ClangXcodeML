@@ -483,10 +483,11 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
   case Stmt::LabelStmtClass: {
     //6.11
     LabelDecl *LD = static_cast<LabelStmt*>(S)->getDecl();
+    xmlNodePtr origCurNode = curNode;
     newChild("statementLabel");
     setLocation(S->getLocStart());
     newChild("name", LD->getNameAsString().c_str());
-    curNode = parentNode;
+    curNode = origCurNode;
     WrapLabelChild();
     return true; // create children (statement) to my parent directly
   }
