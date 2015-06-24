@@ -106,6 +106,13 @@ int main(int argc, const char **argv) {
                    OptionsParser.getSourcePathList());
     Tool.appendArgumentsAdjuster(clang::tooling::getClangSyntaxOnlyAdjuster());
 
+#if 0
+    errs() << "sizeof(XcodeMlVisitorBaseImpl)=" << sizeof(XcodeMlVisitorBaseImpl) << "\n";
+    errs() << "sizeof(TypeTableVisitor)=" << sizeof(TypeTableVisitor) << "\n";
+    errs() << "sizeof(SymbolsVisitor)=" << sizeof(SymbolsVisitor) << "\n";
+    errs() << "sizeof(DeclarationsVisitor)=" << sizeof(DeclarationsVisitor) << "\n"; 
+#endif
+
     std::unique_ptr<FrontendActionFactory> FrontendFactory
         = newFrontendActionFactory<XcodeMlASTDumpAction>();
     return Tool.run(FrontendFactory.get());

@@ -74,8 +74,7 @@ public:
 
 #define DISPATCHER(NAME, TYPE)                                          \
     protected:                                                          \
-    llvm::SmallVector<std::function<bool (TYPE)>, 3>                    \
-    HooksFor##NAME;                                                     \
+    std::function<bool (TYPE)>HookFor##NAME;                            \
     public:                                                             \
     bool PreVisit##NAME(TYPE S) {                                       \
         (void)S;                                                        \
@@ -83,11 +82,9 @@ public:
         return true;                                                    \
     }                                                                   \
     bool Bridge##NAME(TYPE S) override {                                \
-        if (!HooksFor##NAME.empty()) {                                  \
-            auto Hook = HooksFor##NAME.back();                          \
-            HooksFor##NAME.pop_back();                                  \
+        if (HookFor##NAME) {                                            \
             newComment("do Hook " #NAME);                               \
-            return Hook(S);                                             \
+            return HookFor##NAME(S);                                    \
         } else {                                                        \
             return getDerived().Traverse##NAME(S);                      \
         }                                                               \

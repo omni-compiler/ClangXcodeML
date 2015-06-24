@@ -238,10 +238,11 @@ SymbolsVisitor::PreVisitDecl(Decl *D) {
   if (!D) {
     return false;
   }
-  HooksForAttr.push_back([this](Attr *A){
+  HookForAttr = [this](Attr *A){
       newChild("gccAttributes");
+      HookForAttr = nullptr;
       return TraverseAttr(A);
-    });
+  };
 
   switch (D->getKind()) {
   case Decl::AccessSpec: ND("Decl_AccessSpec");

@@ -61,7 +61,7 @@ DeclarationsVisitor::getVisitorName() const {
 
 void
 DeclarationsVisitor::WrapChild(const char **names) {
-  HooksForStmt.push_back([this, names](Stmt *S){
+  HookForStmt = [this, names](Stmt *S){
       DeclarationsVisitor V(this);
       if (!S) {
         // ignore this nullptr
@@ -81,34 +81,41 @@ DeclarationsVisitor::WrapChild(const char **names) {
       }
       if (names[1]) {
         WrapChild(names + 1);
+      } else {
+        HookForStmt = nullptr;
       }
-      return V.TraverseMeStmt(S);});
+      return V.TraverseMeStmt(S);
+  };
 }
 
 void
 DeclarationsVisitor::PropChild(const char *name) {
-  HooksForDeclarationNameInfo.push_back([this, name](DeclarationNameInfo NI){
+  HookForDeclarationNameInfo = [this, name](DeclarationNameInfo NI){
       DeclarationsVisitor V(this);
       DeclarationName DN = NI.getName();
       IdentifierInfo *II = DN.getAsIdentifierInfo();
       newProp(name, II ? II->getNameStart() : "");
-      return true;});
+      HookForDeclarationNameInfo = nullptr;
+      return true;
+  };
 }
 
 void
 DeclarationsVisitor::NameChild(const char *name) {
-  HooksForDeclarationNameInfo.push_back([this, name](DeclarationNameInfo NI){
+  HookForDeclarationNameInfo = [this, name](DeclarationNameInfo NI){
       DeclarationsVisitor V(this);
       DeclarationName DN = NI.getName();
       IdentifierInfo *II = DN.getAsIdentifierInfo();
       newChild(name, II ? II->getNameStart() : nullptr);
-      return true;});
+      HookForDeclarationNameInfo = nullptr;
+      return true;
+  };
 }
 
 void
 DeclarationsVisitor::WrapCompoundStatementBody(xmlNodePtr compoundStatement,
                                                bool nowInDeclPart) {
-  HooksForStmt.push_back([this, compoundStatement, nowInDeclPart](Stmt *S){
+  HookForStmt = [this, compoundStatement, nowInDeclPart](Stmt *S){
       bool nowInBodyPart;
 
       if (S->getStmtClass() == Stmt::DeclStmtClass) {
@@ -151,18 +158,19 @@ DeclarationsVisitor::WrapCompoundStatementBody(xmlNodePtr compoundStatement,
       } else {
         return false;
       }
-    });
+  };
 }
 
 void
 DeclarationsVisitor::WrapLabelChild(void) {
-  HooksForStmt.push_back([this](Stmt *S){
+  HookForStmt = [this](Stmt *S){
       DeclarationsVisitor V(this);
       Expr *E = dyn_cast<Expr>(S);
       if (E) {
         V.newChild("exprStatement");
         V.setLocation(E->getExprLoc());
       }
+      HookForStmt = nullptr;
       if (V.TraverseMeStmt(S)) {
         if (!E
             && S->getStmtClass() != Stmt::NullStmtClass
@@ -173,7 +181,7 @@ DeclarationsVisitor::WrapLabelChild(void) {
       } else {
         return false;
       }
-    });
+  };
 }
 
 bool
@@ -182,10 +190,11 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
     newComment("Stmt_NULL");
     return false;
   }
-  HooksForAttr.push_back([this](Attr *A){
+  HookForAttr = [this](Attr *A){
       newChild("gccAttributes");
+      HookForAttr = nullptr;
       return TraverseAttr(A);
-    });
+  };
 
   const BinaryOperator *BO = dyn_cast<const BinaryOperator>(S);
 
@@ -315,15 +324,16 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
   case Stmt::CXXUuidofExprClass: NS("Stmt_CXXUuidofExprClass");
   case Stmt::CallExprClass:
     //7.9
-    HooksForStmt.push_back([this](Stmt *S){
-        optContext.nameForDeclRefExpr = nullptr;
-        newChild("arguments");
-        return TraverseStmt(S);
-      });
-    HooksForStmt.push_back([this](Stmt *S){
+    HookForStmt = [this](Stmt *S){
         optContext.nameForDeclRefExpr = "function";
+        HookForStmt = [this](Stmt *S){
+          optContext.nameForDeclRefExpr = nullptr;
+          newChild("arguments");
+          HookForStmt = nullptr;
+          return TraverseStmt(S);
+        };
         return TraverseStmt(S);
-      });
+    };
     newChild("functionCall");
     return true;
   case Stmt::CUDAKernelCallExprClass: NS("Stmt_CUDAKernelCallExprClass");
