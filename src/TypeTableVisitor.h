@@ -52,6 +52,7 @@ public:
     const char *getVisitorName() const override;
     bool PreVisitStmt(clang::Stmt *);
     bool PreVisitDecl(clang::Decl *);
+    bool PreVisitType(clang::QualType);
 };
 
 #endif /* !TYPETABLEVISITOR_H */

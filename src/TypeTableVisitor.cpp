@@ -110,8 +110,69 @@ TypeTableVisitor::getVisitorName() const {
 
 bool
 TypeTableVisitor::PreVisitStmt(Stmt *S) {
-  (void)S;
+  if (!S) {
+    return false;
+  }
+  Expr *E = dyn_cast<Expr>(S);
+  
+  if (E) {
+    TraverseType(E->getType());
+  }
   return true; // do not create a new child
+}
+
+bool
+TypeTableVisitor::PreVisitType(QualType T) {
+  if (T.isNull()) {
+    return false;
+  };
+
+  const char *Name = typetableinfo->getTypeName(T).c_str();
+  switch (Name[0]) {
+  case 'P': {
+    addChild("pointerType");
+    newProp("type", Name);
+    const PointerType *PT = dyn_cast<const PointerType>(T.getTypePtr());
+    if (PT) {
+      newProp("ref",
+              typetableinfo->getTypeName(PT->getPointeeType()).c_str());
+    }
+    break;
+  }
+  case 'F':
+    addChild("functionType");
+    newProp("type", Name);
+    break;
+  case 'A':
+    addChild("arrayType");
+    newProp("type", Name);
+    break;
+  case 'S':
+    addChild("structType");
+    newProp("type", Name);
+    break;
+  case 'U':
+    addChild("unionType");
+    newProp("type", Name);
+    break;
+  case 'E':
+    addChild("enumType");
+    newProp("type", Name);
+    break;
+  case 'C':
+    addChild("classType");
+    newProp("type", Name);
+    break;
+  case 'O':
+    addChild("otherType");
+    newProp("type", Name);
+    break;
+  default:
+    addChild("basicType");
+    newProp("type", Name);
+    break;
+  }
+  return true;
 }
 
 #define DECLTYPE() return true //empty
@@ -123,18 +184,7 @@ TypeTableVisitor::PreVisitDecl(Decl *D) {
   TypeDecl *TD = dyn_cast<TypeDecl>(D);
   if (TD) {
     QualType T(TD->getTypeForDecl(), 0);
-    const char *Name = typetableinfo->getTypeName(T).c_str();
-    switch (Name[0]) {
-    case 'P': newChild("pointerType"); newProp("type", Name); break;
-    case 'F': newChild("functionType"); newProp("type", Name); break;
-    case 'A': newChild("arrayType"); newProp("type", Name); break;
-    case 'S': newChild("structType"); newProp("type", Name); break;
-    case 'U': newChild("unionType"); newProp("type", Name); break;
-    case 'E': newChild("enumType"); newProp("type", Name); break;
-    case 'C': newChild("classType"); newProp("type", Name); break;
-    case 'O': newChild("otherType"); newProp("type", Name); break;
-    default: newChild("basicType"); newProp("type", Name); break;
-    }
+    PreVisitType(T);
   }
  
   switch (D->getKind()) {
