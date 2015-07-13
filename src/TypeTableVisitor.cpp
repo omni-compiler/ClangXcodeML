@@ -39,8 +39,10 @@ TypeTableInfo::TypeTableInfo(MangleContext *MC) : mangleContext(MC)
 #define TReference()     TPointer()
 #define TMemberPointer() TOther()
 
-std::string TypeTableInfo::getTypeName(QualType T)
-{
+std::string TypeTableInfo::getTypeName(QualType T, bool *created){
+  if (created) {
+    *created = false;
+  }
   if (T.isNull()) {
     return "nullType";
   };
@@ -48,13 +50,18 @@ std::string TypeTableInfo::getTypeName(QualType T)
   if (!name.empty()) {
     return name;
   }
+
+  if (created) {
+    *created = true;
+  }
   raw_string_ostream OS(name);
   switch (T->getTypeClass()) {
   case Type::Builtin: {
     const Type *Tptr = T.getTypePtrOrNull();
     ASTContext &CXT = mangleContext->getASTContext();
     PrintingPolicy PP(CXT.getLangOpts());
-    return static_cast<const BuiltinType*>(Tptr)->getName(PP).str();
+    return mapFromQualTypeToName[T]
+      = static_cast<const BuiltinType*>(Tptr)->getName(PP).str();
   }
   case Type::Complex: TOther();
   case Type::Pointer: TPointer();
@@ -127,49 +134,45 @@ TypeTableVisitor::PreVisitType(QualType T) {
     return false;
   };
 
-  const char *Name = typetableinfo->getTypeName(T).c_str();
+  bool created;
+  const char *Name = typetableinfo->getTypeName(T, &created).c_str();
+  if (!created) {
+    return true; // emit nothing
+  }
   switch (Name[0]) {
   case 'P': {
-    addChild("pointerType");
-    newProp("type", Name);
+    xmlNodePtr N = addChild("pointerType");
+    newProp("type", Name, N);
     const PointerType *PT = dyn_cast<const PointerType>(T.getTypePtr());
     if (PT) {
       newProp("ref",
-              typetableinfo->getTypeName(PT->getPointeeType()).c_str());
+              typetableinfo->getTypeName(PT->getPointeeType()).c_str(), N);
     }
     break;
   }
   case 'F':
-    addChild("functionType");
-    newProp("type", Name);
+    newProp("type", Name, addChild("functionType"));
     break;
   case 'A':
-    addChild("arrayType");
-    newProp("type", Name);
+    newProp("type", Name, addChild("arrayType"));
     break;
   case 'S':
-    addChild("structType");
-    newProp("type", Name);
+    newProp("type", Name, addChild("structType"));
     break;
   case 'U':
-    addChild("unionType");
-    newProp("type", Name);
+    newProp("type", Name, addChild("unionType"));
     break;
   case 'E':
-    addChild("enumType");
-    newProp("type", Name);
+    newProp("type", Name, addChild("enumType"));
     break;
   case 'C':
-    addChild("classType");
-    newProp("type", Name);
+    newProp("type", Name, addChild("classType"));
     break;
   case 'O':
-    addChild("otherType");
-    newProp("type", Name);
+    newProp("type", Name, addChild("otherType"));
     break;
   default:
-    addChild("basicType");
-    newProp("type", Name);
+    newProp("type", Name, addChild("basicType"));
     break;
   }
   return true;
@@ -255,6 +258,12 @@ TypeTableVisitor::PreVisitDecl(Decl *D) {
     }
   }
   return true; // do not create a new child
+}
+
+bool
+TypeTableVisitor::PreVisitNestedNameSpecifierLoc(NestedNameSpecifierLoc N) {
+  (void)N;
+  return true;
 }
 
 ///

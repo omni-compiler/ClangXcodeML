@@ -40,7 +40,7 @@ public:
 
     explicit TypeTableInfo(clang::MangleContext *MC); // default constructor
 
-    std::string getTypeName(clang::QualType T);
+    std::string getTypeName(clang::QualType T, bool *created = nullptr);
 };
 
 class TypeTableVisitor
@@ -53,6 +53,7 @@ public:
     bool PreVisitStmt(clang::Stmt *);
     bool PreVisitDecl(clang::Decl *);
     bool PreVisitType(clang::QualType);
+    bool PreVisitNestedNameSpecifierLoc(clang::NestedNameSpecifierLoc);
 };
 
 #endif /* !TYPETABLEVISITOR_H */

@@ -54,6 +54,7 @@ TypeTableVisitor.o: \
 DeclarationsVisitor.o: \
 	DeclarationsVisitor.cpp \
 	DeclarationsVisitor.h \
+	TypeTableVisitor.h \
 	XcodeMlRAV.h \
 	XcodeMlVisitorBase.h
 
