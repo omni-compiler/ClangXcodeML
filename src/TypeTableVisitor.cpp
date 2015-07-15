@@ -261,11 +261,22 @@ TypeTableVisitor::PreVisitDecl(Decl *D) {
 }
 
 bool
+TypeTableVisitor::PreVisitTypeLoc(TypeLoc TL) {
+  (void)TL;
+  return true;
+}
+
+bool
 TypeTableVisitor::PreVisitNestedNameSpecifierLoc(NestedNameSpecifierLoc N) {
   (void)N;
   return true;
 }
 
+bool
+TypeTableVisitor::PreVisitDeclarationNameInfo(DeclarationNameInfo NI) {
+  (void)NI;
+  return true;
+}
 ///
 /// Local Variables:
 /// indent-tabs-mode: nil

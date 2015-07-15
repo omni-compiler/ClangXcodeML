@@ -107,12 +107,13 @@ DeclarationsVisitor::PropChild(const char *name) {
 }
 
 void
-DeclarationsVisitor::NameChild(const char *name) {
-  HookForDeclarationNameInfo = [this, name](DeclarationNameInfo NI){
+DeclarationsVisitor::NameChild(const char *name, Expr *E) {
+  HookForDeclarationNameInfo = [this, name, E](DeclarationNameInfo NI){
       DeclarationsVisitor V(this);
       DeclarationName DN = NI.getName();
       IdentifierInfo *II = DN.getAsIdentifierInfo();
       newChild(name, II ? II->getNameStart() : nullptr);
+      TraverseType(E->getType());
       HookForDeclarationNameInfo = nullptr;
       return true;
   };
@@ -331,6 +332,7 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
         return TraverseStmt(S);
     };
     newChild("functionCall");
+    TraverseType(static_cast<Expr*>(S)->getType());
     return true;
   case Stmt::CUDAKernelCallExprClass: NStmtXXX("CUDAKernelCallExprClass");
   case Stmt::CXXMemberCallExprClass: NStmtXXX("CXXMemberCallExprClass");
@@ -357,9 +359,9 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
   case Stmt::ConvertVectorExprClass: NStmtXXX("ConvertVectorExprClass");
   case Stmt::DeclRefExprClass:
     if (optContext.nameForDeclRefExpr) {
-      NameChild(optContext.nameForDeclRefExpr);
+      NameChild(optContext.nameForDeclRefExpr, static_cast<Expr*>(S));
     } else {
-      NameChild("varAddr");
+      NameChild("varAddr", static_cast<Expr*>(S));
     }
     newComment("Stmt_DeclRefExprClass");
     return true;
@@ -1055,7 +1057,11 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
         return false;
       }
     };
-    HookForStmt = [this, functionNode](Stmt *S) {
+    bool IsValiadic = static_cast<FunctionDecl*>(D)->isVariadic();
+    HookForStmt = [this, functionNode, IsValiadic](Stmt *S) {
+      if (IsValiadic) {
+        addChild("ellipsis");
+      }
       curNode = functionNode;
       return TraverseStmt(S);
     };

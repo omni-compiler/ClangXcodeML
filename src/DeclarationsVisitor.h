@@ -32,7 +32,7 @@ private:
     bool WrapExpr(clang::Stmt *);
     void WrapChild(const char **names);
     void PropChild(const char *name);
-    void NameChild(const char *name);
+    void NameChild(const char *name, clang::Expr *);
     void WrapCompoundStatementBody(xmlNodePtr, bool);
     void WrapLabelChild(void);
 };

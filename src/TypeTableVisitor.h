@@ -54,6 +54,8 @@ public:
     bool PreVisitDecl(clang::Decl *);
     bool PreVisitType(clang::QualType);
     bool PreVisitNestedNameSpecifierLoc(clang::NestedNameSpecifierLoc);
+    bool PreVisitTypeLoc(clang::TypeLoc);
+    bool PreVisitDeclarationNameInfo(clang::DeclarationNameInfo);
 };
 
 #endif /* !TYPETABLEVISITOR_H */
