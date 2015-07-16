@@ -7,6 +7,7 @@
 
 #include <libxml/tree.h>
 #include <functional>
+#include <string>
 
 class TypeTableInfo;
 
@@ -94,7 +95,20 @@ public:
         return V.TraverseMe##NAME(S);                                   \
     }                                                                   \
     bool TraverseMe##NAME(TYPE S) {                                     \
-        newComment("Traverse" #NAME);                                   \
+        std::string comment("Traverse" #NAME ":");                      \
+        llvm::raw_string_ostream OS(comment);                           \
+        OS << NameFor##NAME(S);                                         \
+        clang::SourceLocation SL;                                       \
+        if (SourceLocFor##NAME(S, SL)) {                                \
+            clang::FullSourceLoc FL;                                    \
+            FL = mangleContext->getASTContext().getFullLoc(SL);         \
+            if (FL.isValid()) {                                         \
+                clang::PresumedLoc PL;                                  \
+                PL = FL.getManager().getPresumedLoc(FL);                \
+                OS << ":" << PL.getLine() << ":" << PL.getColumn();     \
+            }                                                           \
+            newComment(OS.str().c_str());                               \
+        }                                                               \
         if (!getDerived().PreVisit##NAME(S)) {                          \
             return true; /* avoid traverse children */                  \
         }                                                               \
@@ -117,6 +131,111 @@ public:
     DISPATCHER(TemplateArgumentLoc, const clang::TemplateArgumentLoc &);
     DISPATCHER(ConstructorInitializer, clang::CXXCtorInitializer *);
 #undef DISPATCHER
+
+    const char *NameForStmt(clang::Stmt *S) {
+        return S ? S->getStmtClassName() : "";
+    }
+    const char *NameForType(clang::QualType QT) {
+        return QT->getTypeClassName();
+    }
+    const char *NameForTypeLoc(clang::TypeLoc TL) {
+        return TL.getType()->getTypeClassName();
+    }
+    const char *NameForAttr(clang::Attr *A) {
+        return A ? A->getSpelling() : "";
+    }
+    const char *NameForDecl(clang::Decl *D) {
+        return D ? D->getDeclKindName(): ""; 
+    }
+    const char *NameForNestedNameSpecifier(clang::NestedNameSpecifier *NS) {
+        (void)NS; return "X";
+    }
+    const char *NameForNestedNameSpecifierLoc(clang::NestedNameSpecifierLoc NL) {
+        (void)NL; return "X";
+    }
+    const char *NameForDeclarationNameInfo(clang::DeclarationNameInfo DN) {
+        (void)DN; return "X";
+    }
+    const char *NameForTemplateName(clang::TemplateName TN) {
+        (void)TN; return "X";
+    }
+    const char *NameForTemplateArgument(const clang::TemplateArgument &TA) {
+        (void)TA; return "X";
+    }
+    const char *NameForTemplateArgumentLoc(const clang::TemplateArgumentLoc &TL) {
+        (void)TL; return "X";
+    }
+    const char *NameForConstructorInitializer(clang::CXXCtorInitializer *CI) {
+        (void)CI; return "X";
+    }
+
+    bool SourceLocForStmt(clang::Stmt *S, clang::SourceLocation &SL) {
+        if (S) {
+            SL = S->getLocStart();
+            return true;
+        } else {
+            return false;
+        }
+    }
+    bool SourceLocForType(clang::QualType QT, clang::SourceLocation &SL) {
+        (void)QT, (void)SL;
+        return false;
+    }
+    bool SourceLocForTypeLoc(clang::TypeLoc TL, clang::SourceLocation &SL) {
+        SL = TL.getLocStart();
+        return true;
+    }
+    bool SourceLocForAttr(clang::Attr *A, clang::SourceLocation &SL) {
+        if (A) {
+            SL = A->getLocation();
+            return true;
+        } else {
+            return false;
+        }
+    }
+    bool SourceLocForDecl(clang::Decl *D, clang::SourceLocation &SL) {
+        if (D) {
+            SL = D->getLocStart();
+            return true;
+        } else {
+            return false;
+        }
+    }
+    bool SourceLocForNestedNameSpecifier(clang::NestedNameSpecifier *NS,
+                                         clang::SourceLocation &SL) {
+        (void)NS; (void)SL;
+        return false;
+    }
+    bool SourceLocForNestedNameSpecifierLoc(clang::NestedNameSpecifierLoc NL,
+                                            clang::SourceLocation &SL) {
+        SL = NL.getLocalBeginLoc();
+        return true;
+    }
+    bool SourceLocForDeclarationNameInfo(clang::DeclarationNameInfo DN,
+                                         clang::SourceLocation &SL) {
+        SL = DN.getLocStart();
+        return true;
+    }
+    bool SourceLocForTemplateName(clang::TemplateName TN,
+                                  clang::SourceLocation &SL) {
+        (void)TN; (void)SL;
+        return false;
+    }
+    bool SourceLocForTemplateArgument(const clang::TemplateArgument &TA,
+                                      clang::SourceLocation &SL) {
+        (void)TA; (void)SL;
+        return false;
+    }
+    bool SourceLocForTemplateArgumentLoc(const clang::TemplateArgumentLoc &TL,
+                                         clang::SourceLocation &SL) {
+        (void)TL; (void)SL;
+        return false;
+    }
+    bool SourceLocForConstructorInitializer(clang::CXXCtorInitializer *CI,
+                                            clang::SourceLocation &SL) {
+        (void)CI; (void)SL;
+        return false;
+    }
 };
 
 #endif /* !XCODEMLVISITORBASE_H */
