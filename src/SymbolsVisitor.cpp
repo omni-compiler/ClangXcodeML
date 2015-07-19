@@ -307,7 +307,18 @@ SymbolsVisitor::PreVisitDecl(Decl *D) {
   case Decl::Using: ND("Decl_Using");
   case Decl::UsingDirective: ND("Decl_UsingDirective");
   case Decl::UsingShadow: ND("Decl_UsingShadow");
-  case Decl::Field: ND("Decl_Field");
+  case Decl::Field: {
+    FieldDecl *FD = dyn_cast<FieldDecl>(D);
+    newComment("Decl_Field");
+    newChild("id");
+    if (FD) {
+      IdentifierInfo *II = FD->getDeclName().getAsIdentifierInfo();
+      if (II) {
+        addChild("name", II->getNameStart());
+      }
+    }
+    return true;
+  }
   case Decl::ObjCAtDefsField: ND("Decl_ObjCAtDefsField");
   case Decl::ObjCIvar: ND("Decl_ObjCIvar");
   case Decl::Function: {

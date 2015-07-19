@@ -49,6 +49,7 @@ SymbolsVisitor.o: \
 TypeTableVisitor.o: \
 	TypeTableVisitor.cpp \
 	TypeTableVisitor.h \
+	SymbolsVisitor.h \
 	XcodeMlRAV.h \
 	XcodeMlVisitorBase.h
 DeclarationsVisitor.o: \

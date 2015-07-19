@@ -1,4 +1,5 @@
 #include "XcodeMlVisitorBase.h"
+#include "SymbolsVisitor.h"
 #include "TypeTableVisitor.h"
 
 using namespace clang;
@@ -9,9 +10,18 @@ OptTraceTypeTable("trace-typeTable",
                   cl::desc("emit traces on <typeTable>"),
                   cl::cat(C2XcodeMLCategory));
 static cl::opt<bool>
+OptFullTraceTypeTable("fulltrace-typeTable",
+                      cl::desc("emit full-traces on <typeTable>"),
+                      cl::cat(C2XcodeMLCategory));
+static cl::opt<bool>
 OptDisableTypeTable("disable-typeTable",
                     cl::desc("disable <typeTable>"),
                     cl::cat(C2XcodeMLCategory));
+
+bool
+TypeTableVisitor::FullTrace(void) const {
+  return OptFullTraceTypeTable;
+}
 
 TypeTableInfo::TypeTableInfo(MangleContext *MC) : mangleContext(MC)
 {
@@ -88,7 +98,15 @@ std::string TypeTableInfo::getTypeName(QualType T, bool *created){
   case Type::Decltype: TOther();
   case Type::UnaryTransform: TOther();
   case Type::Record: {
-    TStruct(); // or TUnion() or TClass() ...
+    if (T->isStructureType()) {
+      TStruct();
+    } else if (T->isUnionType()) {
+      TUnion();
+    } else if (T->isClassType()) {
+      TClass();
+    } else {
+      TOther();
+    }
   }
   case Type::Enum: TEnum();
   case Type::Elaborated: TOther();
@@ -130,6 +148,8 @@ TypeTableVisitor::PreVisitStmt(Stmt *S) {
 
 bool
 TypeTableVisitor::PreVisitType(QualType T) {
+  newComment("PreVisitType");
+
   if (T.isNull()) {
     return false;
   };
@@ -157,16 +177,12 @@ TypeTableVisitor::PreVisitType(QualType T) {
     newProp("type", Name, addChild("arrayType"));
     break;
   case 'S':
-    newProp("type", Name, addChild("structType"));
     break;
   case 'U':
-    newProp("type", Name, addChild("unionType"));
     break;
   case 'E':
-    newProp("type", Name, addChild("enumType"));
     break;
   case 'C':
-    newProp("type", Name, addChild("classType"));
     break;
   case 'O':
     newProp("type", Name, addChild("otherType"));
@@ -178,18 +194,21 @@ TypeTableVisitor::PreVisitType(QualType T) {
   return true;
 }
 
-#define DECLTYPE() return true //empty
+#define DECLTYPE()                              \
+  do {                                          \
+    TypeDecl *TD = dyn_cast<TypeDecl>(D);       \
+    if (TD) {                                   \
+      QualType T(TD->getTypeForDecl(), 0);      \
+      PreVisitType(T);                          \
+    }                                           \
+  } while (0)
+
 bool
 TypeTableVisitor::PreVisitDecl(Decl *D) {
   if (!D) {
     return false;
   }
-  TypeDecl *TD = dyn_cast<TypeDecl>(D);
-  if (TD) {
-    QualType T(TD->getTypeForDecl(), 0);
-    PreVisitType(T);
-  }
- 
+
   switch (D->getKind()) {
   case Decl::AccessSpec: return true;
   case Decl::Block: return true;
@@ -217,14 +236,46 @@ TypeTableVisitor::PreVisitDecl(Decl *D) {
   case Decl::TypeAliasTemplate: return true;
   case Decl::VarTemplate: return true;
   case Decl::TemplateTemplateParm: return true;
-  case Decl::Enum: DECLTYPE();
-  case Decl::Record: DECLTYPE();
+  case Decl::Enum: {
+    TagDecl *TD = dyn_cast<TagDecl>(D);
+    if (TD && TD->isCompleteDefinition()) {
+      QualType T(TD->getTypeForDecl(), 0);
+      newChild("enumType");
+      bool created;
+      const char *Name = typetableinfo->getTypeName(T, &created).c_str();
+      newProp("type", Name);
+      SymbolsVisitor SV(mangleContext, curNode, "symbols", typetableinfo);
+      SV.TraverseChildOfDecl(D);
+    }
+    return true;
+  }
+  case Decl::Record: {
+    TagDecl *TD = dyn_cast<TagDecl>(D);
+    if (TD && TD->isCompleteDefinition()) {
+      QualType T(TD->getTypeForDecl(), 0);
+      if (T->isStructureType()) {
+        newChild("structType");
+      } else if (T->isUnionType()) {
+        newChild("unionType");
+      } else if (T->isClassType()) {
+        newChild("classType");
+      } else {
+        newChild("UnknownRecordType");
+      }
+      bool created;
+      const char *Name = typetableinfo->getTypeName(T, &created).c_str();
+      newProp("type", Name);
+      SymbolsVisitor SV(mangleContext, curNode, "symbols", typetableinfo);
+      SV.TraverseChildOfDecl(D);
+    }
+    return true;
+  }
   case Decl::CXXRecord: return true;
   case Decl::ClassTemplateSpecialization: return true;
   case Decl::ClassTemplatePartialSpecialization: return true;
   case Decl::TemplateTypeParm: return true;
   case Decl::TypeAlias: return true;
-  case Decl::Typedef: DECLTYPE();
+  case Decl::Typedef: DECLTYPE(); return true;
   case Decl::UnresolvedUsingTypename: return true;
   case Decl::Using: return true;
   case Decl::UsingDirective: return true;
@@ -232,14 +283,14 @@ TypeTableVisitor::PreVisitDecl(Decl *D) {
   case Decl::Field: return true;
   case Decl::ObjCAtDefsField: return true;
   case Decl::ObjCIvar: return true;
-  case Decl::Function: DECLTYPE();
+  case Decl::Function: DECLTYPE(); return true;
   case Decl::CXXMethod: return true;
   case Decl::CXXConstructor: return true;
   case Decl::CXXConversion: return true;
   case Decl::CXXDestructor: return true;
   case Decl::MSProperty: return true;
   case Decl::NonTypeTemplateParm: return true;
-  case Decl::Var: DECLTYPE();
+  case Decl::Var: DECLTYPE(); return true;
   case Decl::ImplicitParam: return true;
   case Decl::ParmVar: return true;
   case Decl::VarTemplateSpecialization: return true;
@@ -258,6 +309,12 @@ TypeTableVisitor::PreVisitDecl(Decl *D) {
     }
   }
   return true; // do not create a new child
+}
+
+bool
+TypeTableVisitor::PreVisitAttr(Attr *A) {
+  (void)A;
+  return true;
 }
 
 bool

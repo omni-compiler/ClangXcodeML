@@ -1,3 +1,5 @@
+struct dummy;
+
 typedef struct complex {
   double real;
   double img;
