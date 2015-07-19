@@ -107,7 +107,11 @@ public:
                 PL = FL.getManager().getPresumedLoc(FL);                \
                 OS << ":" << PL.getLine() << ":" << PL.getColumn();     \
             }                                                           \
-            newComment(OS.str().c_str());                               \
+            if (getDerived().FullTrace()) {                             \
+                newChild(OS.str().c_str());                             \
+            } else {                                                    \
+                newComment(OS.str().c_str());                           \
+            }                                                           \
         }                                                               \
         if (!getDerived().PreVisit##NAME(S)) {                          \
             return true; /* avoid traverse children */                  \
@@ -131,6 +135,8 @@ public:
     DISPATCHER(TemplateArgumentLoc, const clang::TemplateArgumentLoc &);
     DISPATCHER(ConstructorInitializer, clang::CXXCtorInitializer *);
 #undef DISPATCHER
+
+    bool FullTrace(void) const { return false; };
 
     const char *NameForStmt(clang::Stmt *S) {
         return S ? S->getStmtClassName() : "";
