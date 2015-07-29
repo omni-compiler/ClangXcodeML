@@ -22,6 +22,7 @@ class TypeTableInfo {
     clang::MangleContext *mangleContext;
     std::unordered_map<std::string, clang::QualType> mapFromNameToQualType;
     std::unordered_map<clang::QualType, std::string> mapFromQualTypeToName;
+    int seqForBasicType;
     int seqForPointerType;
     int seqForFunctionType;
     int seqForArrayType;
@@ -40,6 +41,15 @@ public:
 
     explicit TypeTableInfo(clang::MangleContext *MC); // default constructor
 
+    std::string registerBasicType(clang::QualType T); // "B*"
+    std::string registerPointerType(clang::QualType T); // "P*"
+    std::string registerFunctionType(clang::QualType T); // "F*"
+    std::string registerArrayType(clang::QualType T,
+                                  long *arraysize = nullptr); // "A*"
+    std::string registerRecordType(clang::QualType T,
+                                   std::string *rawname = nullptr); // "S*", "U*", or "C*"
+    std::string registerEnumType(clang::QualType T); // "E*"
+    std::string registerOtherType(clang::QualType T); // "O*"
     std::string getTypeName(clang::QualType T, bool *created = nullptr);
 };
 

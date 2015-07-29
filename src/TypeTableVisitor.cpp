@@ -27,6 +27,7 @@ TypeTableInfo::TypeTableInfo(MangleContext *MC) : mangleContext(MC)
 {
   mapFromNameToQualType.clear();
   mapFromQualTypeToName.clear();
+  seqForBasicType = 0;
   seqForPointerType = 0;
   seqForFunctionType = 0;
   seqForArrayType = 0;
@@ -37,17 +38,127 @@ TypeTableInfo::TypeTableInfo(MangleContext *MC) : mangleContext(MC)
   seqForOtherType = 0;
 }
 
-#define TPointer()  OS << "P" << seqForPointerType++; break
-#define TFunction() OS << "F" << seqForFunctionType++; break
 #define TArray()    OS << "A" << seqForArrayType++; break
-#define TStruct()   OS << "S" << seqForStructType++; break
-#define TUnion()    OS << "U" << seqForUnionType++; break
-#define TEnum()     OS << "E" << seqForEnumType++; break
-#define TClass()    OS << "C" << seqForClassType++; break
-#define TOther()    OS << "O" << seqForOtherType++; break
 
-#define TReference()     TPointer()
-#define TMemberPointer() TOther()
+std::string TypeTableInfo::registerBasicType(QualType T){
+  std::string name = mapFromQualTypeToName[T];
+  assert(name.empty());
+
+  raw_string_ostream OS(name);
+  OS << "B" << seqForBasicType++;
+  return mapFromQualTypeToName[T] = OS.str();
+}
+
+std::string TypeTableInfo::registerPointerType(QualType T){
+  std::string name = mapFromQualTypeToName[T];
+  assert(name.empty());
+
+  raw_string_ostream OS(name);
+  switch (T->getTypeClass()) {
+  case Type::Pointer:
+  case Type::BlockPointer:
+  case Type::LValueReference:
+  case Type::RValueReference:
+  case Type::MemberPointer:
+    OS << "P" << seqForPointerType++;
+    break;
+  default:
+    abort();
+  }
+  return mapFromQualTypeToName[T] = OS.str();
+}
+
+std::string TypeTableInfo::registerFunctionType(QualType T){
+  assert(T->getTypeClass() == Type::FunctionProto
+         || T->getTypeClass() == Type::FunctionNoProto);
+  std::string name = mapFromQualTypeToName[T];
+  assert(name.empty());
+
+  raw_string_ostream OS(name);
+  OS << "F" << seqForFunctionType++;
+  return mapFromQualTypeToName[T] = OS.str();
+}
+
+std::string TypeTableInfo::registerArrayType(QualType T, long *arraysize){
+  std::string name = mapFromQualTypeToName[T];
+  assert(name.empty());
+
+  raw_string_ostream OS(name);
+  switch (T->getTypeClass()) {
+  case Type::ConstantArray:
+    OS << "A" << seqForArrayType++;
+    if (arraysize != nullptr) {
+      APInt Value = static_cast<const ConstantArrayType *>(T.getTypePtr())->getSize();
+      *arraysize = *Value.getRawData();
+    }
+    break;
+  case Type::IncompleteArray:
+    OS << "A" << seqForArrayType++;
+    if (arraysize != nullptr) {
+      *arraysize = -1; /* unknown array size */
+    }
+    break;
+  case Type::VariableArray:
+    OS << "A" << seqForArrayType++;
+    if (arraysize != nullptr) {
+      *arraysize = -1; /* unknown array size */
+    }
+    break;
+  case Type::DependentSizedArray:
+    OS << "A" << seqForArrayType++;
+    if (arraysize != nullptr) {
+      *arraysize = -1; /* unknown array size */
+    }
+    break;
+  default:
+    abort();
+  }
+  return mapFromQualTypeToName[T] = OS.str();
+}
+
+std::string TypeTableInfo::registerRecordType(QualType T, std::string *rawname){
+  assert(T->getTypeClass() == Type::Record);
+  std::string name = mapFromQualTypeToName[T];
+
+  if (name.empty()) {
+    return name; // XXX: quick dirty hack
+  }
+  if (rawname != nullptr) {
+    std::string rawnamebuf;
+    raw_string_ostream OS(rawnamebuf);
+
+    if (T->isStructureType()) {
+      OS << "S" << seqForStructType++;
+    } else if (T->isUnionType()) {
+      OS << "U" << seqForUnionType++;
+    } else if (T->isClassType()) {
+      OS << "C" << seqForClassType++;
+    } else {
+      abort();
+    }
+    *rawname = OS.str();
+  }
+  return registerBasicType(T);
+}
+
+std::string TypeTableInfo::registerEnumType(QualType T){
+  assert(T->getTypeClass() == Type::Enum);
+  std::string name = mapFromQualTypeToName[T];
+  assert(name.empty());
+
+  raw_string_ostream OS(name);
+  OS << "E" << seqForEnumType++;
+  return mapFromQualTypeToName[T] = OS.str();
+}
+
+std::string TypeTableInfo::registerOtherType(QualType T){
+  std::string name = mapFromQualTypeToName[T];
+  assert(name.empty());
+
+  raw_string_ostream OS(name);
+  OS << "O" << seqForOtherType++;
+  return mapFromQualTypeToName[T] = OS.str();
+}
 
 std::string TypeTableInfo::getTypeName(QualType T, bool *created){
   if (created) {
@@ -73,59 +184,48 @@ std::string TypeTableInfo::getTypeName(QualType T, bool *created){
     return mapFromQualTypeToName[T]
       = static_cast<const BuiltinType*>(Tptr)->getName(PP).str();
   }
-  case Type::Complex: TOther();
-  case Type::Pointer: TPointer();
-  case Type::BlockPointer: TPointer();
-  case Type::LValueReference: TReference();
-  case Type::RValueReference: TReference();
-  case Type::MemberPointer: TMemberPointer();
-  case Type::ConstantArray: TArray();
-  case Type::IncompleteArray: TArray();
-  case Type::VariableArray: TArray();
-  case Type::DependentSizedArray: TArray();
-  case Type::DependentSizedExtVector: TOther();
-  case Type::Vector: TOther();
-  case Type::ExtVector: TOther();
-  case Type::FunctionProto: TFunction();
-  case Type::FunctionNoProto: TFunction();
-  case Type::UnresolvedUsing: TOther();
-  case Type::Paren: TOther();
-  case Type::Typedef: TOther();
-  case Type::Adjusted: TOther();
-  case Type::Decayed: TOther();
-  case Type::TypeOfExpr: TOther();
-  case Type::TypeOf: TOther();
-  case Type::Decltype: TOther();
-  case Type::UnaryTransform: TOther();
-  case Type::Record: {
-    if (T->isStructureType()) {
-      TStruct();
-    } else if (T->isUnionType()) {
-      TUnion();
-    } else if (T->isClassType()) {
-      TClass();
-    } else {
-      TOther();
-    }
+  case Type::Complex: return registerOtherType(T);
+  case Type::Pointer: return registerPointerType(T);
+  case Type::BlockPointer: return registerPointerType(T);
+  case Type::LValueReference: return registerPointerType(T);
+  case Type::RValueReference: return registerPointerType(T);
+  case Type::MemberPointer: return registerPointerType(T);
+  case Type::ConstantArray: return registerArrayType(T);
+  case Type::IncompleteArray: return registerArrayType(T);
+  case Type::VariableArray: return registerArrayType(T);
+  case Type::DependentSizedArray: return registerArrayType(T);
+  case Type::DependentSizedExtVector: return registerOtherType(T);
+  case Type::Vector: return registerOtherType(T);
+  case Type::ExtVector: return registerOtherType(T);
+  case Type::FunctionProto: return registerFunctionType(T);
+  case Type::FunctionNoProto: return registerFunctionType(T);
+  case Type::UnresolvedUsing: return registerOtherType(T);
+  case Type::Paren: return registerOtherType(T);
+  case Type::Typedef: return registerOtherType(T);
+  case Type::Adjusted: return registerOtherType(T);
+  case Type::Decayed: return registerOtherType(T);
+  case Type::TypeOfExpr: return registerOtherType(T);
+  case Type::TypeOf: return registerOtherType(T);
+  case Type::Decltype: return registerOtherType(T);
+  case Type::UnaryTransform: return registerOtherType(T);
+  case Type::Record: return registerRecordType(T);
+  case Type::Enum: return registerEnumType(T);
+  case Type::Elaborated: return registerOtherType(T);
+  case Type::Attributed: return registerOtherType(T);
+  case Type::TemplateTypeParm: return registerOtherType(T);
+  case Type::SubstTemplateTypeParm: return registerOtherType(T);
+  case Type::SubstTemplateTypeParmPack: return registerOtherType(T);
+  case Type::TemplateSpecialization: return registerOtherType(T);
+  case Type::Auto: return registerOtherType(T);
+  case Type::InjectedClassName: return registerOtherType(T);
+  case Type::DependentName: return registerOtherType(T);
+  case Type::DependentTemplateSpecialization: return registerOtherType(T);
+  case Type::PackExpansion: return registerOtherType(T);
+  case Type::ObjCObject: return registerOtherType(T);
+  case Type::ObjCInterface: return registerOtherType(T);
+  case Type::ObjCObjectPointer: return registerOtherType(T);
+  case Type::Atomic: return registerOtherType(T);
   }
-  case Type::Enum: TEnum();
-  case Type::Elaborated: TOther();
-  case Type::Attributed: TOther();
-  case Type::TemplateTypeParm: TOther();
-  case Type::SubstTemplateTypeParm: TOther();
-  case Type::SubstTemplateTypeParmPack: TOther();
-  case Type::TemplateSpecialization: TOther();
-  case Type::Auto: TOther();
-  case Type::InjectedClassName: TOther();
-  case Type::DependentName: TOther();
-  case Type::DependentTemplateSpecialization: TOther();
-  case Type::PackExpansion: TOther();
-  case Type::ObjCObject: TOther();
-  case Type::ObjCInterface: TOther();
-  case Type::ObjCObjectPointer: TOther();
-  case Type::Atomic: TOther();
-  }
-  return mapFromQualTypeToName[T] = OS.str();
 }
 
 const char *
@@ -139,7 +239,7 @@ TypeTableVisitor::PreVisitStmt(Stmt *S) {
     return false;
   }
   Expr *E = dyn_cast<Expr>(S);
-  
+
   if (E) {
     TraverseType(E->getType());
   }
@@ -251,8 +351,19 @@ TypeTableVisitor::PreVisitDecl(Decl *D) {
   }
   case Decl::Record: {
     TagDecl *TD = dyn_cast<TagDecl>(D);
-    if (TD && TD->isCompleteDefinition()) {
-      QualType T(TD->getTypeForDecl(), 0);
+    if (!TD) {
+      return false;
+    }
+    std::string RawName, Name;
+    QualType T(TD->getTypeForDecl(), 0);
+
+    Name = typetableinfo->registerRecordType(T, &RawName);
+    xmlNodePtr origCurNode = curNode;
+    newChild("basicType");
+    newProp("type", Name.c_str());
+    curNode = origCurNode;
+
+    if (TD->isCompleteDefinition()) {
       if (T->isStructureType()) {
         newChild("structType");
       } else if (T->isUnionType()) {
@@ -262,9 +373,7 @@ TypeTableVisitor::PreVisitDecl(Decl *D) {
       } else {
         newChild("UnknownRecordType");
       }
-      bool created;
-      const char *Name = typetableinfo->getTypeName(T, &created).c_str();
-      newProp("type", Name);
+      newProp("type", RawName.c_str());
       SymbolsVisitor SV(mangleContext, curNode, "symbols", typetableinfo);
       SV.TraverseChildOfDecl(D);
     }
