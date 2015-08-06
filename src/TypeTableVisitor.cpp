@@ -38,8 +38,6 @@ TypeTableInfo::TypeTableInfo(MangleContext *MC) : mangleContext(MC)
   seqForOtherType = 0;
 }
 
-#define TArray()    OS << "A" << seqForArrayType++; break
-
 std::string TypeTableInfo::registerBasicType(QualType T){
   std::string name = mapFromQualTypeToName[T];
   assert(name.empty());
@@ -79,7 +77,7 @@ std::string TypeTableInfo::registerFunctionType(QualType T){
   return mapFromQualTypeToName[T] = OS.str();
 }
 
-std::string TypeTableInfo::registerArrayType(QualType T, long *arraysize){
+std::string TypeTableInfo::registerArrayType(QualType T){
   std::string name = mapFromQualTypeToName[T];
   assert(name.empty());
 
@@ -87,28 +85,15 @@ std::string TypeTableInfo::registerArrayType(QualType T, long *arraysize){
   switch (T->getTypeClass()) {
   case Type::ConstantArray:
     OS << "A" << seqForArrayType++;
-    if (arraysize != nullptr) {
-      APInt Value = static_cast<const ConstantArrayType *>(T.getTypePtr())->getSize();
-      *arraysize = *Value.getRawData();
-    }
     break;
   case Type::IncompleteArray:
     OS << "A" << seqForArrayType++;
-    if (arraysize != nullptr) {
-      *arraysize = -1; /* unknown array size */
-    }
     break;
   case Type::VariableArray:
     OS << "A" << seqForArrayType++;
-    if (arraysize != nullptr) {
-      *arraysize = -1; /* unknown array size */
-    }
     break;
   case Type::DependentSizedArray:
     OS << "A" << seqForArrayType++;
-    if (arraysize != nullptr) {
-      *arraysize = -1; /* unknown array size */
-    }
     break;
   default:
     abort();
@@ -116,29 +101,24 @@ std::string TypeTableInfo::registerArrayType(QualType T, long *arraysize){
   return mapFromQualTypeToName[T] = OS.str();
 }
 
-std::string TypeTableInfo::registerRecordType(QualType T, std::string *rawname){
+std::string TypeTableInfo::registerRecordType(QualType T){
   assert(T->getTypeClass() == Type::Record);
   std::string name = mapFromQualTypeToName[T];
-
-  if (name.empty()) {
-    return name; // XXX: quick dirty hack
+  if (!name.empty()) {
+    return name;
   }
-  if (rawname != nullptr) {
-    std::string rawnamebuf;
-    raw_string_ostream OS(rawnamebuf);
 
-    if (T->isStructureType()) {
-      OS << "S" << seqForStructType++;
-    } else if (T->isUnionType()) {
-      OS << "U" << seqForUnionType++;
-    } else if (T->isClassType()) {
-      OS << "C" << seqForClassType++;
-    } else {
-      abort();
-    }
-    *rawname = OS.str();
+  raw_string_ostream OS(name);
+  if (T->isStructureType()) {
+    OS << "S" << seqForStructType++;
+  } else if (T->isUnionType()) {
+    OS << "U" << seqForUnionType++;
+  } else if (T->isClassType()) {
+    OS << "C" << seqForClassType++;
+  } else {
+    abort();
   }
-  return registerBasicType(T);
+  return mapFromQualTypeToName[T] = OS.str();
 }
 
 std::string TypeTableInfo::registerEnumType(QualType T){
@@ -160,72 +140,256 @@ std::string TypeTableInfo::registerOtherType(QualType T){
   return mapFromQualTypeToName[T] = OS.str();
 }
 
-std::string TypeTableInfo::getTypeName(QualType T, bool *created){
-  if (created) {
-    *created = false;
-  }
+std::string TypeTableInfo::createTypeNode(QualType T, xmlNodePtr *N, bool force){
   if (T.isNull()) {
     return "nullType";
   };
   std::string name = mapFromQualTypeToName[T];
-  if (!name.empty()) {
-    return name;
-  }
+  bool toCreate = force;
 
-  if (created) {
-    *created = true;
-  }
+  assert(!(N == nullptr && name.empty()));
+
   raw_string_ostream OS(name);
   switch (T->getTypeClass()) {
-  case Type::Builtin: {
-    const Type *Tptr = T.getTypePtrOrNull();
-    ASTContext &CXT = mangleContext->getASTContext();
-    PrintingPolicy PP(CXT.getLangOpts());
-    return mapFromQualTypeToName[T]
-      = static_cast<const BuiltinType*>(Tptr)->getName(PP).str();
+  case Type::Builtin:
+    {
+      const Type *Tptr = T.getTypePtrOrNull();
+      ASTContext &CXT = mangleContext->getASTContext();
+      PrintingPolicy PP(CXT.getLangOpts());
+      if (name.empty()) {
+        name
+          = mapFromQualTypeToName[T]
+          = static_cast<const BuiltinType*>(Tptr)->getName(PP).str();
+      }
+    }
+    break;
+
+  case Type::Complex:
+    {
+      if (name.empty()) {
+        name = registerOtherType(T);
+        toCreate = true;
+      }
+      if (toCreate && N != nullptr && *N != nullptr) {
+        // XXX: temporary implementation
+        *N = xmlNewTextChild(*N, nullptr, BAD_CAST "complexType", nullptr);
+        xmlNewProp(*N, BAD_CAST "type", BAD_CAST name.c_str());
+      }
+    }
+    break;
+
+  case Type::Pointer:
+  case Type::BlockPointer:
+  case Type::LValueReference:
+  case Type::RValueReference:
+  case Type::MemberPointer:
+    {
+      const PointerType *PT = dyn_cast<const PointerType>(T.getTypePtr());
+      if (PT && N != nullptr && *N != nullptr) {
+        xmlNodePtr Tmp = *N;
+        createTypeNode(PT->getPointeeType(), &Tmp);
+      }
+      if (name.empty()) {
+        name = registerPointerType(T);
+        toCreate = true;
+      }
+      if (toCreate && N != nullptr && *N != nullptr) {
+        *N = xmlNewTextChild(*N, nullptr, BAD_CAST "pointerType", nullptr);
+        xmlNewProp(*N, BAD_CAST "type", BAD_CAST name.c_str());
+        if (PT) {
+          xmlNewProp(*N, BAD_CAST "ref",
+                     BAD_CAST getTypeName(PT->getPointeeType()).c_str());
+        }
+      }
+    }
+    break;
+
+  case Type::ConstantArray:
+    {
+      const ConstantArrayType *CAT
+        = dyn_cast<const ConstantArrayType>(T.getTypePtr());
+      if (CAT && N != nullptr && *N != nullptr) {
+        xmlNodePtr Tmp = *N;
+        createTypeNode(CAT->getElementType(), &Tmp);
+      }
+
+      if (name.empty()) {
+        name = registerArrayType(T);
+        toCreate = true;
+      }
+      if (toCreate && N != nullptr && *N != nullptr) {
+        *N = xmlNewTextChild(*N, nullptr, BAD_CAST "arrayType", nullptr);
+        xmlNewProp(*N, BAD_CAST "type", BAD_CAST name.c_str());
+        if (CAT) {
+          xmlNewProp(*N, BAD_CAST "element_type",
+                     BAD_CAST getTypeName(CAT->getElementType()).c_str());
+          xmlNewProp(*N, BAD_CAST "array_size",
+                     BAD_CAST CAT->getSize().toString(10, false).c_str());
+        }
+      }
+    }
+    break;
+
+  case Type::IncompleteArray:
+  case Type::VariableArray:
+  case Type::DependentSizedArray:
+    {
+      const ArrayType *AT = dyn_cast<const ArrayType>(T.getTypePtr());
+      if (AT && N != nullptr && *N != nullptr) {
+        xmlNodePtr Tmp = *N;
+        createTypeNode(AT->getElementType(), &Tmp);
+      }
+      if (name.empty()) {
+        name = registerArrayType(T);
+        toCreate = true;
+      }
+      if (toCreate && N != nullptr && *N != nullptr) {
+        *N = xmlNewTextChild(*N, nullptr, BAD_CAST "arrayType", nullptr);
+        xmlNewProp(*N, BAD_CAST "type", BAD_CAST name.c_str());
+        if (AT) {
+          xmlNewProp(*N, BAD_CAST "element_type",
+                     BAD_CAST getTypeName(AT->getElementType()).c_str());
+        }
+      }
+    }
+    break;
+
+  case Type::DependentSizedExtVector:
+  case Type::Vector:
+  case Type::ExtVector:
+    {
+      if (name.empty()) {
+        name = registerOtherType(T);
+        toCreate = true;
+      }
+      if (toCreate && N != nullptr && *N != nullptr) {
+        // XXX: temporary implementation
+        *N = xmlNewTextChild(*N, nullptr, BAD_CAST "vectorType", nullptr);
+        xmlNewProp(*N, BAD_CAST "type", BAD_CAST name.c_str());
+      }
+    }
+    break;
+
+  case Type::FunctionProto:
+  case Type::FunctionNoProto:
+    {
+      if (name.empty()) {
+        name = registerFunctionType(T);
+        toCreate = true;
+      }
+      if (toCreate && N != nullptr && *N != nullptr) {
+        *N = xmlNewTextChild(*N, nullptr, BAD_CAST "functionType", nullptr);
+        xmlNewProp(*N, BAD_CAST "type", BAD_CAST name.c_str());
+      }
+    }
+    break;
+
+  case Type::UnresolvedUsing:
+  case Type::Paren:
+  case Type::Typedef:
+    {
+      if (name.empty()) {
+        name = registerOtherType(T);
+        toCreate = true;
+      }
+      if (toCreate && N != nullptr && *N != nullptr) {
+        // XXX: temporary implementation
+        *N = xmlNewTextChild(*N, nullptr, BAD_CAST "typedefType", nullptr);
+        xmlNewProp(*N, BAD_CAST "type", BAD_CAST name.c_str());
+      }
+    }
+    break;
+
+  case Type::Adjusted:
+  case Type::Decayed:
+  case Type::TypeOfExpr:
+  case Type::TypeOf:
+  case Type::Decltype:
+  case Type::UnaryTransform:
+    {
+      if (name.empty()) {
+        name = registerOtherType(T);
+        toCreate = true;
+      }
+      if (toCreate && N != nullptr && *N != nullptr) {
+        // XXX: temporary implementation
+        *N = xmlNewTextChild(*N, nullptr, BAD_CAST "otherType", nullptr);
+        xmlNewProp(*N, BAD_CAST "type", BAD_CAST name.c_str());
+      }
+    }
+    break;
+
+  case Type::Record:
+    {
+      if (name.empty()) {
+        name = registerRecordType(T);
+        toCreate = true;
+      }
+      if (toCreate && N != nullptr && *N != nullptr) {
+        if (T->isStructureType()) {
+          *N = xmlNewTextChild(*N, nullptr, BAD_CAST "structType", nullptr);
+        } else if (T->isUnionType()) {
+          *N = xmlNewTextChild(*N, nullptr, BAD_CAST "unionType", nullptr);
+        } else if (T->isClassType()) {
+          // XXX: temporary implementation
+          *N = xmlNewTextChild(*N, nullptr, BAD_CAST "classType", nullptr);
+        } else {
+          // XXX: temporary implementation
+          *N = xmlNewTextChild(*N, nullptr, BAD_CAST "unknownRecordType", nullptr);
+        }
+        xmlNewProp(*N, BAD_CAST "type", BAD_CAST name.c_str());
+      }
+    }
+    break;
+
+  case Type::Enum:
+    {
+      if (name.empty()) {
+        name = registerEnumType(T);
+        toCreate = true;
+      }
+      if (toCreate && N != nullptr && *N != nullptr) {
+        *N = xmlNewTextChild(*N, nullptr, BAD_CAST "enumType", nullptr);
+        xmlNewProp(*N, BAD_CAST "type", BAD_CAST name.c_str());
+      }
+    }
+    break;
+
+  case Type::Elaborated:
+  case Type::Attributed:
+  case Type::TemplateTypeParm:
+  case Type::SubstTemplateTypeParm:
+  case Type::SubstTemplateTypeParmPack:
+  case Type::TemplateSpecialization:
+  case Type::Auto:
+  case Type::InjectedClassName:
+  case Type::DependentName:
+  case Type::DependentTemplateSpecialization:
+  case Type::PackExpansion:
+  case Type::ObjCObject:
+  case Type::ObjCInterface:
+  case Type::ObjCObjectPointer:
+  case Type::Atomic:
+    {
+      if (name.empty()) {
+        name = registerOtherType(T);
+        toCreate = true;
+      }
+      if (toCreate && N != nullptr && *N != nullptr) {
+        // XXX: temporary implementation
+        *N = xmlNewTextChild(*N, nullptr, BAD_CAST "otherType", nullptr);
+        xmlNewProp(*N, BAD_CAST "type", BAD_CAST name.c_str());
+      }
+    }
+    break;
   }
-  case Type::Complex: return registerOtherType(T);
-  case Type::Pointer: return registerPointerType(T);
-  case Type::BlockPointer: return registerPointerType(T);
-  case Type::LValueReference: return registerPointerType(T);
-  case Type::RValueReference: return registerPointerType(T);
-  case Type::MemberPointer: return registerPointerType(T);
-  case Type::ConstantArray: return registerArrayType(T);
-  case Type::IncompleteArray: return registerArrayType(T);
-  case Type::VariableArray: return registerArrayType(T);
-  case Type::DependentSizedArray: return registerArrayType(T);
-  case Type::DependentSizedExtVector: return registerOtherType(T);
-  case Type::Vector: return registerOtherType(T);
-  case Type::ExtVector: return registerOtherType(T);
-  case Type::FunctionProto: return registerFunctionType(T);
-  case Type::FunctionNoProto: return registerFunctionType(T);
-  case Type::UnresolvedUsing: return registerOtherType(T);
-  case Type::Paren: return registerOtherType(T);
-  case Type::Typedef: return registerOtherType(T);
-  case Type::Adjusted: return registerOtherType(T);
-  case Type::Decayed: return registerOtherType(T);
-  case Type::TypeOfExpr: return registerOtherType(T);
-  case Type::TypeOf: return registerOtherType(T);
-  case Type::Decltype: return registerOtherType(T);
-  case Type::UnaryTransform: return registerOtherType(T);
-  case Type::Record: return registerRecordType(T);
-  case Type::Enum: return registerEnumType(T);
-  case Type::Elaborated: return registerOtherType(T);
-  case Type::Attributed: return registerOtherType(T);
-  case Type::TemplateTypeParm: return registerOtherType(T);
-  case Type::SubstTemplateTypeParm: return registerOtherType(T);
-  case Type::SubstTemplateTypeParmPack: return registerOtherType(T);
-  case Type::TemplateSpecialization: return registerOtherType(T);
-  case Type::Auto: return registerOtherType(T);
-  case Type::InjectedClassName: return registerOtherType(T);
-  case Type::DependentName: return registerOtherType(T);
-  case Type::DependentTemplateSpecialization: return registerOtherType(T);
-  case Type::PackExpansion: return registerOtherType(T);
-  case Type::ObjCObject: return registerOtherType(T);
-  case Type::ObjCInterface: return registerOtherType(T);
-  case Type::ObjCObjectPointer: return registerOtherType(T);
-  case Type::Atomic: return registerOtherType(T);
-  }
+
+  return name;
+}
+
+std::string TypeTableInfo::getTypeName(QualType T)
+{
+  return createTypeNode(T, nullptr);
 }
 
 const char *
@@ -253,44 +417,8 @@ TypeTableVisitor::PreVisitType(QualType T) {
   if (T.isNull()) {
     return false;
   };
-
-  bool created;
-  const char *Name = typetableinfo->getTypeName(T, &created).c_str();
-  if (!created) {
-    return true; // emit nothing
-  }
-  switch (Name[0]) {
-  case 'P': {
-    xmlNodePtr N = addChild("pointerType");
-    newProp("type", Name, N);
-    const PointerType *PT = dyn_cast<const PointerType>(T.getTypePtr());
-    if (PT) {
-      newProp("ref",
-              typetableinfo->getTypeName(PT->getPointeeType()).c_str(), N);
-    }
-    break;
-  }
-  case 'F':
-    newProp("type", Name, addChild("functionType"));
-    break;
-  case 'A':
-    newProp("type", Name, addChild("arrayType"));
-    break;
-  case 'S':
-    break;
-  case 'U':
-    break;
-  case 'E':
-    break;
-  case 'C':
-    break;
-  case 'O':
-    newProp("type", Name, addChild("otherType"));
-    break;
-  default:
-    newProp("type", Name, addChild("basicType"));
-    break;
-  }
+  xmlNodePtr Tmp = curNode;
+  typetableinfo->createTypeNode(T, &Tmp);
   return true;
 }
 
@@ -338,14 +466,18 @@ TypeTableVisitor::PreVisitDecl(Decl *D) {
   case Decl::TemplateTemplateParm: return true;
   case Decl::Enum: {
     TagDecl *TD = dyn_cast<TagDecl>(D);
-    if (TD && TD->isCompleteDefinition()) {
-      QualType T(TD->getTypeForDecl(), 0);
-      newChild("enumType");
-      bool created;
-      const char *Name = typetableinfo->getTypeName(T, &created).c_str();
-      newProp("type", Name);
+    if (!TD) {
+      return false;
+    }
+    QualType T(TD->getTypeForDecl(), 0);
+    if (TD->isCompleteDefinition()) {
+      typetableinfo->createTypeNode(T, &curNode, true);
       SymbolsVisitor SV(mangleContext, curNode, "symbols", typetableinfo);
       SV.TraverseChildOfDecl(D);
+    } else {
+      // reserve a new name (but no nodes are emitted)
+      xmlNodePtr dummyNode = nullptr;
+      typetableinfo->createTypeNode(T, &dummyNode);
     }
     return true;
   }
@@ -354,28 +486,15 @@ TypeTableVisitor::PreVisitDecl(Decl *D) {
     if (!TD) {
       return false;
     }
-    std::string RawName, Name;
     QualType T(TD->getTypeForDecl(), 0);
-
-    Name = typetableinfo->registerRecordType(T, &RawName);
-    xmlNodePtr origCurNode = curNode;
-    newChild("basicType");
-    newProp("type", Name.c_str());
-    curNode = origCurNode;
-
     if (TD->isCompleteDefinition()) {
-      if (T->isStructureType()) {
-        newChild("structType");
-      } else if (T->isUnionType()) {
-        newChild("unionType");
-      } else if (T->isClassType()) {
-        newChild("classType");
-      } else {
-        newChild("UnknownRecordType");
-      }
-      newProp("type", RawName.c_str());
+      typetableinfo->createTypeNode(T, &curNode, true);
       SymbolsVisitor SV(mangleContext, curNode, "symbols", typetableinfo);
       SV.TraverseChildOfDecl(D);
+    } else {
+      // reserve a new name (but no nodes are emitted)
+      xmlNodePtr dummyNode = nullptr;
+      typetableinfo->createTypeNode(T, &dummyNode);
     }
     return true;
   }

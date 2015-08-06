@@ -44,13 +44,13 @@ public:
     std::string registerBasicType(clang::QualType T); // "B*"
     std::string registerPointerType(clang::QualType T); // "P*"
     std::string registerFunctionType(clang::QualType T); // "F*"
-    std::string registerArrayType(clang::QualType T,
-                                  long *arraysize = nullptr); // "A*"
-    std::string registerRecordType(clang::QualType T,
-                                   std::string *rawname = nullptr); // "S*", "U*", or "C*"
+    std::string registerArrayType(clang::QualType T); // "A*"
+    std::string registerRecordType(clang::QualType T); // "S*", "U*", or "C*"
     std::string registerEnumType(clang::QualType T); // "E*"
     std::string registerOtherType(clang::QualType T); // "O*"
-    std::string getTypeName(clang::QualType T, bool *created = nullptr);
+    std::string createTypeNode(clang::QualType T, xmlNodePtr *N,
+                               bool force = false);
+    std::string getTypeName(clang::QualType T);
 };
 
 class TypeTableVisitor

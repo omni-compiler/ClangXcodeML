@@ -9,6 +9,8 @@ typedef char *charptr;
 complex_t x __attribute__((aligned(64), unused));
 complex_t complex_add(complex_t x, double y);
 
+struct opaque *opaque_creator();
+
 main()
 {
   complex_t z;
