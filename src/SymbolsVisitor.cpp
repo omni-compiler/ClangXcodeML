@@ -365,7 +365,7 @@ SymbolsVisitor::PreVisitDecl(Decl *D) {
     return true;
   }
   case Decl::ImplicitParam: ND("Decl_ImplicitParam");
-  case Decl::ParmVar:  {
+  case Decl::ParmVar: {
     ParmVarDecl *PVD = dyn_cast<ParmVarDecl>(D);
 
     newComment("Decl_ParmVar");
@@ -381,7 +381,19 @@ SymbolsVisitor::PreVisitDecl(Decl *D) {
   }
   case Decl::VarTemplateSpecialization: ND("Decl_VarTemplateSpecialization");
   case Decl::VarTemplatePartialSpecialization: ND("Decl_VarTemplatePartialSpecialization");
-  case Decl::EnumConstant: ND("Decl_EnumConstant");
+  case Decl::EnumConstant: {
+    EnumConstantDecl *ECD = dyn_cast<EnumConstantDecl>(D);
+
+    newComment("Decl_EnumConstant");
+    newChild("id");
+    if (ECD) {
+      IdentifierInfo *II = ECD->getDeclName().getAsIdentifierInfo();
+      if (II) {
+        addChild("name", II->getNameStart());
+      }
+    }
+    return true;
+  }
   case Decl::IndirectField: ND("Decl_IndirectField");
   case Decl::UnresolvedUsingValue: ND("Decl_UnresolvedUsingValue");
   case Decl::OMPThreadPrivate: ND("Decl_OMPThreadPrivate");
