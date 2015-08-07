@@ -273,6 +273,11 @@ std::string TypeTableInfo::createTypeNode(QualType T, xmlNodePtr *N, bool force)
   case Type::FunctionProto:
   case Type::FunctionNoProto:
     {
+      const FunctionType *FT = dyn_cast<const FunctionType>(T.getTypePtr());
+      if (FT && N != nullptr && *N != nullptr) {
+        xmlNodePtr Tmp = *N;
+        createTypeNode(FT->getReturnType(), &Tmp);
+      }
       if (name.empty()) {
         name = registerFunctionType(T);
         toCreate = true;
@@ -280,6 +285,8 @@ std::string TypeTableInfo::createTypeNode(QualType T, xmlNodePtr *N, bool force)
       if (toCreate && N != nullptr && *N != nullptr) {
         *N = xmlNewTextChild(*N, nullptr, BAD_CAST "functionType", nullptr);
         xmlNewProp(*N, BAD_CAST "type", BAD_CAST name.c_str());
+        xmlNewProp(*N, BAD_CAST "return_type",
+                   BAD_CAST getTypeName(FT->getReturnType()).c_str());
       }
     }
     break;
@@ -511,7 +518,24 @@ TypeTableVisitor::PreVisitDecl(Decl *D) {
   case Decl::Field: return true;
   case Decl::ObjCAtDefsField: return true;
   case Decl::ObjCIvar: return true;
-  case Decl::Function: DECLTYPE(); return true;
+  case Decl::Function: {
+    TypeDecl *TD = dyn_cast<TypeDecl>(D);
+    FunctionDecl *FD = dyn_cast<FunctionDecl>(D);
+    if (!TD) {
+      return true;
+    }
+    QualType T(TD->getTypeForDecl(), 0);
+    if (FD && FD->hasPrototype()) {
+      typetableinfo->createTypeNode(T, &curNode, true);
+      SymbolsVisitor SV(mangleContext, curNode, "params", typetableinfo);
+      SV.TraverseChildOfDecl(D);
+    } else {
+      // reserve a new name (but no nodes are emitted)
+      xmlNodePtr dummyNode = nullptr;
+      typetableinfo->createTypeNode(T, &dummyNode);
+    }
+    return true;
+  }
   case Decl::CXXMethod: return true;
   case Decl::CXXConstructor: return true;
   case Decl::CXXConversion: return true;
