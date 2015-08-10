@@ -146,8 +146,43 @@ std::string TypeTableInfo::createTypeNode(QualType T, xmlNodePtr *N, bool force)
   };
   std::string name = mapFromQualTypeToName[T];
   bool toCreate = force;
+  bool isQualified = false;
 
   assert(!(N == nullptr && name.empty()));
+
+  if (T.isConstQualified()) {
+    isQualified = true;
+  }
+  if (T.isVolatileQualified()) {
+    isQualified = true;
+  }
+  if (T.isRestrictQualified()) {
+    isQualified = true;
+  }
+  if (isQualified) {
+    QualType UT = T.getUnqualifiedType();
+    std::string unqualname = createTypeNode(UT, N, force);
+
+    if (name.empty()) {
+      name = registerBasicType(T);
+      toCreate = true;
+    }
+    if (toCreate && N != nullptr && *N != nullptr) {
+      *N = xmlNewTextChild(*N, nullptr, BAD_CAST "basicType", nullptr);
+      xmlNewProp(*N, BAD_CAST "type", BAD_CAST name.c_str());
+
+      if (T.isConstQualified()) {
+        xmlNewProp(*N, BAD_CAST "is_const", BAD_CAST "1");
+      }
+      if (T.isVolatileQualified()) {
+        xmlNewProp(*N, BAD_CAST "is_volatile", BAD_CAST "1");
+      }
+      if (T.isRestrictQualified()) {
+        xmlNewProp(*N, BAD_CAST "is_restrict", BAD_CAST "1");
+      }
+      xmlNewProp(*N, BAD_CAST "name", BAD_CAST unqualname.c_str());
+    }
+  }
 
   raw_string_ostream OS(name);
   switch (T->getTypeClass()) {
