@@ -283,7 +283,7 @@ SymbolsVisitor::PreVisitDecl(Decl *D) {
         addChild("name", II->getNameStart());
       }
     }
-    return true;
+    return false;
   }
   case Decl::CXXRecord: ND("Decl_CXXRecord");
   case Decl::ClassTemplateSpecialization: ND("Decl_ClassTemplateSpecialization");
@@ -332,7 +332,7 @@ SymbolsVisitor::PreVisitDecl(Decl *D) {
         addChild("name", II->getNameStart());
       }
     }
-    return true;
+    return false;
   }
   case Decl::CXXMethod: ND("Decl_CXXMethod");
   case Decl::CXXConstructor: ND("Decl_CXXConstructor");
