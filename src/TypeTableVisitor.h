@@ -22,6 +22,8 @@ class TypeTableInfo {
     clang::MangleContext *mangleContext;
     std::unordered_map<std::string, clang::QualType> mapFromNameToQualType;
     std::unordered_map<clang::QualType, std::string> mapFromQualTypeToName;
+    std::unordered_map<clang::QualType, xmlNodePtr> mapFromQualTypeToXmlNodePtr;
+
     int seqForBasicType;
     int seqForPointerType;
     int seqForFunctionType;
@@ -32,6 +34,25 @@ class TypeTableInfo {
     int seqForClassType;
     int seqForOtherType;
 
+    std::vector<xmlNodePtr> basicTypeNodes;
+    std::vector<xmlNodePtr> pointerTypeNodes;
+    std::vector<xmlNodePtr> functionTypeNodes;
+    std::vector<xmlNodePtr> arrayTypeNodes;
+    std::vector<xmlNodePtr> structTypeNodes;
+    std::vector<xmlNodePtr> unionTypeNodes;
+    std::vector<xmlNodePtr> enumTypeNodes;
+    std::vector<xmlNodePtr> classTypeNodes;
+    std::vector<xmlNodePtr> otherTypeNodes;
+
+    xmlNodePtr createNode(clang::QualType T, const char *fieldname, std::string name);
+    std::string registerBasicType(clang::QualType T); // "B*"
+    std::string registerPointerType(clang::QualType T); // "P*"
+    std::string registerFunctionType(clang::QualType T); // "F*"
+    std::string registerArrayType(clang::QualType T); // "A*"
+    std::string registerRecordType(clang::QualType T); // "S*", "U*", or "C*"
+    std::string registerEnumType(clang::QualType T); // "E*"
+    std::string registerOtherType(clang::QualType T); // "O*"
+
 public:
     TypeTableInfo() = delete;
     TypeTableInfo(const TypeTableInfo&) = delete;
@@ -41,16 +62,9 @@ public:
 
     explicit TypeTableInfo(clang::MangleContext *MC); // default constructor
 
-    std::string registerBasicType(clang::QualType T); // "B*"
-    std::string registerPointerType(clang::QualType T); // "P*"
-    std::string registerFunctionType(clang::QualType T); // "F*"
-    std::string registerArrayType(clang::QualType T); // "A*"
-    std::string registerRecordType(clang::QualType T); // "S*", "U*", or "C*"
-    std::string registerEnumType(clang::QualType T); // "E*"
-    std::string registerOtherType(clang::QualType T); // "O*"
-    std::string createTypeNode(clang::QualType T, xmlNodePtr *N,
-                               bool force = false);
+    std::string registerType(clang::QualType T, xmlNodePtr *curNode = nullptr);
     std::string getTypeName(clang::QualType T);
+    void emitAllTypeNode(xmlNodePtr ParentNode);
 };
 
 class TypeTableVisitor
