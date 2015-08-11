@@ -406,9 +406,6 @@ void TypeTableInfo::emitAllTypeNode(xmlNodePtr ParentNode)
   for (xmlNodePtr N : pointerTypeNodes) {
     xmlAddChild(ParentNode, N);
   }
-  for (xmlNodePtr N : functionTypeNodes) {
-    xmlAddChild(ParentNode, N);
-  }
   for (xmlNodePtr N : arrayTypeNodes) {
     xmlAddChild(ParentNode, N);
   }
@@ -422,6 +419,9 @@ void TypeTableInfo::emitAllTypeNode(xmlNodePtr ParentNode)
     xmlAddChild(ParentNode, N);
   }
   for (xmlNodePtr N : classTypeNodes) {
+    xmlAddChild(ParentNode, N);
+  }
+  for (xmlNodePtr N : functionTypeNodes) {
     xmlAddChild(ParentNode, N);
   }
   for (xmlNodePtr N : otherTypeNodes) {
