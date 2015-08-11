@@ -35,7 +35,7 @@ public:
         MangleContext *MC = CXT.createMangleContext();
         TypeTableInfo typetableinfo(MC);
         TypeTableInfo *TTI = &typetableinfo;
-        TypeTableVisitor TTV(MC, rootNode, "TypeTable", TTI);
+        TypeTableVisitor TTV(MC, rootNode, "typeTable", TTI);
         SymbolsVisitor SV(MC, rootNode, "globalSymbols", TTI);
         DeclarationsVisitor DV(MC, rootNode, "globalDeclarations", TTI);
         Decl *D = CXT.getTranslationUnitDecl();
