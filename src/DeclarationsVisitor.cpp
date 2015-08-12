@@ -469,7 +469,8 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
       }
     }
     OS.str();
-    NExpr("stringConstant", literalAsString.c_str());
+    newChild("stringConstant", literalAsString.c_str()); // do not emit type
+    return true;
   }
   case Stmt::SubstNonTypeTemplateParmExprClass: NStmtXXX("SubstNonTypeTemplateParmExprClass");
   case Stmt::SubstNonTypeTemplateParmPackExprClass: NStmtXXX("SubstNonTypeTemplateParmPackExprClass");
