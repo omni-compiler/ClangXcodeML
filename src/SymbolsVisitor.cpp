@@ -37,7 +37,13 @@ SymbolsVisitor::PreVisitStmt(Stmt *S) {
 bool
 SymbolsVisitor::PreVisitTypeLoc(TypeLoc TL) {
   (void)TL;
-  return true; // do not traverse children
+  return true; // nothing to emit. traverse children recursively
+}
+
+bool
+SymbolsVisitor::PreVisitType(QualType T) {
+  (void)T;
+  return false; // nothing to emit. do not traverse children
 }
 
 bool
