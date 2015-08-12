@@ -441,7 +441,7 @@ TypeTableVisitor::PreVisitStmt(Stmt *S) {
   }
   Expr *E = dyn_cast<Expr>(S);
 
-  if (E) {
+  if (E && S->getStmtClass() != Stmt::StringLiteralClass) {
     TraverseType(E->getType());
   }
   return true; // do not create a new child
