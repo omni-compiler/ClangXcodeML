@@ -44,7 +44,8 @@ class TypeTableInfo {
     std::vector<xmlNodePtr> classTypeNodes;
     std::vector<xmlNodePtr> otherTypeNodes;
 
-    xmlNodePtr createNode(clang::QualType T, const char *fieldname, std::string name);
+    xmlNodePtr createNode(clang::QualType T, const char *fieldname,
+                          std::string name, xmlNodePtr traversingNode);
     std::string registerBasicType(clang::QualType T); // "B*"
     std::string registerPointerType(clang::QualType T); // "P*"
     std::string registerFunctionType(clang::QualType T); // "F*"
@@ -62,7 +63,8 @@ public:
 
     explicit TypeTableInfo(clang::MangleContext *MC); // default constructor
 
-    std::string registerType(clang::QualType T, xmlNodePtr *curNode = nullptr);
+    std::string registerType(clang::QualType T, xmlNodePtr *retNode,
+                             xmlNodePtr traversingNode);
     std::string getTypeName(clang::QualType T);
     void emitAllTypeNode(xmlNodePtr ParentNode);
 };
