@@ -1040,31 +1040,40 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
   case Decl::ObjCIvar: NDeclXXX("ObjCIvar");
   case Decl::Function: {
     // 5.1, 5.4 XXX
-    if (static_cast<FunctionDecl*>(D)->isThisDeclarationADefinition()) {
+    FunctionDecl *FD = static_cast<FunctionDecl*>(D);
+    if (FD && FD->isThisDeclarationADefinition()) {
       newChild("functionDefinition");
+      setLocation(FD->getSourceRange().getBegin());
+      xmlNodePtr functionNode = curNode;
+      HookForDeclarationNameInfo = [this, D](DeclarationNameInfo NI) {
+        DeclarationsVisitor V(this);
+        if (V.TraverseDeclarationNameInfo(NI)) {
+          SymbolsVisitor SV(mangleContext, curNode, "symbols", typetableinfo);
+          SV.TraverseChildOfDecl(D);
+          newChild("params"); //create a new node to parent just after NameInfo
+          return true;
+        } else {
+          return false;
+        }
+      };
+      bool IsValiadic = static_cast<FunctionDecl*>(D)->isVariadic();
+      HookForStmt = [this, functionNode, IsValiadic](Stmt *S) {
+        if (IsValiadic) {
+          addChild("ellipsis");
+        }
+        curNode = functionNode;
+        newChild("body");
+        return TraverseStmt(S);
+      };
     } else {
       newChild("functionDecl");
-    }
-    xmlNodePtr functionNode = curNode;
-    HookForDeclarationNameInfo = [this, D](DeclarationNameInfo NI) {
-      DeclarationsVisitor V(this);
-      if (V.TraverseDeclarationNameInfo(NI)) {
-        SymbolsVisitor SV(mangleContext, curNode, "symbols", typetableinfo);
-        SV.TraverseChildOfDecl(D);
-        newChild("params"); // create a new node to parent just after NameInfo
-        return true;
-      } else {
+      HookForDeclarationNameInfo = [this, D](DeclarationNameInfo NI) {
+        DeclarationsVisitor V(this);
+        V.TraverseDeclarationNameInfo(NI);
         return false;
-      }
-    };
-    bool IsValiadic = static_cast<FunctionDecl*>(D)->isVariadic();
-    HookForStmt = [this, functionNode, IsValiadic](Stmt *S) {
-      if (IsValiadic) {
-        addChild("ellipsis");
-      }
-      curNode = functionNode;
-      return TraverseStmt(S);
-    };
+      };
+    }
+     
     return true;
   }
   case Decl::CXXMethod: NDeclXXX("CXXMethod");

@@ -119,7 +119,8 @@ public:
         return getDerived().TraverseChildOf##NAME(S);                   \
     }                                                                   \
     bool TraverseChildOf##NAME(TYPE S) {                                \
-        return getDerived().otherside->Bridge##NAME(S);                 \
+        getDerived().otherside->Bridge##NAME(S);                        \
+        return true;                                                    \
     }
 
     DISPATCHER(Stmt, clang::Stmt *);

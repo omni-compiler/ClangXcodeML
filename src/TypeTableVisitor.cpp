@@ -458,15 +458,6 @@ TypeTableVisitor::PreVisitType(QualType T) {
   return true;
 }
 
-#define DECLTYPE()                              \
-  do {                                          \
-    TypeDecl *TD = dyn_cast<TypeDecl>(D);       \
-    if (TD) {                                   \
-      QualType T(TD->getTypeForDecl(), 0);      \
-      PreVisitType(T);                          \
-    }                                           \
-  } while (0)
-
 bool
 TypeTableVisitor::PreVisitDecl(Decl *D) {
   if (!D) {
@@ -500,80 +491,122 @@ TypeTableVisitor::PreVisitDecl(Decl *D) {
   case Decl::TypeAliasTemplate: return true;
   case Decl::VarTemplate: return true;
   case Decl::TemplateTemplateParm: return true;
-  case Decl::Enum: {
-    TagDecl *TD = dyn_cast<TagDecl>(D);
-    if (!TD) {
-      return false;
+  case Decl::Enum:
+    {
+      TagDecl *TD = dyn_cast<TagDecl>(D);
+      if (!TD) {
+        return false;
+      }
+      QualType T(TD->getTypeForDecl(), 0);
+      if (TD->isCompleteDefinition()) {
+        xmlNodePtr tmpNode;
+        typetableinfo->registerType(T, &tmpNode);
+        TraverseChildOfDecl(D);
+        SymbolsVisitor SV(mangleContext, tmpNode, "symbols", typetableinfo);
+        SV.TraverseChildOfDecl(D);
+        return false;
+      } else {
+        // just allocate a name.
+        typetableinfo->registerType(T);
+        return true;
+      }
     }
-    QualType T(TD->getTypeForDecl(), 0);
-    if (TD->isCompleteDefinition()) {
-      xmlNodePtr tmpNode;
-      typetableinfo->registerType(T, &tmpNode);
-      SymbolsVisitor SV(mangleContext, tmpNode, "symbols", typetableinfo);
-      SV.TraverseChildOfDecl(D);
-    } else {
-      // just allocate a name.
-      typetableinfo->registerType(T);
+  case Decl::Record:
+    {
+      TagDecl *TD = dyn_cast<TagDecl>(D);
+      if (!TD) {
+        return false;
+      }
+      QualType T(TD->getTypeForDecl(), 0);
+      if (TD->isCompleteDefinition()) {
+        xmlNodePtr tmpNode;
+        typetableinfo->registerType(T, &tmpNode);
+        TraverseChildOfDecl(D);
+        SymbolsVisitor SV(mangleContext, tmpNode, "symbols", typetableinfo);
+        SV.TraverseChildOfDecl(D);
+        return false;
+
+      } else {
+        // just allocate a name.
+        typetableinfo->registerType(T);
+        return true;
+      }
     }
-    return true;
-  }
-  case Decl::Record: {
-    TagDecl *TD = dyn_cast<TagDecl>(D);
-    if (!TD) {
-      return false;
-    }
-    QualType T(TD->getTypeForDecl(), 0);
-    if (TD->isCompleteDefinition()) {
-      xmlNodePtr tmpNode;
-      typetableinfo->registerType(T, &tmpNode);
-      SymbolsVisitor SV(mangleContext, tmpNode, "symbols", typetableinfo);
-      SV.TraverseChildOfDecl(D);
-    } else {
-      // just allocate a name.
-      typetableinfo->registerType(T);
-    }
-    return true;
-  }
   case Decl::CXXRecord: return true;
   case Decl::ClassTemplateSpecialization: return true;
   case Decl::ClassTemplatePartialSpecialization: return true;
   case Decl::TemplateTypeParm: return true;
   case Decl::TypeAlias: return true;
-  case Decl::Typedef: DECLTYPE(); return true;
+  case Decl::Typedef:
+    {
+      TypedefDecl *TD = dyn_cast<TypedefDecl>(D);
+      if (TD) {
+        QualType T = TD->getUnderlyingType();
+        PreVisitType(T);
+      }
+      return true;
+    }
   case Decl::UnresolvedUsingTypename: return true;
   case Decl::Using: return true;
   case Decl::UsingDirective: return true;
   case Decl::UsingShadow: return true;
-  case Decl::Field: return true;
-  case Decl::ObjCAtDefsField: return true;
-  case Decl::ObjCIvar: return true;
-  case Decl::Function: {
-    TypeDecl *TD = dyn_cast<TypeDecl>(D);
-    FunctionDecl *FD = dyn_cast<FunctionDecl>(D);
-    if (!TD) {
+  case Decl::Field:
+    {
+      FieldDecl *FD = dyn_cast<FieldDecl>(D);
+      if (FD) {
+        PreVisitType(FD->getType());
+      }
       return true;
     }
-    QualType T(TD->getTypeForDecl(), 0);
-    if (FD && FD->hasPrototype()) {
-      xmlNodePtr tmpNode;
-      typetableinfo->registerType(T, &tmpNode);
-      SymbolsVisitor SV(mangleContext, tmpNode, "params", typetableinfo);
-      SV.TraverseChildOfDecl(D);
-    } else {
-      // just allocate a name.
-      typetableinfo->registerType(T);
+  case Decl::ObjCAtDefsField: return true;
+  case Decl::ObjCIvar: return true;
+  case Decl::Function:
+    {
+      TypeDecl *TD = dyn_cast<TypeDecl>(D);
+      FunctionDecl *FD = dyn_cast<FunctionDecl>(D);
+      if (FD) {
+        PreVisitType(FD->getReturnType());
+      }
+      if (!TD) {
+        return true;
+      }
+      QualType T(TD->getTypeForDecl(), 0);
+      if (FD && FD->hasPrototype()) {
+        xmlNodePtr tmpNode;
+        typetableinfo->registerType(T, &tmpNode);
+        TraverseChildOfDecl(D);
+        SymbolsVisitor SV(mangleContext, tmpNode, "params", typetableinfo);
+        SV.TraverseChildOfDecl(D);
+        return false;
+      } else {
+        // just allocate a name.
+        typetableinfo->registerType(T);
+        return true;
+      }
     }
-    return true;
-  }
   case Decl::CXXMethod: return true;
   case Decl::CXXConstructor: return true;
   case Decl::CXXConversion: return true;
   case Decl::CXXDestructor: return true;
   case Decl::MSProperty: return true;
   case Decl::NonTypeTemplateParm: return true;
-  case Decl::Var: DECLTYPE(); return true;
+  case Decl::Var:
+    {
+      VarDecl *VD = dyn_cast<VarDecl>(D);
+      if (VD) {
+        PreVisitType(VD->getType());
+      }
+      return true;
+    }
   case Decl::ImplicitParam: return true;
-  case Decl::ParmVar: return true;
+  case Decl::ParmVar:
+    {
+      ParmVarDecl *PVD = dyn_cast<ParmVarDecl>(D);
+      if (PVD) {
+        PreVisitType(PVD->getType());
+      }
+      return true;
+    }
   case Decl::VarTemplateSpecialization: return true;
   case Decl::VarTemplatePartialSpecialization: return true;
   case Decl::EnumConstant: return true;

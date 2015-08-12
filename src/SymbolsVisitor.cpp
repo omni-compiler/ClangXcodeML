@@ -1,5 +1,6 @@
 #include "XcodeMlVisitorBase.h"
 #include "SymbolsVisitor.h"
+#include "TypeTableVisitor.h"
 
 using namespace clang;
 using namespace llvm;
@@ -272,128 +273,157 @@ SymbolsVisitor::PreVisitDecl(Decl *D) {
   case Decl::VarTemplate: ND("Decl_VarTemplate");
   case Decl::TemplateTemplateParm: ND("Decl_TemplateTemplateParm");
   case Decl::Enum: ND("Decl_Enum");
-  case Decl::Record: {
-    RecordDecl *RD = dyn_cast<RecordDecl>(D);
-    newComment("Decl_Record");
-    newChild("id");
-    newProp("sclass", "tagname");
-    if (RD) {
-      IdentifierInfo *II = RD->getDeclName().getAsIdentifierInfo();
-      if (II) {
-        addChild("name", II->getNameStart());
+  case Decl::Record:
+    {
+      RecordDecl *RD = dyn_cast<RecordDecl>(D);
+      newComment("Decl_Record");
+      newChild("id");
+      if (RD) {
+        QualType T(RD->getTypeForDecl(), 0);
+        newProp("type", typetableinfo->getTypeName(T).c_str());
       }
+      newProp("sclass", "tagname");
+      if (RD) {
+        IdentifierInfo *II = RD->getDeclName().getAsIdentifierInfo();
+        if (II) {
+          addChild("name", II->getNameStart());
+        }
+      }
+      return false;
     }
-    return false;
-  }
   case Decl::CXXRecord: ND("Decl_CXXRecord");
   case Decl::ClassTemplateSpecialization: ND("Decl_ClassTemplateSpecialization");
   case Decl::ClassTemplatePartialSpecialization: ND("Decl_ClassTemplatePartialSpecialization");
   case Decl::TemplateTypeParm: ND("Decl_TemplateTypeParm");
   case Decl::TypeAlias: ND("Decl_TypeAlias");
-  case Decl::Typedef: {
-    TypedefDecl *TD = dyn_cast<TypedefDecl>(D);
-    newComment("Decl_Typedef");
-    newChild("id");
-    newProp("sclass", "typedef_name");
-    if (TD) {
-      IdentifierInfo *II = TD->getDeclName().getAsIdentifierInfo();
-      if (II) {
-        addChild("name", II->getNameStart());
+  case Decl::Typedef:
+    {
+      TypedefDecl *TD = dyn_cast<TypedefDecl>(D);
+      newComment("Decl_Typedef");
+      newChild("id");
+      if (TD) {
+        QualType T = TD->getUnderlyingType();
+        newProp("type", typetableinfo->getTypeName(T).c_str());
       }
+      newProp("sclass", "typedef_name");
+      if (TD) {
+        IdentifierInfo *II = TD->getDeclName().getAsIdentifierInfo();
+        if (II) {
+          addChild("name", II->getNameStart());
+        }
+      }
+      return true;
     }
-    return true;
-  }
   case Decl::UnresolvedUsingTypename: ND("Decl_UnresolvedUsingTypename");
   case Decl::Using: ND("Decl_Using");
   case Decl::UsingDirective: ND("Decl_UsingDirective");
   case Decl::UsingShadow: ND("Decl_UsingShadow");
-  case Decl::Field: {
-    FieldDecl *FD = dyn_cast<FieldDecl>(D);
-    newComment("Decl_Field");
-    newChild("id");
-    if (FD) {
-      IdentifierInfo *II = FD->getDeclName().getAsIdentifierInfo();
-      if (II) {
-        addChild("name", II->getNameStart());
+  case Decl::Field:
+    {
+      FieldDecl *FD = dyn_cast<FieldDecl>(D);
+      newComment("Decl_Field");
+      newChild("id");
+      if (FD) {
+        QualType T = FD->getType();
+        newProp("type", typetableinfo->getTypeName(T).c_str());
+        IdentifierInfo *II = FD->getDeclName().getAsIdentifierInfo();
+        if (II) {
+          addChild("name", II->getNameStart());
+        }
       }
+      return true;
     }
-    return true;
-  }
   case Decl::ObjCAtDefsField: ND("Decl_ObjCAtDefsField");
   case Decl::ObjCIvar: ND("Decl_ObjCIvar");
-  case Decl::Function: {
-    FunctionDecl *FD = dyn_cast<FunctionDecl>(D);
-    newComment("Decl_Function");
-    newChild("id");
-    newProp("sclass", "extern_def");
-    if (FD) {
-      IdentifierInfo *II = FD->getDeclName().getAsIdentifierInfo();
-      if (II) {
-        addChild("name", II->getNameStart());
+  case Decl::Function:
+    {
+      FunctionDecl *FD = dyn_cast<FunctionDecl>(D);
+      newComment("Decl_Function");
+      newChild("id");
+      if (FD) {
+        QualType T = FD->getReturnType();
+        newProp("type", typetableinfo->getTypeName(T).c_str());
       }
+      newProp("sclass", "extern_def");
+      if (FD) {
+        IdentifierInfo *II = FD->getDeclName().getAsIdentifierInfo();
+        if (II) {
+          addChild("name", II->getNameStart());
+        }
+      }
+      return false;
     }
-    return false;
-  }
   case Decl::CXXMethod: ND("Decl_CXXMethod");
   case Decl::CXXConstructor: ND("Decl_CXXConstructor");
   case Decl::CXXConversion: ND("Decl_CXXConversion");
   case Decl::CXXDestructor: ND("Decl_CXXDestructor");
   case Decl::MSProperty: ND("Decl_MSProperty");
   case Decl::NonTypeTemplateParm: ND("Decl_NonTypeTemplateParm");
-  case Decl::Var: {
-    VarDecl *VD = dyn_cast<VarDecl>(D);
-    const char *sclass;
+  case Decl::Var:
+    {
+      VarDecl *VD = dyn_cast<VarDecl>(D);
+      const char *sclass;
 
-    newComment("Decl_Var");
-    newChild("id");
-    switch (VD->getStorageClass()) {
-    case SC_None: sclass = "auto"; break;
-    case SC_Extern: sclass = "extern_def"; break; // "extern"??
-    case SC_Static: sclass = "static"; break;
-    case SC_PrivateExtern: sclass = "extern"; break; //??
-    case SC_OpenCLWorkGroupLocal: sclass = "SC_OpenCLWorkGroupLocal"; break;
-    case SC_Auto: sclass = "auto"; break;
-    case SC_Register: sclass = "register"; break;
-    }
-    newProp("sclass", sclass);
-    if (VD) {
-      IdentifierInfo *II = VD->getDeclName().getAsIdentifierInfo();
-      if (II) {
-        addChild("name", II->getNameStart());
+      newComment("Decl_Var");
+      newChild("id");
+      if (VD) {
+        QualType T = VD->getType();
+        newProp("type", typetableinfo->getTypeName(T).c_str());
       }
+      switch (VD->getStorageClass()) {
+      case SC_None: sclass = "auto"; break;
+      case SC_Extern: sclass = "extern_def"; break; // "extern"??
+      case SC_Static: sclass = "static"; break;
+      case SC_PrivateExtern: sclass = "extern"; break; //??
+      case SC_OpenCLWorkGroupLocal: sclass = "SC_OpenCLWorkGroupLocal"; break;
+      case SC_Auto: sclass = "auto"; break;
+      case SC_Register: sclass = "register"; break;
+      }
+      newProp("sclass", sclass);
+      if (VD) {
+        IdentifierInfo *II = VD->getDeclName().getAsIdentifierInfo();
+        if (II) {
+          addChild("name", II->getNameStart());
+        }
+      }
+      return true;
     }
-    return true;
-  }
   case Decl::ImplicitParam: ND("Decl_ImplicitParam");
-  case Decl::ParmVar: {
-    ParmVarDecl *PVD = dyn_cast<ParmVarDecl>(D);
+  case Decl::ParmVar:
+    {
+      ParmVarDecl *PVD = dyn_cast<ParmVarDecl>(D);
 
-    newComment("Decl_ParmVar");
-    newChild("id");
-    newProp("sclass", "param");
-    if (PVD) {
-      IdentifierInfo *II = PVD->getDeclName().getAsIdentifierInfo();
-      if (II) {
-        addChild("name", II->getNameStart());
+      newComment("Decl_ParmVar");
+      newChild("id");
+      if (PVD) {
+        QualType T = PVD->getType();
+        newProp("type", typetableinfo->getTypeName(T).c_str());
       }
+      newProp("sclass", "param");
+      if (PVD) {
+        IdentifierInfo *II = PVD->getDeclName().getAsIdentifierInfo();
+        if (II) {
+          addChild("name", II->getNameStart());
+        }
+      }
+      return true;
     }
-    return true;
-  }
   case Decl::VarTemplateSpecialization: ND("Decl_VarTemplateSpecialization");
   case Decl::VarTemplatePartialSpecialization: ND("Decl_VarTemplatePartialSpecialization");
-  case Decl::EnumConstant: {
-    EnumConstantDecl *ECD = dyn_cast<EnumConstantDecl>(D);
+  case Decl::EnumConstant:
+    {
+      EnumConstantDecl *ECD = dyn_cast<EnumConstantDecl>(D);
 
-    newComment("Decl_EnumConstant");
-    newChild("id");
-    if (ECD) {
-      IdentifierInfo *II = ECD->getDeclName().getAsIdentifierInfo();
-      if (II) {
-        addChild("name", II->getNameStart());
+      newComment("Decl_EnumConstant");
+      newChild("id");
+      if (ECD) {
+        IdentifierInfo *II = ECD->getDeclName().getAsIdentifierInfo();
+        if (II) {
+          addChild("name", II->getNameStart());
+        }
       }
+      return true;
     }
-    return true;
-  }
   case Decl::IndirectField: ND("Decl_IndirectField");
   case Decl::UnresolvedUsingValue: ND("Decl_UnresolvedUsingValue");
   case Decl::OMPThreadPrivate: ND("Decl_OMPThreadPrivate");
