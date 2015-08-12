@@ -132,6 +132,7 @@ DeclarationsVisitor::WrapCompoundStatementBody(xmlNodePtr compoundStatement,
         } else {
           newComment("Stmt::DeclStmtClass: nowInDeclPart=false");
           newChild("compoundStatement");
+          setLocation(S->getLocStart());
           SymbolsVisitor SV(mangleContext, curNode, "symbols", typetableinfo);
           SV.TraverseChildOfStmt(S);
           WrapCompoundStatementBody(curNode, true);
@@ -267,6 +268,7 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
   case Stmt::CompoundStmtClass: {
     // 6.2
     newChild("compoundStatement");
+    setLocation(S->getLocStart());
     SymbolsVisitor SV(mangleContext, curNode, "symbols", typetableinfo);
     SV.TraverseChildOfStmt(S);
     WrapCompoundStatementBody(curNode, true);
