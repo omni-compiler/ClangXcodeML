@@ -37,6 +37,7 @@ DeclarationsVisitor::WrapExpr(Stmt *S) {
   }
   if (TraverseMeStmt(S)) {
     if (!E
+        && S->getStmtClass() != Stmt::CompoundStmtClass
         && S->getStmtClass() != Stmt::DeclStmtClass
         && S->getStmtClass() != Stmt::NullStmtClass
         && S->getStmtClass() != Stmt::LabelStmtClass
