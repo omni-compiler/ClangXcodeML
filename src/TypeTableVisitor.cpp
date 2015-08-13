@@ -590,23 +590,30 @@ TypeTableVisitor::PreVisitDecl(Decl *D) {
   case Decl::ObjCIvar: return true;
   case Decl::Function:
     {
-      TypeDecl *TD = dyn_cast<TypeDecl>(D);
       FunctionDecl *FD = dyn_cast<FunctionDecl>(D);
-      if (FD) {
-        PreVisitType(FD->getReturnType());
-      }
-      if (!TD) {
+      if (!FD) {
         return true;
       }
-      QualType T(TD->getTypeForDecl(), 0);
-      if (FD && FD->hasPrototype()) {
+      PreVisitType(FD->getReturnType());
+      QualType T = FD->getType();
+
+      if (FD->hasPrototype()) {
         xmlNodePtr tmpNode;
-        newComment("PreVisitDecl::Function(withDef)");
+        if (!FD->isFirstDecl()) {
+          newComment("PreVisitDecl::Function(withProto but not 1st)");
+          return false;
+        }
+        newComment("PreVisitDecl::Function(withProto)");
         typetableinfo->registerType(T, &tmpNode, curNode);
+        curNode = tmpNode;
+        newChild("params");
+        return true;
+#if 0
         TraverseChildOfDecl(D);
         SymbolsVisitor SV(mangleContext, tmpNode, "params", typetableinfo);
         SV.TraverseChildOfDecl(D);
         return false;
+#endif
       } else {
         // just allocate a name.
         newComment("PreVisitDecl::Function");
@@ -634,6 +641,7 @@ TypeTableVisitor::PreVisitDecl(Decl *D) {
       ParmVarDecl *PVD = dyn_cast<ParmVarDecl>(D);
       if (PVD) {
         PreVisitType(PVD->getType());
+        newChild("name", PVD->getNameAsString().c_str());
       }
       return true;
     }
