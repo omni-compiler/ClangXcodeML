@@ -5,6 +5,7 @@
 #include <iostream>
 #include <fstream>
 #include <map>
+#include <cctype>
 
 using namespace clang;
 using namespace llvm;
@@ -222,10 +223,10 @@ void TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr tra
     isQualified = true;
   }
 
-  switch (T->getTypeClass()) {
-  case Type::Builtin:
+  if (T->isBuiltinType() || T->getTypeClass() == Type::Builtin) {
     if (isQualified) {
       rawname = registerBasicType(T);
+      // XXX: temporary imcompletearray
       Node = createNode(T, "basicType", traversingNode);
       basicTypeNodes.push_back(Node);
     } else {
@@ -234,10 +235,16 @@ void TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr tra
       PrintingPolicy PP(CXT.getLangOpts());
 
       // XXX: temporary implementation
-      mapFromQualTypeToName[T]
-        = static_cast<const BuiltinType*>(Tptr)->getName(PP).str();
-      return;
+      rawname = static_cast<const BuiltinType*>(Tptr)->getName(PP).str();
+      for (auto I = rawname.begin(); I != rawname.end(); ++I) {
+        if (!std::isalnum(*I)) {
+          *I = '_';
+        }
+      }
+      mapFromQualTypeToName[T] = rawname;
     }
+  } else switch (T->getTypeClass()) {
+  case Type::Builtin:
     break;
 
   case Type::Complex:
@@ -419,6 +426,7 @@ std::string TypeTableInfo::getTypeName(QualType T)
   if (T.isNull()) {
     return "nullType";
   };
+
   std::string name = mapFromQualTypeToName[T];
   assert(!name.empty());
 
@@ -438,7 +446,7 @@ std::string TypeTableInfo::getTypeName(QualType T)
           std::cerr << OptTypeNameMap << ": read error" << std::endl;
           exit(1);
         }
-        std::cout << "typenamemap: " << lhs << "->" << rhs << std::endl;
+        std::cerr << "typenamemap: " << lhs << "->" << rhs << std::endl;
         typenamemap[lhs] = rhs;
       }
     }
@@ -680,6 +688,7 @@ TypeTableVisitor::PreVisitDecl(Decl *D) {
       if (PVD) {
         typetableinfo->registerType(PVD->getType(), nullptr, curNode);
         newChild("name", PVD->getNameAsString().c_str());
+        newProp("type", typetableinfo->getTypeName(PVD->getType()).c_str());
       }
       return true;
     }

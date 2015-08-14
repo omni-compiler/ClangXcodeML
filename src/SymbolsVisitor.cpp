@@ -262,7 +262,21 @@ SymbolsVisitor::PreVisitDecl(Decl *D) {
   case Decl::FriendTemplate: ND("Decl_FriendTemplate");
   case Decl::Import: ND("Decl_Import");
   case Decl::LinkageSpec: ND("Decl_LinkageSpec");
-  case Decl::Label: ND("Decl_Label");
+  case Decl::Label:
+    {
+      LabelDecl *LD = dyn_cast<LabelDecl>(D);
+      newComment("Decl_Label");
+      newChild("id");
+      newProp("type", "Label");
+      newProp("sclass", "label");
+      if (LD) {
+        IdentifierInfo *II = LD->getDeclName().getAsIdentifierInfo();
+        if (II) {
+          addChild("name", II->getNameStart());
+        }
+      }
+      return false;
+    }
   case Decl::Namespace: ND("Decl_Namespace");
   case Decl::NamespaceAlias: ND("Decl_NamespaceAlias");
   case Decl::ObjCCompatibleAlias: ND("Decl_ObjCCompatibleAlias");
@@ -278,7 +292,52 @@ SymbolsVisitor::PreVisitDecl(Decl *D) {
   case Decl::TypeAliasTemplate: ND("Decl_TypeAliasTemplate");
   case Decl::VarTemplate: ND("Decl_VarTemplate");
   case Decl::TemplateTemplateParm: ND("Decl_TemplateTemplateParm");
-  case Decl::Enum: ND("Decl_Enum");
+  case Decl::Enum:
+    {
+      newComment("Decl_Enum");
+      EnumDecl *ED = dyn_cast<EnumDecl>(D);
+      if (!ED) {
+        return false;
+      }
+      xmlNodePtr origCur = curNode;
+      newChild("id");
+      QualType T(ED->getTypeForDecl(), 0);
+      newProp("type", typetableinfo->getTypeName(T).c_str());
+      newProp("sclass", "tagname");
+      if (ED) {
+        IdentifierInfo *II = ED->getDeclName().getAsIdentifierInfo();
+        if (II) {
+          addChild("name", II->getNameStart());
+        }
+      }
+      curNode = origCur;
+
+      HookForDecl = [this, ED](Decl *D){
+
+        if (D->getKind() == Decl::EnumConstant) {
+          EnumConstantDecl *ECD = dyn_cast<EnumConstantDecl>(D);
+          xmlNodePtr origCur = curNode;
+
+          newComment("Decl_EnumConstant");
+          newChild("id");
+          QualType T(ED->getTypeForDecl(), 0);
+          newProp("type", typetableinfo->getTypeName(T).c_str());
+          newProp("sclass", "moe");
+          if (ECD) {
+            IdentifierInfo *II = ECD->getDeclName().getAsIdentifierInfo();
+            if (II) {
+              addChild("name", II->getNameStart());
+            }
+          }
+          curNode = origCur;
+          return true;
+        } else {
+          return TraverseDecl(D);
+        }
+      };
+      return true; // traverse children
+    }
+
   case Decl::Record:
     {
       RecordDecl *RD = dyn_cast<RecordDecl>(D);
@@ -306,6 +365,9 @@ SymbolsVisitor::PreVisitDecl(Decl *D) {
     {
       TypedefDecl *TD = dyn_cast<TypedefDecl>(D);
       newComment("Decl_Typedef");
+      if (TD && TD->getUnderlyingType()->isBuiltinType()) {
+        return true; // do not emit this typedef
+      }
       newChild("id");
       if (TD) {
         QualType T = TD->getUnderlyingType();
@@ -325,6 +387,7 @@ SymbolsVisitor::PreVisitDecl(Decl *D) {
   case Decl::UsingDirective: ND("Decl_UsingDirective");
   case Decl::UsingShadow: ND("Decl_UsingShadow");
   case Decl::Field:
+    // this is called from TypeTable (not from SymbolsVisitor's Decl::Record)
     {
       FieldDecl *FD = dyn_cast<FieldDecl>(D);
       newComment("Decl_Field");
@@ -417,6 +480,7 @@ SymbolsVisitor::PreVisitDecl(Decl *D) {
   case Decl::VarTemplateSpecialization: ND("Decl_VarTemplateSpecialization");
   case Decl::VarTemplatePartialSpecialization: ND("Decl_VarTemplatePartialSpecialization");
   case Decl::EnumConstant:
+    // this is called from TypeTable (not from SymbolsVisitor's Decl::Enum)
     {
       EnumConstantDecl *ECD = dyn_cast<EnumConstantDecl>(D);
 
