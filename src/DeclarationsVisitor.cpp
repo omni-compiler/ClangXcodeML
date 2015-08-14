@@ -292,10 +292,21 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
   case Stmt::ConditionalOperatorClass:
     //7.13
     NExpr("condExpr", nullptr);
-  case Stmt::AddrLabelExprClass: NStmtXXX("AddrLabelExprClass");
+  case Stmt::AddrLabelExprClass: {
+    //7.8
+    LabelDecl *LD = static_cast<AddrLabelExpr*>(S)->getLabel();
+    NExpr("gccLabelAddr", LD->getNameAsString().c_str());
+  }
   case Stmt::ArraySubscriptExprClass:
     //7.4 (this cannot support C++)
-    NStmtXXX("ArraySubscriptExprClass");
+    HookForStmt = [this](Stmt *S){
+      optContext.nameForDeclRefExpr = "arrayAddr";
+      bool retval = TraverseStmt(S);
+      optContext.nameForDeclRefExpr = nullptr;
+      HookForStmt = nullptr;
+      return retval;
+    };
+    NExpr("arrayRef", nullptr);
   case Stmt::ArrayTypeTraitExprClass: NStmtXXX("ArrayTypeTraitExprClass");
   case Stmt::AsTypeExprClass: NStmtXXX("AsTypeExprClass");
   case Stmt::AtomicExprClass: NStmtXXX("AtomicExprClass");
@@ -493,6 +504,7 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
     //6.10
     LabelDecl *LD = static_cast<GotoStmt*>(S)->getLabel();
     newChild("gotoStatement");
+    setLocation(S->getLocStart());
     newChild("name", LD->getNameAsString().c_str());
     return false; // no need to traverse children recursively
   }
@@ -1047,7 +1059,7 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
     FunctionDecl *FD = static_cast<FunctionDecl*>(D);
     if (FD && FD->isThisDeclarationADefinition()) {
       newChild("functionDefinition");
-      setLocation(FD->getSourceRange().getBegin());
+      setLocation(FD->getLocStart());
       xmlNodePtr functionNode = curNode;
       HookForDeclarationNameInfo = [this, D](DeclarationNameInfo NI) {
         DeclarationsVisitor V(this);
@@ -1086,10 +1098,22 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
   case Decl::CXXDestructor: NDeclXXX("CXXDestructor");
   case Decl::MSProperty: NDeclXXX("MSProperty");
   case Decl::NonTypeTemplateParm: NDeclXXX("NonTypeTemplateParm");
-  case Decl::Var:
+  case Decl::Var: {
     // 5.3
+    VarDecl *VD = static_cast<VarDecl*>(D);
     newChild("varDecl");
+    setLocation(D->getLocStart());
+    addChild("name", VD->getNameAsString().c_str());
+    HookForStmt = [this](Stmt *S){
+      if (!S) {
+        newComment("Stmt_NULL in Decl::Var");
+        return false; // do not traverse Attr
+      }
+      newChild("value");
+      return TraverseStmt(S);
+    };
     return true;
+  }
   case Decl::ImplicitParam: NDeclXXX("ImplicitParam");
   case Decl::ParmVar: {
     ParmVarDecl *PVD = static_cast<ParmVarDecl*>(D);
