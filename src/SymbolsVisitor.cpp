@@ -347,7 +347,7 @@ SymbolsVisitor::PreVisitDecl(Decl *D) {
       newComment("Decl_Function");
       newChild("id");
       if (FD) {
-        QualType T = FD->getReturnType();
+        QualType T = FD->getType();
         newProp("type", typetableinfo->getTypeName(T).c_str());
       }
       newProp("sclass", "extern_def");

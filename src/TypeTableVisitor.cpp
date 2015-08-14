@@ -2,6 +2,10 @@
 #include "SymbolsVisitor.h"
 #include "TypeTableVisitor.h"
 
+#include <iostream>
+#include <fstream>
+#include <map>
+
 using namespace clang;
 using namespace llvm;
 
@@ -17,6 +21,14 @@ static cl::opt<bool>
 OptDisableTypeTable("disable-typeTable",
                     cl::desc("disable <typeTable>"),
                     cl::cat(C2XcodeMLCategory));
+
+static cl::opt<std::string>
+OptTypeNameMap("typenamemap",
+               cl::desc("a map file of typename substitution"),
+               cl::cat(C2XcodeMLCategory));
+
+static std::ifstream mapfile;
+static std::map<std::string, std::string> typenamemap;
 
 bool
 TypeTableVisitor::FullTrace(void) const {
@@ -54,7 +66,7 @@ std::string TypeTableInfo::registerBasicType(QualType T){
   assert(name.empty());
 
   raw_string_ostream OS(name);
-  OS << "B" << seqForBasicType++;
+  OS << "Basic" << seqForBasicType++;
   return mapFromQualTypeToName[T] = OS.str();
 }
 
@@ -69,7 +81,7 @@ std::string TypeTableInfo::registerPointerType(QualType T){
   case Type::LValueReference:
   case Type::RValueReference:
   case Type::MemberPointer:
-    OS << "P" << seqForPointerType++;
+    OS << "Pointer" << seqForPointerType++;
     break;
   default:
     abort();
@@ -84,7 +96,7 @@ std::string TypeTableInfo::registerFunctionType(QualType T){
   assert(name.empty());
 
   raw_string_ostream OS(name);
-  OS << "F" << seqForFunctionType++;
+  OS << "Function" << seqForFunctionType++;
   return mapFromQualTypeToName[T] = OS.str();
 }
 
@@ -95,16 +107,16 @@ std::string TypeTableInfo::registerArrayType(QualType T){
   raw_string_ostream OS(name);
   switch (T->getTypeClass()) {
   case Type::ConstantArray:
-    OS << "A" << seqForArrayType++;
+    OS << "ConstantArray" << seqForArrayType++;
     break;
   case Type::IncompleteArray:
-    OS << "A" << seqForArrayType++;
+    OS << "ImcompleteArray" << seqForArrayType++;
     break;
   case Type::VariableArray:
-    OS << "A" << seqForArrayType++;
+    OS << "VariableArray" << seqForArrayType++;
     break;
   case Type::DependentSizedArray:
-    OS << "A" << seqForArrayType++;
+    OS << "DependentSizeArray" << seqForArrayType++;
     break;
   default:
     abort();
@@ -119,11 +131,11 @@ std::string TypeTableInfo::registerRecordType(QualType T){
 
   raw_string_ostream OS(name);
   if (T->isStructureType()) {
-    OS << "S" << seqForStructType++;
+    OS << "Struct" << seqForStructType++;
   } else if (T->isUnionType()) {
-    OS << "U" << seqForUnionType++;
+    OS << "Union" << seqForUnionType++;
   } else if (T->isClassType()) {
-    OS << "C" << seqForClassType++;
+    OS << "Class" << seqForClassType++;
   } else {
     abort();
   }
@@ -136,7 +148,7 @@ std::string TypeTableInfo::registerEnumType(QualType T){
   assert(name.empty());
 
   raw_string_ostream OS(name);
-  OS << "E" << seqForEnumType++;
+  OS << "Enum" << seqForEnumType++;
   return mapFromQualTypeToName[T] = OS.str();
 }
 
@@ -145,14 +157,14 @@ std::string TypeTableInfo::registerOtherType(QualType T){
   assert(name.empty());
 
   raw_string_ostream OS(name);
-  OS << "O" << seqForOtherType++;
+  OS << "Other" << seqForOtherType++;
   return mapFromQualTypeToName[T] = OS.str();
 }
 
-xmlNodePtr TypeTableInfo::createNode(QualType T, const char *fieldname, std::string name, xmlNodePtr traversingNode) {
+xmlNodePtr TypeTableInfo::createNode(QualType T, const char *fieldname, xmlNodePtr traversingNode) {
   xmlNodePtr N = xmlNewNode(nullptr, BAD_CAST fieldname);
   bool isQualified = false;
-  xmlNewProp(N, BAD_CAST "type", BAD_CAST name.c_str());
+  xmlNewProp(N, BAD_CAST "type", BAD_CAST getTypeName(T).c_str());
 
   if (T.isConstQualified()) {
     xmlNewProp(N, BAD_CAST "is_const", BAD_CAST "1");
@@ -167,36 +179,37 @@ xmlNodePtr TypeTableInfo::createNode(QualType T, const char *fieldname, std::str
     isQualified = true;
   }
   if (isQualified) {
-    std::string unqualname = registerType(T.getUnqualifiedType(), nullptr, traversingNode);
-    xmlNewProp(N, BAD_CAST "name", BAD_CAST unqualname.c_str());
+    registerType(T.getUnqualifiedType(), nullptr, traversingNode);
+    xmlNewProp(N, BAD_CAST "name",
+               BAD_CAST getTypeName(T.getUnqualifiedType()).c_str());
   }
 
   return N;
 }
 
-std::string TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr traversingNode) {
+void TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr traversingNode) {
   bool isQualified = false;
   xmlNodePtr Node = nullptr;
-  std::string name = mapFromQualTypeToName[T];
+  std::string rawname;
 
   if (T.isNull()) {
-    return "nullType";
+    return;
   };
 
   if (!T.isCanonical()) {
     if (OptTraceTypeTable) {
       xmlAddChild(traversingNode, xmlNewComment(BAD_CAST "registerType: not canonoical"));
     }
-    std::string name = registerType(T.getCanonicalType(), retNode, traversingNode);
-    mapFromQualTypeToName[T] = name;
-    return name;
+    registerType(T.getCanonicalType(), retNode, traversingNode);
+    mapFromQualTypeToName[T] = mapFromQualTypeToName[T.getCanonicalType()];
+    return;
   }
 
-  if (!name.empty()) {
+  if (!mapFromQualTypeToName[T].empty()) {
     if (retNode != nullptr) {
       *retNode = mapFromQualTypeToXmlNodePtr[T];
     }
-    return name;
+    return;
   }
 
   if (T.isConstQualified()) {
@@ -212,26 +225,28 @@ std::string TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNode
   switch (T->getTypeClass()) {
   case Type::Builtin:
     if (isQualified) {
-      name = registerBasicType(T);
-      Node = createNode(T, "basicType", name, traversingNode);
+      rawname = registerBasicType(T);
+      Node = createNode(T, "basicType", traversingNode);
       basicTypeNodes.push_back(Node);
     } else {
       const Type *Tptr = T.getTypePtrOrNull();
       ASTContext &CXT = mangleContext->getASTContext();
       PrintingPolicy PP(CXT.getLangOpts());
 
-      return (mapFromQualTypeToName[T]
-              = static_cast<const BuiltinType*>(Tptr)->getName(PP).str());
+      // XXX: temporary implementation
+      mapFromQualTypeToName[T]
+        = static_cast<const BuiltinType*>(Tptr)->getName(PP).str();
+      return;
     }
     break;
 
   case Type::Complex:
-    name = registerOtherType(T);
+    rawname = registerOtherType(T);
     // XXX: temporary implementation
     if (isQualified) {
-      Node = createNode(T, "basicType", name, traversingNode);
+      Node = createNode(T, "basicType", traversingNode);
     } else {
-      Node = createNode(T, "complexType", name, traversingNode);
+      Node = createNode(T, "complexType", traversingNode);
     }
     otherTypeNodes.push_back(Node);
     break;
@@ -243,14 +258,14 @@ std::string TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNode
   case Type::MemberPointer:
     {
       const PointerType *PT = dyn_cast<const PointerType>(T.getTypePtr());
-      std::string pointeeName = "";
       if (PT) {
-        pointeeName = registerType(PT->getPointeeType(), nullptr, traversingNode);
+        registerType(PT->getPointeeType(), nullptr, traversingNode);
       }
-      name = registerPointerType(T);
-      Node = createNode(T, "pointerType", name, traversingNode);
+      rawname = registerPointerType(T);
+      Node = createNode(T, "pointerType", traversingNode);
       if (PT) {
-        xmlNewProp(Node, BAD_CAST "ref", BAD_CAST pointeeName.c_str());
+        xmlNewProp(Node, BAD_CAST "ref",
+                   BAD_CAST getTypeName(PT->getPointeeType()).c_str());
       }
       pointerTypeNodes.push_back(Node);
     }
@@ -260,15 +275,14 @@ std::string TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNode
     {
       const ConstantArrayType *CAT
         = dyn_cast<const ConstantArrayType>(T.getTypePtr());
-      std::string elementName = "";
       if (CAT) {
-        elementName = registerType(CAT->getElementType(), nullptr, traversingNode);
+        registerType(CAT->getElementType(), nullptr, traversingNode);
       }
-      name = registerArrayType(T);
-      Node = createNode(T, "arrayType", name, traversingNode);
+      rawname = registerArrayType(T);
+      Node = createNode(T, "arrayType", traversingNode);
       if (CAT) {
         xmlNewProp(Node, BAD_CAST "element_type",
-                   BAD_CAST registerType(CAT->getElementType(), nullptr, traversingNode).c_str());
+                   BAD_CAST getTypeName(CAT->getElementType()).c_str());
         xmlNewProp(Node, BAD_CAST "array_size",
                    BAD_CAST CAT->getSize().toString(10, false).c_str());
       }
@@ -281,15 +295,14 @@ std::string TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNode
   case Type::DependentSizedArray:
     {
       const ArrayType *AT = dyn_cast<const ArrayType>(T.getTypePtr());
-      std::string elementName = "";
       if (AT) {
-        elementName = registerType(AT->getElementType(), nullptr, traversingNode);
+        registerType(AT->getElementType(), nullptr, traversingNode);
       }
-      name = registerArrayType(T);
-      Node = createNode(T, "arrayType", name, traversingNode);
+      rawname = registerArrayType(T);
+      Node = createNode(T, "arrayType", traversingNode);
       if (AT){
         xmlNewProp(Node, BAD_CAST "element_type",
-                   BAD_CAST registerType(AT->getElementType(), nullptr, traversingNode).c_str());
+                   BAD_CAST getTypeName(AT->getElementType()).c_str());
       }
       arrayTypeNodes.push_back(Node);
     }
@@ -298,9 +311,9 @@ std::string TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNode
   case Type::DependentSizedExtVector:
   case Type::Vector:
   case Type::ExtVector:
-    name = registerOtherType(T);
+    rawname = registerOtherType(T);
     // XXX: temporary implementation
-    Node = createNode(T, "vectorType", name, traversingNode);
+    Node = createNode(T, "vectorType", traversingNode);
     arrayTypeNodes.push_back(Node);
     break;
 
@@ -308,13 +321,15 @@ std::string TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNode
   case Type::FunctionNoProto:
     {
       const FunctionType *FT = dyn_cast<const FunctionType>(T.getTypePtr());
-      std::string returnType = "";
       if (FT) {
-        returnType = registerType(FT->getReturnType(), nullptr, traversingNode);
+        registerType(FT->getReturnType(), nullptr, traversingNode);
       }
-      name = registerFunctionType(T);
-      Node = createNode(T, "functionType", name, traversingNode);
-      xmlNewProp(Node, BAD_CAST "return_type", BAD_CAST returnType.c_str());
+      rawname = registerFunctionType(T);
+      Node = createNode(T, "functionType", traversingNode);
+      if (FT) {
+        xmlNewProp(Node, BAD_CAST "return_type",
+                   BAD_CAST getTypeName(FT->getReturnType()).c_str());
+      }
       functionTypeNodes.push_back(Node);
     }
     break;
@@ -322,9 +337,9 @@ std::string TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNode
   case Type::UnresolvedUsing:
   case Type::Paren:
   case Type::Typedef:
-    name = registerOtherType(T);
+    rawname = registerOtherType(T);
     // XXX: temporary implementation
-    Node = createNode(T, "typedefType", name, traversingNode);
+    Node = createNode(T, "typedefType", traversingNode);
     otherTypeNodes.push_back(Node);
     break;
 
@@ -334,34 +349,34 @@ std::string TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNode
   case Type::TypeOf:
   case Type::Decltype:
   case Type::UnaryTransform:
-    name = registerOtherType(T);
+    rawname = registerOtherType(T);
     // XXX: temporary implementation
-    Node = createNode(T, "otherType", name, traversingNode);
+    Node = createNode(T, "otherType", traversingNode);
     otherTypeNodes.push_back(Node);
     break;
 
   case Type::Record:
-    name = registerRecordType(T);
+    rawname = registerRecordType(T);
     if (T->isStructureType()) {
-      Node = createNode(T, "structType", name, traversingNode);
+      Node = createNode(T, "structType", traversingNode);
       structTypeNodes.push_back(Node);
     } else if (T->isUnionType()) {
-      Node = createNode(T, "unionType", name, traversingNode);
+      Node = createNode(T, "unionType", traversingNode);
       unionTypeNodes.push_back(Node);
     } else if (T->isClassType()) {
       // XXX: temporary implementation
-      Node = createNode(T, "classType", name, traversingNode);
+      Node = createNode(T, "classType", traversingNode);
       classTypeNodes.push_back(Node);
     } else {
       // XXX: temporary implementation
-      Node = createNode(T, "unknownRecordType", name, traversingNode);
+      Node = createNode(T, "unknownRecordType", traversingNode);
       otherTypeNodes.push_back(Node);
     }
     break;
 
   case Type::Enum:
-    name = registerEnumType(T);
-    Node = createNode(T, "enumType", name, traversingNode);
+    rawname = registerEnumType(T);
+    Node = createNode(T, "enumType", traversingNode);
     enumTypeNodes.push_back(Node);
     break;
 
@@ -380,9 +395,9 @@ std::string TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNode
   case Type::ObjCInterface:
   case Type::ObjCObjectPointer:
   case Type::Atomic:
-    name = registerOtherType(T);
+    rawname = registerOtherType(T);
     // XXX: temporary implementation
-    Node = createNode(T, "otherType", name, traversingNode);
+    Node = createNode(T, "otherType", traversingNode);
     otherTypeNodes.push_back(Node);
     break;
   }
@@ -390,15 +405,13 @@ std::string TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNode
   if (retNode != nullptr) {
     *retNode = Node;
   }
-  mapFromNameToQualType[name] = T;
+  mapFromNameToQualType[rawname] = T;
   mapFromQualTypeToXmlNodePtr[T] = Node;
 
   if (traversingNode && OptTraceTypeTable) {
-    std::string comment = "registerType: " + name;
+    std::string comment = "registerType: " + rawname + "(" + getTypeName(T) + ")";
     xmlAddChild(traversingNode, xmlNewComment(BAD_CAST comment.c_str()));
   }
-
-  return name;
 }
 
 std::string TypeTableInfo::getTypeName(QualType T)
@@ -407,8 +420,32 @@ std::string TypeTableInfo::getTypeName(QualType T)
     return "nullType";
   };
   std::string name = mapFromQualTypeToName[T];
-
   assert(!name.empty());
+
+  if (!OptTypeNameMap.empty()) {
+    if (!mapfile.is_open()) {
+      std::cerr << "use " << OptTypeNameMap << " as a typenamemap file" << std::endl;
+      mapfile.open(OptTypeNameMap);
+      if (mapfile.fail()) {
+        std::cerr << OptTypeNameMap << ": cannot open" << std::endl;
+        exit(1);
+      }
+      typenamemap.clear();
+      while (!mapfile.eof()) {
+        std::string lhs, rhs;
+        mapfile >> lhs >> rhs;
+        if (mapfile.fail()) {
+          std::cerr << OptTypeNameMap << ": read error" << std::endl;
+          exit(1);
+        }
+        std::cout << "typenamemap: " << lhs << "->" << rhs << std::endl;
+        typenamemap[lhs] = rhs;
+      }
+    }
+    std::string rhs = typenamemap[name];
+    return !rhs.empty() ? rhs : name;
+  }
+
   return name;
 }
 
@@ -570,7 +607,7 @@ TypeTableVisitor::PreVisitDecl(Decl *D) {
       TypedefDecl *TD = dyn_cast<TypedefDecl>(D);
       if (TD) {
         QualType T = TD->getUnderlyingType();
-        PreVisitType(T);
+        typetableinfo->registerType(T, nullptr, curNode);
       }
       return true;
     }
@@ -582,7 +619,7 @@ TypeTableVisitor::PreVisitDecl(Decl *D) {
     {
       FieldDecl *FD = dyn_cast<FieldDecl>(D);
       if (FD) {
-        PreVisitType(FD->getType());
+        typetableinfo->registerType(FD->getType(), nullptr, curNode);
       }
       return true;
     }
@@ -594,32 +631,33 @@ TypeTableVisitor::PreVisitDecl(Decl *D) {
       if (!FD) {
         return true;
       }
-      PreVisitType(FD->getReturnType());
+      typetableinfo->registerType(FD->getReturnType(), nullptr, curNode);
       QualType T = FD->getType();
 
-      if (FD->hasPrototype()) {
-        xmlNodePtr tmpNode;
-        if (!FD->isFirstDecl()) {
-          newComment("PreVisitDecl::Function(withProto but not 1st)");
-          return false;
-        }
-        newComment("PreVisitDecl::Function(withProto)");
-        typetableinfo->registerType(T, &tmpNode, curNode);
-        curNode = tmpNode;
-        newChild("params");
-        return true;
-#if 0
-        TraverseChildOfDecl(D);
-        SymbolsVisitor SV(mangleContext, tmpNode, "params", typetableinfo);
-        SV.TraverseChildOfDecl(D);
+      xmlNodePtr tmpNode;
+      if (!FD->isFirstDecl()) {
+        if (FD->hasPrototype()) {
+          newComment("PreVisitDecl::Function (with proto, not 1st)");
+        } else {
+          newComment("PreVisitDecl::Function (without proto, not 1st)");
+        }          
         return false;
-#endif
-      } else {
-        // just allocate a name.
-        newComment("PreVisitDecl::Function");
-        typetableinfo->registerType(T, nullptr, curNode);
-        return true;
       }
+      if (FD->hasPrototype()) {
+        newComment("PreVisitDecl::Function (with proto)");
+      } else {
+        newComment("PreVisitDecl::Function (without proto)");
+      }
+      typetableinfo->registerType(T, &tmpNode, curNode);
+      curNode = tmpNode;
+      newChild("params");
+      return true;
+#if 0
+      TraverseChildOfDecl(D);
+      SymbolsVisitor SV(mangleContext, tmpNode, "params", typetableinfo);
+      SV.TraverseChildOfDecl(D);
+      return false;
+#endif
     }
   case Decl::CXXMethod: return true;
   case Decl::CXXConstructor: return true;
@@ -631,7 +669,7 @@ TypeTableVisitor::PreVisitDecl(Decl *D) {
     {
       VarDecl *VD = dyn_cast<VarDecl>(D);
       if (VD) {
-        PreVisitType(VD->getType());
+        typetableinfo->registerType(VD->getType(), nullptr, curNode);
       }
       return true;
     }
@@ -640,7 +678,7 @@ TypeTableVisitor::PreVisitDecl(Decl *D) {
     {
       ParmVarDecl *PVD = dyn_cast<ParmVarDecl>(D);
       if (PVD) {
-        PreVisitType(PVD->getType());
+        typetableinfo->registerType(PVD->getType(), nullptr, curNode);
         newChild("name", PVD->getNameAsString().c_str());
       }
       return true;
