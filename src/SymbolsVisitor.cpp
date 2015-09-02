@@ -345,6 +345,10 @@ SymbolsVisitor::PreVisitDecl(Decl *D) {
   case Decl::Record:
     {
       RecordDecl *RD = dyn_cast<RecordDecl>(D);
+      if (RD && !RD->isFirstDecl()) {
+        newComment("Decl_Record (not 1st)");
+        return false;
+      }
       newComment("Decl_Record");
       newChild("id");
       if (RD) {
