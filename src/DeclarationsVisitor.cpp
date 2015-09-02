@@ -420,7 +420,7 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
     //7.5 (TBD: how to handle C++ "->" overloadding)
     PropChild("member");
     optContext.nameForDeclRefExpr = nullptr;
-    NExpr("memberRef", nullptr); 
+    NExpr("memberRef", nullptr);
   case Stmt::ObjCArrayLiteralClass: NStmtXXX("ObjCArrayLiteralClass");
   case Stmt::ObjCBoolLiteralExprClass: NStmtXXX("ObjCBoolLiteralExprClass");
   case Stmt::ObjCBoxedExprClass: NStmtXXX("ObjCBoxedExprClass");
@@ -474,7 +474,7 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
       default:
         OS << '\\';
         OS << ((C >> 6) & 0x7) + '0';
-        OS << ((C >> 3) & 0x7) + '0';        
+        OS << ((C >> 3) & 0x7) + '0';
         OS << ((C >> 0) & 0x7) + '0';
         break;
       }
@@ -487,7 +487,18 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
   case Stmt::SubstNonTypeTemplateParmPackExprClass: NStmtXXX("SubstNonTypeTemplateParmPackExprClass");
   case Stmt::TypeTraitExprClass: NStmtXXX("TypeTraitExprClass");
   case Stmt::TypoExprClass: NStmtXXX("TypoExprClass");
-  case Stmt::UnaryExprOrTypeTraitExprClass: NStmtXXX("UnaryExprOrTypeTraitExprClass");
+  case Stmt::UnaryExprOrTypeTraitExprClass: {
+    //7.8 sizeof, alignof
+    UnaryExprOrTypeTraitExpr *UEOTTE = static_cast<UnaryExprOrTypeTraitExpr*>(S);
+    switch (UEOTTE->getKind()) {
+    case UETT_SizeOf:  NExpr("sizeOfExpr", nullptr);
+    case UETT_AlignOf: NExpr("gccAlignOfExpr", nullptr);
+    case UETT_VecStep:
+      NStmtXXX("UnaryExprOrTypeTraitExpr(UETT_VecStep)");
+    //case UETT_OpenMPRequiredSimdAlign:
+    //  NStmtXXX("UnaryExprOrTypeTraitExpr(UETT_OpenMPRequiredSimdAlign");
+    }
+  }
   case Stmt::UnaryOperatorClass: NStmtXXX("UnaryOperatorClass");
   case Stmt::VAArgExprClass: NStmtXXX("VAArgExprClass");
   case Stmt::ForStmtClass: {
@@ -601,7 +612,7 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
 
     // the child stmt should belongs to my parent directly
     curNode = origCurNode;
-    return true; 
+    return true;
   }
   case Stmt::DefaultStmtClass: {
     //6.15
@@ -1093,7 +1104,7 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
         return false;
       };
     }
-     
+
     return true;
   }
   case Decl::CXXMethod: NDeclXXX("CXXMethod");
