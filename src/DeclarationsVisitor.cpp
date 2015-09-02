@@ -1003,6 +1003,10 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
   if (!D) {
     return false;
   }
+  if (D->isImplicit()) {
+    return false;
+  }
+
   switch (D->getKind()) {
   case Decl::AccessSpec: NDeclXXX("AccessSpec");
   case Decl::Block: NDeclXXX("Block");

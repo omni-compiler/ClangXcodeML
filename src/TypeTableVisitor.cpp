@@ -532,6 +532,9 @@ TypeTableVisitor::PreVisitDecl(Decl *D) {
   if (!D) {
     return false;
   }
+  if (D->isImplicit()) {
+    return false;
+  }
 
   switch (D->getKind()) {
   case Decl::AccessSpec: return true;
@@ -649,6 +652,7 @@ TypeTableVisitor::PreVisitDecl(Decl *D) {
         } else {
           newComment("PreVisitDecl::Function (without proto, not 1st)");
         }          
+        typetableinfo->registerType(T, &tmpNode, curNode);
         return false;
       }
       if (FD->hasPrototype()) {

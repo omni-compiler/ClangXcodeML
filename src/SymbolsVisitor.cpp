@@ -245,6 +245,10 @@ SymbolsVisitor::PreVisitDecl(Decl *D) {
   if (!D) {
     return false;
   }
+  if (D->isImplicit()) {
+    return false;
+  }
+
   HookForAttr = [this](Attr *A){
       newChild("gccAttributes");
       HookForAttr = nullptr;
