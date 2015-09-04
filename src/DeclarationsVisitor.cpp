@@ -108,13 +108,24 @@ DeclarationsVisitor::PropChild(const char *name) {
 }
 
 void
-DeclarationsVisitor::NameChild(const char *name, Expr *E) {
-  HookForDeclarationNameInfo = [this, name, E](DeclarationNameInfo NI){
+DeclarationsVisitor::NameChild(const char *name, Expr *E, VarDecl *VD) {
+  HookForDeclarationNameInfo = [this, name, E, VD](DeclarationNameInfo NI){
       DeclarationsVisitor V(this);
       DeclarationName DN = NI.getName();
       IdentifierInfo *II = DN.getAsIdentifierInfo();
       newChild(name, II ? II->getNameStart() : nullptr);
       TraverseType(E->getType());
+      if (VD) {
+        if (VD->isLocalVarDeclOrParm()) {
+          if (VD->isLocalVarDecl()) {
+            newProp("scope", "local");
+          } else {
+            newProp("scope", "param");
+          }
+        } else {
+          newProp("scope", "global");
+        }
+      }
       HookForDeclarationNameInfo = nullptr;
       return true;
   };
@@ -371,14 +382,16 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
   case Stmt::ChooseExprClass: NStmtXXX("ChooseExprClass");
   case Stmt::CompoundLiteralExprClass: NStmtXXX("CompoundLiteralExprClass");
   case Stmt::ConvertVectorExprClass: NStmtXXX("ConvertVectorExprClass");
-  case Stmt::DeclRefExprClass:
+  case Stmt::DeclRefExprClass: {
+    VarDecl *VD = dyn_cast<VarDecl>(static_cast<DeclRefExpr*>(S)->getDecl());
     if (optContext.nameForDeclRefExpr) {
-      NameChild(optContext.nameForDeclRefExpr, static_cast<Expr*>(S));
+      NameChild(optContext.nameForDeclRefExpr, static_cast<Expr*>(S), VD);
     } else {
-      NameChild("varAddr", static_cast<Expr*>(S));
+      NameChild("varAddr", static_cast<Expr*>(S), VD);
     }
     newComment("Stmt_DeclRefExprClass");
     return true;
+  }
   case Stmt::DependentScopeDeclRefExprClass: NStmtXXX("DependentScopeDeclRefExprClass");
   case Stmt::DesignatedInitExprClass: NStmtXXX("DesignatedInitExprClass");
   case Stmt::ExprWithCleanupsClass: NStmtXXX("ExprWithCleanupsClass");
