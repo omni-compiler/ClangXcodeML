@@ -448,7 +448,15 @@ SymbolsVisitor::PreVisitDecl(Decl *D) {
         newProp("type", typetableinfo->getTypeName(T).c_str());
       }
       switch (VD->getStorageClass()) {
-      case SC_None: sclass = "auto"; break;
+      case SC_None:
+        switch (VD->getStorageDuration()) {
+        case SD_FullExpression: sclass = "auto"; break;
+        case SD_Automatic: sclass = "auto"; break;
+        case SD_Thread: sclass = "extern_def"; break; //???
+        case SD_Static: sclass = "extern_def"; break; // maybe OK
+        case SD_Dynamic: sclass = "auto"; break; //???
+        }
+        break;
       case SC_Extern: sclass = "extern_def"; break; // "extern"??
       case SC_Static: sclass = "static"; break;
       case SC_PrivateExtern: sclass = "extern"; break; //??
