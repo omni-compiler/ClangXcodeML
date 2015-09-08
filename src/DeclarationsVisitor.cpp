@@ -701,12 +701,14 @@ DeclarationsVisitor::PreVisitType(QualType T) {
   }
 
   newProp("type", typetableinfo->getTypeName(T).c_str());
+#if 0
   if (T.isConstQualified()) {
     newProp("is_const", "1");
   }
   if (T.isVolatileQualified()) {
     newProp("is_volatile", "1");
   }
+#endif
   return false; // do not traverse children
 
 #if 0
@@ -1047,13 +1049,17 @@ DeclarationsVisitor::PreVisitAttr(Attr *A) {
     setLocation(D->getLocation());              \
     return true;                                \
   } while (0)
+
 bool
 DeclarationsVisitor::PreVisitDecl(Decl *D) {
   if (!D) {
     return false;
   }
+
   if (D->isImplicit()) {
     return false;
+    //newChild("debug:implicit");
+    //setLocation(D->getLocStart());
   }
 
   switch (D->getKind()) {
