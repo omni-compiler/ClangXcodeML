@@ -707,7 +707,8 @@ TypeTableVisitor::PreVisitDecl(Decl *D) {
         newChild("name", PVD->getNameAsString().c_str());
         newProp("type", typetableinfo->getTypeName(PVD->getType()).c_str());
       }
-      return true;
+      return false;
+      //return true;
     }
   case Decl::VarTemplateSpecialization: return true;
   case Decl::VarTemplatePartialSpecialization: return true;

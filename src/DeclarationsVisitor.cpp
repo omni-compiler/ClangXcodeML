@@ -1179,7 +1179,8 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
     // 5.2 XXX
     newChild("name", PVD->getNameAsString().c_str());
     newProp("type", typetableinfo->getTypeName(PVD->getType()).c_str());
-    return true;
+    return false;
+    //return true;
   }
   case Decl::VarTemplateSpecialization: NDeclXXX("VarTemplateSpecialization");
   case Decl::VarTemplatePartialSpecialization: NDeclXXX("VarTemplatePartialSpecialization");

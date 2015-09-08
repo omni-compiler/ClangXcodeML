@@ -509,7 +509,8 @@ SymbolsVisitor::PreVisitDecl(Decl *D) {
           addChild("name", II->getNameStart());
         }
       }
-      return true;
+      return false;
+      //return true;
     }
   case Decl::VarTemplateSpecialization: ND("Decl_VarTemplateSpecialization");
   case Decl::VarTemplatePartialSpecialization: ND("Decl_VarTemplatePartialSpecialization");
