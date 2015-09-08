@@ -74,9 +74,8 @@ public:
     Derived &getDerived() { return *static_cast<Derived *>(this); }
 
 #define DISPATCHER(NAME, TYPE)                                          \
-    protected:                                                          \
-    std::function<bool (TYPE)>HookFor##NAME;                            \
     public:                                                             \
+    std::function<bool (TYPE)>HookFor##NAME;                            \
     bool PreVisit##NAME(TYPE S) {                                       \
         (void)S;                                                        \
         newChild("Traverse" #NAME);                                     \

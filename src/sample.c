@@ -97,3 +97,8 @@ int gototest(int x, ...)
  moge: return -1;
  hunya:;
 }
+
+int funcptrtest(int (*fp)(int), int x)
+{
+  return (*fp)(x);
+}

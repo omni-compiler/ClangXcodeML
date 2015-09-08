@@ -146,6 +146,21 @@ DeclarationsVisitor::WrapCompoundStatementBody(xmlNodePtr compoundStatement,
           newChild("compoundStatement");
           setLocation(S->getLocStart());
           SymbolsVisitor SV(mangleContext, curNode, "symbols", typetableinfo);
+          SV.HookForStmt = [&SV](Stmt *S) {
+            SV.newComment("SV.HookForStmt in WrapComplundStatementBody: true");
+            if (!S) {
+              return false;
+            }
+            if (S->getStmtClass() == Stmt::DeclStmtClass) {
+              return SV.TraverseStmt(S);
+            }
+            SV.HookForStmt = [&SV](Stmt *S) {
+              SV.newComment("SV.HookForStmt in WrapComplundStatementBody: false");
+              (void)S;
+              return false;
+            };
+            return false;
+          };
           SV.TraverseChildOfStmt(S);
           WrapCompoundStatementBody(curNode, true);
           newChild("declarations");
@@ -282,6 +297,21 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
     newChild("compoundStatement");
     setLocation(S->getLocStart());
     SymbolsVisitor SV(mangleContext, curNode, "symbols", typetableinfo);
+    SV.HookForStmt = [&SV](Stmt *S) {
+      SV.newComment("SV.HookForStmt: true");
+      if (!S) {
+        return false;
+      }
+      if (S->getStmtClass() == Stmt::DeclStmtClass) {
+        return SV.TraverseStmt(S);
+      }
+      SV.HookForStmt = [&SV](Stmt *S) {
+        SV.newComment("SV.HookForStmt: false");
+        (void)S;
+        return false;
+      };
+      return false;
+    };
     SV.TraverseChildOfStmt(S);
     WrapCompoundStatementBody(curNode, true);
     NStmt("declarations");
