@@ -29,6 +29,7 @@ OptTypeNameMap("typenamemap",
                cl::cat(C2XcodeMLCategory));
 
 static std::ifstream mapfile;
+static bool map_is_already_set = false;
 static std::map<std::string, std::string> typenamemap;
 
 bool
@@ -430,14 +431,19 @@ std::string TypeTableInfo::getTypeName(QualType T)
   std::string name = mapFromQualTypeToName[T];
   assert(!name.empty());
 
+  if (!map_is_already_set) {
+    typenamemap["unsigned_int"] = "unsigned";
+  }
   if (!OptTypeNameMap.empty()) {
-    if (!mapfile.is_open()) {
+    if (!map_is_already_set) {
       std::cerr << "use " << OptTypeNameMap << " as a typenamemap file" << std::endl;
       mapfile.open(OptTypeNameMap);
       if (mapfile.fail()) {
         std::cerr << OptTypeNameMap << ": cannot open" << std::endl;
         exit(1);
       }
+      map_is_already_set = true;
+
       typenamemap.clear();
       while (!mapfile.eof()) {
         std::string lhs, rhs;
@@ -454,6 +460,7 @@ std::string TypeTableInfo::getTypeName(QualType T)
     return !rhs.empty() ? rhs : name;
   }
 
+  map_is_already_set = true;
   return name;
 }
 
