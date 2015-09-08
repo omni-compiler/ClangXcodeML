@@ -465,7 +465,7 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
   case Stmt::SizeOfPackExprClass: NStmtXXX("SizeOfPackExprClass");
   case Stmt::StmtExprClass:
     // 7.14
-    NStmt("gccCompoundExpr");
+    NExpr("gccCompoundExpr", nullptr);
   case Stmt::StringLiteralClass: {
     //7.1
     StringRef Data = static_cast<StringLiteral*>(S)->getString();
