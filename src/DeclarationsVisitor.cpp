@@ -508,7 +508,17 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
     //7.8 sizeof, alignof
     UnaryExprOrTypeTraitExpr *UEOTTE = static_cast<UnaryExprOrTypeTraitExpr*>(S);
     switch (UEOTTE->getKind()) {
-    case UETT_SizeOf:  NExpr("sizeOfExpr", nullptr);
+    case UETT_SizeOf: {
+      newChild("sizeOfExpr");
+      TraverseType(static_cast<Expr*>(S)->getType());
+      if (UEOTTE->isArgumentType()) {
+        newChild("typeName");
+        TraverseType(UEOTTE->getArgumentType());
+      } else {
+        TraverseStmt(UEOTTE->getArgumentExpr());
+      }
+      return false;
+    }
     case UETT_AlignOf: NExpr("gccAlignOfExpr", nullptr);
     case UETT_VecStep:
       NStmtXXX("UnaryExprOrTypeTraitExpr(UETT_VecStep)");

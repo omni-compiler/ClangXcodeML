@@ -506,6 +506,12 @@ TypeTableVisitor::PreVisitStmt(Stmt *S) {
   if (E && S->getStmtClass() != Stmt::StringLiteralClass) {
     TraverseType(E->getType());
   }
+  {
+    UnaryExprOrTypeTraitExpr *UEOTTE = dyn_cast<UnaryExprOrTypeTraitExpr>(S);
+    if (UEOTTE && UEOTTE->isArgumentType()) {
+      TraverseType(UEOTTE->getArgumentType());
+    }
+  }
   return true; // do not create a new child
 }
 

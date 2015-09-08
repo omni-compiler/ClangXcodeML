@@ -1,6 +1,7 @@
 #include "XcodeMlVisitorBase.h"
 #include "SymbolsVisitor.h"
 #include "TypeTableVisitor.h"
+#include "DeclarationsVisitor.h"
 
 using namespace clang;
 using namespace llvm;
@@ -401,11 +402,28 @@ SymbolsVisitor::PreVisitDecl(Decl *D) {
       newComment("Decl_Field");
       newChild("id");
       if (FD) {
+        Expr *BW = nullptr;
+        if (FD->isBitField()) {
+          APSInt Value;
+          ASTContext &Ctx = mangleContext->getASTContext();
+          BW = FD->getBitWidth();
+          if (dyn_cast<IntegerLiteral>(BW)
+              && BW->EvaluateAsInt(Value, Ctx)) {
+            newProp("bit_field", Value.toString(10).c_str());
+            BW = nullptr;
+          } else {
+            newProp("bit_field", "*");
+          }
+        }
         QualType T = FD->getType();
         newProp("type", typetableinfo->getTypeName(T).c_str());
         IdentifierInfo *II = FD->getDeclName().getAsIdentifierInfo();
         if (II) {
           addChild("name", II->getNameStart());
+        }
+        if (BW) {
+          DeclarationsVisitor DV(mangleContext, curNode, "bitField", typetableinfo); 
+          DV.TraverseStmt(BW);
         }
       }
       return true;
