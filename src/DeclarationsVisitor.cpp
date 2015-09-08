@@ -344,11 +344,14 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
   case Stmt::CXXTypeidExprClass: NStmtXXX("CXXTypeidExprClass");
   case Stmt::CXXUnresolvedConstructExprClass: NStmtXXX("CXXUnresolvedConstructExprClass");
   case Stmt::CXXUuidofExprClass: NStmtXXX("CXXUuidofExprClass");
-  case Stmt::CallExprClass:
+  case Stmt::CallExprClass: {
     //7.9
     HookForStmt = [this](Stmt *S){
-        optContext.nameForDeclRefExpr = "function";
-        HookForStmt = [this](Stmt *S){
+        xmlNodePtr origCurNode = curNode;
+        newChild("function");
+        optContext.nameForDeclRefExpr = "funcAddr";
+        HookForStmt = [this, origCurNode](Stmt *S){
+          curNode = origCurNode;
           optContext.nameForDeclRefExpr = nullptr;
           newChild("arguments");
           HookForStmt = nullptr;
@@ -359,6 +362,7 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
     newChild("functionCall");
     TraverseType(static_cast<Expr*>(S)->getType());
     return true;
+  }
   case Stmt::CUDAKernelCallExprClass: NStmtXXX("CUDAKernelCallExprClass");
   case Stmt::CXXMemberCallExprClass: NStmtXXX("CXXMemberCallExprClass");
   case Stmt::CXXOperatorCallExprClass: NStmtXXX("CXXOperatorCallExprClass");
