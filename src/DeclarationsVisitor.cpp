@@ -519,7 +519,18 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
       }
       return false;
     }
-    case UETT_AlignOf: NExpr("gccAlignOfExpr", nullptr);
+    case UETT_AlignOf: {
+      newChild("gccAlignOfExpr");
+      TraverseType(static_cast<Expr*>(S)->getType());
+      if (UEOTTE->isArgumentType()) {
+        newChild("typeName");
+        TraverseType(UEOTTE->getArgumentType());
+      } else {
+        TraverseStmt(UEOTTE->getArgumentExpr());
+      }
+      return false;
+
+    }
     case UETT_VecStep:
       NStmtXXX("UnaryExprOrTypeTraitExpr(UETT_VecStep)");
     //case UETT_OpenMPRequiredSimdAlign:
