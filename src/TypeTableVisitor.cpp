@@ -61,6 +61,8 @@ TypeTableInfo::TypeTableInfo(MangleContext *MC) : mangleContext(MC)
   enumTypeNodes.clear();
   classTypeNodes.clear();
   otherTypeNodes.clear();
+
+  useLabelType = false;
 }
 
 std::string TypeTableInfo::registerBasicType(QualType T){
@@ -422,6 +424,11 @@ void TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr tra
   }
 }
 
+void TypeTableInfo::registerLabelType(void)
+{
+  useLabelType = true;
+}
+
 std::string TypeTableInfo::getTypeName(QualType T)
 {
   if (T.isNull()) {
@@ -464,12 +471,27 @@ std::string TypeTableInfo::getTypeName(QualType T)
   return name;
 }
 
+std::string TypeTableInfo::getTypeNameForLabel(void)
+{
+  if (!typenamemap["Label"].empty()) {
+    return typenamemap["Label"];
+  } else {
+    return "Label";
+  }
+}
+
 void TypeTableInfo::emitAllTypeNode(xmlNodePtr ParentNode)
 {
   for (xmlNodePtr N : basicTypeNodes) {
     xmlAddChild(ParentNode, N);
   }
   for (xmlNodePtr N : pointerTypeNodes) {
+    xmlAddChild(ParentNode, N);
+  }
+  if (useLabelType) {
+    xmlNodePtr N = xmlNewNode(nullptr, BAD_CAST "pointerType");
+    xmlNewProp(N, BAD_CAST "type", BAD_CAST getTypeNameForLabel().c_str());
+    xmlNewProp(N, BAD_CAST "ref", BAD_CAST "void");
     xmlAddChild(ParentNode, N);
   }
   for (xmlNodePtr N : arrayTypeNodes) {
@@ -512,6 +534,9 @@ TypeTableVisitor::PreVisitStmt(Stmt *S) {
 
   if (E && S->getStmtClass() != Stmt::StringLiteralClass) {
     TraverseType(E->getType());
+  }
+  if (S->getStmtClass() == Stmt::LabelStmtClass) {
+    typetableinfo->registerLabelType();
   }
   {
     UnaryExprOrTypeTraitExpr *UEOTTE = dyn_cast<UnaryExprOrTypeTraitExpr>(S);
@@ -560,7 +585,9 @@ TypeTableVisitor::PreVisitDecl(Decl *D) {
   case Decl::FriendTemplate: return true;
   case Decl::Import: return true;
   case Decl::LinkageSpec: return true;
-  case Decl::Label: return true;
+  case Decl::Label:
+    typetableinfo->registerLabelType();
+    return true;
   case Decl::Namespace: return true;
   case Decl::NamespaceAlias: return true;
   case Decl::ObjCCompatibleAlias: return true;

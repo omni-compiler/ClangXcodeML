@@ -43,6 +43,7 @@ class TypeTableInfo {
     std::vector<xmlNodePtr> enumTypeNodes;
     std::vector<xmlNodePtr> classTypeNodes;
     std::vector<xmlNodePtr> otherTypeNodes;
+    bool useLabelType;
 
     xmlNodePtr createNode(clang::QualType T, const char *fieldname,
                           xmlNodePtr traversingNode);
@@ -65,7 +66,9 @@ public:
 
     void registerType(clang::QualType T, xmlNodePtr *retNode,
                              xmlNodePtr traversingNode);
+    void registerLabelType(void);
     std::string getTypeName(clang::QualType T);
+    std::string getTypeNameForLabel(void);
     void emitAllTypeNode(xmlNodePtr ParentNode);
 };
 

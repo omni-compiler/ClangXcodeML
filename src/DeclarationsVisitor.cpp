@@ -43,6 +43,7 @@ DeclarationsVisitor::WrapExpr(Stmt *S) {
         && S->getStmtClass() != Stmt::LabelStmtClass
         && S->getStmtClass() != Stmt::CaseStmtClass
         && S->getStmtClass() != Stmt::DefaultStmtClass
+        && S->getStmtClass() != Stmt::GotoStmtClass
         && S->getStmtClass() != Stmt::IndirectGotoStmtClass) {
       setLocation(S->getLocStart());
     }
@@ -297,7 +298,7 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
     newChild("compoundStatement");
     setLocation(S->getLocStart());
     SymbolsVisitor SV(mangleContext, curNode, "symbols", typetableinfo);
-    SV.HookForStmt = [&SV](Stmt *S) {
+    SV.HookForStmt = [this, &SV](Stmt *S) {
       SV.newComment("SV.HookForStmt: true");
       if (!S) {
         return false;
@@ -305,12 +306,16 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
       if (S->getStmtClass() == Stmt::DeclStmtClass) {
         return SV.TraverseStmt(S);
       }
-      SV.HookForStmt = [&SV](Stmt *S) {
+      SV.HookForStmt = [this, &SV](Stmt *S) {
         SV.newComment("SV.HookForStmt: false");
-        (void)S;
-        return false;
+        while (S->getStmtClass() == Stmt::LabelStmtClass) {
+          LabelStmt *LS = static_cast<LabelStmt*>(S);
+          SV.TraverseDecl(LS->getDecl());
+          S = LS->getSubStmt();
+        }
+        return true;
       };
-      return false;
+      return true;
     };
     SV.TraverseChildOfStmt(S);
     WrapCompoundStatementBody(curNode, true);
@@ -601,6 +606,7 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
     newChild("gotoStatement");
     setLocation(S->getLocStart());
     newChild("pointerRef"); // XXX?
+    newProp("type", "void");
     return true;
   case Stmt::LabelStmtClass: {
     //6.11

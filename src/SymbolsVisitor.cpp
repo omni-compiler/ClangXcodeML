@@ -272,7 +272,7 @@ SymbolsVisitor::PreVisitDecl(Decl *D) {
       LabelDecl *LD = dyn_cast<LabelDecl>(D);
       newComment("Decl_Label");
       newChild("id");
-      newProp("type", "Label");
+      newProp("type", typetableinfo->getTypeNameForLabel().c_str());
       newProp("sclass", "label");
       if (LD) {
         IdentifierInfo *II = LD->getDeclName().getAsIdentifierInfo();

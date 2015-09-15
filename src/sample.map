@@ -18,6 +18,7 @@ Pointer1 P6
 Pointer5 P9
 Pointer9 P13
 Pointer11 P15
-ConstantArray3 A2
-ConstantArray0 __builtin_va_list
+ConstantArray3 __builtin_va_list
+ConstantArray0 A3
 unsigned_int unsigned
+Label P14
