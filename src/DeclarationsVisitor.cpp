@@ -333,7 +333,7 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
     return true; // everything is performed by WrapCompoundStatementBody
   case Stmt::DoStmtClass: {
     //6.5
-    static const char *childnames[] = {"+body", "condition", nullptr};
+    static const char *childnames[] = {"*body", "condition", nullptr};
     WrapChild(childnames);
     NStmt("doStatement");
   }
@@ -584,7 +584,7 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
     static const char *childnames[] = {
       "init",
       "-", // Variable Declaration
-      "condition", "iter", "+body", nullptr
+      "condition", "iter", "*body", nullptr
     };
     WrapChild(childnames);
     NStmt("forStatement");
@@ -718,7 +718,7 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
     //6.4
     static const char *childnames[] = {
       "-", // Variable Declaration
-      "condition", "+body", nullptr
+      "condition", "*body", nullptr
     };
     WrapChild(childnames);
     NStmt("whileStatement");
@@ -1108,7 +1108,7 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
   case Decl::Block: NDeclXXX("Block");
   case Decl::Captured: NDeclXXX("Captured");
   case Decl::ClassScopeFunctionSpecialization: NDeclXXX("ClassScopeFunctionSpecialization");
-  case Decl::Empty: NDeclXXX("Empty");
+  case Decl::Empty: return true; // NDeclXXX("Empty");
   case Decl::FileScopeAsm: NDeclXXX("FileScopeAsm");
   case Decl::Friend: NDeclXXX("Friend");
   case Decl::FriendTemplate: NDeclXXX("FriendTemplate");
