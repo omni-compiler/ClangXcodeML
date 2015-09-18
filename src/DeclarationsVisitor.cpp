@@ -115,7 +115,12 @@ DeclarationsVisitor::NameChild(const char *name, Expr *E, VarDecl *VD) {
       DeclarationName DN = NI.getName();
       IdentifierInfo *II = DN.getAsIdentifierInfo();
       newChild(name, II ? II->getNameStart() : nullptr);
-      TraverseType(E->getType());
+      if (strstr(name, "Addr") != nullptr) {
+        ASTContext &CXT = mangleContext->getASTContext();
+        TraverseType(CXT.getPointerType(E->getType()));
+      } else {
+        TraverseType(E->getType());
+      }
       if (VD) {
         if (VD->isLocalVarDeclOrParm()) {
           if (VD->isLocalVarDecl()) {

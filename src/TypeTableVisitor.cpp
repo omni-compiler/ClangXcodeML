@@ -535,14 +535,29 @@ TypeTableVisitor::PreVisitStmt(Stmt *S) {
   if (E && S->getStmtClass() != Stmt::StringLiteralClass) {
     TraverseType(E->getType());
   }
-  if (S->getStmtClass() == Stmt::LabelStmtClass) {
+
+  // additional typeinfo creation
+  switch (S->getStmtClass()) {
+  default:
+    break;
+  case Stmt::LabelStmtClass:
     typetableinfo->registerLabelType();
-  }
-  {
+    break;
+  case Stmt::UnaryExprOrTypeTraitExprClass: {
     UnaryExprOrTypeTraitExpr *UEOTTE = dyn_cast<UnaryExprOrTypeTraitExpr>(S);
     if (UEOTTE && UEOTTE->isArgumentType()) {
       TraverseType(UEOTTE->getArgumentType());
     }
+    break;
+  }
+  case Stmt::ArraySubscriptExprClass:
+  case Stmt::CallExprClass:
+  case Stmt::DeclRefExprClass: {
+    ASTContext &CXT = mangleContext->getASTContext();
+    Expr *E = static_cast<Expr*>(S);
+    TraverseType(CXT.getPointerType(E->getType()));
+    break;
+  }
   }
   return true; // do not create a new child
 }
