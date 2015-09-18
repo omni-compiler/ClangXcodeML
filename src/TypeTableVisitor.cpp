@@ -707,17 +707,21 @@ TypeTableVisitor::PreVisitDecl(Decl *D) {
         } else {
           newComment("PreVisitDecl::Function (without proto, not 1st)");
         }          
-        typetableinfo->registerType(T, &tmpNode, curNode);
-        return false;
-      }
-      if (FD->hasPrototype()) {
-        newComment("PreVisitDecl::Function (with proto)");
       } else {
-        newComment("PreVisitDecl::Function (without proto)");
+        if (FD->hasPrototype()) {
+          newComment("PreVisitDecl::Function (with proto)");
+        } else {
+          newComment("PreVisitDecl::Function (without proto)");
+        }
       }
       typetableinfo->registerType(T, &tmpNode, curNode);
-      curNode = tmpNode;
-      newChild("params");
+      // quick hack
+      if (xmlChildElementCount(tmpNode) == 0) {
+        curNode = tmpNode;
+        newChild("params");
+      } else {
+        newComment("PreVisitDecl::Function: already the same type is registered");
+      }
       return true;
 #if 0
       TraverseChildOfDecl(D);
