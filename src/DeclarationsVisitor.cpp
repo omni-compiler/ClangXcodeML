@@ -53,6 +53,19 @@ DeclarationsVisitor::WrapExpr(Stmt *S) {
   }
 }
 
+bool
+DeclarationsVisitor::WrapAsgExpr(void) {
+  HookForStmt = [this](Stmt *S){
+    optContext.nameForDeclRefExpr = "Var";
+    HookForStmt = [this](Stmt *S) {
+      optContext.nameForDeclRefExpr = nullptr;
+      return TraverseStmt(S);
+    };
+    return TraverseStmt(S);
+  };
+  return true;
+}
+
 void
 DeclarationsVisitor::WrapChild(const char **names) {
   HookForStmt = [this, names](Stmt *S){
@@ -253,18 +266,18 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
     case BO_Or:        NExpr("bitOrExpr", nullptr);
     case BO_LAnd:      NExpr("logAndExpr", nullptr);
     case BO_LOr:       NExpr("logOrExpr", nullptr);
-    case BO_Assign:    NExpr("assignExpr", nullptr);
+    case BO_Assign:    WrapAsgExpr(); NExpr("assignExpr", nullptr);
     case BO_Comma:     NExpr("commaExpr", nullptr);
-    case BO_MulAssign: NExpr("asgMulExpr", nullptr);
-    case BO_DivAssign: NExpr("asgDivExpr", nullptr);
-    case BO_RemAssign: NExpr("asgModExpr", nullptr);
-    case BO_AddAssign: NExpr("asgPlusExpr", nullptr);
-    case BO_SubAssign: NExpr("asgMinusExpr", nullptr);
-    case BO_ShlAssign: NExpr("asgLshiftExpr", nullptr);
-    case BO_ShrAssign: NExpr("asgRshiftExpr", nullptr);
-    case BO_AndAssign: NExpr("asgBitAndExpr", nullptr);
-    case BO_OrAssign:  NExpr("asgBitOrExpr", nullptr);
-    case BO_XorAssign: NExpr("asgBitXorExpr", nullptr);
+    case BO_MulAssign: WrapAsgExpr(); NExpr("asgMulExpr", nullptr);
+    case BO_DivAssign: WrapAsgExpr(); NExpr("asgDivExpr", nullptr);
+    case BO_RemAssign: WrapAsgExpr(); NExpr("asgModExpr", nullptr);
+    case BO_AddAssign: WrapAsgExpr(); NExpr("asgPlusExpr", nullptr);
+    case BO_SubAssign: WrapAsgExpr(); NExpr("asgMinusExpr", nullptr);
+    case BO_ShlAssign: WrapAsgExpr(); NExpr("asgLshiftExpr", nullptr);
+    case BO_ShrAssign: WrapAsgExpr(); NExpr("asgRshiftExpr", nullptr);
+    case BO_AndAssign: WrapAsgExpr(); NExpr("asgBitAndExpr", nullptr);
+    case BO_OrAssign:  WrapAsgExpr(); NExpr("asgBitOrExpr", nullptr);
+    case BO_XorAssign: WrapAsgExpr(); NExpr("asgBitXorExpr", nullptr);
     }
   }
   const UnaryOperator *UO = dyn_cast<const UnaryOperator>(S);
@@ -272,10 +285,10 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
     // XcodeML-C-0.9J.pdf 7.2(varAddr), 7.3(pointerRef), 7.8, 7.11
     //QualType T = UO->getType();
     switch (UO->getOpcode()) {
-    case UO_PostInc:   NExpr("postIncrExpr", nullptr);
-    case UO_PostDec:   NExpr("postDecrExpr", nullptr);
-    case UO_PreInc:    NExpr("preIncrExpr", nullptr);
-    case UO_PreDec:    NExpr("preDecrExpr", nullptr);
+    case UO_PostInc:   WrapAsgExpr(); NExpr("postIncrExpr", nullptr);
+    case UO_PostDec:   WrapAsgExpr(); NExpr("postDecrExpr", nullptr);
+    case UO_PreInc:    WrapAsgExpr(); NExpr("preIncrExpr", nullptr);
+    case UO_PreDec:    WrapAsgExpr(); NExpr("preDecrExpr", nullptr);
     case UO_AddrOf:    NExpr("varAddr", nullptr);
     case UO_Deref:     NExpr("pointerRef", nullptr);
     case UO_Plus:      NExpr("UNDEF_UO_Plus", nullptr);

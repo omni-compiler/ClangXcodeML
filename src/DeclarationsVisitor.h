@@ -30,6 +30,7 @@ public:
 
 private:
     bool WrapExpr(clang::Stmt *);
+    bool WrapAsgExpr(void);
     void WrapChild(const char **names);
     void PropChild(const char *name);
     void NameChild(const char *name, clang::Expr *, clang::VarDecl *);
