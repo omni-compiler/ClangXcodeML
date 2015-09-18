@@ -433,6 +433,10 @@ SymbolsVisitor::PreVisitDecl(Decl *D) {
   case Decl::Function:
     {
       FunctionDecl *FD = dyn_cast<FunctionDecl>(D);
+      if (!FD->isFirstDecl()) {
+        newComment("Decl_Function: not 1st");
+        return false;
+      }
       newComment("Decl_Function");
       newChild("id");
       if (FD) {
