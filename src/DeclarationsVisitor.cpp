@@ -435,7 +435,7 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
   case Stmt::CXXMemberCallExprClass: NStmtXXX("CXXMemberCallExprClass");
   case Stmt::CXXOperatorCallExprClass: NStmtXXX("CXXOperatorCallExprClass");
   case Stmt::UserDefinedLiteralClass: NStmtXXX("UserDefinedLiteralClass");
-  case Stmt::CStyleCastExprClass: NStmt("castExpr"); //7.12
+  case Stmt::CStyleCastExprClass: NExpr("castExpr", nullptr); //7.12
   case Stmt::CXXFunctionalCastExprClass: NStmtXXX("CXXFunctionalCastExprClass");
   case Stmt::CXXConstCastExprClass: NStmtXXX("CXXConstCastExprClass");
   case Stmt::CXXDynamicCastExprClass: NStmtXXX("CXXDynamicCastExprClass");
