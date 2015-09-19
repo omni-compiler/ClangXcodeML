@@ -55,6 +55,7 @@ DeclarationsVisitor::WrapExpr(Stmt *S) {
 
 bool
 DeclarationsVisitor::WrapAsgExpr(void) {
+  optContext.nameForDeclRefExpr = nullptr;
   HookForStmt = [this](Stmt *S){
     optContext.nameForDeclRefExpr = "Var";
     HookForStmt = [this](Stmt *S) {
@@ -128,7 +129,8 @@ DeclarationsVisitor::NameChild(const char *name, Expr *E, VarDecl *VD) {
       DeclarationName DN = NI.getName();
       IdentifierInfo *II = DN.getAsIdentifierInfo();
       newChild(name, II ? II->getNameStart() : nullptr);
-      if (strstr(name, "Addr") != nullptr) {
+      if (strstr(name, "Addr") != nullptr
+          && strstr(name, "arrayAddr") == nullptr) {
         ASTContext &CXT = mangleContext->getASTContext();
         TraverseType(CXT.getPointerType(E->getType()));
       } else {
@@ -290,7 +292,7 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
     case UO_PreInc:    WrapAsgExpr(); NExpr("preIncrExpr", nullptr);
     case UO_PreDec:    WrapAsgExpr(); NExpr("preDecrExpr", nullptr);
     case UO_AddrOf:    NExpr("varAddr", nullptr);
-    case UO_Deref:     NExpr("pointerRef", nullptr);
+    case UO_Deref:     WrapAsgExpr(); NExpr("pointerRef", nullptr);
     case UO_Plus:      NExpr("UNDEF_UO_Plus", nullptr);
     case UO_Minus:     NExpr("unaryMinusExpr", nullptr);
     case UO_Not:       NExpr("bitNotExpr", nullptr);
@@ -1217,6 +1219,7 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
     newChild("varDecl");
     setLocation(D->getLocStart());
     addChild("name", VD->getNameAsString().c_str());
+#if 0
     HookForStmt = [this](Stmt *S){
       if (!S) {
         newComment("Stmt_NULL in Decl::Var");
@@ -1225,7 +1228,13 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
       newChild("value");
       return TraverseStmt(S);
     };
-    return true;
+#endif
+    TraverseNestedNameSpecifierLoc(VD->getQualifierLoc());
+    if (Stmt *S = VD->getInit()) {
+      newChild("value");
+      TraverseStmt(S);
+    }
+    return false;
   }
   case Decl::ImplicitParam: NDeclXXX("ImplicitParam");
   case Decl::ParmVar: {
