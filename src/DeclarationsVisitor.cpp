@@ -2,6 +2,7 @@
 #include "TypeTableVisitor.h"
 #include "SymbolsVisitor.h"
 #include "DeclarationsVisitor.h"
+#include "clang/Basic/Builtins.h"
 
 using namespace clang;
 using namespace llvm;
@@ -400,8 +401,19 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
   case Stmt::CXXUnresolvedConstructExprClass: NStmtXXX("CXXUnresolvedConstructExprClass");
   case Stmt::CXXUuidofExprClass: NStmtXXX("CXXUuidofExprClass");
   case Stmt::CallExprClass: {
-    //7.9
-    HookForStmt = [this](Stmt *S){
+    CallExpr *CE = static_cast<CallExpr*>(S);
+    unsigned builtinID = CE->getBuiltinCallee();
+    const char *builtinName = "";
+    if (builtinID > 0) {
+      ASTContext &CXT = mangleContext->getASTContext();
+      builtinName = CXT.BuiltinInfo.GetName(builtinID);
+    }
+    if (strncmp(builtinName, "__builtin", 9) == 0) {
+      newChild("builtin_op");
+      newProp("name", builtinName);
+    } else {
+      //7.9
+      HookForStmt = [this](Stmt *S){
         xmlNodePtr origCurNode = curNode;
         newChild("function");
         optContext.nameForDeclRefExpr = "funcAddr";
@@ -413,8 +425,9 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
           return TraverseStmt(S);
         };
         return TraverseStmt(S);
-    };
-    newChild("functionCall");
+      };
+      newChild("functionCall");
+    }
     TraverseType(static_cast<Expr*>(S)->getType());
     return true;
   }
