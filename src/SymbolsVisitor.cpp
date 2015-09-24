@@ -246,7 +246,7 @@ SymbolsVisitor::PreVisitDecl(Decl *D) {
   if (!D) {
     return false;
   }
-  if (D->isImplicit()) {
+  if (D->isImplicit() && D->getKind() != Decl::Function) {
     return false;
   }
 
@@ -435,6 +435,10 @@ SymbolsVisitor::PreVisitDecl(Decl *D) {
       FunctionDecl *FD = dyn_cast<FunctionDecl>(D);
       if (!FD->isFirstDecl()) {
         newComment("Decl_Function: not 1st");
+        IdentifierInfo *II = FD->getDeclName().getAsIdentifierInfo();
+        if (II) {
+          newComment(II->getNameStart());
+        }
         return false;
       }
       newComment("Decl_Function");

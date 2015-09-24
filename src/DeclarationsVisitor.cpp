@@ -292,7 +292,7 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
     case UO_PostDec:   WrapAsgExpr(); NExpr("postDecrExpr", nullptr);
     case UO_PreInc:    WrapAsgExpr(); NExpr("preIncrExpr", nullptr);
     case UO_PreDec:    WrapAsgExpr(); NExpr("preDecrExpr", nullptr);
-    case UO_AddrOf:    NExpr("varAddr", nullptr);
+    case UO_AddrOf:    return true; // CtoXcodeML cannot handle cast explicitly
     case UO_Deref:     WrapAsgExpr(); NExpr("pointerRef", nullptr);
     case UO_Plus:      NExpr("UNDEF_UO_Plus", nullptr);
     case UO_Minus:     NExpr("unaryMinusExpr", nullptr);
