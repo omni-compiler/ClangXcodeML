@@ -452,14 +452,15 @@ std::string TypeTableInfo::getTypeName(QualType T)
       map_is_already_set = true;
 
       typenamemap.clear();
-      while (!mapfile.eof()) {
-        std::string lhs, rhs;
-        mapfile >> lhs >> rhs;
-        if (mapfile.fail()) {
+      std::string line;
+      while (std::getline(mapfile, line)) {
+        istringstream iss(line);
+        string lhs, rhs;
+        iss >> lhs >> rhs;
+        if (!iss) {
           std::cerr << OptTypeNameMap << ": read error" << std::endl;
           exit(1);
         }
-        std::cerr << "typenamemap: " << lhs << "->" << rhs << std::endl;
         typenamemap[lhs] = rhs;
       }
     }
