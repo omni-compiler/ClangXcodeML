@@ -462,6 +462,7 @@ std::string TypeTableInfo::getTypeName(QualType T)
           exit(1);
         }
         typenamemap[lhs] = rhs;
+        //std::cerr << "typenamemap: " << lhs << "->" << rhs << std::endl;
       }
     }
     std::string rhs = typenamemap[name];
