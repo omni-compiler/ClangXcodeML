@@ -3,6 +3,7 @@
 #include "TypeTableVisitor.h"
 
 #include <iostream>
+#include <sstream>
 #include <fstream>
 #include <map>
 #include <cctype>
@@ -454,8 +455,8 @@ std::string TypeTableInfo::getTypeName(QualType T)
       typenamemap.clear();
       std::string line;
       while (std::getline(mapfile, line)) {
-        istringstream iss(line);
-        string lhs, rhs;
+        std::istringstream iss(line);
+        std::string lhs, rhs;
         iss >> lhs >> rhs;
         if (!iss) {
           std::cerr << OptTypeNameMap << ": read error" << std::endl;
