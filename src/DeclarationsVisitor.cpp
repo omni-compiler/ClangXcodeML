@@ -1005,13 +1005,13 @@ DeclarationsVisitor::PreVisitAttr(Attr *A) {
   case attr::MSInheritance: NAttr("MSInheritance");
   case attr::MSP430Interrupt: NAttr("MSP430Interrupt");
   case attr::MSVtorDisp: NAttr("MSVtorDisp");
-  case attr::Malloc: NAttr("Malloc");
+  // case attr::Malloc: NAttr("Malloc");
   case attr::MaxFieldAlignment: NAttr("MaxFieldAlignment");
   case attr::MayAlias: NAttr("MayAlias");
   case attr::MinSize: NAttr("MinSize");
   case attr::Mips16: NAttr("Mips16");
   case attr::Mode: NAttr("Mode");
-  case attr::MsStruct: NAttr("MsStruct");
+  case attr::MSStruct: NAttr("MSStruct");
   case attr::NSConsumed: NAttr("NSConsumed");
   case attr::NSConsumesSelf: NAttr("NSConsumesSelf");
   case attr::NSReturnsAutoreleased: NAttr("NSReturnsAutoreleased");
@@ -1025,9 +1025,9 @@ DeclarationsVisitor::PreVisitAttr(Attr *A) {
   case attr::NoInstrumentFunction: NAttr("NoInstrumentFunction");
   case attr::NoMips16: NAttr("NoMips16");
   case attr::NoReturn: NAttr("NoReturn");
-  case attr::NoSanitizeAddress: NAttr("NoSanitizeAddress");
-  case attr::NoSanitizeMemory: NAttr("NoSanitizeMemory");
-  case attr::NoSanitizeThread: NAttr("NoSanitizeThread");
+  // case attr::NoSanitizeAddress: NAttr("NoSanitizeAddress");
+  // case attr::NoSanitizeMemory: NAttr("NoSanitizeMemory");
+  // case attr::NoSanitizeThread: NAttr("NoSanitizeThread");
   case attr::NoSplitStack: NAttr("NoSplitStack");
   case attr::NoThreadSafetyAnalysis: NAttr("NoThreadSafetyAnalysis");
   case attr::NoThrow: NAttr("NoThrow");
@@ -1057,7 +1057,7 @@ DeclarationsVisitor::PreVisitAttr(Attr *A) {
   case attr::ParamTypestate: NAttr("ParamTypestate");
   case attr::Pascal: NAttr("Pascal");
   case attr::Pcs: NAttr("Pcs");
-  case attr::PnaclCall: NAttr("PnaclCall");
+  // case attr::PnaclCall: NAttr("PnaclCall");
   case attr::PtGuardedBy: NAttr("PtGuardedBy");
   case attr::PtGuardedVar: NAttr("PtGuardedVar");
   case attr::Pure: NAttr("Pure");
