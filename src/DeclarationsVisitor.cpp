@@ -988,15 +988,52 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
   case Decl::TypeAliasTemplate: NDeclXXX("TypeAliasTemplate");
   case Decl::VarTemplate: NDeclXXX("VarTemplate");
   case Decl::TemplateTemplateParm: NDeclXXX("TemplateTemplateParm");
-  case Decl::Enum:
+  case Decl::Enum: {
+    EnumDecl *ED = dyn_cast<EnumDecl>(D);
+    if (!ED) {
+      return true;
+    }
     newComment("Decl_Enum");
-    return false; // to be traversed in typeTable
-  case Decl::Record:
-    newComment("Decl_Record");
-    return false; // to be traversed in typeTable
+    newChild("Decl_Enum");
+    setLocation(ED->getLocation());
+    if (ED) {
+      QualType T(ED->getTypeForDecl(), 0);
+      newProp("type", typetableinfo->getTypeName(T).c_str());
+    }
+    newProp("sclass", "tagname");
+    if (ED) {
+      IdentifierInfo *II = ED->getDeclName().getAsIdentifierInfo();
+      if (II) {
+        addChild("name", II->getNameStart());
+      }
+    }
+    return true;
+  }
+  case Decl::Record: {
+    RecordDecl *RD = dyn_cast<RecordDecl>(D);
+    if (!RD) {
+      return true;
+    }
+    newComment(RD->isFirstDecl() ? "Decl_Record" : "Decl_Record (not 1st)");
+    newChild("Decl_Record");
+    setLocation(RD->getLocation());
+    if (RD) {
+      QualType T(RD->getTypeForDecl(), 0);
+      newProp("type", typetableinfo->getTypeName(T).c_str());
+    }
+    newProp("sclass", "tagname");
+    if (RD) {
+      IdentifierInfo *II = RD->getDeclName().getAsIdentifierInfo();
+      if (II) {
+        addChild("myname", II->getNameStart());
+      }
+    }
+    return true;
+  }
   case Decl::CXXRecord:
     newComment("Decl_CXXRecord");
-    return false; // to be traversed in typeTable
+    NDeclXXX("AnCXXRecord");
+    // return false; // to be traversed in typeTable
   case Decl::ClassTemplateSpecialization: NDeclXXX("ClassTemplateSpecialization");
   case Decl::ClassTemplatePartialSpecialization: NDeclXXX("ClassTemplatePartialSpecialization");
   case Decl::TemplateTypeParm: NDeclXXX("TemplateTypeParm");
@@ -1009,7 +1046,37 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
   case Decl::Using: NDeclXXX("Using");
   case Decl::UsingDirective: NDeclXXX("UsingDirective");
   case Decl::UsingShadow: NDeclXXX("UsingShadow");
-  case Decl::Field: NDeclXXX("Field");  // XXX?
+  case Decl::Field: {
+    FieldDecl *FD = dyn_cast<FieldDecl>(D);
+    newComment("Decl_Field");
+    newChild("id");
+    if (FD) {
+      Expr *BW = nullptr;
+      if (FD->isBitField()) {
+        APSInt Value;
+        ASTContext &Ctx = mangleContext->getASTContext();
+        BW = FD->getBitWidth();
+        if (dyn_cast<IntegerLiteral>(BW)
+            && BW->EvaluateAsInt(Value, Ctx)) {
+          newProp("bit_field", Value.toString(10).c_str());
+          BW = nullptr;
+        } else {
+          newProp("bit_field", "*");
+        }
+      }
+      QualType T = FD->getType();
+      newProp("type", typetableinfo->getTypeName(T).c_str());
+      IdentifierInfo *II = FD->getDeclName().getAsIdentifierInfo();
+      if (II) {
+        addChild("name", II->getNameStart());
+      }
+      if (BW) {
+        DeclarationsVisitor DV(mangleContext, curNode, "bitField", typetableinfo); 
+        DV.TraverseStmt(BW);
+      }
+    }
+    return true;
+  }
   case Decl::ObjCAtDefsField: NDeclXXX("ObjCAtDefsField");
   case Decl::ObjCIvar: NDeclXXX("ObjCIvar");
   case Decl::Function: {
