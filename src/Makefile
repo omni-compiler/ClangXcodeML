@@ -11,7 +11,10 @@ PCHFILES = XcodeMlVisitorBase.pch
 USEDLIBS = -L$(shell $(LLVM_CONFIG) --libdir)
 USEDLIBS += -lclangTooling -lclangFrontend -lclangSerialization -lclangDriver \
             -lclangParse -lclangSema -lclangAnalysis \
-            -lclangAST -lclangASTMatchers -lclangEdit -lclangLex -lclangBasic
+            -lclangAST -lclangASTMatchers -lclangEdit -lclangLex -lclangBasic \
+						-lclangFormat -lclangARCMigrate -lclangDynamicASTMatchers \
+						-lclangIndex -lclangCodeGen -lclangFrontendTool \
+						-lclangStaticAnalyzerCheckers -lclangRewrite -lclangRewriteFrontend
 USEDLIBS += $(shell $(LLVM_CONFIG) --libs mcparser bitreader support mc option)
 USEDLIBS += -lpthread -ldl -ltinfo -lz
 USEDLIBS += `pkg-config --libs libxml-2.0` -lclang
@@ -60,9 +63,6 @@ DeclarationsVisitor.o: \
 	TypeTableVisitor.h \
 	XcodeMlRAV.h \
 	XcodeMlVisitorBase.h
-
-XcodeMlVisitorBase.pch: XcodeMlVisitorBase.h XcodeMlRAV.h
-	clang -x c++-header $(CXXFLAGS) XcodeMlVisitorBase.h -o XcodeMlVisitorBase.pch
 
 CtoXcodeML.ast: CtoXcodeML.cpp
 	$(CXX) $(CXXFLAGS) -Xclang -ast-dump CtoXcodeML.cpp -o CtoXcodeML.ast 
