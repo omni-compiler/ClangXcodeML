@@ -33,6 +33,15 @@ static std::ifstream mapfile;
 static bool map_is_already_set = false;
 static std::map<std::string, std::string> typenamemap;
 
+static std::string
+make_comment(Decl *decl, std::string message) {
+  std::string comment("PreVisitDecl::");
+  comment += decl->getDeclKindName();
+  comment += ": ";
+  comment += message;
+  return comment;
+}
+
 bool
 TypeTableVisitor::FullTrace(void) const {
   return OptFullTraceTypeTable;
@@ -697,6 +706,10 @@ TypeTableVisitor::PreVisitDecl(Decl *D) {
   case Decl::ObjCAtDefsField: return true;
   case Decl::ObjCIvar: return true;
   case Decl::Function:
+  case Decl::CXXMethod:
+  case Decl::CXXConstructor:
+  case Decl::CXXConversion:
+  case Decl::CXXDestructor:
     {
       FunctionDecl *FD = dyn_cast<FunctionDecl>(D);
       if (!FD) {
@@ -707,17 +720,13 @@ TypeTableVisitor::PreVisitDecl(Decl *D) {
 
       xmlNodePtr tmpNode;
       if (!FD->isFirstDecl()) {
-        if (FD->hasPrototype()) {
-          newComment("PreVisitDecl::Function (with proto, not 1st)");
-        } else {
-          newComment("PreVisitDecl::Function (without proto, not 1st)");
-        }          
+        newComment(make_comment(D,
+              FD->hasPrototype() ?
+                "(with proto, not 1st)" :
+                "(without proto, not 1st)"));
       } else {
-        if (FD->hasPrototype()) {
-          newComment("PreVisitDecl::Function (with proto)");
-        } else {
-          newComment("PreVisitDecl::Function (without proto)");
-        }
+        newComment(make_comment(D,
+              FD->hasPrototype() ? "(with proto)" : "(without proto)"));
       }
       typetableinfo->registerType(T, &tmpNode, curNode);
       // quick hack
@@ -734,42 +743,6 @@ TypeTableVisitor::PreVisitDecl(Decl *D) {
       SV.TraverseChildOfDecl(D);
       return false;
 #endif
-    }
-  case Decl::CXXMethod:
-  case Decl::CXXConstructor:
-  case Decl::CXXConversion:
-  case Decl::CXXDestructor:
-    {
-      CXXMethodDecl *FD = dyn_cast<CXXMethodDecl>(D);
-      if (!FD) {
-        return true;
-      }
-      typetableinfo->registerType(FD->getReturnType(), nullptr, curNode);
-      QualType T = FD->getType();
-
-      xmlNodePtr tmpNode;
-      if (!FD->isFirstDecl()) {
-        if (FD->hasPrototype()) {
-          newComment("PreVisitDecl::Function (with proto, not 1st)");
-        } else {
-          newComment("PreVisitDecl::Function (without proto, not 1st)");
-        }
-      } else {
-        if (FD->hasPrototype()) {
-          newComment("PreVisitDecl::Function (with proto)");
-        } else {
-          newComment("PreVisitDecl::Function (without proto)");
-        }
-      }
-      typetableinfo->registerType(T, &tmpNode, curNode);
-      // quick hack
-      if (xmlChildElementCount(tmpNode) == 0) {
-        curNode = tmpNode;
-        newChild("params");
-      } else {
-        newComment("PreVisitDecl::Function: already the same type is registered");
-      }
-      return true;
     }
   case Decl::MSProperty: return true;
   case Decl::NonTypeTemplateParm: return true;
