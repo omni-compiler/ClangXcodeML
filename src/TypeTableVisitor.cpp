@@ -644,7 +644,10 @@ TypeTableVisitor::PreVisitDecl(Decl *D) {
       }
     }
   case Decl::Record:
+  case Decl::CXXRecord:
     {
+      std::string comment("PreVisitDecl::");
+      comment += D->getDeclKindName();
       TagDecl *TD = dyn_cast<TagDecl>(D);
       if (!TD) {
         return false;
@@ -652,7 +655,7 @@ TypeTableVisitor::PreVisitDecl(Decl *D) {
       QualType T(TD->getTypeForDecl(), 0);
       if (TD->isCompleteDefinition()) {
         xmlNodePtr tmpNode;
-        newComment("PreVisitDecl::Record(withDef)");
+        newComment((comment + "(withDef)").c_str());
         typetableinfo->registerType(T, &tmpNode, curNode);
         TraverseChildOfDecl(D);
         SymbolsVisitor SV(mangleContext, tmpNode, "symbols", typetableinfo);
@@ -661,12 +664,11 @@ TypeTableVisitor::PreVisitDecl(Decl *D) {
 
       } else {
         // just allocate a name.
-        newComment("PreVisitDecl::Record");
+        newComment(comment.c_str());
         typetableinfo->registerType(T, nullptr, curNode);
         return true;
       }
     }
-  case Decl::CXXRecord: return true;
   case Decl::ClassTemplateSpecialization: return true;
   case Decl::ClassTemplatePartialSpecialization: return true;
   case Decl::TemplateTypeParm: return true;
