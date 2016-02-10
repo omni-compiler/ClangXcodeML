@@ -735,10 +735,42 @@ TypeTableVisitor::PreVisitDecl(Decl *D) {
       return false;
 #endif
     }
-  case Decl::CXXMethod: return true;
-  case Decl::CXXConstructor: return true;
-  case Decl::CXXConversion: return true;
-  case Decl::CXXDestructor: return true;
+  case Decl::CXXMethod:
+  case Decl::CXXConstructor:
+  case Decl::CXXConversion:
+  case Decl::CXXDestructor:
+    {
+      CXXMethodDecl *FD = dyn_cast<CXXMethodDecl>(D);
+      if (!FD) {
+        return true;
+      }
+      typetableinfo->registerType(FD->getReturnType(), nullptr, curNode);
+      QualType T = FD->getType();
+
+      xmlNodePtr tmpNode;
+      if (!FD->isFirstDecl()) {
+        if (FD->hasPrototype()) {
+          newComment("PreVisitDecl::Function (with proto, not 1st)");
+        } else {
+          newComment("PreVisitDecl::Function (without proto, not 1st)");
+        }
+      } else {
+        if (FD->hasPrototype()) {
+          newComment("PreVisitDecl::Function (with proto)");
+        } else {
+          newComment("PreVisitDecl::Function (without proto)");
+        }
+      }
+      typetableinfo->registerType(T, &tmpNode, curNode);
+      // quick hack
+      if (xmlChildElementCount(tmpNode) == 0) {
+        curNode = tmpNode;
+        newChild("params");
+      } else {
+        newComment("PreVisitDecl::Function: already the same type is registered");
+      }
+      return true;
+    }
   case Decl::MSProperty: return true;
   case Decl::NonTypeTemplateParm: return true;
   case Decl::Var:

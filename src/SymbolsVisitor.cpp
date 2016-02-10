@@ -284,10 +284,36 @@ SymbolsVisitor::PreVisitDecl(Decl *D) {
       }
       return false;
     }
-  case Decl::CXXMethod: ND("Decl_CXXMethod");
-  case Decl::CXXConstructor: ND("Decl_CXXConstructor");
-  case Decl::CXXConversion: ND("Decl_CXXConversion");
-  case Decl::CXXDestructor: ND("Decl_CXXDestructor");
+  case Decl::CXXMethod:
+  case Decl::CXXConstructor:
+  case Decl::CXXConversion:
+  case Decl::CXXDestructor:
+    {
+      CXXMethodDecl *MD = dyn_cast<CXXMethodDecl>(D);
+      if (!MD->isFirstDecl()) {
+        newComment("Decl_CXXMethod: not 1st");
+        IdentifierInfo *II = MD->getDeclName().getAsIdentifierInfo();
+        if (II) {
+          newComment(II->getNameStart());
+        }
+        return false;
+      }
+      newComment("Decl_CXXMethod");
+      newChild("id");
+      if (MD) {
+        QualType T = MD->getType();
+        newProp("type", typetableinfo->getTypeName(T).c_str());
+      }
+      newProp("sclass", "extern_def");
+      if (MD) {
+        IdentifierInfo *II = MD->getDeclName().getAsIdentifierInfo();
+        if (II) {
+          addChild("name", II->getNameStart());
+        }
+      }
+
+      return false;
+    }
   case Decl::MSProperty: ND("Decl_MSProperty");
   case Decl::NonTypeTemplateParm: ND("Decl_NonTypeTemplateParm");
   case Decl::Var:
