@@ -71,6 +71,10 @@ void XcodeMlVisitorBaseImpl::newComment(const char *str, xmlNodePtr N) {
     newComment(BAD_CAST str, N);
 }
 
+void XcodeMlVisitorBaseImpl::newComment(const std::string &str, xmlNodePtr N) {
+    newComment(str.c_str(), N);
+}
+
 void XcodeMlVisitorBaseImpl::setLocation(SourceLocation Loc, xmlNodePtr N) {
     if (!N) N = curNode;
     FullSourceLoc FLoc = mangleContext->getASTContext().getFullLoc(Loc);
