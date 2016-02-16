@@ -1026,14 +1026,14 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
     if (RD) {
       IdentifierInfo *II = RD->getDeclName().getAsIdentifierInfo();
       if (II) {
-        addChild("myname", II->getNameStart());
+        addChild("name", II->getNameStart());
       }
     }
     return true;
   }
   case Decl::CXXRecord:
     newComment("Decl_CXXRecord");
-    NDeclXXX("AnCXXRecord");
+    NDeclXXX("CXXRecord");
     // return false; // to be traversed in typeTable
   case Decl::ClassTemplateSpecialization: NDeclXXX("ClassTemplateSpecialization");
   case Decl::ClassTemplatePartialSpecialization: NDeclXXX("ClassTemplatePartialSpecialization");
