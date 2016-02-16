@@ -929,7 +929,7 @@ DeclarationsVisitor::PreVisitAttr(Attr *A) {
     newComment("Attr_NULL");
     return false;
   }
-  newComment(NAttr(A->getSpelling()).c_str());
+  newComment(NAttr(A->getSpelling()));
   newChild("gccAttribute");
 
   newProp("name", contentBySource(A->getLocation(), A->getLocation()).c_str());
@@ -938,7 +938,7 @@ DeclarationsVisitor::PreVisitAttr(Attr *A) {
   raw_string_ostream OS(prettyprint);
   ASTContext &CXT = mangleContext->getASTContext();
   A->printPretty(OS, PrintingPolicy(CXT.getLangOpts()));
-  newComment(OS.str().c_str());
+  newComment(OS.str());
 
   return true;
 }
