@@ -962,7 +962,19 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
   }
 
   switch (D->getKind()) {
-  case Decl::AccessSpec: NDeclXXX("AccessSpec");
+  case Decl::AccessSpec: {
+    AccessSpecDecl *ASD = dyn_cast<AccessSpecDecl>(D);
+    newChild("Decl_AccessSpec");
+
+    // XXX
+    AccessSpecifier as(D->getAccess());
+    std::string as_name;
+    if (as == AS_public) as_name = "public";
+    else if (as == AS_protected) as_name = "protected";
+    else if (as == AS_private) as_name = "private";
+    newProp("access", as_name.c_str());
+    return false;
+  }
   case Decl::Block: NDeclXXX("Block");
   case Decl::Captured: NDeclXXX("Captured");
   case Decl::ClassScopeFunctionSpecialization: NDeclXXX("ClassScopeFunctionSpecialization");
@@ -1031,10 +1043,14 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
     }
     return true;
   }
-  case Decl::CXXRecord:
-    newComment("Decl_CXXRecord");
-    NDeclXXX("CXXRecord");
-    // return false; // to be traversed in typeTable
+  case Decl::CXXRecord: {
+    CXXRecordDecl *RD = dyn_cast<CXXRecordDecl>(D);
+    if (!RD) {
+      return true;
+    }
+    newChild("Decl_CXXRecord");
+    return true;
+  }
   case Decl::ClassTemplateSpecialization: NDeclXXX("ClassTemplateSpecialization");
   case Decl::ClassTemplatePartialSpecialization: NDeclXXX("ClassTemplatePartialSpecialization");
   case Decl::TemplateTypeParm: NDeclXXX("TemplateTypeParm");
@@ -1080,12 +1096,29 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
   }
   case Decl::ObjCAtDefsField: NDeclXXX("ObjCAtDefsField");
   case Decl::ObjCIvar: NDeclXXX("ObjCIvar");
-  case Decl::Function: {
+  case Decl::Function:
+  case Decl::CXXMethod:
+  case Decl::CXXConstructor:
+  case Decl::CXXConversion:
+  case Decl::CXXDestructor:
+  {
     // 5.1, 5.4 XXX
     FunctionDecl *FD = static_cast<FunctionDecl*>(D);
     if (FD && FD->isThisDeclarationADefinition()) {
       newChild("functionDefinition");
       setLocation(FD->getLocStart());
+
+      // XXX
+      clang::Decl::Kind kind(D->getKind());
+      if (kind != Decl::Function) {
+        AccessSpecifier as(FD->getAccess());
+        std::string as_name;
+        if (as == AS_public) as_name = "public";
+        else if (as == AS_protected) as_name = "protected";
+        else if (as == AS_private) as_name = "private";
+        newProp("access", as_name.c_str());
+      }
+
       xmlNodePtr functionNode = curNode;
       HookForDeclarationNameInfo = [this, D](DeclarationNameInfo NI) {
         DeclarationsVisitor V(this);
@@ -1118,10 +1151,6 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
 
     return true;
   }
-  case Decl::CXXMethod: NDeclXXX("CXXMethod");
-  case Decl::CXXConstructor: NDeclXXX("CXXConstructor");
-  case Decl::CXXConversion: NDeclXXX("CXXConversion");
-  case Decl::CXXDestructor: NDeclXXX("CXXDestructor");
   case Decl::MSProperty: NDeclXXX("MSProperty");
   case Decl::NonTypeTemplateParm: NDeclXXX("NonTypeTemplateParm");
   case Decl::Var: {
