@@ -1000,13 +1000,14 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
       QualType T(ED->getTypeForDecl(), 0);
       newProp("type", typetableinfo->getTypeName(T).c_str());
     }
-    newProp("sclass", "tagname");
     if (ED) {
       IdentifierInfo *II = ED->getDeclName().getAsIdentifierInfo();
       if (II) {
         addChild("name", II->getNameStart());
       }
     }
+    newChild("enumType");
+    newChild("symbols");
     return true;
   }
   case Decl::Record: {
@@ -1157,7 +1158,14 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
   }
   case Decl::VarTemplateSpecialization: NDeclXXX("VarTemplateSpecialization");
   case Decl::VarTemplatePartialSpecialization: NDeclXXX("VarTemplatePartialSpecialization");
-  case Decl::EnumConstant: NDeclXXX("EnumConstant"); // XXX?
+  case Decl::EnumConstant: {
+    EnumConstantDecl *ED = static_cast<EnumConstantDecl*>(D);
+    if (ED) {
+      newChild("id");
+      newChild("name", ED->getNameAsString().c_str());
+    }
+    return false;
+  }
   case Decl::IndirectField: NDeclXXX("IndirectField");
   case Decl::UnresolvedUsingValue: NDeclXXX("UnresolvedUsingValue");
   case Decl::OMPThreadPrivate: NDeclXXX("OMPThreadPrivate");
