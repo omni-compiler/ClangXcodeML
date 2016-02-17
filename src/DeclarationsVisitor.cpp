@@ -1285,14 +1285,31 @@ DeclarationsVisitor::PreVisitDeclarationNameInfo(DeclarationNameInfo NI) {
   const char *content = II ? II->getNameStart() : nullptr;
 
   switch (DN.getNameKind()) {
-  case DeclarationName::CXXConstructorName: NDeclName("CXXConstructorName");
-  case DeclarationName::CXXDestructorName: NDeclName("CXXDestructorName");
+  case DeclarationName::CXXConstructorName: {
+    newComment("DeclarationNameInfo_CXXConstructorName");
+    newChild("constructor");
+    return true;
+  }
+  case DeclarationName::CXXDestructorName: {
+    newComment("DeclarationNameInfo_CXXDestructorName");
+    newChild("destructor");
+    return true;
+  }
   case DeclarationName::CXXConversionFunctionName: NDeclName("CXXConversionFunctionName");
   case DeclarationName::Identifier: NDeclName("Identifier");
   case DeclarationName::ObjCZeroArgSelector: NDeclName("ObjCZeroArgSelector");
   case DeclarationName::ObjCOneArgSelector: NDeclName("ObjCOneArgSelector");
   case DeclarationName::ObjCMultiArgSelector: NDeclName("ObjCMultiArgSelector");
-  case DeclarationName::CXXOperatorName: NDeclName("CXXOperatorName");
+  case DeclarationName::CXXOperatorName: {
+    newComment("DeclarationNameInfo_CXXDestructorName");
+    OverloadedOperatorKind op(DN.getCXXOverloadedOperator());
+    newChild("operator", getOperatorSpelling(op));
+      // XXX:
+      // getOperatorSpelling returns spelling of operators, like "*", "+=".
+      // should use names of operators, like "MulExpr"
+      // Clang seems not to provide such API
+    return true;
+  }
   case DeclarationName::CXXLiteralOperatorName: NDeclName("CXXLiteralOperatorName");
   case DeclarationName::CXXUsingDirective: NDeclName("CXXUsingDirective");
   }
