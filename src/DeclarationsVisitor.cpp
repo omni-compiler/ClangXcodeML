@@ -1331,7 +1331,7 @@ static std::string OverloadedOperatorKindToString(OverloadedOperatorKind op) {
     case OO_PlusPlus:
     case OO_MinusMinus:
     default:
-      return unique_meaning[op];
+      return unique_meaning.at(op);
   }
 }
 
@@ -1365,7 +1365,7 @@ DeclarationsVisitor::PreVisitDeclarationNameInfo(DeclarationNameInfo NI) {
   case DeclarationName::ObjCMultiArgSelector: NDeclName("ObjCMultiArgSelector");
   case DeclarationName::CXXOperatorName: {
     newComment("DeclarationNameInfo_CXXDestructorName");
-    newChild("operator", OverloadedOperatorKindToString(op));
+    newChild("operator", OverloadedOperatorKindToString(DN.getCXXOverloadedOperator()).c_str());
     return true;
   }
   case DeclarationName::CXXLiteralOperatorName: NDeclName("CXXLiteralOperatorName");
