@@ -1081,6 +1081,15 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
           newProp("bit_field", "*");
         }
       }
+
+      // XXX
+      AccessSpecifier as(D->getAccess());
+      std::string as_name;
+      if (as == AS_public) as_name = "public";
+      else if (as == AS_protected) as_name = "protected";
+      else if (as == AS_private) as_name = "private";
+      newProp("access", as_name.c_str());
+
       QualType T = FD->getType();
       newProp("type", typetableinfo->getTypeName(T).c_str());
       IdentifierInfo *II = FD->getDeclName().getAsIdentifierInfo();
