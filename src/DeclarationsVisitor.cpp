@@ -1084,7 +1084,9 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
         }
       }
 
-      newProp("access", getAccessAsString(D).c_str());
+      if (FD->getParent()->getKind() == Decl::CXXRecord) {
+        newProp("access", getAccessAsString(D).c_str());
+      }
 
       QualType T = FD->getType();
       newProp("type", typetableinfo->getTypeName(T).c_str());
