@@ -10,7 +10,6 @@ struct DeclarationsContext {
     DeclarationsContext &operator =(DeclarationsContext &&) = delete;
 
     const char *nameForDeclRefExpr;  // inherited to ancestors
-    clang::AccessSpecifier currentAS;
 };
 
 class DeclarationsVisitor
