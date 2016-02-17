@@ -3,6 +3,7 @@
 #include "SymbolsVisitor.h"
 #include "DeclarationsVisitor.h"
 #include "clang/Basic/Builtins.h"
+#include <map>
 
 using namespace clang;
 using namespace llvm;
@@ -1273,6 +1274,68 @@ DeclarationsVisitor::PreVisitNestedNameSpecifierLoc(NestedNameSpecifierLoc NNS) 
 }
 #undef NNNSLocXXX
 
+static std::string OverloadedOperatorKindToString(OverloadedOperatorKind op) {
+  const static std::map<OverloadedOperatorKind, std::string> unique_meaning = {
+    // 7.10 binary operators
+    // arithmetic binary operators
+    {OO_Slash,                "divExpr"},
+    {OO_Percent,              "modExpr"},
+    {OO_LessLess,             "LshiftExpr"},
+    {OO_GreaterGreater,       "RshiftExpr"},
+    {OO_Pipe,                 "bitOrExpr"},
+    {OO_Caret,                "bitXorExpr"},
+
+    // assignment operators
+    {OO_PlusEqual,            "asgPlusExpr"},
+    {OO_MinusEqual,           "asgMinusExpr"},
+    {OO_StarEqual,            "asgMulExpr"},
+    {OO_SlashEqual,           "asgDivExpr"},
+    {OO_PercentEqual,         "asgModExpr"},
+    {OO_LessLessEqual,        "asgLshiftExpr"},
+    {OO_GreaterGreaterEqual,  "asgRshiftExpr"},
+    {OO_AmpEqual,             "asgBitAndExpr"},
+    {OO_PipeEqual,            "asgBitOrExpr"},
+    {OO_CaretEqual,           "asgBitXorExpr"},
+
+    // logical binary operators
+    {OO_EqualEqual,           "logEQExpr"},
+    {OO_ExclaimEqual,         "logNEQExpr"},
+    {OO_GreaterEqual,         "logGEExpr"},
+    {OO_Greater,              "logGTExpr"},
+    {OO_LessEqual,            "logLEExpr"},
+    {OO_Less,                 "logLTExpr"},
+    {OO_AmpAmp,               "logAndExpr"},
+      // rvalue reference operator(&&) is neither an operator nor overloadable
+    {OO_PipePipe,             "logOrExpr"},
+    {OO_Equal,                "assignExpr"},
+
+    // 7.11 unary operators
+    {OO_Tilde,                "bitNotExpr"},
+    {OO_Exclaim,              "logNotExpr"},
+
+    // 7.13 commaExpr element
+    {OO_Comma,                "commaExpr"},
+
+    // XXX: undocumented yet, should be discussed
+    {OO_Arrow,                "arrowExpr"},
+    {OO_ArrowStar,            "arrowStarExpr"},
+    {OO_Call,                 "callExpr"},
+    {OO_Subscript,            "subScriptExpr"}
+  };
+
+  switch (op) {
+    case OO_Plus:
+    case OO_Minus:
+    case OO_Star:
+    case OO_Amp:
+    case OO_PlusPlus:
+    case OO_MinusMinus:
+    default:
+      return unique_meaning[op];
+  }
+}
+
+
 #define NDeclName(mes) do {                                     \
     newComment("DeclarationNameInfo_" mes);                     \
     newChild("name", content);                                  \
@@ -1302,12 +1365,7 @@ DeclarationsVisitor::PreVisitDeclarationNameInfo(DeclarationNameInfo NI) {
   case DeclarationName::ObjCMultiArgSelector: NDeclName("ObjCMultiArgSelector");
   case DeclarationName::CXXOperatorName: {
     newComment("DeclarationNameInfo_CXXDestructorName");
-    OverloadedOperatorKind op(DN.getCXXOverloadedOperator());
-    newChild("operator", getOperatorSpelling(op));
-      // XXX:
-      // getOperatorSpelling returns spelling of operators, like "*", "+=".
-      // should use names of operators, like "MulExpr"
-      // Clang seems not to provide such API
+    newChild("operator", OverloadedOperatorKindToString(op));
     return true;
   }
   case DeclarationName::CXXLiteralOperatorName: NDeclName("CXXLiteralOperatorName");
