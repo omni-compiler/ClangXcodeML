@@ -29,6 +29,15 @@ DeclarationsVisitor::getVisitorName() const {
     return true;                                 \
   } while (0)
 
+static std::string getAccessAsString(Decl *decl) {
+  switch (decl->getAccess()) {
+    case AS_public : return "public";
+    case AS_private : return "private";
+    case AS_protected : return "protected";
+    default: return "none";
+  }
+}
+
 bool
 DeclarationsVisitor::WrapExpr(Stmt *S) {
   Expr *E = dyn_cast<Expr>(S);
@@ -965,14 +974,7 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
   case Decl::AccessSpec: {
     AccessSpecDecl *ASD = dyn_cast<AccessSpecDecl>(D);
     newChild("Decl_AccessSpec");
-
-    // XXX
-    AccessSpecifier as(D->getAccess());
-    std::string as_name;
-    if (as == AS_public) as_name = "public";
-    else if (as == AS_protected) as_name = "protected";
-    else if (as == AS_private) as_name = "private";
-    newProp("access", as_name.c_str());
+    newProp("access", getAccessAsString(D).c_str());
     return false;
   }
   case Decl::Block: NDeclXXX("Block");
@@ -1082,13 +1084,7 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
         }
       }
 
-      // XXX
-      AccessSpecifier as(D->getAccess());
-      std::string as_name;
-      if (as == AS_public) as_name = "public";
-      else if (as == AS_protected) as_name = "protected";
-      else if (as == AS_private) as_name = "private";
-      newProp("access", as_name.c_str());
+      newProp("access", getAccessAsString(D).c_str());
 
       QualType T = FD->getType();
       newProp("type", typetableinfo->getTypeName(T).c_str());
@@ -1115,18 +1111,8 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
     FunctionDecl *FD = static_cast<FunctionDecl*>(D);
     if (FD && FD->isThisDeclarationADefinition()) {
       newChild("functionDefinition");
+      newProp("access", getAccessAsString(D).c_str());
       setLocation(FD->getLocStart());
-
-      // XXX
-      clang::Decl::Kind kind(D->getKind());
-      if (kind != Decl::Function) {
-        AccessSpecifier as(FD->getAccess());
-        std::string as_name;
-        if (as == AS_public) as_name = "public";
-        else if (as == AS_protected) as_name = "protected";
-        else if (as == AS_private) as_name = "private";
-        newProp("access", as_name.c_str());
-      }
 
       xmlNodePtr functionNode = curNode;
       HookForDeclarationNameInfo = [this, D](DeclarationNameInfo NI) {
