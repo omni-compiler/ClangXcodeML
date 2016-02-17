@@ -1113,7 +1113,9 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
     FunctionDecl *FD = static_cast<FunctionDecl*>(D);
     if (FD && FD->isThisDeclarationADefinition()) {
       newChild("functionDefinition");
-      newProp("access", getAccessAsString(D).c_str());
+      if (D->getKind() != Decl::Function) { // D is a member function if and only if  D is not Decl::Function.
+        newProp("access", getAccessAsString(D).c_str());
+      }
       setLocation(FD->getLocStart());
 
       xmlNodePtr functionNode = curNode;
