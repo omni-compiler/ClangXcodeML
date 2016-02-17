@@ -1316,6 +1316,13 @@ static std::string OverloadedOperatorKindToString(OverloadedOperatorKind op) {
     // 7.13 commaExpr element
     {OO_Comma,                "commaExpr"},
 
+    // 7.19 newExpr and newArrayExpr elements
+    // 7.20 deleteExpr and deleteArrayExpr elements
+    {OO_New,                  "newExpr"},
+    {OO_Array_New,            "newArrayExpr"},
+    {OO_Delete,               "deleteExpr"},
+    {OO_Array_Delete,         "deleteArrayExpr"},
+
     // XXX: undocumented yet, should be discussed
     {OO_Arrow,                "arrowExpr"},
     {OO_ArrowStar,            "arrowStarExpr"},
