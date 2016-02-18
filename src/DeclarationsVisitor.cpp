@@ -1190,20 +1190,18 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
     // 5.1, 5.4 XXX
     FunctionDecl *FD = static_cast<FunctionDecl*>(D);
     unsigned param_size(FD->param_size());
-    DeclarationName DN(FD->getDeclName());
+    OverloadedOperatorKind OK(FD->getDeclName().getCXXOverloadedOperator());
     if (FD && FD->isThisDeclarationADefinition()) {
       newChild("functionDefinition");
       newProp("access", getAccessAsString(D).c_str());
       setLocation(FD->getLocStart());
 
       xmlNodePtr functionNode = curNode;
-      HookForDeclarationNameInfo = [this, D, DN, param_size](DeclarationNameInfo NI) {
+      HookForDeclarationNameInfo = [this, D, OK, param_size](DeclarationNameInfo NI) {
         DeclarationsVisitor V(this);
-        DeclarationName::NameKind NK(DN.getNameKind());
-        if (NK == DeclarationName::CXXOperatorName) {
+        if (OK != OO_None) {
           newComment("DeclarationNameInfo_CXXOperatorName");
-          OverloadedOperatorKind op(DN.getCXXOverloadedOperator());
-          addChild("operator", OverloadedOperatorKindToString(op, param_size).c_str());
+          addChild("operator", OverloadedOperatorKindToString(OK, param_size).c_str());
           SymbolsVisitor SV(mangleContext, curNode, "symbols", typetableinfo);
           SV.TraverseChildOfDecl(D);
           addChild("params"); //create a new node to parent just after NameInfo
@@ -1228,12 +1226,10 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
       };
     } else {
       newChild("functionDecl");
-      HookForDeclarationNameInfo = [this, D, DN, param_size](DeclarationNameInfo NI) {
-        DeclarationName::NameKind NK(DN.getNameKind());
-        if (NK == DeclarationName::CXXOperatorName) {
+      HookForDeclarationNameInfo = [this, D, OK, param_size](DeclarationNameInfo NI) {
+        if (OK != OO_None) {
           newComment("DeclarationNameInfo_CXXOperatorName");
-          OverloadedOperatorKind op(DN.getCXXOverloadedOperator());
-          addChild("operator", OverloadedOperatorKindToString(op, param_size).c_str());
+          addChild("operator", OverloadedOperatorKindToString(OK, param_size).c_str());
         } else {
           DeclarationsVisitor V(this);
           V.TraverseDeclarationNameInfo(NI);
