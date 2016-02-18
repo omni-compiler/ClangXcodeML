@@ -292,19 +292,19 @@ static std::string OverloadedOperatorKindToString(OverloadedOperatorKind op, uns
 
   switch (op) {
     case OO_Plus:
-      return param_size == 1 ? "plusExpr" : "unaryPlusExpr";
+      return param_size == 2 ? "plusExpr" : "unaryPlusExpr";
       // XXX: unray plus operator is not defined in document yet.
       // See 7.11 unary operators.
     case OO_Minus:
-      return param_size == 1 ? "minusExpr" : "unaryMinusExpr";
+      return param_size == 2 ? "minusExpr" : "unaryMinusExpr";
     case OO_Star:
-      return param_size == 1 ? "mulExpr" : "pointerRef"/*XXX: correct name?*/;
+      return param_size == 2 ? "mulExpr" : "pointerRef"/*XXX: correct name?*/;
     case OO_Amp:
-      return param_size == 1 ? "logAndExpr" : "varAddr"/*XXX: correct name?*/;
+      return param_size == 2 ? "logAndExpr" : "varAddr"/*XXX: correct name?*/;
     case OO_PlusPlus:
-      return param_size == 1 ? "postIncrExpr" : "preIncrExpr";
+      return param_size == 2 ? "postIncrExpr" : "preIncrExpr";
     case OO_MinusMinus:
-      return param_size == 1 ? "postDecrExpr" : "preIncrExpr";
+      return param_size == 2 ? "postDecrExpr" : "preIncrExpr";
     default:
       return unique_meaning.at(op);
   }
@@ -1189,11 +1189,12 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
   {
     // 5.1, 5.4 XXX
     FunctionDecl *FD = static_cast<FunctionDecl*>(D);
-    unsigned param_size(FD->param_size());
+    bool is_member_function = D->getKind() != Decl::Function;
+    unsigned param_size = FD->param_size() + (is_member_function? 1:0);
     OverloadedOperatorKind OK(FD->getDeclName().getCXXOverloadedOperator());
     if (FD && FD->isThisDeclarationADefinition()) {
       newChild("functionDefinition");
-      if (D->getKind() != Decl::Function) { // D is a member function if and only if  D is not Decl::Function.
+      if (is_member_function) {
         newProp("access", getAccessAsString(D).c_str());
       }
       setLocation(FD->getLocStart());
