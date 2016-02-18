@@ -1183,12 +1183,15 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
   case Decl::ObjCIvar: NDeclXXX("ObjCIvar");
   case Decl::Function:
   case Decl::CXXMethod:
+  case Decl::CXXConstructor:
+  case Decl::CXXConversion:
+  case Decl::CXXDestructor:
   {
     // 5.1, 5.4 XXX
     FunctionDecl *FD = static_cast<FunctionDecl*>(D);
     size_t param(FD->param_size());
+    DeclarationName DN(FD->getDeclName());
     if (FD && FD->isThisDeclarationADefinition()) {
-      DeclarationName DN(FD->getDeclName());
       newChild("functionDefinition");
       newProp("access", getAccessAsString(D).c_str());
       setLocation(FD->getLocStart());
@@ -1225,9 +1228,7 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
         return TraverseStmt(S);
       };
     } else {
-      DeclarationName DN(FD->getDeclName());
       newChild("functionDecl");
-      newProp("access", getAccessAsString(D).c_str());
       HookForDeclarationNameInfo = [this, D, DN, param](DeclarationNameInfo NI) {
         DeclarationName::NameKind NK(DN.getNameKind());
         if (NK == DeclarationName::CXXOperatorName ||
@@ -1239,49 +1240,6 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
           DeclarationsVisitor V(this);
           V.TraverseDeclarationNameInfo(NI);
         }
-        return false;
-      };
-    }
-
-    return true;
-  }
-  case Decl::CXXConstructor:
-  case Decl::CXXConversion:
-  case Decl::CXXDestructor:
-  {
-    // 5.1, 5.4 XXX
-    FunctionDecl *FD = static_cast<FunctionDecl*>(D);
-    if (FD && FD->isThisDeclarationADefinition()) {
-      newChild("functionDefinition");
-      newProp("access", getAccessAsString(D).c_str());
-      setLocation(FD->getLocStart());
-
-      xmlNodePtr functionNode = curNode;
-      HookForDeclarationNameInfo = [this, D](DeclarationNameInfo NI) {
-        DeclarationsVisitor V(this);
-        if (V.TraverseDeclarationNameInfo(NI)) {
-          SymbolsVisitor SV(mangleContext, curNode, "symbols", typetableinfo);
-          SV.TraverseChildOfDecl(D);
-          newChild("params"); //create a new node to parent just after NameInfo
-          return true;
-        } else {
-          return false;
-        }
-      };
-      bool IsValiadic = static_cast<FunctionDecl*>(D)->isVariadic();
-      HookForStmt = [this, functionNode, IsValiadic](Stmt *S) {
-        if (IsValiadic) {
-          addChild("ellipsis");
-        }
-        curNode = functionNode;
-        newChild("body");
-        return TraverseStmt(S);
-      };
-    } else {
-      newChild("functionDecl");
-      HookForDeclarationNameInfo = [this, D](DeclarationNameInfo NI) {
-        DeclarationsVisitor V(this);
-        V.TraverseDeclarationNameInfo(NI);
         return false;
       };
     }
