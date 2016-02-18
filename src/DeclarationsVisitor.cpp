@@ -3,6 +3,7 @@
 #include "SymbolsVisitor.h"
 #include "DeclarationsVisitor.h"
 #include "clang/Basic/Builtins.h"
+#include <map>
 
 using namespace clang;
 using namespace llvm;
@@ -232,6 +233,83 @@ DeclarationsVisitor::WrapLabelChild(void) {
       }
   };
 }
+
+static std::string OverloadedOperatorKindToString(OverloadedOperatorKind op, unsigned param_size) {
+  const static std::map<OverloadedOperatorKind, std::string> unique_meaning = {
+    // 7.10 binary operators
+    // arithmetic binary operators
+    {OO_Slash,                "divExpr"},
+    {OO_Percent,              "modExpr"},
+    {OO_LessLess,             "LshiftExpr"},
+    {OO_GreaterGreater,       "RshiftExpr"},
+    {OO_Pipe,                 "bitOrExpr"},
+    {OO_Caret,                "bitXorExpr"},
+
+    // assignment operators
+    {OO_PlusEqual,            "asgPlusExpr"},
+    {OO_MinusEqual,           "asgMinusExpr"},
+    {OO_StarEqual,            "asgMulExpr"},
+    {OO_SlashEqual,           "asgDivExpr"},
+    {OO_PercentEqual,         "asgModExpr"},
+    {OO_LessLessEqual,        "asgLshiftExpr"},
+    {OO_GreaterGreaterEqual,  "asgRshiftExpr"},
+    {OO_AmpEqual,             "asgBitAndExpr"},
+    {OO_PipeEqual,            "asgBitOrExpr"},
+    {OO_CaretEqual,           "asgBitXorExpr"},
+
+    // logical binary operators
+    {OO_EqualEqual,           "logEQExpr"},
+    {OO_ExclaimEqual,         "logNEQExpr"},
+    {OO_GreaterEqual,         "logGEExpr"},
+    {OO_Greater,              "logGTExpr"},
+    {OO_LessEqual,            "logLEExpr"},
+    {OO_Less,                 "logLTExpr"},
+    {OO_AmpAmp,               "logAndExpr"},
+      // rvalue reference operator(&&) is neither an operator nor overloadable
+    {OO_PipePipe,             "logOrExpr"},
+    {OO_Equal,                "assignExpr"},
+
+    // 7.11 unary operators
+    {OO_Tilde,                "bitNotExpr"},
+    {OO_Exclaim,              "logNotExpr"},
+
+    // 7.13 commaExpr element
+    {OO_Comma,                "commaExpr"},
+
+    // 7.19 newExpr and newArrayExpr elements
+    // 7.20 deleteExpr and deleteArrayExpr elements
+    {OO_New,                  "newExpr"},
+    {OO_Array_New,            "newArrayExpr"},
+    {OO_Delete,               "deleteExpr"},
+    {OO_Array_Delete,         "deleteArrayExpr"},
+
+    // XXX: undocumented yet, should be discussed
+    {OO_Arrow,                "arrowExpr"},
+    {OO_ArrowStar,            "arrowStarExpr"},
+    {OO_Call,                 "callExpr"},
+    {OO_Subscript,            "subScriptExpr"}
+  };
+
+  switch (op) {
+    case OO_Plus:
+      return param_size == 1 ? "plusExpr" : "unaryPlusExpr";
+      // XXX: unray plus operator is not defined in document yet.
+      // See 7.11 unary operators.
+    case OO_Minus:
+      return param_size == 1 ? "minusExpr" : "unaryMinusExpr";
+    case OO_Star:
+      return param_size == 1 ? "mulExpr" : "pointerRef"/*XXX: correct name?*/;
+    case OO_Amp:
+      return param_size == 1 ? "logAndExpr" : "varAddr"/*XXX: correct name?*/;
+    case OO_PlusPlus:
+      return param_size == 1 ? "postIncrExpr" : "preIncrExpr";
+    case OO_MinusMinus:
+      return param_size == 1 ? "postDecrExpr" : "preIncrExpr";
+    default:
+      return unique_meaning.at(op);
+  }
+}
+
 
 #define NStmt(mes) do {newChild(mes); return true;} while (0)
 #define NStmtXXX(mes) NStmt("Stmt_" mes)
@@ -1111,6 +1189,8 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
   {
     // 5.1, 5.4 XXX
     FunctionDecl *FD = static_cast<FunctionDecl*>(D);
+    unsigned param_size(FD->param_size());
+    OverloadedOperatorKind OK(FD->getDeclName().getCXXOverloadedOperator());
     if (FD && FD->isThisDeclarationADefinition()) {
       newChild("functionDefinition");
       if (D->getKind() != Decl::Function) { // D is a member function if and only if  D is not Decl::Function.
@@ -1119,9 +1199,16 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
       setLocation(FD->getLocStart());
 
       xmlNodePtr functionNode = curNode;
-      HookForDeclarationNameInfo = [this, D](DeclarationNameInfo NI) {
+      HookForDeclarationNameInfo = [this, D, OK, param_size](DeclarationNameInfo NI) {
         DeclarationsVisitor V(this);
-        if (V.TraverseDeclarationNameInfo(NI)) {
+        if (OK != OO_None) {
+          newComment("DeclarationNameInfo_CXXOperatorName");
+          addChild("operator", OverloadedOperatorKindToString(OK, param_size).c_str());
+          SymbolsVisitor SV(mangleContext, curNode, "symbols", typetableinfo);
+          SV.TraverseChildOfDecl(D);
+          addChild("params"); //create a new node to parent just after NameInfo
+          return true;
+        } else if (V.TraverseDeclarationNameInfo(NI)) {
           SymbolsVisitor SV(mangleContext, curNode, "symbols", typetableinfo);
           SV.TraverseChildOfDecl(D);
           newChild("params"); //create a new node to parent just after NameInfo
@@ -1141,9 +1228,14 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
       };
     } else {
       newChild("functionDecl");
-      HookForDeclarationNameInfo = [this, D](DeclarationNameInfo NI) {
-        DeclarationsVisitor V(this);
-        V.TraverseDeclarationNameInfo(NI);
+      HookForDeclarationNameInfo = [this, D, OK, param_size](DeclarationNameInfo NI) {
+        if (OK != OO_None) {
+          newComment("DeclarationNameInfo_CXXOperatorName");
+          addChild("operator", OverloadedOperatorKindToString(OK, param_size).c_str());
+        } else {
+          DeclarationsVisitor V(this);
+          V.TraverseDeclarationNameInfo(NI);
+        }
         return false;
       };
     }
@@ -1302,16 +1394,7 @@ DeclarationsVisitor::PreVisitDeclarationNameInfo(DeclarationNameInfo NI) {
   case DeclarationName::ObjCZeroArgSelector: NDeclName("ObjCZeroArgSelector");
   case DeclarationName::ObjCOneArgSelector: NDeclName("ObjCOneArgSelector");
   case DeclarationName::ObjCMultiArgSelector: NDeclName("ObjCMultiArgSelector");
-  case DeclarationName::CXXOperatorName: {
-    newComment("DeclarationNameInfo_CXXDestructorName");
-    OverloadedOperatorKind op(DN.getCXXOverloadedOperator());
-    newChild("operator", getOperatorSpelling(op));
-      // XXX:
-      // getOperatorSpelling returns spelling of operators, like "*", "+=".
-      // should use names of operators, like "MulExpr"
-      // Clang seems not to provide such API
-    return true;
-  }
+  case DeclarationName::CXXOperatorName: NDeclName("CXXOperatorName");
   case DeclarationName::CXXLiteralOperatorName: NDeclName("CXXLiteralOperatorName");
   case DeclarationName::CXXUsingDirective: NDeclName("CXXUsingDirective");
   }
