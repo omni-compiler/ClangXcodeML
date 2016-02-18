@@ -1229,6 +1229,9 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
       };
     } else {
       newChild("functionDecl");
+      if (is_member_function) {
+        newProp("access", getAccessAsString(D).c_str());
+      }
       HookForDeclarationNameInfo = [this, D, OK, param_size](DeclarationNameInfo NI) {
         if (OK != OO_None) {
           newComment("DeclarationNameInfo_CXXOperatorName");
