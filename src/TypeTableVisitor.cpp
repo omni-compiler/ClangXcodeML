@@ -47,6 +47,15 @@ TypeTableVisitor::FullTrace(void) const {
   return OptFullTraceTypeTable;
 }
 
+bool base_registerer(const CXXRecordDecl *BaseDef, void *basesNodePtr) {
+  const char *name = BaseDef->getNameAsString().c_str();
+  xmlNodePtr typeNameNode = xmlNewNode(nullptr, BAD_CAST "typename");
+  xmlAddChild(typeNameNode, xmlNewText(BAD_CAST name));
+  xmlNodePtr* basesNode = (xmlNodePtr*)basesNodePtr;
+  xmlAddChild(*basesNode, typeNameNode);
+  return false;
+}
+
 TypeTableInfo::TypeTableInfo(MangleContext *MC) : mangleContext(MC)
 {
   mapFromNameToQualType.clear();
@@ -661,21 +670,19 @@ TypeTableVisitor::PreVisitDecl(Decl *D) {
       if (!TD) {
         return false;
       }
-      xmlNodePtr baseClasses;
-      CXXRecordDecl *RD(dyn_cast<CXXRecordDecl>(D));
-      if (RD) {
-        auto base_registerer = [&baseClasses](const CXXRecordDecl *BaseDef, void *none) -> bool {
-          const char *name = BaseDef->getNameAsString().c_str();
-          xmlAddChild(baseClasses, xmlNewNode(nullptr, BAD_CAST name));
-          return false;
-        };
-        RD->forallBases(base_registerer, nullptr);
-      }
       QualType T(TD->getTypeForDecl(), 0);
       if (TD->isCompleteDefinition()) {
         xmlNodePtr tmpNode;
         newComment((comment + "(withDef)").c_str());
         typetableinfo->registerType(T, &tmpNode, curNode);
+        xmlNodePtr basesNode = xmlNewNode(nullptr, BAD_CAST "inheritedFrom");
+        CXXRecordDecl *RD(dyn_cast<CXXRecordDecl>(D));
+        if (RD) {
+          RD->forallBases(base_registerer, &basesNode);
+          if (RD->bases_begin() != RD->bases_end()) {
+            xmlAddChild(tmpNode, basesNode);
+          }
+        }
         TraverseChildOfDecl(D);
         SymbolsVisitor SV(mangleContext, tmpNode, "symbols", typetableinfo);
         SV.TraverseChildOfDecl(D);
