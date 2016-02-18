@@ -234,7 +234,7 @@ DeclarationsVisitor::WrapLabelChild(void) {
   };
 }
 
-static std::string OverloadedOperatorKindToString(OverloadedOperatorKind op, size_t param) {
+static std::string OverloadedOperatorKindToString(OverloadedOperatorKind op, unsigned param_size) {
   const static std::map<OverloadedOperatorKind, std::string> unique_meaning = {
     // 7.10 binary operators
     // arithmetic binary operators
@@ -292,19 +292,19 @@ static std::string OverloadedOperatorKindToString(OverloadedOperatorKind op, siz
 
   switch (op) {
     case OO_Plus:
-      return param == 1 ? "plusExpr" : "unaryPlusExpr";
+      return param_size == 1 ? "plusExpr" : "unaryPlusExpr";
       // XXX: unray plus operator is not defined in document yet.
       // See 7.11 unary operators.
     case OO_Minus:
-      return param == 1 ? "minusExpr" : "unaryMinusExpr";
+      return param_size == 1 ? "minusExpr" : "unaryMinusExpr";
     case OO_Star:
-      return param == 1 ? "mulExpr" : "pointerRef"/*XXX: correct name?*/;
+      return param_size == 1 ? "mulExpr" : "pointerRef"/*XXX: correct name?*/;
     case OO_Amp:
-      return param == 1 ? "logAndExpr" : "varAddr"/*XXX: correct name?*/;
+      return param_size == 1 ? "logAndExpr" : "varAddr"/*XXX: correct name?*/;
     case OO_PlusPlus:
-      return param == 1 ? "postIncrExpr" : "preIncrExpr";
+      return param_size == 1 ? "postIncrExpr" : "preIncrExpr";
     case OO_MinusMinus:
-      return param == 1 ? "postDecrExpr" : "preIncrExpr";
+      return param_size == 1 ? "postDecrExpr" : "preIncrExpr";
     default:
       return unique_meaning.at(op);
   }
@@ -1189,7 +1189,7 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
   {
     // 5.1, 5.4 XXX
     FunctionDecl *FD = static_cast<FunctionDecl*>(D);
-    size_t param(FD->param_size());
+    unsigned param_size(FD->param_size());
     DeclarationName DN(FD->getDeclName());
     if (FD && FD->isThisDeclarationADefinition()) {
       newChild("functionDefinition");
@@ -1197,14 +1197,14 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
       setLocation(FD->getLocStart());
 
       xmlNodePtr functionNode = curNode;
-      HookForDeclarationNameInfo = [this, D, DN, param](DeclarationNameInfo NI) {
+      HookForDeclarationNameInfo = [this, D, DN, param_size](DeclarationNameInfo NI) {
         DeclarationsVisitor V(this);
         DeclarationName::NameKind NK(DN.getNameKind());
         if (NK == DeclarationName::CXXOperatorName ||
             NK == DeclarationName::CXXLiteralOperatorName) {
           newComment("DeclarationNameInfo_CXXOperatorName");
           OverloadedOperatorKind op(DN.getCXXOverloadedOperator());
-          addChild("operator", OverloadedOperatorKindToString(op, param).c_str());
+          addChild("operator", OverloadedOperatorKindToString(op, param_size).c_str());
           SymbolsVisitor SV(mangleContext, curNode, "symbols", typetableinfo);
           SV.TraverseChildOfDecl(D);
           addChild("params"); //create a new node to parent just after NameInfo
@@ -1229,13 +1229,13 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
       };
     } else {
       newChild("functionDecl");
-      HookForDeclarationNameInfo = [this, D, DN, param](DeclarationNameInfo NI) {
+      HookForDeclarationNameInfo = [this, D, DN, param_size](DeclarationNameInfo NI) {
         DeclarationName::NameKind NK(DN.getNameKind());
         if (NK == DeclarationName::CXXOperatorName ||
             NK == DeclarationName::CXXLiteralOperatorName) {
           newComment("DeclarationNameInfo_CXXOperatorName");
           OverloadedOperatorKind op(DN.getCXXOverloadedOperator());
-          addChild("operator", OverloadedOperatorKindToString(op, param).c_str());
+          addChild("operator", OverloadedOperatorKindToString(op, param_size).c_str());
         } else {
           DeclarationsVisitor V(this);
           V.TraverseDeclarationNameInfo(NI);
