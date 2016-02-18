@@ -1200,8 +1200,7 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
       HookForDeclarationNameInfo = [this, D, DN, param_size](DeclarationNameInfo NI) {
         DeclarationsVisitor V(this);
         DeclarationName::NameKind NK(DN.getNameKind());
-        if (NK == DeclarationName::CXXOperatorName ||
-            NK == DeclarationName::CXXLiteralOperatorName) {
+        if (NK == DeclarationName::CXXOperatorName) {
           newComment("DeclarationNameInfo_CXXOperatorName");
           OverloadedOperatorKind op(DN.getCXXOverloadedOperator());
           addChild("operator", OverloadedOperatorKindToString(op, param_size).c_str());
@@ -1231,8 +1230,7 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
       newChild("functionDecl");
       HookForDeclarationNameInfo = [this, D, DN, param_size](DeclarationNameInfo NI) {
         DeclarationName::NameKind NK(DN.getNameKind());
-        if (NK == DeclarationName::CXXOperatorName ||
-            NK == DeclarationName::CXXLiteralOperatorName) {
+        if (NK == DeclarationName::CXXOperatorName) {
           newComment("DeclarationNameInfo_CXXOperatorName");
           OverloadedOperatorKind op(DN.getCXXOverloadedOperator());
           addChild("operator", OverloadedOperatorKindToString(op, param_size).c_str());
