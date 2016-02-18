@@ -661,6 +661,16 @@ TypeTableVisitor::PreVisitDecl(Decl *D) {
       if (!TD) {
         return false;
       }
+      xmlNodePtr baseClasses;
+      CXXRecordDecl *RD(dyn_cast<CXXRecordDecl>(D));
+      if (RD) {
+        auto base_registerer = [&baseClasses](const CXXRecordDecl *BaseDef, void *none) -> bool {
+          const char *name = BaseDef->getNameAsString().c_str();
+          xmlAddChild(baseClasses, xmlNewNode(nullptr, BAD_CAST name));
+          return false;
+        };
+        RD->forallBases(base_registerer, nullptr);
+      }
       QualType T(TD->getTypeForDecl(), 0);
       if (TD->isCompleteDefinition()) {
         xmlNodePtr tmpNode;
@@ -670,7 +680,6 @@ TypeTableVisitor::PreVisitDecl(Decl *D) {
         SymbolsVisitor SV(mangleContext, tmpNode, "symbols", typetableinfo);
         SV.TraverseChildOfDecl(D);
         return false;
-
       } else {
         // just allocate a name.
         newComment(comment.c_str());
