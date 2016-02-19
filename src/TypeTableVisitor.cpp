@@ -672,8 +672,8 @@ TypeTableVisitor::PreVisitDecl(Decl *D) {
           for (auto base : RD->bases()) {
             QualType baseType = base.getType();
             std::string name = typetableinfo->getTypeName(baseType);
-            xmlNodePtr typeNameNode = xmlNewNode(nullptr, BAD_CAST "typename");
-            xmlAddChild(typeNameNode, xmlNewText(BAD_CAST name.c_str()));
+            xmlNodePtr typeNameNode = xmlNewNode(nullptr, BAD_CAST "typeName");
+            xmlNewProp(typeNameNode, BAD_CAST "ref", BAD_CAST name.c_str());
             xmlAddChild(basesNode, typeNameNode);
           }
           xmlAddChild(tmpNode, basesNode);
