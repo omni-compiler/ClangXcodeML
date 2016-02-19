@@ -677,16 +677,14 @@ TypeTableVisitor::PreVisitDecl(Decl *D) {
         typetableinfo->registerType(T, &tmpNode, curNode);
         xmlNodePtr basesNode = xmlNewNode(nullptr, BAD_CAST "inheritedFrom");
         CXXRecordDecl *RD(dyn_cast<CXXRecordDecl>(D));
-        if (RD) {
+        if (RD && RD->bases_begin() != RD->bases_end()) {
           for (auto base : RD->bases()) {
             const char *name = base.getType().getAsString().c_str();
             xmlNodePtr typeNameNode = xmlNewNode(nullptr, BAD_CAST "typename");
             xmlAddChild(typeNameNode, xmlNewText(BAD_CAST name));
             xmlAddChild(basesNode, typeNameNode);
           }
-          if (RD->bases_begin() != RD->bases_end()) {
-            xmlAddChild(tmpNode, basesNode);
-          }
+          xmlAddChild(tmpNode, basesNode);
         }
         TraverseChildOfDecl(D);
         SymbolsVisitor SV(mangleContext, tmpNode, "symbols", typetableinfo);
