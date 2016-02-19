@@ -47,15 +47,6 @@ TypeTableVisitor::FullTrace(void) const {
   return OptFullTraceTypeTable;
 }
 
-bool base_registerer(const CXXRecordDecl *BaseDef, void *basesNodePtr) {
-  const char *name = BaseDef->getNameAsString().c_str();
-  xmlNodePtr typeNameNode = xmlNewNode(nullptr, BAD_CAST "typename");
-  xmlAddChild(typeNameNode, xmlNewText(BAD_CAST name));
-  xmlNodePtr* basesNode = (xmlNodePtr*)basesNodePtr;
-  xmlAddChild(*basesNode, typeNameNode);
-  return false;
-}
-
 TypeTableInfo::TypeTableInfo(MangleContext *MC) : mangleContext(MC)
 {
   mapFromNameToQualType.clear();
