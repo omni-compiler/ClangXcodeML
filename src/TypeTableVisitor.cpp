@@ -670,9 +670,10 @@ TypeTableVisitor::PreVisitDecl(Decl *D) {
         CXXRecordDecl *RD(dyn_cast<CXXRecordDecl>(D));
         if (RD && RD->bases_begin() != RD->bases_end()) {
           for (auto base : RD->bases()) {
-            const char *name = base.getType().getAsString().c_str();
+            QualType baseType = base.getType();
+            std::string name = typetableinfo->getTypeName(baseType);
             xmlNodePtr typeNameNode = xmlNewNode(nullptr, BAD_CAST "typename");
-            xmlAddChild(typeNameNode, xmlNewText(BAD_CAST name));
+            xmlAddChild(typeNameNode, xmlNewText(BAD_CAST name.c_str()));
             xmlAddChild(basesNode, typeNameNode);
           }
           xmlAddChild(tmpNode, basesNode);
