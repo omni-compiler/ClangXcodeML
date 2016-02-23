@@ -25,9 +25,10 @@ OptEmitSourceRange("range", cl::desc("emit 'range'"),
 
 XcodeMlVisitorBaseImpl::XcodeMlVisitorBaseImpl(MangleContext *MC,
                                                xmlNodePtr CurNode,
-                                               TypeTableInfo *TTI)
+                                               TypeTableInfo *TTI,
+                                               InheritanceInfo *II)
     : XcodeMlRAVpool(this), mangleContext(MC), curNode(CurNode),
-      typetableinfo(TTI) {};
+      typetableinfo(TTI), inheritanceinfo(II) {};
 
 xmlNodePtr XcodeMlVisitorBaseImpl::addChild(const char *Name, const char *Content) {
     return xmlNewTextChild(curNode, nullptr, BAD_CAST Name, BAD_CAST Content);

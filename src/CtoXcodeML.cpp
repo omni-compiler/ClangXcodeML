@@ -3,6 +3,7 @@
 #include "SymbolsVisitor.h"
 #include "TypeTableVisitor.h"
 #include "DeclarationsVisitor.h"
+#include "InheritanceInfo.h"
 
 #include "clang/AST/ASTConsumer.h"
 #include "clang/Frontend/ASTConsumers.h"
@@ -35,9 +36,11 @@ public:
         MangleContext *MC = CXT.createMangleContext();
         TypeTableInfo typetableinfo(MC);
         TypeTableInfo *TTI = &typetableinfo;
-        TypeTableVisitor TTV(MC, rootNode, "typeTable", TTI);
-        SymbolsVisitor SV(MC, rootNode, "globalSymbols", TTI);
-        DeclarationsVisitor DV(MC, rootNode, "globalDeclarations", TTI);
+        InheritanceInfo inheritanceinfo;
+        InheritanceInfo *II = &inheritanceinfo;
+        TypeTableVisitor TTV(MC, rootNode, "typeTable", TTI, II);
+        SymbolsVisitor SV(MC, rootNode, "globalSymbols", TTI, II);
+        DeclarationsVisitor DV(MC, rootNode, "globalDeclarations", TTI, II);
         Decl *D = CXT.getTranslationUnitDecl();
 
         TTV.TraverseDecl(D);
