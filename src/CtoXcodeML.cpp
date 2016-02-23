@@ -3,7 +3,6 @@
 #include "SymbolsVisitor.h"
 #include "TypeTableVisitor.h"
 #include "DeclarationsVisitor.h"
-#include "InheritanceInfo.h"
 
 #include "clang/AST/ASTConsumer.h"
 #include "clang/Frontend/ASTConsumers.h"

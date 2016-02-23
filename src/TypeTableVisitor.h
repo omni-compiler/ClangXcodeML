@@ -1,22 +1,8 @@
 #ifndef TYPETABLEVISITOR_H
 #define TYPETABLEVISITOR_H
 
+#include "InheritanceInfo.h"
 #include <unordered_map>
-
-namespace std {
-    template<>
-    struct hash<clang::QualType> {
-        size_t operator()(const clang::QualType T) const {
-            union union_for_hash {
-                size_t value;
-                clang::QualType originalT;
-                union_for_hash(clang::QualType T) : originalT(T) {};
-            };
-            const union_for_hash tmp(T);
-            return tmp.value;
-        }
-    };
-}
 
 class TypeTableInfo {
     clang::MangleContext *mangleContext;

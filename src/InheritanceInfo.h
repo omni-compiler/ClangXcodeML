@@ -1,10 +1,8 @@
 #ifndef INHERITANCEINFO_H
 #define INHERITANCEINFO_H
 
-#include "XcodeMlVisitorBase.h"
-#include "TypeTableVisitor.h"
+#include "Hash.h"
 
-#include <unordered_map>
 #include <vector>
 
 class InheritanceInfo {

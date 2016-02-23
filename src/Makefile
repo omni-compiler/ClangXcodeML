@@ -71,7 +71,8 @@ DeclarationsVisitor.o: \
 	InheritanceInfo.h
 InheritanceInfo.o: \
 	InheritanceInfo.cpp \
-	InheritanceInfo.h
+	InheritanceInfo.h \
+	Hash.h
 
 CtoXcodeML.ast: CtoXcodeML.cpp
 	$(CXX) $(CXXFLAGS) -Xclang -ast-dump CtoXcodeML.cpp -o CtoXcodeML.ast 

@@ -1,11 +1,9 @@
 #ifndef HASH_H
 #define HASH_H
 
+#include "clang/AST/Type.h"
 #include <unordered_map>
 
-namespace clang {
-  class QualType;
-}
 
 namespace std {
     template<>
