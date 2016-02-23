@@ -25,7 +25,8 @@ OBJS =  CtoXcodeML.o \
 	XcodeMlVisitorBase.o \
 	SymbolsVisitor.o \
 	TypeTableVisitor.o \
-	DeclarationsVisitor.o
+	DeclarationsVisitor.o \
+	InheritanceInfo.o
 
 CtoXcodeML: $(RAVOBJS) $(OBJS)
 	$(CXX) $(CXXFLAGS) $(RAVOBJS) $(OBJS) $(USEDLIBS) -o CtoXcodeML

@@ -47,7 +47,9 @@ TypeTableVisitor::FullTrace(void) const {
   return OptFullTraceTypeTable;
 }
 
-TypeTableInfo::TypeTableInfo(MangleContext *MC) : mangleContext(MC)
+TypeTableInfo::TypeTableInfo(MangleContext *MC, InheritanceInfo *II) :
+  mangleContext(MC),
+  inheritanceinfo(II)
 {
   mapFromNameToQualType.clear();
   mapFromQualTypeToName.clear();
@@ -529,6 +531,14 @@ void TypeTableInfo::emitAllTypeNode(xmlNodePtr ParentNode)
   }
 }
 
+std::vector<clang::QualType> TypeTableInfo::getBaseClasses(clang::QualType type) {
+  return inheritanceinfo->getInheritance(type);
+}
+
+void TypeTableInfo::addInheritance(clang::QualType derived, clang::QualType base) {
+  inheritanceinfo->addInheritance(derived, base);
+}
+
 const char *
 TypeTableVisitor::getVisitorName() const {
   return OptTraceTypeTable ? "TypeTable" : nullptr;
@@ -671,6 +681,9 @@ TypeTableVisitor::PreVisitDecl(Decl *D) {
         if (RD && RD->bases_begin() != RD->bases_end()) {
           for (auto base : RD->bases()) {
             QualType baseType = base.getType();
+            typetableinfo->addInheritance(T, baseType);
+          }
+          for (QualType baseType : typetableinfo->getBaseClasses(T)) {
             std::string name = typetableinfo->getTypeName(baseType);
             xmlNodePtr typeNameNode = xmlNewNode(nullptr, BAD_CAST "typeName");
             xmlNewProp(typeNameNode, BAD_CAST "ref", BAD_CAST name.c_str());

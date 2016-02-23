@@ -1132,8 +1132,8 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
     newChild("Decl_CXXRecord");
     xmlNodePtr basesNode = xmlNewNode(nullptr, BAD_CAST "inheritedFrom");
     if (RD && RD->bases_begin() != RD->bases_end()) {
-      for (auto base : RD->bases()) {
-        QualType baseType = base.getType();
+      QualType T(RD->getTypeForDecl(), 0);
+      for (QualType baseType : typetableinfo->getBaseClasses(T)) {
         std::string name = typetableinfo->getTypeName(baseType);
         xmlNodePtr typeNameNode = xmlNewNode(nullptr, BAD_CAST "typeName");
         xmlNewProp(typeNameNode, BAD_CAST "ref", BAD_CAST name.c_str());
