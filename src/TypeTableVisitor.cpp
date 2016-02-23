@@ -1,7 +1,6 @@
 #include "XcodeMlVisitorBase.h"
 #include "SymbolsVisitor.h"
 #include "TypeTableVisitor.h"
-#include "InheritanceInfo.h"
 
 #include <iostream>
 #include <sstream>
@@ -672,9 +671,6 @@ TypeTableVisitor::PreVisitDecl(Decl *D) {
         if (RD && RD->bases_begin() != RD->bases_end()) {
           for (auto base : RD->bases()) {
             QualType baseType = base.getType();
-            inheritanceinfo->addInheritance(T, baseType);
-          }
-          for (auto baseType : inheritanceinfo->getInheritance(T)) {
             std::string name = typetableinfo->getTypeName(baseType);
             xmlNodePtr typeNameNode = xmlNewNode(nullptr, BAD_CAST "typeName");
             xmlNewProp(typeNameNode, BAD_CAST "ref", BAD_CAST name.c_str());

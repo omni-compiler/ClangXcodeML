@@ -10,7 +10,6 @@
 #include <string>
 
 class TypeTableInfo;
-class InheritanceInfo;
 
 // some members & methods of XcodeMlVisitorBase do not need the info
 // of deriving type <Derived>:
@@ -21,7 +20,6 @@ protected:
     clang::MangleContext *mangleContext;
     xmlNodePtr curNode;        // a candidate of the new chlid.
     TypeTableInfo *typetableinfo;
-    InheritanceInfo *inheritanceinfo;
 public:
     XcodeMlVisitorBaseImpl() = delete;
     XcodeMlVisitorBaseImpl(const XcodeMlVisitorBaseImpl&) = delete;
@@ -31,8 +29,7 @@ public:
 
     explicit XcodeMlVisitorBaseImpl(clang::MangleContext *MC,
                                     xmlNodePtr CurNode,
-                                    TypeTableInfo *TTI,
-                                    InheritanceInfo *II);
+                                    TypeTableInfo *TTI);
 
     xmlNodePtr addChild(const char *Name, const char *Content = nullptr);
     xmlNodePtr addChild(const char *Name, xmlNodePtr N);
@@ -62,19 +59,17 @@ public:
 
     explicit XcodeMlVisitorBase(clang::MangleContext *MC, xmlNodePtr Parent,
                                 const char *ChildName,
-                                TypeTableInfo *TTI = nullptr,
-                                InheritanceInfo *II = nullptr)
+                                TypeTableInfo *TTI = nullptr)
         : XcodeMlVisitorBaseImpl(MC, (ChildName
                                       ? xmlNewTextChild(Parent, nullptr,
                                                         BAD_CAST ChildName,
                                                         nullptr)
                                       : Parent),
-                                 TTI,
-                                 II),
+                                 TTI),
           optContext() {};
     explicit XcodeMlVisitorBase(XcodeMlVisitorBase *p)
         : XcodeMlVisitorBaseImpl(p->mangleContext, p->curNode,
-                                 p->typetableinfo, p->inheritanceinfo),
+                                 p->typetableinfo),
           optContext(p->optContext) {};
 
     Derived &getDerived() { return *static_cast<Derived *>(this); }

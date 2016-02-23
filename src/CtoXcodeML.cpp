@@ -35,11 +35,9 @@ public:
         MangleContext *MC = CXT.createMangleContext();
         TypeTableInfo typetableinfo(MC);
         TypeTableInfo *TTI = &typetableinfo;
-        InheritanceInfo inheritanceinfo;
-        InheritanceInfo *II = &inheritanceinfo;
-        TypeTableVisitor TTV(MC, rootNode, "typeTable", TTI, II);
-        SymbolsVisitor SV(MC, rootNode, "globalSymbols", TTI, II);
-        DeclarationsVisitor DV(MC, rootNode, "globalDeclarations", TTI, II);
+        TypeTableVisitor TTV(MC, rootNode, "typeTable", TTI);
+        SymbolsVisitor SV(MC, rootNode, "globalSymbols", TTI);
+        DeclarationsVisitor DV(MC, rootNode, "globalDeclarations", TTI);
         Decl *D = CXT.getTranslationUnitDecl();
 
         TTV.TraverseDecl(D);
