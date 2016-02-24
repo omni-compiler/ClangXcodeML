@@ -33,7 +33,9 @@ public:
 
     virtual void HandleTranslationUnit(ASTContext &CXT) override {
         MangleContext *MC = CXT.createMangleContext();
-        TypeTableInfo typetableinfo(MC);
+        InheritanceInfo inheritanceinfo;
+        InheritanceInfo *II = &inheritanceinfo;
+        TypeTableInfo typetableinfo(MC, II);
         TypeTableInfo *TTI = &typetableinfo;
         TypeTableVisitor TTV(MC, rootNode, "typeTable", TTI);
         SymbolsVisitor SV(MC, rootNode, "globalSymbols", TTI);

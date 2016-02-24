@@ -2,7 +2,9 @@
 #include "TypeTableVisitor.h"
 #include "SymbolsVisitor.h"
 #include "DeclarationsVisitor.h"
+#include "InheritanceInfo.h"
 #include "clang/Basic/Builtins.h"
+#include <map>
 
 using namespace clang;
 using namespace llvm;
@@ -28,6 +30,15 @@ DeclarationsVisitor::getVisitorName() const {
     newProp("pointer", typenamestr.c_str());     \
     return true;                                 \
   } while (0)
+
+static std::string getAccessAsString(Decl *decl) {
+  switch (decl->getAccess()) {
+    case AS_public : return "public";
+    case AS_private : return "private";
+    case AS_protected : return "protected";
+    default: return "none";
+  }
+}
 
 bool
 DeclarationsVisitor::WrapExpr(Stmt *S) {
@@ -223,6 +234,83 @@ DeclarationsVisitor::WrapLabelChild(void) {
       }
   };
 }
+
+static std::string OverloadedOperatorKindToString(OverloadedOperatorKind op, unsigned param_size) {
+  const static std::map<OverloadedOperatorKind, std::string> unique_meaning = {
+    // 7.10 binary operators
+    // arithmetic binary operators
+    {OO_Slash,                "divExpr"},
+    {OO_Percent,              "modExpr"},
+    {OO_LessLess,             "LshiftExpr"},
+    {OO_GreaterGreater,       "RshiftExpr"},
+    {OO_Pipe,                 "bitOrExpr"},
+    {OO_Caret,                "bitXorExpr"},
+
+    // assignment operators
+    {OO_PlusEqual,            "asgPlusExpr"},
+    {OO_MinusEqual,           "asgMinusExpr"},
+    {OO_StarEqual,            "asgMulExpr"},
+    {OO_SlashEqual,           "asgDivExpr"},
+    {OO_PercentEqual,         "asgModExpr"},
+    {OO_LessLessEqual,        "asgLshiftExpr"},
+    {OO_GreaterGreaterEqual,  "asgRshiftExpr"},
+    {OO_AmpEqual,             "asgBitAndExpr"},
+    {OO_PipeEqual,            "asgBitOrExpr"},
+    {OO_CaretEqual,           "asgBitXorExpr"},
+
+    // logical binary operators
+    {OO_EqualEqual,           "logEQExpr"},
+    {OO_ExclaimEqual,         "logNEQExpr"},
+    {OO_GreaterEqual,         "logGEExpr"},
+    {OO_Greater,              "logGTExpr"},
+    {OO_LessEqual,            "logLEExpr"},
+    {OO_Less,                 "logLTExpr"},
+    {OO_AmpAmp,               "logAndExpr"},
+      // rvalue reference operator(&&) is neither an operator nor overloadable
+    {OO_PipePipe,             "logOrExpr"},
+    {OO_Equal,                "assignExpr"},
+
+    // 7.11 unary operators
+    {OO_Tilde,                "bitNotExpr"},
+    {OO_Exclaim,              "logNotExpr"},
+
+    // 7.13 commaExpr element
+    {OO_Comma,                "commaExpr"},
+
+    // 7.19 newExpr and newArrayExpr elements
+    // 7.20 deleteExpr and deleteArrayExpr elements
+    {OO_New,                  "newExpr"},
+    {OO_Array_New,            "newArrayExpr"},
+    {OO_Delete,               "deleteExpr"},
+    {OO_Array_Delete,         "deleteArrayExpr"},
+
+    // XXX: undocumented yet, should be discussed
+    {OO_Arrow,                "arrowExpr"},
+    {OO_ArrowStar,            "arrowStarExpr"},
+    {OO_Call,                 "callExpr"},
+    {OO_Subscript,            "subScriptExpr"}
+  };
+
+  switch (op) {
+    case OO_Plus:
+      return param_size == 2 ? "plusExpr" : "unaryPlusExpr";
+      // XXX: unray plus operator is not defined in document yet.
+      // See 7.11 unary operators.
+    case OO_Minus:
+      return param_size == 2 ? "minusExpr" : "unaryMinusExpr";
+    case OO_Star:
+      return param_size == 2 ? "mulExpr" : "pointerRef"/*XXX: correct name?*/;
+    case OO_Amp:
+      return param_size == 2 ? "logAndExpr" : "varAddr"/*XXX: correct name?*/;
+    case OO_PlusPlus:
+      return param_size == 2 ? "postIncrExpr" : "preIncrExpr";
+    case OO_MinusMinus:
+      return param_size == 2 ? "postDecrExpr" : "preIncrExpr";
+    default:
+      return unique_meaning.at(op);
+  }
+}
+
 
 #define NStmt(mes) do {newChild(mes); return true;} while (0)
 #define NStmtXXX(mes) NStmt("Stmt_" mes)
@@ -929,7 +1017,7 @@ DeclarationsVisitor::PreVisitAttr(Attr *A) {
     newComment("Attr_NULL");
     return false;
   }
-  newComment(NAttr(A->getSpelling()).c_str());
+  newComment(NAttr(A->getSpelling()));
   newChild("gccAttribute");
 
   newProp("name", contentBySource(A->getLocation(), A->getLocation()).c_str());
@@ -938,7 +1026,7 @@ DeclarationsVisitor::PreVisitAttr(Attr *A) {
   raw_string_ostream OS(prettyprint);
   ASTContext &CXT = mangleContext->getASTContext();
   A->printPretty(OS, PrintingPolicy(CXT.getLangOpts()));
-  newComment(OS.str().c_str());
+  newComment(OS.str());
 
   return true;
 }
@@ -962,7 +1050,11 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
   }
 
   switch (D->getKind()) {
-  case Decl::AccessSpec: NDeclXXX("AccessSpec");
+  case Decl::AccessSpec: {
+    newChild("Decl_AccessSpec");
+    newProp("access", getAccessAsString(D).c_str());
+    return false;
+  }
   case Decl::Block: NDeclXXX("Block");
   case Decl::Captured: NDeclXXX("Captured");
   case Decl::ClassScopeFunctionSpecialization: NDeclXXX("ClassScopeFunctionSpecialization");
@@ -988,15 +1080,69 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
   case Decl::TypeAliasTemplate: NDeclXXX("TypeAliasTemplate");
   case Decl::VarTemplate: NDeclXXX("VarTemplate");
   case Decl::TemplateTemplateParm: NDeclXXX("TemplateTemplateParm");
-  case Decl::Enum:
+  case Decl::Enum: {
+    EnumDecl *ED = dyn_cast<EnumDecl>(D);
+    if (!ED) {
+      return true;
+    }
     newComment("Decl_Enum");
-    return false; // to be traversed in typeTable
-  case Decl::Record:
-    newComment("Decl_Record");
-    return false; // to be traversed in typeTable
-  case Decl::CXXRecord:
-    newComment("Decl_CXXRecord");
-    return false; // to be traversed in typeTable
+    newChild("Decl_Enum");
+    setLocation(ED->getLocation());
+    if (ED) {
+      QualType T(ED->getTypeForDecl(), 0);
+      newProp("type", typetableinfo->getTypeName(T).c_str());
+    }
+    if (ED) {
+      IdentifierInfo *II = ED->getDeclName().getAsIdentifierInfo();
+      if (II) {
+        addChild("name", II->getNameStart());
+      }
+    }
+    newChild("enumType");
+    newChild("symbols");
+    return true;
+  }
+  case Decl::Record: {
+    RecordDecl *RD = dyn_cast<RecordDecl>(D);
+    if (!RD) {
+      return true;
+    }
+    newComment(RD->isFirstDecl() ? "Decl_Record" : "Decl_Record (not 1st)");
+    newChild("Decl_Record");
+    setLocation(RD->getLocation());
+    if (RD) {
+      QualType T(RD->getTypeForDecl(), 0);
+      newProp("type", typetableinfo->getTypeName(T).c_str());
+    }
+    newProp("sclass", "tagname");
+    if (RD) {
+      IdentifierInfo *II = RD->getDeclName().getAsIdentifierInfo();
+      if (II) {
+        addChild("name", II->getNameStart());
+      }
+    }
+    return true;
+  }
+  case Decl::CXXRecord: {
+    CXXRecordDecl *RD = dyn_cast<CXXRecordDecl>(D);
+    if (!RD) {
+      return true;
+    }
+    newChild("Decl_CXXRecord");
+    QualType T(RD->getTypeForDecl(), 0);
+    if (RD && typetableinfo->hasBaseClass(T)) {
+      xmlNodePtr basesNode = xmlNewNode(nullptr, BAD_CAST "inheritedFrom");
+      QualType T(RD->getTypeForDecl(), 0);
+      for (QualType baseType : typetableinfo->getBaseClasses(T)) {
+        std::string name = typetableinfo->getTypeName(baseType);
+        xmlNodePtr typeNameNode = xmlNewNode(nullptr, BAD_CAST "typeName");
+        xmlNewProp(typeNameNode, BAD_CAST "ref", BAD_CAST name.c_str());
+        xmlAddChild(basesNode, typeNameNode);
+      }
+      xmlAddChild(curNode, basesNode);
+    }
+    return true;
+  }
   case Decl::ClassTemplateSpecialization: NDeclXXX("ClassTemplateSpecialization");
   case Decl::ClassTemplatePartialSpecialization: NDeclXXX("ClassTemplatePartialSpecialization");
   case Decl::TemplateTypeParm: NDeclXXX("TemplateTypeParm");
@@ -1009,19 +1155,73 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
   case Decl::Using: NDeclXXX("Using");
   case Decl::UsingDirective: NDeclXXX("UsingDirective");
   case Decl::UsingShadow: NDeclXXX("UsingShadow");
-  case Decl::Field: NDeclXXX("Field");  // XXX?
+  case Decl::Field: {
+    FieldDecl *FD = dyn_cast<FieldDecl>(D);
+    newComment("Decl_Field");
+    newChild("id");
+    if (FD) {
+      Expr *BW = nullptr;
+      if (FD->isBitField()) {
+        APSInt Value;
+        ASTContext &Ctx = mangleContext->getASTContext();
+        BW = FD->getBitWidth();
+        if (dyn_cast<IntegerLiteral>(BW)
+            && BW->EvaluateAsInt(Value, Ctx)) {
+          newProp("bit_field", Value.toString(10).c_str());
+          BW = nullptr;
+        } else {
+          newProp("bit_field", "*");
+        }
+      }
+
+      if (FD->getParent()->getKind() == Decl::CXXRecord) {
+        newProp("access", getAccessAsString(D).c_str());
+      }
+
+      QualType T = FD->getType();
+      newProp("type", typetableinfo->getTypeName(T).c_str());
+      IdentifierInfo *II = FD->getDeclName().getAsIdentifierInfo();
+      if (II) {
+        addChild("name", II->getNameStart());
+      }
+      if (BW) {
+        DeclarationsVisitor DV(mangleContext, curNode, "bitField", typetableinfo); 
+        DV.TraverseStmt(BW);
+      }
+    }
+    return true;
+  }
   case Decl::ObjCAtDefsField: NDeclXXX("ObjCAtDefsField");
   case Decl::ObjCIvar: NDeclXXX("ObjCIvar");
-  case Decl::Function: {
+  case Decl::Function:
+  case Decl::CXXMethod:
+  case Decl::CXXConstructor:
+  case Decl::CXXConversion:
+  case Decl::CXXDestructor:
+  {
     // 5.1, 5.4 XXX
     FunctionDecl *FD = static_cast<FunctionDecl*>(D);
+    bool is_member_function = D->getKind() != Decl::Function;
+    unsigned param_size = FD->param_size() + (is_member_function? 1:0);
+    OverloadedOperatorKind OK(FD->getDeclName().getCXXOverloadedOperator());
     if (FD && FD->isThisDeclarationADefinition()) {
       newChild("functionDefinition");
+      if (is_member_function) {
+        newProp("access", getAccessAsString(D).c_str());
+      }
       setLocation(FD->getLocStart());
+
       xmlNodePtr functionNode = curNode;
-      HookForDeclarationNameInfo = [this, D](DeclarationNameInfo NI) {
+      HookForDeclarationNameInfo = [this, D, OK, param_size](DeclarationNameInfo NI) {
         DeclarationsVisitor V(this);
-        if (V.TraverseDeclarationNameInfo(NI)) {
+        if (OK != OO_None) {
+          newComment("DeclarationNameInfo_CXXOperatorName");
+          addChild("operator", OverloadedOperatorKindToString(OK, param_size).c_str());
+          SymbolsVisitor SV(mangleContext, curNode, "symbols", typetableinfo);
+          SV.TraverseChildOfDecl(D);
+          addChild("params"); //create a new node to parent just after NameInfo
+          return true;
+        } else if (V.TraverseDeclarationNameInfo(NI)) {
           SymbolsVisitor SV(mangleContext, curNode, "symbols", typetableinfo);
           SV.TraverseChildOfDecl(D);
           newChild("params"); //create a new node to parent just after NameInfo
@@ -1039,21 +1239,42 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
         newChild("body");
         return TraverseStmt(S);
       };
+      HookForConstructorInitializer = [this, functionNode](CXXCtorInitializer *CI) {
+        /* Combine <ConstructorInitializer> elements as
+         * <ConstructorInitializerList> element's children.
+         */
+        
+        curNode = functionNode;
+        newChild("constructorInitializerList");
+        xmlNodePtr listNode = curNode;
+        newChild("constructorInitializer"); // 1st child of them
+        /* Make a hook for subsequent ConstructorInitializers. */
+        HookForConstructorInitializer = [this, listNode] (CXXCtorInitializer *CI) {
+          curNode = listNode;
+          newChild("constructorInitializer"); // 2, 3... th child
+          return TraverseConstructorInitializer(CI);
+        };
+        return TraverseConstructorInitializer(CI);
+      };
     } else {
       newChild("functionDecl");
-      HookForDeclarationNameInfo = [this, D](DeclarationNameInfo NI) {
-        DeclarationsVisitor V(this);
-        V.TraverseDeclarationNameInfo(NI);
+      if (is_member_function) {
+        newProp("access", getAccessAsString(D).c_str());
+      }
+      HookForDeclarationNameInfo = [this, D, OK, param_size](DeclarationNameInfo NI) {
+        if (OK != OO_None) {
+          newComment("DeclarationNameInfo_CXXOperatorName");
+          addChild("operator", OverloadedOperatorKindToString(OK, param_size).c_str());
+        } else {
+          DeclarationsVisitor V(this);
+          V.TraverseDeclarationNameInfo(NI);
+        }
         return false;
       };
     }
 
     return true;
   }
-  case Decl::CXXMethod: NDeclXXX("CXXMethod");
-  case Decl::CXXConstructor: NDeclXXX("CXXConstructor");
-  case Decl::CXXConversion: NDeclXXX("CXXConversion");
-  case Decl::CXXDestructor: NDeclXXX("CXXDestructor");
   case Decl::MSProperty: NDeclXXX("MSProperty");
   case Decl::NonTypeTemplateParm: NDeclXXX("NonTypeTemplateParm");
   case Decl::Var: {
@@ -1090,7 +1311,14 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
   }
   case Decl::VarTemplateSpecialization: NDeclXXX("VarTemplateSpecialization");
   case Decl::VarTemplatePartialSpecialization: NDeclXXX("VarTemplatePartialSpecialization");
-  case Decl::EnumConstant: NDeclXXX("EnumConstant"); // XXX?
+  case Decl::EnumConstant: {
+    EnumConstantDecl *ED = static_cast<EnumConstantDecl*>(D);
+    if (ED) {
+      newChild("id");
+      newChild("name", ED->getNameAsString().c_str());
+    }
+    return false;
+  }
   case Decl::IndirectField: NDeclXXX("IndirectField");
   case Decl::UnresolvedUsingValue: NDeclXXX("UnresolvedUsingValue");
   case Decl::OMPThreadPrivate: NDeclXXX("OMPThreadPrivate");
@@ -1184,8 +1412,16 @@ DeclarationsVisitor::PreVisitDeclarationNameInfo(DeclarationNameInfo NI) {
   const char *content = II ? II->getNameStart() : nullptr;
 
   switch (DN.getNameKind()) {
-  case DeclarationName::CXXConstructorName: NDeclName("CXXConstructorName");
-  case DeclarationName::CXXDestructorName: NDeclName("CXXDestructorName");
+  case DeclarationName::CXXConstructorName: {
+    newComment("DeclarationNameInfo_CXXConstructorName");
+    newChild("constructor");
+    return true;
+  }
+  case DeclarationName::CXXDestructorName: {
+    newComment("DeclarationNameInfo_CXXDestructorName");
+    newChild("destructor");
+    return true;
+  }
   case DeclarationName::CXXConversionFunctionName: NDeclName("CXXConversionFunctionName");
   case DeclarationName::Identifier: NDeclName("Identifier");
   case DeclarationName::ObjCZeroArgSelector: NDeclName("ObjCZeroArgSelector");
@@ -1197,6 +1433,10 @@ DeclarationsVisitor::PreVisitDeclarationNameInfo(DeclarationNameInfo NI) {
   }
 }
 #undef NDeclName
+
+bool DeclarationsVisitor::PreVisitConstructorInitializer(CXXCtorInitializer *CI) {
+  return true;
+}
 
 ///
 /// Local Variables:

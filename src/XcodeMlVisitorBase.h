@@ -38,6 +38,7 @@ public:
     void newProp(const char *Name, const char *Val, xmlNodePtr N = nullptr);
     void newComment(const xmlChar *str, xmlNodePtr RN = nullptr);
     void newComment(const char *str, xmlNodePtr RN = nullptr);
+    void newComment(const std::string &str, xmlNodePtr RN = nullptr);
     void setLocation(clang::SourceLocation Loc, xmlNodePtr N = nullptr);
     std::string contentBySource(clang::SourceLocation LocStart,
                                 clang::SourceLocation LocEnd);

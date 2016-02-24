@@ -1,28 +1,15 @@
 #ifndef TYPETABLEVISITOR_H
 #define TYPETABLEVISITOR_H
 
+#include "InheritanceInfo.h"
 #include <unordered_map>
-
-namespace std {
-    template<>
-    struct hash<clang::QualType> {
-        size_t operator()(const clang::QualType T) const {
-            union union_for_hash {
-                size_t value;
-                clang::QualType originalT;
-                union_for_hash(clang::QualType T) : originalT(T) {};
-            };
-            const union_for_hash tmp(T);
-            return tmp.value;
-        }
-    };
-}
 
 class TypeTableInfo {
     clang::MangleContext *mangleContext;
     std::unordered_map<std::string, clang::QualType> mapFromNameToQualType;
     std::unordered_map<clang::QualType, std::string> mapFromQualTypeToName;
     std::unordered_map<clang::QualType, xmlNodePtr> mapFromQualTypeToXmlNodePtr;
+    InheritanceInfo *inheritanceinfo;
 
     int seqForBasicType;
     int seqForPointerType;
@@ -62,7 +49,7 @@ public:
     TypeTableInfo& operator =(const TypeTableInfo &) = delete;
     TypeTableInfo& operator =(const TypeTableInfo &&) = delete;
 
-    explicit TypeTableInfo(clang::MangleContext *MC); // default constructor
+    explicit TypeTableInfo(clang::MangleContext *MC, InheritanceInfo *II); // default constructor
 
     void registerType(clang::QualType T, xmlNodePtr *retNode,
                              xmlNodePtr traversingNode);
@@ -70,6 +57,9 @@ public:
     std::string getTypeName(clang::QualType T);
     std::string getTypeNameForLabel(void);
     void emitAllTypeNode(xmlNodePtr ParentNode);
+    std::vector<clang::QualType> getBaseClasses(clang::QualType type);
+    void addInheritance(clang::QualType derived, clang::QualType base);
+    bool hasBaseClass(clang::QualType type);
 };
 
 class TypeTableVisitor
@@ -86,6 +76,7 @@ public:
     bool PreVisitNestedNameSpecifierLoc(clang::NestedNameSpecifierLoc);
     bool PreVisitTypeLoc(clang::TypeLoc);
     bool PreVisitDeclarationNameInfo(clang::DeclarationNameInfo);
+    bool PreVisitConstructorInitializer(clang::CXXCtorInitializer *CI);
     bool FullTrace(void) const;
 };
 

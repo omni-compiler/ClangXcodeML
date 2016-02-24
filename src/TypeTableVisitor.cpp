@@ -33,12 +33,23 @@ static std::ifstream mapfile;
 static bool map_is_already_set = false;
 static std::map<std::string, std::string> typenamemap;
 
+static std::string
+make_comment(Decl *decl, std::string message) {
+  std::string comment("PreVisitDecl::");
+  comment += decl->getDeclKindName();
+  comment += ": ";
+  comment += message;
+  return comment;
+}
+
 bool
 TypeTableVisitor::FullTrace(void) const {
   return OptFullTraceTypeTable;
 }
 
-TypeTableInfo::TypeTableInfo(MangleContext *MC) : mangleContext(MC)
+TypeTableInfo::TypeTableInfo(MangleContext *MC, InheritanceInfo *II) :
+  mangleContext(MC),
+  inheritanceinfo(II)
 {
   mapFromNameToQualType.clear();
   mapFromQualTypeToName.clear();
@@ -520,6 +531,18 @@ void TypeTableInfo::emitAllTypeNode(xmlNodePtr ParentNode)
   }
 }
 
+std::vector<clang::QualType> TypeTableInfo::getBaseClasses(clang::QualType type) {
+  return inheritanceinfo->getInheritance(type);
+}
+
+void TypeTableInfo::addInheritance(clang::QualType derived, clang::QualType base) {
+  inheritanceinfo->addInheritance(derived, base);
+}
+
+bool TypeTableInfo::hasBaseClass(clang::QualType type) {
+  return !( inheritanceinfo->getInheritance(type).empty() );
+}
+
 const char *
 TypeTableVisitor::getVisitorName() const {
   return OptTraceTypeTable ? "TypeTable" : nullptr;
@@ -644,7 +667,10 @@ TypeTableVisitor::PreVisitDecl(Decl *D) {
       }
     }
   case Decl::Record:
+  case Decl::CXXRecord:
     {
+      std::string comment("PreVisitDecl::");
+      comment += D->getDeclKindName();
       TagDecl *TD = dyn_cast<TagDecl>(D);
       if (!TD) {
         return false;
@@ -652,21 +678,34 @@ TypeTableVisitor::PreVisitDecl(Decl *D) {
       QualType T(TD->getTypeForDecl(), 0);
       if (TD->isCompleteDefinition()) {
         xmlNodePtr tmpNode;
-        newComment("PreVisitDecl::Record(withDef)");
+        newComment((comment + "(withDef)").c_str());
         typetableinfo->registerType(T, &tmpNode, curNode);
+        xmlNodePtr basesNode = xmlNewNode(nullptr, BAD_CAST "inheritedFrom");
+        CXXRecordDecl *RD(dyn_cast<CXXRecordDecl>(D));
+        if (RD && RD->bases_begin() != RD->bases_end()) {
+          for (auto base : RD->bases()) {
+            QualType baseType = base.getType();
+            typetableinfo->addInheritance(T, baseType);
+          }
+          for (QualType baseType : typetableinfo->getBaseClasses(T)) {
+            std::string name = typetableinfo->getTypeName(baseType);
+            xmlNodePtr typeNameNode = xmlNewNode(nullptr, BAD_CAST "typeName");
+            xmlNewProp(typeNameNode, BAD_CAST "ref", BAD_CAST name.c_str());
+            xmlAddChild(basesNode, typeNameNode);
+          }
+          xmlAddChild(tmpNode, basesNode);
+        }
         TraverseChildOfDecl(D);
         SymbolsVisitor SV(mangleContext, tmpNode, "symbols", typetableinfo);
         SV.TraverseChildOfDecl(D);
         return false;
-
       } else {
         // just allocate a name.
-        newComment("PreVisitDecl::Record");
+        newComment(comment.c_str());
         typetableinfo->registerType(T, nullptr, curNode);
         return true;
       }
     }
-  case Decl::CXXRecord: return true;
   case Decl::ClassTemplateSpecialization: return true;
   case Decl::ClassTemplatePartialSpecialization: return true;
   case Decl::TemplateTypeParm: return true;
@@ -695,6 +734,10 @@ TypeTableVisitor::PreVisitDecl(Decl *D) {
   case Decl::ObjCAtDefsField: return true;
   case Decl::ObjCIvar: return true;
   case Decl::Function:
+  case Decl::CXXMethod:
+  case Decl::CXXConstructor:
+  case Decl::CXXConversion:
+  case Decl::CXXDestructor:
     {
       FunctionDecl *FD = dyn_cast<FunctionDecl>(D);
       if (!FD) {
@@ -705,17 +748,13 @@ TypeTableVisitor::PreVisitDecl(Decl *D) {
 
       xmlNodePtr tmpNode;
       if (!FD->isFirstDecl()) {
-        if (FD->hasPrototype()) {
-          newComment("PreVisitDecl::Function (with proto, not 1st)");
-        } else {
-          newComment("PreVisitDecl::Function (without proto, not 1st)");
-        }          
+        newComment(make_comment(D,
+              FD->hasPrototype() ?
+                "(with proto, not 1st)" :
+                "(without proto, not 1st)"));
       } else {
-        if (FD->hasPrototype()) {
-          newComment("PreVisitDecl::Function (with proto)");
-        } else {
-          newComment("PreVisitDecl::Function (without proto)");
-        }
+        newComment(make_comment(D,
+              FD->hasPrototype() ? "(with proto)" : "(without proto)"));
       }
       typetableinfo->registerType(T, &tmpNode, curNode);
       // quick hack
@@ -733,10 +772,6 @@ TypeTableVisitor::PreVisitDecl(Decl *D) {
       return false;
 #endif
     }
-  case Decl::CXXMethod: return true;
-  case Decl::CXXConstructor: return true;
-  case Decl::CXXConversion: return true;
-  case Decl::CXXDestructor: return true;
   case Decl::MSProperty: return true;
   case Decl::NonTypeTemplateParm: return true;
   case Decl::Var:
@@ -814,6 +849,11 @@ TypeTableVisitor::PreVisitDeclarationNameInfo(DeclarationNameInfo NI) {
   }
 
   (void)NI;
+  return true;
+}
+
+bool
+TypeTableVisitor::PreVisitConstructorInitializer(CXXCtorInitializer *CI) {
   return true;
 }
 ///
