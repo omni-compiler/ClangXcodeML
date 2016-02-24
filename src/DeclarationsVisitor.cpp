@@ -1137,11 +1137,11 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
     if (RD && typetableinfo->hasBaseClass(T)) {
       xmlNodePtr basesNode = xmlNewNode(nullptr, BAD_CAST "inheritedFrom");
       QualType T(RD->getTypeForDecl(), 0);
-      for (BaseClass baseClass : typetableinfo->getBaseClasses(T)) {
-        std::string name = typetableinfo->getTypeName(baseClass.type());
+      for (BaseClass base : typetableinfo->getBaseClasses(T)) {
+        std::string name = typetableinfo->getTypeName(base.type());
         xmlNodePtr typeNameNode = xmlNewNode(nullptr, BAD_CAST "typeName");
         xmlNewProp(typeNameNode, BAD_CAST "ref", BAD_CAST name.c_str());
-        xmlNewProp(typeNameNode, BAD_CAST "access", BAD_CAST getAccessAsString(baseClass.access()).c_str());
+        xmlNewProp(typeNameNode, BAD_CAST "access", BAD_CAST getAccessAsString(base.access()).c_str());
         if (baseClass.isVirtual()) {
           xmlNewProp(typeNameNode, BAD_CAST "is_virtual", BAD_CAST "1");
         }
