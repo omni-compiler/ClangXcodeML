@@ -31,13 +31,17 @@ DeclarationsVisitor::getVisitorName() const {
     return true;                                 \
   } while (0)
 
-static std::string getAccessAsString(Decl *decl) {
-  switch (decl->getAccess()) {
+static std::string getAccessAsString(clang::AccessSpecifier AS) {
+  switch (AS) {
     case AS_public : return "public";
     case AS_private : return "private";
     case AS_protected : return "protected";
     default: return "none";
   }
+}
+
+static std::string getAccessAsString(Decl *decl) {
+  return getAccessAsString(decl->getAccess());
 }
 
 bool
@@ -1133,10 +1137,11 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
     if (RD && typetableinfo->hasBaseClass(T)) {
       xmlNodePtr basesNode = xmlNewNode(nullptr, BAD_CAST "inheritedFrom");
       QualType T(RD->getTypeForDecl(), 0);
-      for (QualType baseType : typetableinfo->getBaseClasses(T)) {
-        std::string name = typetableinfo->getTypeName(baseType);
+      for (BaseClass baseClass : typetableinfo->getBaseClasses(T)) {
+        std::string name = typetableinfo->getTypeName(baseClass.type());
         xmlNodePtr typeNameNode = xmlNewNode(nullptr, BAD_CAST "typeName");
         xmlNewProp(typeNameNode, BAD_CAST "ref", BAD_CAST name.c_str());
+        xmlNewProp(typeNameNode, BAD_CAST "access", BAD_CAST getAccessAsString(baseClass.access()).c_str());
         xmlAddChild(basesNode, typeNameNode);
       }
       xmlAddChild(curNode, basesNode);
