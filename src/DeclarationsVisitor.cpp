@@ -1239,6 +1239,23 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
         newChild("body");
         return TraverseStmt(S);
       };
+      HookForConstructorInitializer = [this, functionNode](CXXCtorInitializer *CI) {
+        /* Combine <ConstructorInitializer> elements as
+         * <ConstructorInitializerList> element's children.
+         */
+        
+        curNode = functionNode;
+        newChild("constructorInitializerList");
+        xmlNodePtr listNode = curNode;
+        newChild("constructorInitializer"); // 1st child of them
+        /* Make a hook for subsequent ConstructorInitializers. */
+        HookForConstructorInitializer = [this, listNode] (CXXCtorInitializer *CI) {
+          curNode = listNode;
+          newChild("constructorInitializer"); // 2, 3... th child
+          return TraverseConstructorInitializer(CI);
+        };
+        return TraverseConstructorInitializer(CI);
+      };
     } else {
       newChild("functionDecl");
       if (is_member_function) {
@@ -1416,6 +1433,10 @@ DeclarationsVisitor::PreVisitDeclarationNameInfo(DeclarationNameInfo NI) {
   }
 }
 #undef NDeclName
+
+bool DeclarationsVisitor::PreVisitConstructorInitializer(CXXCtorInitializer *CI) {
+  return true;
+}
 
 ///
 /// Local Variables:
