@@ -439,6 +439,11 @@ SymbolsVisitor::PreVisitDeclarationNameInfo(DeclarationNameInfo NameInfo) {
 #endif
 }
 
+bool
+SymbolsVisitor::PreVisitConstructorInitializer(CXXCtorInitializer *CI) {
+  return true;
+}
+
 ///
 /// Local Variables:
 /// indent-tabs-mode: nil

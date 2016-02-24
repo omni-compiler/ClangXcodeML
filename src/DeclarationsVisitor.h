@@ -27,6 +27,7 @@ public:
     bool PreVisitNestedNameSpecifier(clang::NestedNameSpecifier *);
     bool PreVisitNestedNameSpecifierLoc(clang::NestedNameSpecifierLoc);
     bool PreVisitDeclarationNameInfo(clang::DeclarationNameInfo);
+    bool PreVisitConstructorInitializer(clang::CXXCtorInitializer *CI);
 
 private:
     bool WrapExpr(clang::Stmt *);
