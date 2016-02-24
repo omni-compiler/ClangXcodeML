@@ -684,7 +684,7 @@ TypeTableVisitor::PreVisitDecl(Decl *D) {
         CXXRecordDecl *RD(dyn_cast<CXXRecordDecl>(D));
         if (RD && RD->bases_begin() != RD->bases_end()) {
           for (auto base : RD->bases()) {
-            BaseClass baseClass(base.getType(), base.getAccessSpecifier(), false);
+            BaseClass baseClass(base.getType(), base.getAccessSpecifier(), base.isVirtual());
             typetableinfo->addInheritance(T, baseClass);
           }
           for (BaseClass baseClass : typetableinfo->getBaseClasses(T)) {
