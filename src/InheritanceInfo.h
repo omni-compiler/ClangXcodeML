@@ -2,7 +2,6 @@
 #define INHERITANCEINFO_H
 
 #include "Hash.h"
-
 #include <vector>
 
 class InheritanceInfo {

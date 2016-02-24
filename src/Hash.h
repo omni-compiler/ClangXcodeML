@@ -4,7 +4,6 @@
 #include "clang/AST/Type.h"
 #include <unordered_map>
 
-
 namespace std {
     template<>
     struct hash<clang::QualType> {
