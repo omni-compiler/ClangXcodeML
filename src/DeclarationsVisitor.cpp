@@ -1051,7 +1051,6 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
 
   switch (D->getKind()) {
   case Decl::AccessSpec: {
-    AccessSpecDecl *ASD = dyn_cast<AccessSpecDecl>(D);
     newChild("Decl_AccessSpec");
     newProp("access", getAccessAsString(D).c_str());
     return false;
