@@ -2,6 +2,7 @@
 #include "TypeTableVisitor.h"
 #include "SymbolsVisitor.h"
 #include "DeclarationsVisitor.h"
+#include "InheritanceInfo.h"
 #include "clang/Basic/Builtins.h"
 #include <map>
 
@@ -1129,6 +1130,18 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
       return true;
     }
     newChild("Decl_CXXRecord");
+    QualType T(RD->getTypeForDecl(), 0);
+    if (RD && typetableinfo->hasBaseClass(T)) {
+      xmlNodePtr basesNode = xmlNewNode(nullptr, BAD_CAST "inheritedFrom");
+      QualType T(RD->getTypeForDecl(), 0);
+      for (QualType baseType : typetableinfo->getBaseClasses(T)) {
+        std::string name = typetableinfo->getTypeName(baseType);
+        xmlNodePtr typeNameNode = xmlNewNode(nullptr, BAD_CAST "typeName");
+        xmlNewProp(typeNameNode, BAD_CAST "ref", BAD_CAST name.c_str());
+        xmlAddChild(basesNode, typeNameNode);
+      }
+      xmlAddChild(curNode, basesNode);
+    }
     return true;
   }
   case Decl::ClassTemplateSpecialization: NDeclXXX("ClassTemplateSpecialization");

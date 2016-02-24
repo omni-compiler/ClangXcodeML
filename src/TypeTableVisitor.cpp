@@ -47,7 +47,9 @@ TypeTableVisitor::FullTrace(void) const {
   return OptFullTraceTypeTable;
 }
 
-TypeTableInfo::TypeTableInfo(MangleContext *MC) : mangleContext(MC)
+TypeTableInfo::TypeTableInfo(MangleContext *MC, InheritanceInfo *II) :
+  mangleContext(MC),
+  inheritanceinfo(II)
 {
   mapFromNameToQualType.clear();
   mapFromQualTypeToName.clear();
@@ -529,6 +531,18 @@ void TypeTableInfo::emitAllTypeNode(xmlNodePtr ParentNode)
   }
 }
 
+std::vector<clang::QualType> TypeTableInfo::getBaseClasses(clang::QualType type) {
+  return inheritanceinfo->getInheritance(type);
+}
+
+void TypeTableInfo::addInheritance(clang::QualType derived, clang::QualType base) {
+  inheritanceinfo->addInheritance(derived, base);
+}
+
+bool TypeTableInfo::hasBaseClass(clang::QualType type) {
+  return !( inheritanceinfo->getInheritance(type).empty() );
+}
+
 const char *
 TypeTableVisitor::getVisitorName() const {
   return OptTraceTypeTable ? "TypeTable" : nullptr;
@@ -666,11 +680,25 @@ TypeTableVisitor::PreVisitDecl(Decl *D) {
         xmlNodePtr tmpNode;
         newComment((comment + "(withDef)").c_str());
         typetableinfo->registerType(T, &tmpNode, curNode);
+        xmlNodePtr basesNode = xmlNewNode(nullptr, BAD_CAST "inheritedFrom");
+        CXXRecordDecl *RD(dyn_cast<CXXRecordDecl>(D));
+        if (RD && RD->bases_begin() != RD->bases_end()) {
+          for (auto base : RD->bases()) {
+            QualType baseType = base.getType();
+            typetableinfo->addInheritance(T, baseType);
+          }
+          for (QualType baseType : typetableinfo->getBaseClasses(T)) {
+            std::string name = typetableinfo->getTypeName(baseType);
+            xmlNodePtr typeNameNode = xmlNewNode(nullptr, BAD_CAST "typeName");
+            xmlNewProp(typeNameNode, BAD_CAST "ref", BAD_CAST name.c_str());
+            xmlAddChild(basesNode, typeNameNode);
+          }
+          xmlAddChild(tmpNode, basesNode);
+        }
         TraverseChildOfDecl(D);
         SymbolsVisitor SV(mangleContext, tmpNode, "symbols", typetableinfo);
         SV.TraverseChildOfDecl(D);
         return false;
-
       } else {
         // just allocate a name.
         newComment(comment.c_str());
