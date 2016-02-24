@@ -76,6 +76,7 @@ public:
     bool PreVisitNestedNameSpecifierLoc(clang::NestedNameSpecifierLoc);
     bool PreVisitTypeLoc(clang::TypeLoc);
     bool PreVisitDeclarationNameInfo(clang::DeclarationNameInfo);
+    bool PreVisitConstructorInitializer(clang::CXXCtorInitializer *CI);
     bool FullTrace(void) const;
 };
 

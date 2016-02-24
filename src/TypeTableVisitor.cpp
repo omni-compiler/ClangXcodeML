@@ -851,6 +851,11 @@ TypeTableVisitor::PreVisitDeclarationNameInfo(DeclarationNameInfo NI) {
   (void)NI;
   return true;
 }
+
+bool
+TypeTableVisitor::PreVisitConstructorInitializer(CXXCtorInitializer *CI) {
+  return true;
+}
 ///
 /// Local Variables:
 /// indent-tabs-mode: nil
