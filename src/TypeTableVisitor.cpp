@@ -539,6 +539,10 @@ void TypeTableInfo::addInheritance(clang::QualType derived, clang::QualType base
   inheritanceinfo->addInheritance(derived, base);
 }
 
+bool TypeTableInfo::hasBaseClass(clang::QualType type) {
+  return !( inheritanceinfo->getInheritance(type).empty() );
+}
+
 const char *
 TypeTableVisitor::getVisitorName() const {
   return OptTraceTypeTable ? "TypeTable" : nullptr;

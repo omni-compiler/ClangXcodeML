@@ -1130,7 +1130,8 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
       return true;
     }
     newChild("Decl_CXXRecord");
-    if (RD && RD->bases_begin() != RD->bases_end()) {
+    QualType T(RD->getTypeForDecl(), 0);
+    if (RD && typetableinfo->hasBaseClass(T)) {
       xmlNodePtr basesNode = xmlNewNode(nullptr, BAD_CAST "inheritedFrom");
       QualType T(RD->getTypeForDecl(), 0);
       for (QualType baseType : typetableinfo->getBaseClasses(T)) {

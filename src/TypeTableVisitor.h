@@ -59,6 +59,7 @@ public:
     void emitAllTypeNode(xmlNodePtr ParentNode);
     std::vector<clang::QualType> getBaseClasses(clang::QualType type);
     void addInheritance(clang::QualType derived, clang::QualType base);
+    bool hasBaseClass(clang::QualType type);
 };
 
 class TypeTableVisitor
