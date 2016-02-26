@@ -31,19 +31,6 @@ DeclarationsVisitor::getVisitorName() const {
     return true;                                 \
   } while (0)
 
-static std::string getAccessAsString(clang::AccessSpecifier AS) {
-  switch (AS) {
-    case AS_public : return "public";
-    case AS_private : return "private";
-    case AS_protected : return "protected";
-    default: return "none";
-  }
-}
-
-static std::string getAccessAsString(Decl *decl) {
-  return getAccessAsString(decl->getAccess());
-}
-
 bool
 DeclarationsVisitor::WrapExpr(Stmt *S) {
   Expr *E = dyn_cast<Expr>(S);
@@ -1055,8 +1042,7 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
 
   switch (D->getKind()) {
   case Decl::AccessSpec: {
-    newChild("Decl_AccessSpec");
-    newProp("access", getAccessAsString(D).c_str());
+    newComment("Decl_AccessSpec");
     return false;
   }
   case Decl::Block: NDeclXXX("Block");
@@ -1141,10 +1127,6 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
         std::string name = typetableinfo->getTypeName(base.type());
         xmlNodePtr typeNameNode = xmlNewNode(nullptr, BAD_CAST "typeName");
         xmlNewProp(typeNameNode, BAD_CAST "ref", BAD_CAST name.c_str());
-        xmlNewProp(typeNameNode, BAD_CAST "access", BAD_CAST getAccessAsString(base.access()).c_str());
-        if (base.isVirtual()) {
-          xmlNewProp(typeNameNode, BAD_CAST "is_virtual", BAD_CAST "1");
-        }
         xmlAddChild(basesNode, typeNameNode);
       }
       xmlAddChild(curNode, basesNode);
@@ -1182,10 +1164,6 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
         }
       }
 
-      if (FD->getParent()->getKind() == Decl::CXXRecord) {
-        newProp("access", getAccessAsString(D).c_str());
-      }
-
       QualType T = FD->getType();
       newProp("type", typetableinfo->getTypeName(T).c_str());
       IdentifierInfo *II = FD->getDeclName().getAsIdentifierInfo();
@@ -1214,9 +1192,6 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
     OverloadedOperatorKind OK(FD->getDeclName().getCXXOverloadedOperator());
     if (FD && FD->isThisDeclarationADefinition()) {
       newChild("functionDefinition");
-      if (is_member_function) {
-        newProp("access", getAccessAsString(D).c_str());
-      }
       setLocation(FD->getLocStart());
 
       xmlNodePtr functionNode = curNode;
@@ -1266,9 +1241,6 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
       };
     } else {
       newChild("functionDecl");
-      if (is_member_function) {
-        newProp("access", getAccessAsString(D).c_str());
-      }
       HookForDeclarationNameInfo = [this, D, OK, param_size](DeclarationNameInfo NI) {
         if (OK != OO_None) {
           newComment("DeclarationNameInfo_CXXOperatorName");

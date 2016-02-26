@@ -3,15 +3,25 @@
 
 #include "Hash.h"
 #include <vector>
+#include <string>
+
+class AccessSpec {
+  clang::AccessSpecifier accessSpec;
+public:
+  AccessSpec(clang::AccessSpecifier);
+  operator clang::AccessSpecifier() const;
+  std::string to_string() const;
+  const char* c_str() const;
+};
 
 class BaseClass {
   clang::QualType baseType;
-  clang::AccessSpecifier accessSpec;
+  AccessSpec accessSpec;
   bool virtuality;
 public:
   BaseClass(clang::QualType, clang::AccessSpecifier, bool);
   clang::QualType type();
-  clang::AccessSpecifier access();
+  AccessSpec access();
   bool isVirtual();
 };
 
