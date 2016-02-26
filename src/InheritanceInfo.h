@@ -3,6 +3,16 @@
 
 #include "Hash.h"
 #include <vector>
+#include <string>
+
+class AccessSpec {
+  clang::AccessSpecifier accessSpec;
+public:
+  AccessSpec(clang::AccessSpecifier);
+  operator clang::AccessSpecifier() const;
+  std::string to_string() const;
+  const char* c_str() const;
+};
 
 class BaseClass {
   clang::QualType baseType;

@@ -1,5 +1,26 @@
 #include "InheritanceInfo.h"
 
+AccessSpec::AccessSpec(clang::AccessSpecifier AS):
+  accessSpec(AS)
+{}
+
+AccessSpec::operator clang::AccessSpecifier() const {
+  return accessSpec;
+}
+
+std::string AccessSpec::to_string() const {
+  return c_str();
+}
+
+const char* AccessSpec::c_str() const {
+  switch (accessSpec) {
+    case clang::AS_public : return "public";
+    case clang::AS_private : return "private";
+    case clang::AS_protected : return "protected";
+    default: return "none";
+  }
+}
+
 BaseClass::BaseClass(clang::QualType t, clang::AccessSpecifier a, bool v):
   baseType(t),
   accessSpec(a),
