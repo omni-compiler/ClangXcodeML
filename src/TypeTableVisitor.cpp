@@ -680,13 +680,13 @@ TypeTableVisitor::PreVisitDecl(Decl *D) {
         xmlNodePtr tmpNode;
         newComment((comment + "(withDef)").c_str());
         typetableinfo->registerType(T, &tmpNode, curNode);
-        xmlNodePtr basesNode = xmlNewNode(nullptr, BAD_CAST "inheritedFrom");
         CXXRecordDecl *RD(dyn_cast<CXXRecordDecl>(D));
         if (RD && RD->bases_begin() != RD->bases_end()) {
           for (auto base : RD->bases()) {
             BaseClass baseClass(base.getType(), base.getAccessSpecifier(), base.isVirtual());
             typetableinfo->addInheritance(T, baseClass);
           }
+          xmlNodePtr basesNode = xmlNewNode(nullptr, BAD_CAST "inheritedFrom");
           for (BaseClass baseClass : typetableinfo->getBaseClasses(T)) {
             std::string name = typetableinfo->getTypeName(baseClass.type());
             xmlNodePtr typeNameNode = xmlNewNode(nullptr, BAD_CAST "typeName");
