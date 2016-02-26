@@ -31,7 +31,7 @@ clang::QualType BaseClass::type() {
   return baseType;
 }
 
-clang::AccessSpecifier BaseClass::access() {
+AccessSpec BaseClass::access() {
   return accessSpec;
 }
 

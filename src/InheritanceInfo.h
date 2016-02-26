@@ -16,12 +16,12 @@ public:
 
 class BaseClass {
   clang::QualType baseType;
-  clang::AccessSpecifier accessSpec;
+  AccessSpec accessSpec;
   bool virtuality;
 public:
   BaseClass(clang::QualType, clang::AccessSpecifier, bool);
   clang::QualType type();
-  clang::AccessSpecifier access();
+  AccessSpec access();
   bool isVirtual();
 };
 
