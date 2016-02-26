@@ -1046,8 +1046,7 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
 
   switch (D->getKind()) {
   case Decl::AccessSpec: {
-    newChild("Decl_AccessSpec");
-    newProp("access", getAccessAsString(D).c_str());
+    newComment("Decl_AccessSpec");
     return false;
   }
   case Decl::Block: NDeclXXX("Block");
