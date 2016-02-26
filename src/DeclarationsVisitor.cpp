@@ -31,17 +31,8 @@ DeclarationsVisitor::getVisitorName() const {
     return true;                                 \
   } while (0)
 
-static std::string getAccessAsString(clang::AccessSpecifier AS) {
-  switch (AS) {
-    case AS_public : return "public";
-    case AS_private : return "private";
-    case AS_protected : return "protected";
-    default: return "none";
-  }
-}
-
 static std::string getAccessAsString(Decl *decl) {
-  return getAccessAsString(decl->getAccess());
+  return AccessSpec(decl->getAccess()).to_string();
 }
 
 bool
