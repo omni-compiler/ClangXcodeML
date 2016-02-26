@@ -245,6 +245,9 @@ SymbolsVisitor::PreVisitDecl(Decl *D) {
         }
         QualType T = FD->getType();
         newProp("type", typetableinfo->getTypeName(T).c_str());
+        if (FD->getParent()->getKind() == Decl::CXXRecord) {
+          newProp("access", AccessSpec(D->getAccess()).c_str());
+        }
         IdentifierInfo *II = FD->getDeclName().getAsIdentifierInfo();
         if (II) {
           addChild("name", II->getNameStart());

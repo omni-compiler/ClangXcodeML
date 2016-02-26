@@ -1168,10 +1168,6 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
         }
       }
 
-      if (FD->getParent()->getKind() == Decl::CXXRecord) {
-        newProp("access", getAccessAsString(D).c_str());
-      }
-
       QualType T = FD->getType();
       newProp("type", typetableinfo->getTypeName(T).c_str());
       IdentifierInfo *II = FD->getDeclName().getAsIdentifierInfo();
