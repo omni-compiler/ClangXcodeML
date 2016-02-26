@@ -31,10 +31,6 @@ DeclarationsVisitor::getVisitorName() const {
     return true;                                 \
   } while (0)
 
-static std::string getAccessAsString(Decl *decl) {
-  return AccessSpec(decl->getAccess()).to_string();
-}
-
 bool
 DeclarationsVisitor::WrapExpr(Stmt *S) {
   Expr *E = dyn_cast<Expr>(S);
@@ -1196,9 +1192,6 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
     OverloadedOperatorKind OK(FD->getDeclName().getCXXOverloadedOperator());
     if (FD && FD->isThisDeclarationADefinition()) {
       newChild("functionDefinition");
-      if (is_member_function) {
-        newProp("access", getAccessAsString(D).c_str());
-      }
       setLocation(FD->getLocStart());
 
       xmlNodePtr functionNode = curNode;
@@ -1248,9 +1241,6 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
       };
     } else {
       newChild("functionDecl");
-      if (is_member_function) {
-        newProp("access", getAccessAsString(D).c_str());
-      }
       HookForDeclarationNameInfo = [this, D, OK, param_size](DeclarationNameInfo NI) {
         if (OK != OO_None) {
           newComment("DeclarationNameInfo_CXXOperatorName");

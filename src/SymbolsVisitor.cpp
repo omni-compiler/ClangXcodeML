@@ -309,6 +309,7 @@ SymbolsVisitor::PreVisitDecl(Decl *D) {
       }
       newProp("sclass", "extern_def");
       if (MD) {
+        newProp("access", AccessSpec(MD->getAccess()).c_str());
         IdentifierInfo *II = MD->getDeclName().getAsIdentifierInfo();
         if (II) {
           addChild("name", II->getNameStart());
