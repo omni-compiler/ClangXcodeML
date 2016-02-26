@@ -691,6 +691,10 @@ TypeTableVisitor::PreVisitDecl(Decl *D) {
             std::string name = typetableinfo->getTypeName(baseClass.type());
             xmlNodePtr typeNameNode = xmlNewNode(nullptr, BAD_CAST "typeName");
             xmlNewProp(typeNameNode, BAD_CAST "ref", BAD_CAST name.c_str());
+            xmlNewProp(typeNameNode, BAD_CAST "access", BAD_CAST baseClass.access().c_str());
+            if (baseClass.isVirtual()) {
+              xmlNewProp(typeNameNode, BAD_CAST "is_virtual", BAD_CAST "1");
+            }
             xmlAddChild(basesNode, typeNameNode);
           }
           xmlAddChild(tmpNode, basesNode);

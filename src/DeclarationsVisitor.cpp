@@ -1141,10 +1141,6 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
         std::string name = typetableinfo->getTypeName(base.type());
         xmlNodePtr typeNameNode = xmlNewNode(nullptr, BAD_CAST "typeName");
         xmlNewProp(typeNameNode, BAD_CAST "ref", BAD_CAST name.c_str());
-        xmlNewProp(typeNameNode, BAD_CAST "access", BAD_CAST getAccessAsString(base.access()).c_str());
-        if (base.isVirtual()) {
-          xmlNewProp(typeNameNode, BAD_CAST "is_virtual", BAD_CAST "1");
-        }
         xmlAddChild(basesNode, typeNameNode);
       }
       xmlAddChild(curNode, basesNode);
