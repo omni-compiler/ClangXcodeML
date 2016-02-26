@@ -680,6 +680,8 @@ TypeTableVisitor::PreVisitDecl(Decl *D) {
         xmlNodePtr tmpNode;
         newComment((comment + "(withDef)").c_str());
         typetableinfo->registerType(T, &tmpNode, curNode);
+        curNode = tmpNode;
+        addChild("name", TD->getNameAsString().c_str());
         CXXRecordDecl *RD(dyn_cast<CXXRecordDecl>(D));
         if (RD && RD->bases_begin() != RD->bases_end()) {
           for (auto base : RD->bases()) {
