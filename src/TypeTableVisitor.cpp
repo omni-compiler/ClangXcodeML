@@ -859,7 +859,7 @@ TypeTableVisitor::PreVisitDeclarationNameInfo(DeclarationNameInfo NI) {
 }
 
 bool
-TypeTableVisitor::PreVisitConstructorInitializer(CXXCtorInitializer *CI) {
+TypeTableVisitor::PreVisitConstructorInitializer(CXXCtorInitializer *) {
   return true;
 }
 ///

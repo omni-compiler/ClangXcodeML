@@ -1414,7 +1414,7 @@ DeclarationsVisitor::PreVisitDeclarationNameInfo(DeclarationNameInfo NI) {
 }
 #undef NDeclName
 
-bool DeclarationsVisitor::PreVisitConstructorInitializer(CXXCtorInitializer *CI) {
+bool DeclarationsVisitor::PreVisitConstructorInitializer(CXXCtorInitializer *) {
   return true;
 }
 

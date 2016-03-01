@@ -444,7 +444,7 @@ SymbolsVisitor::PreVisitDeclarationNameInfo(DeclarationNameInfo NameInfo) {
 }
 
 bool
-SymbolsVisitor::PreVisitConstructorInitializer(CXXCtorInitializer *CI) {
+SymbolsVisitor::PreVisitConstructorInitializer(CXXCtorInitializer *) {
   return true;
 }
 
