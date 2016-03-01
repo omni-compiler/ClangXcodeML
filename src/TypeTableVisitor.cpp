@@ -713,9 +713,7 @@ TypeTableVisitor::PreVisitDecl(Decl *D) {
           }
           xmlAddChild(tmpNode, basesNode);
         }
-        if (RD && isSimple(*RD)) {
-          typetableinfo->setXcodeMLSimplicity(T, true);
-        }
+        typetableinfo->setXcodeMLSimplicity(T, RD->isPOD());
         TraverseChildOfDecl(D);
         SymbolsVisitor SV(mangleContext, tmpNode, "symbols", typetableinfo);
         SV.TraverseChildOfDecl(D);
