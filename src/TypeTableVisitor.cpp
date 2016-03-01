@@ -543,6 +543,14 @@ bool TypeTableInfo::hasBaseClass(clang::QualType type) {
   return !( inheritanceinfo->getInheritance(type).empty() );
 }
 
+void TypeTableInfo::setXcodeMLSimplicity(clang::QualType T, bool b) {
+  MapXcodeMLSimplicity[T] = b;
+}
+
+bool TypeTableInfo::isXcodeMLSimple(clang::QualType T) {
+  return MapXcodeMLSimplicity[T];
+}
+
 const char *
 TypeTableVisitor::getVisitorName() const {
   return OptTraceTypeTable ? "TypeTable" : nullptr;
@@ -600,6 +608,10 @@ TypeTableVisitor::PreVisitType(QualType T) {
   typetableinfo->registerType(T, nullptr, curNode);
 
   return true;
+}
+
+static bool isSimple(const CXXRecordDecl &RD) {
+  return RD.isPOD();
 }
 
 bool
@@ -700,6 +712,9 @@ TypeTableVisitor::PreVisitDecl(Decl *D) {
             xmlAddChild(basesNode, typeNameNode);
           }
           xmlAddChild(tmpNode, basesNode);
+        }
+        if (RD && isSimple(*RD)) {
+          typetableinfo->setXcodeMLSimplicity(T, true);
         }
         TraverseChildOfDecl(D);
         SymbolsVisitor SV(mangleContext, tmpNode, "symbols", typetableinfo);

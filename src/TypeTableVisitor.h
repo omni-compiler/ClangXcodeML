@@ -10,6 +10,7 @@ class TypeTableInfo {
     std::unordered_map<clang::QualType, std::string> mapFromQualTypeToName;
     std::unordered_map<clang::QualType, xmlNodePtr> mapFromQualTypeToXmlNodePtr;
     InheritanceInfo *inheritanceinfo;
+    std::unordered_map<clang::QualType, bool> MapXcodeMLSimplicity;
 
     int seqForBasicType;
     int seqForPointerType;
@@ -60,6 +61,8 @@ public:
     std::vector<BaseClass> getBaseClasses(clang::QualType type);
     void addInheritance(clang::QualType derived, BaseClass base);
     bool hasBaseClass(clang::QualType type);
+    void setXcodeMLSimplicity(clang::QualType, bool);
+    bool isXcodeMLSimple(clang::QualType);
 };
 
 class TypeTableVisitor
