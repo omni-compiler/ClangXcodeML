@@ -610,7 +610,7 @@ TypeTableVisitor::PreVisitType(QualType T) {
   return true;
 }
 
-static bool isSimple(const CXXRecordDecl &RD) {
+static bool isNormalizable(const CXXRecordDecl &RD) {
   return RD.getParent()->isTranslationUnit();
 }
 
@@ -713,7 +713,7 @@ TypeTableVisitor::PreVisitDecl(Decl *D) {
           }
           xmlAddChild(tmpNode, basesNode);
         }
-        if (isSimple(*RD)) {
+        if (isNormalizable(*RD)) {
           typetableinfo->setNormalizability(T, true);
         } else {
           /* CXXRecordDecl D is in another class,
