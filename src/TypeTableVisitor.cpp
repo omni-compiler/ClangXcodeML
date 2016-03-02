@@ -713,10 +713,12 @@ TypeTableVisitor::PreVisitDecl(Decl *D) {
           }
           xmlAddChild(tmpNode, basesNode);
         }
-        if (isNormalizable(*RD)) {
+        if (RD->isLocalClass()) {
+          typetableinfo->setNormalizability(T, false);
+        } else if (isNormalizable(*RD)) {
           typetableinfo->setNormalizability(T, true);
         } else {
-          /* CXXRecordDecl D is in another class,
+          /* CXXRecordDecl D is not local but in another class,
            * so D and the enblacing class is not normalizable.
            */
           RecordDecl* enclosure(D->getDeclContext()->getOuterLexicalRecordContext());
