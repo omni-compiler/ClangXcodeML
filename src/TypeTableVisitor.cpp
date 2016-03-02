@@ -543,12 +543,12 @@ bool TypeTableInfo::hasBaseClass(clang::QualType type) {
   return !( inheritanceinfo->getInheritance(type).empty() );
 }
 
-void TypeTableInfo::setXcodeMLSimplicity(clang::QualType T, bool b) {
-  MapXcodeMLSimplicity[T] = b;
+void TypeTableInfo::setNormalizability(clang::QualType T, bool b) {
+  normalizability[T] = b;
 }
 
-bool TypeTableInfo::isXcodeMLSimple(clang::QualType T) {
-  return MapXcodeMLSimplicity[T];
+bool TypeTableInfo::isNormalizable(clang::QualType T) {
+  return normalizability[T];
 }
 
 const char *
@@ -713,7 +713,7 @@ TypeTableVisitor::PreVisitDecl(Decl *D) {
           }
           xmlAddChild(tmpNode, basesNode);
         }
-        typetableinfo->setXcodeMLSimplicity(T, RD->isPOD());
+        typetableinfo->setNormalizability(T, RD->isPOD());
         TraverseChildOfDecl(D);
         SymbolsVisitor SV(mangleContext, tmpNode, "symbols", typetableinfo);
         SV.TraverseChildOfDecl(D);

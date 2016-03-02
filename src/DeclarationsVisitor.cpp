@@ -1121,7 +1121,7 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
     newChild("Decl_CXXRecord");
     QualType T(RD->getTypeForDecl(), 0);
     newProp("type", typetableinfo->getTypeName(T).c_str());
-    if (typetableinfo->isXcodeMLSimple(T)) {
+    if (typetableinfo->isNormalizable(T)) {
       return false;
     }
     if (RD && typetableinfo->hasBaseClass(T)) {
