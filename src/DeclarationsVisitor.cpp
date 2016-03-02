@@ -1372,13 +1372,17 @@ DeclarationsVisitor::PreVisitNestedNameSpecifierLoc(NestedNameSpecifierLoc NNS) 
     newComment("NestedNameSpecifierLoc_NULL");
     return false;
   }
+  newComment("poe");
   switch (NNS.getNestedNameSpecifier()->getKind()) {
   case NestedNameSpecifier::Identifier: NNNSLocXXX("Identifier");
   case NestedNameSpecifier::Namespace: NNNSLocXXX("Namespace");
   case NestedNameSpecifier::NamespaceAlias: NNNSLocXXX("NamespaceAlias");
   case NestedNameSpecifier::Global: NNNSLocXXX("Global");
   case NestedNameSpecifier::Super: NNNSLocXXX("Super");
-  case NestedNameSpecifier::TypeSpec: NNNSLocXXX("TypeSpec");
+  case NestedNameSpecifier::TypeSpec: {
+    newProp("fullName", NNS.getNestedNameSpecifier()->getAsType()->getCanonicalTypeInternal().getAsString().c_str());
+    return true;
+  }
   case NestedNameSpecifier::TypeSpecWithTemplate: NNNSLocXXX("TypeSpecWithTemplate");
   }
 }
