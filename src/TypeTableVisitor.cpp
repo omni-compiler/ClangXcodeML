@@ -611,7 +611,7 @@ TypeTableVisitor::PreVisitType(QualType T) {
 }
 
 static bool isSimple(const CXXRecordDecl &RD) {
-  return RD.isPOD();
+  return RD.getParent()->isTranslationUnit();
 }
 
 bool
@@ -713,7 +713,18 @@ TypeTableVisitor::PreVisitDecl(Decl *D) {
           }
           xmlAddChild(tmpNode, basesNode);
         }
-        typetableinfo->setNormalizability(T, RD->isPOD());
+        if (isSimple(*RD)) {
+          typetableinfo->setNormalizability(T, true);
+        } else {
+          /* CXXRecordDecl D is in another class,
+           * so D and the enblacing class is not normalizable.
+           */
+          RecordDecl* enclosure(D->getDeclContext()->getOuterLexicalRecordContext());
+          QualType enclosureType(enclosure->getTypeForDecl(), 0);
+          std::cout << T.getAsString() << " < " << enclosureType.getAsString() << std::endl;
+          typetableinfo->setNormalizability(enclosureType, false);
+          typetableinfo->setNormalizability(T, false);
+        }
         TraverseChildOfDecl(D);
         SymbolsVisitor SV(mangleContext, tmpNode, "symbols", typetableinfo);
         SV.TraverseChildOfDecl(D);
