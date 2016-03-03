@@ -1118,10 +1118,16 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
     if (!RD) {
       return true;
     }
+    xmlNodePtr parentNode = curNode;
     newChild("Decl_CXXRecord");
     QualType T(RD->getTypeForDecl(), 0);
     newProp("type", typetableinfo->getTypeName(T).c_str());
     if (typetableinfo->isNormalizable(T)) {
+      curNode = parentNode;
+      for (clang::CXXMethodDecl *MD : RD->methods()) {
+        DeclarationsVisitor DV(mangleContext, parentNode, "functionDefinition", typetableinfo);
+        DV.TraverseChildOfDecl(MD);
+      }
       return false;
     }
     if (RD && typetableinfo->hasBaseClass(T)) {
