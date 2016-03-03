@@ -1125,8 +1125,8 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
     if (typetableinfo->isNormalizable(T)) {
       curNode = parentNode;
       for (clang::CXXMethodDecl *MD : RD->methods()) {
-        DeclarationsVisitor DV(mangleContext, parentNode, "functionDefinition", typetableinfo);
-        DV.TraverseChildOfDecl(MD);
+        DeclarationsVisitor DV(this);
+        DV.TraverseDecl(MD);
       }
       return false;
     }
