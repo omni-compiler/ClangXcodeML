@@ -1206,6 +1206,10 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
 
       xmlNodePtr functionNode = curNode;
       HookForDeclarationNameInfo = [this, D, OK, param_size](DeclarationNameInfo NI) {
+        NamedDecl *ND = dyn_cast<NamedDecl>(D);
+        if (ND) {
+          addChild("qualName", ND->getQualifiedNameAsString().c_str());
+        }
         DeclarationsVisitor V(this);
         if (OK != OO_None) {
           newComment("DeclarationNameInfo_CXXOperatorName");
