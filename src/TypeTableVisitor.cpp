@@ -721,6 +721,7 @@ TypeTableVisitor::PreVisitDecl(Decl *D) {
         newChild("params");
       } else {
         newComment("PreVisitDecl::Function: already the same type is registered");
+        return false;
       }
       return true;
 #if 0
