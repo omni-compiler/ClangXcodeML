@@ -1207,10 +1207,9 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
       xmlNodePtr functionNode = curNode;
       HookForDeclarationNameInfo = [this, D, OK, param_size](DeclarationNameInfo NI) {
         NamedDecl *ND = dyn_cast<NamedDecl>(D);
-        if (ND) {
-          addChild("qualName", ND->getQualifiedNameAsString().c_str());
-        }
         DeclarationsVisitor V(this);
+        V.curFullName = ND->getQualifiedNameAsString();
+        curFullName = ND->getQualifiedNameAsString();
         if (OK != OO_None) {
           newComment("DeclarationNameInfo_CXXOperatorName");
           addChild("operator", OverloadedOperatorKindToString(OK, param_size).c_str());
@@ -1218,7 +1217,9 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
           SV.TraverseChildOfDecl(D);
           addChild("params"); //create a new node to parent just after NameInfo
           return true;
-        } else if (V.TraverseDeclarationNameInfo(NI)) {
+        }
+        bool result = V.TraverseDeclarationNameInfo(NI);
+        if (result) {
           SymbolsVisitor SV(mangleContext, curNode, "symbols", typetableinfo);
           SV.TraverseChildOfDecl(D);
           newChild("params"); //create a new node to parent just after NameInfo
@@ -1397,6 +1398,7 @@ DeclarationsVisitor::PreVisitNestedNameSpecifierLoc(NestedNameSpecifierLoc NNS) 
 #define NDeclName(mes) do {                                     \
     newComment("DeclarationNameInfo_" mes);                     \
     newChild("name", content);                                  \
+    newProp("fullName", curFullName.c_str());                   \
     return true;                                                \
   } while (0)
 bool

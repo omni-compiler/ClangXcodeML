@@ -30,6 +30,7 @@ public:
     bool PreVisitConstructorInitializer(clang::CXXCtorInitializer *CI);
 
 private:
+    std::string curFullName;
     bool WrapExpr(clang::Stmt *);
     bool WrapAsgExpr(void);
     void WrapChild(const char **names);
