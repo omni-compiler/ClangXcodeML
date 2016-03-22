@@ -10,6 +10,7 @@ struct DeclarationsContext {
     DeclarationsContext &operator =(DeclarationsContext &&) = delete;
 
     const char *nameForDeclRefExpr;  // inherited to ancestors
+    std::string curFullName;
 };
 
 class DeclarationsVisitor
@@ -30,7 +31,6 @@ public:
     bool PreVisitConstructorInitializer(clang::CXXCtorInitializer *CI);
 
 private:
-    std::string curFullName;
     void setCurFullName(std::string);
     bool WrapExpr(clang::Stmt *);
     bool WrapAsgExpr(void);

@@ -1398,7 +1398,7 @@ DeclarationsVisitor::PreVisitNestedNameSpecifierLoc(NestedNameSpecifierLoc NNS) 
 #define NDeclName(mes) do {                                     \
     newComment("DeclarationNameInfo_" mes);                     \
     newChild("name", content);                                  \
-    newProp("fullName", curFullName.c_str());                   \
+    newProp("fullName", optContext.curFullName.c_str());        \
     return true;                                                \
   } while (0)
 bool
@@ -1435,7 +1435,7 @@ bool DeclarationsVisitor::PreVisitConstructorInitializer(CXXCtorInitializer *) {
 }
 
 void DeclarationsVisitor::setCurFullName(std::string fullName) {
-  curFullName = fullName;
+  optContext.curFullName = fullName;
 }
 
 ///
