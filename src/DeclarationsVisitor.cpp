@@ -1118,8 +1118,18 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
     if (!RD) {
       return true;
     }
+    xmlNodePtr parentNode = curNode;
     newChild("Decl_CXXRecord");
     QualType T(RD->getTypeForDecl(), 0);
+    newProp("type", typetableinfo->getTypeName(T).c_str());
+    if (typetableinfo->isNormalizable(T)) {
+      curNode = parentNode;
+      for (clang::CXXMethodDecl *MD : RD->methods()) {
+        DeclarationsVisitor DV(this);
+        DV.TraverseDecl(MD);
+      }
+      return false;
+    }
     if (RD && typetableinfo->hasBaseClass(T)) {
       xmlNodePtr basesNode = xmlNewNode(nullptr, BAD_CAST "inheritedFrom");
       QualType T(RD->getTypeForDecl(), 0);
@@ -1190,21 +1200,25 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
     bool is_member_function = D->getKind() != Decl::Function;
     unsigned param_size = FD->param_size() + (is_member_function? 1:0);
     OverloadedOperatorKind OK(FD->getDeclName().getCXXOverloadedOperator());
+    std::string full_name = FD->getQualifiedNameAsString();
     if (FD && FD->isThisDeclarationADefinition()) {
       newChild("functionDefinition");
       setLocation(FD->getLocStart());
 
       xmlNodePtr functionNode = curNode;
-      HookForDeclarationNameInfo = [this, D, OK, param_size](DeclarationNameInfo NI) {
+      HookForDeclarationNameInfo = [this, D, OK, param_size, full_name](DeclarationNameInfo NI) {
         DeclarationsVisitor V(this);
+        V.setCurFullName(full_name);
         if (OK != OO_None) {
           newComment("DeclarationNameInfo_CXXOperatorName");
-          addChild("operator", OverloadedOperatorKindToString(OK, param_size).c_str());
+          xmlNodePtr opNode = addChild("operator", OverloadedOperatorKindToString(OK, param_size).c_str());
+          newProp("fullName", full_name.c_str(), opNode);
           SymbolsVisitor SV(mangleContext, curNode, "symbols", typetableinfo);
           SV.TraverseChildOfDecl(D);
           addChild("params"); //create a new node to parent just after NameInfo
           return true;
-        } else if (V.TraverseDeclarationNameInfo(NI)) {
+        }
+        if (V.PreVisitDeclarationNameInfo(NI)) {
           SymbolsVisitor SV(mangleContext, curNode, "symbols", typetableinfo);
           SV.TraverseChildOfDecl(D);
           newChild("params"); //create a new node to parent just after NameInfo
@@ -1241,13 +1255,15 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
       };
     } else {
       newChild("functionDecl");
-      HookForDeclarationNameInfo = [this, D, OK, param_size](DeclarationNameInfo NI) {
+      HookForDeclarationNameInfo = [this, D, OK, param_size, FD, full_name](DeclarationNameInfo NI) {
         if (OK != OO_None) {
           newComment("DeclarationNameInfo_CXXOperatorName");
-          addChild("operator", OverloadedOperatorKindToString(OK, param_size).c_str());
+          xmlNodePtr opNode = addChild("operator", OverloadedOperatorKindToString(OK, param_size).c_str());
+          newProp("fullName", full_name.c_str(), opNode);
         } else {
           DeclarationsVisitor V(this);
-          V.TraverseDeclarationNameInfo(NI);
+          V.setCurFullName(full_name);
+          V.PreVisitDeclarationNameInfo(NI);
         }
         return false;
       };
@@ -1383,6 +1399,7 @@ DeclarationsVisitor::PreVisitNestedNameSpecifierLoc(NestedNameSpecifierLoc NNS) 
 #define NDeclName(mes) do {                                     \
     newComment("DeclarationNameInfo_" mes);                     \
     newChild("name", content);                                  \
+    newProp("fullName", optContext.curFullName.c_str());        \
     return true;                                                \
   } while (0)
 bool
@@ -1414,8 +1431,12 @@ DeclarationsVisitor::PreVisitDeclarationNameInfo(DeclarationNameInfo NI) {
 }
 #undef NDeclName
 
-bool DeclarationsVisitor::PreVisitConstructorInitializer(CXXCtorInitializer *CI) {
+bool DeclarationsVisitor::PreVisitConstructorInitializer(CXXCtorInitializer *) {
   return true;
+}
+
+void DeclarationsVisitor::setCurFullName(std::string fullName) {
+  optContext.curFullName = fullName;
 }
 
 ///

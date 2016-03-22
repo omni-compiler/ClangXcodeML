@@ -543,6 +543,14 @@ bool TypeTableInfo::hasBaseClass(clang::QualType type) {
   return !( inheritanceinfo->getInheritance(type).empty() );
 }
 
+void TypeTableInfo::setNormalizability(clang::QualType T, bool b) {
+  normalizability[T] = b;
+}
+
+bool TypeTableInfo::isNormalizable(clang::QualType T) {
+  return normalizability[T];
+}
+
 const char *
 TypeTableVisitor::getVisitorName() const {
   return OptTraceTypeTable ? "TypeTable" : nullptr;
@@ -600,6 +608,10 @@ TypeTableVisitor::PreVisitType(QualType T) {
   typetableinfo->registerType(T, nullptr, curNode);
 
   return true;
+}
+
+static bool isNormalizable(const CXXRecordDecl &RD) {
+  return RD.getParent()->isTranslationUnit();
 }
 
 bool
@@ -700,6 +712,20 @@ TypeTableVisitor::PreVisitDecl(Decl *D) {
             xmlAddChild(basesNode, typeNameNode);
           }
           xmlAddChild(tmpNode, basesNode);
+        }
+        if (RD->isLocalClass()) {
+          typetableinfo->setNormalizability(T, false);
+        } else if (isNormalizable(*RD)) {
+          typetableinfo->setNormalizability(T, true);
+        } else {
+          /* CXXRecordDecl D is not local but in another class,
+           * so D and the enblacing class is not normalizable.
+           */
+          RecordDecl* enclosure(D->getDeclContext()->getOuterLexicalRecordContext());
+          QualType enclosureType(enclosure->getTypeForDecl(), 0);
+          std::cout << T.getAsString() << " < " << enclosureType.getAsString() << std::endl;
+          typetableinfo->setNormalizability(enclosureType, false);
+          typetableinfo->setNormalizability(T, false);
         }
         TraverseChildOfDecl(D);
         SymbolsVisitor SV(mangleContext, tmpNode, "symbols", typetableinfo);
@@ -859,7 +885,7 @@ TypeTableVisitor::PreVisitDeclarationNameInfo(DeclarationNameInfo NI) {
 }
 
 bool
-TypeTableVisitor::PreVisitConstructorInitializer(CXXCtorInitializer *CI) {
+TypeTableVisitor::PreVisitConstructorInitializer(CXXCtorInitializer *) {
   return true;
 }
 ///
