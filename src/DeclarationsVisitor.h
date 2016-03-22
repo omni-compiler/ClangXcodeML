@@ -31,6 +31,7 @@ public:
 
 private:
     std::string curFullName;
+    void setCurFullName(std::string);
     bool WrapExpr(clang::Stmt *);
     bool WrapAsgExpr(void);
     void WrapChild(const char **names);

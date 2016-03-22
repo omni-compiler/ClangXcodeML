@@ -1208,8 +1208,8 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
       HookForDeclarationNameInfo = [this, D, OK, param_size](DeclarationNameInfo NI) {
         NamedDecl *ND = dyn_cast<NamedDecl>(D);
         DeclarationsVisitor V(this);
-        V.curFullName = ND->getQualifiedNameAsString();
-        curFullName = ND->getQualifiedNameAsString();
+        V.setCurFullName( ND->getQualifiedNameAsString() );
+        setCurFullName( ND->getQualifiedNameAsString() );
         if (OK != OO_None) {
           newComment("DeclarationNameInfo_CXXOperatorName");
           addChild("operator", OverloadedOperatorKindToString(OK, param_size).c_str());
@@ -1432,6 +1432,10 @@ DeclarationsVisitor::PreVisitDeclarationNameInfo(DeclarationNameInfo NI) {
 
 bool DeclarationsVisitor::PreVisitConstructorInitializer(CXXCtorInitializer *) {
   return true;
+}
+
+void DeclarationsVisitor::setCurFullName(std::string fullName) {
+  curFullName = fullName;
 }
 
 ///
