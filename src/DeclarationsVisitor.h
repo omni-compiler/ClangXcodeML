@@ -10,7 +10,7 @@ struct DeclarationsContext {
     DeclarationsContext &operator =(DeclarationsContext &&) = delete;
 
     const char *nameForDeclRefExpr;  // inherited to ancestors
-    std::string curFullName;
+    std::string curFullName; // XXX: unpreferable class member
 };
 
 class DeclarationsVisitor
