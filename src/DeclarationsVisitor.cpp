@@ -1218,7 +1218,7 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
           addChild("params"); //create a new node to parent just after NameInfo
           return true;
         }
-        bool result = V.TraverseDeclarationNameInfo(NI);
+        bool result = V.PreVisitDeclarationNameInfo(NI);
         if (result) {
           SymbolsVisitor SV(mangleContext, curNode, "symbols", typetableinfo);
           SV.TraverseChildOfDecl(D);
@@ -1256,13 +1256,14 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
       };
     } else {
       newChild("functionDecl");
-      HookForDeclarationNameInfo = [this, D, OK, param_size](DeclarationNameInfo NI) {
+      HookForDeclarationNameInfo = [this, D, OK, param_size, FD](DeclarationNameInfo NI) {
         if (OK != OO_None) {
           newComment("DeclarationNameInfo_CXXOperatorName");
           addChild("operator", OverloadedOperatorKindToString(OK, param_size).c_str());
         } else {
           DeclarationsVisitor V(this);
-          V.TraverseDeclarationNameInfo(NI);
+          V.setCurFullName(FD->getQualifiedNameAsString().c_str());
+          V.PreVisitDeclarationNameInfo(NI);
         }
         return false;
       };
