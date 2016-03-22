@@ -1200,18 +1200,19 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
     bool is_member_function = D->getKind() != Decl::Function;
     unsigned param_size = FD->param_size() + (is_member_function? 1:0);
     OverloadedOperatorKind OK(FD->getDeclName().getCXXOverloadedOperator());
+    std::string full_name = FD->getQualifiedNameAsString();
     if (FD && FD->isThisDeclarationADefinition()) {
       newChild("functionDefinition");
       setLocation(FD->getLocStart());
 
       xmlNodePtr functionNode = curNode;
-      HookForDeclarationNameInfo = [this, D, OK, param_size](DeclarationNameInfo NI) {
-        NamedDecl *ND = dyn_cast<NamedDecl>(D);
+      HookForDeclarationNameInfo = [this, D, OK, param_size, full_name](DeclarationNameInfo NI) {
         DeclarationsVisitor V(this);
-        V.setCurFullName(ND->getQualifiedNameAsString());
+        V.setCurFullName(full_name);
         if (OK != OO_None) {
           newComment("DeclarationNameInfo_CXXOperatorName");
-          addChild("operator", OverloadedOperatorKindToString(OK, param_size).c_str());
+          xmlNodePtr opNode = addChild("operator", OverloadedOperatorKindToString(OK, param_size).c_str());
+          newProp("fullName", full_name.c_str(), opNode);
           SymbolsVisitor SV(mangleContext, curNode, "symbols", typetableinfo);
           SV.TraverseChildOfDecl(D);
           addChild("params"); //create a new node to parent just after NameInfo
@@ -1254,13 +1255,14 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
       };
     } else {
       newChild("functionDecl");
-      HookForDeclarationNameInfo = [this, D, OK, param_size, FD](DeclarationNameInfo NI) {
+      HookForDeclarationNameInfo = [this, D, OK, param_size, FD, full_name](DeclarationNameInfo NI) {
         if (OK != OO_None) {
           newComment("DeclarationNameInfo_CXXOperatorName");
-          addChild("operator", OverloadedOperatorKindToString(OK, param_size).c_str());
+          xmlNodePtr opNode = addChild("operator", OverloadedOperatorKindToString(OK, param_size).c_str());
+          newProp("fullName", full_name.c_str(), opNode);
         } else {
           DeclarationsVisitor V(this);
-          V.setCurFullName(FD->getQualifiedNameAsString().c_str());
+          V.setCurFullName(full_name);
           V.PreVisitDeclarationNameInfo(NI);
         }
         return false;
