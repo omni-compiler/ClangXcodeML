@@ -1085,7 +1085,7 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
     if (ED) {
       IdentifierInfo *II = ED->getDeclName().getAsIdentifierInfo();
       if (II) {
-        addChild("name", II->getNameStart());
+        addName(ED, II->getNameStart());
       }
     }
     newChild("enumType");
@@ -1108,7 +1108,7 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
     if (RD) {
       IdentifierInfo *II = RD->getDeclName().getAsIdentifierInfo();
       if (II) {
-        addChild("name", II->getNameStart());
+        addName(RD, II->getNameStart());
       }
     }
     return true;
@@ -1178,7 +1178,7 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
       newProp("type", typetableinfo->getTypeName(T).c_str());
       IdentifierInfo *II = FD->getDeclName().getAsIdentifierInfo();
       if (II) {
-        addChild("name", II->getNameStart());
+        addName(FD, II->getNameStart());
       }
       if (BW) {
         DeclarationsVisitor DV(mangleContext, curNode, "bitField", typetableinfo); 
@@ -1278,7 +1278,14 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
     VarDecl *VD = static_cast<VarDecl*>(D);
     newChild("varDecl");
     setLocation(D->getLocStart());
-    addChild("name", VD->getNameAsString().c_str());
+    const char *var_name = VD->getNameAsString().c_str();
+    if (VD->isLocalVarDecl()) {
+      addChild("name", var_name);
+    } else {
+      /* global variables have qualified names
+       * but local variables don't. */
+      addName(VD, var_name);
+    }
 #if 0
     HookForStmt = [this](Stmt *S){
       if (!S) {
@@ -1311,7 +1318,7 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
     EnumConstantDecl *ED = static_cast<EnumConstantDecl*>(D);
     if (ED) {
       newChild("id");
-      newChild("name", ED->getNameAsString().c_str());
+      newName(ED, ED->getNameAsString().c_str());
     }
     return false;
   }
@@ -1398,8 +1405,7 @@ DeclarationsVisitor::PreVisitNestedNameSpecifierLoc(NestedNameSpecifierLoc NNS) 
 
 #define NDeclName(mes) do {                                     \
     newComment("DeclarationNameInfo_" mes);                     \
-    newChild("name", content);                                  \
-    newProp("fullName", optContext.curFullName.c_str());        \
+    newName(optContext.curFullName.c_str(), content);           \
     return true;                                                \
   } while (0)
 bool
