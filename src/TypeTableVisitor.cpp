@@ -610,8 +610,8 @@ TypeTableVisitor::PreVisitType(QualType T) {
   return true;
 }
 
-static bool isNormalizable(const CXXRecordDecl &RD) {
-  return ! RD.getParent()->getOuterLexicalRecordContext();
+static bool isNested(const CXXRecordDecl &RD) {
+  return RD.getParent()->getOuterLexicalRecordContext();
 }
 
 bool
@@ -715,7 +715,7 @@ TypeTableVisitor::PreVisitDecl(Decl *D) {
         }
         if (RD->isLocalClass()) {
           typetableinfo->setNormalizability(T, false);
-        } else if (isNormalizable(*RD)) {
+        } else if (! isNested(*RD)) {
           typetableinfo->setNormalizability(T, true);
         } else {
           /* CXXRecordDecl D is not local but in another class,
