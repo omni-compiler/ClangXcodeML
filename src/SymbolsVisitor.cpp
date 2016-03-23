@@ -140,7 +140,7 @@ SymbolsVisitor::PreVisitDecl(Decl *D) {
       if (ED) {
         IdentifierInfo *II = ED->getDeclName().getAsIdentifierInfo();
         if (II) {
-          addChild("name", II->getNameStart());
+          addName(ED, II->getNameStart());
         }
       }
       curNode = origCur;
@@ -159,7 +159,7 @@ SymbolsVisitor::PreVisitDecl(Decl *D) {
           if (ECD) {
             IdentifierInfo *II = ECD->getDeclName().getAsIdentifierInfo();
             if (II) {
-              addChild("name", II->getNameStart());
+              addName(ECD, II->getNameStart());
             }
           }
           curNode = origCur;
@@ -188,7 +188,7 @@ SymbolsVisitor::PreVisitDecl(Decl *D) {
       if (RD) {
         IdentifierInfo *II = RD->getDeclName().getAsIdentifierInfo();
         if (II) {
-          addChild("name", II->getNameStart());
+          addName(RD, II->getNameStart());
         }
       }
       return false;
@@ -214,7 +214,7 @@ SymbolsVisitor::PreVisitDecl(Decl *D) {
       if (TD) {
         IdentifierInfo *II = TD->getDeclName().getAsIdentifierInfo();
         if (II) {
-          addChild("name", II->getNameStart());
+          addName(TD, II->getNameStart());
         }
       }
       return true;
@@ -250,7 +250,7 @@ SymbolsVisitor::PreVisitDecl(Decl *D) {
         }
         IdentifierInfo *II = FD->getDeclName().getAsIdentifierInfo();
         if (II) {
-          addChild("name", II->getNameStart());
+          addName(FD, II->getNameStart());
         }
         if (BW) {
           DeclarationsVisitor DV(mangleContext, curNode, "bitField", typetableinfo); 
@@ -282,7 +282,7 @@ SymbolsVisitor::PreVisitDecl(Decl *D) {
       if (FD) {
         IdentifierInfo *II = FD->getDeclName().getAsIdentifierInfo();
         if (II) {
-          addChild("name", II->getNameStart());
+          addName(FD, II->getNameStart());
         }
       }
       return false;
@@ -312,7 +312,7 @@ SymbolsVisitor::PreVisitDecl(Decl *D) {
         newProp("access", AccessSpec(MD->getAccess()).c_str());
         IdentifierInfo *II = MD->getDeclName().getAsIdentifierInfo();
         if (II) {
-          addChild("name", II->getNameStart());
+          addName(MD, II->getNameStart());
         }
       }
 
@@ -351,8 +351,13 @@ SymbolsVisitor::PreVisitDecl(Decl *D) {
       newProp("sclass", sclass);
       if (VD) {
         IdentifierInfo *II = VD->getDeclName().getAsIdentifierInfo();
-        if (II) {
+        if (!II) {
+          return true;
+        }
+        if (VD->isLocalVarDecl()) {
           addChild("name", II->getNameStart());
+        } else {
+          addName(VD, II->getNameStart());
         }
       }
       return true;
@@ -390,7 +395,7 @@ SymbolsVisitor::PreVisitDecl(Decl *D) {
       if (ECD) {
         IdentifierInfo *II = ECD->getDeclName().getAsIdentifierInfo();
         if (II) {
-          addChild("name", II->getNameStart());
+          addName(ECD, II->getNameStart());
         }
       }
       return true;
