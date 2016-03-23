@@ -33,7 +33,11 @@ public:
 
     xmlNodePtr addChild(const char *Name, const char *Content = nullptr);
     xmlNodePtr addChild(const char *Name, xmlNodePtr N);
+    xmlNodePtr addName(clang::NamedDecl *ND, const char *Content = nullptr);
+    xmlNodePtr addName(const char *FullName, const char *Content = nullptr);
     void newChild(const char *Name, const char *Content = nullptr);
+    void newName(clang::NamedDecl *ND, const char *Content = nullptr);
+    void newName(const char *FullName, const char *Content = nullptr);
     void newProp(const char *Name, int Val, xmlNodePtr N = nullptr);
     void newProp(const char *Name, const char *Val, xmlNodePtr N = nullptr);
     void newComment(const xmlChar *str, xmlNodePtr RN = nullptr);
