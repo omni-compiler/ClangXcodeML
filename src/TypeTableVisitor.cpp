@@ -723,7 +723,6 @@ TypeTableVisitor::PreVisitDecl(Decl *D) {
            */
           RecordDecl* enclosure(D->getDeclContext()->getOuterLexicalRecordContext());
           QualType enclosureType(enclosure->getTypeForDecl(), 0);
-          std::cout << T.getAsString() << " < " << enclosureType.getAsString() << std::endl;
           typetableinfo->setNormalizability(enclosureType, false);
           typetableinfo->setNormalizability(T, false);
         }
