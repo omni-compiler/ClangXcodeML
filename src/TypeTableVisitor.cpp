@@ -611,7 +611,7 @@ TypeTableVisitor::PreVisitType(QualType T) {
 }
 
 static bool isNormalizable(const CXXRecordDecl &RD) {
-  return RD.getParent()->isTranslationUnit();
+  return ! RD.getParent()->getOuterLexicalRecordContext();
 }
 
 bool
