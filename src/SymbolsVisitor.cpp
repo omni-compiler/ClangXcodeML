@@ -2,6 +2,7 @@
 #include "SymbolsVisitor.h"
 #include "TypeTableVisitor.h"
 #include "DeclarationsVisitor.h"
+#include "operator.h"
 
 using namespace clang;
 using namespace llvm;
@@ -278,6 +279,20 @@ SymbolsVisitor::PreVisitDecl(Decl *D) {
       }
       newComment("Decl_Function");
       newChild("id");
+
+      OverloadedOperatorKind OK = FD->getDeclName().getCXXOverloadedOperator();
+      if (OK != OO_None) {
+        newComment("Decl_CXXOperator");
+        bool is_member_function = FD->getKind() != Decl::Function;
+        unsigned param_size = FD->param_size() + (is_member_function? 1:0);
+        xmlNodePtr opNode = addChild(
+            "operator",
+            OverloadedOperatorKindToString(OK, param_size).c_str()
+        );
+        std::string full_name = FD->getQualifiedNameAsString();
+        newProp("fullName", full_name.c_str(), opNode);
+      }
+
       if (FD) {
         QualType T = FD->getType();
         newProp("type", typetableinfo->getTypeName(T).c_str());
