@@ -475,7 +475,10 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
   case Stmt::CXXScalarValueInitExprClass: NStmtXXX("CXXScalarValueInitExprClass");
   case Stmt::CXXStdInitializerListExprClass: NStmtXXX("CXXStdInitializerListExprClass");
   case Stmt::CXXThisExprClass: NStmtXXX("CXXThisExprClass");
-  case Stmt::CXXThrowExprClass: NStmtXXX("CXXThrowExprClass");
+  case Stmt::CXXThrowExprClass: {
+    newChild("throwExpr");
+    return false; // see 6.13
+  }
   case Stmt::CXXTypeidExprClass: NStmtXXX("CXXTypeidExprClass");
   case Stmt::CXXUnresolvedConstructExprClass: NStmtXXX("CXXUnresolvedConstructExprClass");
   case Stmt::CXXUuidofExprClass: NStmtXXX("CXXUuidofExprClass");
