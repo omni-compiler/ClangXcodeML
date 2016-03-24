@@ -26,7 +26,8 @@ OBJS =  CtoXcodeML.o \
 	SymbolsVisitor.o \
 	TypeTableVisitor.o \
 	DeclarationsVisitor.o \
-	InheritanceInfo.o
+	InheritanceInfo.o \
+	operator.o
 
 CtoXcodeML: $(RAVOBJS) $(OBJS)
 	$(CXX) $(CXXFLAGS) $(RAVOBJS) $(OBJS) $(USEDLIBS) -o CtoXcodeML
@@ -50,6 +51,7 @@ SymbolsVisitor.o: \
 	SymbolsVisitor.h \
 	TypeTableVisitor.h \
 	DeclarationsVisitor.h \
+	operator.h \
 	XcodeMlRAV.h \
 	XcodeMlVisitorBase.h
 TypeTableVisitor.o: \
@@ -61,6 +63,7 @@ TypeTableVisitor.o: \
 DeclarationsVisitor.o: \
 	DeclarationsVisitor.cpp \
 	DeclarationsVisitor.h \
+	operator.h \
 	TypeTableVisitor.h \
 	XcodeMlRAV.h \
 	XcodeMlVisitorBase.h \
