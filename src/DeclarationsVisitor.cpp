@@ -391,7 +391,7 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
   case Stmt::BreakStmtClass: NStmt("breakStatement"); //6.7
   case Stmt::CXXCatchStmtClass: NStmtXXX("CXXCatchStmtClass");
   case Stmt::CXXForRangeStmtClass: NStmtXXX("CXXForRangeStmtClass");
-  case Stmt::CXXTryStmtClass: NStmtXXX("CXXTryStmtClass");
+  case Stmt::CXXTryStmtClass: NStmt("tryStatement");
   case Stmt::CapturedStmtClass: NStmtXXX("CapturedStmtClass");
   case Stmt::CompoundStmtClass: {
     // 6.2
