@@ -315,7 +315,7 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
   case Stmt::BreakStmtClass: NStmt("breakStatement"); //6.7
   case Stmt::CXXCatchStmtClass: NStmtXXX("CXXCatchStmtClass");
   case Stmt::CXXForRangeStmtClass: NStmtXXX("CXXForRangeStmtClass");
-  case Stmt::CXXTryStmtClass: NStmtXXX("CXXTryStmtClass");
+  case Stmt::CXXTryStmtClass: NStmt("tryStatement");
   case Stmt::CapturedStmtClass: NStmtXXX("CapturedStmtClass");
   case Stmt::CompoundStmtClass: {
     // 6.2
@@ -398,8 +398,11 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
   case Stmt::CXXPseudoDestructorExprClass: NStmtXXX("CXXPseudoDestructorExprClass");
   case Stmt::CXXScalarValueInitExprClass: NStmtXXX("CXXScalarValueInitExprClass");
   case Stmt::CXXStdInitializerListExprClass: NStmtXXX("CXXStdInitializerListExprClass");
-  case Stmt::CXXThisExprClass: NStmtXXX("CXXThisExprClass");
-  case Stmt::CXXThrowExprClass: NStmtXXX("CXXThrowExprClass");
+  case Stmt::CXXThisExprClass: NStmt("thisExpr"); // 7.8
+  case Stmt::CXXThrowExprClass: {
+    newChild("throwExpr");
+    return false; // see 6.13
+  }
   case Stmt::CXXTypeidExprClass: NStmtXXX("CXXTypeidExprClass");
   case Stmt::CXXUnresolvedConstructExprClass: NStmtXXX("CXXUnresolvedConstructExprClass");
   case Stmt::CXXUuidofExprClass: NStmtXXX("CXXUuidofExprClass");
