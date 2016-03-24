@@ -474,7 +474,7 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
   case Stmt::CXXPseudoDestructorExprClass: NStmtXXX("CXXPseudoDestructorExprClass");
   case Stmt::CXXScalarValueInitExprClass: NStmtXXX("CXXScalarValueInitExprClass");
   case Stmt::CXXStdInitializerListExprClass: NStmtXXX("CXXStdInitializerListExprClass");
-  case Stmt::CXXThisExprClass: NStmtXXX("CXXThisExprClass");
+  case Stmt::CXXThisExprClass: NStmt("thisExpr"); // 7.8
   case Stmt::CXXThrowExprClass: {
     newChild("throwExpr");
     return false; // see 6.13
