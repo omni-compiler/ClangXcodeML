@@ -713,18 +713,17 @@ TypeTableVisitor::PreVisitDecl(Decl *D) {
           }
           xmlAddChild(tmpNode, basesNode);
         }
-        if (RD->isLocalClass()) {
-          typetableinfo->setNormalizability(T, false);
-        } else if (! isNested(*RD)) {
-          typetableinfo->setNormalizability(T, true);
-        } else {
-          /* CXXRecordDecl D is not local but in another class,
-           * so D and the enblacing class is not normalizable.
-           */
+        std::string class_name(RD->getName());
+        if (isNested(*RD)) {
+          /* neither enblaced classes nor enblacing classes are normalizable */
           RecordDecl* enclosure(D->getDeclContext()->getOuterLexicalRecordContext());
           QualType enclosureType(enclosure->getTypeForDecl(), 0);
           typetableinfo->setNormalizability(enclosureType, false);
           typetableinfo->setNormalizability(T, false);
+        } else if (RD->isLocalClass() || class_name.empty()) {
+          typetableinfo->setNormalizability(T, false);
+        } else {
+          typetableinfo->setNormalizability(T, true);
         }
         TraverseChildOfDecl(D);
         SymbolsVisitor SV(mangleContext, tmpNode, "symbols", typetableinfo);
