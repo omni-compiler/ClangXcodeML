@@ -721,7 +721,8 @@ TypeTableVisitor::PreVisitDecl(Decl *D) {
         newChild("params");
       } else {
         newComment("PreVisitDecl::Function: already the same type is registered");
-        return false;
+        // ignore the children, but traverse them all
+        curNode = xmlNewNode(nullptr, BAD_CAST "dummy"); 
       }
       return true;
 #if 0
