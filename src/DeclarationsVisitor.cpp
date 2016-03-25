@@ -443,10 +443,10 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
   case Stmt::UserDefinedLiteralClass: NStmtXXX("UserDefinedLiteralClass");
   case Stmt::CStyleCastExprClass: NExpr("castExpr", nullptr); //7.12
   case Stmt::CXXFunctionalCastExprClass: NStmtXXX("CXXFunctionalCastExprClass");
-  case Stmt::CXXConstCastExprClass: NStmtXXX("CXXConstCastExprClass");
-  case Stmt::CXXDynamicCastExprClass: NStmtXXX("CXXDynamicCastExprClass");
-  case Stmt::CXXReinterpretCastExprClass: NStmtXXX("CXXReinterpretCastExprClass");
-  case Stmt::CXXStaticCastExprClass: NStmtXXX("CXXStaticCastExprClass");
+  case Stmt::CXXConstCastExprClass: NExpr("constCast", nullptr);
+  case Stmt::CXXDynamicCastExprClass: NExpr("dynamicCast", nullptr);
+  case Stmt::CXXReinterpretCastExprClass: NExpr("reinterpretCast", nullptr);
+  case Stmt::CXXStaticCastExprClass: NExpr("staticCast", nullptr);
   case Stmt::ObjCBridgedCastExprClass: NStmtXXX("ObjCBridgedCastExprClass");
   case Stmt::ImplicitCastExprClass:
     //NStmtXXX("ImplicitCastExprClass");
