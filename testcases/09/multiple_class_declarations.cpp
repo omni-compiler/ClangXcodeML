@@ -1,6 +1,6 @@
 namespace A {
   int x;
-  enum E {
+  enum B {
     E, N, U, M
   };
 }
@@ -24,10 +24,10 @@ class D {
   };
 };
 
-namespace A {
-  namespace B {
-    class C;
+namespace F {
+  namespace G {
+    class H;
   }
 }
 
-int f() {}
+class F::G::H { };

@@ -1,4 +1,4 @@
-/*namespace {
+namespace {
   namespace A {
     namespace {
       namespace B {
@@ -10,10 +10,10 @@
       }
     }
   }
-}*/
+}
 
 namespace A {
-class K {
-  int f();
-};
+  class K {
+    int f();
+  };
 }

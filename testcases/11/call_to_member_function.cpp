@@ -1,8 +1,8 @@
 class {
   public:
-  int f();
+  int f() { return 0; }
 } a;
 
-int main() {
-  a.f();
+int g() {
+  return a.f();
 }
