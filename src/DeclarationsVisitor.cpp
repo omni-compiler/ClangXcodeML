@@ -252,8 +252,11 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
     // XcodeML-C-0.9J.pdf: 7.6(assignExpr), 7.7, 7.10(commmaExpr)
     //QualType T = BO->getType();
     switch (BO->getOpcode()) {
-    case BO_PtrMemD:   NExpr("UNDEF_BO_PtrMemD", nullptr);
+    case BO_PtrMemD:   NExpr("memberPointerRef", nullptr);
+      // XXX: incomplete implementation
+      // XXX: ambiguous spec (memberPointerRef / memberPointer ?)
     case BO_PtrMemI:   NExpr("UNDEF_BO_PtrMemI", nullptr);
+      // XXX: undocumented yet
     case BO_Mul:       NExpr("mulExpr", nullptr);
     case BO_Div:       NExpr("divExpr", nullptr);
     case BO_Rem:       NExpr("modExpr", nullptr);
@@ -313,8 +316,10 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
   case Stmt::MSAsmStmtClass:  NStmtXXX("MSAsmStmtClass");
   case Stmt::AttributedStmtClass: NStmtXXX("AttributedStmtClass");
   case Stmt::BreakStmtClass: NStmt("breakStatement"); //6.7
-  case Stmt::CXXCatchStmtClass: NStmtXXX("CXXCatchStmtClass");
-  case Stmt::CXXForRangeStmtClass: NStmtXXX("CXXForRangeStmtClass");
+  case Stmt::CXXCatchStmtClass: NStmt("catchStatement");
+    // XXX: incomplete implementation
+  case Stmt::CXXForRangeStmtClass: NStmt("rangeForStatement");
+    // XXX: incomplete implementation
   case Stmt::CXXTryStmtClass: NStmt("tryStatement");
   case Stmt::CapturedStmtClass: NStmtXXX("CapturedStmtClass");
   case Stmt::CompoundStmtClass: {
@@ -389,10 +394,12 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
   case Stmt::CXXTemporaryObjectExprClass: NStmtXXX("CXXTemporaryObjectExprClass");
   case Stmt::CXXDefaultArgExprClass: NStmtXXX("CXXDefaultArgExprClass");
   case Stmt::CXXDefaultInitExprClass: NStmtXXX("CXXDefaultInitExprClass");
-  case Stmt::CXXDeleteExprClass: NStmtXXX("CXXDeleteExprClass");
+  case Stmt::CXXDeleteExprClass: NExpr("CXXDeleteExprClass", nullptr);
+    // XXX: incomplete implementation
   case Stmt::CXXDependentScopeMemberExprClass: NStmtXXX("CXXDependentScopeMemberExprClass");
   case Stmt::CXXFoldExprClass: NStmtXXX("CXXFoldExprClass");
-  case Stmt::CXXNewExprClass: NStmtXXX("CXXNewExprClass");
+  case Stmt::CXXNewExprClass: NExpr("newExpr", nullptr);
+    // XXX: incomplete implementation
   case Stmt::CXXNoexceptExprClass: NStmtXXX("CXXNoexceptExprClass");
   case Stmt::CXXNullPtrLiteralExprClass: NStmtXXX("CXXNullPtrLiteralExprClass");
   case Stmt::CXXPseudoDestructorExprClass: NStmtXXX("CXXPseudoDestructorExprClass");
@@ -504,7 +511,8 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
     OS.str();
     NExpr("intConstant", valueAsString.c_str());
   }
-  case Stmt::LambdaExprClass: NStmtXXX("LambdaExprClass");
+  case Stmt::LambdaExprClass: NExpr("lambdaExpr", nullptr);
+    // XXX: incomplete implementation
   case Stmt::MSPropertyRefExprClass: NStmtXXX("MSPropertyRefExprClass");
   case Stmt::MaterializeTemporaryExprClass: NStmtXXX("MaterializeTemporaryExprClass");
   case Stmt::MemberExprClass:
