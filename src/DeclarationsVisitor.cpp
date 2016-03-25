@@ -400,7 +400,7 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
   case Stmt::CXXStdInitializerListExprClass: NStmtXXX("CXXStdInitializerListExprClass");
   case Stmt::CXXThisExprClass: NStmt("thisExpr"); // 7.8
   case Stmt::CXXThrowExprClass: {
-    newChild("throwExpr");
+    newChild("throwStatement");
     return false; // see 6.13
   }
   case Stmt::CXXTypeidExprClass: NStmtXXX("CXXTypeidExprClass");
