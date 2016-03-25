@@ -2,6 +2,7 @@
 #include "SymbolsVisitor.h"
 #include "TypeTableVisitor.h"
 #include "DeclarationsVisitor.h"
+#include "operator.h"
 
 using namespace clang;
 using namespace llvm;
@@ -262,6 +263,10 @@ SymbolsVisitor::PreVisitDecl(Decl *D) {
   case Decl::ObjCAtDefsField: ND("Decl_ObjCAtDefsField");
   case Decl::ObjCIvar: ND("Decl_ObjCIvar");
   case Decl::Function:
+  case Decl::CXXMethod:
+  case Decl::CXXConstructor:
+  case Decl::CXXConversion:
+  case Decl::CXXDestructor:
     {
       FunctionDecl *FD = dyn_cast<FunctionDecl>(D);
       if (!FD->isFirstDecl()) {
@@ -274,48 +279,37 @@ SymbolsVisitor::PreVisitDecl(Decl *D) {
       }
       newComment("Decl_Function");
       newChild("id");
+
+      OverloadedOperatorKind OK = FD->getDeclName().getCXXOverloadedOperator();
+      if (OK != OO_None) {
+        newComment("Decl_CXXOperator");
+        bool is_member_function = FD->getKind() != Decl::Function;
+        unsigned param_size = FD->param_size() + (is_member_function? 1:0);
+        xmlNodePtr opNode = addChild(
+            "operator",
+            OverloadedOperatorKindToString(OK, param_size).c_str()
+        );
+        std::string full_name = FD->getQualifiedNameAsString();
+        newProp("fullName", full_name.c_str(), opNode);
+      }
+
       if (FD) {
         QualType T = FD->getType();
         newProp("type", typetableinfo->getTypeName(T).c_str());
       }
       newProp("sclass", "extern_def");
+
+      CXXMethodDecl *MD = dyn_cast<CXXMethodDecl>(D);
+      if (MD) {
+        newProp("access", AccessSpec(MD->getAccess()).c_str());
+      }
+
       if (FD) {
         IdentifierInfo *II = FD->getDeclName().getAsIdentifierInfo();
         if (II) {
           addName(FD, II->getNameStart());
         }
       }
-      return false;
-    }
-  case Decl::CXXMethod:
-  case Decl::CXXConstructor:
-  case Decl::CXXConversion:
-  case Decl::CXXDestructor:
-    {
-      CXXMethodDecl *MD = dyn_cast<CXXMethodDecl>(D);
-      if (!MD->isFirstDecl()) {
-        newComment("Decl_CXXMethod: not 1st");
-        IdentifierInfo *II = MD->getDeclName().getAsIdentifierInfo();
-        if (II) {
-          newComment(II->getNameStart());
-        }
-        return false;
-      }
-      newComment("Decl_CXXMethod");
-      newChild("id");
-      if (MD) {
-        QualType T = MD->getType();
-        newProp("type", typetableinfo->getTypeName(T).c_str());
-      }
-      newProp("sclass", "extern_def");
-      if (MD) {
-        newProp("access", AccessSpec(MD->getAccess()).c_str());
-        IdentifierInfo *II = MD->getDeclName().getAsIdentifierInfo();
-        if (II) {
-          addName(MD, II->getNameStart());
-        }
-      }
-
       return false;
     }
   case Decl::MSProperty: ND("Decl_MSProperty");
