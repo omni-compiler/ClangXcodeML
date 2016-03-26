@@ -446,7 +446,23 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
   }
   case Stmt::CUDAKernelCallExprClass: NStmtXXX("CUDAKernelCallExprClass");
   case Stmt::CXXMemberCallExprClass: NExpr("functionCall", nullptr);
-  case Stmt::CXXOperatorCallExprClass: NStmtXXX("CXXOperatorCallExprClass");
+  case Stmt::CXXOperatorCallExprClass: {
+    CXXOperatorCallExpr *OCE = dyn_cast<CXXOperatorCallExpr>(S);
+    newChild("functionCall");
+    OverloadedOperatorKind OK = OCE->getOperator();
+    std::string op_name = OverloadedOperatorKindToString(
+        OK,
+        OCE->getNumArgs()
+        );
+    HookForStmt = [this, op_name](Stmt *) {
+      /* avoid traversing the next node (function call to
+       * operator overloading) */
+      addChild("operator", op_name.c_str());
+      HookForStmt = nullptr;
+      return true;
+    };
+    return true;
+  }
   case Stmt::UserDefinedLiteralClass: NStmtXXX("UserDefinedLiteralClass");
   case Stmt::CStyleCastExprClass: NExpr("castExpr", nullptr); //7.12
   case Stmt::CXXFunctionalCastExprClass: NStmtXXX("CXXFunctionalCastExprClass");
