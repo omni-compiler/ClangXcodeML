@@ -445,7 +445,7 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
     return true;
   }
   case Stmt::CUDAKernelCallExprClass: NStmtXXX("CUDAKernelCallExprClass");
-  case Stmt::CXXMemberCallExprClass: NStmtXXX("CXXMemberCallExprClass");
+  case Stmt::CXXMemberCallExprClass: NExpr("functionCall", nullptr);
   case Stmt::CXXOperatorCallExprClass: NStmtXXX("CXXOperatorCallExprClass");
   case Stmt::UserDefinedLiteralClass: NStmtXXX("UserDefinedLiteralClass");
   case Stmt::CStyleCastExprClass: NExpr("castExpr", nullptr); //7.12
