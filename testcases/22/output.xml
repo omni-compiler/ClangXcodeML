@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<XcodeProgram source="/home/hnagamin/Documents/ClangXcodeML/testcases/22/cast.cpp" language="C" time="2016-03-28 14:53:36">
+  <typeTable>
+    <basicType type="Basic0" is_const="1" name="int"/>
+    <pointerType type="Pointer0" ref="Struct0"/>
+    <pointerType type="Pointer1" ref="int"/>
+    <pointerType type="Pointer2" ref="Basic0"/>
+    <pointerType type="Pointer3" ref="void"/>
+    <pointerType type="Pointer4" ref="Struct1"/>
+    <pointerType type="Pointer5" ref="Pointer0"/>
+    <structType type="Struct0">
+      <name fullName="Base">Base</name>
+      <symbols>
+        <id type="Function0" sclass="extern_def" access="public">
+          <name fullName="Base::vv">vv</name>
+        </id>
+      </symbols>
+    </structType>
+    <structType type="Struct1">
+      <name fullName="Derived">Derived</name>
+      <inheritedFrom>
+        <typeName ref="Struct0" access="public"/>
+      </inheritedFrom>
+      <symbols/>
+    </structType>
+    <functionType type="Function0" return_type="void">
+      <params/>
+    </functionType>
+    <functionType type="Function1" return_type="void">
+      <params>
+        <name type="Pointer0">pb</name>
+      </params>
+    </functionType>
+  </typeTable>
+  <globalSymbols>
+    <id type="Function1" sclass="extern_def">
+      <name fullName="f">f</name>
+    </id>
+  </globalSymbols>
+  <globalDeclarations>
+    <Decl_CXXRecord type="Struct0"/>
+    <functionDecl>
+      <name fullName="Base::vv">vv</name>
+    </functionDecl>
+    <Decl_CXXRecord type="Struct1"/>
+    <functionDefinition>
+      <name fullName="f">f</name>
+      <symbols>
+        <id type="Pointer0" sclass="param">
+          <name>pb</name>
+        </id>
+      </symbols>
+      <params>
+        <name type="Pointer0">pb</name>
+      </params>
+      <body>
+        <compoundStatement>
+          <symbols>
+            <id type="Basic0" sclass="auto">
+              <name>ci</name>
+            </id>
+            <id type="Pointer1" sclass="auto">
+              <name>pi</name>
+            </id>
+            <id type="double" sclass="auto">
+              <name>d</name>
+            </id>
+            <id type="Pointer3" sclass="auto">
+              <name>pv</name>
+            </id>
+            <id type="Pointer4" sclass="auto">
+              <name>pd</name>
+            </id>
+          </symbols>
+          <declarations>
+            <varDecl>
+              <name>ci</name>
+              <value>
+                <intConstant type="int">0</intConstant>
+              </value>
+            </varDecl>
+            <varDecl>
+              <name>pi</name>
+              <value>
+                <constCast type="Pointer1">
+                  <varAddr type="Pointer2" scope="local">ci</varAddr>
+                </constCast>
+              </value>
+            </varDecl>
+            <varDecl>
+              <name>d</name>
+              <value>
+                <staticCast type="double">
+                  <Var type="Basic0" scope="local">ci</Var>
+                </staticCast>
+              </value>
+            </varDecl>
+            <varDecl>
+              <name>pv</name>
+              <value>
+                <reinterpretCast type="Pointer3">
+                  <Var type="Basic0" scope="local">ci</Var>
+                </reinterpretCast>
+              </value>
+            </varDecl>
+            <varDecl>
+              <name>pd</name>
+              <value>
+                <dynamicCast type="Pointer4">
+                  <Var type="Pointer0" scope="param">pb</Var>
+                </dynamicCast>
+              </value>
+            </varDecl>
+          </declarations>
+        </compoundStatement>
+      </body>
+    </functionDefinition>
+  </globalDeclarations>
+</XcodeProgram>

@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<XcodeProgram source="/home/hnagamin/Documents/ClangXcodeML/testcases/09/multiple_class_declarations.cpp" language="C" time="2016-03-28 14:53:36">
+  <typeTable>
+    <basicType type="Basic0" is_const="1" name="int"/>
+    <pointerType type="Pointer0" ref="int"/>
+    <enumType type="Enum0">
+      <symbols>
+        <id>
+          <name fullName="A::B::E">E</name>
+        </id>
+        <id>
+          <name fullName="A::B::N">N</name>
+        </id>
+        <id>
+          <name fullName="A::B::U">U</name>
+        </id>
+        <id>
+          <name fullName="A::B::M">M</name>
+        </id>
+      </symbols>
+    </enumType>
+    <classType type="Class0">
+      <name fullName="B::C">C</name>
+      <symbols>
+        <id type="int" access="public">
+          <name fullName="B::C::x">x</name>
+        </id>
+      </symbols>
+    </classType>
+    <classType type="Class1">
+      <name fullName="D">D</name>
+      <symbols/>
+    </classType>
+    <classType type="Class2">
+      <name fullName="D::E">E</name>
+      <symbols>
+        <id type="int" access="public">
+          <name fullName="D::E::y">y</name>
+        </id>
+      </symbols>
+    </classType>
+    <classType type="Class3">
+      <name fullName="F::G::H">H</name>
+      <symbols/>
+    </classType>
+    <functionType type="Function0" return_type="int">
+      <params/>
+    </functionType>
+  </typeTable>
+  <globalSymbols/>
+  <globalDeclarations>
+    <Decl_Namespace>
+      <varDecl>
+        <name fullName="A::x">x</name>
+      </varDecl>
+      <Decl_Enum type="Enum0">
+        <name fullName="A::B">B</name>
+        <enumType>
+          <symbols type="Enum0">
+            <id>
+              <name fullName="A::B::E">E</name>
+            </id>
+            <id>
+              <name fullName="A::B::N">N</name>
+            </id>
+            <id>
+              <name fullName="A::B::U">U</name>
+            </id>
+            <id>
+              <name fullName="A::B::M">M</name>
+            </id>
+          </symbols>
+        </enumType>
+      </Decl_Enum>
+    </Decl_Namespace>
+    <Decl_Namespace>
+      <Decl_CXXRecord type="Class0"/>
+      <varDecl>
+        <name fullName="B::override">override</name>
+        <value>
+          <intConstant type="int">108</intConstant>
+        </value>
+      </varDecl>
+      <functionDefinition>
+        <name fullName="B::f">f</name>
+        <symbols/>
+        <params/>
+        <body>
+          <compoundStatement>
+            <symbols>
+              <id type="int" sclass="auto">
+                <name>answer</name>
+              </id>
+            </symbols>
+            <declarations>
+              <varDecl>
+                <name>answer</name>
+                <value>
+                  <intConstant type="int">42</intConstant>
+                </value>
+              </varDecl>
+            </declarations>
+            <body>
+              <returnStatement>
+                <Var type="int" scope="local">answer</Var>
+              </returnStatement>
+            </body>
+          </compoundStatement>
+        </body>
+      </functionDefinition>
+    </Decl_Namespace>
+    <Decl_CXXRecord type="Class1">
+      <Decl_CXXRecord type="Class2">
+        <id type="int">
+          <name fullName="D::E::y">y</name>
+        </id>
+      </Decl_CXXRecord>
+    </Decl_CXXRecord>
+    <Decl_Namespace>
+      <Decl_Namespace>
+        <Decl_CXXRecord type="Class3"/>
+      </Decl_Namespace>
+    </Decl_Namespace>
+    <Decl_CXXRecord type="Class3"/>
+  </globalDeclarations>
+</XcodeProgram>

@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<XcodeProgram source="/home/hnagamin/Documents/ClangXcodeML/testcases/02/member_initializer_list.cpp" language="C" time="2016-03-28 14:53:35">
+  <typeTable>
+    <pointerType type="Pointer0" ref="int"/>
+    <classType type="Class0">
+      <name fullName="A">A</name>
+      <symbols>
+        <id type="Function0" sclass="extern_def" access="public"/>
+        <id type="int" access="private">
+          <name fullName="A::x">x</name>
+        </id>
+        <id type="int" access="private">
+          <name fullName="A::y">y</name>
+        </id>
+        <id type="int" access="private">
+          <name fullName="A::z">z</name>
+        </id>
+      </symbols>
+    </classType>
+    <classType type="Class1">
+      <name fullName="B">B</name>
+      <symbols>
+        <id type="Function0" sclass="extern_def" access="public"/>
+        <id type="int" access="private">
+          <name fullName="B::x">x</name>
+        </id>
+        <id type="int" access="private">
+          <name fullName="B::y">y</name>
+        </id>
+        <id type="int" access="private">
+          <name fullName="B::z">z</name>
+        </id>
+      </symbols>
+    </classType>
+    <functionType type="Function0" return_type="void">
+      <params>
+        <name type="int">a</name>
+        <name type="int">b</name>
+      </params>
+    </functionType>
+    <functionType type="Function1" return_type="void">
+      <params/>
+    </functionType>
+  </typeTable>
+  <globalSymbols>
+    <id type="Function1" sclass="extern_def">
+      <name fullName="f">f</name>
+    </id>
+  </globalSymbols>
+  <globalDeclarations>
+    <Decl_CXXRecord type="Class0"/>
+    <functionDefinition>
+      <constructor/>
+      <symbols>
+        <id type="int" sclass="param">
+          <name>a</name>
+        </id>
+        <id type="int" sclass="param">
+          <name>b</name>
+        </id>
+      </symbols>
+      <params>
+        <name type="int">a</name>
+        <name type="int">b</name>
+      </params>
+      <constructorInitializerList>
+        <constructorInitializer>
+          <mulExpr type="int">
+            <Var type="int" scope="param">a</Var>
+            <Var type="int" scope="param">b</Var>
+          </mulExpr>
+        </constructorInitializer>
+        <constructorInitializer>
+          <plusExpr type="int">
+            <Var type="int" scope="param">a</Var>
+            <Var type="int" scope="param">b</Var>
+          </plusExpr>
+        </constructorInitializer>
+        <constructorInitializer>
+          <intConstant type="int">0</intConstant>
+        </constructorInitializer>
+      </constructorInitializerList>
+      <body>
+        <compoundStatement>
+          <symbols/>
+          <declarations/>
+        </compoundStatement>
+      </body>
+    </functionDefinition>
+    <Decl_CXXRecord type="Class1"/>
+    <functionDecl>
+      <constructor/>
+    </functionDecl>
+    <functionDefinition>
+      <NestedNameSpecifier_TypeSpec/>
+      <constructor/>
+      <symbols>
+        <id type="int" sclass="param">
+          <name>a</name>
+        </id>
+        <id type="int" sclass="param">
+          <name>b</name>
+        </id>
+      </symbols>
+      <params>
+        <name type="int">a</name>
+        <name type="int">b</name>
+      </params>
+      <constructorInitializerList>
+        <constructorInitializer>
+          <mulExpr type="int">
+            <Var type="int" scope="param">a</Var>
+            <Var type="int" scope="param">b</Var>
+          </mulExpr>
+        </constructorInitializer>
+        <constructorInitializer>
+          <plusExpr type="int">
+            <Var type="int" scope="param">a</Var>
+            <Var type="int" scope="param">b</Var>
+          </plusExpr>
+        </constructorInitializer>
+        <constructorInitializer>
+          <intConstant type="int">0</intConstant>
+        </constructorInitializer>
+      </constructorInitializerList>
+      <body>
+        <compoundStatement>
+          <symbols/>
+          <declarations/>
+        </compoundStatement>
+      </body>
+    </functionDefinition>
+    <functionDefinition>
+      <name fullName="f">f</name>
+      <symbols/>
+      <params/>
+      <body>
+        <compoundStatement>
+          <symbols>
+            <id type="Class0" sclass="auto">
+              <name>a</name>
+            </id>
+          </symbols>
+          <declarations>
+            <varDecl>
+              <name>a</name>
+              <value>
+                <Stmt_CXXConstructExprClass>
+                  <intConstant type="int">42</intConstant>
+                  <intConstant type="int">54</intConstant>
+                </Stmt_CXXConstructExprClass>
+              </value>
+            </varDecl>
+          </declarations>
+        </compoundStatement>
+      </body>
+    </functionDefinition>
+  </globalDeclarations>
+</XcodeProgram>

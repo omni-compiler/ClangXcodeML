@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<XcodeProgram source="/home/hnagamin/Documents/ClangXcodeML/testcases/06/call_to_member_function_of_struct.cpp" language="C" time="2016-03-28 14:53:35">
+  <typeTable>
+    <pointerType type="Pointer0" ref="Struct0"/>
+    <structType type="Struct0">
+      <name fullName="A">A</name>
+      <symbols>
+        <id type="int" access="public">
+          <name fullName="A::x">x</name>
+        </id>
+        <id type="Function0" sclass="extern_def" access="public">
+          <name fullName="A::f">f</name>
+        </id>
+      </symbols>
+    </structType>
+    <functionType type="Function0" return_type="int">
+      <params/>
+    </functionType>
+  </typeTable>
+  <globalSymbols>
+    <id type="Function0" sclass="extern_def">
+      <name fullName="g">g</name>
+    </id>
+    <id type="Function0" sclass="extern_def">
+      <name fullName="main">main</name>
+    </id>
+  </globalSymbols>
+  <globalDeclarations>
+    <Decl_CXXRecord type="Struct0"/>
+    <functionDefinition>
+      <name fullName="A::f">f</name>
+      <symbols/>
+      <params/>
+      <body>
+        <compoundStatement>
+          <symbols/>
+          <declarations/>
+          <body>
+            <returnStatement>
+              <intConstant type="int">0</intConstant>
+            </returnStatement>
+          </body>
+        </compoundStatement>
+      </body>
+    </functionDefinition>
+    <functionDefinition>
+      <name fullName="g">g</name>
+      <symbols/>
+      <params/>
+      <body>
+        <compoundStatement>
+          <symbols/>
+          <declarations/>
+          <body>
+            <returnStatement>
+              <intConstant type="int">0</intConstant>
+            </returnStatement>
+          </body>
+        </compoundStatement>
+      </body>
+    </functionDefinition>
+    <functionDefinition>
+      <name fullName="main">main</name>
+      <symbols/>
+      <params/>
+      <body>
+        <compoundStatement>
+          <symbols>
+            <id type="Struct0" sclass="auto">
+              <name>a</name>
+            </id>
+          </symbols>
+          <declarations>
+            <varDecl>
+              <name>a</name>
+              <value>
+                <Stmt_CXXConstructExprClass/>
+              </value>
+            </varDecl>
+          </declarations>
+          <body>
+            <exprStatement>
+              <assignExpr type="int">
+                <memberRef type="int" member="x">
+                  <varAddr type="Pointer0" scope="local">a</varAddr>
+                </memberRef>
+                <intConstant type="int">0</intConstant>
+              </assignExpr>
+            </exprStatement>
+            <returnStatement>
+              <functionCall type="int">
+                <memberRef type="_bound_member_function_type_" member="f">
+                  <varAddr type="Pointer0" scope="local">a</varAddr>
+                </memberRef>
+              </functionCall>
+            </returnStatement>
+          </body>
+        </compoundStatement>
+      </body>
+    </functionDefinition>
+  </globalDeclarations>
+</XcodeProgram>

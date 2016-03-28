@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<XcodeProgram source="/home/hnagamin/Documents/ClangXcodeML/testcases/17/user-defined_literal.cpp" language="C" time="2016-03-28 14:53:36">
+  <typeTable>
+    <pointerType type="Pointer0" ref="unsigned_long_long"/>
+    <functionType type="Function0" return_type="int">
+      <params>
+        <name type="unsigned_long_long">x</name>
+      </params>
+    </functionType>
+  </typeTable>
+  <globalSymbols>
+    <id type="Function0" sclass="extern_def"/>
+  </globalSymbols>
+  <globalDeclarations>
+    <functionDefinition>
+      <name fullName="operator &quot;&quot; _times"/>
+      <symbols>
+        <id type="unsigned_long_long" sclass="param">
+          <name>x</name>
+        </id>
+      </symbols>
+      <params>
+        <name type="unsigned_long_long">x</name>
+      </params>
+      <body>
+        <compoundStatement>
+          <symbols/>
+          <declarations/>
+          <body>
+            <returnStatement>
+              <Var type="unsigned_long_long" scope="param">x</Var>
+            </returnStatement>
+          </body>
+        </compoundStatement>
+      </body>
+    </functionDefinition>
+  </globalDeclarations>
+</XcodeProgram>
