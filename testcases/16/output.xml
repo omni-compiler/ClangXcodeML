@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<XcodeProgram source="/home/hnagamin/Documents/ClangXcodeML/testcases/16/complex_function_type.cpp" language="C" time="2016-03-28 18:43:12">
+  <typeTable>
+    <pointerType type="Pointer0" ref="Function0"/>
+    <pointerType type="Pointer1" ref="Function2"/>
+    <pointerType type="Pointer2" ref="Function1"/>
+    <functionType type="Function0" return_type="double"/>
+    <functionType type="Function1" return_type="Pointer0">
+      <params>
+        <name type="double"></name>
+        <name type="Pointer1">p</name>
+        <name type="double"></name>
+      </params>
+    </functionType>
+    <functionType type="Function2" return_type="int"/>
+  </typeTable>
+  <globalSymbols>
+    <id type="Function1" sclass="extern_def">
+      <name fullName="f">f</name>
+    </id>
+  </globalSymbols>
+  <globalDeclarations>
+    <functionDefinition>
+      <name fullName="f">f</name>
+      <symbols>
+        <id type="double" sclass="param"/>
+        <id type="Pointer1" sclass="param">
+          <name>p</name>
+        </id>
+      </symbols>
+      <params>
+        <name type="double"></name>
+        <name type="Pointer1">p</name>
+      </params>
+      <body>
+        <compoundStatement>
+          <symbols/>
+          <declarations/>
+          <body>
+            <returnStatement>
+              <castExpr type="Pointer0">
+                <name type="double"></name>
+                <Var type="Function1">f</Var>
+              </castExpr>
+            </returnStatement>
+          </body>
+        </compoundStatement>
+      </body>
+    </functionDefinition>
+  </globalDeclarations>
+</XcodeProgram>

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<XcodeProgram source="/home/hnagamin/Documents/ClangXcodeML/testcases/11/call_to_member_function.cpp" language="C" time="2016-03-28 18:43:12">
+  <typeTable>
+    <pointerType type="Pointer0" ref="Class0"/>
+    <classType type="Class0">
+      <name fullName="(anonymous)"></name>
+      <symbols>
+        <id type="Function0" sclass="extern_def" access="public">
+          <name fullName="(anonymous class)::f">f</name>
+        </id>
+      </symbols>
+    </classType>
+    <functionType type="Function0" return_type="int">
+      <params/>
+    </functionType>
+  </typeTable>
+  <globalSymbols>
+    <id type="Class0" sclass="extern_def">
+      <name fullName="a">a</name>
+    </id>
+    <id type="Function0" sclass="extern_def">
+      <name fullName="g">g</name>
+    </id>
+  </globalSymbols>
+  <globalDeclarations>
+    <classDecl type="Class0">
+      <functionDefinition>
+        <name fullName="(anonymous class)::f">f</name>
+        <symbols/>
+        <params/>
+        <body>
+          <compoundStatement>
+            <symbols/>
+            <declarations/>
+            <body>
+              <returnStatement>
+                <intConstant type="int">0</intConstant>
+              </returnStatement>
+            </body>
+          </compoundStatement>
+        </body>
+      </functionDefinition>
+    </classDecl>
+    <varDecl>
+      <name fullName="a">a</name>
+      <value>
+        <Stmt_CXXConstructExprClass/>
+      </value>
+    </varDecl>
+    <functionDefinition>
+      <name fullName="g">g</name>
+      <symbols/>
+      <params/>
+      <body>
+        <compoundStatement>
+          <symbols/>
+          <declarations/>
+          <body>
+            <returnStatement>
+              <functionCall type="int">
+                <memberRef type="_bound_member_function_type_" member="f">
+                  <varAddr type="Pointer0" scope="global">a</varAddr>
+                </memberRef>
+              </functionCall>
+            </returnStatement>
+          </body>
+        </compoundStatement>
+      </body>
+    </functionDefinition>
+  </globalDeclarations>
+</XcodeProgram>

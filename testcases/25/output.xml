@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<XcodeProgram source="/home/hnagamin/Documents/ClangXcodeML/testcases/25/try-throw-catch.cpp" language="C" time="2016-03-28 18:43:12">
+  <typeTable>
+    <pointerType type="Pointer0" ref="Struct0"/>
+    <structType type="Struct0">
+      <name fullName="A">A</name>
+      <symbols>
+        <id type="int" access="public">
+          <name fullName="A::x">x</name>
+        </id>
+      </symbols>
+    </structType>
+    <structType type="Struct1" is_const="1" name="Struct0"/>
+    <functionType type="Function0" return_type="int">
+      <params/>
+    </functionType>
+  </typeTable>
+  <globalSymbols>
+    <id type="Function0" sclass="extern_def">
+      <name fullName="main">main</name>
+    </id>
+  </globalSymbols>
+  <globalDeclarations>
+    <classDecl type="Struct0"/>
+    <functionDefinition>
+      <name fullName="main">main</name>
+      <symbols/>
+      <params/>
+      <body>
+        <compoundStatement>
+          <symbols/>
+          <declarations/>
+          <body>
+            <tryStatement>
+              <compoundStatement>
+                <symbols>
+                  <id type="Struct0" sclass="auto">
+                    <name>a</name>
+                  </id>
+                </symbols>
+                <declarations>
+                  <varDecl>
+                    <name>a</name>
+                    <value>
+                      <Stmt_CXXConstructExprClass/>
+                    </value>
+                  </varDecl>
+                </declarations>
+                <body>
+                  <exprStatement>
+                    <throwStatement/>
+                  </exprStatement>
+                </body>
+              </compoundStatement>
+              <catchStatement>
+                <varDecl>
+                  <name>a</name>
+                </varDecl>
+                <compoundStatement>
+                  <symbols/>
+                  <declarations/>
+                  <body>
+                    <exprStatement>
+                      <assignExpr type="int">
+                        <memberRef type="int" member="x">
+                          <varAddr type="Pointer0" scope="local">a</varAddr>
+                        </memberRef>
+                        <intConstant type="int">0</intConstant>
+                      </assignExpr>
+                    </exprStatement>
+                  </body>
+                </compoundStatement>
+              </catchStatement>
+            </tryStatement>
+            <compoundStatement>
+              <symbols>
+                <id type="int" sclass="auto">
+                  <name>k</name>
+                </id>
+              </symbols>
+              <declarations>
+                <varDecl>
+                  <name>k</name>
+                </varDecl>
+              </declarations>
+              <body>
+                <returnStatement>
+                  <intConstant type="int">0</intConstant>
+                </returnStatement>
+              </body>
+            </compoundStatement>
+          </body>
+        </compoundStatement>
+      </body>
+    </functionDefinition>
+  </globalDeclarations>
+</XcodeProgram>

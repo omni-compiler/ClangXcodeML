@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<XcodeProgram source="/home/hnagamin/Documents/ClangXcodeML/testcases/19/non-normalizable_class.cpp" language="C" time="2016-03-28 18:43:12">
+  <typeTable>
+    <pointerType type="Pointer0" ref="Class0"/>
+    <classType type="Class0">
+      <name fullName="(anonymous)"></name>
+      <symbols>
+        <id type="Function0" sclass="extern_def" access="public">
+          <name fullName="(anonymous class)::f">f</name>
+        </id>
+      </symbols>
+    </classType>
+    <classType type="Class1">
+      <name fullName="(anonymous)"></name>
+      <symbols/>
+    </classType>
+    <classType type="Class2">
+      <name fullName="(anonymous class)::A">A</name>
+      <symbols>
+        <id type="Function0" sclass="extern_def" access="private">
+          <name fullName="(anonymous class)::A::f">f</name>
+        </id>
+      </symbols>
+    </classType>
+    <classType type="Class3">
+      <name fullName="B">B</name>
+      <symbols>
+        <id type="int" access="private">
+          <name fullName="main()::B::x">x</name>
+        </id>
+      </symbols>
+    </classType>
+    <classType type="Class4">
+      <name fullName="C">C</name>
+      <symbols>
+        <id type="Class5" access="private">
+          <name fullName="main()::C::x">x</name>
+        </id>
+      </symbols>
+    </classType>
+    <classType type="Class5">
+      <name fullName="main()::C::(anonymous)"></name>
+      <symbols>
+        <id type="Function0" sclass="extern_def" access="private">
+          <name fullName="main()::C::(anonymous class)::f">f</name>
+        </id>
+      </symbols>
+    </classType>
+    <functionType type="Function0" return_type="int">
+      <params/>
+    </functionType>
+  </typeTable>
+  <globalSymbols>
+    <id type="Class0" sclass="extern_def">
+      <name fullName="a">a</name>
+    </id>
+    <id type="Class1" sclass="extern_def">
+      <name fullName="b">b</name>
+    </id>
+    <id type="Function0" sclass="extern_def">
+      <name fullName="main">main</name>
+    </id>
+  </globalSymbols>
+  <globalDeclarations>
+    <classDecl type="Class0">
+      <functionDefinition>
+        <name fullName="(anonymous class)::f">f</name>
+        <symbols/>
+        <params/>
+        <body>
+          <compoundStatement>
+            <symbols/>
+            <declarations/>
+            <body>
+              <returnStatement>
+                <intConstant type="int">0</intConstant>
+              </returnStatement>
+            </body>
+          </compoundStatement>
+        </body>
+      </functionDefinition>
+    </classDecl>
+    <varDecl>
+      <name fullName="a">a</name>
+      <value>
+        <Stmt_CXXConstructExprClass/>
+      </value>
+    </varDecl>
+    <classDecl type="Class1">
+      <classDecl type="Class2">
+        <functionDefinition>
+          <name fullName="(anonymous class)::A::f">f</name>
+          <symbols/>
+          <params/>
+          <body>
+            <compoundStatement>
+              <symbols/>
+              <declarations/>
+              <body>
+                <returnStatement>
+                  <intConstant type="int">0</intConstant>
+                </returnStatement>
+              </body>
+            </compoundStatement>
+          </body>
+        </functionDefinition>
+      </classDecl>
+    </classDecl>
+    <varDecl>
+      <name fullName="b">b</name>
+      <value>
+        <Stmt_CXXConstructExprClass/>
+      </value>
+    </varDecl>
+    <functionDefinition>
+      <name fullName="main">main</name>
+      <symbols/>
+      <params/>
+      <body>
+        <compoundStatement>
+          <symbols>
+            <id type="Class3" sclass="auto">
+              <name>t</name>
+            </id>
+            <id type="Class4" sclass="auto">
+              <name>u</name>
+            </id>
+          </symbols>
+          <declarations>
+            <classDecl type="Class3">
+              <id type="int">
+                <name fullName="main()::B::x">x</name>
+              </id>
+            </classDecl>
+            <varDecl>
+              <name>t</name>
+              <value>
+                <Stmt_CXXConstructExprClass/>
+              </value>
+            </varDecl>
+            <classDecl type="Class4">
+              <classDecl type="Class5">
+                <functionDefinition>
+                  <name fullName="main()::C::(anonymous class)::f">f</name>
+                  <symbols/>
+                  <params/>
+                  <body>
+                    <compoundStatement>
+                      <symbols/>
+                      <declarations/>
+                      <body>
+                        <returnStatement>
+                          <intConstant type="int">0</intConstant>
+                        </returnStatement>
+                      </body>
+                    </compoundStatement>
+                  </body>
+                </functionDefinition>
+              </classDecl>
+              <id type="Class5">
+                <name fullName="main()::C::x">x</name>
+              </id>
+            </classDecl>
+            <varDecl>
+              <name>u</name>
+              <value>
+                <Stmt_CXXConstructExprClass/>
+              </value>
+            </varDecl>
+          </declarations>
+          <body>
+            <returnStatement>
+              <functionCall type="int">
+                <memberRef type="_bound_member_function_type_" member="f">
+                  <varAddr type="Pointer0" scope="global">a</varAddr>
+                </memberRef>
+              </functionCall>
+            </returnStatement>
+          </body>
+        </compoundStatement>
+      </body>
+    </functionDefinition>
+  </globalDeclarations>
+</XcodeProgram>

@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<XcodeProgram source="/home/hnagamin/Documents/ClangXcodeML/testcases/04/derivation.cpp" language="C" time="2016-03-28 18:43:12">
+  <typeTable>
+    <classType type="Class0">
+      <name fullName="A">A</name>
+      <symbols/>
+    </classType>
+    <classType type="Class1">
+      <name fullName="B">B</name>
+      <symbols/>
+    </classType>
+    <classType type="Class2">
+      <name fullName="D">D</name>
+      <inheritedFrom>
+        <typeName ref="Class0" access="private"/>
+      </inheritedFrom>
+      <symbols/>
+    </classType>
+    <classType type="Class3">
+      <name fullName="PD1">PD1</name>
+      <inheritedFrom>
+        <typeName ref="Class0" access="public"/>
+      </inheritedFrom>
+      <symbols/>
+    </classType>
+    <classType type="Class4">
+      <name fullName="PD2">PD2</name>
+      <inheritedFrom>
+        <typeName ref="Class0" access="private"/>
+      </inheritedFrom>
+      <symbols/>
+    </classType>
+    <classType type="Class5">
+      <name fullName="PD3">PD3</name>
+      <inheritedFrom>
+        <typeName ref="Class0" access="protected"/>
+      </inheritedFrom>
+      <symbols/>
+    </classType>
+    <classType type="Class6">
+      <name fullName="MD1">MD1</name>
+      <inheritedFrom>
+        <typeName ref="Class0" access="private"/>
+        <typeName ref="Class1" access="private"/>
+      </inheritedFrom>
+      <symbols/>
+    </classType>
+    <classType type="Class7">
+      <name fullName="MD2">MD2</name>
+      <inheritedFrom>
+        <typeName ref="Class3" access="public"/>
+        <typeName ref="Class4" access="private"/>
+        <typeName ref="Class5" access="protected"/>
+      </inheritedFrom>
+      <symbols/>
+    </classType>
+    <classType type="Class8">
+      <name fullName="VD1">VD1</name>
+      <inheritedFrom>
+        <typeName ref="Class0" access="private" is_virtual="1"/>
+      </inheritedFrom>
+      <symbols/>
+    </classType>
+    <classType type="Class9">
+      <name fullName="VD2">VD2</name>
+      <inheritedFrom>
+        <typeName ref="Class0" access="public" is_virtual="1"/>
+      </inheritedFrom>
+      <symbols/>
+    </classType>
+    <classType type="Class10">
+      <name fullName="VD3">VD3</name>
+      <inheritedFrom>
+        <typeName ref="Class0" access="private" is_virtual="1"/>
+      </inheritedFrom>
+      <symbols/>
+    </classType>
+    <classType type="Class11">
+      <name fullName="VD4">VD4</name>
+      <inheritedFrom>
+        <typeName ref="Class0" access="protected" is_virtual="1"/>
+      </inheritedFrom>
+      <symbols/>
+    </classType>
+    <classType type="Class12">
+      <name fullName="CD">CD</name>
+      <inheritedFrom>
+        <typeName ref="Class8" access="private"/>
+        <typeName ref="Class9" access="public"/>
+        <typeName ref="Class2" access="protected" is_virtual="1"/>
+        <typeName ref="Class6" access="private"/>
+      </inheritedFrom>
+      <symbols/>
+    </classType>
+  </typeTable>
+  <globalSymbols/>
+  <globalDeclarations>
+    <classDecl type="Class0"/>
+    <classDecl type="Class1"/>
+    <classDecl type="Class2"/>
+    <classDecl type="Class3"/>
+    <classDecl type="Class4"/>
+    <classDecl type="Class5"/>
+    <classDecl type="Class6"/>
+    <classDecl type="Class7"/>
+    <classDecl type="Class8"/>
+    <classDecl type="Class9"/>
+    <classDecl type="Class10"/>
+    <classDecl type="Class11"/>
+    <classDecl type="Class12"/>
+  </globalDeclarations>
+</XcodeProgram>

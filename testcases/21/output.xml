@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<XcodeProgram source="/home/hnagamin/Documents/ClangXcodeML/testcases/21/call_to_overloaded_operator.cpp" language="C" time="2016-03-28 18:43:12">
+  <typeTable>
+    <pointerType type="Pointer0" ref="Struct0"/>
+    <pointerType type="Pointer1" ref="int"/>
+    <pointerType type="Pointer2" ref="Function0"/>
+    <structType type="Struct0">
+      <name fullName="A">A</name>
+      <symbols>
+        <id type="int" access="public">
+          <name fullName="A::content">content</name>
+        </id>
+      </symbols>
+    </structType>
+    <structType type="Struct1" is_const="1" name="Struct0"/>
+    <functionType type="Function0" return_type="Struct0">
+      <params>
+        <name type="Struct0">a</name>
+        <name type="int">x</name>
+      </params>
+    </functionType>
+    <functionType type="Function1" return_type="void">
+      <params/>
+    </functionType>
+  </typeTable>
+  <globalSymbols>
+    <id type="Function0" sclass="extern_def">
+      <operator fullName="operator+=">asgPlusExpr</operator>
+    </id>
+    <id type="Function1" sclass="extern_def">
+      <name fullName="f">f</name>
+    </id>
+  </globalSymbols>
+  <globalDeclarations>
+    <classDecl type="Struct0"/>
+    <functionDefinition>
+      <operator fullName="operator+=">asgPlusExpr</operator>
+      <symbols>
+        <id type="Struct0" sclass="param">
+          <name>a</name>
+        </id>
+        <id type="int" sclass="param">
+          <name>x</name>
+        </id>
+      </symbols>
+      <params/>
+      <name type="Struct0">a</name>
+      <name type="int">x</name>
+      <body>
+        <compoundStatement>
+          <symbols/>
+          <declarations/>
+          <body>
+            <exprStatement>
+              <asgPlusExpr type="int">
+                <memberRef type="int" member="content">
+                  <varAddr type="Pointer0" scope="param">a</varAddr>
+                </memberRef>
+                <Var type="int" scope="param">x</Var>
+              </asgPlusExpr>
+            </exprStatement>
+            <returnStatement>
+              <Stmt_CXXConstructExprClass>
+                <Var type="Struct0" scope="param">a</Var>
+              </Stmt_CXXConstructExprClass>
+            </returnStatement>
+          </body>
+        </compoundStatement>
+      </body>
+    </functionDefinition>
+    <functionDefinition>
+      <name fullName="f">f</name>
+      <symbols/>
+      <params/>
+      <body>
+        <compoundStatement>
+          <symbols>
+            <id type="Struct0" sclass="auto">
+              <name>a</name>
+            </id>
+          </symbols>
+          <declarations>
+            <varDecl>
+              <name>a</name>
+              <value>
+                <Stmt_InitListExprClass>
+                  <intConstant type="int">0</intConstant>
+                  <intConstant type="int">0</intConstant>
+                </Stmt_InitListExprClass>
+              </value>
+            </varDecl>
+          </declarations>
+          <body>
+            <exprStatement>
+              <functionCall>
+                <operator>asgPlusExpr</operator>
+                <Stmt_CXXConstructExprClass>
+                  <Var type="Struct0" scope="local">a</Var>
+                </Stmt_CXXConstructExprClass>
+                <intConstant type="int">3</intConstant>
+              </functionCall>
+            </exprStatement>
+          </body>
+        </compoundStatement>
+      </body>
+    </functionDefinition>
+  </globalDeclarations>
+</XcodeProgram>

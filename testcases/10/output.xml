@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<XcodeProgram source="/home/hnagamin/Documents/ClangXcodeML/testcases/10/list_initialization.cpp" language="C" time="2016-03-28 18:43:12">
+  <typeTable>
+    <pointerType type="Pointer0" ref="int"/>
+    <pointerType type="Pointer1" ref="ConstantArray0"/>
+    <arrayType type="ConstantArray0" element_type="int" array_size="4"/>
+    <functionType type="Function0" return_type="int">
+      <params/>
+    </functionType>
+  </typeTable>
+  <globalSymbols>
+    <id type="Function0" sclass="extern_def">
+      <name fullName="f">f</name>
+    </id>
+  </globalSymbols>
+  <globalDeclarations>
+    <functionDefinition>
+      <name fullName="f">f</name>
+      <symbols/>
+      <params/>
+      <body>
+        <compoundStatement>
+          <symbols>
+            <id type="ConstantArray0" sclass="auto">
+              <name>a</name>
+            </id>
+          </symbols>
+          <declarations>
+            <varDecl>
+              <name>a</name>
+              <value>
+                <Stmt_InitListExprClass>
+                  <intConstant type="int">1</intConstant>
+                  <intConstant type="int">2</intConstant>
+                  <intConstant type="int">3</intConstant>
+                  <intConstant type="int">4</intConstant>
+                  <intConstant type="int">1</intConstant>
+                  <intConstant type="int">2</intConstant>
+                  <intConstant type="int">3</intConstant>
+                  <intConstant type="int">4</intConstant>
+                </Stmt_InitListExprClass>
+              </value>
+            </varDecl>
+          </declarations>
+          <body>
+            <returnStatement>
+              <arrayRef type="int">
+                <arrayAddr type="ConstantArray0" scope="local">a</arrayAddr>
+                <intConstant type="int">0</intConstant>
+              </arrayRef>
+            </returnStatement>
+          </body>
+        </compoundStatement>
+      </body>
+    </functionDefinition>
+  </globalDeclarations>
+</XcodeProgram>
