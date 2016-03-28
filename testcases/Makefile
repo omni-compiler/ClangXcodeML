@@ -1,8 +1,9 @@
-subdirs := $(wildcard */)
+.PHONY: check update
 
-.PHONY: check $(subdirs)
+subdirs = $(wildcard */)
 
-check: $(subdirs)
+update :
+	for dir in $(subdirs); do $(MAKE) TARGET=output.xml -C $$dir; done
 
-$(subdirs):
-	$(MAKE) check -C $@
+check :
+	for dir in $(subdirs); do $(MAKE) check -C $$dir; done

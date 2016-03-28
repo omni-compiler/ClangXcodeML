@@ -1,7 +1,10 @@
-.PHONY: check
+.PHONY: check $(TARGET)
 
-tmp.xml : $(wildcard *.cpp)
-	../../src/CtoXcodeML $< -- -std=c++14 > $@
+TARGET = tmp.xml
+CTOXCODEML = ../../src/CtoXcodeML
+
+$(TARGET) : $(wildcard *.cpp) $(CTOXCODEML)
+	$(CTOXCODEML) $< -- > $@
 
 check : tmp.xml
 	diff --brief --ignore-matching-lines="<XcodeProgram.*>" tmp.xml output.xml
