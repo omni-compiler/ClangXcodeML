@@ -1070,7 +1070,7 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
       return true;
     }
     xmlNodePtr parentNode = curNode;
-    newChild("Decl_CXXRecord");
+    newChild("classDecl");
     QualType T(RD->getTypeForDecl(), 0);
     newProp("type", typetableinfo->getTypeName(T).c_str());
     if (typetableinfo->isNormalizable(T)) {
