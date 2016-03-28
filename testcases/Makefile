@@ -7,3 +7,10 @@ update :
 
 check :
 	for dir in $(subdirs); do $(MAKE) check -C $$dir; done
+
+clean :
+	for dir in $(subdirs); \
+	do if [ -e $${dir}tmp.xml ]; then \
+		rm $${dir}tmp.xml; \
+	fi \
+	done
