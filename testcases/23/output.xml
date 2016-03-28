@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<XcodeProgram source="/home/hnagamin/Documents/ClangXcodeML/testcases/23/pointer_to_member.cpp" language="C" time="2016-03-28 14:53:36">
+<XcodeProgram source="/home/hnagamin/Documents/ClangXcodeML/testcases/23/pointer_to_member.cpp" language="C" time="2016-03-28 18:43:12">
   <typeTable>
     <pointerType type="Pointer0"/>
     <pointerType type="Pointer1" ref="int"/>
@@ -35,7 +35,7 @@
     </id>
   </globalSymbols>
   <globalDeclarations>
-    <Decl_CXXRecord type="Struct0"/>
+    <classDecl type="Struct0"/>
     <functionDefinition>
       <name fullName="A::f">f</name>
       <symbols/>

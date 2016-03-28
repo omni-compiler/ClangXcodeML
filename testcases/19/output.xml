@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<XcodeProgram source="/home/hnagamin/Documents/ClangXcodeML/testcases/19/non-normalizable_class.cpp" language="C" time="2016-03-28 14:53:36">
+<XcodeProgram source="/home/hnagamin/Documents/ClangXcodeML/testcases/19/non-normalizable_class.cpp" language="C" time="2016-03-28 18:43:12">
   <typeTable>
     <pointerType type="Pointer0" ref="Class0"/>
     <classType type="Class0">
@@ -62,7 +62,7 @@
     </id>
   </globalSymbols>
   <globalDeclarations>
-    <Decl_CXXRecord type="Class0">
+    <classDecl type="Class0">
       <functionDefinition>
         <name fullName="(anonymous class)::f">f</name>
         <symbols/>
@@ -79,15 +79,15 @@
           </compoundStatement>
         </body>
       </functionDefinition>
-    </Decl_CXXRecord>
+    </classDecl>
     <varDecl>
       <name fullName="a">a</name>
       <value>
         <Stmt_CXXConstructExprClass/>
       </value>
     </varDecl>
-    <Decl_CXXRecord type="Class1">
-      <Decl_CXXRecord type="Class2">
+    <classDecl type="Class1">
+      <classDecl type="Class2">
         <functionDefinition>
           <name fullName="(anonymous class)::A::f">f</name>
           <symbols/>
@@ -104,8 +104,8 @@
             </compoundStatement>
           </body>
         </functionDefinition>
-      </Decl_CXXRecord>
-    </Decl_CXXRecord>
+      </classDecl>
+    </classDecl>
     <varDecl>
       <name fullName="b">b</name>
       <value>
@@ -127,19 +127,19 @@
             </id>
           </symbols>
           <declarations>
-            <Decl_CXXRecord type="Class3">
+            <classDecl type="Class3">
               <id type="int">
                 <name fullName="main()::B::x">x</name>
               </id>
-            </Decl_CXXRecord>
+            </classDecl>
             <varDecl>
               <name>t</name>
               <value>
                 <Stmt_CXXConstructExprClass/>
               </value>
             </varDecl>
-            <Decl_CXXRecord type="Class4">
-              <Decl_CXXRecord type="Class5">
+            <classDecl type="Class4">
+              <classDecl type="Class5">
                 <functionDefinition>
                   <name fullName="main()::C::(anonymous class)::f">f</name>
                   <symbols/>
@@ -156,11 +156,11 @@
                     </compoundStatement>
                   </body>
                 </functionDefinition>
-              </Decl_CXXRecord>
+              </classDecl>
               <id type="Class5">
                 <name fullName="main()::C::x">x</name>
               </id>
-            </Decl_CXXRecord>
+            </classDecl>
             <varDecl>
               <name>u</name>
               <value>

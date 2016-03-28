@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<XcodeProgram source="/home/hnagamin/Documents/ClangXcodeML/testcases/03/overload_of_multiplication_and_indirection.cpp" language="C" time="2016-03-28 14:53:35">
+<XcodeProgram source="/home/hnagamin/Documents/ClangXcodeML/testcases/03/overload_of_multiplication_and_indirection.cpp" language="C" time="2016-03-28 18:43:12">
   <typeTable>
     <pointerType type="Pointer0" ref="int"/>
     <pointerType type="Pointer1" ref="Class0"/>
@@ -19,6 +19,7 @@
         </id>
       </symbols>
     </classType>
+    <classType type="Class1" is_const="1" name="Class0"/>
     <functionType type="Function0" return_type="void">
       <params>
         <name type="int">v</name>
@@ -45,7 +46,7 @@
     </id>
   </globalSymbols>
   <globalDeclarations>
-    <Decl_CXXRecord type="Class0"/>
+    <classDecl type="Class0"/>
     <functionDefinition>
       <constructor/>
       <symbols>
@@ -119,7 +120,7 @@
                         <Var type="int" scope="param">k</Var>
                         <functionCall>
                           <operator>pointerRef</operator>
-                          <varAddr type="Pointer1" scope="param">x</varAddr>
+                          <Var type="Class0" scope="param">x</Var>
                         </functionCall>
                       </mulExpr>
                     </Stmt_CXXConstructExprClass>

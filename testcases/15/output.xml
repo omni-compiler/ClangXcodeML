@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<XcodeProgram source="/home/hnagamin/Documents/ClangXcodeML/testcases/15/const_vs._non-const_member_function.cpp" language="C" time="2016-03-28 14:53:36">
+<XcodeProgram source="/home/hnagamin/Documents/ClangXcodeML/testcases/15/const_vs._non-const_member_function.cpp" language="C" time="2016-03-28 18:43:12">
   <typeTable>
     <basicType type="Basic0" is_const="1" name="int"/>
     <pointerType type="Pointer0" ref="Class0"/>
@@ -28,7 +28,7 @@
   </typeTable>
   <globalSymbols/>
   <globalDeclarations>
-    <Decl_CXXRecord type="Class0"/>
+    <classDecl type="Class0"/>
     <functionDecl>
       <name fullName="A::f">f</name>
     </functionDecl>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<XcodeProgram source="/home/hnagamin/Documents/ClangXcodeML/testcases/07/repeated_function_types.cpp" language="C" time="2016-03-28 14:53:35">
+<XcodeProgram source="/home/hnagamin/Documents/ClangXcodeML/testcases/07/repeated_function_types.cpp" language="C" time="2016-03-28 18:43:12">
   <typeTable>
     <pointerType type="Pointer0" ref="int"/>
     <functionType type="Function0" return_type="int">

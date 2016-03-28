@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<XcodeProgram source="/home/hnagamin/Documents/ClangXcodeML/testcases/14/forward_class_declaration.cpp" language="C" time="2016-03-28 14:53:36">
+<XcodeProgram source="/home/hnagamin/Documents/ClangXcodeML/testcases/14/forward_class_declaration.cpp" language="C" time="2016-03-28 18:43:12">
   <typeTable>
     <classType type="Class0">
       <name fullName="A">A</name>
@@ -12,11 +12,11 @@
   </typeTable>
   <globalSymbols/>
   <globalDeclarations>
-    <Decl_CXXRecord type="Class0">
-      <Decl_CXXRecord type="Class1"/>
-    </Decl_CXXRecord>
-    <Decl_CXXRecord type="Class1">
+    <classDecl type="Class0">
+      <classDecl type="Class1"/>
+    </classDecl>
+    <classDecl type="Class1">
       <NestedNameSpecifier_TypeSpec/>
-    </Decl_CXXRecord>
+    </classDecl>
   </globalDeclarations>
 </XcodeProgram>

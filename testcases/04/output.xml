@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<XcodeProgram source="/home/hnagamin/Documents/ClangXcodeML/testcases/04/derivation.cpp" language="C" time="2016-03-28 14:53:35">
+<XcodeProgram source="/home/hnagamin/Documents/ClangXcodeML/testcases/04/derivation.cpp" language="C" time="2016-03-28 18:43:12">
   <typeTable>
     <classType type="Class0">
       <name fullName="A">A</name>
@@ -95,18 +95,18 @@
   </typeTable>
   <globalSymbols/>
   <globalDeclarations>
-    <Decl_CXXRecord type="Class0"/>
-    <Decl_CXXRecord type="Class1"/>
-    <Decl_CXXRecord type="Class2"/>
-    <Decl_CXXRecord type="Class3"/>
-    <Decl_CXXRecord type="Class4"/>
-    <Decl_CXXRecord type="Class5"/>
-    <Decl_CXXRecord type="Class6"/>
-    <Decl_CXXRecord type="Class7"/>
-    <Decl_CXXRecord type="Class8"/>
-    <Decl_CXXRecord type="Class9"/>
-    <Decl_CXXRecord type="Class10"/>
-    <Decl_CXXRecord type="Class11"/>
-    <Decl_CXXRecord type="Class12"/>
+    <classDecl type="Class0"/>
+    <classDecl type="Class1"/>
+    <classDecl type="Class2"/>
+    <classDecl type="Class3"/>
+    <classDecl type="Class4"/>
+    <classDecl type="Class5"/>
+    <classDecl type="Class6"/>
+    <classDecl type="Class7"/>
+    <classDecl type="Class8"/>
+    <classDecl type="Class9"/>
+    <classDecl type="Class10"/>
+    <classDecl type="Class11"/>
+    <classDecl type="Class12"/>
   </globalDeclarations>
 </XcodeProgram>

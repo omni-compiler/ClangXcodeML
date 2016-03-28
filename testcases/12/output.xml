@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<XcodeProgram source="/home/hnagamin/Documents/ClangXcodeML/testcases/12/functions_with_the_same_name_in_different_namespaces.cpp" language="C" time="2016-03-28 14:53:36">
+<XcodeProgram source="/home/hnagamin/Documents/ClangXcodeML/testcases/12/functions_with_the_same_name_in_different_namespaces.cpp" language="C" time="2016-03-28 18:43:12">
   <typeTable>
     <functionType type="Function0" return_type="int">
       <params/>

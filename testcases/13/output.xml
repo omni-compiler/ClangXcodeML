@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<XcodeProgram source="/home/hnagamin/Documents/ClangXcodeML/testcases/13/complicated_class_declaration.cpp" language="C" time="2016-03-28 14:53:36">
+<XcodeProgram source="/home/hnagamin/Documents/ClangXcodeML/testcases/13/complicated_class_declaration.cpp" language="C" time="2016-03-28 18:43:12">
   <typeTable>
     <basicType type="Basic0" is_const="1" name="int"/>
     <pointerType type="Pointer0"/>
@@ -57,13 +57,10 @@
     </id>
   </globalSymbols>
   <globalDeclarations>
-    <Decl_CXXRecord type="Class0"/>
-    <functionDefinition>
+    <classDecl type="Class0"/>
+    <functionDecl>
       <constructor/>
-      <symbols/>
-      <params/>
-      <body/>
-    </functionDefinition>
+    </functionDecl>
     <functionDefinition>
       <constructor/>
       <symbols>
@@ -93,7 +90,7 @@
         </compoundStatement>
       </body>
     </functionDefinition>
-    <Decl_CXXRecord type="Class1"/>
+    <classDecl type="Class1"/>
     <functionDecl>
       <name fullName="B::f">f</name>
     </functionDecl>
