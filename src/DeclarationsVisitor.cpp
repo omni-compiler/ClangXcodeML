@@ -252,8 +252,11 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
     // XcodeML-C-0.9J.pdf: 7.6(assignExpr), 7.7, 7.10(commmaExpr)
     //QualType T = BO->getType();
     switch (BO->getOpcode()) {
-    case BO_PtrMemD:   NExpr("UNDEF_BO_PtrMemD", nullptr);
+    case BO_PtrMemD:   NExpr("memberPointerRef", nullptr);
+      // XXX: incomplete implementation
+      // XXX: ambiguous spec (memberPointerRef / memberPointer ?)
     case BO_PtrMemI:   NExpr("UNDEF_BO_PtrMemI", nullptr);
+      // XXX: undocumented yet
     case BO_Mul:       NExpr("mulExpr", nullptr);
     case BO_Div:       NExpr("divExpr", nullptr);
     case BO_Rem:       NExpr("modExpr", nullptr);
@@ -313,8 +316,10 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
   case Stmt::MSAsmStmtClass:  NStmtXXX("MSAsmStmtClass");
   case Stmt::AttributedStmtClass: NStmtXXX("AttributedStmtClass");
   case Stmt::BreakStmtClass: NStmt("breakStatement"); //6.7
-  case Stmt::CXXCatchStmtClass: NStmtXXX("CXXCatchStmtClass");
-  case Stmt::CXXForRangeStmtClass: NStmtXXX("CXXForRangeStmtClass");
+  case Stmt::CXXCatchStmtClass: NStmt("catchStatement");
+    // XXX: incomplete implementation
+  case Stmt::CXXForRangeStmtClass: NStmt("rangeForStatement");
+    // XXX: incomplete implementation
   case Stmt::CXXTryStmtClass: NStmt("tryStatement");
   case Stmt::CapturedStmtClass: NStmtXXX("CapturedStmtClass");
   case Stmt::CompoundStmtClass: {
@@ -389,10 +394,12 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
   case Stmt::CXXTemporaryObjectExprClass: NStmtXXX("CXXTemporaryObjectExprClass");
   case Stmt::CXXDefaultArgExprClass: NStmtXXX("CXXDefaultArgExprClass");
   case Stmt::CXXDefaultInitExprClass: NStmtXXX("CXXDefaultInitExprClass");
-  case Stmt::CXXDeleteExprClass: NStmtXXX("CXXDeleteExprClass");
+  case Stmt::CXXDeleteExprClass: NExpr("CXXDeleteExprClass", nullptr);
+    // XXX: incomplete implementation
   case Stmt::CXXDependentScopeMemberExprClass: NStmtXXX("CXXDependentScopeMemberExprClass");
   case Stmt::CXXFoldExprClass: NStmtXXX("CXXFoldExprClass");
-  case Stmt::CXXNewExprClass: NStmtXXX("CXXNewExprClass");
+  case Stmt::CXXNewExprClass: NExpr("newExpr", nullptr);
+    // XXX: incomplete implementation
   case Stmt::CXXNoexceptExprClass: NStmtXXX("CXXNoexceptExprClass");
   case Stmt::CXXNullPtrLiteralExprClass: NStmtXXX("CXXNullPtrLiteralExprClass");
   case Stmt::CXXPseudoDestructorExprClass: NStmtXXX("CXXPseudoDestructorExprClass");
@@ -400,7 +407,7 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
   case Stmt::CXXStdInitializerListExprClass: NStmtXXX("CXXStdInitializerListExprClass");
   case Stmt::CXXThisExprClass: NStmt("thisExpr"); // 7.8
   case Stmt::CXXThrowExprClass: {
-    newChild("throwExpr");
+    newChild("throwStatement");
     return false; // see 6.13
   }
   case Stmt::CXXTypeidExprClass: NStmtXXX("CXXTypeidExprClass");
@@ -438,15 +445,31 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
     return true;
   }
   case Stmt::CUDAKernelCallExprClass: NStmtXXX("CUDAKernelCallExprClass");
-  case Stmt::CXXMemberCallExprClass: NStmtXXX("CXXMemberCallExprClass");
-  case Stmt::CXXOperatorCallExprClass: NStmtXXX("CXXOperatorCallExprClass");
+  case Stmt::CXXMemberCallExprClass: NExpr("functionCall", nullptr);
+  case Stmt::CXXOperatorCallExprClass: {
+    CXXOperatorCallExpr *OCE = dyn_cast<CXXOperatorCallExpr>(S);
+    newChild("functionCall");
+    OverloadedOperatorKind OK = OCE->getOperator();
+    std::string op_name = OverloadedOperatorKindToString(
+        OK,
+        OCE->getNumArgs()
+        );
+    HookForStmt = [this, op_name](Stmt *) {
+      /* avoid traversing the next node (function call to
+       * operator overloading) */
+      addChild("operator", op_name.c_str());
+      HookForStmt = nullptr;
+      return true;
+    };
+    return true;
+  }
   case Stmt::UserDefinedLiteralClass: NStmtXXX("UserDefinedLiteralClass");
   case Stmt::CStyleCastExprClass: NExpr("castExpr", nullptr); //7.12
   case Stmt::CXXFunctionalCastExprClass: NStmtXXX("CXXFunctionalCastExprClass");
-  case Stmt::CXXConstCastExprClass: NStmtXXX("CXXConstCastExprClass");
-  case Stmt::CXXDynamicCastExprClass: NStmtXXX("CXXDynamicCastExprClass");
-  case Stmt::CXXReinterpretCastExprClass: NStmtXXX("CXXReinterpretCastExprClass");
-  case Stmt::CXXStaticCastExprClass: NStmtXXX("CXXStaticCastExprClass");
+  case Stmt::CXXConstCastExprClass: NExpr("constCast", nullptr);
+  case Stmt::CXXDynamicCastExprClass: NExpr("dynamicCast", nullptr);
+  case Stmt::CXXReinterpretCastExprClass: NExpr("reinterpretCast", nullptr);
+  case Stmt::CXXStaticCastExprClass: NExpr("staticCast", nullptr);
   case Stmt::ObjCBridgedCastExprClass: NStmtXXX("ObjCBridgedCastExprClass");
   case Stmt::ImplicitCastExprClass:
     //NStmtXXX("ImplicitCastExprClass");
@@ -504,7 +527,8 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
     OS.str();
     NExpr("intConstant", valueAsString.c_str());
   }
-  case Stmt::LambdaExprClass: NStmtXXX("LambdaExprClass");
+  case Stmt::LambdaExprClass: NExpr("lambdaExpr", nullptr);
+    // XXX: incomplete implementation
   case Stmt::MSPropertyRefExprClass: NStmtXXX("MSPropertyRefExprClass");
   case Stmt::MaterializeTemporaryExprClass: NStmtXXX("MaterializeTemporaryExprClass");
   case Stmt::MemberExprClass:
@@ -1046,7 +1070,7 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
       return true;
     }
     xmlNodePtr parentNode = curNode;
-    newChild("Decl_CXXRecord");
+    newChild("classDecl");
     QualType T(RD->getTypeForDecl(), 0);
     newProp("type", typetableinfo->getTypeName(T).c_str());
     if (typetableinfo->isNormalizable(T)) {
