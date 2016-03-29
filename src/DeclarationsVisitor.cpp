@@ -1236,7 +1236,7 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
     VarDecl *VD = static_cast<VarDecl*>(D);
     newChild("varDecl");
     setLocation(D->getLocStart());
-    const char *var_name = VD->getNameAsString().c_str();
+    const char *var_name = VD->getName().data();
     if (VD->isLocalVarDecl()) {
       addChild("name", var_name);
     } else {
@@ -1277,7 +1277,7 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
     EnumConstantDecl *ED = static_cast<EnumConstantDecl*>(D);
     if (ED) {
       newChild("id");
-      newName(ED, ED->getNameAsString().c_str());
+      newName(ED, ED->getName().data());
     }
     return false;
   }
