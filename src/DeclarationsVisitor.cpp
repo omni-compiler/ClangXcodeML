@@ -520,6 +520,7 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
   case Stmt::InitListExprClass:
     // It is suspicious that there is a bug when traversing InitListExprClass
     // on clang-3.7&3.8; avoid the bug here.
+    newChild("value");
     for (Stmt *SubStmt : S->children()) {
       TraverseStmt(SubStmt);
     }
@@ -1255,10 +1256,11 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
 #endif
     TraverseNestedNameSpecifierLoc(VD->getQualifierLoc());
     if (Stmt *S = VD->getInit()) {
-      newChild("value");
-      TraverseStmt(S);
+      if (S->getStmtClass() != Stmt::InitListExprClass) {
+        newChild("value");
+      }
     }
-    return false;
+    return true;
   }
   case Decl::ImplicitParam: NDeclXXX("ImplicitParam");
   case Decl::ParmVar: {
