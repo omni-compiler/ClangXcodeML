@@ -123,6 +123,7 @@
       <name fullName="A::a">a</name>
       <NestedNameSpecifier_TypeSpec/>
       <value>
+        <NestedNameSpecifier_TypeSpec/>
         <intConstant type="int">1</intConstant>
       </value>
     </varDecl>

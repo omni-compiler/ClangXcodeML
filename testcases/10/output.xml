@@ -29,16 +29,10 @@
             <varDecl>
               <name>a</name>
               <value>
-                <Stmt_InitListExprClass>
-                  <intConstant type="int">1</intConstant>
-                  <intConstant type="int">2</intConstant>
-                  <intConstant type="int">3</intConstant>
-                  <intConstant type="int">4</intConstant>
-                  <intConstant type="int">1</intConstant>
-                  <intConstant type="int">2</intConstant>
-                  <intConstant type="int">3</intConstant>
-                  <intConstant type="int">4</intConstant>
-                </Stmt_InitListExprClass>
+                <intConstant type="int">1</intConstant>
+                <intConstant type="int">2</intConstant>
+                <intConstant type="int">3</intConstant>
+                <intConstant type="int">4</intConstant>
               </value>
             </varDecl>
           </declarations>

@@ -72,10 +72,7 @@
             <varDecl>
               <name>a</name>
               <value>
-                <Stmt_InitListExprClass>
-                  <intConstant type="int">10</intConstant>
-                  <intConstant type="int">10</intConstant>
-                </Stmt_InitListExprClass>
+                <intConstant type="int">10</intConstant>
               </value>
             </varDecl>
           </declarations>

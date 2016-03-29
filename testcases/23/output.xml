@@ -67,7 +67,7 @@
           <declarations>
             <varDecl>
               <name>p</name>
-              <value>
+              <value type="Struct0">
                 <NestedNameSpecifier_TypeSpec/>
                 <varAddr type="Pointer1">x</varAddr>
               </value>
@@ -75,17 +75,13 @@
             <varDecl>
               <name>a</name>
               <value>
-                <Stmt_InitListExprClass>
-                  <intConstant type="int">0</intConstant>
-                  <intConstant type="int">1</intConstant>
-                  <intConstant type="int">0</intConstant>
-                  <intConstant type="int">1</intConstant>
-                </Stmt_InitListExprClass>
+                <intConstant type="int">0</intConstant>
+                <intConstant type="int">1</intConstant>
               </value>
             </varDecl>
             <varDecl>
               <name>func</name>
-              <value>
+              <value type="Struct0">
                 <NestedNameSpecifier_TypeSpec/>
                 <varAddr type="Pointer3">f</varAddr>
               </value>
