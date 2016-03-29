@@ -58,9 +58,12 @@
   </globalSymbols>
   <globalDeclarations>
     <classDecl type="Class0"/>
-    <functionDecl>
+    <functionDefinition>
       <constructor/>
-    </functionDecl>
+      <symbols/>
+      <params/>
+      <body/>
+    </functionDefinition>
     <functionDefinition>
       <constructor/>
       <symbols>
