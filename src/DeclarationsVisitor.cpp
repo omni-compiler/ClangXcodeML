@@ -517,7 +517,13 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
   case Stmt::GenericSelectionExprClass: NStmtXXX("GenericSelectionExprClass");
   case Stmt::ImaginaryLiteralClass: NStmtXXX("ImaginaryLiteralClass");
   case Stmt::ImplicitValueInitExprClass: NStmtXXX("ImplicitValueInitExprClass");
-  case Stmt::InitListExprClass: NStmtXXX("InitListExprClass");
+  case Stmt::InitListExprClass:
+    // It is suspicious that there is a bug when traversing InitListExprClass
+    // on clang-3.7&3.8; avoid the bug here.
+    for (Stmt *SubStmt : S->children()) {
+      TraverseStmt(SubStmt);
+    }
+    return false;
   case Stmt::IntegerLiteralClass: {
     //7.1 XXX: long long should be treated specially
     APInt Value = static_cast<IntegerLiteral*>(S)->getValue();
