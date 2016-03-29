@@ -1,3 +1,3 @@
 double (*f(int (*p)(int))) (double) {
-  return (double(*)(double))f;
+  return (double(*)(double))p;
 }

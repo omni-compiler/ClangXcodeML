@@ -3,7 +3,7 @@
   <typeTable>
     <pointerType type="Pointer0" ref="Function0"/>
     <pointerType type="Pointer1" ref="Function2"/>
-    <pointerType type="Pointer2" ref="Function1"/>
+    <pointerType type="Pointer2" ref="Pointer1"/>
     <functionType type="Function0" return_type="double"/>
     <functionType type="Function1" return_type="Pointer0">
       <params>
@@ -40,7 +40,7 @@
             <returnStatement>
               <castExpr type="Pointer0">
                 <name type="double"></name>
-                <Var type="Function1">f</Var>
+                <Var type="Pointer1" scope="param">p</Var>
               </castExpr>
             </returnStatement>
           </body>
