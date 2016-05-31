@@ -25,7 +25,7 @@
     <xsd:complexType>
       <xsd:simpleContent>
         <xsd:extension base="xsd:string">
-          <xsd:attribute name="type" type="data-type-identifying-name"
+          <xsd:attribute name="type" type="dataTypeIdentName"
             use="optional" />
         </xsd:extension>
       </xsd:simpleContent>
@@ -37,18 +37,18 @@
     <xsd:complexType>
       <xsd:sequence>
         <xsd:element minOccurs="0" maxOccurs="unbounded"
-          ref="child-of-value-element" />
+          ref="ChildOfValueElem" />
       </xsd:sequence>
     </xsd:complexType>
   </xsd:element>
 
   <!-- FIXME -->
-  <xsd:simpleType name="child-of-value-element">
-    <xsd:union memberTypes="elements-at-section-seven" />
+  <xsd:simpleType name="ChildOfValueElem">
+    <xsd:union memberTypes="ElemAtSectionSeven" />
   </xsd:simpleType>
 
   <!-- FIXME -->
-  <xsd:simpleType name="elements-at-section-seven">
+  <xsd:simpleType name="ElemAtSectionSeven">
     <xsd:union memberTypes="FIXME" />
   </xsd:simpleType>
 
@@ -56,12 +56,12 @@
   <xsd:complexType name="typeTable">
     <xsd:sequence>
       <xsd:element minOccurs="0" maxOccurs="unbounded"
-        ref="data-type-definition-element" />
+        ref="DataTypeDefElems" />
     </xsd:sequence>
   </xsd:complexType>
 
   <!-- FIXME: structType/unionType are deprecated -->
-  <xsd:complexType name="data-type-definition-element">
+  <xsd:complexType name="DataTypeDefElems">
     <xsd:choice minOccurs="1" maxOccurs="1">
       <xsd:element ref="basicType" />
       <xsd:element ref="pointerType" />
@@ -78,7 +78,7 @@
   </xsd:complexType>
 
   <!-- 3.1 data type identifying name -->
-  <xsd:simpleType name="builtin-data-type-identifying-name">
+  <xsd:simpleType name="BuiltinDataTypeIdentName">
     <xsd:restriction base="xsd:string">
       <xsd:enumeration value="void" />
       <xsd:enumeration value="char" />
@@ -116,7 +116,7 @@
   <!-- FIXME: inheritedFrom element対応 -->
   <xsd:element name="typeName">
     <xsd:complexType>
-      <xsd:attribute name="ref" type="data-type-identifying-name"
+      <xsd:attribute name="ref" type="dataTypeIdentName"
         use="required" />
       <xsd:attribute name="access" type="AccessSpec" default="private" />
     </xsd:complexType>
@@ -124,20 +124,20 @@
 
   <!-- 3.3 data type definition element attributes -->
   <!-- FIXME: default of AccessSpec -->
-  <xsd:attributeGroup name="data-type-definition-element-attributes">
-    <xsd:attribute name="is_const" type="extBool" default="false" />
-    <xsd:attribute name="is_volatile" type="extBool" default="false" />
-    <xsd:attribute name="is_restrict" type="extBool" default="false" />
-    <xsd:attribute name="is_static" type="extBool" default="false" />
-    <xsd:attribute name="reference" type="referenceAttr" default="default" />
+  <xsd:attributeGroup name="dataTypeDefElemAttrs">
+    <xsd:attribute name="is_const" type="ExtBool" default="false" />
+    <xsd:attribute name="is_volatile" type="ExtBool" default="false" />
+    <xsd:attribute name="is_restrict" type="ExtBool" default="false" />
+    <xsd:attribute name="is_static" type="ExtBool" default="false" />
+    <xsd:attribute name="reference" type="ReferenceAttr" default="default" />
     <xsd:attribute name="access" type="AccessSpec" default="private" />
-    <xsd:attribute name="is_virtual" type="extBool" default="false" />
-    <xsd:attribute name="is_userDefined" type="extBool" default="false" />
+    <xsd:attribute name="is_virtual" type="ExtBool" default="false" />
+    <xsd:attribute name="is_userDefined" type="ExtBool" default="false" />
   </xsd:attributeGroup>
 
   <!-- FIXME: base = xsd:string ? -->
   <!-- FIXME: default of AccessSpec -->
-  <xsd:simpleType name="extBool">
+  <xsd:simpleType name="ExtBool">
     <xsd:restriction base="xsd:string">
       <xsd:enumeration value="1" />
       <xsd:enumeration value="0" />
@@ -146,7 +146,7 @@
     </xsd:restriction>
   </xsd:simpleType>
 
-  <xsd:simpleType name="referenceAttr">
+  <xsd:simpleType name="ReferenceAttr">
     <xsd:restriction base="xsd:string">
       <xsd:enumeration value="lvalue" />
       <xsd:enumeration value="rvalue" />
@@ -166,13 +166,15 @@
   <!-- FIXME: alignas is nani???? -->
   <xsd:element name="basicType">
     <xsd:complexType>
-      <xsd:attribute name="type" type="data-type-identifying-name"
-        use="required" />
-      <xsd:attribute name="name" type="data-type-identifying-name"
-        use="required" />
       <xsd:attribute name="alignas" type="alignasType" />
-      <xsd:attributeGroup ref="data-type-definition-element-attributes" />
+      <xsd:attributeGroup ref="dataTypeDefElemAttrs" />
+      <xsd:attributeGroup ref="typeRefAttrs" />
     </xsd:complexType>
   </xsd:element>
+
+  <xsd:attributeGroup name="typeRefAttrs">
+    <xsd:attribute name="type" type="dataTypeIdentName" use="required" />
+    <xsd:attribute name="ref" type="dataTypeIdentName" use="required" />
+  </xsd:attributeGroup>
 
 </xsd:schema>
