@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema targetNamespace="http://example/xcodeml/"
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+  xmlns="http://example/xcodeml/">
+  <!-- 2 Translation unit and XcodeProgram element -->
+  <!-- FIXME: templateInstances element (テンプレートの展開結果)の仕様 -->
+  <xsd:element name="XcodeProgram">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element minOccurs="1" maxOccurs="1" ref="typeTable" />
+        <xsd:element minOccurs="1" maxOccurs="1" ref="globalSymbols" />
+        <xsd:element minOccurs="1" maxOccurs="1" ref="globalDeclarations" />
+      </xsd:sequence>
+      <xsd:attribute name="compiler-info" use="optional" />
+      <xsd:attribute name="version" use="optional" />
+      <xsd:attribute name="time" use="optional" />
+      <xsd:attribute name="language" use="optional" />
+      <xsd:attribute name="source" use="optional" />
+    </xsd:complexType>
+  </xsd:element>
+
+  <!-- 2.1 name element -->
+  <!-- FIXME: baseはxsd:stringより小さくしたい -->
+  <xsd:element name="name">
+    <xsd:complexType>
+      <xsd:simpleContent>
+        <xsd:extension base="xsd:string">
+          <xsd:attribute name="type" type="data-type-identifying-name"
+            use="optional" />
+        </xsd:extension>
+      </xsd:simpleContent>
+    </xsd:complexType>
+  </xsd:element>
+
+  <!-- 2.2 value element -->
+  <xsd:element name="value">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element minOccurs="0" maxOccurs="unbounded"
+          ref="child-of-value-element" />
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+
+  <!-- FIXME -->
+  <xsd:simpleType name="child-of-value-element">
+    <xsd:union memberTypes="elements-at-section-seven" />
+  </xsd:simpleType>
+
+  <!-- FIXME -->
+  <xsd:simpleType name="elements-at-section-seven">
+    <xsd:union memberTypes="FIXME" />
+  </xsd:simpleType>
+
+  <!-- 3 typeTable element and data type definition element -->
+  <xsd:complexType name="typeTable">
+    <xsd:sequence>
+      <xsd:element minOccurs="0" maxOccurs="unbounded"
+        ref="data-type-definition-element" />
+    </xsd:sequence>
+  </xsd:complexType>
+
+  <!-- FIXME: structType/unionType are deprecated -->
+  <xsd:complexType name="data-type-definition-element">
+    <xsd:choice minOccurs="1" maxOccurs="1">
+      <xsd:element ref="basicType" />
+      <xsd:element ref="pointerType" />
+      <xsd:element ref="functionType" />
+      <xsd:element ref="arrayType" />
+      <xsd:element ref="structType" />
+      <xsd:element ref="unionType" />
+      <xsd:element ref="classType" />
+      <xsd:element ref="enumType" />
+      <xsd:element ref="typeInstance" />
+      <xsd:element ref="classTemplate" />
+      <xsd:element ref="aliasTemplate" />
+    </xsd:choice>
+  </xsd:complexType>
+
+  <!-- 3.1 data type identifying name -->
+  <xsd:simpleType name="builtin-data-type-identifying-name">
+    <xsd:restriction base="xsd:string">
+      <xsd:enumeration value="void" />
+      <xsd:enumeration value="char" />
+      <xsd:enumeration value="short" />
+      <xsd:enumeration value="int" />
+      <xsd:enumeration value="long" />
+      <xsd:enumeration value="long_long" />
+      <xsd:enumeration value="unsigned_char" />
+      <xsd:enumeration value="unsigned_short" />
+      <xsd:enumeration value="unsigned" />
+      <xsd:enumeration value="unsigned_long" />
+      <xsd:enumeration value="unsigned_long_long" />
+      <xsd:enumeration value="float" />
+      <xsd:enumeration value="double" />
+      <xsd:enumeration value="long_double" />
+      <xsd:enumeration value="wchar_t" />
+      <xsd:enumeration value="char16_t" />
+      <xsd:enumeration value="char32_t" />
+      <xsd:enumeration value="bool" />
+      <xsd:enumeration value="float_complex" />
+      <xsd:enumeration value="double_complex" />
+      <xsd:enumeration value="long_double_complex" />
+      <xsd:enumeration value="float_imaginary" />
+      <xsd:enumeration value="double_imaginary" />
+      <xsd:enumeration value="long_double_imaginary" />
+      <xsd:enumeration value="__builtin_va_arg" />
+      <xsd:enumeration value="auto" />
+      <xsd:enumeration value="namespace" />
+      <xsd:enumeration value="any_class" />
+      <xsd:enumeration value="any_template" />
+    </xsd:restriction>
+  </xsd:simpleType>
+
+  <!-- 3.2 typeName element -->
+  <!-- FIXME: inheritedFrom element対応 -->
+  <xsd:element name="typeName">
+    <xsd:complexType>
+      <xsd:attribute name="ref" type="data-type-identifying-name"
+        use="required" />
+      <xsd:attribute name="access" type="AccessSpec" default="private" />
+    </xsd:complexType>
+  </xsd:element>
+
+  <!-- 3.3 data type definition element attributes -->
+  <!-- FIXME: default of AccessSpec -->
+  <xsd:attributeGroup name="data-type-definition-element-attributes">
+    <xsd:attribute name="is_const" type="extBool" default="false" />
+    <xsd:attribute name="is_volatile" type="extBool" default="false" />
+    <xsd:attribute name="is_restrict" type="extBool" default="false" />
+    <xsd:attribute name="is_static" type="extBool" default="false" />
+    <xsd:attribute name="reference" type="referenceAttr" default="default" />
+    <xsd:attribute name="access" type="AccessSpec" default="private" />
+    <xsd:attribute name="is_virtual" type="extBool" default="false" />
+    <xsd:attribute name="is_userDefined" type="extBool" default="false" />
+  </xsd:attributeGroup>
+
+  <!-- FIXME: base = xsd:string ? -->
+  <!-- FIXME: default of AccessSpec -->
+  <xsd:simpleType name="extBool">
+    <xsd:restriction base="xsd:string">
+      <xsd:enumeration value="1" />
+      <xsd:enumeration value="0" />
+      <xsd:enumeration value="true" />
+      <xsd:enumeration value="false" />
+    </xsd:restriction>
+  </xsd:simpleType>
+
+  <xsd:simpleType name="referenceAttr">
+    <xsd:restriction base="xsd:string">
+      <xsd:enumeration value="lvalue" />
+      <xsd:enumeration value="rvalue" />
+      <xsd:enumeration value="default" />
+    </xsd:restriction>
+  </xsd:simpleType>
+
+  <xsd:simpleType name="AccessSpec">
+    <xsd:restriction base="xsd:string">
+      <xsd:enumeration value="private" />
+      <xsd:enumeration value="public" />
+      <xsd:enumeration value="protected" />
+    </xsd:restriction>
+  </xsd:simpleType>
+
+  <!-- 3.4 basicType element -->
+  <!-- FIXME: alignas is nani???? -->
+  <xsd:element name="basicType">
+    <xsd:complexType>
+      <xsd:attribute name="type" type="data-type-identifying-name"
+        use="required" />
+      <xsd:attribute name="name" type="data-type-identifying-name"
+        use="required" />
+      <xsd:attribute name="alignas" type="alignasType" />
+      <xsd:attributeGroup ref="data-type-definition-element-attributes" />
+    </xsd:complexType>
+  </xsd:element>
+
+</xsd:schema>
