@@ -283,4 +283,63 @@
     </xsd:complexType>
   </xsd:element>
 
+  <!-- 4.1 id element -->
+  <xsd:element name="id">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element minOccurs="1" maxOccurs="1" ref="name" />
+        <xsd:element minOccurs="0" maxOccurs="1" ref="value" />
+        <xsd:element minOccurs="0" maxOccurs="1" ref="bitField" />
+        <xsd:element minOccurs="0" maxOccurs="1" ref="alignAs" />
+      </xsd:sequence>
+      <xsd:attribute name="sclass" type="StorageClass" default="" />
+      <xsd:attribute name="fspec" type="FuncSpec" default="" />
+      <xsd:attribute name="type" type="dataTypeIdentName" default="" />
+      <xsd:attribute name="bit_field" type="FIXME" default="" />
+      <xsd:attribute name="align_as" type="FIXME" default="" />
+      <xsd:attribute name="is_gccThread" type="ExtBool" default="" />
+      <xsd:attribute name="is_gccExtension" type="ExtBool" default="" />
+    </xsd:complexType>
+  </xsd:element>
+
+  <xsd:simpleType name="StorageClass">
+    <xsd:restriction base="xsd:string">
+      <xsd:enumeration value="auto" />
+      <xsd:enumeration value="param" />
+      <xsd:enumeration value="extern" />
+      <xsd:enumeration value="extern_def" />
+      <xsd:enumeration value="static" />
+      <xsd:enumeration value="register" />
+      <xsd:enumeration value="label" />
+      <xsd:enumeration value="tagname" />
+      <xsd:enumeration value="moe" />
+      <xsd:enumeration value="typedef_name" />
+      <xsd:enumeration value="template_param" />
+      <xsd:enumeration value="namespace_name" />
+      <xsd:enumeration value="thread_local" />
+      <xsd:enumeration value="alias_name" />
+    </xsd:restriction>
+  </xsd:simpleType>
+
+  <!-- FIXME: not MECE -->
+  <xsd:simpleType name="FuncSpec">
+    <xsd:restriction base="xsd:string">
+      <xsd:enumeration value="inline" />
+      <xsd:enumeration value="virtual" />
+      <xsd:enumeration value="explicit" />
+    </xsd:restriction>
+  </xsd:simpleType>
+
+  <!-- 4.2 globalSymbols element -->
+  <xsd:element name="globalSymbols" type="IdElems" />
+
+  <xsd:complexType name="IdElems">
+    <xsd:sequence>
+      <xsd:element minOccurs="0" maxOccurs="unbounded" ref="id" />
+    </xsd:sequence>
+  </xsd:complexType>
+
+  <!-- 4.3 symbols element -->
+  <xsd:element name="symbols" type="IdElems" />
+
 </xsd:schema>
