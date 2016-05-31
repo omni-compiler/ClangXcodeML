@@ -177,4 +177,110 @@
     <xsd:attribute name="ref" type="dataTypeIdentName" use="required" />
   </xsd:attributeGroup>
 
+  <!-- 3.5 pointerType element -->
+  <xsd:element name="pointerType">
+    <xsd:complexType>
+      <xsd:attributeGroup ref="dataTypeIdentName" />
+      <xsd:attributeGroup ref="typeRefAttrs" />
+    </xsd:complexType>
+  </xsd:element>
+
+  <xsd:element name="functionType">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element minOccurs="1" maxOccurs="1" ref="params" />
+      </xsd:sequence>
+      <xsd:attribute name="type" type="dataTypeIdentName"
+        use="required" />
+      <xsd:attribute name="return_type" type="dataTypeIdentName"
+        use="required" />
+      <xsd:attribute name="is_inline" type="extBool" />
+    </xsd:complexType>
+  </xsd:element>
+
+  <!-- 3.7 arrayType element -->
+  <!-- FIXME: arraySize xor array_size -->
+  <!-- FIXME: default of attribute array_size -->
+  <xsd:element name="arrayType">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element minOccurs="0" maxOccurs="unbounded" ref="arraySize" />
+      </xsd:sequence>
+      <xsd:attribute name="type" type="dataTypeIdentName"
+        use="required" />
+      <xsd:attribute name="element_type" type="dataTypeIdentName"
+        use="required" />
+      <xsd:attribute name="array_size" type="xsd:nonNegativeInteger"
+        default="42" />
+      <xsd:attributeGroup ref="dataTypeDefElemAttrs" />
+    </xsd:complexType>
+  </xsd:element>
+
+  <xsd:element name="arraySize">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element name="FIXME" type="FIXME" />
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+
+  <!-- 3.8 unionType element -->
+  <xsd:element name="unionType">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element minOccurs="1" maxOccurs="1" ref="symbols" />
+      </xsd:sequence>
+      <xsd:attribute name="type" type="dataTypeIdentName" use="required" />
+      <xsd:attributeGroup ref="dataTypeDefElemAttrs" />
+    </xsd:complexType>
+  </xsd:element>
+
+  <!-- 3.9 structType element and class element (C++) -->
+  <xsd:element name="structType" type="CXXClassElem" />
+  <xsd:element name="class" type="CXXClassElem" />
+  <xsd:complexType name="CXXClassElem">
+    <xsd:sequence>
+      <xsd:element minOccurs="0" maxOccurs="1" ref="inheritedFrom" />
+      <xsd:element minOccurs="1" maxOccurs="1" ref="symbols" />
+      <xsd:element minOccurs="0" maxOccurs="1" ref="declarations" />
+    </xsd:sequence>
+    <xsd:attribute name="type" type="dataTypeIdentName" use="required" />
+    <xsd:attribute name="lineno" type="FIXME" default="FIXME" />
+    <xsd:attribute name="file" type="FIXME" default="FIXME" />
+    <xsd:attribute name="inherited" type="xsd:string" default="FIXME" />
+    <xsd:attributeGroup ref="dataTypeDefElemAttrs" />
+  </xsd:complexType>
+
+  <!-- 3.9.1 inheritedFrom element (C++) -->
+  <xsd:element name="inheritedFrom">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element minOccurs="1" maxOccurs="unbounded" ref="typeName" />
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+
+  <!-- 3.10 enumType element -->
+  <xsd:element name="enumType">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element minOccurs="0" maxOccurs="1" ref="name" />
+        <xsd:element minOccurs="1" maxOccurs="1" ref="symbols" />
+      </xsd:sequence>
+      <xsd:attribute name="type" type="dataTypeIdentName" />
+      <xsd:attributeGroup ref="dataTypeDefElemAttrs" />
+    </xsd:complexType>
+  </xsd:element>
+
+  <!-- 3.11 parameterPack element (C++) -->
+  <xsd:element name="parameterPack">
+    <xsd:complexType>
+      <xsd:attribute name="type" type="dataTypeIdentName"
+        use="required" />
+      <xsd:attribute name="element_type" type="dataTypeIdentName"
+        use="required" />
+      <xsd:attributeGroup ref="dataTypeDefElemAttrs" />
+    </xsd:complexType>
+  </xsd:element>
+
 </xsd:schema>
