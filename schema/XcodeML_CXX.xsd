@@ -135,6 +135,11 @@
     <xsd:attribute name="is_userDefined" type="ExtBool" default="false" />
   </xsd:attributeGroup>
 
+  <xsd:attributeGroup name="SourceLocInfo">
+    <xsd:attribute name="lineno" type="xsd:nonNegativeInteger" />
+    <xsd:attribute name="file" type="xsd:string" />
+  </xsd:attributeGroup>
+
   <!-- FIXME: base = xsd:string ? -->
   <!-- FIXME: default of AccessSpec -->
   <xsd:simpleType name="ExtBool">
@@ -245,10 +250,9 @@
       <xsd:element minOccurs="0" maxOccurs="1" ref="declarations" />
     </xsd:sequence>
     <xsd:attribute name="type" type="dataTypeIdentName" use="required" />
-    <xsd:attribute name="lineno" type="FIXME" default="FIXME" />
-    <xsd:attribute name="file" type="FIXME" default="FIXME" />
     <xsd:attribute name="inherited" type="xsd:string" default="FIXME" />
     <xsd:attributeGroup ref="dataTypeDefElemAttrs" />
+    <xsd:attributeGroup ref="SourceLocInfo" />
   </xsd:complexType>
 
   <!-- 3.9.1 inheritedFrom element (C++) -->
@@ -342,4 +346,108 @@
   <!-- 4.3 symbols element -->
   <xsd:element name="symbols" type="IdElems" />
 
+  <!-- 5.1 globalDeclarations element -->
+  <xsd:element name="globalDeclarations">
+    <xsd:complexType>
+      <xsd:choice minOccurs="0" maxOccurs="unbounded">
+        <xsd:element ref="varDecl" />
+        <xsd:element ref="functionDecl" />
+        <xsd:element ref="usingDecl" />
+        <xsd:element ref="functionDefinition" />
+        <xsd:element ref="functionTemplate" />
+        <xsd:element ref="text" />
+      </xsd:choice>
+    </xsd:complexType>
+  </xsd:element>
+
+  <!-- 5.2 declarations element -->
+  <xsd:element name="declarations">
+    <xsd:complexType>
+      <xsd:choice minOccurs="0" maxOccurs="unbounded">
+        <xsd:element ref="varDecl" />
+        <xsd:element ref="functionDecl" />
+        <xsd:element ref="usingDecl" />
+        <xsd:element ref="functionDefinition" />
+        <xsd:element ref="text" />
+      </xsd:choice>
+    </xsd:complexType>
+  </xsd:element>
+  <xsd:element name="functionDefinition">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:choice minOccurs="1" maxOccurs="1">
+          <xsd:element ref="name" />
+          <xsd:element ref="operator" />
+          <xsd:element ref="constructor" />
+          <xsd:element ref="destructor" />
+        </xsd:choice>
+        <xsd:element minOccurs="1" maxOccurs="1" ref="symbols" />
+        <xsd:element minOccurs="1" maxOccurs="1" ref="params" />
+        <xsd:element minOccurs="1" maxOccurs="1" ref="body" />
+      </xsd:sequence>
+      <xsd:attribute name="is_gccExtension" type="ExtBool" />
+    </xsd:complexType>
+  </xsd:element>
+
+  <!-- 5.3 operator element (C++) -->
+  <!-- FIXME: operatorString instead of string -->
+  <xsd:element name="operator" type="xsd:string" />
+
+  <!-- 5.3.2 constructor element (C++) -->
+  <xsd:element name="constructor">
+    <xsd:complexType>
+      <xsd:sequence minOccurs="0" maxOccurs="unbounded">
+        <xsd:element minOccurs="1" maxOccurs="1" ref="name" />
+        <xsd:element minOccurs="1" maxOccurs="1" ref="value" />
+      </xsd:sequence>
+      <xsd:attribute name="is_explicit" type="ExtBool" />
+    </xsd:complexType>
+  </xsd:element>
+
+  <!-- 5.3.3 destructor element (C++) -->
+  <xsd:element name="destructor" />
+
+  <!-- 5.3.4 params element -->
+  <xsd:element name="params">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:sequence minOccurs="0" maxOccurs="unbounded">
+          <xsd:element minOccurs="1" maxOccurs="1" ref="name" />
+          <xsd:element minOccurs="1" maxOccurs="1" ref="value" />
+        </xsd:sequence>
+        <xsd:element minOccurs="0" maxOccurs="1" name="elipsis" />
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+
+  <!-- 5.4 varDecl element -->
+  <xsd:element name="varDecl">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element minOccurs="1" maxOccurs="1" ref="name" />
+        <xsd:element minOccurs="0" maxOccurs="1" ref="value" />
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+
+  <!-- 5.5 functionDecl element -->
+  <xsd:element name="functionDecl">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element minOccurs="1" maxOccurs="1" ref="name" />
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+
+  <!-- 5.6 usingDecl element (C++) -->
+  <!-- FIXME: more strong restriction -->
+  <xsd:element usingDecl="">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element ref="name" />
+      </xsd:sequence>
+      <xsd:attribute name="namespace" type="ExtBool" />
+      <xsd:attributeGroup ref="SourceLocInfo" />
+    </xsd:complexType>
+  </xsd:element>
 </xsd:schema>
