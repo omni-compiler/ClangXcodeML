@@ -127,9 +127,7 @@ void processNode(xmlTextReaderPtr reader);
 int main(int argc, char **argv) {
   std::string filename(argv[1]);
   xmlTextReaderPtr reader = xmlNewTextReaderFilename(filename.c_str());
-  while (xmlTextReaderRead(reader) == 1) {
-    processNode(reader);
-  }
+  processNode(reader);
   xmlFreeTextReader(reader);
   return 0;
 }
@@ -137,21 +135,8 @@ int main(int argc, char **argv) {
 std::vector<xmlChar*> path;
 
 void processNode(xmlTextReaderPtr reader) {
-  int nodeType = xmlTextReaderNodeType(reader);
-  xmlChar* name = xmlTextReaderName(reader);
-  if (!name) {
-    name = xmlStrdup(BAD_CAST "---");
-  }
-  std::cout << nodeType << ":\t";
-  for (xmlChar* str : path) {
-    std::cout << str << ">";
-  }
-  std::cout << std::endl;
-  if (nodeType == XML_READER_TYPE_ELEMENT) {
-    path.push_back(name);
-  } else if (nodeType == XML_READER_TYPE_END_ELEMENT) {
-    path.pop_back();
-  } else if (nodeType == XML_READER_TYPE_TEXT) {
+  XMLVisitor visitor = identicalXMLVisitor;
+  visitor.readTextNode = [](xmlTextReaderPtr reader, std::vector<XMLString> path) {
     xmlChar* value = xmlTextReaderValue(reader);
     if (!value) {
       value = xmlStrdup(BAD_CAST "---");
@@ -160,5 +145,6 @@ void processNode(xmlTextReaderPtr reader) {
       std::cout << '.';
     }
     std::cout << value << std::endl;
-  }
+  };
+  ReadXML(reader, visitor);
 }
