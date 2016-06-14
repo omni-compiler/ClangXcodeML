@@ -56,7 +56,7 @@ const XMLVisitor identicalXMLVisitor = {
   identicalNodeVisitor
 };
 
-void ReadXML(xmlTextReaderPtr reader, XMLVisitor visitor) {
+void readXML(xmlTextReaderPtr reader, XMLVisitor visitor) {
   std::vector<XMLString> path;
   while (xmlTextReaderRead(reader) == 1) {
     xmlReaderTypes nodeType = static_cast<xmlReaderTypes>(xmlTextReaderNodeType(reader));
@@ -146,5 +146,5 @@ void processNode(xmlTextReaderPtr reader) {
     }
     std::cout << value << std::endl;
   };
-  ReadXML(reader, visitor);
+  readXML(reader, visitor);
 }
