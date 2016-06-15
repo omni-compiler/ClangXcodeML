@@ -65,6 +65,7 @@ std::function<void()> flushLineFn(std::stringstream& ss, std::string text) {
 
 void buildCode(xmlNodePtr node, std::stringstream& ss, xmlXPathContextPtr xpathCtxt) {
   std::function<void()> postprocess = [](){ };
+  bool stop_traversing = false;
   for (xmlNodePtr cur = node; cur; cur = cur->next) {
     if (cur->type == XML_ELEMENT_NODE) {
       XMLString elemName = cur->name;
@@ -87,9 +88,14 @@ void buildCode(xmlNodePtr node, std::stringstream& ss, xmlXPathContextPtr xpathC
       } else if (elemName == "compoundStatement") {
         ss << "{ /* compoundStatement */\n";
         postprocess = flushLineFn(ss, "} /*compoundStatement */\n");
+      } else if (elemName == "symbols") {
+        ss << "/* symbols */\n";
+        //stop_traversing = true;
       }
     }
-    buildCode(cur->children, ss, xpathCtxt);
+    if (!stop_traversing) {
+      buildCode(cur->children, ss, xpathCtxt);
+    }
   }
   postprocess();
 }
