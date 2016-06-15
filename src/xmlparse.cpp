@@ -7,11 +7,13 @@
 #include <functional>
 #include <map>
 #include <sstream>
+#include <cassert>
 #include "XMLString.h"
 
 using TypeMap = std::map<std::string, std::string>;
 
 TypeMap parseTypeTable(xmlDocPtr doc);
+void buildCode(xmlNodePtr, std::stringstream&, xmlXPathContextPtr);
 
 int main(int argc, char** argv) {
   if (argc < 2) {
@@ -21,6 +23,10 @@ int main(int argc, char** argv) {
   std::string filename(argv[1]);
   xmlDocPtr doc = xmlParseFile(filename.c_str());
   TypeMap t = parseTypeTable(doc);
+  std::stringstream ss;
+  xmlXPathContextPtr xpathCtxt = xmlXPathNewContext(doc);
+  buildCode(xmlDocGetRootElement(doc), ss, xpathCtxt);
+  std::cout << ss.str() << std::endl;
   return 0;
 }
 
@@ -35,15 +41,57 @@ XMLString xmlNodePtrToTypeName(xmlNodePtr node) {
   return "Type";
 }
 
-xmlNodePtr find(xmlNodePtr node, const char* xpathExpr) {
-
+xmlNodePtr findFirst(xmlNodePtr node, const char* xpathExpr, xmlXPathContextPtr xpathCtxt) {
+  if (!xpathCtxt) {
+    return nullptr;
+  }
+  xmlXPathSetContextNode(node, xpathCtxt);
+  xmlXPathObjectPtr xpathObj = xmlXPathNodeEval(
+      node,
+      BAD_CAST xpathExpr,
+      xpathCtxt
+      );
+  if (!xpathObj || !(xpathObj->nodesetval)) {
+    return nullptr;
+  }
+  return xpathObj->nodesetval->nodeTab[0];
 }
 
-void buildCode(xmlNodePtr node, std::stringstream ss) {
-  XMLString nodeType = node->name;
-  if (nodeType == "functionDefinition") {
-    xmlNodePtr 
+std::function<void()> flushLineFn(std::stringstream& ss, std::string text) {
+  return [&ss, text](){
+    ss << text;
+  };
+}
+
+void buildCode(xmlNodePtr node, std::stringstream& ss, xmlXPathContextPtr xpathCtxt) {
+  std::function<void()> postprocess = [](){ };
+  for (xmlNodePtr cur = node; cur; cur = cur->next) {
+    if (cur->type == XML_ELEMENT_NODE) {
+      XMLString elemName = cur->name;
+      if (elemName == "functionDefinition") {
+        xmlNodePtr fnName = findFirst(
+            cur,
+            "name|operator|constructor|destructor",
+            xpathCtxt);
+        XMLString fnType = fnName->name;
+        if (fnType == "name" || fnType == "operator") {
+          ss << xmlNodeGetContent(fnName);
+        } else if (fnType == "constructor") {
+          ss << "<constructor>";
+        } else if (fnType == "destructor") {
+          ss << "<destructor>";
+        } else {
+          assert(false);
+        }
+        ss << "()\n";
+      } else if (elemName == "compoundStatement") {
+        ss << "{ /* compoundStatement */\n";
+        postprocess = flushLineFn(ss, "} /*compoundStatement */\n");
+      }
+    }
+    buildCode(cur->children, ss, xpathCtxt);
   }
+  postprocess();
 }
 
 TypeMap parseTypeTable(xmlDocPtr doc) {
