@@ -9,11 +9,12 @@
 #include <sstream>
 #include <cassert>
 #include "XMLString.h"
+#include "Reality.h"
 
 using TypeMap = std::map<std::string, std::string>;
 
 TypeMap parseTypeTable(xmlDocPtr doc);
-void buildCode(xmlNodePtr, std::stringstream&, xmlXPathContextPtr);
+void buildCode(xmlDocPtr, std::stringstream&);
 
 int main(int argc, char** argv) {
   if (argc < 2) {
@@ -25,7 +26,7 @@ int main(int argc, char** argv) {
   TypeMap t = parseTypeTable(doc);
   std::stringstream ss;
   xmlXPathContextPtr xpathCtxt = xmlXPathNewContext(doc);
-  buildCode(xmlDocGetRootElement(doc), ss, xpathCtxt);
+  buildCode(doc, ss);
   std::cout << ss.str() << std::endl;
   return 0;
 }
@@ -40,6 +41,7 @@ XMLString xmlNodePtrToTypeName(xmlNodePtr node) {
   }
   return "Type";
 }
+
 
 xmlNodePtr findFirst(xmlNodePtr node, const char* xpathExpr, xmlXPathContextPtr xpathCtxt) {
   if (!xpathCtxt) {
@@ -57,102 +59,82 @@ xmlNodePtr findFirst(xmlNodePtr node, const char* xpathExpr, xmlXPathContextPtr 
   return xpathObj->nodesetval->nodeTab[0];
 }
 
-std::function<void()> flushLineFn(std::stringstream& ss, std::string text) {
-  return [&ss, text](){
-    ss << text;
+#define DEFINE_NP(name) void name(xmlNodePtr node, xmlXPathContextPtr ctxt, std::stringstream& ss, const Reality& r)
+
+DEFINE_NP(functionDefinitionProc) {
+  xmlNodePtr fnName = findFirst(node, "name|operator|constructor|destructor", ctxt);
+  XMLString fnType = fnName->name;
+  std::cout << static_cast<std::string>( fnType ) << std::endl;
+  if (fnType == "name" || fnType == "operator") {
+    ss << xmlNodeGetContent(fnName);
+  } else if (fnType == "constructor") {
+    ss << "<constructor>";
+  } else if (fnType == "destructor") {
+    ss << "<destructor>";
+  } else {
+    assert(false);
+  }
+  ss << "()\n";
+  r.call(node->children, ctxt, ss);
+}
+
+DEFINE_NP(memberRefProc) {
+  r.call(node->children, ctxt, ss);
+  ss << "." << xmlGetProp(node, BAD_CAST "member");
+}
+
+DEFINE_NP(memberAddrProc) {
+  ss << "&";
+  memberRefProc(node, ctxt, ss, r);
+}
+
+DEFINE_NP(memberPointerRefProc) {
+  r.call(node->children, ctxt, ss);
+  ss << ".*" << xmlGetProp(node, BAD_CAST "name");
+}
+
+DEFINE_NP(compoundValueProc) {
+  ss << "{";
+  r.call(node->children, ctxt, ss);
+  ss << "}";
+}
+
+DEFINE_NP(thisExprProc) {
+  ss << "this";
+}
+
+DEFINE_NP(assignExprProc) {
+  for (xmlNodePtr ch = node->children; ch; ch = ch->next) {
+    ss << " = ";
+    r.call(ch, ctxt, ss);
+  }
+}
+
+NodeProcessor showNodeContent(std::string prefix, std::string suffix) {
+  return [prefix, suffix](xmlNodePtr node, xmlXPathContextPtr ctxt, std::stringstream& ss, const Reality& r) {
+    ss << prefix << xmlNodeGetContent(node) << suffix;
   };
 }
 
-void buildExpr(xmlNodePtr node, std::stringstream& ss, xmlXPathContextPtr xpathCtxt) {
-  for (xmlNodePtr cur = node; cur; cur = cur->next) {
-    if (cur->type == XML_ELEMENT_NODE) {
-      XMLString elemName = cur->name;
-      ss << "/* "<< static_cast<std::string>( elemName ) << " */\n";
-    }
-  }
-}
+void buildCode(xmlDocPtr doc, std::stringstream& ss) {
+  Reality r;
+  const NodeProcessor snc = showNodeContent("", "");
+  r.registerNP("functionDefinition", functionDefinitionProc);
+  r.registerNP("intConstant", snc);
+  r.registerNP("moeConstant", snc);
+  r.registerNP("booleanConstant", snc);
+  r.registerNP("funcAddr", snc);
+  r.registerNP("stringConstant", showNodeContent("\"", "\""));
+  r.registerNP("varAddr", showNodeContent("&", ""));
+  r.registerNP("pointerRef", showNodeContent("*", ""));
+  r.registerNP("memberRef", memberRefProc);
+  r.registerNP("memberAddr", memberAddrProc);
+  r.registerNP("memberPointerRef", memberPointerRefProc);
+  r.registerNP("compoundValue", compoundValueProc);
+  r.registerNP("thisExpr", thisExprProc);
+  r.registerNP("assignExpr", assignExprProc);
 
-void buildCode(xmlNodePtr node, std::stringstream& ss, xmlXPathContextPtr xpathCtxt) {
-  for (xmlNodePtr cur = node; cur; cur = cur->next) {
-    bool stop_traversing = false;
-    if (cur->type == XML_ELEMENT_NODE) {
-      XMLString elemName = cur->name;
-      ss << "/* "<< static_cast<std::string>( elemName ) << " */\n";
-      if (elemName == "functionDefinition") {
-        xmlNodePtr fnName = findFirst(
-            cur,
-            "name|operator|constructor|destructor",
-            xpathCtxt);
-        XMLString fnType = fnName->name;
-        if (fnType == "name" || fnType == "operator") {
-          ss << xmlNodeGetContent(fnName);
-        } else if (fnType == "constructor") {
-          ss << "<constructor>";
-        } else if (fnType == "destructor") {
-          ss << "<destructor>";
-        } else {
-          assert(false);
-        }
-        ss << "()\n";
-        stop_traversing = true;
-        buildCode(cur->children, ss, xpathCtxt);
-      } else if (elemName == "compoundStatement") {
-        ss << "{ /* compoundStatement */\n";
-        stop_traversing = true;
-        buildCode(cur->children, ss, xpathCtxt);
-        ss << "}\n";
-      } else if (elemName == "intConstant" ||
-          elemName == "floatConstant" ||
-          elemName == "moeConstant" ||
-          elemName == "booleanConstant" ||
-          elemName == "funcAddr") {
-        ss << xmlNodeGetContent(cur);
-      } else if (elemName == "longlongConstant") {
-        ss << "/* FIXME */";
-      } else if (elemName == "stringConstant") {
-        ss << '"' << xmlNodeGetContent(cur) << '"';
-      } else if (elemName == "Var") {
-        ss << xmlNodeGetContent(cur);
-      } else if (elemName == "varAddr") {
-        ss << "&" << xmlNodeGetContent(cur);
-      } else if (elemName == "arrayAddr") {
-        ss << xmlNodeGetContent(cur);
-      } else if (elemName == "pointerRef") {
-        ss << "*" << xmlNodeGetContent(cur);
-      } else if (elemName == "arrayRef") {
-        ss << "/* FIXME */";
-      } else if (elemName == "memberRef" || elemName == "memberArrayRef") {
-        stop_traversing = true;
-        buildCode(cur->children, ss, xpathCtxt);
-        ss << "." << xmlGetProp(cur, BAD_CAST "member");
-      } else if (elemName == "memberAddr" || elemName == "memberArrayAddr") {
-        ss << "&";
-        stop_traversing = true;
-        buildCode(cur->children, ss, xpathCtxt);
-        ss << '.' << xmlGetProp(cur, BAD_CAST "member");
-      } else if (elemName == "memberPointerRef") {
-        stop_traversing = true;
-        buildCode(cur->children, ss, xpathCtxt);
-        ss << ".*" << xmlGetProp(cur, BAD_CAST "name");
-      } else if (elemName == "compoundValue") {
-        ss << "{";
-        stop_traversing = true;
-        buildCode(cur->children, ss, xpathCtxt);
-        ss << "}";
-      } else if (elemName == "thisExpr") {
-        ss << "this";
-      } else if (elemName == "assignExpr") {
-        stop_traversing = true;
-        for (xmlNodePtr ch = cur->children; ch; ch = ch->next) {
-          ss << " = ";
-          buildCode(ch, ss, xpathCtxt);
-        }
-      }
-    }
-    if (!stop_traversing) {
-      buildCode(cur->children, ss, xpathCtxt);
-    }
-  }
+  r.call(xmlDocGetRootElement(doc), xmlXPathNewContext(doc), ss);
 }
 
 TypeMap parseTypeTable(xmlDocPtr doc) {
