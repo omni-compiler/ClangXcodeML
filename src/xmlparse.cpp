@@ -63,12 +63,21 @@ std::function<void()> flushLineFn(std::stringstream& ss, std::string text) {
   };
 }
 
-void buildCode(xmlNodePtr node, std::stringstream& ss, xmlXPathContextPtr xpathCtxt) {
-  std::function<void()> postprocess = [](){ };
-  bool stop_traversing = false;
+void buildExpr(xmlNodePtr node, std::stringstream& ss, xmlXPathContextPtr xpathCtxt) {
   for (xmlNodePtr cur = node; cur; cur = cur->next) {
     if (cur->type == XML_ELEMENT_NODE) {
       XMLString elemName = cur->name;
+      ss << "/* "<< static_cast<std::string>( elemName ) << " */\n";
+    }
+  }
+}
+
+void buildCode(xmlNodePtr node, std::stringstream& ss, xmlXPathContextPtr xpathCtxt) {
+  for (xmlNodePtr cur = node; cur; cur = cur->next) {
+    bool stop_traversing = false;
+    if (cur->type == XML_ELEMENT_NODE) {
+      XMLString elemName = cur->name;
+      ss << "/* "<< static_cast<std::string>( elemName ) << " */\n";
       if (elemName == "functionDefinition") {
         xmlNodePtr fnName = findFirst(
             cur,
@@ -85,19 +94,65 @@ void buildCode(xmlNodePtr node, std::stringstream& ss, xmlXPathContextPtr xpathC
           assert(false);
         }
         ss << "()\n";
+        stop_traversing = true;
+        buildCode(cur->children, ss, xpathCtxt);
       } else if (elemName == "compoundStatement") {
         ss << "{ /* compoundStatement */\n";
-        postprocess = flushLineFn(ss, "} /*compoundStatement */\n");
-      } else if (elemName == "symbols") {
-        ss << "/* symbols */\n";
-        //stop_traversing = true;
+        stop_traversing = true;
+        buildCode(cur->children, ss, xpathCtxt);
+        ss << "}\n";
+      } else if (elemName == "intConstant" ||
+          elemName == "floatConstant" ||
+          elemName == "moeConstant" ||
+          elemName == "booleanConstant" ||
+          elemName == "funcAddr") {
+        ss << xmlNodeGetContent(cur);
+      } else if (elemName == "longlongConstant") {
+        ss << "/* FIXME */";
+      } else if (elemName == "stringConstant") {
+        ss << '"' << xmlNodeGetContent(cur) << '"';
+      } else if (elemName == "Var") {
+        ss << xmlNodeGetContent(cur);
+      } else if (elemName == "varAddr") {
+        ss << "&" << xmlNodeGetContent(cur);
+      } else if (elemName == "arrayAddr") {
+        ss << xmlNodeGetContent(cur);
+      } else if (elemName == "pointerRef") {
+        ss << "*" << xmlNodeGetContent(cur);
+      } else if (elemName == "arrayRef") {
+        ss << "/* FIXME */";
+      } else if (elemName == "memberRef" || elemName == "memberArrayRef") {
+        stop_traversing = true;
+        buildCode(cur->children, ss, xpathCtxt);
+        ss << "." << xmlGetProp(cur, BAD_CAST "member");
+      } else if (elemName == "memberAddr" || elemName == "memberArrayAddr") {
+        ss << "&";
+        stop_traversing = true;
+        buildCode(cur->children, ss, xpathCtxt);
+        ss << '.' << xmlGetProp(cur, BAD_CAST "member");
+      } else if (elemName == "memberPointerRef") {
+        stop_traversing = true;
+        buildCode(cur->children, ss, xpathCtxt);
+        ss << ".*" << xmlGetProp(cur, BAD_CAST "name");
+      } else if (elemName == "compoundValue") {
+        ss << "{";
+        stop_traversing = true;
+        buildCode(cur->children, ss, xpathCtxt);
+        ss << "}";
+      } else if (elemName == "thisExpr") {
+        ss << "this";
+      } else if (elemName == "assignExpr") {
+        stop_traversing = true;
+        for (xmlNodePtr ch = cur->children; ch; ch = ch->next) {
+          ss << " = ";
+          buildCode(ch, ss, xpathCtxt);
+        }
       }
     }
     if (!stop_traversing) {
       buildCode(cur->children, ss, xpathCtxt);
     }
   }
-  postprocess();
 }
 
 TypeMap parseTypeTable(xmlDocPtr doc) {
