@@ -111,6 +111,12 @@ DEFINE_NP(assignExprProc) {
   r.callOnce(rhs, ctxt, ss);
 }
 
+DEFINE_NP(compoundStatementProc) {
+  ss << "{\n";
+  r.call(node->children, ctxt, ss);
+  ss << "}\n";
+}
+
 NodeProcessor showNodeContent(std::string prefix, std::string suffix) {
   return [prefix, suffix](xmlNodePtr node, xmlXPathContextPtr ctxt, std::stringstream& ss, const Reality& r) {
     ss << prefix << xmlNodeGetContent(node) << suffix;
@@ -132,6 +138,7 @@ void buildCode(xmlDocPtr doc, std::stringstream& ss) {
   r.registerNP("memberAddr", memberAddrProc);
   r.registerNP("memberPointerRef", memberPointerRefProc);
   r.registerNP("compoundValue", compoundValueProc);
+  r.registerNP("compoundStatement", compoundStatementProc);
   r.registerNP("thisExpr", thisExprProc);
   r.registerNP("assignExpr", assignExprProc);
 
