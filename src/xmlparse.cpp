@@ -132,6 +132,7 @@ void buildCode(xmlDocPtr doc, std::stringstream& ss) {
   r.registerNP("booleanConstant", snc);
   r.registerNP("funcAddr", snc);
   r.registerNP("stringConstant", showNodeContent("\"", "\""));
+  r.registerNP("Var", snc);
   r.registerNP("varAddr", showNodeContent("&", ""));
   r.registerNP("pointerRef", showNodeContent("*", ""));
   r.registerNP("memberRef", memberRefProc);
