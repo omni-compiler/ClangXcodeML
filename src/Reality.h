@@ -4,6 +4,7 @@ using NodeProcessor = std::function<void(xmlNodePtr, xmlXPathContextPtr, std::st
 class Reality {
 public:
   void call(xmlNodePtr, xmlXPathContextPtr, std::stringstream&) const;
+  void callOnce(xmlNodePtr, xmlXPathContextPtr, std::stringstream&) const;
   bool registerNP(std::string, NodeProcessor);
 private:
   std::map<std::string, NodeProcessor> map;
@@ -11,19 +12,22 @@ private:
 
 void Reality::call(xmlNodePtr node, xmlXPathContextPtr ctxt, std::stringstream& ss) const {
   for (xmlNodePtr cur = node; cur; cur = cur->next) {
-    bool traverseChildren = true;
-    if (cur->type == XML_ELEMENT_NODE) {
-      XMLString elemName = cur->name;
-      std::cout << "/* "<< static_cast<std::string>( elemName ) << " */\n";
-      auto iter = map.find(elemName);
-      if (iter != map.end()) {
-        (iter->second)(cur, ctxt, ss, *this);
-        traverseChildren = false;
-      }
+    callOnce(cur, ctxt, ss);
+  }
+}
+
+void Reality::callOnce(xmlNodePtr node, xmlXPathContextPtr ctxt, std::stringstream& ss) const {
+  bool traverseChildren = true;
+  if (node->type == XML_ELEMENT_NODE) {
+    XMLString elemName = node->name;
+    auto iter = map.find(elemName);
+    if (iter != map.end()) {
+      (iter->second)(node, ctxt, ss, *this);
+      traverseChildren = false;
     }
-    if (traverseChildren) {
-      call(cur->children, ctxt, ss);
-    }
+  }
+  if (traverseChildren) {
+    call(node->children, ctxt, ss);
   }
 }
 
