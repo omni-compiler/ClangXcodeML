@@ -104,10 +104,11 @@ DEFINE_NP(thisExprProc) {
 }
 
 DEFINE_NP(assignExprProc) {
-  for (xmlNodePtr ch = node->children; ch; ch = ch->next) {
-    ss << " = ";
-    r.call(ch, ctxt, ss);
-  }
+  xmlNodePtr lhs = findFirst(node, "./*[1]", ctxt),
+             rhs = findFirst(node, "./*[2]", ctxt);
+  r.callOnce(lhs, ctxt, ss);
+  ss << " = ";
+  r.callOnce(rhs, ctxt, ss);
 }
 
 NodeProcessor showNodeContent(std::string prefix, std::string suffix) {
