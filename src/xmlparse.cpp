@@ -59,11 +59,11 @@ xmlNodePtr findFirst(xmlNodePtr node, const char* xpathExpr, xmlXPathContextPtr 
   return xpathObj->nodesetval->nodeTab[0];
 }
 
-#define NP_ARGS xmlNodePtr node, xmlXPathContextPtr ctxt, std::stringstream& ss, const Reality& r
+#define NP_ARGS xmlNodePtr node, SourceInfo src, std::stringstream& ss, const Reality& r
 #define DEFINE_NP(name) void name(NP_ARGS)
 
 DEFINE_NP(functionDefinitionProc) {
-  xmlNodePtr fnName = findFirst(node, "name|operator|constructor|destructor", ctxt);
+  xmlNodePtr fnName = findFirst(node, "name|operator|constructor|destructor", src.ctxt);
   XMLString fnType = fnName->name;
   std::cout << static_cast<std::string>( fnType ) << std::endl;
   if (fnType == "name" || fnType == "operator") {
@@ -76,27 +76,27 @@ DEFINE_NP(functionDefinitionProc) {
     assert(false);
   }
   ss << "()\n";
-  r.call(node->children, ctxt, ss);
+  r.call(node->children, src, ss);
 }
 
 DEFINE_NP(memberRefProc) {
-  r.call(node->children, ctxt, ss);
+  r.call(node->children, src, ss);
   ss << "." << xmlGetProp(node, BAD_CAST "member");
 }
 
 DEFINE_NP(memberAddrProc) {
   ss << "&";
-  memberRefProc(node, ctxt, ss, r);
+  memberRefProc(node, src, ss, r);
 }
 
 DEFINE_NP(memberPointerRefProc) {
-  r.call(node->children, ctxt, ss);
+  r.call(node->children, src, ss);
   ss << ".*" << xmlGetProp(node, BAD_CAST "name");
 }
 
 DEFINE_NP(compoundValueProc) {
   ss << "{";
-  r.call(node->children, ctxt, ss);
+  r.call(node->children, src, ss);
   ss << "}";
 }
 
@@ -106,15 +106,15 @@ DEFINE_NP(thisExprProc) {
 
 DEFINE_NP(compoundStatementProc) {
   ss << "{\n";
-  r.call(node->children, ctxt, ss);
+  r.call(node->children, src, ss);
   ss << "}\n";
 }
 
 DEFINE_NP(functionCallProc) {
-  xmlNodePtr function = findFirst(node, "function/*", ctxt);
-  r.callOnce(function, ctxt, ss);
-  xmlNodePtr arguments = findFirst(node, "arguments", ctxt);
-  r.callOnce(arguments, ctxt, ss);
+  xmlNodePtr function = findFirst(node, "function/*", src.ctxt);
+  r.callOnce(function, src, ss);
+  xmlNodePtr arguments = findFirst(node, "arguments", src.ctxt);
+  r.callOnce(arguments, src, ss);
 }
 
 DEFINE_NP(argumentsProc) {
@@ -127,38 +127,38 @@ DEFINE_NP(argumentsProc) {
     if (alreadyPrinted) {
       ss << ",";
     }
-    r.callOnce(arg, ctxt, ss);
+    r.callOnce(arg, src, ss);
     alreadyPrinted = true;
   }
   ss << ")";
 }
 
 DEFINE_NP(condExprProc) {
-  xmlNodePtr prd = findFirst(node, "*[1]", ctxt),
-             the = findFirst(node, "*[2]", ctxt),
-             els = findFirst(node, "*[3]", ctxt);
-  r.callOnce(prd, ctxt, ss);
+  xmlNodePtr prd = findFirst(node, "*[1]", src.ctxt),
+             the = findFirst(node, "*[2]", src.ctxt),
+             els = findFirst(node, "*[3]", src.ctxt);
+  r.callOnce(prd, src, ss);
   ss << " ? ";
-  r.callOnce(the, ctxt, ss);
+  r.callOnce(the, src, ss);
   ss << " : ";
-  r.callOnce(els, ctxt, ss);
+  r.callOnce(els, src, ss);
 }
 
 DEFINE_NP(varDeclProc) {
-  xmlNodePtr name = findFirst(node, "name", ctxt),
-             value = findFirst(node, "value", ctxt);
+  xmlNodePtr name = findFirst(node, "name", src.ctxt),
+             value = findFirst(node, "value", src.ctxt);
   ss << xmlNodeGetContent(name) << " = ";
-  r.callOnce(value, ctxt, ss);
+  r.callOnce(value, src, ss);
   ss << ";\n";
 }
 
 NodeProcessor showBinOp(std::string operand) {
   return [operand](NP_ARGS) {
-    xmlNodePtr lhs = findFirst(node, "*[1]", ctxt),
-               rhs = findFirst(node, "*[2]", ctxt);
-    r.callOnce(lhs, ctxt, ss);
+    xmlNodePtr lhs = findFirst(node, "*[1]", src.ctxt),
+               rhs = findFirst(node, "*[2]", src.ctxt);
+    r.callOnce(lhs, src, ss);
     ss << operand;
-    r.callOnce(rhs, ctxt, ss);
+    r.callOnce(rhs, src, ss);
   };
 }
 
@@ -175,7 +175,7 @@ NodeProcessor showChildElem(std::string prefix, std::string suffix) {
     while (target->type != XML_ELEMENT_NODE) {
       target = target->next;
     }
-    r.callOnce(target, ctxt, ss);
+    r.callOnce(target, src, ss);
     ss << suffix;
   };
 }
@@ -215,7 +215,8 @@ void buildCode(xmlDocPtr doc, std::stringstream& ss) {
   r.registerNP("returnStatement", showChildElem("return ", ";\n"));
   r.registerNP("varDecl", varDeclProc);
 
-  r.call(xmlDocGetRootElement(doc), xmlXPathNewContext(doc), ss);
+  SourceInfo src = {xmlXPathNewContext(doc), parseTypeTable(doc)};
+  r.call(xmlDocGetRootElement(doc), src, ss);
 }
 
 TypeMap parseTypeTable(xmlDocPtr doc) {
