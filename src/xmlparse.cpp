@@ -59,7 +59,9 @@ xmlNodePtr findFirst(xmlNodePtr node, const char* xpathExpr, xmlXPathContextPtr 
   return xpathObj->nodesetval->nodeTab[0];
 }
 
-#define NP_ARGS xmlNodePtr node, SourceInfo src, std::stringstream& ss, const Reality& r
+using CodeBuilderProc = NodeProcessor<const SourceInfo&, std::stringstream&>;
+using CodeBuilder = Reality<const SourceInfo&, std::stringstream&>;
+#define NP_ARGS xmlNodePtr node, const CodeBuilder& r, const SourceInfo& src, std::stringstream& ss
 #define DEFINE_NP(name) void name(NP_ARGS)
 
 DEFINE_NP(functionDefinitionProc) {
@@ -85,7 +87,7 @@ DEFINE_NP(memberRefProc) {
 
 DEFINE_NP(memberAddrProc) {
   ss << "&";
-  memberRefProc(node, src, ss, r);
+  memberRefProc(node, r, src, ss);
 }
 
 DEFINE_NP(memberPointerRefProc) {
@@ -151,7 +153,7 @@ DEFINE_NP(varDeclProc) {
   ss << ";\n";
 }
 
-NodeProcessor showBinOp(std::string operand) {
+CodeBuilderProc showBinOp(std::string operand) {
   return [operand](NP_ARGS) {
     xmlNodePtr lhs = findFirst(node, "*[1]", src.ctxt),
                rhs = findFirst(node, "*[2]", src.ctxt);
@@ -161,13 +163,13 @@ NodeProcessor showBinOp(std::string operand) {
   };
 }
 
-NodeProcessor showNodeContent(std::string prefix, std::string suffix) {
+CodeBuilderProc showNodeContent(std::string prefix, std::string suffix) {
   return [prefix, suffix](NP_ARGS) {
     ss << prefix << xmlNodeGetContent(node) << suffix;
   };
 }
 
-NodeProcessor showChildElem(std::string prefix, std::string suffix) {
+CodeBuilderProc showChildElem(std::string prefix, std::string suffix) {
   return [prefix, suffix](NP_ARGS) {
     ss << prefix;
     xmlNodePtr target = node->children;
@@ -180,8 +182,8 @@ NodeProcessor showChildElem(std::string prefix, std::string suffix) {
 }
 
 void buildCode(xmlDocPtr doc, std::stringstream& ss) {
-  Reality r;
-  const NodeProcessor snc = showNodeContent("", "");
+  CodeBuilder r;
+  const CodeBuilderProc snc = showNodeContent("", "");
   r.registerNP("functionDefinition", functionDefinitionProc);
   r.registerNP("intConstant", snc);
   r.registerNP("moeConstant", snc);

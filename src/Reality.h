@@ -4,40 +4,47 @@ public:
   std::map<std::string, std::string> typeTable;
 };
 
+template<typename... T>
 class Reality;
-using NodeProcessor = std::function<void(xmlNodePtr, SourceInfo, std::stringstream&, const Reality&)>;
 
+template<typename... T>
+using NodeProcessor = std::function<void(xmlNodePtr, const Reality<T...>&, T...)>;
+
+template<typename... T>
 class Reality {
 public:
-  void call(xmlNodePtr, SourceInfo, std::stringstream&) const;
-  void callOnce(xmlNodePtr, SourceInfo, std::stringstream&) const;
-  bool registerNP(std::string, NodeProcessor);
+  void call(xmlNodePtr, T...) const;
+  void callOnce(xmlNodePtr, T...) const;
+  bool registerNP(std::string, NodeProcessor<T...>);
 private:
-  std::map<std::string, NodeProcessor> map;
+  std::map<std::string, NodeProcessor<T...>> map;
 };
 
-void Reality::call(xmlNodePtr node, SourceInfo src, std::stringstream& ss) const {
+template<typename... T>
+void Reality<T...>::call(xmlNodePtr node, T... args) const {
   for (xmlNodePtr cur = node; cur; cur = cur->next) {
-    callOnce(cur, src, ss);
+    callOnce(cur, args...);
   }
 }
 
-void Reality::callOnce(xmlNodePtr node, SourceInfo src, std::stringstream& ss) const {
+template<typename... T>
+void Reality<T...>::callOnce(xmlNodePtr node, T... args) const {
   bool traverseChildren = true;
   if (node->type == XML_ELEMENT_NODE) {
     XMLString elemName = node->name;
     auto iter = map.find(elemName);
     if (iter != map.end()) {
-      (iter->second)(node, src, ss, *this);
+      (iter->second)(node, *this, args...);
       traverseChildren = false;
     }
   }
   if (traverseChildren) {
-    call(node->children, src, ss);
+    call(node->children, args...);
   }
 }
 
-bool Reality::registerNP(std::string key, NodeProcessor proc) {
+template<typename... T>
+bool Reality<T...>::registerNP(std::string key, NodeProcessor<T...> proc) {
   auto iter = map.find(key);
   if (iter != map.end()) {
     return false;
