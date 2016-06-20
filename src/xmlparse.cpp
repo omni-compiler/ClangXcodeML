@@ -109,6 +109,29 @@ DEFINE_NP(compoundStatementProc) {
   ss << "}\n";
 }
 
+DEFINE_NP(functionCallProc) {
+  xmlNodePtr function = findFirst(node, "function/*", ctxt);
+  r.callOnce(function, ctxt, ss);
+  xmlNodePtr arguments = findFirst(node, "arguments", ctxt);
+  r.callOnce(arguments, ctxt, ss);
+}
+
+DEFINE_NP(argumentsProc) {
+  ss << "(";
+  bool alreadyPrinted = false;
+  for (xmlNodePtr arg = node->children; arg; arg = arg->next) {
+    if (arg->type != XML_ELEMENT_NODE) {
+      continue;
+    }
+    if (alreadyPrinted) {
+      ss << ",";
+    }
+    r.callOnce(arg, ctxt, ss);
+    alreadyPrinted = true;
+  }
+  ss << ")";
+}
+
 NodeProcessor showBinOp(std::string operand) {
   return [operand](xmlNodePtr node, xmlXPathContextPtr ctxt, std::stringstream& ss, const Reality& r) {
     xmlNodePtr lhs = findFirst(node, "*[1]", ctxt),
@@ -149,6 +172,8 @@ void buildCode(xmlDocPtr doc, std::stringstream& ss) {
   r.registerNP("mulExpr", showBinOp(" * "));
   r.registerNP("divExpr", showBinOp(" / "));
   r.registerNP("modExpr", showBinOp(" % "));
+  r.registerNP("functionCall", functionCallProc);
+  r.registerNP("arguments", argumentsProc);
 
   r.call(xmlDocGetRootElement(doc), xmlXPathNewContext(doc), ss);
 }
