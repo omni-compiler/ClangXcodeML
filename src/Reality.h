@@ -5,19 +5,14 @@ public:
 };
 
 template<typename... T>
-class Reality;
-
-template<typename... T>
-using NodeProcessor = std::function<void(xmlNodePtr, const Reality<T...>&, T...)>;
-
-template<typename... T>
 class Reality {
 public:
+  using Procedure = std::function<void(xmlNodePtr, const Reality&, T...)>;
   void call(xmlNodePtr, T...) const;
   void callOnce(xmlNodePtr, T...) const;
-  bool registerNP(std::string, NodeProcessor<T...>);
+  bool registerNP(std::string, Procedure);
 private:
-  std::map<std::string, NodeProcessor<T...>> map;
+  std::map<std::string, Procedure> map;
 };
 
 template<typename... T>
@@ -44,7 +39,7 @@ void Reality<T...>::callOnce(xmlNodePtr node, T... args) const {
 }
 
 template<typename... T>
-bool Reality<T...>::registerNP(std::string key, NodeProcessor<T...> proc) {
+bool Reality<T...>::registerNP(std::string key, Procedure proc) {
   auto iter = map.find(key);
   if (iter != map.end()) {
     return false;

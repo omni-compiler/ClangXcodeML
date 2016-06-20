@@ -59,12 +59,11 @@ xmlNodePtr findFirst(xmlNodePtr node, const char* xpathExpr, xmlXPathContextPtr 
   return xpathObj->nodesetval->nodeTab[0];
 }
 
-using CodeBuilderProc = NodeProcessor<const SourceInfo&, std::stringstream&>;
 using CodeBuilder = Reality<const SourceInfo&, std::stringstream&>;
-#define NP_ARGS xmlNodePtr node, const CodeBuilder& r, const SourceInfo& src, std::stringstream& ss
-#define DEFINE_NP(name) void name(NP_ARGS)
+#define CB_ARGS xmlNodePtr node, const CodeBuilder& r, const SourceInfo& src, std::stringstream& ss
+#define DEFINE_CB(name) void name(CB_ARGS)
 
-DEFINE_NP(functionDefinitionProc) {
+DEFINE_CB(functionDefinitionProc) {
   xmlNodePtr fnName = findFirst(node, "name|operator|constructor|destructor", src.ctxt);
   XMLString fnType = fnName->name;
   if (fnType == "name" || fnType == "operator") {
@@ -80,45 +79,45 @@ DEFINE_NP(functionDefinitionProc) {
   r.call(node->children, src, ss);
 }
 
-DEFINE_NP(memberRefProc) {
+DEFINE_CB(memberRefProc) {
   r.call(node->children, src, ss);
   ss << "." << xmlGetProp(node, BAD_CAST "member");
 }
 
-DEFINE_NP(memberAddrProc) {
+DEFINE_CB(memberAddrProc) {
   ss << "&";
   memberRefProc(node, r, src, ss);
 }
 
-DEFINE_NP(memberPointerRefProc) {
+DEFINE_CB(memberPointerRefProc) {
   r.call(node->children, src, ss);
   ss << ".*" << xmlGetProp(node, BAD_CAST "name");
 }
 
-DEFINE_NP(compoundValueProc) {
+DEFINE_CB(compoundValueProc) {
   ss << "{";
   r.call(node->children, src, ss);
   ss << "}";
 }
 
-DEFINE_NP(thisExprProc) {
+DEFINE_CB(thisExprProc) {
   ss << "this";
 }
 
-DEFINE_NP(compoundStatementProc) {
+DEFINE_CB(compoundStatementProc) {
   ss << "{\n";
   r.call(node->children, src, ss);
   ss << "}\n";
 }
 
-DEFINE_NP(functionCallProc) {
+DEFINE_CB(functionCallProc) {
   xmlNodePtr function = findFirst(node, "function/*", src.ctxt);
   r.callOnce(function, src, ss);
   xmlNodePtr arguments = findFirst(node, "arguments", src.ctxt);
   r.callOnce(arguments, src, ss);
 }
 
-DEFINE_NP(argumentsProc) {
+DEFINE_CB(argumentsProc) {
   ss << "(";
   bool alreadyPrinted = false;
   for (xmlNodePtr arg = node->children; arg; arg = arg->next) {
@@ -134,7 +133,7 @@ DEFINE_NP(argumentsProc) {
   ss << ")";
 }
 
-DEFINE_NP(condExprProc) {
+DEFINE_CB(condExprProc) {
   xmlNodePtr prd = findFirst(node, "*[1]", src.ctxt),
              the = findFirst(node, "*[2]", src.ctxt),
              els = findFirst(node, "*[3]", src.ctxt);
@@ -145,7 +144,7 @@ DEFINE_NP(condExprProc) {
   r.callOnce(els, src, ss);
 }
 
-DEFINE_NP(varDeclProc) {
+DEFINE_CB(varDeclProc) {
   xmlNodePtr name = findFirst(node, "name", src.ctxt),
              value = findFirst(node, "value", src.ctxt);
   ss << xmlNodeGetContent(name) << " = ";
@@ -153,8 +152,8 @@ DEFINE_NP(varDeclProc) {
   ss << ";\n";
 }
 
-CodeBuilderProc showBinOp(std::string operand) {
-  return [operand](NP_ARGS) {
+CodeBuilder::Procedure showBinOp(std::string operand) {
+  return [operand](CB_ARGS) {
     xmlNodePtr lhs = findFirst(node, "*[1]", src.ctxt),
                rhs = findFirst(node, "*[2]", src.ctxt);
     r.callOnce(lhs, src, ss);
@@ -163,14 +162,14 @@ CodeBuilderProc showBinOp(std::string operand) {
   };
 }
 
-CodeBuilderProc showNodeContent(std::string prefix, std::string suffix) {
-  return [prefix, suffix](NP_ARGS) {
+CodeBuilder::Procedure showNodeContent(std::string prefix, std::string suffix) {
+  return [prefix, suffix](CB_ARGS) {
     ss << prefix << xmlNodeGetContent(node) << suffix;
   };
 }
 
-CodeBuilderProc showChildElem(std::string prefix, std::string suffix) {
-  return [prefix, suffix](NP_ARGS) {
+CodeBuilder::Procedure showChildElem(std::string prefix, std::string suffix) {
+  return [prefix, suffix](CB_ARGS) {
     ss << prefix;
     xmlNodePtr target = node->children;
     while (target->type != XML_ELEMENT_NODE) {
@@ -183,7 +182,7 @@ CodeBuilderProc showChildElem(std::string prefix, std::string suffix) {
 
 void buildCode(xmlDocPtr doc, std::stringstream& ss) {
   CodeBuilder r;
-  const CodeBuilderProc snc = showNodeContent("", "");
+  const CodeBuilder::Procedure snc = showNodeContent("", "");
   r.registerNP("functionDefinition", functionDefinitionProc);
   r.registerNP("intConstant", snc);
   r.registerNP("moeConstant", snc);
