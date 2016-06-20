@@ -132,6 +132,25 @@ DEFINE_NP(argumentsProc) {
   ss << ")";
 }
 
+DEFINE_NP(condExprProc) {
+  xmlNodePtr prd = findFirst(node, "*[1]", ctxt),
+             the = findFirst(node, "*[2]", ctxt),
+             els = findFirst(node, "*[3]", ctxt);
+  r.callOnce(prd, ctxt, ss);
+  ss << " ? ";
+  r.callOnce(the, ctxt, ss);
+  ss << " : ";
+  r.callOnce(els, ctxt, ss);
+}
+
+DEFINE_NP(varDeclProc) {
+  xmlNodePtr name = findFirst(node, "name", ctxt),
+             value = findFirst(node, "value", ctxt);
+  ss << xmlNodeGetContent(name) << " = ";
+  r.callOnce(value, ctxt, ss);
+  ss << ";\n";
+}
+
 NodeProcessor showBinOp(std::string operand) {
   return [operand](xmlNodePtr node, xmlXPathContextPtr ctxt, std::stringstream& ss, const Reality& r) {
     xmlNodePtr lhs = findFirst(node, "*[1]", ctxt),
@@ -190,6 +209,10 @@ void buildCode(xmlDocPtr doc, std::stringstream& ss) {
   r.registerNP("sizeOfExpr", showChildElem("sizeof ", ""));
   r.registerNP("functionCall", functionCallProc);
   r.registerNP("arguments", argumentsProc);
+  r.registerNP("condExpr", condExprProc);
+  r.registerNP("exprStatement", showChildElem("", ";\n"));
+  r.registerNP("returnStatement", showChildElem("return ", ";\n"));
+  r.registerNP("varDecl", varDeclProc);
 
   r.call(xmlDocGetRootElement(doc), xmlXPathNewContext(doc), ss);
 }
