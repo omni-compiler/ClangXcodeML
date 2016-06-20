@@ -59,7 +59,8 @@ xmlNodePtr findFirst(xmlNodePtr node, const char* xpathExpr, xmlXPathContextPtr 
   return xpathObj->nodesetval->nodeTab[0];
 }
 
-#define DEFINE_NP(name) void name(xmlNodePtr node, xmlXPathContextPtr ctxt, std::stringstream& ss, const Reality& r)
+#define NP_ARGS xmlNodePtr node, xmlXPathContextPtr ctxt, std::stringstream& ss, const Reality& r
+#define DEFINE_NP(name) void name(NP_ARGS)
 
 DEFINE_NP(functionDefinitionProc) {
   xmlNodePtr fnName = findFirst(node, "name|operator|constructor|destructor", ctxt);
@@ -152,7 +153,7 @@ DEFINE_NP(varDeclProc) {
 }
 
 NodeProcessor showBinOp(std::string operand) {
-  return [operand](xmlNodePtr node, xmlXPathContextPtr ctxt, std::stringstream& ss, const Reality& r) {
+  return [operand](NP_ARGS) {
     xmlNodePtr lhs = findFirst(node, "*[1]", ctxt),
                rhs = findFirst(node, "*[2]", ctxt);
     r.callOnce(lhs, ctxt, ss);
@@ -162,13 +163,13 @@ NodeProcessor showBinOp(std::string operand) {
 }
 
 NodeProcessor showNodeContent(std::string prefix, std::string suffix) {
-  return [prefix, suffix](xmlNodePtr node, xmlXPathContextPtr ctxt, std::stringstream& ss, const Reality& r) {
+  return [prefix, suffix](NP_ARGS) {
     ss << prefix << xmlNodeGetContent(node) << suffix;
   };
 }
 
 NodeProcessor showChildElem(std::string prefix, std::string suffix) {
-  return [prefix, suffix](xmlNodePtr node, xmlXPathContextPtr ctxt, std::stringstream& ss, const Reality& r) {
+  return [prefix, suffix](NP_ARGS) {
     ss << prefix;
     xmlNodePtr target = node->children;
     while (target->type != XML_ELEMENT_NODE) {
