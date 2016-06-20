@@ -103,18 +103,20 @@ DEFINE_NP(thisExprProc) {
   ss << "this";
 }
 
-DEFINE_NP(assignExprProc) {
-  xmlNodePtr lhs = findFirst(node, "./*[1]", ctxt),
-             rhs = findFirst(node, "./*[2]", ctxt);
-  r.callOnce(lhs, ctxt, ss);
-  ss << " = ";
-  r.callOnce(rhs, ctxt, ss);
-}
-
 DEFINE_NP(compoundStatementProc) {
   ss << "{\n";
   r.call(node->children, ctxt, ss);
   ss << "}\n";
+}
+
+NodeProcessor showBinOp(std::string operand) {
+  return [operand](xmlNodePtr node, xmlXPathContextPtr ctxt, std::stringstream& ss, const Reality& r) {
+    xmlNodePtr lhs = findFirst(node, "*[1]", ctxt),
+               rhs = findFirst(node, "*[2]", ctxt);
+    r.callOnce(lhs, ctxt, ss);
+    ss << operand;
+    r.callOnce(rhs, ctxt, ss);
+  };
 }
 
 NodeProcessor showNodeContent(std::string prefix, std::string suffix) {
@@ -141,7 +143,12 @@ void buildCode(xmlDocPtr doc, std::stringstream& ss) {
   r.registerNP("compoundValue", compoundValueProc);
   r.registerNP("compoundStatement", compoundStatementProc);
   r.registerNP("thisExpr", thisExprProc);
-  r.registerNP("assignExpr", assignExprProc);
+  r.registerNP("assignExpr", showBinOp(" = "));
+  r.registerNP("plusExpr", showBinOp(" + "));
+  r.registerNP("minusExpr", showBinOp(" - "));
+  r.registerNP("mulExpr", showBinOp(" * "));
+  r.registerNP("divExpr", showBinOp(" / "));
+  r.registerNP("modExpr", showBinOp(" % "));
 
   r.call(xmlDocGetRootElement(doc), xmlXPathNewContext(doc), ss);
 }
