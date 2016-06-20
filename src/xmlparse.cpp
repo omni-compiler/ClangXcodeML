@@ -65,7 +65,6 @@ xmlNodePtr findFirst(xmlNodePtr node, const char* xpathExpr, xmlXPathContextPtr 
 DEFINE_NP(functionDefinitionProc) {
   xmlNodePtr fnName = findFirst(node, "name|operator|constructor|destructor", src.ctxt);
   XMLString fnType = fnName->name;
-  std::cout << static_cast<std::string>( fnType ) << std::endl;
   if (fnType == "name" || fnType == "operator") {
     ss << xmlNodeGetContent(fnName);
   } else if (fnType == "constructor") {
