@@ -148,6 +148,18 @@ NodeProcessor showNodeContent(std::string prefix, std::string suffix) {
   };
 }
 
+NodeProcessor showChildElem(std::string prefix, std::string suffix) {
+  return [prefix, suffix](xmlNodePtr node, xmlXPathContextPtr ctxt, std::stringstream& ss, const Reality& r) {
+    ss << prefix;
+    xmlNodePtr target = node->children;
+    while (target->type != XML_ELEMENT_NODE) {
+      target = target->next;
+    }
+    r.callOnce(target, ctxt, ss);
+    ss << suffix;
+  };
+}
+
 void buildCode(xmlDocPtr doc, std::stringstream& ss) {
   Reality r;
   const NodeProcessor snc = showNodeContent("", "");
@@ -172,6 +184,10 @@ void buildCode(xmlDocPtr doc, std::stringstream& ss) {
   r.registerNP("mulExpr", showBinOp(" * "));
   r.registerNP("divExpr", showBinOp(" / "));
   r.registerNP("modExpr", showBinOp(" % "));
+  r.registerNP("unaryMinusExpr", showChildElem("-", ""));
+  r.registerNP("binNotExpr", showChildElem("~", ""));
+  r.registerNP("logNotExpr", showChildElem("!", ""));
+  r.registerNP("sizeOfExpr", showChildElem("sizeof ", ""));
   r.registerNP("functionCall", functionCallProc);
   r.registerNP("arguments", argumentsProc);
 
