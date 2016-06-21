@@ -10,6 +10,7 @@
 #include <cassert>
 #include "XMLString.h"
 #include "Reality.h"
+#include "XcodeMlType.h"
 
 using TypeMap = std::map<std::string, std::string>;
 
