@@ -5,29 +5,41 @@
 class XcodeMlType;
 using XcodeMlTypeRef = std::shared_ptr<XcodeMlType>; /* not nullable */
 
-struct XcodeMlReservedType {
+class XcodeMlReservedType {
+public:
+  XcodeMlReservedType(std::string);
+private:
   std::string name;
 };
 
-struct XcodeMlPointerType {
+class XcodeMlPointerType {
+public:
+  XcodeMlPointerType(XcodeMlTypeRef);
+private:
   XcodeMlTypeRef ref;
 };
 
-struct XcodeMlFunctionType {
+class XcodeMlFunctionType {
+public:
+  XcodeMlFunctionType(XcodeMlTypeRef, const std::vector<XcodeMlTypeRef>&);
+private:
   XcodeMlTypeRef returnType;
   std::vector<XcodeMlTypeRef> params;
 };
 
-struct XcodeMlArrayType {
+class XcodeMlArrayType {
+public:
+  XcodeMlArrayType(XcodeMlTypeRef, size_t);
+private:
   XcodeMlTypeRef elementType;
   std::shared_ptr<size_t> size;
 };
 
-enum XcodeMlTypeKind {
-  XTK_Reserved,
-  XTK_Pointer,
-  XTK_Function,
-  XTK_Array,
+enum class XcodeMlTypeKind {
+  Reserved,
+  Pointer,
+  Function,
+  Array,
 };
 
 class XcodeMlType {
@@ -39,45 +51,3 @@ private:
   std::unique_ptr<Impl> impl;
 };
 
-void XcodeMlType::swap(XcodeMlType& other) {
-  std::swap(this->impl, other.impl);
-}
-
-namespace std {
-  template<>
-  void swap(XcodeMlType& lhs, XcodeMlType& rhs) {
-    lhs.swap(rhs);
-  }
-}
-
-XcodeMlType& XcodeMlType::operator=(XcodeMlType rhs) {
-  rhs.swap(*this);
-  return *this;
-}
-
-class XcodeMlType::Impl {
-public:
-  XcodeMlTypeKind kind;
-  union {
-    XcodeMlReservedType reservedType;
-    XcodeMlPointerType pointerType;
-    XcodeMlFunctionType functionType;
-    XcodeMlArrayType arrayType;
-  };
-  ~Impl();
-};
-
-XcodeMlType::Impl::~Impl() {
-  switch (kind) {
-    case XTK_None:
-      break;
-    case XTK_Reserved:
-      reservedType.~XcodeMlReservedType();
-    case XTK_Pointer:
-      pointerType.~XcodeMlPointerType();
-    case XTK_Function:
-      functionType.~XcodeMlFunctionType();
-    case XTK_Array:
-      arrayType.~XcodeMlArrayType();
-  }
-}
