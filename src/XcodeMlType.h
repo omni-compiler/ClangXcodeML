@@ -5,32 +5,20 @@
 class XcodeMlType;
 using XcodeMlTypeRef = std::shared_ptr<XcodeMlType>; /* not nullable */
 
-class XcodeMlReservedType {
-public:
-  XcodeMlReservedType(std::string);
-private:
+struct XcodeMlReservedType {
   std::string name;
 };
 
-class XcodeMlPointerType {
-public:
-  XcodeMlPointerType(XcodeMlTypeRef);
-private:
+struct XcodeMlPointerType {
   XcodeMlTypeRef ref;
 };
 
-class XcodeMlFunctionType {
-public:
-  XcodeMlFunctionType(XcodeMlTypeRef, const std::vector<XcodeMlTypeRef>&);
-private:
+struct XcodeMlFunctionType {
   XcodeMlTypeRef returnType;
   std::vector<XcodeMlTypeRef> params;
 };
 
-class XcodeMlArrayType {
-public:
-  XcodeMlArrayType(XcodeMlTypeRef, size_t);
-private:
+struct XcodeMlArrayType {
   XcodeMlTypeRef elementType;
   std::shared_ptr<size_t> size;
 };
