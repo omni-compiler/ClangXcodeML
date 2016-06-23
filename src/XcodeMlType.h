@@ -32,8 +32,20 @@ enum class XcodeMlTypeKind {
 
 class XcodeMlType {
 public:
+  friend XcodeMlTypeKind typeKind(XcodeMlTypeRef);
+
+  friend XcodeMlTypeRef makeReservedType(std::string);
+  friend XcodeMlTypeRef makePointerType(XcodeMlTypeRef);
+  friend XcodeMlTypeRef makeFunctionType(XcodeMlTypeRef, const std::vector<XcodeMlTypeRef>&);
+  friend XcodeMlTypeRef makeArrayType(XcodeMlTypeRef, size_t);
+
+  friend XcodeMlReservedType getReservedType(XcodeMlTypeRef);
+  friend XcodeMlPointerType getPointerType(XcodeMlTypeRef);
+  friend XcodeMlFunctionType getFunctionType(XcodeMlTypeRef);
+  friend XcodeMlArrayType getArrayType(XcodeMlTypeRef);
 private:
   class Impl;
   std::shared_ptr<Impl> impl;
 };
+
 
