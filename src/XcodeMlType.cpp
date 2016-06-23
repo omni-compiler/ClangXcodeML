@@ -25,26 +25,18 @@ class XcodeMlType::Impl {
 public:
   XcodeMlTypeKind kind;
   union {
-    XcodeMlReservedType reservedType;
-    XcodeMlPointerType pointerType;
-    XcodeMlFunctionType functionType;
-    XcodeMlArrayType arrayType;
-  };
+    XcodeMlReservedType reserved;
+    XcodeMlPointerType pointer;
+    XcodeMlFunctionType function;
+    XcodeMlArrayType array;
+  } type;
+  Impl(const Impl& other) = default;
+  Impl& operator=(Impl rhs);
   ~Impl();
+  void swap(Impl&);
 };
 
-void XcodeMlType::swap(XcodeMlType& other) {
-  std::swap(this->impl, other.impl);
-}
-
-namespace std {
-  template<>
-  void swap(XcodeMlType& lhs, XcodeMlType& rhs) {
-    lhs.swap(rhs);
-  }
-}
-
-XcodeMlType& XcodeMlType::operator=(XcodeMlType rhs) {
+XcodeMlType::Impl& XcodeMlType::Impl::operator=(Impl rhs) {
   rhs.swap(*this);
   return *this;
 }
@@ -52,16 +44,23 @@ XcodeMlType& XcodeMlType::operator=(XcodeMlType rhs) {
 XcodeMlType::Impl::~Impl() {
   switch (kind) {
     case XcodeMlTypeKind::Reserved:
-      reservedType.~XcodeMlReservedType();
+      type.reserved.~XcodeMlReservedType();
       break;
     case XcodeMlTypeKind::Pointer:
-      pointerType.~XcodeMlPointerType();
+      type.pointer.~XcodeMlPointerType();
       break;
     case XcodeMlTypeKind::Function:
-      functionType.~XcodeMlFunctionType();
+      type.function.~XcodeMlFunctionType();
       break;
     case XcodeMlTypeKind::Array:
-      arrayType.~XcodeMlArrayType();
+      type.array.~XcodeMlArrayType();
       break;
   }
 }
+
+void XcodeMlType::Impl::swap(Impl& other) {
+  using std::swap;
+  swap(kind, other.kind);
+  swap(type, other.type);
+}
+

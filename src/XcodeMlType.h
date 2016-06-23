@@ -44,10 +44,8 @@ enum class XcodeMlTypeKind {
 
 class XcodeMlType {
 public:
-  void swap(XcodeMlType&);
-  XcodeMlType& operator=(XcodeMlType);
 private:
   class Impl;
-  std::unique_ptr<Impl> impl;
+  std::shared_ptr<Impl> impl;
 };
 
