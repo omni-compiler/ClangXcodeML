@@ -44,8 +44,10 @@ public:
   friend XcodeMlFunctionType getFunctionType(XcodeMlTypeRef);
   friend XcodeMlArrayType getArrayType(XcodeMlTypeRef);
 private:
-  class Impl;
-  std::shared_ptr<Impl> impl;
+  XcodeMlTypeKind kind;
+  /* FIXME: knows too much */
+  std::string name;
+  XcodeMlTypeRef type;
+  std::vector<XcodeMlTypeRef> params;
+  std::shared_ptr<size_t> size;
 };
-
-
