@@ -9,10 +9,8 @@
 #include <sstream>
 #include <cassert>
 #include "XMLString.h"
-#include "Reality.h"
 #include "XcodeMlType.h"
-
-using TypeMap = std::map<std::string, std::string>;
+#include "Reality.h"
 
 TypeMap parseTypeTable(xmlDocPtr doc);
 void buildCode(xmlDocPtr, std::stringstream&);
@@ -31,18 +29,6 @@ int main(int argc, char** argv) {
   std::cout << ss.str() << std::endl;
   return 0;
 }
-
-XMLString xmlNodePtrToTypeName(xmlNodePtr node) {
-  XMLString type = node->name;
-  if (type == "typeName" || type == "basicType") {
-    return xmlGetProp(node, BAD_CAST "ref");
-  } else if (type == "pointerType") {
-    XMLString type = xmlStrdup(xmlGetProp(node, BAD_CAST "ref"));
-    return type + "*";
-  }
-  return "Type";
-}
-
 
 xmlNodePtr findFirst(xmlNodePtr node, const char* xpathExpr, xmlXPathContextPtr xpathCtxt) {
   if (!xpathCtxt) {
@@ -220,6 +206,70 @@ void buildCode(xmlDocPtr doc, std::stringstream& ss) {
   r.call(xmlDocGetRootElement(doc), src, ss);
 }
 
+using TypeAnalyzer = Reality<TypeMap&>;
+#define TA_ARGS xmlNodePtr node, const TypeAnalyzer& r, TypeMap& map
+#define DEFINE_TA(name) void name(TA_ARGS)
+
+DEFINE_TA(basicTypeProc) {
+  XMLString protoName = xmlGetProp(node, BAD_CAST "name");
+  auto prototype = map[protoName];
+  XMLString name(xmlGetProp(node, BAD_CAST "type"));
+  map[name] = prototype;
+}
+
+DEFINE_TA(pointerTypeProc) {
+  XMLString refName = xmlGetProp(node, BAD_CAST "ref");
+  auto ref = map[refName];
+  XMLString name(xmlGetProp(node, BAD_CAST "type"));
+  map[name] = makePointerType(ref);
+}
+
+DEFINE_TA(functionTypeProc) {
+  XMLString returnName = xmlGetProp(node, BAD_CAST "return_type");
+  auto returnType = map[returnName];
+  XMLString name(xmlGetProp(node, BAD_CAST "type"));
+  map[name] = makeFunctionType(returnType, {});
+}
+
+DEFINE_TA(arrayTypeProc) {
+  XMLString elemName = xmlGetProp(node, BAD_CAST "element_type");
+  auto elemType = map[elemName];
+  XMLString name(xmlGetProp(node, BAD_CAST "type"));
+  map[name] = makeArrayType(elemType, 0);
+}
+
+const std::vector<std::string> dataTypeIdents = {
+  "void",
+  "char",
+  "short",
+  "int",
+  "long",
+  "long_long",
+  "unsigned_char",
+  "unsigned_short",
+  "unsigned",
+  "unsigned_long",
+  "unsigned_long_long",
+  "float",
+  "double",
+  "long_double",
+  "wchar_t",
+  "char16_t",
+  "char32_t",
+  "bool",
+};
+
+
+XcodeMlTypeRef makeReservedType(std::string);
+
+const TypeMap dataTypeIdentMap = [](const std::vector<std::string>& keys) {
+  TypeMap map;
+  for (std::string key : keys) {
+    map[key] = makeReservedType(key);
+  }
+  return map;
+}(dataTypeIdents);
+
 TypeMap parseTypeTable(xmlDocPtr doc) {
   if (doc == nullptr) {
     return TypeMap();
@@ -236,13 +286,16 @@ TypeMap parseTypeTable(xmlDocPtr doc) {
     return TypeMap();
   }
   const size_t len = (xpathObj->nodesetval)? xpathObj->nodesetval->nodeNr:0;
-  TypeMap val;
-  for (int i = 0; i < len; ++i) {
-    xmlNodePtr cur = xpathObj->nodesetval->nodeTab[i];
-    std::stringstream ss;
-    ss << cur->name;
-    val[ss.str()] = xmlNodePtrToTypeName(cur);
+  TypeAnalyzer ta;
+  TypeMap map(dataTypeIdentMap);
+  ta.registerNP("basicType", basicTypeProc);
+  ta.registerNP("pointerType", pointerTypeProc);
+  ta.registerNP("functionType", functionTypeProc);
+  ta.registerNP("arrayType", arrayTypeProc);
+  for (size_t i = 0; i < len; ++i) {
+    xmlNodePtr node = xpathObj->nodesetval->nodeTab[i];
+    ta.callOnce(node, map);
   }
-  return TypeMap();
+  return map;
 }
 

@@ -1,9 +1,11 @@
 #include <vector>
 #include <memory>
 #include <string>
+#include <map>
 
 class XcodeMlType;
 using XcodeMlTypeRef = std::shared_ptr<XcodeMlType>; /* not nullable */
+using TypeMap = std::map<std::string, XcodeMlTypeRef>;
 
 struct XcodeMlReservedType {
   std::string name;

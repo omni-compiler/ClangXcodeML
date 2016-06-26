@@ -1,7 +1,7 @@
 class SourceInfo {
 public:
   xmlXPathContextPtr ctxt;
-  std::map<std::string, std::string> typeTable;
+  TypeMap typeTable;
 };
 
 template<typename... T>
