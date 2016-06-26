@@ -217,10 +217,10 @@ void buildCode(xmlDocPtr doc, std::stringstream& ss) {
   r.registerNP("mulExpr", showBinOp(" * "));
   r.registerNP("divExpr", showBinOp(" / "));
   r.registerNP("modExpr", showBinOp(" % "));
-  r.registerNP("unaryMinusExpr", showChildElem("-", ""));
-  r.registerNP("binNotExpr", showChildElem("~", ""));
-  r.registerNP("logNotExpr", showChildElem("!", ""));
-  r.registerNP("sizeOfExpr", showChildElem("sizeof ", ""));
+  r.registerNP("unaryMinusExpr", showChildElem("-(", ")"));
+  r.registerNP("binNotExpr", showChildElem("~(", ")"));
+  r.registerNP("logNotExpr", showChildElem("!(", ")"));
+  r.registerNP("sizeOfExpr", showChildElem("sizeof (", ")"));
   r.registerNP("functionCall", functionCallProc);
   r.registerNP("arguments", argumentsProc);
   r.registerNP("condExpr", condExprProc);
