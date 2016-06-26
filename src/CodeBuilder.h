@@ -1,13 +1,17 @@
 #ifndef CODEBUILDER_H
 #define CODEBUILDER_H
 
+using SymbolEntry = std::map<std::string,std::string>;
+using SymbolMap = std::vector<SymbolEntry>;
+
 class SourceInfo {
 public:
   xmlXPathContextPtr ctxt;
   TypeMap typeTable;
+  SymbolMap symTable;
 };
 
-using CodeBuilder = Reality<const SourceInfo&, std::stringstream&>;
+using CodeBuilder = Reality<SourceInfo&, std::stringstream&>;
 
 void buildCode(xmlDocPtr, std::stringstream&);
 

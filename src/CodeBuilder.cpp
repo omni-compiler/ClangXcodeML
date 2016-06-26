@@ -13,7 +13,44 @@
 #include "CodeBuilder.h"
 #include "LibXMLUtil.h"
 
-#define CB_ARGS xmlNodePtr node, const CodeBuilder& r, const SourceInfo& src, std::stringstream& ss
+SymbolEntry parseSymbols(xmlNodePtr node, xmlXPathContextPtr ctxt) {
+  xmlXPathObjectPtr xpathObj = xmlXPathNodeEval(node, BAD_CAST "id", ctxt);
+  if (xpathObj == nullptr) {
+    return SymbolEntry();
+  }
+  const size_t len = (xpathObj->nodesetval)? xpathObj->nodesetval->nodeNr:0;
+  SymbolEntry entry;
+  for (size_t i = 0; i < len; ++i) {
+    xmlNodePtr idElem = xpathObj->nodesetval->nodeTab[i];
+    xmlNodePtr nameElem = findFirst(idElem, "name", ctxt);
+    XMLString type(xmlGetProp(idElem, BAD_CAST "type"));
+    XMLString name(xmlNodeGetContent(nameElem));
+    entry[name] = type;
+  }
+  return entry;
+}
+
+SymbolMap parseGlobalSymbols(xmlDocPtr doc) {
+  if (doc == nullptr) {
+    return SymbolMap();
+  }
+  xmlXPathContextPtr xpathCtx = xmlXPathNewContext(doc);
+  if (xpathCtx == nullptr) {
+    return SymbolMap();
+  }
+  xmlXPathObjectPtr xpathObj = xmlXPathEvalExpression(
+      BAD_CAST "/XcodeProgram/globalSymbols",
+      xpathCtx);
+  if (xpathObj == nullptr) {
+    xmlXPathFreeContext(xpathCtx);
+    return SymbolMap();
+  }
+  assert(xpathObj->nodesetval->nodeTab[0]);
+  auto initialEntry(parseSymbols(xpathObj->nodesetval->nodeTab[0], xpathCtx));
+  return {initialEntry};
+}
+
+#define CB_ARGS xmlNodePtr node, const CodeBuilder& r, SourceInfo& src, std::stringstream& ss
 #define DEFINE_CB(name) void name(CB_ARGS)
 
 DEFINE_CB(functionDefinitionProc) {
@@ -58,9 +95,12 @@ DEFINE_CB(thisExprProc) {
 }
 
 DEFINE_CB(compoundStatementProc) {
+  SymbolEntry entry = parseSymbols(findFirst(node, "symbols", src.ctxt), src.ctxt);
+  src.symTable.push_back(entry);
   ss << "{\n";
   r.call(node->children, src, ss);
   ss << "}\n";
+  src.symTable.pop_back();
 }
 
 DEFINE_CB(functionCallProc) {
@@ -168,6 +208,10 @@ void buildCode(xmlDocPtr doc, std::stringstream& ss) {
   r.registerNP("returnStatement", showChildElem("return ", ";\n"));
   r.registerNP("varDecl", varDeclProc);
 
-  SourceInfo src = {xmlXPathNewContext(doc), parseTypeTable(doc)};
+  SourceInfo src = {
+    xmlXPathNewContext(doc),
+    parseTypeTable(doc),
+    parseGlobalSymbols(doc)
+  };
   r.call(xmlDocGetRootElement(doc), src, ss);
 }
