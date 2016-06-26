@@ -31,7 +31,7 @@ OBJS =  CtoXcodeML.o \
 	operator.o
 
 DECOMPILER_OBJS = XcodeMlType.o \
-	xmlparse.o \
+	XcodeMLtoCXX.o \
 	LibXMLUtil.o \
 	CodeBuilder.o \
 	TypeAnalyzer.o \
@@ -89,7 +89,7 @@ XcodeMlType.o: \
 	XcodeMlType.h
 XcodeMLtoCXX.o: \
 	XcodeMlType.h \
-	xmlparse.cpp
+	XcodeMLtoCXX.cpp
 XMLString.o: \
 	XMLString.cpp \
 	XMLString.h
