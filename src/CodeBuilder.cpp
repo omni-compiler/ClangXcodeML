@@ -167,9 +167,11 @@ CodeBuilder::Procedure showBinOp(std::string operand) {
   return [operand](CB_ARGS) {
     xmlNodePtr lhs = findFirst(node, "*[1]", src.ctxt),
                rhs = findFirst(node, "*[2]", src.ctxt);
+    ss << "(";
     r.callOnce(lhs, src, ss);
     ss << operand;
     r.callOnce(rhs, src, ss);
+    ss << ")";
   };
 }
 
