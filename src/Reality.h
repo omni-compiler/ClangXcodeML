@@ -1,8 +1,5 @@
-class SourceInfo {
-public:
-  xmlXPathContextPtr ctxt;
-  TypeMap typeTable;
-};
+#ifndef REALITY_H
+#define REALITY_H
 
 template<typename... T>
 class Reality {
@@ -48,3 +45,4 @@ bool Reality<T...>::registerNP(std::string key, Procedure proc) {
   return true;
 }
 
+#endif /* !REALITY_H */

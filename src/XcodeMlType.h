@@ -1,7 +1,5 @@
-#include <vector>
-#include <memory>
-#include <string>
-#include <map>
+#ifndef XCODEMLTYPE_H
+#define XCODEMLTYPE_H
 
 class XcodeMlType;
 using XcodeMlTypeRef = std::shared_ptr<XcodeMlType>; /* not nullable */
@@ -53,3 +51,5 @@ private:
   std::vector<XcodeMlTypeRef> params;
   std::shared_ptr<size_t> size;
 };
+
+#endif /* !XCODEMLTYPE_H */

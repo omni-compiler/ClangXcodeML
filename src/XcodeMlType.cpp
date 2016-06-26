@@ -1,4 +1,8 @@
 #include <cassert>
+#include <memory>
+#include <map>
+#include <string>
+#include <vector>
 #include "XcodeMlType.h"
 
 XcodeMlTypeKind typeKind(XcodeMlTypeRef type) {

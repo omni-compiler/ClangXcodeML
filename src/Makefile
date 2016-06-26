@@ -31,7 +31,11 @@ OBJS =  CtoXcodeML.o \
 	operator.o
 
 DECOMPILER_OBJS = XcodeMlType.o \
-	xmlparse.o
+	xmlparse.o \
+	LibXMLUtil.o \
+	CodeBuilder.o \
+	TypeAnalyzer.o \
+	XMLString.o \
 
 CtoXcodeML: $(RAVOBJS) $(OBJS)
 	$(CXX) $(CXXFLAGS) $(RAVOBJS) $(OBJS) $(USEDLIBS) -o CtoXcodeML
@@ -86,6 +90,17 @@ XcodeMlType.o: \
 XcodeMLtoCXX.o: \
 	XcodeMlType.h \
 	xmlparse.cpp
+XMLString.o: \
+	XMLString.cpp \
+	XMLString.h
+CodeBuilder.o: \
+	CodeBuilder.cpp \
+	CodeBuilder.h \
+	Reality.h
+TypeAnalyzer.o: \
+	TypeAnalyzer.cpp \
+	TypeAnalyzer.h \
+	Reality.h
 
 CtoXcodeML.ast: CtoXcodeML.cpp
 	$(CXX) $(CXXFLAGS) -Xclang -ast-dump CtoXcodeML.cpp -o CtoXcodeML.ast 
@@ -99,7 +114,7 @@ distclean: clean
 	rm -f $(RAVOBJS) $(PCHFILES)
 
 clean:
-	rm -f CtoXcodeML mockup XcodeMlRAV.i CtoXcodeML.i  $(OBJS) *~
+	rm -f CtoXcodeML mockup XcodeMlRAV.i CtoXcodeML.i  $(OBJS) $(DECOMPILER_OBJS) *~
 
 XcodeMlRAV.i: XcodeMlRAV.cpp
 	$(CXX) $(CXXFLAGS) -E XcodeMlRAV.cpp -o XcodeMlRAV.i
