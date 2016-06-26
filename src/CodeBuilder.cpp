@@ -30,6 +30,23 @@ SymbolEntry parseSymbols(xmlNodePtr node, xmlXPathContextPtr ctxt) {
   return entry;
 }
 
+/* table shoud contain name */
+std::string findSymbolType(const SymbolMap& table, const std::string& name) {
+  for (auto entry : table) {
+    auto result(entry.find(name));
+    if (result != entry.end()) {
+      return result->second;
+    }
+  }
+  assert(false); /* due to constraint of parameters */
+}
+
+/* src.symTable should contain name */
+XcodeMlTypeRef getIdentType(const SourceInfo& src, const std::string& ident) {
+  std::string dataTypeIdent(findSymbolType(src.symTable, ident));
+  return src.typeTable.find(dataTypeIdent)->second;
+}
+
 SymbolMap parseGlobalSymbols(xmlDocPtr doc) {
   if (doc == nullptr) {
     return SymbolMap();
@@ -138,10 +155,11 @@ DEFINE_CB(condExprProc) {
 }
 
 DEFINE_CB(varDeclProc) {
-  xmlNodePtr name = findFirst(node, "name", src.ctxt),
-             value = findFirst(node, "value", src.ctxt);
-  ss << xmlNodeGetContent(name) << " = ";
-  r.callOnce(value, src, ss);
+  xmlNodePtr nameElem = findFirst(node, "name", src.ctxt),
+             valueElem = findFirst(node, "value", src.ctxt);
+  XMLString name(xmlNodeGetContent(nameElem));
+  ss << findSymbolType(src.symTable, name) << " " << (std::string)name << " = ";
+  r.callOnce(valueElem, src, ss);
   ss << ";\n";
 }
 
