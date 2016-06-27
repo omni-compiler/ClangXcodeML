@@ -76,6 +76,13 @@ const TypeMap dataTypeIdentMap = [](const std::vector<std::string>& keys) {
   return map;
 }(dataTypeIdents);
 
+const TypeAnalyzer XcodeMLTypeAnalyzer = {
+  std::make_tuple("basicType", basicTypeProc),
+  std::make_tuple("pointerType", pointerTypeProc),
+  std::make_tuple("functionType", functionTypeProc),
+  std::make_tuple("arrayType", arrayTypeProc),
+};
+
 TypeMap parseTypeTable(xmlDocPtr doc) {
   if (doc == nullptr) {
     return TypeMap();
@@ -92,15 +99,10 @@ TypeMap parseTypeTable(xmlDocPtr doc) {
     return TypeMap();
   }
   const size_t len = (xpathObj->nodesetval)? xpathObj->nodesetval->nodeNr:0;
-  TypeAnalyzer ta;
   TypeMap map(dataTypeIdentMap);
-  ta.registerNP("basicType", basicTypeProc);
-  ta.registerNP("pointerType", pointerTypeProc);
-  ta.registerNP("functionType", functionTypeProc);
-  ta.registerNP("arrayType", arrayTypeProc);
   for (size_t i = 0; i < len; ++i) {
     xmlNodePtr node = xpathObj->nodesetval->nodeTab[i];
-    ta.callOnce(node, map);
+    XcodeMLTypeAnalyzer.callOnce(node, map);
   }
   return map;
 }
