@@ -211,6 +211,8 @@ CodeBuilder::Procedure showNodeContent(std::string prefix, std::string suffix) {
   };
 }
 
+CodeBuilder::Procedure EmptySNCProc = showNodeContent("", "");
+
 CodeBuilder::Procedure showChildElem(std::string prefix, std::string suffix) {
   return [prefix, suffix](CB_ARGS) {
     ss << prefix;
@@ -223,45 +225,49 @@ CodeBuilder::Procedure showChildElem(std::string prefix, std::string suffix) {
   };
 }
 
-void buildCode(xmlDocPtr doc, std::stringstream& ss) {
-  CodeBuilder r;
-  const CodeBuilder::Procedure snc = showNodeContent("", "");
-  r.registerNP("functionDefinition", improveSymTableStack(functionDefinitionProc));
-  r.registerNP("intConstant", snc);
-  r.registerNP("moeConstant", snc);
-  r.registerNP("booleanConstant", snc);
-  r.registerNP("funcAddr", snc);
-  r.registerNP("stringConstant", showNodeContent("\"", "\""));
-  r.registerNP("Var", snc);
-  r.registerNP("varAddr", showNodeContent("&", ""));
-  r.registerNP("pointerRef", showNodeContent("*", ""));
-  r.registerNP("memberRef", memberRefProc);
-  r.registerNP("memberAddr", memberAddrProc);
-  r.registerNP("memberPointerRef", memberPointerRefProc);
-  r.registerNP("compoundValue", compoundValueProc);
-  r.registerNP("compoundStatement", improveSymTableStack(compoundStatementProc));
-  r.registerNP("thisExpr", thisExprProc);
-  r.registerNP("assignExpr", showBinOp(" = "));
-  r.registerNP("plusExpr", showBinOp(" + "));
-  r.registerNP("minusExpr", showBinOp(" - "));
-  r.registerNP("mulExpr", showBinOp(" * "));
-  r.registerNP("divExpr", showBinOp(" / "));
-  r.registerNP("modExpr", showBinOp(" % "));
-  r.registerNP("unaryMinusExpr", showChildElem("-(", ")"));
-  r.registerNP("binNotExpr", showChildElem("~(", ")"));
-  r.registerNP("logNotExpr", showChildElem("!(", ")"));
-  r.registerNP("sizeOfExpr", showChildElem("sizeof (", ")"));
-  r.registerNP("functionCall", functionCallProc);
-  r.registerNP("arguments", argumentsProc);
-  r.registerNP("condExpr", condExprProc);
-  r.registerNP("exprStatement", showChildElem("", ";\n"));
-  r.registerNP("returnStatement", showChildElem("return ", ";\n"));
-  r.registerNP("varDecl", varDeclProc);
+CodeBuilder::Procedure showUnaryOp(std::string operand) {
+  return showChildElem(operand + "(", ")");
+}
 
+const CodeBuilder CXXBuilder = {
+  std::make_tuple("functionDefinition", improveSymTableStack(functionDefinitionProc)),
+  std::make_tuple("intConstant", EmptySNCProc),
+  std::make_tuple("moeConstant", EmptySNCProc),
+  std::make_tuple("booleanConstant", EmptySNCProc),
+  std::make_tuple("funcAddr", EmptySNCProc),
+  std::make_tuple("stringConstant", showNodeContent("\"", "\"")),
+  std::make_tuple("Var", EmptySNCProc),
+  std::make_tuple("varAddr", showNodeContent("&", "")),
+  std::make_tuple("pointerRef", showNodeContent("*", "")),
+  std::make_tuple("memberRef", memberRefProc),
+  std::make_tuple("memberAddr", memberAddrProc),
+  std::make_tuple("memberPointerRef", memberPointerRefProc),
+  std::make_tuple("compoundValue", compoundValueProc),
+  std::make_tuple("compoundStatement", improveSymTableStack(compoundStatementProc)),
+  std::make_tuple("thisExpr", thisExprProc),
+  std::make_tuple("assignExpr", showBinOp(" = ")),
+  std::make_tuple("plusExpr", showBinOp(" + ")),
+  std::make_tuple("minusExpr", showBinOp(" - ")),
+  std::make_tuple("mulExpr", showBinOp(" * ")),
+  std::make_tuple("divExpr", showBinOp(" / ")),
+  std::make_tuple("modExpr", showBinOp(" % ")),
+  std::make_tuple("unaryMinusExpr", showUnaryOp("-")),
+  std::make_tuple("binNotExpr", showUnaryOp("~")),
+  std::make_tuple("logNotExpr", showUnaryOp("!")),
+  std::make_tuple("sizeOfExpr", showUnaryOp("sizeof")),
+  std::make_tuple("functionCall", functionCallProc),
+  std::make_tuple("arguments", argumentsProc),
+  std::make_tuple("condExpr", condExprProc),
+  std::make_tuple("exprStatement", showChildElem("", ";\n")),
+  std::make_tuple("returnStatement", showChildElem("return ", ";\n")),
+  std::make_tuple("varDecl", varDeclProc),
+};
+
+void buildCode(xmlDocPtr doc, std::stringstream& ss) {
   SourceInfo src = {
     xmlXPathNewContext(doc),
     parseTypeTable(doc),
     parseGlobalSymbols(doc)
   };
-  r.call(xmlDocGetRootElement(doc), src, ss);
+  CXXBuilder.call(xmlDocGetRootElement(doc), src, ss);
 }
