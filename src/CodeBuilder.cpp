@@ -158,7 +158,8 @@ DEFINE_CB(varDeclProc) {
   xmlNodePtr nameElem = findFirst(node, "name", src.ctxt),
              valueElem = findFirst(node, "value", src.ctxt);
   XMLString name(xmlNodeGetContent(nameElem));
-  ss << findSymbolType(src.symTable, name) << " " << (std::string)name << " = ";
+  auto type = getIdentType(src, name);
+  ss << XcodeMlTypeRefToString(type) << " " << static_cast<std::string>(name) << " = ";
   r.callOnce(valueElem, src, ss);
   ss << ";\n";
 }

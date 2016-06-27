@@ -43,6 +43,7 @@ public:
   friend XcodeMlPointerType getPointerType(XcodeMlTypeRef);
   friend XcodeMlFunctionType getFunctionType(XcodeMlTypeRef);
   friend XcodeMlArrayType getArrayType(XcodeMlTypeRef);
+  friend std::string XcodeMlTypeRefToString(XcodeMlTypeRef);
 private:
   XcodeMlTypeKind kind;
   /* FIXME: knows too much */

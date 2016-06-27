@@ -58,3 +58,15 @@ XcodeMlArrayType getArrayType(XcodeMlTypeRef type) {
   assert(type->kind == XcodeMlTypeKind::Array);
   return {type->type, type->size};
 }
+
+std::string XcodeMlTypeRefToString(XcodeMlTypeRef type) {
+  switch (typeKind(type)) {
+    case XcodeMlTypeKind::Reserved:
+      return getReservedType(type).name;
+    case XcodeMlTypeKind::Pointer:
+      return XcodeMlTypeRefToString(getPointerType(type).ref) + "*";
+    case XcodeMlTypeKind::Function:
+    case XcodeMlTypeKind::Array:
+      return "";
+  }
+}
