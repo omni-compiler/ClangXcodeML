@@ -19,7 +19,7 @@ XcodeMLtoCXX: $(OBJS)
 	$(CXX) $(CXXFLAGS) $(OBJS) $(USEDLIBS) -o XcodeMLtoCXX
 
 XcodeMLtoCXX.o: XcodeMlType.o CodeBuilder.o TypeAnalyzer.o
-CodeBuilder.o: XMLString.o LibXMLUtil.o XcodeMlType.o Reality.h
+CodeBuilder.o: XMLString.o LibXMLUtil.o XcodeMlType.o TypeAnalyzer.o Reality.h
 TypeAnalyzer.o: XMLString.o LibXMLUtil.o XcodeMlType.o Reality.h
 
 clean:
