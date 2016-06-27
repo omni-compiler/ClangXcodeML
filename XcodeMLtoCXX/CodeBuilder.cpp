@@ -67,7 +67,10 @@ SymbolMap parseGlobalSymbols(xmlDocPtr doc) {
   return {initialEntry};
 }
 
-#define CB_ARGS xmlNodePtr node, const CodeBuilder& r, SourceInfo& src, std::stringstream& ss
+#define CB_ARGS xmlNodePtr node __attribute__((unused)), \
+                const CodeBuilder& r __attribute__((unused)), \
+                SourceInfo& src __attribute__((unused)), \
+                std::stringstream& ss __attribute__((unused))
 #define DEFINE_CB(name) void name(CB_ARGS)
 
 CodeBuilder::Procedure handleSymTableStack(

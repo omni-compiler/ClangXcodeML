@@ -13,7 +13,9 @@
 #include "XcodeMlType.h"
 #include "TypeAnalyzer.h"
 
-#define TA_ARGS xmlNodePtr node, const TypeAnalyzer& r, TypeMap& map
+#define TA_ARGS xmlNodePtr node __attribute__((unused)), \
+                const TypeAnalyzer& r __attribute__((unused)), \
+                TypeMap& map __attribute__((unused))
 #define DEFINE_TA(name) void name(TA_ARGS)
 
 DEFINE_TA(basicTypeProc) {
