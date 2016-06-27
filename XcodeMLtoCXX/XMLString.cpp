@@ -24,3 +24,7 @@ size_t length(XMLString str) {
   return static_cast<size_t>(xmlStrlen(str.c_ptr()));
 }
 
+std::ostream& operator<<(std::ostream& os, const XMLString& str) {
+  os << str.c_ptr();
+  return os;
+}

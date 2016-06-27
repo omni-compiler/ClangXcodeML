@@ -94,7 +94,7 @@ DEFINE_CB(functionDefinitionProc) {
   XMLString kind(nameElem->name);
   if (kind == "name" || kind == "operator") {
     ss << XcodeMlTypeRefToString(type.returnType)
-      << " " << name.c_ptr();
+      << " " << name;
   } else if (kind == "constructor") {
     ss << "<constructor>";
   } else if (kind == "destructor") {
@@ -188,7 +188,7 @@ DEFINE_CB(varDeclProc) {
              valueElem = findFirst(node, "value", src.ctxt);
   XMLString name(xmlNodeGetContent(nameElem));
   auto type = getIdentType(src, name);
-  ss << XcodeMlTypeRefToString(type) << " " << static_cast<std::string>(name) << " = ";
+  ss << XcodeMlTypeRefToString(type) << " " << name << " = ";
   r.callOnce(valueElem, src, ss);
   ss << ";\n";
 }
