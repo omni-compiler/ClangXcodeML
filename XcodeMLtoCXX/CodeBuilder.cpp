@@ -70,6 +70,18 @@ SymbolMap parseGlobalSymbols(xmlDocPtr doc) {
 #define CB_ARGS xmlNodePtr node, const CodeBuilder& r, SourceInfo& src, std::stringstream& ss
 #define DEFINE_CB(name) void name(CB_ARGS)
 
+CodeBuilder::Procedure improveSymTableStack(
+    const CodeBuilder::Procedure mainProc) {
+  const CodeBuilder::Procedure push = [](CB_ARGS) {
+    SymbolEntry entry = parseSymbols(findFirst(node, "symbols", src.ctxt), src.ctxt);
+    src.symTable.push_back(entry);
+  };
+  const CodeBuilder::Procedure pop = [](CB_ARGS) {
+    src.symTable.pop_back();
+  };
+  return CodeBuilder::merge(push, CodeBuilder::merge(mainProc, pop));
+}
+
 DEFINE_CB(functionDefinitionProc) {
   xmlNodePtr nameElem = findFirst(
       node,
@@ -91,15 +103,9 @@ DEFINE_CB(functionDefinitionProc) {
     assert(false);
   }
 
-  SymbolEntry entry(parseSymbols(
-        findFirst(node, "symbols", src.ctxt),
-        src.ctxt
-  ));
-  src.symTable.push_back(entry);
-
   ss << "(";
   bool alreadyPrinted = false;
-  for (auto p : entry) {
+  for (auto p : src.symTable.back()) {
     if (alreadyPrinted) {
       ss << ", ";
     }
@@ -110,7 +116,6 @@ DEFINE_CB(functionDefinitionProc) {
   ss << ")" << std::endl;
 
   r.call(node->children, src, ss);
-  src.symTable.pop_back();
 }
 
 DEFINE_CB(memberRefProc) {
@@ -139,12 +144,9 @@ DEFINE_CB(thisExprProc) {
 }
 
 DEFINE_CB(compoundStatementProc) {
-  SymbolEntry entry = parseSymbols(findFirst(node, "symbols", src.ctxt), src.ctxt);
-  src.symTable.push_back(entry);
   ss << "{\n";
   r.call(node->children, src, ss);
   ss << "}\n";
-  src.symTable.pop_back();
 }
 
 DEFINE_CB(functionCallProc) {
@@ -224,7 +226,7 @@ CodeBuilder::Procedure showChildElem(std::string prefix, std::string suffix) {
 void buildCode(xmlDocPtr doc, std::stringstream& ss) {
   CodeBuilder r;
   const CodeBuilder::Procedure snc = showNodeContent("", "");
-  r.registerNP("functionDefinition", functionDefinitionProc);
+  r.registerNP("functionDefinition", improveSymTableStack(functionDefinitionProc));
   r.registerNP("intConstant", snc);
   r.registerNP("moeConstant", snc);
   r.registerNP("booleanConstant", snc);
@@ -237,7 +239,7 @@ void buildCode(xmlDocPtr doc, std::stringstream& ss) {
   r.registerNP("memberAddr", memberAddrProc);
   r.registerNP("memberPointerRef", memberPointerRefProc);
   r.registerNP("compoundValue", compoundValueProc);
-  r.registerNP("compoundStatement", compoundStatementProc);
+  r.registerNP("compoundStatement", improveSymTableStack(compoundStatementProc));
   r.registerNP("thisExpr", thisExprProc);
   r.registerNP("assignExpr", showBinOp(" = "));
   r.registerNP("plusExpr", showBinOp(" + "));

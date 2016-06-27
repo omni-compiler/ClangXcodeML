@@ -8,6 +8,7 @@ public:
   void call(xmlNodePtr, T...) const;
   void callOnce(xmlNodePtr, T...) const;
   bool registerNP(std::string, Procedure);
+  static Procedure merge(Procedure, Procedure);
 private:
   std::map<std::string, Procedure> map;
 };
@@ -43,6 +44,16 @@ bool Reality<T...>::registerNP(std::string key, Procedure proc) {
   }
   map[key] = proc;
   return true;
+}
+
+template<typename... T>
+typename Reality<T...>::Procedure Reality<T...>::merge(
+    typename Reality<T...>::Procedure lhs,
+    typename Reality<T...>::Procedure rhs) {
+  return [lhs, rhs](xmlNodePtr node, const Reality<T...>& r, T... args) {
+    lhs(node, r, args ...);
+    rhs(node, r, args ...);
+  };
 }
 
 #endif /* !REALITY_H */
