@@ -5,6 +5,8 @@ template<typename... T>
 class Reality {
 public:
   using Procedure = std::function<void(xmlNodePtr, const Reality&, T...)>;
+  Reality() = default;
+  Reality(std::initializer_list<std::tuple<std::string, Procedure>>);
   void call(xmlNodePtr, T...) const;
   void callOnce(xmlNodePtr, T...) const;
   bool registerNP(std::string, Procedure);
@@ -12,6 +14,15 @@ public:
 private:
   std::map<std::string, Procedure> map;
 };
+
+template<typename... T>
+Reality<T...>::Reality(std::initializer_list<std::tuple<std::string, typename Reality<T...>::Procedure>> pairs):
+  map()
+{
+  for (auto p : pairs) {
+    registerNP(std::get<0>(p), std::get<1>(p));
+  }
+}
 
 template<typename... T>
 void Reality<T...>::call(xmlNodePtr node, T... args) const {
