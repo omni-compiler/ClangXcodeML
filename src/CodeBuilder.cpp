@@ -71,13 +71,21 @@ SymbolMap parseGlobalSymbols(xmlDocPtr doc) {
 #define DEFINE_CB(name) void name(CB_ARGS)
 
 DEFINE_CB(functionDefinitionProc) {
-  xmlNodePtr fnName = findFirst(node, "name|operator|constructor|destructor", src.ctxt);
-  XMLString fnType = fnName->name;
-  if (fnType == "name" || fnType == "operator") {
-    ss << xmlNodeGetContent(fnName);
-  } else if (fnType == "constructor") {
+  xmlNodePtr nameElem = findFirst(
+      node,
+      "name|operator|constructor|destructor",
+      src.ctxt
+  );
+  XMLString name(xmlNodeGetContent(nameElem));
+  auto type(getFunctionType(getIdentType(src, name)));
+
+  XMLString kind(nameElem->name);
+  if (kind == "name" || kind == "operator") {
+    ss << XcodeMlTypeRefToString(type.returnType)
+      << " " << name.c_ptr();
+  } else if (kind == "constructor") {
     ss << "<constructor>";
-  } else if (fnType == "destructor") {
+  } else if (kind == "destructor") {
     ss << "<destructor>";
   } else {
     assert(false);
