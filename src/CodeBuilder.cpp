@@ -90,8 +90,27 @@ DEFINE_CB(functionDefinitionProc) {
   } else {
     assert(false);
   }
-  ss << "()\n";
+
+  SymbolEntry entry(parseSymbols(
+        findFirst(node, "symbols", src.ctxt),
+        src.ctxt
+  ));
+  src.symTable.push_back(entry);
+
+  ss << "(";
+  bool alreadyPrinted = false;
+  for (auto p : entry) {
+    if (alreadyPrinted) {
+      ss << ", ";
+    }
+    auto paramType(getIdentType(src, p.first));
+    ss << XcodeMlTypeRefToString(paramType) << " " << p.first;
+    alreadyPrinted = true;
+  }
+  ss << ")" << std::endl;
+
   r.call(node->children, src, ss);
+  src.symTable.pop_back();
 }
 
 DEFINE_CB(memberRefProc) {
