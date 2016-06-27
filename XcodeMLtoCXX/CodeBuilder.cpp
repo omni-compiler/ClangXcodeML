@@ -70,7 +70,7 @@ SymbolMap parseGlobalSymbols(xmlDocPtr doc) {
 #define CB_ARGS xmlNodePtr node, const CodeBuilder& r, SourceInfo& src, std::stringstream& ss
 #define DEFINE_CB(name) void name(CB_ARGS)
 
-CodeBuilder::Procedure improveSymTableStack(
+CodeBuilder::Procedure handleSymTableStack(
     const CodeBuilder::Procedure mainProc) {
   const CodeBuilder::Procedure push = [](CB_ARGS) {
     SymbolEntry entry = parseSymbols(findFirst(node, "symbols", src.ctxt), src.ctxt);
@@ -230,7 +230,7 @@ CodeBuilder::Procedure showUnaryOp(std::string operand) {
 }
 
 const CodeBuilder CXXBuilder = {
-  std::make_tuple("functionDefinition", improveSymTableStack(functionDefinitionProc)),
+  std::make_tuple("functionDefinition", handleSymTableStack(functionDefinitionProc)),
   std::make_tuple("intConstant", EmptySNCProc),
   std::make_tuple("moeConstant", EmptySNCProc),
   std::make_tuple("booleanConstant", EmptySNCProc),
@@ -243,7 +243,7 @@ const CodeBuilder CXXBuilder = {
   std::make_tuple("memberAddr", memberAddrProc),
   std::make_tuple("memberPointerRef", memberPointerRefProc),
   std::make_tuple("compoundValue", compoundValueProc),
-  std::make_tuple("compoundStatement", improveSymTableStack(compoundStatementProc)),
+  std::make_tuple("compoundStatement", handleSymTableStack(compoundStatementProc)),
   std::make_tuple("thisExpr", thisExprProc),
   std::make_tuple("assignExpr", showBinOp(" = ")),
   std::make_tuple("plusExpr", showBinOp(" + ")),
