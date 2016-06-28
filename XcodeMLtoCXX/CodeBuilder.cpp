@@ -118,7 +118,7 @@ CodeBuilder::Procedure handleSymTableStack(
   const CodeBuilder::Procedure pop = [](CB_ARGS) {
     src.symTable.pop_back();
   };
-  return CodeBuilder::merge(push, CodeBuilder::merge(mainProc, pop));
+  return merge(push, merge(mainProc, pop));
 }
 
 DEFINE_CB(functionDefinitionProc) {

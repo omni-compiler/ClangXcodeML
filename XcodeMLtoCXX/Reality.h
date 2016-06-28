@@ -10,7 +10,6 @@ public:
   void call(xmlNodePtr, T...) const;
   void callOnce(xmlNodePtr, T...) const;
   bool registerNP(std::string, Procedure);
-  static Procedure merge(Procedure, Procedure);
 private:
   std::map<std::string, Procedure> map;
 };
@@ -58,12 +57,12 @@ bool Reality<T...>::registerNP(std::string key, Procedure proc) {
 }
 
 template<typename... T>
-typename Reality<T...>::Procedure Reality<T...>::merge(
-    typename Reality<T...>::Procedure lhs,
-    typename Reality<T...>::Procedure rhs) {
-  return [lhs, rhs](xmlNodePtr node, const Reality<T...>& r, T... args) {
-    lhs(node, r, args ...);
-    rhs(node, r, args ...);
+typename std::function<void(T...)> merge(
+    typename std::function<void(T...)> lhs,
+    typename std::function<void(T...)> rhs) {
+  return [lhs, rhs](T... args) {
+    lhs(args ...);
+    rhs(args ...);
   };
 }
 
