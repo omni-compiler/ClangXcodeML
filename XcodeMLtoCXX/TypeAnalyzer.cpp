@@ -13,6 +13,8 @@
 #include "XcodeMlType.h"
 #include "TypeAnalyzer.h"
 
+using XcodeMl::TypeMap;
+
 #define TA_ARGS xmlNodePtr node __attribute__((unused)), \
                 const TypeAnalyzer& r __attribute__((unused)), \
                 TypeMap& map __attribute__((unused))
@@ -67,13 +69,10 @@ const std::vector<std::string> dataTypeIdents = {
   "bool",
 };
 
-
-XcodeMlTypeRef makeReservedType(std::string);
-
 const TypeMap dataTypeIdentMap = [](const std::vector<std::string>& keys) {
   TypeMap map;
   for (std::string key : keys) {
-    map[key] = makeReservedType(key);
+    map[key] = XcodeMl::makeReservedType(key);
   }
   return map;
 }(dataTypeIdents);

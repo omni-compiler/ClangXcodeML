@@ -5,68 +5,72 @@
 #include <vector>
 #include "XcodeMlType.h"
 
-XcodeMlTypeKind typeKind(XcodeMlTypeRef type) {
+namespace XcodeMl {
+
+TypeKind typeKind(TypeRef type) {
   return type->kind;
 }
 
-XcodeMlTypeRef makeReservedType(std::string name) {
-  XcodeMlType type;
-  type.kind = XcodeMlTypeKind::Reserved;
+TypeRef makeReservedType(std::string name) {
+  Type type;
+  type.kind = TypeKind::Reserved;
   type.name = name;
-  return std::make_shared<XcodeMlType>(type);
+  return std::make_shared<Type>(type);
 }
 
-XcodeMlTypeRef makePointerType(XcodeMlTypeRef ref) {
-  XcodeMlType type;
-  type.kind = XcodeMlTypeKind::Pointer;
+TypeRef makePointerType(TypeRef ref) {
+  Type type;
+  type.kind = TypeKind::Pointer;
   type.type = ref;
-  return std::make_shared<XcodeMlType>(type);
+  return std::make_shared<Type>(type);
 }
 
-XcodeMlTypeRef makeFunctionType(XcodeMlTypeRef returnType, const std::vector<XcodeMlTypeRef>& params) {
-  XcodeMlType type;
-  type.kind = XcodeMlTypeKind::Function;
+TypeRef makeFunctionType(TypeRef returnType, const std::vector<TypeRef>& params) {
+  Type type;
+  type.kind = TypeKind::Function;
   type.type = returnType;
   type.params = params;
-  return std::make_shared<XcodeMlType>(type);
+  return std::make_shared<Type>(type);
 }
 
-XcodeMlTypeRef makeArrayType(XcodeMlTypeRef elem, size_t size) {
-  XcodeMlType type;
-  type.kind = XcodeMlTypeKind::Array;
+TypeRef makeArrayType(TypeRef elem, size_t size) {
+  Type type;
+  type.kind = TypeKind::Array;
   type.type = elem;
   type.size = std::make_shared<size_t>(size);
-  return std::make_shared<XcodeMlType>(type);
+  return std::make_shared<Type>(type);
 }
 
-XcodeMlReservedType getReservedType(XcodeMlTypeRef type) {
-  assert(type->kind == XcodeMlTypeKind::Reserved);
+ReservedType getReservedType(TypeRef type) {
+  assert(type->kind == TypeKind::Reserved);
   return {type->name};
 }
 
-XcodeMlPointerType getPointerType(XcodeMlTypeRef type) {
-  assert(type->kind == XcodeMlTypeKind::Pointer);
+PointerType getPointerType(TypeRef type) {
+  assert(type->kind == TypeKind::Pointer);
   return {type->type};
 }
 
-XcodeMlFunctionType getFunctionType(XcodeMlTypeRef type) {
-  assert(type->kind == XcodeMlTypeKind::Function);
+FunctionType getFunctionType(TypeRef type) {
+  assert(type->kind == TypeKind::Function);
   return {type->type, type->params};
 }
 
-XcodeMlArrayType getArrayType(XcodeMlTypeRef type) {
-  assert(type->kind == XcodeMlTypeKind::Array);
+ArrayType getArrayType(TypeRef type) {
+  assert(type->kind == TypeKind::Array);
   return {type->type, type->size};
 }
 
-std::string XcodeMlTypeRefToString(XcodeMlTypeRef type) {
+std::string TypeRefToString(TypeRef type) {
   switch (typeKind(type)) {
-    case XcodeMlTypeKind::Reserved:
+    case TypeKind::Reserved:
       return getReservedType(type).name;
-    case XcodeMlTypeKind::Pointer:
-      return XcodeMlTypeRefToString(getPointerType(type).ref) + "*";
-    case XcodeMlTypeKind::Function:
-    case XcodeMlTypeKind::Array:
+    case TypeKind::Pointer:
+      return TypeRefToString(getPointerType(type).ref) + "*";
+    case TypeKind::Function:
+    case TypeKind::Array:
       return "";
   }
+}
+
 }

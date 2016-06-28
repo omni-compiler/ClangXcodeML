@@ -42,7 +42,7 @@ std::string findSymbolType(const SymbolMap& table, const std::string& name) {
 }
 
 /* src.symTable should contain name */
-XcodeMlTypeRef getIdentType(const SourceInfo& src, const std::string& ident) {
+XcodeMl::TypeRef getIdentType(const SourceInfo& src, const std::string& ident) {
   std::string dataTypeIdent(findSymbolType(src.symTable, ident));
   return src.typeTable.find(dataTypeIdent)->second;
 }
@@ -96,7 +96,7 @@ DEFINE_CB(functionDefinitionProc) {
 
   XMLString kind(nameElem->name);
   if (kind == "name" || kind == "operator") {
-    ss << XcodeMlTypeRefToString(type.returnType)
+    ss << TypeRefToString(type.returnType)
       << " " << name;
   } else if (kind == "constructor") {
     ss << "<constructor>";
@@ -113,7 +113,7 @@ DEFINE_CB(functionDefinitionProc) {
       ss << ", ";
     }
     auto paramType(getIdentType(src, p.first));
-    ss << XcodeMlTypeRefToString(paramType) << " " << p.first;
+    ss << TypeRefToString(paramType) << " " << p.first;
     alreadyPrinted = true;
   }
   ss << ")" << std::endl;
@@ -191,7 +191,7 @@ DEFINE_CB(varDeclProc) {
              valueElem = findFirst(node, "value", src.ctxt);
   XMLString name(xmlNodeGetContent(nameElem));
   auto type = getIdentType(src, name);
-  ss << XcodeMlTypeRefToString(type) << " " << name << " = ";
+  ss << TypeRefToString(type) << " " << name << " = ";
   r.callOnce(valueElem, src, ss);
   ss << ";\n";
 }
