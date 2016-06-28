@@ -73,6 +73,42 @@ SymbolMap parseGlobalSymbols(xmlDocPtr doc) {
                 std::stringstream& ss __attribute__((unused))
 #define DEFINE_CB(name) void name(CB_ARGS)
 
+CodeBuilder::Procedure showBinOp(std::string operand) {
+  return [operand](CB_ARGS) {
+    xmlNodePtr lhs = findFirst(node, "*[1]", src.ctxt),
+               rhs = findFirst(node, "*[2]", src.ctxt);
+    ss << "(";
+    r.callOnce(lhs, src, ss);
+    ss << operand;
+    r.callOnce(rhs, src, ss);
+    ss << ")";
+  };
+}
+
+CodeBuilder::Procedure showNodeContent(std::string prefix, std::string suffix) {
+  return [prefix, suffix](CB_ARGS) {
+    ss << prefix << xmlNodeGetContent(node) << suffix;
+  };
+}
+
+CodeBuilder::Procedure EmptySNCProc = showNodeContent("", "");
+
+CodeBuilder::Procedure showChildElem(std::string prefix, std::string suffix) {
+  return [prefix, suffix](CB_ARGS) {
+    ss << prefix;
+    xmlNodePtr target = node->children;
+    while (target->type != XML_ELEMENT_NODE) {
+      target = target->next;
+    }
+    r.callOnce(target, src, ss);
+    ss << suffix;
+  };
+}
+
+CodeBuilder::Procedure showUnaryOp(std::string operand) {
+  return showChildElem(operand + "(", ")");
+}
+
 CodeBuilder::Procedure handleSymTableStack(
     const CodeBuilder::Procedure mainProc) {
   const CodeBuilder::Procedure push = [](CB_ARGS) {
@@ -194,42 +230,6 @@ DEFINE_CB(varDeclProc) {
   ss << TypeRefToString(type) << " " << name << " = ";
   r.callOnce(valueElem, src, ss);
   ss << ";\n";
-}
-
-CodeBuilder::Procedure showBinOp(std::string operand) {
-  return [operand](CB_ARGS) {
-    xmlNodePtr lhs = findFirst(node, "*[1]", src.ctxt),
-               rhs = findFirst(node, "*[2]", src.ctxt);
-    ss << "(";
-    r.callOnce(lhs, src, ss);
-    ss << operand;
-    r.callOnce(rhs, src, ss);
-    ss << ")";
-  };
-}
-
-CodeBuilder::Procedure showNodeContent(std::string prefix, std::string suffix) {
-  return [prefix, suffix](CB_ARGS) {
-    ss << prefix << xmlNodeGetContent(node) << suffix;
-  };
-}
-
-CodeBuilder::Procedure EmptySNCProc = showNodeContent("", "");
-
-CodeBuilder::Procedure showChildElem(std::string prefix, std::string suffix) {
-  return [prefix, suffix](CB_ARGS) {
-    ss << prefix;
-    xmlNodePtr target = node->children;
-    while (target->type != XML_ELEMENT_NODE) {
-      target = target->next;
-    }
-    r.callOnce(target, src, ss);
-    ss << suffix;
-  };
-}
-
-CodeBuilder::Procedure showUnaryOp(std::string operand) {
-  return showChildElem(operand + "(", ")");
 }
 
 const CodeBuilder CXXBuilder = {
