@@ -7,6 +7,9 @@
 
 namespace XcodeMl {
 
+/*!
+ * \brief Return the kind of \c type.
+ */
 TypeKind typeKind(TypeRef type) {
   return type->kind;
 }

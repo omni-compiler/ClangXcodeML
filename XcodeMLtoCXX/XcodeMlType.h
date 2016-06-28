@@ -5,6 +5,9 @@ namespace XcodeMl {
 
 class Type;
 using TypeRef = std::shared_ptr<Type>; /* not nullable */
+/*!
+ * \brief A mapping from data type identifiers
+ * to actual data types. */
 using TypeMap = std::map<std::string, TypeRef>;
 
 struct ReservedType {
@@ -26,9 +29,13 @@ struct ArrayType {
 };
 
 enum class TypeKind {
+ /*! basic data type (3.4 <basicType> element) */
   Reserved,
+  /*! pointer (3.5 <pointerType> element) */
   Pointer,
+  /*! function (3.6 <functionType> element) */
   Function,
+  /*! C-style array (3.7 <ArrayType> element) */
   Array,
 };
 
@@ -45,6 +52,9 @@ FunctionType getFunctionType(TypeRef);
 ArrayType getArrayType(TypeRef);
 std::string TypeRefToString(TypeRef);
 
+/*!
+ * \brief A class that represents data types in XcodeML.
+ */
 class Type {
 public:
   friend TypeKind typeKind(TypeRef);

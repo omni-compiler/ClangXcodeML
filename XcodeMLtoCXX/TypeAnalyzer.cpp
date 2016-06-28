@@ -15,9 +15,15 @@
 
 using XcodeMl::TypeMap;
 
+/*!
+ * \brief Arguments to be passed to TypeAnalyzer::Procedure.
+ */
 #define TA_ARGS xmlNodePtr node __attribute__((unused)), \
                 const TypeAnalyzer& r __attribute__((unused)), \
                 TypeMap& map __attribute__((unused))
+/*!
+ * \brief Define new TypeAnalyzer::Procedure named \c name.
+ */
 #define DEFINE_TA(name) void name(TA_ARGS)
 
 DEFINE_TA(basicTypeProc) {
@@ -69,6 +75,9 @@ const std::vector<std::string> dataTypeIdents = {
   "bool",
 };
 
+/*!
+ * \brief Mapping from Data type identifiers to basic data types.
+ */
 const TypeMap dataTypeIdentMap = [](const std::vector<std::string>& keys) {
   TypeMap map;
   for (std::string key : keys) {
@@ -84,6 +93,10 @@ const TypeAnalyzer XcodeMLTypeAnalyzer = {
   std::make_tuple("arrayType", arrayTypeProc),
 };
 
+/*!
+ * \brief Traverse an XcodeML document and make mapping from data
+ * type identifiers to data types defined in it.
+ */
 TypeMap parseTypeTable(xmlDocPtr doc) {
   if (doc == nullptr) {
     return TypeMap();

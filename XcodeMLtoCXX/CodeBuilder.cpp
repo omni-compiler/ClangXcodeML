@@ -67,10 +67,16 @@ SymbolMap parseGlobalSymbols(xmlDocPtr doc) {
   return {initialEntry};
 }
 
+/*!
+ * \brief Arguments to be passed to CodeBuilder::Procedure.
+ */
 #define CB_ARGS xmlNodePtr node __attribute__((unused)), \
                 const CodeBuilder& r __attribute__((unused)), \
                 SourceInfo& src __attribute__((unused)), \
                 std::stringstream& ss __attribute__((unused))
+/*!
+ * \brief Define new CodeBuilder::Procedure named \c name.
+ */
 #define DEFINE_CB(name) void name(CB_ARGS)
 
 CodeBuilder::Procedure showBinOp(std::string operand) {
@@ -85,6 +91,9 @@ CodeBuilder::Procedure showBinOp(std::string operand) {
   };
 }
 
+/*!
+ * \br
+ */
 CodeBuilder::Procedure showNodeContent(std::string prefix, std::string suffix) {
   return [prefix, suffix](CB_ARGS) {
     ss << prefix << xmlNodeGetContent(node) << suffix;
@@ -266,6 +275,9 @@ const CodeBuilder CXXBuilder = {
   std::make_tuple("varDecl", varDeclProc),
 };
 
+/*!
+ * \brief Traverse an XcodeML document and generate C++ source code.
+ */
 void buildCode(xmlDocPtr doc, std::stringstream& ss) {
   SourceInfo src = {
     xmlXPathNewContext(doc),

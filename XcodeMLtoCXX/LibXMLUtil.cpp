@@ -4,6 +4,10 @@
 #include <libxml/xpathInternals.h>
 #include "LibXMLUtil.h"
 
+/*!
+ * \brief Search for an element that matches given XPath expression.
+ * \return The first element that matches \c xpathExpr.
+ */
 xmlNodePtr findFirst(xmlNodePtr node, const char* xpathExpr, xmlXPathContextPtr xpathCtxt) {
   if (!xpathCtxt) {
     return nullptr;

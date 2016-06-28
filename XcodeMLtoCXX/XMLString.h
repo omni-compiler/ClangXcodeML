@@ -1,6 +1,9 @@
 #ifndef XMLSTRING_H
 #define XMLSTRING_H
 
+/*!
+ * \brief A wrapper of \c xmlChar*.
+ */
 class XMLString {
 public:
   XMLString(const xmlChar*);
