@@ -9,7 +9,7 @@
  * It has a mapping from XML element names to procedures
  * (std::function<void(xmlNodePtr, const Reality&, T...)>). Once
  * Reality<T...>::call() runs, it performs pre-order traversal of
- * given XML elements and its descendants until it finds an element
+ * given XML elements and their descendants until it finds an element
  * whose name is registered with the map. Finally it executes
  * a corresponding procedure.
  */

@@ -13,6 +13,10 @@
 #include "CodeBuilder.h"
 #include "LibXMLUtil.h"
 
+/*!
+ * \brief Traverse XcodeML node and make SymbolEntry.
+ * \pre \c node is <globalSymbols> or <symbols> element.
+ */
 SymbolEntry parseSymbols(xmlNodePtr node, xmlXPathContextPtr ctxt) {
   xmlXPathObjectPtr xpathObj = xmlXPathNodeEval(node, BAD_CAST "id", ctxt);
   if (xpathObj == nullptr) {
@@ -30,7 +34,11 @@ SymbolEntry parseSymbols(xmlNodePtr node, xmlXPathContextPtr ctxt) {
   return entry;
 }
 
-/* table shoud contain name */
+/*!
+ * \brief Search \c table for \c name visible .
+ * \pre \c table contains \c name.
+ * \return Data type identifier of \c name.
+ */
 std::string findSymbolType(const SymbolMap& table, const std::string& name) {
   for (auto entry : table) {
     auto result(entry.find(name));
@@ -41,7 +49,11 @@ std::string findSymbolType(const SymbolMap& table, const std::string& name) {
   assert(false); /* due to constraint of parameters */
 }
 
-/* src.symTable should contain name */
+/*!
+ * \brief Search for \c ident visible in current scope.
+ * \pre src.symTable contains \c ident.
+ * \return Data type of \c ident.
+ */
 XcodeMl::TypeRef getIdentType(const SourceInfo& src, const std::string& ident) {
   std::string dataTypeIdent(findSymbolType(src.symTable, ident));
   return src.typeTable.find(dataTypeIdent)->second;
@@ -79,20 +91,27 @@ SymbolMap parseGlobalSymbols(xmlDocPtr doc) {
  */
 #define DEFINE_CB(name) void name(CB_ARGS)
 
-CodeBuilder::Procedure showBinOp(std::string operand) {
-  return [operand](CB_ARGS) {
+/*!
+ * \brief Make a procedure that handles binary operation.
+ * \param Operator Spelling of binary operator.
+ */
+CodeBuilder::Procedure showBinOp(std::string Operator) {
+  return [Operator](CB_ARGS) {
     xmlNodePtr lhs = findFirst(node, "*[1]", src.ctxt),
                rhs = findFirst(node, "*[2]", src.ctxt);
     ss << "(";
     r.callOnce(lhs, src, ss);
-    ss << operand;
+    ss << Operator;
     r.callOnce(rhs, src, ss);
     ss << ")";
   };
 }
 
 /*!
- * \br
+ * \brief Make a procedure that outputs text content of a given
+ * XML element.
+ * \param prefix Text to output before text content.
+ * \param suffix Text to output after text content.
  */
 CodeBuilder::Procedure showNodeContent(std::string prefix, std::string suffix) {
   return [prefix, suffix](CB_ARGS) {
@@ -102,6 +121,12 @@ CodeBuilder::Procedure showNodeContent(std::string prefix, std::string suffix) {
 
 CodeBuilder::Procedure EmptySNCProc = showNodeContent("", "");
 
+/*!
+ * \brief Make a procedure that processes the first child element of
+ * a given XML element (At least one element should exist in it).
+ * \param prefix Text to output before traversing descendant elements.
+ * \param suffix Text to output after traversing descendant elements.
+ */
 CodeBuilder::Procedure showChildElem(std::string prefix, std::string suffix) {
   return [prefix, suffix](CB_ARGS) {
     ss << prefix;
@@ -114,10 +139,20 @@ CodeBuilder::Procedure showChildElem(std::string prefix, std::string suffix) {
   };
 }
 
-CodeBuilder::Procedure showUnaryOp(std::string operand) {
-  return showChildElem(operand + "(", ")");
+/*!
+ * \brief Make a procedure that handles unary operation.
+ * \param Operator Spelling of unary operator.
+ */
+CodeBuilder::Procedure showUnaryOp(std::string Operator) {
+  return showChildElem(Operator + "(", ")");
 }
 
+/*!
+ * \brief Make a procedure that handles SourceInfo::symTable.
+ * \return A procudure. It traverses <symbols> node and pushes new
+ * entry to symTable before running \c mainProc. After \c mainProc,
+ * it pops the entry.
+ */
 CodeBuilder::Procedure handleSymTableStack(
     const CodeBuilder::Procedure mainProc) {
   const CodeBuilder::Procedure push = [](CB_ARGS) {
@@ -277,6 +312,8 @@ const CodeBuilder CXXBuilder = {
 
 /*!
  * \brief Traverse an XcodeML document and generate C++ source code.
+ * \param[in] doc XcodeML document.
+ * \param[out] ss Stringstream to flush C++ source code.
  */
 void buildCode(xmlDocPtr doc, std::stringstream& ss) {
   SourceInfo src = {

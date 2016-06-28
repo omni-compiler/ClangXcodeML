@@ -6,6 +6,7 @@
 
 /*!
  * \brief Search for an element that matches given XPath expression.
+ * \pre At least one element that matches \c xpathExpr exists in \c node.
  * \return The first element that matches \c xpathExpr.
  */
 xmlNodePtr findFirst(xmlNodePtr node, const char* xpathExpr, xmlXPathContextPtr xpathCtxt) {
