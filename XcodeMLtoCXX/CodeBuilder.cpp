@@ -232,6 +232,16 @@ DEFINE_CB(compoundStatementProc) {
   ss << "}\n";
 }
 
+DEFINE_CB(whileStatementProc) {
+  auto cond = findFirst(node, "condition", src.ctxt),
+       body = findFirst(node, "body", src.ctxt);
+  ss << "while (";
+  r.walk(cond, src, ss);
+  ss << ")" << std::endl << "{" << std::endl;
+  r.walk(body, src, ss);
+  ss << "}" << std::endl;
+}
+
 DEFINE_CB(functionCallProc) {
   xmlNodePtr function = findFirst(node, "function/*", src.ctxt);
   r.walk(function, src, ss);
@@ -291,6 +301,7 @@ const CodeBuilder CXXBuilder = {
   std::make_tuple("memberPointerRef", memberPointerRefProc),
   std::make_tuple("compoundValue", compoundValueProc),
   std::make_tuple("compoundStatement", handleSymTableStack(compoundStatementProc)),
+  std::make_tuple("whileStatement", whileStatementProc),
   std::make_tuple("thisExpr", thisExprProc),
   std::make_tuple("assignExpr", showBinOp(" = ")),
   std::make_tuple("plusExpr", showBinOp(" + ")),
