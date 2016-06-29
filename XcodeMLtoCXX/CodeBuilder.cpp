@@ -253,6 +253,22 @@ DEFINE_CB(doStatementProc) {
   ss  << ");" << std::endl;
 }
 
+DEFINE_CB(forStatementProc) {
+  auto init = findFirst(node, "init", src.ctxt),
+       cond = findFirst(node, "condition", src.ctxt),
+       iter = findFirst(node, "iter", src.ctxt),
+       body = findFirst(node, "body", src.ctxt);
+  ss << "for (";
+  r.walk(init, src, ss);
+  ss << ";";
+  r.walk(cond, src, ss);
+  ss << ";";
+  r.walk(iter, src, ss);
+  ss << ")" << std::endl << "{" << std::endl;
+  r.walk(body, src, ss);
+  ss << "}" << std::endl;
+}
+
 DEFINE_CB(functionCallProc) {
   xmlNodePtr function = findFirst(node, "function/*", src.ctxt);
   r.walk(function, src, ss);
@@ -314,6 +330,7 @@ const CodeBuilder CXXBuilder = {
   std::make_tuple("compoundStatement", handleSymTableStack(compoundStatementProc)),
   std::make_tuple("whileStatement", whileStatementProc),
   std::make_tuple("doStatement", doStatementProc),
+  std::make_tuple("forStatement", forStatementProc),
   std::make_tuple("thisExpr", thisExprProc),
   std::make_tuple("assignExpr", showBinOp(" = ")),
   std::make_tuple("plusExpr", showBinOp(" + ")),
