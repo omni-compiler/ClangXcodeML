@@ -23,6 +23,6 @@ CodeBuilder.o: XMLString.o LibXMLUtil.o XcodeMlType.o TypeAnalyzer.o XMLWalker.h
 TypeAnalyzer.o: XMLString.o LibXMLUtil.o XcodeMlType.o XMLWalker.h
 
 clean:
-	rm -f XcodeMLtoCXX $(OBJS) *~
+	rm -f $(OBJS) *~
 
 all: XcodeMLtoCXX
