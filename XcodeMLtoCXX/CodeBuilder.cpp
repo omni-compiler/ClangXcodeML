@@ -7,7 +7,7 @@
 #include <libxml/tree.h>
 #include <libxml/xpath.h>
 #include "XMLString.h"
-#include "Reality.h"
+#include "XMLWalker.h"
 #include "XcodeMlType.h"
 #include "TypeAnalyzer.h"
 #include "CodeBuilder.h"
@@ -100,9 +100,9 @@ CodeBuilder::Procedure showBinOp(std::string Operator) {
     xmlNodePtr lhs = findFirst(node, "*[1]", src.ctxt),
                rhs = findFirst(node, "*[2]", src.ctxt);
     ss << "(";
-    r.callOnce(lhs, src, ss);
+    r.walk(lhs, src, ss);
     ss << Operator;
-    r.callOnce(rhs, src, ss);
+    r.walk(rhs, src, ss);
     ss << ")";
   };
 }
@@ -134,7 +134,7 @@ CodeBuilder::Procedure showChildElem(std::string prefix, std::string suffix) {
     while (target->type != XML_ELEMENT_NODE) {
       target = target->next;
     }
-    r.callOnce(target, src, ss);
+    r.walk(target, src, ss);
     ss << suffix;
   };
 }
@@ -198,11 +198,11 @@ DEFINE_CB(functionDefinitionProc) {
   }
   ss << ")" << std::endl;
 
-  r.call(node->children, src, ss);
+  r.walkAll(node->children, src, ss);
 }
 
 DEFINE_CB(memberRefProc) {
-  r.call(node->children, src, ss);
+  r.walkAll(node->children, src, ss);
   ss << "." << xmlGetProp(node, BAD_CAST "member");
 }
 
@@ -212,13 +212,13 @@ DEFINE_CB(memberAddrProc) {
 }
 
 DEFINE_CB(memberPointerRefProc) {
-  r.call(node->children, src, ss);
+  r.walkAll(node->children, src, ss);
   ss << ".*" << xmlGetProp(node, BAD_CAST "name");
 }
 
 DEFINE_CB(compoundValueProc) {
   ss << "{";
-  r.call(node->children, src, ss);
+  r.walkAll(node->children, src, ss);
   ss << "}";
 }
 
@@ -228,15 +228,15 @@ DEFINE_CB(thisExprProc) {
 
 DEFINE_CB(compoundStatementProc) {
   ss << "{\n";
-  r.call(node->children, src, ss);
+  r.walkAll(node->children, src, ss);
   ss << "}\n";
 }
 
 DEFINE_CB(functionCallProc) {
   xmlNodePtr function = findFirst(node, "function/*", src.ctxt);
-  r.callOnce(function, src, ss);
+  r.walk(function, src, ss);
   xmlNodePtr arguments = findFirst(node, "arguments", src.ctxt);
-  r.callOnce(arguments, src, ss);
+  r.walk(arguments, src, ss);
 }
 
 DEFINE_CB(argumentsProc) {
@@ -249,7 +249,7 @@ DEFINE_CB(argumentsProc) {
     if (alreadyPrinted) {
       ss << ",";
     }
-    r.callOnce(arg, src, ss);
+    r.walk(arg, src, ss);
     alreadyPrinted = true;
   }
   ss << ")";
@@ -259,11 +259,11 @@ DEFINE_CB(condExprProc) {
   xmlNodePtr prd = findFirst(node, "*[1]", src.ctxt),
              the = findFirst(node, "*[2]", src.ctxt),
              els = findFirst(node, "*[3]", src.ctxt);
-  r.callOnce(prd, src, ss);
+  r.walk(prd, src, ss);
   ss << " ? ";
-  r.callOnce(the, src, ss);
+  r.walk(the, src, ss);
   ss << " : ";
-  r.callOnce(els, src, ss);
+  r.walk(els, src, ss);
 }
 
 DEFINE_CB(varDeclProc) {
@@ -272,7 +272,7 @@ DEFINE_CB(varDeclProc) {
   XMLString name(xmlNodeGetContent(nameElem));
   auto type = getIdentType(src, name);
   ss << TypeRefToString(type) << " " << name << " = ";
-  r.callOnce(valueElem, src, ss);
+  r.walk(valueElem, src, ss);
   ss << ";\n";
 }
 
@@ -321,5 +321,5 @@ void buildCode(xmlDocPtr doc, std::stringstream& ss) {
     parseTypeTable(doc),
     parseGlobalSymbols(doc)
   };
-  CXXBuilder.call(xmlDocGetRootElement(doc), src, ss);
+  CXXBuilder.walkAll(xmlDocGetRootElement(doc), src, ss);
 }

@@ -4,37 +4,37 @@
 /*!
  * \brief A class that combines procedures into a single one
  * that traverses XML node and visits each element.
- * \tparam ...T parameter type required by procedures in Reality.
+ * \tparam ...T parameter type required by procedures in XMLWalker.
  *
  * It has a mapping from XML element names to procedures
- * (std::function<void(xmlNodePtr, const Reality&, T...)>). Once
- * Reality<T...>::call() runs, it performs pre-order traversal of
+ * (std::function<void(xmlNodePtr, const XMLWalker&, T...)>). Once
+ * XMLWalker<T...>::walkAll() runs, it performs pre-order traversal of
  * given XML elements and their descendants until it finds an element
  * whose name is registered with the map. Finally it executes
  * a corresponding procedure.
  */
 template<typename... T>
-class Reality {
+class XMLWalker {
 public:
   /*!
-   * \brief Procedure to be registered with Reality.
+   * \brief Procedure to be registered with XMLWalker.
    */
-  using Procedure = std::function<void(xmlNodePtr, const Reality&, T...)>;
-  Reality() = default;
-  Reality(std::initializer_list<std::tuple<std::string, Procedure>>);
-  void call(xmlNodePtr, T...) const;
-  void callOnce(xmlNodePtr, T...) const;
-  bool registerNP(std::string, Procedure);
+  using Procedure = std::function<void(xmlNodePtr, const XMLWalker&, T...)>;
+  XMLWalker() = default;
+  XMLWalker(std::initializer_list<std::tuple<std::string, Procedure>>);
+  void walkAll(xmlNodePtr, T...) const;
+  void walk(xmlNodePtr, T...) const;
+  bool registerProc(std::string, Procedure);
 private:
   std::map<std::string, Procedure> map;
 };
 
 template<typename... T>
-Reality<T...>::Reality(std::initializer_list<std::tuple<std::string, typename Reality<T...>::Procedure>> pairs):
+XMLWalker<T...>::XMLWalker(std::initializer_list<std::tuple<std::string, typename XMLWalker<T...>::Procedure>> pairs):
   map()
 {
   for (auto p : pairs) {
-    registerNP(std::get<0>(p), std::get<1>(p));
+    registerProc(std::get<0>(p), std::get<1>(p));
   }
 }
 
@@ -44,9 +44,9 @@ Reality<T...>::Reality(std::initializer_list<std::tuple<std::string, typename Re
  * \param args... Arguments to be passed to registered procedures.
  */
 template<typename... T>
-void Reality<T...>::call(xmlNodePtr node, T... args) const {
+void XMLWalker<T...>::walkAll(xmlNodePtr node, T... args) const {
   for (xmlNodePtr cur = node; cur; cur = cur->next) {
-    callOnce(cur, args...);
+    walk(cur, args...);
   }
 }
 
@@ -56,7 +56,7 @@ void Reality<T...>::call(xmlNodePtr node, T... args) const {
  * \param args... Arguments to be passed to registered procedures.
  */
 template<typename... T>
-void Reality<T...>::callOnce(xmlNodePtr node, T... args) const {
+void XMLWalker<T...>::walk(xmlNodePtr node, T... args) const {
   bool traverseChildren = true;
   if (node->type == XML_ELEMENT_NODE) {
     XMLString elemName = node->name;
@@ -67,7 +67,7 @@ void Reality<T...>::callOnce(xmlNodePtr node, T... args) const {
     }
   }
   if (traverseChildren) {
-    call(node->children, args...);
+    walkAll(node->children, args...);
   }
 }
 
@@ -79,7 +79,7 @@ void Reality<T...>::callOnce(xmlNodePtr node, T... args) const {
  * \return false if \c key already exists.
  */
 template<typename... T>
-bool Reality<T...>::registerNP(std::string key, Procedure value) {
+bool XMLWalker<T...>::registerProc(std::string key, Procedure value) {
   auto iter = map.find(key);
   if (iter != map.end()) {
     return false;

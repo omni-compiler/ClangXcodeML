@@ -12,7 +12,7 @@
 #include <vector>
 #include "XMLString.h"
 #include "XcodeMlType.h"
-#include "Reality.h"
+#include "XMLWalker.h"
 #include "CodeBuilder.h"
 #include "TypeAnalyzer.h"
 

@@ -9,7 +9,7 @@
 #include <libxml/xpath.h>
 #include <libxml/xpathInternals.h>
 #include "XMLString.h"
-#include "Reality.h"
+#include "XMLWalker.h"
 #include "XcodeMlType.h"
 #include "TypeAnalyzer.h"
 
@@ -116,7 +116,7 @@ TypeMap parseTypeTable(xmlDocPtr doc) {
   TypeMap map(dataTypeIdentMap);
   for (size_t i = 0; i < len; ++i) {
     xmlNodePtr node = xpathObj->nodesetval->nodeTab[i];
-    XcodeMLTypeAnalyzer.callOnce(node, map);
+    XcodeMLTypeAnalyzer.walk(node, map);
   }
   return map;
 }

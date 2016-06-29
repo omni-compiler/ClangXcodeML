@@ -25,7 +25,7 @@ public:
   SymbolMap symTable;
 };
 
-using CodeBuilder = Reality<SourceInfo&, std::stringstream&>;
+using CodeBuilder = XMLWalker<SourceInfo&, std::stringstream&>;
 
 void buildCode(xmlDocPtr, std::stringstream&);
 
