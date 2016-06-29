@@ -4,6 +4,7 @@
 #include <map>
 #include <sstream>
 #include <memory>
+#include <cassert>
 #include <libxml/tree.h>
 #include <libxml/parser.h>
 #include <libxml/xpath.h>

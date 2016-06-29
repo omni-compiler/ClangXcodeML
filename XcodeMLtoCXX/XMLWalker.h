@@ -52,7 +52,15 @@ XMLWalker<T...>::XMLWalker(std::initializer_list<std::tuple<std::string, typenam
  */
 template<typename... T>
 void XMLWalker<T...>::walkAll(xmlNodePtr node, T... args) const {
-  for (xmlNodePtr cur = node; cur; cur = cur->next) {
+  if (!node) {
+    return;
+  }
+  for (xmlNodePtr cur =
+        node->type == XML_ELEMENT_NODE ?
+          node : xmlNextElementSibling(node) ;
+       cur;
+       cur = xmlNextElementSibling(cur))
+  {
     walk(cur, args...);
   }
 }
@@ -68,17 +76,18 @@ void XMLWalker<T...>::walkChildren(xmlNodePtr node, T... args) const {
  * \brief Traverse an XML element.
  * \param node XML element to traverse
  * \param args... Arguments to be passed to registered procedures.
+ * \pre \c node is not null.
+ * \pre \c node is an XML element node.
  */
 template<typename... T>
 void XMLWalker<T...>::walk(xmlNodePtr node, T... args) const {
+  assert(node && node->type == XML_ELEMENT_NODE);
   bool traverseChildren = true;
-  if (node->type == XML_ELEMENT_NODE) {
-    XMLString elemName = node->name;
-    auto iter = map.find(elemName);
-    if (iter != map.end()) {
-      (iter->second)(node, *this, args...);
-      traverseChildren = false;
-    }
+  XMLString elemName = node->name;
+  auto iter = map.find(elemName);
+  if (iter != map.end()) {
+    (iter->second)(node, *this, args...);
+    traverseChildren = false;
   }
   if (traverseChildren) {
     walkAll(node->children, args...);

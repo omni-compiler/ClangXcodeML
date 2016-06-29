@@ -130,11 +130,7 @@ CodeBuilder::Procedure EmptySNCProc = showNodeContent("", "");
 CodeBuilder::Procedure showChildElem(std::string prefix, std::string suffix) {
   return [prefix, suffix](CB_ARGS) {
     ss << prefix;
-    xmlNodePtr target = node->children;
-    while (target->type != XML_ELEMENT_NODE) {
-      target = target->next;
-    }
-    r.walk(target, src, ss);
+    r.walk(xmlFirstElementChild(node), src, ss);
     ss << suffix;
   };
 }
