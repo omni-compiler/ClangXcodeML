@@ -24,6 +24,7 @@ public:
   XMLWalker(std::initializer_list<std::tuple<std::string, Procedure>>);
   XMLWalker(std::map<std::string, Procedure>&&);
   void walkAll(xmlNodePtr, T...) const;
+  void walkChildren(xmlNodePtr, T...) const;
   void walk(xmlNodePtr, T...) const;
   bool registerProc(std::string, Procedure);
 private:
@@ -53,6 +54,13 @@ template<typename... T>
 void XMLWalker<T...>::walkAll(xmlNodePtr node, T... args) const {
   for (xmlNodePtr cur = node; cur; cur = cur->next) {
     walk(cur, args...);
+  }
+}
+
+template<typename... T>
+void XMLWalker<T...>::walkChildren(xmlNodePtr node, T... args) const {
+  if (node) {
+    walkAll(node->children, args...);
   }
 }
 

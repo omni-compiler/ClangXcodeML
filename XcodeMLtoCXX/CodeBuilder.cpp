@@ -198,11 +198,11 @@ DEFINE_CB(functionDefinitionProc) {
   }
   ss << ")" << std::endl;
 
-  r.walkAll(node->children, src, ss);
+  r.walkChildren(node, src, ss);
 }
 
 DEFINE_CB(memberRefProc) {
-  r.walkAll(node->children, src, ss);
+  r.walkChildren(node, src, ss);
   ss << "." << xmlGetProp(node, BAD_CAST "member");
 }
 
@@ -212,13 +212,13 @@ DEFINE_CB(memberAddrProc) {
 }
 
 DEFINE_CB(memberPointerRefProc) {
-  r.walkAll(node->children, src, ss);
+  r.walkChildren(node, src, ss);
   ss << ".*" << xmlGetProp(node, BAD_CAST "name");
 }
 
 DEFINE_CB(compoundValueProc) {
   ss << "{";
-  r.walkAll(node->children, src, ss);
+  r.walkChildren(node, src, ss);
   ss << "}";
 }
 
@@ -228,7 +228,7 @@ DEFINE_CB(thisExprProc) {
 
 DEFINE_CB(compoundStatementProc) {
   ss << "{\n";
-  r.walkAll(node->children, src, ss);
+  r.walkChildren(node, src, ss);
   ss << "}\n";
 }
 
