@@ -22,12 +22,18 @@ public:
   using Procedure = std::function<void(xmlNodePtr, const XMLWalker&, T...)>;
   XMLWalker() = default;
   XMLWalker(std::initializer_list<std::tuple<std::string, Procedure>>);
+  XMLWalker(std::map<std::string, Procedure>&&);
   void walkAll(xmlNodePtr, T...) const;
   void walk(xmlNodePtr, T...) const;
   bool registerProc(std::string, Procedure);
 private:
   std::map<std::string, Procedure> map;
 };
+
+template<typename... T>
+XMLWalker<T...>::XMLWalker(std::map<std::string,Procedure>&& initMap):
+  map(initMap)
+{}
 
 template<typename... T>
 XMLWalker<T...>::XMLWalker(std::initializer_list<std::tuple<std::string, typename XMLWalker<T...>::Procedure>> pairs):
