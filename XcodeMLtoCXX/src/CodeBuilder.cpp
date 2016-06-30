@@ -91,6 +91,40 @@ SymbolMap parseGlobalSymbols(xmlDocPtr doc) {
  */
 #define DEFINE_CB(name) void name(CB_ARGS)
 
+DEFINE_CB(EmptyProc) {
+  w.walkChildren(node, src, ss);
+}
+
+CodeBuilder::Procedure outputStringLn(std::string str) {
+  return [str](CB_ARGS) {
+    ss << str << std::endl;
+  };
+}
+
+CodeBuilder::Procedure outputString(std::string str) {
+  return [str](CB_ARGS) {
+    ss << str;
+  };
+}
+
+CodeBuilder::Procedure handleBrackets(
+    std::string opening,
+    std::string closing,
+    CodeBuilder::Procedure mainProc
+) {
+  return merge(outputString(opening),
+               merge(mainProc, outputString(closing)));
+}
+
+CodeBuilder::Procedure handleBracketsLn(
+    std::string opening,
+    std::string closing,
+    CodeBuilder::Procedure mainProc
+) {
+  return merge(outputStringLn(opening),
+               merge(mainProc,outputStringLn(closing)));
+}
+
 /*!
  * \brief Make a procedure that handles binary operation.
  * \param Operator Spelling of binary operator.
@@ -107,19 +141,22 @@ CodeBuilder::Procedure showBinOp(std::string Operator) {
   };
 }
 
+const CodeBuilder::Procedure EmptySNCProc = [](CB_ARGS) {
+  ss << xmlNodeGetContent(node);
+};
+
 /*!
  * \brief Make a procedure that outputs text content of a given
  * XML element.
  * \param prefix Text to output before text content.
  * \param suffix Text to output after text content.
  */
-CodeBuilder::Procedure showNodeContent(std::string prefix, std::string suffix) {
-  return [prefix, suffix](CB_ARGS) {
-    ss << prefix << xmlNodeGetContent(node) << suffix;
-  };
+CodeBuilder::Procedure showNodeContent(
+    std::string prefix,
+    std::string suffix
+) {
+  return handleBrackets(prefix, suffix, EmptySNCProc);
 }
-
-CodeBuilder::Procedure EmptySNCProc = showNodeContent("", "");
 
 /*!
  * \brief Make a procedure that processes the first child element of
@@ -127,12 +164,11 @@ CodeBuilder::Procedure EmptySNCProc = showNodeContent("", "");
  * \param prefix Text to output before traversing descendant elements.
  * \param suffix Text to output after traversing descendant elements.
  */
-CodeBuilder::Procedure showChildElem(std::string prefix, std::string suffix) {
-  return [prefix, suffix](CB_ARGS) {
-    ss << prefix;
-    w.walk(xmlFirstElementChild(node), src, ss);
-    ss << suffix;
-  };
+CodeBuilder::Procedure showChildElem(
+    std::string prefix,
+    std::string suffix
+) {
+  return handleBrackets(prefix, suffix, EmptyProc);
 }
 
 /*!
@@ -160,6 +196,9 @@ CodeBuilder::Procedure handleSymTableStack(
   };
   return merge(push, merge(mainProc, pop));
 }
+
+const CodeBuilder::Procedure handleScope =
+  handleSymTableStack(handleBracketsLn("{", "}", EmptyProc));
 
 DEFINE_CB(functionDefinitionProc) {
   xmlNodePtr nameElem = findFirst(
@@ -222,28 +261,22 @@ DEFINE_CB(thisExprProc) {
   ss << "this";
 }
 
-DEFINE_CB(compoundStatementProc) {
-  ss << "{\n";
-  w.walkChildren(node, src, ss);
-  ss << "}\n";
-}
+const auto compoundStatementProc = handleScope;
 
 DEFINE_CB(whileStatementProc) {
   auto cond = findFirst(node, "condition", src.ctxt),
        body = findFirst(node, "body", src.ctxt);
   ss << "while (";
   w.walk(cond, src, ss);
-  ss << ")" << std::endl << "{" << std::endl;
-  w.walk(body, src, ss);
-  ss << "}" << std::endl;
+  ss << ")" << std::endl;
+  handleScope(w, body, src, ss);
 }
 
 DEFINE_CB(doStatementProc) {
   auto cond = findFirst(node, "condition", src.ctxt),
        body = findFirst(node, "body", src.ctxt);
-  ss << "do {" << std::endl;
-  w.walk(body, src, ss);
-  ss << "}" << std::endl;
+  ss << "do ";
+  handleScope(w, body, src, ss);
   ss << "while (";
   w.walk(cond, src, ss);
   ss  << ");" << std::endl;
@@ -260,9 +293,8 @@ DEFINE_CB(forStatementProc) {
   w.walk(cond, src, ss);
   ss << ";";
   w.walk(iter, src, ss);
-  ss << ")" << std::endl << "{" << std::endl;
-  w.walk(body, src, ss);
-  ss << "}" << std::endl;
+  ss << ")" << std::endl;
+  handleScope(w, body, src, ss);
 }
 
 DEFINE_CB(returnStatementProc) {
@@ -334,7 +366,7 @@ const CodeBuilder CXXBuilder({
   { "memberAddr", memberAddrProc },
   { "memberPointerRef", memberPointerRefProc },
   { "compoundValue", compoundValueProc },
-  { "compoundStatement", handleSymTableStack(compoundStatementProc) },
+  { "compoundStatement", compoundStatementProc },
   { "whileStatement", whileStatementProc },
   { "doStatement", doStatementProc },
   { "forStatement", forStatementProc },
