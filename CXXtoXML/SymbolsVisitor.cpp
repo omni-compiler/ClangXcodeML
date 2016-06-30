@@ -55,7 +55,7 @@ SymbolsVisitor::PreVisitAttr(Attr *A) {
     newComment("Attr_NULL");
     return false;
   }
-  newComment(NAttr(A->getSpelling()).c_str());
+  newComment(A->getSpelling());
   newChild("gccAttribute");
 
   std::string attrName = contentBySource(A->getLocation(), A->getLocation());

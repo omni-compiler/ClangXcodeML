@@ -8,6 +8,7 @@
 using namespace clang;
 using namespace llvm;
 
+#if 0
 static cl::opt<bool>
 OptEmitSourceFileName("file", cl::desc("emit 'file'"),
                       cl::cat(CXX2XMLCategory));
@@ -20,6 +21,7 @@ OptEmitSourceColumn("column", cl::desc("emit 'column'"),
 static cl::opt<bool>
 OptEmitSourceRange("range", cl::desc("emit 'range'"),
                    cl::cat(CXX2XMLCategory));
+#endif
 
 // implementation of XMLVisitorBaseImpl
 
@@ -101,13 +103,9 @@ void XMLVisitorBaseImpl::setLocation(SourceLocation Loc, xmlNodePtr N) {
     if (FLoc.isValid()) {
         PresumedLoc PLoc = FLoc.getManager().getPresumedLoc(FLoc);
 
-        if (OptEmitSourceColumn) {
-            newProp("column", PLoc.getColumn(), N);
-        }
-        if (OptEmitSourceLineNo) {
-            newProp("lineno", PLoc.getLine(), N);
-        }
-        if (OptEmitSourceFileName) {
+        newProp("column", PLoc.getColumn(), N);
+        newProp("lineno", PLoc.getLine(), N);
+        {
             const char *filename = PLoc.getFilename();
             static char cwd[BUFSIZ];
             static size_t cwdlen;
