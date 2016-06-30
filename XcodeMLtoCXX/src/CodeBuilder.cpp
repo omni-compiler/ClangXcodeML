@@ -288,11 +288,17 @@ DEFINE_CB(forStatementProc) {
        iter = findFirst(node, "iter", src.ctxt),
        body = findFirst(node, "body", src.ctxt);
   ss << "for (";
-  w.walk(init, src, ss);
+  if (init) {
+    w.walk(init, src, ss);
+  }
   ss << ";";
-  w.walk(cond, src, ss);
+  if (cond) {
+    w.walk(cond, src, ss);
+  }
   ss << ";";
-  w.walk(iter, src, ss);
+  if (iter) {
+    w.walk(iter, src, ss);
+  }
   ss << ")" << std::endl;
   handleScope(w, body, src, ss);
 }
