@@ -14,7 +14,8 @@ USEDLIBS += -lclangTooling -lclangFrontend -lclangSerialization -lclangDriver \
             -lclangAST -lclangASTMatchers -lclangEdit -lclangLex -lclangBasic \
 						-lclangFormat -lclangARCMigrate -lclangDynamicASTMatchers \
 						-lclangIndex -lclangCodeGen -lclangFrontendTool \
-						-lclangStaticAnalyzerCheckers -lclangRewrite -lclangRewriteFrontend
+						-lclangStaticAnalyzerCheckers -lclangRewrite -lclangRewriteFrontend \
+						-lxml2
 USEDLIBS += $(shell $(LLVM_CONFIG) --libs mcparser bitreader support mc option)
 USEDLIBS += -lpthread -ldl -ltinfo -lz
 USEDLIBS += `pkg-config --libs libxml-2.0` -lclang
@@ -29,8 +30,18 @@ OBJS =  CtoXcodeML.o \
 	InheritanceInfo.o \
 	operator.o
 
+DECOMPILER_OBJS = XcodeMlType.o \
+	XcodeMLtoCXX.o \
+	LibXMLUtil.o \
+	CodeBuilder.o \
+	TypeAnalyzer.o \
+	XMLString.o \
+
 CtoXcodeML: $(RAVOBJS) $(OBJS)
 	$(CXX) $(CXXFLAGS) $(RAVOBJS) $(OBJS) $(USEDLIBS) -o CtoXcodeML
+
+XcodeMLtoCXX: $(DECOMPILER_OBJS)
+	$(CXX) $(CXXFLAGS) $(DECOMPILER_OBJS) $(USEDLIBS) -o XcodeMLtoCXX
 
 XcodeMlRAV.o: \
 	XcodeMlRAV.cpp \
@@ -73,6 +84,23 @@ InheritanceInfo.o: \
 	InheritanceInfo.cpp \
 	InheritanceInfo.h \
 	Hash.h
+XcodeMlType.o: \
+	XcodeMlType.cpp \
+	XcodeMlType.h
+XcodeMLtoCXX.o: \
+	XcodeMlType.h \
+	XcodeMLtoCXX.cpp
+XMLString.o: \
+	XMLString.cpp \
+	XMLString.h
+CodeBuilder.o: \
+	CodeBuilder.cpp \
+	CodeBuilder.h \
+	Reality.h
+TypeAnalyzer.o: \
+	TypeAnalyzer.cpp \
+	TypeAnalyzer.h \
+	Reality.h
 
 CtoXcodeML.ast: CtoXcodeML.cpp
 	$(CXX) $(CXXFLAGS) -Xclang -ast-dump CtoXcodeML.cpp -o CtoXcodeML.ast 
@@ -86,7 +114,7 @@ distclean: clean
 	rm -f $(RAVOBJS) $(PCHFILES)
 
 clean:
-	rm -f CtoXcodeML mockup XcodeMlRAV.i CtoXcodeML.i  $(OBJS) *~
+	rm -f CtoXcodeML mockup XcodeMlRAV.i CtoXcodeML.i  $(OBJS) $(DECOMPILER_OBJS) *~
 
 XcodeMlRAV.i: XcodeMlRAV.cpp
 	$(CXX) $(CXXFLAGS) -E XcodeMlRAV.cpp -o XcodeMlRAV.i

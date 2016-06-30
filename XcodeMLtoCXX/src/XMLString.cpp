@@ -1,16 +1,7 @@
-class XMLString {
-public:
-  XMLString(const xmlChar*);
-  XMLString(const char*);
-  const xmlChar* c_ptr() const;
-  operator std::string() {
-    std::stringstream ss;
-    ss << c_ptr();
-    return ss.str();
-  }
-private:
-  const xmlChar* ptr;
-};
+#include <libxml/xmlstring.h>
+#include <string>
+#include <sstream>
+#include "XMLString.h"
 
 XMLString::XMLString(const xmlChar * p) : ptr(p) {}
 
@@ -33,3 +24,7 @@ size_t length(XMLString str) {
   return static_cast<size_t>(xmlStrlen(str.c_ptr()));
 }
 
+std::ostream& operator<<(std::ostream& os, const XMLString& str) {
+  os << str.c_ptr();
+  return os;
+}
