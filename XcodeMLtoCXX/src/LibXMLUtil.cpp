@@ -1,3 +1,4 @@
+#include <cassert>
 #include <libxml/tree.h>
 #include <libxml/parser.h>
 #include <libxml/xpath.h>
@@ -6,22 +7,28 @@
 
 /*!
  * \brief Search for an element that matches given XPath expression.
- * \pre At least one element that matches \c xpathExpr exists in \c node.
+ * \pre \c node is not null.
+ * \pre \c xpathExpr is not null.
+ * \pre \c xpathCtxt is not null.
+ * \return nullptr if any element in \c node doesn't match \c xpathExpr
  * \return The first element that matches \c xpathExpr.
  */
 xmlNodePtr findFirst(xmlNodePtr node, const char* xpathExpr, xmlXPathContextPtr xpathCtxt) {
-  if (!xpathCtxt) {
-    return nullptr;
-  }
+  assert(node && xpathExpr);
   xmlXPathSetContextNode(node, xpathCtxt);
   xmlXPathObjectPtr xpathObj = xmlXPathNodeEval(
       node,
       BAD_CAST xpathExpr,
       xpathCtxt
       );
-  if (!xpathObj || !(xpathObj->nodesetval)) {
+  if (!xpathObj) {
     return nullptr;
   }
-  return xpathObj->nodesetval->nodeTab[0];
+  xmlNodeSetPtr matchedNodes = xpathObj->nodesetval;
+  if (!matchedNodes || !matchedNodes->nodeNr) {
+    xmlXPathFreeObject(xpathObj);
+    return nullptr;
+  }
+  return matchedNodes->nodeTab[0];
 }
 
