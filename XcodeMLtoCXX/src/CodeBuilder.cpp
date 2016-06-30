@@ -82,8 +82,8 @@ SymbolMap parseGlobalSymbols(xmlDocPtr doc) {
 /*!
  * \brief Arguments to be passed to CodeBuilder::Procedure.
  */
-#define CB_ARGS xmlNodePtr node __attribute__((unused)), \
-                const CodeBuilder& r __attribute__((unused)), \
+#define CB_ARGS const CodeBuilder& w __attribute__((unused)), \
+                xmlNodePtr node __attribute__((unused)), \
                 SourceInfo& src __attribute__((unused)), \
                 std::stringstream& ss __attribute__((unused))
 /*!
@@ -100,9 +100,9 @@ CodeBuilder::Procedure showBinOp(std::string Operator) {
     xmlNodePtr lhs = findFirst(node, "*[1]", src.ctxt),
                rhs = findFirst(node, "*[2]", src.ctxt);
     ss << "(";
-    r.walk(lhs, src, ss);
+    w.walk(lhs, src, ss);
     ss << Operator;
-    r.walk(rhs, src, ss);
+    w.walk(rhs, src, ss);
     ss << ")";
   };
 }
@@ -130,7 +130,7 @@ CodeBuilder::Procedure EmptySNCProc = showNodeContent("", "");
 CodeBuilder::Procedure showChildElem(std::string prefix, std::string suffix) {
   return [prefix, suffix](CB_ARGS) {
     ss << prefix;
-    r.walk(xmlFirstElementChild(node), src, ss);
+    w.walk(xmlFirstElementChild(node), src, ss);
     ss << suffix;
   };
 }
@@ -194,27 +194,27 @@ DEFINE_CB(functionDefinitionProc) {
   }
   ss << ")" << std::endl;
 
-  r.walkChildren(node, src, ss);
+  w.walkChildren(node, src, ss);
 }
 
 DEFINE_CB(memberRefProc) {
-  r.walkChildren(node, src, ss);
+  w.walkChildren(node, src, ss);
   ss << "." << xmlGetProp(node, BAD_CAST "member");
 }
 
 DEFINE_CB(memberAddrProc) {
   ss << "&";
-  memberRefProc(node, r, src, ss);
+  memberRefProc(w, node, src, ss);
 }
 
 DEFINE_CB(memberPointerRefProc) {
-  r.walkChildren(node, src, ss);
+  w.walkChildren(node, src, ss);
   ss << ".*" << xmlGetProp(node, BAD_CAST "name");
 }
 
 DEFINE_CB(compoundValueProc) {
   ss << "{";
-  r.walkChildren(node, src, ss);
+  w.walkChildren(node, src, ss);
   ss << "}";
 }
 
@@ -224,7 +224,7 @@ DEFINE_CB(thisExprProc) {
 
 DEFINE_CB(compoundStatementProc) {
   ss << "{\n";
-  r.walkChildren(node, src, ss);
+  w.walkChildren(node, src, ss);
   ss << "}\n";
 }
 
@@ -232,9 +232,9 @@ DEFINE_CB(whileStatementProc) {
   auto cond = findFirst(node, "condition", src.ctxt),
        body = findFirst(node, "body", src.ctxt);
   ss << "while (";
-  r.walk(cond, src, ss);
+  w.walk(cond, src, ss);
   ss << ")" << std::endl << "{" << std::endl;
-  r.walk(body, src, ss);
+  w.walk(body, src, ss);
   ss << "}" << std::endl;
 }
 
@@ -242,10 +242,10 @@ DEFINE_CB(doStatementProc) {
   auto cond = findFirst(node, "condition", src.ctxt),
        body = findFirst(node, "body", src.ctxt);
   ss << "do {" << std::endl;
-  r.walk(body, src, ss);
+  w.walk(body, src, ss);
   ss << "}" << std::endl;
   ss << "while (";
-  r.walk(cond, src, ss);
+  w.walk(cond, src, ss);
   ss  << ");" << std::endl;
 }
 
@@ -255,13 +255,13 @@ DEFINE_CB(forStatementProc) {
        iter = findFirst(node, "iter", src.ctxt),
        body = findFirst(node, "body", src.ctxt);
   ss << "for (";
-  r.walk(init, src, ss);
+  w.walk(init, src, ss);
   ss << ";";
-  r.walk(cond, src, ss);
+  w.walk(cond, src, ss);
   ss << ";";
-  r.walk(iter, src, ss);
+  w.walk(iter, src, ss);
   ss << ")" << std::endl << "{" << std::endl;
-  r.walk(body, src, ss);
+  w.walk(body, src, ss);
   ss << "}" << std::endl;
 }
 
@@ -269,7 +269,7 @@ DEFINE_CB(returnStatementProc) {
   xmlNodePtr child = xmlFirstElementChild(node);
   if (child) {
     ss << "return ";
-    r.walkAll(child, src, ss);
+    w.walkAll(child, src, ss);
     ss << ";" << std::endl;
   } else {
     ss << "return;" << std::endl;
@@ -278,9 +278,9 @@ DEFINE_CB(returnStatementProc) {
 
 DEFINE_CB(functionCallProc) {
   xmlNodePtr function = findFirst(node, "function/*", src.ctxt);
-  r.walk(function, src, ss);
+  w.walk(function, src, ss);
   xmlNodePtr arguments = findFirst(node, "arguments", src.ctxt);
-  r.walk(arguments, src, ss);
+  w.walk(arguments, src, ss);
 }
 
 DEFINE_CB(argumentsProc) {
@@ -293,7 +293,7 @@ DEFINE_CB(argumentsProc) {
     if (alreadyPrinted) {
       ss << ",";
     }
-    r.walk(arg, src, ss);
+    w.walk(arg, src, ss);
     alreadyPrinted = true;
   }
   ss << ")";
@@ -303,11 +303,11 @@ DEFINE_CB(condExprProc) {
   xmlNodePtr prd = findFirst(node, "*[1]", src.ctxt),
              the = findFirst(node, "*[2]", src.ctxt),
              els = findFirst(node, "*[3]", src.ctxt);
-  r.walk(prd, src, ss);
+  w.walk(prd, src, ss);
   ss << " ? ";
-  r.walk(the, src, ss);
+  w.walk(the, src, ss);
   ss << " : ";
-  r.walk(els, src, ss);
+  w.walk(els, src, ss);
 }
 
 DEFINE_CB(varDeclProc) {
@@ -316,7 +316,7 @@ DEFINE_CB(varDeclProc) {
   XMLString name(xmlNodeGetContent(nameElem));
   auto type = getIdentType(src, name);
   ss << TypeRefToString(type) << " " << name << " = ";
-  r.walk(valueElem, src, ss);
+  w.walk(valueElem, src, ss);
   ss << ";\n";
 }
 

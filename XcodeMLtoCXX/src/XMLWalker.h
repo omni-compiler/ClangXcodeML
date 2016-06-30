@@ -1,5 +1,5 @@
-#ifndef REALITY_H
-#define REALITY_H
+#ifndef XMLWALKER_H
+#define XMLWALKER_H
 
 /*!
  * \brief A class that combines procedures into a single one
@@ -19,7 +19,7 @@ public:
   /*!
    * \brief Procedure to be registered with XMLWalker.
    */
-  using Procedure = std::function<void(xmlNodePtr, const XMLWalker&, T...)>;
+  using Procedure = std::function<void(const XMLWalker&, xmlNodePtr, T...)>;
   XMLWalker() = default;
   XMLWalker(std::initializer_list<std::tuple<std::string, Procedure>>);
   XMLWalker(std::map<std::string, Procedure>&&);
@@ -86,7 +86,7 @@ void XMLWalker<T...>::walk(xmlNodePtr node, T... args) const {
   XMLString elemName = node->name;
   auto iter = map.find(elemName);
   if (iter != map.end()) {
-    (iter->second)(node, *this, args...);
+    (iter->second)(*this, node, args...);
     traverseChildren = false;
   }
   if (traverseChildren) {
@@ -126,4 +126,4 @@ typename std::function<void(T...)> merge(
   };
 }
 
-#endif /* !REALITY_H */
+#endif /* !XMLWALKER_H */

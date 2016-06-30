@@ -19,8 +19,8 @@ using XcodeMl::TypeMap;
 /*!
  * \brief Arguments to be passed to TypeAnalyzer::Procedure.
  */
-#define TA_ARGS xmlNodePtr node __attribute__((unused)), \
-                const TypeAnalyzer& r __attribute__((unused)), \
+#define TA_ARGS const TypeAnalyzer& w __attribute__((unused)), \
+                xmlNodePtr node __attribute__((unused)), \
                 TypeMap& map __attribute__((unused))
 /*!
  * \brief Define new TypeAnalyzer::Procedure named \c name.
