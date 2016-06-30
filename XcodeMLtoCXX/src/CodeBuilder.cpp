@@ -265,6 +265,17 @@ DEFINE_CB(forStatementProc) {
   ss << "}" << std::endl;
 }
 
+DEFINE_CB(returnStatementProc) {
+  xmlNodePtr child = xmlFirstElementChild(node);
+  if (child) {
+    ss << "return ";
+    r.walkAll(child, src, ss);
+    ss << ";" << std::endl;
+  } else {
+    ss << "return;" << std::endl;
+  }
+}
+
 DEFINE_CB(functionCallProc) {
   xmlNodePtr function = findFirst(node, "function/*", src.ctxt);
   r.walk(function, src, ss);
@@ -342,7 +353,7 @@ const CodeBuilder CXXBuilder({
   { "arguments", argumentsProc },
   { "condExpr", condExprProc },
   { "exprStatement", showChildElem("", ";\n") },
-  { "returnStatement", showChildElem("return ", ";\n") },
+  { "returnStatement", returnStatementProc },
   { "varDecl", varDeclProc },
 });
 
