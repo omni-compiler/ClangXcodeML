@@ -1,5 +1,5 @@
 #include "XMLVisitorBase.h"
-#include "SymbolsVisitor.h"
+#include "DeclarationsVisitor.h"
 #include "TypeTableVisitor.h"
 
 #include <iostream>
@@ -668,8 +668,8 @@ TypeTableVisitor::PreVisitDecl(Decl *D) {
         newComment("PreVisitDecl::Enum(withDef)");
         typetableinfo->registerType(T, &tmpNode, curNode);
         TraverseChildOfDecl(D);
-        SymbolsVisitor SV(mangleContext, tmpNode, "symbols", typetableinfo);
-        SV.TraverseChildOfDecl(D);
+        DeclarationsVisitor DV(mangleContext, tmpNode, "symbols", typetableinfo);
+        DV.TraverseChildOfDecl(D);
         return false;
       } else {
         // just allocate a name.
@@ -693,7 +693,8 @@ TypeTableVisitor::PreVisitDecl(Decl *D) {
         newComment((comment + "(withDef)").c_str());
         typetableinfo->registerType(T, &tmpNode, curNode);
         curNode = tmpNode;
-        addName(TD, TD->getNameAsString().c_str());
+        addChild("name", TD->getNameAsString().c_str());
+
         CXXRecordDecl *RD(dyn_cast<CXXRecordDecl>(D));
         if (RD && RD->bases_begin() != RD->bases_end()) {
           for (auto base : RD->bases()) {
@@ -726,8 +727,8 @@ TypeTableVisitor::PreVisitDecl(Decl *D) {
           typetableinfo->setNormalizability(T, true);
         }
         TraverseChildOfDecl(D);
-        SymbolsVisitor SV(mangleContext, tmpNode, "symbols", typetableinfo);
-        SV.TraverseChildOfDecl(D);
+        DeclarationsVisitor DV(mangleContext, tmpNode, "symbols", typetableinfo);
+        DV.TraverseChildOfDecl(D);
         return false;
       } else {
         // just allocate a name.
@@ -797,12 +798,6 @@ TypeTableVisitor::PreVisitDecl(Decl *D) {
         curNode = xmlNewNode(nullptr, BAD_CAST "dummy"); 
       }
       return true;
-#if 0
-      TraverseChildOfDecl(D);
-      SymbolsVisitor SV(mangleContext, tmpNode, "params", typetableinfo);
-      SV.TraverseChildOfDecl(D);
-      return false;
-#endif
     }
   case Decl::MSProperty: return true;
   case Decl::NonTypeTemplateParm: return true;

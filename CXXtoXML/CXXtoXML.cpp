@@ -1,6 +1,5 @@
 #include "XMLVisitorBase.h"
 
-#include "SymbolsVisitor.h"
 #include "TypeTableVisitor.h"
 #include "DeclarationsVisitor.h"
 
@@ -38,12 +37,10 @@ public:
         TypeTableInfo typetableinfo(MC, II);
         TypeTableInfo *TTI = &typetableinfo;
         TypeTableVisitor TTV(MC, rootNode, "typeTable", TTI);
-        SymbolsVisitor SV(MC, rootNode, "globalSymbols", TTI);
-        DeclarationsVisitor DV(MC, rootNode, "globalDeclarations", TTI);
+        DeclarationsVisitor DV(MC, rootNode, "clangAST", TTI);
         Decl *D = CXT.getTranslationUnitDecl();
 
         TTV.TraverseDecl(D);
-        SV.TraverseDecl(D);
         DV.TraverseDecl(D);
     }
 #if 0
@@ -107,13 +104,6 @@ int main(int argc, const char **argv) {
     ClangTool Tool(OptionsParser.getCompilations(),
                    OptionsParser.getSourcePathList());
     Tool.appendArgumentsAdjuster(clang::tooling::getClangSyntaxOnlyAdjuster());
-
-#if 0
-    errs() << "sizeof(XMLVisitorBaseImpl)=" << sizeof(XMLVisitorBaseImpl) << "\n";
-    errs() << "sizeof(TypeTableVisitor)=" << sizeof(TypeTableVisitor) << "\n";
-    errs() << "sizeof(SymbolsVisitor)=" << sizeof(SymbolsVisitor) << "\n";
-    errs() << "sizeof(DeclarationsVisitor)=" << sizeof(DeclarationsVisitor) << "\n"; 
-#endif
 
     std::unique_ptr<FrontendActionFactory> FrontendFactory
         = newFrontendActionFactory<XMLASTDumpAction>();

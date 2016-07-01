@@ -21,7 +21,6 @@ USEDLIBS += $(OTHERLIBS)
 RAVOBJS = XMLRAV.o
 OBJS =  CXXtoXML.o \
 	XMLVisitorBase.o \
-	SymbolsVisitor.o \
 	TypeTableVisitor.o \
 	DeclarationsVisitor.o \
 	InheritanceInfo.o \
@@ -37,25 +36,16 @@ CXXtoXML.o: \
 	CXXtoXML.cpp \
 	XMLRAV.h \
 	XMLVisitorBase.h \
-	SymbolsVisitor.h \
 	TypeTableVisitor.h \
 	DeclarationsVisitor.h
 XMLVisitorBase.o: \
 	XMLVisitorBase.cpp \
 	XMLRAV.h \
 	XMLVisitorBase.h
-SymbolsVisitor.o: \
-	SymbolsVisitor.cpp \
-	SymbolsVisitor.h \
-	TypeTableVisitor.h \
-	DeclarationsVisitor.h \
-	operator.h \
-	XMLRAV.h \
-	XMLVisitorBase.h
 TypeTableVisitor.o: \
 	TypeTableVisitor.cpp \
 	TypeTableVisitor.h \
-	SymbolsVisitor.h \
+	DeclarationsVisitor.h \
 	XMLRAV.h \
 	XMLVisitorBase.h
 DeclarationsVisitor.o: \

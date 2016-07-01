@@ -33,11 +33,7 @@ public:
 
     xmlNodePtr addChild(const char *Name, const char *Content = nullptr);
     xmlNodePtr addChild(const char *Name, xmlNodePtr N);
-    xmlNodePtr addName(clang::NamedDecl *ND, const char *Content = nullptr);
-    xmlNodePtr addName(const char *FullName, const char *Content = nullptr);
     void newChild(const char *Name, const char *Content = nullptr);
-    void newName(clang::NamedDecl *ND, const char *Content = nullptr);
-    void newName(const char *FullName, const char *Content = nullptr);
     void newProp(const char *Name, int Val, xmlNodePtr N = nullptr);
     void newProp(const char *Name, const char *Val, xmlNodePtr N = nullptr);
     void newComment(const xmlChar *str, xmlNodePtr RN = nullptr);
@@ -80,19 +76,18 @@ public:
 
 #define DISPATCHER(NAME, TYPE)                                          \
     public:                                                             \
-    std::function<bool (TYPE)>HookFor##NAME;                            \
     bool PreVisit##NAME(TYPE S) {                                       \
         (void)S;                                                        \
-        newChild("Traverse" #NAME);                                     \
+        newChild((std::string(#NAME":")                                 \
+                  + std::string(NameFor##NAME(S))).c_str());            \
+        clang::SourceLocation SL;                                       \
+        if (SourceLocFor##NAME(S, SL)) {                                \
+            setLocation(SL);                                            \
+        }                                                               \
         return true;                                                    \
     }                                                                   \
     bool Bridge##NAME(TYPE S) override {                                \
-        if (HookFor##NAME) {                                            \
-            newComment("do Hook " #NAME);                               \
-            return HookFor##NAME(S);                                    \
-        } else {                                                        \
-            return getDerived().Traverse##NAME(S);                      \
-        }                                                               \
+        return getDerived().Traverse##NAME(S);                          \
     }                                                                   \
     bool Traverse##NAME(TYPE S) {                                       \
         Derived V(this);                                                \
@@ -144,28 +139,51 @@ public:
     bool FullTrace(void) const { return false; };
 
     const char *NameForStmt(clang::Stmt *S) {
-        return S ? S->getStmtClassName() : "";
+        return S ? S->getStmtClassName() : "NULL";
     }
     const char *NameForType(clang::QualType QT) {
         return QT->getTypeClassName();
     }
     const char *NameForTypeLoc(clang::TypeLoc TL) {
-        return TL.getType()->getTypeClassName();
+        return !TL.isNull() ? TL.getType()->getTypeClassName() : "NULL";
     }
     const char *NameForAttr(clang::Attr *A) {
-        return A ? A->getSpelling() : "";
+        return A ? A->getSpelling() : "NULL";
     }
     const char *NameForDecl(clang::Decl *D) {
-        return D ? D->getDeclKindName(): ""; 
+        return D ? D->getDeclKindName(): "NULL"; 
     }
     const char *NameForNestedNameSpecifier(clang::NestedNameSpecifier *NS) {
-        (void)NS; return "X";
+        if (!NS) return "NULL";
+        switch (NS->getKind()) {
+        case clang::NestedNameSpecifier::Identifier: return "Identifier";
+        case clang::NestedNameSpecifier::Namespace: return "Namespace";
+        case clang::NestedNameSpecifier::NamespaceAlias: return "NamespaceAlias";
+        case clang::NestedNameSpecifier::Global: return "Global";
+        case clang::NestedNameSpecifier::Super: return "Super";
+        case clang::NestedNameSpecifier::TypeSpec: return "TypeSpec";
+        case clang::NestedNameSpecifier::TypeSpecWithTemplate: return "TypeSpecWithTemplate";
+        }
     }
     const char *NameForNestedNameSpecifierLoc(clang::NestedNameSpecifierLoc NL) {
-        (void)NL; return "X";
+        return NameForNestedNameSpecifier(NL.getNestedNameSpecifier());
+    }
+    const char *NameForDeclarationName(clang::DeclarationName DN) {
+        switch (DN.getNameKind()) {
+        case clang::DeclarationName::CXXConstructorName: return "CXXConstructorName";
+        case clang::DeclarationName::CXXDestructorName: return "CXXDestructorName";
+        case clang::DeclarationName::CXXConversionFunctionName: return "CXXConversionFunctionName";
+        case clang::DeclarationName::Identifier: return "Identifier";
+        case clang::DeclarationName::ObjCZeroArgSelector: return "ObjCZeroArgSelector";
+        case clang::DeclarationName::ObjCOneArgSelector: return "ObjCOneArgSelector";
+        case clang::DeclarationName::ObjCMultiArgSelector: return "ObjCMultiArgSelector";
+        case clang::DeclarationName::CXXOperatorName: return "CXXOperatorName";
+        case clang::DeclarationName::CXXLiteralOperatorName: return "CXXLiteralOperatorName";
+        case clang::DeclarationName::CXXUsingDirective: return "CXXUsingDirective";
+        }
     }
     const char *NameForDeclarationNameInfo(clang::DeclarationNameInfo DN) {
-        (void)DN; return "X";
+        return NameForDeclarationName(DN.getName());
     }
     const char *NameForTemplateName(clang::TemplateName TN) {
         (void)TN; return "X";

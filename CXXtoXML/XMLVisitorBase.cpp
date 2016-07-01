@@ -39,28 +39,9 @@ xmlNodePtr XMLVisitorBaseImpl::addChild(const char *Name, xmlNodePtr N) {
     return xmlNewTextChild(N, nullptr, BAD_CAST Name, nullptr);
 }
 
-xmlNodePtr XMLVisitorBaseImpl::addName(const char *FullName, const char *Content) {
-    xmlNodePtr node = addChild("name", Content);
-    newProp("fullName", FullName, node);
-    return node;
-}
-
-xmlNodePtr XMLVisitorBaseImpl::addName(clang::NamedDecl *ND, const char *Content) {
-    return addName(ND->getQualifiedNameAsString().c_str(), Content);
-}
-
 void XMLVisitorBaseImpl::newChild(const char *Name, const char *Content) {
     curNode = xmlNewTextChild(curNode, nullptr,
                               BAD_CAST Name, BAD_CAST Content);
-}
-
-
-void XMLVisitorBaseImpl::newName(const char *FullName, const char *Content) {
-    curNode = addName(FullName, Content);
-}
-
-void XMLVisitorBaseImpl::newName(clang::NamedDecl *ND, const char *Content) {
-    curNode = addName(ND, Content);
 }
 
 void XMLVisitorBaseImpl::newProp(const char *Name, int Val, xmlNodePtr N) {

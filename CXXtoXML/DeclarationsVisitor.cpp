@@ -148,65 +148,6 @@ DeclarationsVisitor::PreVisitType(QualType T) {
   return true;
 }
 
-#define NTypeLoc(mes) do {                                       \
-    newComment("TypeLoc:" mes);                                  \
-    return true;                                                 \
-  } while (0)
-bool
-DeclarationsVisitor::PreVisitTypeLoc(TypeLoc TL) {
-  if (TL.isNull()) {
-    newComment("Typeloc:NULL");
-    return true;
-  }
-
-  switch (TL.getTypeLocClass()) {
-  case TypeLoc::Qualified: NTypeLoc("Qualified");
-  case TypeLoc::Builtin: NTypeLoc("Builtin");
-  case TypeLoc::Complex: NTypeLoc("Complex");
-  case TypeLoc::Pointer: NTypeLoc("Pointer");
-  case TypeLoc::BlockPointer: NTypeLoc("BlockPointer");
-  case TypeLoc::LValueReference: NTypeLoc("LValueReference");
-  case TypeLoc::RValueReference: NTypeLoc("RValueReference");
-  case TypeLoc::MemberPointer: NTypeLoc("MemberPointer");
-  case TypeLoc::ConstantArray: NTypeLoc("ConstantArray");
-  case TypeLoc::IncompleteArray: NTypeLoc("IncompleteArray");
-  case TypeLoc::VariableArray: NTypeLoc("VariableArray");
-  case TypeLoc::DependentSizedArray: NTypeLoc("DependentSizedArray");
-  case TypeLoc::DependentSizedExtVector: NTypeLoc("DependentSizedExtVector");
-  case TypeLoc::Vector: NTypeLoc("Vector");
-  case TypeLoc::ExtVector: NTypeLoc("ExtVector");
-  case TypeLoc::FunctionProto: NTypeLoc("FunctionProto");
-  case TypeLoc::FunctionNoProto: NTypeLoc("FunctionNoProto");
-  case TypeLoc::UnresolvedUsing: NTypeLoc("UnresolvedUsing");
-  case TypeLoc::Paren: NTypeLoc("Paren");
-  case TypeLoc::Typedef: NTypeLoc("Typedef");
-  case TypeLoc::Adjusted: NTypeLoc("Adjusted");
-  case TypeLoc::Decayed: NTypeLoc("Decayed");
-  case TypeLoc::TypeOfExpr: NTypeLoc("TypeOfExpr");
-  case TypeLoc::TypeOf: NTypeLoc("TypeOf");
-  case TypeLoc::Decltype: NTypeLoc("Decltype");
-  case TypeLoc::UnaryTransform: NTypeLoc("UnaryTransform");
-  case TypeLoc::Record: NTypeLoc("Record");
-  case TypeLoc::Enum: NTypeLoc("Enum");
-  case TypeLoc::Elaborated: NTypeLoc("Elaborated");
-  case TypeLoc::Attributed: NTypeLoc("Attributed");
-  case TypeLoc::TemplateTypeParm: NTypeLoc("TemplateTypeParm");
-  case TypeLoc::SubstTemplateTypeParm: NTypeLoc("SubstTemplateTypeParm");
-  case TypeLoc::SubstTemplateTypeParmPack: NTypeLoc("SubstTemplateTypeParmPack");
-  case TypeLoc::TemplateSpecialization: NTypeLoc("TemplateSpecialization");
-  case TypeLoc::Auto: NTypeLoc("Auto");
-  case TypeLoc::InjectedClassName: NTypeLoc("InjectedClassName");
-  case TypeLoc::DependentName: NTypeLoc("DependentName");
-  case TypeLoc::DependentTemplateSpecialization: NTypeLoc("DependentTemplateSpecialization");
-  case TypeLoc::PackExpansion: NTypeLoc("PackExpansion");
-  case TypeLoc::ObjCObject: NTypeLoc("ObjCObject");
-  case TypeLoc::ObjCInterface: NTypeLoc("ObjCInterface");
-  case TypeLoc::ObjCObjectPointer: NTypeLoc("ObjCObjectPointer");
-  case TypeLoc::Atomic: NTypeLoc("Atomic");
-  }
-}
-#undef NTypeLoc
-
 bool
 DeclarationsVisitor::PreVisitAttr(Attr *A) {
   if (!A) {
@@ -234,125 +175,26 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
   }
 
   // default: use the AST name simply.
-  NamedDecl *ND = dyn_cast<NamedDecl>(D);
   newChild((std::string("Decl:") + D->getDeclKindName()).c_str());    
   setLocation(D->getLocation());
   if (D->isImplicit()) {
     newProp("is_implicit", "1");
   }
+  NamedDecl *ND = dyn_cast<NamedDecl>(D);
   if (ND) {
-    DeclarationName DN = ND->getDeclName();
-    IdentifierInfo *II = ND->getIdentifier();
-
-    switch (DN.getNameKind()) {
-    case DeclarationName::CXXConstructorName:
-      newChild("DeclName:CXXConstructorName");
-      break;
-    case DeclarationName::CXXDestructorName:
-      newChild("DeclName:CXXDestructorName");
-      break;
-    case DeclarationName::CXXConversionFunctionName:
-      newChild("DeclName:CXXConversionFunctionName");
-      break;
-    case DeclarationName::Identifier:
-      newChild("DeclName:Identifier");
-      break;
-    case DeclarationName::ObjCZeroArgSelector:
-      newChild("DeclName:ObjCZeroArgSelector");
-      break;
-    case DeclarationName::ObjCOneArgSelector:
-      newChild("DeclName:ObjCOneArgSelector");
-      break;
-    case DeclarationName::ObjCMultiArgSelector:
-      newChild("DeclName:ObjCMultiArgSelector");
-      break;
-    case DeclarationName::CXXOperatorName:
-      newChild("DeclName:CXXOperatorName");
-      break;
-    case DeclarationName::CXXLiteralOperatorName:
-      newChild("DeclName:CXXLiteralOperatorName");
-      break;
-    case DeclarationName::CXXUsingDirective:
-      newChild("DeclName:CXXUsingDirective");
-      break;
-    }
-    addName(ND, II ? II->getNameStart() : nullptr);
-
+    addChild("fullName", ND->getQualifiedNameAsString().c_str());
   }
   return true;
 }
 
-
-#define NNNSXXX(mes) do {                       \
-    newChild("NestedNameSpecifier:" mes);       \
-    return true;                                \
-  } while (0)
-bool
-DeclarationsVisitor::PreVisitNestedNameSpecifier(NestedNameSpecifier *NNS) {
-  if (!NNS) {
-    newComment("NestedNameSpecifier:NULL");
-    return true;
-  }
-  switch (NNS->getKind()) {
-  case NestedNameSpecifier::Identifier: NNNSXXX("Identifier");
-  case NestedNameSpecifier::Namespace: NNNSXXX("Namespace");
-  case NestedNameSpecifier::NamespaceAlias: NNNSXXX("NamespaceAlias");
-  case NestedNameSpecifier::Global: NNNSXXX("Global");
-  case NestedNameSpecifier::Super: NNNSXXX("Super");
-  case NestedNameSpecifier::TypeSpec: NNNSXXX("TypeSpec");
-  case NestedNameSpecifier::TypeSpecWithTemplate: NNNSXXX("TypeSpecWithTemplate");
-  }
-}
-#undef NNNSXXX
-
-#define NNNSLocXXX(mes) do {                    \
-    newChild("NestedNameSpecifierLoc:" mes);    \
-    return true;                                \
-  } while (0)
-bool
-DeclarationsVisitor::PreVisitNestedNameSpecifierLoc(NestedNameSpecifierLoc NNS) {
-  if (!NNS) {
-    newComment("NestedNameSpecifierLoc:NULL");
-    return true;
-  }
-  switch (NNS.getNestedNameSpecifier()->getKind()) {
-  case NestedNameSpecifier::Identifier: NNNSLocXXX("Identifier");
-  case NestedNameSpecifier::Namespace: NNNSLocXXX("Namespace");
-  case NestedNameSpecifier::NamespaceAlias: NNNSLocXXX("NamespaceAlias");
-  case NestedNameSpecifier::Global: NNNSLocXXX("Global");
-  case NestedNameSpecifier::Super: NNNSLocXXX("Super");
-  case NestedNameSpecifier::TypeSpec: NNNSLocXXX("TypeSpec");
-  case NestedNameSpecifier::TypeSpecWithTemplate: NNNSLocXXX("TypeSpecWithTemplate");
-  }
-}
-#undef NNNSLocXXX
-
-#define NDeclName(mes) do {                            \
-    newName("DeclarationNmeInfo:" mes, content);       \
-    return true;                                       \
-  } while (0)
 bool
 DeclarationsVisitor::PreVisitDeclarationNameInfo(DeclarationNameInfo NI) {
   DeclarationName DN = NI.getName();
   IdentifierInfo *II = DN.getAsIdentifierInfo();
-  const char *content = II ? II->getNameStart() : nullptr;
 
-  switch (DN.getNameKind()) {
-  case DeclarationName::CXXConstructorName: NDeclName("CXXConstructorName");
-  case DeclarationName::CXXDestructorName: NDeclName("CXXDestructorName");
-  case DeclarationName::CXXConversionFunctionName: NDeclName("CXXConversionFunctionName");
-  case DeclarationName::Identifier: NDeclName("Identifier");
-  case DeclarationName::ObjCZeroArgSelector: NDeclName("ObjCZeroArgSelector");
-  case DeclarationName::ObjCOneArgSelector: NDeclName("ObjCOneArgSelector");
-  case DeclarationName::ObjCMultiArgSelector: NDeclName("ObjCMultiArgSelector");
-  case DeclarationName::CXXOperatorName: NDeclName("CXXOperatorName");
-  case DeclarationName::CXXLiteralOperatorName: NDeclName("CXXLiteralOperatorName");
-  case DeclarationName::CXXUsingDirective: NDeclName("CXXUsingDirective");
-  }
-}
-#undef NDeclName
-
-bool DeclarationsVisitor::PreVisitConstructorInitializer(CXXCtorInitializer *) {
+  newChild((std::string("DeclarationNameInfo:")
+            + NameForDeclarationName(DN)).c_str(),
+          II ? II->getNameStart() : nullptr);
   return true;
 }
 
