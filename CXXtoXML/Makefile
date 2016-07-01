@@ -23,8 +23,7 @@ OBJS =  CXXtoXML.o \
 	XMLVisitorBase.o \
 	TypeTableVisitor.o \
 	DeclarationsVisitor.o \
-	InheritanceInfo.o \
-	operator.o
+	InheritanceInfo.o
 
 CXXtoXML: $(RAVOBJS) $(OBJS)
 	$(CXX) $(CXXFLAGS) $(RAVOBJS) $(OBJS) $(USEDLIBS) -o CXXtoXML
@@ -51,7 +50,6 @@ TypeTableVisitor.o: \
 DeclarationsVisitor.o: \
 	DeclarationsVisitor.cpp \
 	DeclarationsVisitor.h \
-	operator.h \
 	TypeTableVisitor.h \
 	XMLRAV.h \
 	XMLVisitorBase.h \

@@ -1,10 +1,8 @@
 #include "XMLVisitorBase.h"
 #include "TypeTableVisitor.h"
-#include "SymbolsVisitor.h"
 #include "DeclarationsVisitor.h"
 #include "InheritanceInfo.h"
 #include "clang/Basic/Builtins.h"
-#include "operator.h"
 #include <map>
 
 using namespace clang;
