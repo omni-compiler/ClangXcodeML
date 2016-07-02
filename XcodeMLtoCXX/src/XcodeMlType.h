@@ -57,27 +57,53 @@ std::string TypeRefToString(TypeRef);
  */
 class Type {
 public:
-  friend TypeKind typeKind(TypeRef);
+  virtual std::string toString() = 0;
+  virtual ~Type() = 0;
+protected:
+  virtual TypeKind getKind() = 0;
+};
 
-  friend TypeRef XcodeMl::makeReservedType(std::string);
-  friend TypeRef XcodeMl::makePointerType(TypeRef);
-  friend TypeRef XcodeMl::makeFunctionType(TypeRef, const std::vector<TypeRef>&);
-  friend TypeRef XcodeMl::makeArrayType(TypeRef, size_t);
-
-  friend ReservedType XcodeMl::getReservedType(TypeRef);
-  friend PointerType XcodeMl::getPointerType(TypeRef);
-  friend FunctionType XcodeMl::getFunctionType(TypeRef);
-  friend ArrayType XcodeMl::getArrayType(TypeRef);
-  friend std::string XcodeMl::TypeRefToString(TypeRef);
+class Reserved : public Type {
+public:
+  Reserved(std::string);
+  std::string toString() override;
+  ~Reserved() override;
 private:
-  TypeKind kind;
-  /* FIXME: knows too much */
+  TypeKind getKind() override;
   std::string name;
-  TypeRef type;
+};
+
+class Pointer : public Type {
+public:
+  PointerType(TypeRef);
+  std::string toString() override;
+  ~Pointer() override;
+  TypeKind getKind() override;
+private:
+  TypeRef ref;
+};
+
+class Function : public Type {
+public:
+  Function(TypeRef, std::vector<TypeRef>);
+  std::string toString() override;
+  ~Function() override;
+private:
+  TypeKind getKind() override;
+  TypeRef returnType;
   std::vector<TypeRef> params;
+};
+
+class Array : public Type {
+public:
+  Array(TypeRef, size_t);
+  std::string toString() override;
+  ~Array() override;
+private:
+  TypeKind getKind() override;
+  TypeRef elementType;
   std::shared_ptr<size_t> size;
 };
 
 }
-
 #endif /* !XCODEMLTYPE_H */
