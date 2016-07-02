@@ -8,6 +8,8 @@
 
 namespace XcodeMl {
 
+Type::~Type() {}
+
 Reserved::Reserved(std::string dataType):
   name(dataType)
 {}
