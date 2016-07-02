@@ -1,7 +1,22 @@
 #ifndef TYPEANALYZER_H
 #define TYPEANALYZER_H
 
-using TypeAnalyzer = XMLWalker<XcodeMl::TypeMap&>;
-XcodeMl::TypeMap parseTypeTable(xmlDocPtr doc);
+/*!
+ * \brief A mapping from data type identifiers
+ * to actual data types.
+ */
+class TypeMap {
+public:
+  const XcodeMl::TypeRef& operator[](const std::string&) const;
+  XcodeMl::TypeRef& operator[](const std::string&);
+  const XcodeMl::TypeRef& getReturnType(const std::string&) const;
+  void setReturnType(const std::string&, const XcodeMl::TypeRef&);
+private:
+  std::map<std::string, XcodeMl::TypeRef> map;
+  std::map<std::string, XcodeMl::TypeRef> returnMap;
+};
+
+using TypeAnalyzer = XMLWalker<TypeMap&>;
+TypeMap parseTypeTable(xmlDocPtr doc);
 
 #endif /* !TYPEANALYZER_H */

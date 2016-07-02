@@ -20,7 +20,7 @@ using SymbolMap = std::vector<SymbolEntry>;
 class SourceInfo {
 public:
   xmlXPathContextPtr ctxt;
-  XcodeMl::TypeMap typeTable;
+  TypeMap typeTable;
   /*! SymbolEntry stack in current scope. */
   SymbolMap symTable;
 };

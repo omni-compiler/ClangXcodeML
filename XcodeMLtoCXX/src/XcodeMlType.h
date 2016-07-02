@@ -5,10 +5,6 @@ namespace XcodeMl {
 
 class Type;
 using TypeRef = std::shared_ptr<Type>; /* not nullable */
-/*!
- * \brief A mapping from data type identifiers
- * to actual data types. */
-using TypeMap = std::map<std::string, TypeRef>;
 
 enum class TypeKind {
  /*! basic data type (3.4 <basicType> element) */

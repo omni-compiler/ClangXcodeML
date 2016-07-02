@@ -56,7 +56,7 @@ std::string findSymbolType(const SymbolMap& table, const std::string& name) {
  */
 XcodeMl::TypeRef getIdentType(const SourceInfo& src, const std::string& ident) {
   std::string dataTypeIdent(findSymbolType(src.symTable, ident));
-  return src.typeTable.find(dataTypeIdent)->second;
+  return src.typeTable[dataTypeIdent];
 }
 
 SymbolMap parseGlobalSymbols(xmlDocPtr doc) {
@@ -207,7 +207,21 @@ DEFINE_CB(functionDefinitionProc) {
       src.ctxt
   );
   XMLString name(xmlNodeGetContent(nameElem));
-  ss << getIdentType(src, name)->makeDeclaration(name);
+  auto fnTypeName = findSymbolType(src.symTable, name);
+  ss << TypeRefToString(src.typeTable.getReturnType(fnTypeName))
+    << " "
+    << name
+    << "(";
+  bool alreadyPrinted = false;
+  for (auto p : src.symTable.back()) {
+    if (alreadyPrinted) {
+      ss << ", ";
+    }
+    auto paramType(getIdentType(src, p.first));
+    ss << TypeRefToString(paramType) << " " << p.first;
+    alreadyPrinted = true;
+  }
+  ss << ")" << std::endl;
   w.walkChildren(node, src, ss);
 }
 

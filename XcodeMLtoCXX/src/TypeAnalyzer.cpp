@@ -14,7 +14,30 @@
 #include "XcodeMlType.h"
 #include "TypeAnalyzer.h"
 
-using XcodeMl::TypeMap;
+const XcodeMl::TypeRef& TypeMap::operator[](
+  const std::string& dataTypeIdent
+) const {
+  return map.at(dataTypeIdent);
+}
+
+XcodeMl::TypeRef& TypeMap::operator[](
+  const std::string& dataTypeIdent
+) {
+  return map[dataTypeIdent];
+}
+
+const XcodeMl::TypeRef& TypeMap::getReturnType(
+  const std::string& dataTypeIdent
+) const {
+  return returnMap.at(dataTypeIdent);
+}
+
+void TypeMap::setReturnType(
+  const std::string& dataTypeIdent,
+  const XcodeMl::TypeRef& type
+) {
+  returnMap[dataTypeIdent] = type;
+}
 
 /*!
  * \brief Arguments to be passed to TypeAnalyzer::Procedure.
@@ -45,6 +68,7 @@ DEFINE_TA(functionTypeProc) {
   XMLString returnName = xmlGetProp(node, BAD_CAST "return_type");
   auto returnType = map[returnName];
   XMLString name(xmlGetProp(node, BAD_CAST "type"));
+  map.setReturnType(name, returnType);
   map[name] = makeFunctionType(returnType, {});
 }
 
