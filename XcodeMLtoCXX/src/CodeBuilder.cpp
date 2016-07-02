@@ -95,8 +95,15 @@ DEFINE_CB(EmptyProc) {
   w.walkChildren(node, src, ss);
 }
 
+DEFINE_CB(outputIndentation) {
+  for (unsigned int i = 0; i < src.indentation; ++i) {
+    ss << '\t';
+  }
+}
+
 CodeBuilder::Procedure outputStringLn(std::string str) {
   return [str](CB_ARGS) {
+    outputIndentation(w, node, src, ss);
     ss << str << std::endl;
   };
 }
@@ -197,8 +204,23 @@ CodeBuilder::Procedure handleSymTableStack(
   return merge(push, merge(mainProc, pop));
 }
 
+CodeBuilder::Procedure handleIndentation(
+  const CodeBuilder::Procedure mainProc
+) {
+  const CodeBuilder::Procedure indent = [](CB_ARGS) {
+    src.indentation++;
+  };
+  const CodeBuilder::Procedure outdent = [](CB_ARGS) {
+    src.indentation--;
+  };
+  return merge(indent, merge(mainProc, outdent));
+}
+
 const CodeBuilder::Procedure handleScope =
-  handleSymTableStack(handleBracketsLn("{", "}", EmptyProc));
+  handleBracketsLn("{", "}",
+  handleIndentation(
+  handleSymTableStack(
+  EmptyProc)));
 
 DEFINE_CB(functionDefinitionProc) {
   xmlNodePtr nameElem = findFirst(
@@ -211,6 +233,7 @@ DEFINE_CB(functionDefinitionProc) {
 
   XMLString kind(nameElem->name);
   if (kind == "name" || kind == "operator") {
+    outputIndentation(w, node, src, ss);
     ss << TypeRefToString(type.returnType)
       << " " << name;
   } else if (kind == "constructor") {
@@ -266,6 +289,7 @@ const auto compoundStatementProc = handleScope;
 DEFINE_CB(whileStatementProc) {
   auto cond = findFirst(node, "condition", src.ctxt),
        body = findFirst(node, "body", src.ctxt);
+  outputIndentation(w, node, src, ss);
   ss << "while (";
   w.walk(cond, src, ss);
   ss << ")" << std::endl;
@@ -275,8 +299,10 @@ DEFINE_CB(whileStatementProc) {
 DEFINE_CB(doStatementProc) {
   auto cond = findFirst(node, "condition", src.ctxt),
        body = findFirst(node, "body", src.ctxt);
+  outputIndentation(w, node, src, ss);
   ss << "do ";
   handleScope(w, body, src, ss);
+  outputIndentation(w, node, src, ss);
   ss << "while (";
   w.walk(cond, src, ss);
   ss  << ");" << std::endl;
@@ -287,6 +313,7 @@ DEFINE_CB(forStatementProc) {
        cond = findFirst(node, "condition", src.ctxt),
        iter = findFirst(node, "iter", src.ctxt),
        body = findFirst(node, "body", src.ctxt);
+  outputIndentation(w, node, src, ss);
   ss << "for (";
   if (init) {
     w.walk(init, src, ss);
@@ -306,10 +333,12 @@ DEFINE_CB(forStatementProc) {
 DEFINE_CB(returnStatementProc) {
   xmlNodePtr child = xmlFirstElementChild(node);
   if (child) {
+    outputIndentation(w, node, src, ss);
     ss << "return ";
     w.walkAll(child, src, ss);
     ss << ";" << std::endl;
   } else {
+    outputIndentation(w, node, src, ss);
     ss << "return;" << std::endl;
   }
 }
@@ -353,6 +382,7 @@ DEFINE_CB(varDeclProc) {
              valueElem = findFirst(node, "value", src.ctxt);
   XMLString name(xmlNodeGetContent(nameElem));
   auto type = getIdentType(src, name);
+  outputIndentation(w, node, src, ss);
   ss << TypeRefToString(type) << " " << name << " = ";
   w.walk(valueElem, src, ss);
   ss << ";\n";
@@ -404,7 +434,8 @@ void buildCode(xmlDocPtr doc, std::stringstream& ss) {
   SourceInfo src = {
     xmlXPathNewContext(doc),
     parseTypeTable(doc),
-    parseGlobalSymbols(doc)
+    parseGlobalSymbols(doc),
+    0
   };
   CXXBuilder.walkAll(xmlDocGetRootElement(doc), src, ss);
 }
