@@ -12,8 +12,8 @@ Reserved::Reserved(std::string dataType):
   name(dataType)
 {}
 
-std::string Reserved::toString() {
-  return name;
+std::string Reserved::makeDeclaration(std::string var) {
+  return name + " " + var;
 }
 
 TypeKind Reserved::getKind() {
@@ -26,9 +26,9 @@ Pointer::Pointer(TypeRef signified):
   ref(signified)
 {}
 
-std::string Pointer::toString() {
+std::string Pointer::makeDeclaration(std::string var) {
   assert(ref);
-  return ref->toString() + "*";
+  return ref->makeDeclaration("*" + var);
 }
 
 TypeKind Pointer::getKind() {
@@ -37,18 +37,32 @@ TypeKind Pointer::getKind() {
 
 Pointer::~Pointer() = default;
 
-Function::Function(TypeRef r, std::vector<TypeRef> p):
+Function::Function(TypeRef r, const std::vector<TypeRef>& p):
+  returnType(r),
+  params(p.size())
+{
+  // FIXME: initialization cost
+  for (size_t i = 0; i < p.size(); ++i) {
+    params[i] = std::make_tuple(p[i], "");
+  }
+}
+
+Function::Function(TypeRef r, const std::vector<std::tuple<TypeRef, std::string>>& p):
   returnType(r),
   params(p)
 {}
 
-std::string Function::toString() {
+std::string Function::makeDeclaration(std::string var) {
   std::stringstream ss;
   ss << "("
-    << returnType->toString()
-    << "(*)(";
+    << returnType->makeDeclaration("")
+    << "(*"
+    << var
+    << ")(";
   for (auto param : params) {
-    ss << param->toString() << ", ";
+    auto paramType(std::get<0>(param));
+    auto paramName(std::get<1>(param));
+    ss << paramType->makeDeclaration(paramName) << ", ";
   }
   ss <<  "))";
   return ss.str();
@@ -65,8 +79,8 @@ Array::Array(TypeRef elem, size_t s):
   size(std::make_shared<size_t>(s))
 {}
 
-std::string Array::toString() {
-  return elementType->toString() + "[]";
+std::string Array::makeDeclaration(std::string var) {
+  return elementType->makeDeclaration(var + "[]");
 }
 
 TypeKind Array::getKind() {
@@ -109,40 +123,8 @@ TypeRef makeArrayType(TypeRef elem, size_t size) {
   );
 }
 
-ReservedType getReservedType(TypeRef type) {
-  assert(typeKind(type) == TypeKind::Reserved);
-  Reserved* r = dynamic_cast<Reserved*>(type.get());
-  return {r->name};
-}
-
-PointerType getPointerType(TypeRef type) {
-  assert(typeKind(type) == TypeKind::Pointer);
-  Pointer* p = dynamic_cast<Pointer*>(type.get());
-  return {p->ref};
-}
-
-FunctionType getFunctionType(TypeRef type) {
-  assert(typeKind(type) == TypeKind::Function);
-  Function* f = dynamic_cast<Function*>(type.get());
-  return {f->returnType, f->params};
-}
-
-ArrayType getArrayType(TypeRef type) {
-  assert(typeKind(type) == TypeKind::Array);
-  Array* a = dynamic_cast<Array*>(type.get());
-  return {a->elementType, a->size};
-}
-
 std::string TypeRefToString(TypeRef type) {
-  switch (typeKind(type)) {
-    case TypeKind::Reserved:
-      return getReservedType(type).name;
-    case TypeKind::Pointer:
-      return TypeRefToString(getPointerType(type).ref) + "*";
-    case TypeKind::Function:
-    case TypeKind::Array:
-      return "";
-  }
+  return type->makeDeclaration("");
 }
 
 }

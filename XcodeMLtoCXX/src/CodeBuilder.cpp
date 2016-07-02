@@ -207,32 +207,7 @@ DEFINE_CB(functionDefinitionProc) {
       src.ctxt
   );
   XMLString name(xmlNodeGetContent(nameElem));
-  auto type(getFunctionType(getIdentType(src, name)));
-
-  XMLString kind(nameElem->name);
-  if (kind == "name" || kind == "operator") {
-    ss << TypeRefToString(type.returnType)
-      << " " << name;
-  } else if (kind == "constructor") {
-    ss << "<constructor>";
-  } else if (kind == "destructor") {
-    ss << "<destructor>";
-  } else {
-    assert(false);
-  }
-
-  ss << "(";
-  bool alreadyPrinted = false;
-  for (auto p : src.symTable.back()) {
-    if (alreadyPrinted) {
-      ss << ", ";
-    }
-    auto paramType(getIdentType(src, p.first));
-    ss << TypeRefToString(paramType) << " " << p.first;
-    alreadyPrinted = true;
-  }
-  ss << ")" << std::endl;
-
+  ss << getIdentType(src, name)->makeDeclaration(name);
   w.walkChildren(node, src, ss);
 }
 
