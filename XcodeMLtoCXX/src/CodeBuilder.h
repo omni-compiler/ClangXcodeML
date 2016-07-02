@@ -23,6 +23,7 @@ public:
   XcodeMl::TypeMap typeTable;
   /*! SymbolEntry stack in current scope. */
   SymbolMap symTable;
+  unsigned int indentation;
 };
 
 using CodeBuilder = XMLWalker<SourceInfo&, std::stringstream&>;
