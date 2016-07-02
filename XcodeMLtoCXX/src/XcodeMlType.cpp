@@ -8,11 +8,11 @@
 
 namespace XcodeMl {
 
-Reserved::ReservedType(std::string dataType):
+Reserved::Reserved(std::string dataType):
   name(dataType)
 {}
 
-std::string ReservedType::toString() {
+std::string Reserved::toString() {
   return name;
 }
 
@@ -110,23 +110,27 @@ TypeRef makeArrayType(TypeRef elem, size_t size) {
 }
 
 ReservedType getReservedType(TypeRef type) {
-  assert(type->getKind() == TypeKind::Reserved);
-  return {type->name};
+  assert(typeKind(type) == TypeKind::Reserved);
+  Reserved* r = dynamic_cast<Reserved*>(type.get());
+  return {r->name};
 }
 
 PointerType getPointerType(TypeRef type) {
-  assert(type->getKind() == TypeKind::Pointer);
-  return {type->type};
+  assert(typeKind(type) == TypeKind::Pointer);
+  Pointer* p = dynamic_cast<Pointer*>(type.get());
+  return {p->ref};
 }
 
 FunctionType getFunctionType(TypeRef type) {
-  assert(type->getKind() == TypeKind::Function);
-  return {type->type, type->params};
+  assert(typeKind(type) == TypeKind::Function);
+  Function* f = dynamic_cast<Function*>(type.get());
+  return {f->returnType, f->params};
 }
 
 ArrayType getArrayType(TypeRef type) {
-  assert(type->getKind() == TypeKind::Array);
-  return {type->type, type->size};
+  assert(typeKind(type) == TypeKind::Array);
+  Array* a = dynamic_cast<Array*>(type.get());
+  return {a->elementType, a->size};
 }
 
 std::string TypeRefToString(TypeRef type) {

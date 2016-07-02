@@ -59,6 +59,7 @@ class Type {
 public:
   virtual std::string toString() = 0;
   virtual ~Type() = 0;
+  friend TypeKind typeKind(TypeRef);
 protected:
   virtual TypeKind getKind() = 0;
 };
@@ -68,6 +69,7 @@ public:
   Reserved(std::string);
   std::string toString() override;
   ~Reserved() override;
+  friend ReservedType getReservedType(TypeRef);
 private:
   TypeKind getKind() override;
   std::string name;
@@ -75,11 +77,12 @@ private:
 
 class Pointer : public Type {
 public:
-  PointerType(TypeRef);
+  Pointer(TypeRef);
   std::string toString() override;
   ~Pointer() override;
-  TypeKind getKind() override;
+  friend PointerType getPointerType(TypeRef);
 private:
+  TypeKind getKind() override;
   TypeRef ref;
 };
 
@@ -88,6 +91,7 @@ public:
   Function(TypeRef, std::vector<TypeRef>);
   std::string toString() override;
   ~Function() override;
+  friend FunctionType getFunctionType(TypeRef);
 private:
   TypeKind getKind() override;
   TypeRef returnType;
@@ -99,6 +103,7 @@ public:
   Array(TypeRef, size_t);
   std::string toString() override;
   ~Array() override;
+  friend ArrayType getArrayType(TypeRef);
 private:
   TypeKind getKind() override;
   TypeRef elementType;
