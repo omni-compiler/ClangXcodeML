@@ -56,11 +56,10 @@ Function::Function(TypeRef r, const std::vector<std::tuple<TypeRef, std::string>
 
 std::string Function::makeDeclaration(std::string var) {
   std::stringstream ss;
-  ss << "("
-    << returnType->makeDeclaration("")
-    << "(*"
+  ss << returnType->makeDeclaration("")
+    << " "
     << var
-    << ")(";
+    << "(";
   for (auto param : params) {
     auto paramType(std::get<0>(param));
     auto paramName(std::get<1>(param));
