@@ -65,7 +65,7 @@ std::string Function::makeDeclaration(std::string var) {
     auto paramName(std::get<1>(param));
     ss << paramType->makeDeclaration(paramName) << ", ";
   }
-  ss <<  "))";
+  ss <<  ")";
   return ss.str();
 }
 
