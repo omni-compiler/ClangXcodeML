@@ -112,10 +112,10 @@ const TypeMap dataTypeIdentMap = [](const std::vector<std::string>& keys) {
 }(dataTypeIdents);
 
 const TypeAnalyzer XcodeMLTypeAnalyzer = {
-  std::make_tuple("basicType", basicTypeProc),
-  std::make_tuple("pointerType", pointerTypeProc),
-  std::make_tuple("functionType", functionTypeProc),
-  std::make_tuple("arrayType", arrayTypeProc),
+  { "basicType", basicTypeProc },
+  { "pointerType", pointerTypeProc },
+  { "functionType", functionTypeProc },
+  { "arrayType", arrayTypeProc },
 };
 
 /*!
