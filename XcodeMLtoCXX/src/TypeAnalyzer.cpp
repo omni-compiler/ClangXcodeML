@@ -111,12 +111,12 @@ const TypeMap dataTypeIdentMap = [](const std::vector<std::string>& keys) {
   return map;
 }(dataTypeIdents);
 
-const TypeAnalyzer XcodeMLTypeAnalyzer = {
+const TypeAnalyzer XcodeMLTypeAnalyzer({
   { "basicType", basicTypeProc },
   { "pointerType", pointerTypeProc },
   { "functionType", functionTypeProc },
   { "arrayType", arrayTypeProc },
-};
+});
 
 /*!
  * \brief Traverse an XcodeML document and make mapping from data
