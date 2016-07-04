@@ -338,13 +338,16 @@ DEFINE_CB(condExprProc) {
 }
 
 DEFINE_CB(varDeclProc) {
-  xmlNodePtr nameElem = findFirst(node, "name", src.ctxt),
-             valueElem = findFirst(node, "value", src.ctxt);
+  xmlNodePtr nameElem = findFirst(node, "name", src.ctxt);
   XMLString name(xmlNodeGetContent(nameElem));
   auto type = getIdentType(src, name);
-  ss << TypeRefToString(type) << " " << name << " = ";
-  w.walk(valueElem, src, ss);
-  ss << ";\n";
+  ss << makeDecl(type, name);
+  xmlNodePtr valueElem = findFirst(node, "value", src.ctxt);
+  if (valueElem) {
+    ss << " = ";
+    w.walk(valueElem, src, ss);
+  }
+  ss << ";" << std::endl;
 }
 
 const CodeBuilder CXXBuilder({
