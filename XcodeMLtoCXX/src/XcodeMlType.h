@@ -18,6 +18,7 @@ enum class TypeKind {
 };
 
 TypeKind typeKind(TypeRef);
+std::string makeDecl(TypeRef, std::string);
 
 TypeRef makeReservedType(std::string);
 TypeRef makePointerType(TypeRef);
@@ -31,11 +32,12 @@ std::string TypeRefToString(TypeRef);
  */
 class Type {
 public:
-  virtual std::string makeDeclaration(std::string) = 0;
   virtual ~Type() = 0;
   friend TypeKind typeKind(TypeRef);
+  friend std::string makeDecl(TypeRef, std::string);
 protected:
   virtual TypeKind getKind() = 0;
+  virtual std::string makeDeclaration(std::string) = 0;
 };
 
 class Reserved : public Type {

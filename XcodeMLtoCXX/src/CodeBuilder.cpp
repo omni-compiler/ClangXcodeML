@@ -218,7 +218,7 @@ DEFINE_CB(functionDefinitionProc) {
       ss << ", ";
     }
     auto paramType(getIdentType(src, p.first));
-    ss << paramType->makeDeclaration(p.first);
+    ss << makeDecl(paramType, p.first);
     alreadyPrinted = true;
   }
   ss << ")" << std::endl;

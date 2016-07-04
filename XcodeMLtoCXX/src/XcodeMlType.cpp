@@ -30,7 +30,12 @@ Pointer::Pointer(TypeRef signified):
 
 std::string Pointer::makeDeclaration(std::string var) {
   assert(ref);
-  return ref->makeDeclaration("*" + var);
+  switch (typeKind(ref)) {
+    case TypeKind::Function:
+      return makeDecl(ref, "(*" + var + ")");
+    default:
+      return makeDecl(ref, "*" + var);
+  }
 }
 
 TypeKind Pointer::getKind() {
@@ -56,14 +61,14 @@ Function::Function(TypeRef r, const std::vector<std::tuple<TypeRef, std::string>
 
 std::string Function::makeDeclaration(std::string var) {
   std::stringstream ss;
-  ss << returnType->makeDeclaration("")
+  ss << makeDecl(returnType, "")
     << " "
     << var
     << "(";
   for (auto param : params) {
     auto paramType(std::get<0>(param));
     auto paramName(std::get<1>(param));
-    ss << paramType->makeDeclaration(paramName) << ", ";
+    ss << makeDecl(paramType, paramName) << ", ";
   }
   ss <<  ")";
   return ss.str();
@@ -81,7 +86,7 @@ Array::Array(TypeRef elem, size_t s):
 {}
 
 std::string Array::makeDeclaration(std::string var) {
-  return elementType->makeDeclaration(var + "[]");
+  return makeDecl(elementType, var + "[]");
 }
 
 TypeKind Array::getKind() {
@@ -95,6 +100,10 @@ Array::~Array() = default;
  */
 TypeKind typeKind(TypeRef type) {
   return type->getKind();
+}
+
+std::string makeDecl(TypeRef type, std::string var) {
+  return type->makeDeclaration(var);
 }
 
 TypeRef makeReservedType(std::string name) {
@@ -125,7 +134,7 @@ TypeRef makeArrayType(TypeRef elem, size_t size) {
 }
 
 std::string TypeRefToString(TypeRef type) {
-  return type->makeDeclaration("");
+  return makeDecl(type, "");
 }
 
 }
