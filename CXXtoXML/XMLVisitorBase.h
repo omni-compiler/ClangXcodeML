@@ -76,16 +76,6 @@ public:
 
 #define DISPATCHER(NAME, TYPE)                                          \
     public:                                                             \
-    bool PreVisit##NAME(TYPE S) {                                       \
-        (void)S;                                                        \
-        newChild((std::string(#NAME":")                                 \
-                  + std::string(NameFor##NAME(S))).c_str());            \
-        clang::SourceLocation SL;                                       \
-        if (SourceLocFor##NAME(S, SL)) {                                \
-            setLocation(SL);                                            \
-        }                                                               \
-        return true;                                                    \
-    }                                                                   \
     bool Bridge##NAME(TYPE S) override {                                \
         return getDerived().Traverse##NAME(S);                          \
     }                                                                   \
@@ -115,10 +105,30 @@ public:
         if (!getDerived().PreVisit##NAME(S)) {                          \
             return true; /* avoid traverse children */                  \
         }                                                               \
-        return getDerived().TraverseChildOf##NAME(S);                   \
+        bool ret = getDerived().TraverseChildOf##NAME(S);               \
+        ret &= !getDerived().PostVisit##NAME(S);                        \
+        return ret;                                                     \
     }                                                                   \
     bool TraverseChildOf##NAME(TYPE S) {                                \
         getDerived().otherside->Bridge##NAME(S);                        \
+        return true;                                                    \
+    }                                                                   \
+    bool PreVisit##NAME(TYPE S) {                                       \
+        (void)S;                                                        \
+        newChild(#NAME);                                                \
+        newProp("class", NameFor##NAME(S));                             \
+        clang::SourceLocation SL;                                       \
+        if (SourceLocFor##NAME(S, SL)) {                                \
+            setLocation(SL);                                            \
+        }                                                               \
+        return Visit##NAME(S);                                          \
+    }                                                                   \
+    bool Visit##NAME(TYPE S) {                                          \
+        (void)S;                                                        \
+        return true;                                                    \
+    }                                                                   \
+    bool PostVisit##NAME(TYPE S) {                                      \
+        (void)S;                                                        \
         return true;                                                    \
     }
 
