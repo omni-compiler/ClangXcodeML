@@ -311,6 +311,8 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
   }
 
   switch (S->getStmtClass()) {
+  default: return false;
+
   case Stmt::NoStmtClass:     NStmtXXX("NoStmtClass");
   case Stmt::GCCAsmStmtClass: NStmtXXX("GCCAsmStmtClass");
   case Stmt::MSAsmStmtClass:  NStmtXXX("MSAsmStmtClass");
@@ -422,7 +424,7 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
     const char *builtinName = "";
     if (builtinID > 0) {
       ASTContext &CXT = mangleContext->getASTContext();
-      builtinName = CXT.BuiltinInfo.GetName(builtinID);
+      builtinName = CXT.BuiltinInfo.getName(builtinID);
     }
     if (strncmp(builtinName, "__builtin", 9) == 0) {
       newChild("builtin_op");

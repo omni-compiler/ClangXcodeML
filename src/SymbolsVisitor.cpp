@@ -338,7 +338,7 @@ SymbolsVisitor::PreVisitDecl(Decl *D) {
       case SC_Extern: sclass = "extern_def"; break; // "extern"??
       case SC_Static: sclass = "static"; break;
       case SC_PrivateExtern: sclass = "extern"; break; //??
-      case SC_OpenCLWorkGroupLocal: sclass = "SC_OpenCLWorkGroupLocal"; break;
+      //case SC_OpenCLWorkGroupLocal: sclass = "SC_OpenCLWorkGroupLocal"; break;
       case SC_Auto: sclass = "auto"; break;
       case SC_Register: sclass = "register"; break;
       }
