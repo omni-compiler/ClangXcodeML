@@ -13,6 +13,8 @@
 #include "CodeBuilder.h"
 #include "LibXMLUtil.h"
 
+using CodeBuilder = XMLWalker<SourceInfo&, std::stringstream&>;
+
 /*!
  * \brief Traverse XcodeML node and make SymbolEntry.
  * \pre \c node is <globalSymbols> or <symbols> element.
@@ -56,7 +58,7 @@ std::string findSymbolType(const SymbolMap& table, const std::string& name) {
  */
 XcodeMl::TypeRef getIdentType(const SourceInfo& src, const std::string& ident) {
   std::string dataTypeIdent(findSymbolType(src.symTable, ident));
-  return src.typeTable.find(dataTypeIdent)->second;
+  return src.typeTable[dataTypeIdent];
 }
 
 SymbolMap parseGlobalSymbols(xmlDocPtr doc) {
@@ -229,12 +231,12 @@ DEFINE_CB(functionDefinitionProc) {
       src.ctxt
   );
   XMLString name(xmlNodeGetContent(nameElem));
-  auto type(getFunctionType(getIdentType(src, name)));
 
   XMLString kind(nameElem->name);
   if (kind == "name" || kind == "operator") {
     outputIndentation(w, node, src, ss);
-    ss << TypeRefToString(type.returnType)
+    auto fnTypeName = findSymbolType(src.symTable, name);
+    ss << TypeRefToString(src.typeTable.getReturnType(fnTypeName))
       << " " << name;
   } else if (kind == "constructor") {
     ss << "<constructor>";
@@ -243,19 +245,18 @@ DEFINE_CB(functionDefinitionProc) {
   } else {
     assert(false);
   }
-
   ss << "(";
+
   bool alreadyPrinted = false;
   for (auto p : src.symTable.back()) {
     if (alreadyPrinted) {
       ss << ", ";
     }
     auto paramType(getIdentType(src, p.first));
-    ss << TypeRefToString(paramType) << " " << p.first;
+    ss << makeDecl(paramType, p.first);
     alreadyPrinted = true;
   }
   ss << ")" << std::endl;
-
   w.walkChildren(node, src, ss);
 }
 
@@ -378,14 +379,17 @@ DEFINE_CB(condExprProc) {
 }
 
 DEFINE_CB(varDeclProc) {
-  xmlNodePtr nameElem = findFirst(node, "name", src.ctxt),
-             valueElem = findFirst(node, "value", src.ctxt);
+  xmlNodePtr nameElem = findFirst(node, "name", src.ctxt);
   XMLString name(xmlNodeGetContent(nameElem));
   auto type = getIdentType(src, name);
   outputIndentation(w, node, src, ss);
-  ss << TypeRefToString(type) << " " << name << " = ";
-  w.walk(valueElem, src, ss);
-  ss << ";\n";
+  ss << makeDecl(type, name);
+  xmlNodePtr valueElem = findFirst(node, "value", src.ctxt);
+  if (valueElem) {
+    ss << " = ";
+    w.walk(valueElem, src, ss);
+  }
+  ss << ";" << std::endl;
 }
 
 const CodeBuilder CXXBuilder({

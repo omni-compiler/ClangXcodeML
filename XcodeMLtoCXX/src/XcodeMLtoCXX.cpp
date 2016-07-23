@@ -13,8 +13,8 @@
 #include "XMLString.h"
 #include "XcodeMlType.h"
 #include "XMLWalker.h"
-#include "CodeBuilder.h"
 #include "TypeAnalyzer.h"
+#include "CodeBuilder.h"
 
 int main(int argc, char** argv) {
   if (argc < 2) {
@@ -23,7 +23,6 @@ int main(int argc, char** argv) {
   }
   std::string filename(argv[1]);
   xmlDocPtr doc = xmlParseFile(filename.c_str());
-  XcodeMl::TypeMap t = parseTypeTable(doc);
   std::stringstream ss;
   buildCode(doc, ss);
   std::cout << ss.str() << std::endl;

@@ -5,28 +5,6 @@ namespace XcodeMl {
 
 class Type;
 using TypeRef = std::shared_ptr<Type>; /* not nullable */
-/*!
- * \brief A mapping from data type identifiers
- * to actual data types. */
-using TypeMap = std::map<std::string, TypeRef>;
-
-struct ReservedType {
-  std::string name;
-};
-
-struct PointerType {
-  TypeRef ref;
-};
-
-struct FunctionType {
-  TypeRef returnType;
-  std::vector<TypeRef> params;
-};
-
-struct ArrayType {
-  TypeRef elementType;
-  std::shared_ptr<size_t> size;
-};
 
 enum class TypeKind {
  /*! basic data type (3.4 <basicType> element) */
@@ -40,16 +18,13 @@ enum class TypeKind {
 };
 
 TypeKind typeKind(TypeRef);
+std::string makeDecl(TypeRef, std::string);
 
 TypeRef makeReservedType(std::string);
 TypeRef makePointerType(TypeRef);
 TypeRef makeFunctionType(TypeRef, const std::vector<TypeRef>&);
 TypeRef makeArrayType(TypeRef, size_t);
 
-ReservedType getReservedType(TypeRef);
-PointerType getPointerType(TypeRef);
-FunctionType getFunctionType(TypeRef);
-ArrayType getArrayType(TypeRef);
 std::string TypeRefToString(TypeRef);
 
 /*!
@@ -57,27 +32,56 @@ std::string TypeRefToString(TypeRef);
  */
 class Type {
 public:
+  virtual ~Type() = 0;
   friend TypeKind typeKind(TypeRef);
+  friend std::string makeDecl(TypeRef, std::string);
+protected:
+  virtual TypeKind getKind() = 0;
+  virtual std::string makeDeclaration(std::string) = 0;
+};
 
-  friend TypeRef XcodeMl::makeReservedType(std::string);
-  friend TypeRef XcodeMl::makePointerType(TypeRef);
-  friend TypeRef XcodeMl::makeFunctionType(TypeRef, const std::vector<TypeRef>&);
-  friend TypeRef XcodeMl::makeArrayType(TypeRef, size_t);
-
-  friend ReservedType XcodeMl::getReservedType(TypeRef);
-  friend PointerType XcodeMl::getPointerType(TypeRef);
-  friend FunctionType XcodeMl::getFunctionType(TypeRef);
-  friend ArrayType XcodeMl::getArrayType(TypeRef);
-  friend std::string XcodeMl::TypeRefToString(TypeRef);
+class Reserved : public Type {
+public:
+  Reserved(std::string);
+  std::string makeDeclaration(std::string) override;
+  ~Reserved() override;
 private:
-  TypeKind kind;
-  /* FIXME: knows too much */
+  TypeKind getKind() override;
   std::string name;
-  TypeRef type;
-  std::vector<TypeRef> params;
+};
+
+class Pointer : public Type {
+public:
+  Pointer(TypeRef);
+  std::string makeDeclaration(std::string) override;
+  ~Pointer() override;
+private:
+  TypeKind getKind() override;
+  TypeRef ref;
+};
+
+class Function : public Type {
+public:
+  Function(TypeRef, const std::vector<TypeRef>&);
+  Function(TypeRef, const std::vector<std::tuple<TypeRef,std::string>>&);
+  std::string makeDeclaration(std::string) override;
+  ~Function() override;
+private:
+  TypeKind getKind() override;
+  TypeRef returnType;
+  std::vector<std::tuple<TypeRef,std::string>> params;
+};
+
+class Array : public Type {
+public:
+  Array(TypeRef, size_t);
+  std::string makeDeclaration(std::string) override;
+  ~Array() override;
+private:
+  TypeKind getKind() override;
+  TypeRef elementType;
   std::shared_ptr<size_t> size;
 };
 
 }
-
 #endif /* !XCODEMLTYPE_H */
