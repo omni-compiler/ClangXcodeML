@@ -23,7 +23,6 @@ int main(int argc, char** argv) {
   }
   std::string filename(argv[1]);
   xmlDocPtr doc = xmlParseFile(filename.c_str());
-  TypeMap t = parseTypeTable(doc);
   std::stringstream ss;
   buildCode(doc, ss);
   std::cout << ss.str() << std::endl;
