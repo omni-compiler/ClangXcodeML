@@ -16,7 +16,6 @@ private:
   std::map<std::string, XcodeMl::TypeRef> returnMap;
 };
 
-using TypeAnalyzer = XMLWalker<TypeMap&>;
 TypeMap parseTypeTable(xmlDocPtr doc);
 
 #endif /* !TYPEANALYZER_H */
