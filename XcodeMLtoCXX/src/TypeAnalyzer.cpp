@@ -14,6 +14,8 @@
 #include "XcodeMlType.h"
 #include "TypeAnalyzer.h"
 
+using TypeAnalyzer = XMLWalker<TypeMap&>;
+
 const XcodeMl::TypeRef& TypeMap::operator[](
   const std::string& dataTypeIdent
 ) const {
