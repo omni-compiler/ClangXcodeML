@@ -88,6 +88,10 @@ DEFINE_TA(arrayTypeProc) {
   map[name] = makeArrayType(elemType, 0);
 }
 
+DEFINE_TA(structTypeProc) {
+  // under construction
+}
+
 const std::vector<std::string> dataTypeIdents = {
   "void",
   "char",
@@ -125,6 +129,7 @@ const TypeAnalyzer XcodeMLTypeAnalyzer({
   { "pointerType", pointerTypeProc },
   { "functionType", functionTypeProc },
   { "arrayType", arrayTypeProc },
+  { "structType", structTypeProc },
 });
 
 /*!
