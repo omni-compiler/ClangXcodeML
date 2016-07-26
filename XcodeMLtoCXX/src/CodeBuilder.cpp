@@ -441,5 +441,10 @@ void buildCode(xmlDocPtr doc, std::stringstream& ss) {
     parseGlobalSymbols(doc),
     0
   };
+  const std::vector<std::string> &typeNames = src.typeTable.getKeys();
+  for (auto t : typeNames) {
+    ss << "// " << src.typeTable[t] << std::endl;
+  }
+
   CXXBuilder.walkAll(xmlDocGetRootElement(doc), src, ss);
 }

@@ -25,6 +25,9 @@ const XcodeMl::TypeRef& TypeMap::operator[](
 XcodeMl::TypeRef& TypeMap::operator[](
   const std::string& dataTypeIdent
 ) {
+  if (map.find(dataTypeIdent) == map.end()) {
+    keys.push_back(dataTypeIdent);
+  }
   return map[dataTypeIdent];
 }
 
@@ -39,6 +42,10 @@ void TypeMap::setReturnType(
   const XcodeMl::TypeRef& type
 ) {
   returnMap[dataTypeIdent] = type;
+}
+
+const std::vector<std::string>& TypeMap::getKeys(void) const {
+  return keys;
 }
 
 /*!
