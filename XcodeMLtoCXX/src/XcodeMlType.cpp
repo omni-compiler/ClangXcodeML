@@ -29,7 +29,9 @@ Pointer::Pointer(TypeRef signified):
 {}
 
 std::string Pointer::makeDeclaration(std::string var) {
-  assert(ref);
+  if (!ref) {
+    return "INCOMPLETE_TYPE " + var;
+  }
   switch (typeKind(ref)) {
     case TypeKind::Function:
       return makeDecl(ref, "(*" + var + ")");
@@ -103,7 +105,11 @@ TypeKind typeKind(TypeRef type) {
 }
 
 std::string makeDecl(TypeRef type, std::string var) {
-  return type->makeDeclaration(var);
+  if (type) {
+    return type->makeDeclaration(var);
+  } else {
+    return "UNKNOWN_TYPE";
+  }
 }
 
 TypeRef makeReservedType(std::string name) {

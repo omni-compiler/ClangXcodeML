@@ -443,7 +443,8 @@ void buildCode(xmlDocPtr doc, std::stringstream& ss) {
   };
   const std::vector<std::string> &typeNames = src.typeTable.getKeys();
   for (auto t : typeNames) {
-    ss << "// " << src.typeTable[t] << std::endl;
+    XcodeMl::TypeRef ref = src.typeTable[t];
+    ss << "// " << ref << ":" << ref->makeDeclaration("X") << std::endl;
   }
 
   CXXBuilder.walkAll(xmlDocGetRootElement(doc), src, ss);

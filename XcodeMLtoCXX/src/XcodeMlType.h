@@ -37,6 +37,7 @@ public:
   friend std::string makeDecl(TypeRef, std::string);
 protected:
   virtual TypeKind getKind() = 0;
+public:
   virtual std::string makeDeclaration(std::string) = 0;
 };
 
