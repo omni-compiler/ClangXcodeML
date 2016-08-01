@@ -11,9 +11,11 @@ public:
   XcodeMl::TypeRef& operator[](const std::string&);
   const XcodeMl::TypeRef& getReturnType(const std::string&) const;
   void setReturnType(const std::string&, const XcodeMl::TypeRef&);
+  const std::vector<std::string>& getKeys(void) const;
 private:
   std::map<std::string, XcodeMl::TypeRef> map;
   std::map<std::string, XcodeMl::TypeRef> returnMap;
+  std::vector<std::string> keys;
 };
 
 TypeMap parseTypeTable(xmlDocPtr doc);

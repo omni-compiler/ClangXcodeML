@@ -11,6 +11,7 @@
 #include <libxml/xpathInternals.h>
 #include "XMLString.h"
 #include "XMLWalker.h"
+#include "SymbolAnalyzer.h"
 #include "XcodeMlType.h"
 #include "TypeAnalyzer.h"
 
@@ -25,6 +26,9 @@ const XcodeMl::TypeRef& TypeMap::operator[](
 XcodeMl::TypeRef& TypeMap::operator[](
   const std::string& dataTypeIdent
 ) {
+  if (map.find(dataTypeIdent) == map.end()) {
+    keys.push_back(dataTypeIdent);
+  }
   return map[dataTypeIdent];
 }
 
@@ -39,6 +43,10 @@ void TypeMap::setReturnType(
   const XcodeMl::TypeRef& type
 ) {
   returnMap[dataTypeIdent] = type;
+}
+
+const std::vector<std::string>& TypeMap::getKeys(void) const {
+  return keys;
 }
 
 /*!
@@ -81,6 +89,15 @@ DEFINE_TA(arrayTypeProc) {
   map[name] = makeArrayType(elemType, 0);
 }
 
+DEFINE_TA(structTypeProc) {
+  // under construction
+  XMLString elemName = xmlGetProp(node, BAD_CAST "type");
+  //xmlNodePtr symTab = findFirst(node, "../" xpathCtx)
+  SymbolMap fields;
+
+  map[elemName] = XcodeMl::makeStructType(elemName, "", std::move(fields));
+}
+
 const std::vector<std::string> dataTypeIdents = {
   "void",
   "char",
@@ -118,6 +135,7 @@ const TypeAnalyzer XcodeMLTypeAnalyzer({
   { "pointerType", pointerTypeProc },
   { "functionType", functionTypeProc },
   { "arrayType", arrayTypeProc },
+  { "structType", structTypeProc },
 });
 
 /*!
