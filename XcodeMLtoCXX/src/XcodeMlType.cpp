@@ -4,7 +4,10 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include "SymbolAnalyzer.h"
 #include "XcodeMlType.h"
+
+#include <iostream>
 
 namespace XcodeMl {
 
@@ -30,7 +33,7 @@ Pointer::Pointer(TypeRef signified):
 
 std::string Pointer::makeDeclaration(std::string var) {
   if (!ref) {
-    return "INCOMPLETE_TYPE " + var;
+    return "INCOMPLETE_TYPE *" + var;
   }
   switch (typeKind(ref)) {
     case TypeKind::Function:
@@ -97,6 +100,24 @@ TypeKind Array::getKind() {
 
 Array::~Array() = default;
 
+Struct::Struct(std::string n, std::string t, SymbolMap &&f)
+  : name(n), tag(t), fields(f) {
+  std::cerr << "Struct::Struct(" << n << ")" << std::endl;
+}
+
+std::string Struct::makeDeclaration(std::string var)
+{
+  std::stringstream ss;
+  ss << "struct " << name << " " << var;
+  return ss.str();
+}
+
+Struct::~Struct() = default;
+
+TypeKind Struct::getKind() {
+  return TypeKind::Struct;
+}
+
 /*!
  * \brief Return the kind of \c type.
  */
@@ -121,6 +142,12 @@ TypeRef makeReservedType(std::string name) {
 TypeRef makePointerType(TypeRef ref) {
   return std::make_shared<Pointer>(
     Pointer(ref)
+  );
+}
+
+TypeRef makeStructType(std::string name, std::string tag, SymbolMap &&fields) {
+  return std::make_shared<Struct>(
+    Struct(name, tag, std::move(fields))
   );
 }
 

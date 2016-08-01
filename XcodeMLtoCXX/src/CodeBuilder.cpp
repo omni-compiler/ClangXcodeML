@@ -8,6 +8,7 @@
 #include <libxml/xpath.h>
 #include "XMLString.h"
 #include "XMLWalker.h"
+#include "SymbolAnalyzer.h"
 #include "XcodeMlType.h"
 #include "TypeAnalyzer.h"
 #include "CodeBuilder.h"
@@ -441,15 +442,27 @@ void buildCode(xmlDocPtr doc, std::stringstream& ss) {
     parseGlobalSymbols(doc),
     0
   };
+
+
+  // emit forward declarations
+  ss << "// forward declarations" << std::endl;
   const std::vector<std::string> &typeNames = src.typeTable.getKeys();
   for (auto t : typeNames) {
     XcodeMl::TypeRef ref = src.typeTable[t];
     if (ref) {
       ss << "// " << ref << ":" << ref->makeDeclaration("X") << std::endl;
+      switch (typeKind(ref)) {
+      case XcodeMl::TypeKind::Struct:
+	ss << "struct " << t << ";" << std::endl;
+	break;
+      default:
+	break;
+      }
     } else {
       ss << "// null ref" << std::endl;
     }
   }
+  ss << "// end of forward declarations" << std::endl << std::endl;
 
   CXXBuilder.walkAll(xmlDocGetRootElement(doc), src, ss);
 }

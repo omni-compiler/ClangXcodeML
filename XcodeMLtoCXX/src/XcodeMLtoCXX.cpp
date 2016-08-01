@@ -11,6 +11,7 @@
 #include <memory>
 #include <vector>
 #include "XMLString.h"
+#include "SymbolAnalyzer.h"
 #include "XcodeMlType.h"
 #include "XMLWalker.h"
 #include "TypeAnalyzer.h"

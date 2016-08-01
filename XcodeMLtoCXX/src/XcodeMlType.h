@@ -15,6 +15,8 @@ enum class TypeKind {
   Function,
   /*! C-style array (3.7 <ArrayType> element) */
   Array,
+  /*! C-Style struct (3.xx <structType> element) */
+  Struct,
 };
 
 TypeKind typeKind(TypeRef);
@@ -24,6 +26,7 @@ TypeRef makeReservedType(std::string);
 TypeRef makePointerType(TypeRef);
 TypeRef makeFunctionType(TypeRef, const std::vector<TypeRef>&);
 TypeRef makeArrayType(TypeRef, size_t);
+TypeRef makeStructType(std::string, std::string, SymbolMap &&);
 
 std::string TypeRefToString(TypeRef);
 
@@ -82,6 +85,18 @@ private:
   TypeKind getKind() override;
   TypeRef elementType;
   std::shared_ptr<size_t> size;
+};
+
+class Struct : public Type {
+public:
+  Struct(std::string, std::string, SymbolMap &&);
+  std::string makeDeclaration(std::string) override;
+  ~Struct() override;
+private:
+  std::string name;
+  std::string tag;
+  SymbolMap fields;
+  TypeKind getKind() override;
 };
 
 }

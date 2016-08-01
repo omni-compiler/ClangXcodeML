@@ -11,6 +11,7 @@
 #include <libxml/xpathInternals.h>
 #include "XMLString.h"
 #include "XMLWalker.h"
+#include "SymbolAnalyzer.h"
 #include "XcodeMlType.h"
 #include "TypeAnalyzer.h"
 
@@ -90,6 +91,11 @@ DEFINE_TA(arrayTypeProc) {
 
 DEFINE_TA(structTypeProc) {
   // under construction
+  XMLString elemName = xmlGetProp(node, BAD_CAST "type");
+  //xmlNodePtr symTab = findFirst(node, "../" xpathCtx)
+  SymbolMap fields;
+
+  map[elemName] = XcodeMl::makeStructType(elemName, "", std::move(fields));
 }
 
 const std::vector<std::string> dataTypeIdents = {

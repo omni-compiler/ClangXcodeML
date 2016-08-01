@@ -26,11 +26,15 @@ CodeBuilder.o: \
 	LibXMLUtil.h \
 	XcodeMlType.h \
 	TypeAnalyzer.h \
+	SymbolAnalyzer.h \
+	CodeBuilder.h \
 	XMLWalker.h
 TypeAnalyzer.o: \
 	XMLString.h \
 	LibXMLUtil.h \
+	SymbolAnalyzer.h \
 	XcodeMlType.h \
+	TypeAnalyzer.h \
 	XMLWalker.h
 
 clean:
