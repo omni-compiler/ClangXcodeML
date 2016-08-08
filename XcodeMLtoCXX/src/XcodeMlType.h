@@ -6,6 +6,9 @@ namespace XcodeMl {
 class Type;
 using TypeRef = std::shared_ptr<Type>; /* not nullable */
 
+/* data type identifier (3.1 data type identifier) */
+using DataTypeIdent = std::string;
+
 enum class TypeKind {
  /*! basic data type (3.4 <basicType> element) */
   Reserved,
@@ -22,12 +25,6 @@ enum class TypeKind {
 TypeKind typeKind(TypeRef);
 std::string makeDecl(TypeRef, std::string);
 
-TypeRef makeReservedType(std::string);
-TypeRef makePointerType(TypeRef);
-TypeRef makeFunctionType(TypeRef, const std::vector<TypeRef>&);
-TypeRef makeArrayType(TypeRef, size_t);
-TypeRef makeStructType(std::string, std::string, SymbolMap &&);
-
 std::string TypeRefToString(TypeRef);
 
 /*!
@@ -37,7 +34,6 @@ class Type {
 public:
   virtual ~Type() = 0;
   friend TypeKind typeKind(TypeRef);
-  friend std::string makeDecl(TypeRef, std::string);
 protected:
   virtual TypeKind getKind() = 0;
 public:
@@ -61,7 +57,7 @@ public:
   ~Pointer() override;
 private:
   TypeKind getKind() override;
-  TypeRef ref;
+  DataTypeIdent ref;
 };
 
 class Function : public Type {
@@ -72,8 +68,8 @@ public:
   ~Function() override;
 private:
   TypeKind getKind() override;
-  TypeRef returnType;
-  std::vector<std::tuple<TypeRef,std::string>> params;
+  DataTypeIdent returnType;
+  std::vector<std::tuple<DataTypeIdent,std::string>> params;
 };
 
 class Array : public Type {
@@ -83,7 +79,7 @@ public:
   ~Array() override;
 private:
   TypeKind getKind() override;
-  TypeRef elementType;
+  DataTypeIdent elementType;
   std::shared_ptr<size_t> size;
 };
 

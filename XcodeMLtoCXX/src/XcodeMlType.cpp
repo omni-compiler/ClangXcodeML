@@ -133,39 +133,6 @@ std::string makeDecl(TypeRef type, std::string var) {
   }
 }
 
-TypeRef makeReservedType(std::string name) {
-  return std::make_shared<Reserved>(
-    Reserved(name)
-  );
-}
-
-TypeRef makePointerType(TypeRef ref) {
-  return std::make_shared<Pointer>(
-    Pointer(ref)
-  );
-}
-
-TypeRef makeStructType(std::string name, std::string tag, SymbolMap &&fields) {
-  return std::make_shared<Struct>(
-    Struct(name, tag, std::move(fields))
-  );
-}
-
-TypeRef makeFunctionType(
-    TypeRef returnType,
-    const std::vector<TypeRef>& params
-) {
-  return std::make_shared<Function>(
-    Function(returnType, params)
-  );
-}
-
-TypeRef makeArrayType(TypeRef elem, size_t size) {
-  return std::make_shared<Array>(
-    Array(elem, size)
-  );
-}
-
 std::string TypeRefToString(TypeRef type) {
   return makeDecl(type, "");
 }
