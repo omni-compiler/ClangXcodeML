@@ -4,7 +4,7 @@
 namespace XcodeMl {
 
 class Type;
-using TypeRef = std::shared_ptr<Type>; /* not nullable */
+using TypeRef = std::unique_ptr<Type>;
 
 /* data type identifier (3.1 data type identifier) */
 using DataTypeIdent = std::string;
@@ -32,17 +32,21 @@ std::string TypeRefToString(TypeRef);
  */
 class Type {
 public:
+  Type(DataTypeIdent);
   virtual ~Type() = 0;
   friend TypeKind typeKind(TypeRef);
 protected:
   virtual TypeKind getKind() = 0;
 public:
   virtual std::string makeDeclaration(std::string) = 0;
+  DataTypeIdent dataTypeIdent();
+private:
+  DataTypeIdent ident;
 };
 
 class Reserved : public Type {
 public:
-  Reserved(std::string);
+  Reserved(DataTypeIdent, std::string);
   std::string makeDeclaration(std::string) override;
   ~Reserved() override;
 private:
@@ -52,7 +56,7 @@ private:
 
 class Pointer : public Type {
 public:
-  Pointer(TypeRef);
+  Pointer(DataTypeIdent, TypeRef);
   std::string makeDeclaration(std::string) override;
   ~Pointer() override;
 private:
@@ -62,8 +66,8 @@ private:
 
 class Function : public Type {
 public:
-  Function(TypeRef, const std::vector<TypeRef>&);
-  Function(TypeRef, const std::vector<std::tuple<TypeRef,std::string>>&);
+  Function(DataTypeIdent, TypeRef, const std::vector<TypeRef>&);
+  Function(DataTypeIdent, TypeRef, const std::vector<std::tuple<TypeRef,std::string>>&);
   std::string makeDeclaration(std::string) override;
   ~Function() override;
 private:

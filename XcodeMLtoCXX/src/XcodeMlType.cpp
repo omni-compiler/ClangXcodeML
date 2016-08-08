@@ -11,9 +11,18 @@
 
 namespace XcodeMl {
 
+Type::Type(std::string id):
+  ident(id)
+{}
+
 Type::~Type() {}
 
-Reserved::Reserved(std::string dataType):
+DataTypeIdent Type::dataTypeIdent() {
+  return ident;
+}
+
+Reserved::Reserved(DataTypeIdent ident, std::string dataType):
+  Type(ident),
   name(dataType)
 {}
 
@@ -27,8 +36,9 @@ TypeKind Reserved::getKind() {
 
 Reserved::~Reserved() = default;
 
-Pointer::Pointer(TypeRef signified):
-  ref(signified)
+Pointer::Pointer(DataTypeIdent ident, TypeRef signified):
+  Type(ident),
+  ref(signified->dataTypeIdent())
 {}
 
 std::string Pointer::makeDeclaration(std::string var) {
@@ -49,18 +59,20 @@ TypeKind Pointer::getKind() {
 
 Pointer::~Pointer() = default;
 
-Function::Function(TypeRef r, const std::vector<TypeRef>& p):
-  returnType(r),
+Function::Function(DataTypeIdent ident, TypeRef r, const std::vector<TypeRef>& p):
+  Type(ident),
+  returnType(r->dataTypeIdent()),
   params(p.size())
 {
   // FIXME: initialization cost
   for (size_t i = 0; i < p.size(); ++i) {
-    params[i] = std::make_tuple(p[i], "");
+    params[i] = std::make_tuple(p[i]->dataTypeIdent(), "");
   }
 }
 
-Function::Function(TypeRef r, const std::vector<std::tuple<TypeRef, std::string>>& p):
-  returnType(r),
+Function::Function(DataTypeIdent ident, TypeRef r, const std::vector<std::tuple<TypeRef, std::string>>& p):
+  Type(ident),
+  returnType(r->dataTypeIdent()),
   params(p)
 {}
 
@@ -86,7 +98,7 @@ TypeKind Function::getKind() {
 Function::~Function() = default;
 
 Array::Array(TypeRef elem, size_t s):
-  elementType(elem),
+  elementType(elem->dataTypeIdent()),
   size(std::make_shared<size_t>(s))
 {}
 
