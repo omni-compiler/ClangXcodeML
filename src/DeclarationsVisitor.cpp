@@ -389,7 +389,10 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
   case Stmt::CompoundAssignOperatorClass: NStmtXXX("CompoundAssignOperatorClass");
   case Stmt::BlockExprClass: NStmtXXX("BlockExprClass");
   case Stmt::CXXBindTemporaryExprClass: NStmtXXX("CXXBindTemporaryExprClass");
-  case Stmt::CXXBoolLiteralExprClass: NStmtXXX("CXXBoolLiteralExprClass");
+  case Stmt::CXXBoolLiteralExprClass: {
+    bool value = static_cast<CXXBoolLiteralExpr*>(S)->getValue();
+    NExpr("booleanConstant", value ? "true":"false");
+  }
   case Stmt::CXXConstructExprClass: NStmtXXX("CXXConstructExprClass");
   case Stmt::CXXTemporaryObjectExprClass: NStmtXXX("CXXTemporaryObjectExprClass");
   case Stmt::CXXDefaultArgExprClass: NStmtXXX("CXXDefaultArgExprClass");
