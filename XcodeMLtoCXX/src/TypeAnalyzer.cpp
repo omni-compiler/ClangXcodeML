@@ -9,6 +9,7 @@
 #include <libxml/parser.h>
 #include <libxml/xpath.h>
 #include <libxml/xpathInternals.h>
+#include "LibXMLUtil.h"
 #include "XMLString.h"
 #include "XMLWalker.h"
 #include "SymbolAnalyzer.h"
@@ -157,10 +158,10 @@ TypeMap parseTypeTable(xmlDocPtr doc) {
     xmlXPathFreeContext(xpathCtx);
     return TypeMap();
   }
-  const size_t len = (xpathObj->nodesetval)? xpathObj->nodesetval->nodeNr:0;
+  const size_t len = length(xpathObj);
   TypeMap map(dataTypeIdentMap);
   for (size_t i = 0; i < len; ++i) {
-    xmlNodePtr node = xpathObj->nodesetval->nodeTab[i];
+    xmlNodePtr node = nth(xpathObj, i);
     XcodeMLTypeAnalyzer.walk(node, map);
   }
   return map;
