@@ -62,10 +62,10 @@ const std::vector<std::string>& TypeMap::getKeys(void) const {
 #define DEFINE_TA(name) void name(TA_ARGS)
 
 DEFINE_TA(basicTypeProc) {
-  XMLString protoName = xmlGetProp(node, BAD_CAST "name");
-  auto prototype = map[protoName];
-  XMLString name(xmlGetProp(node, BAD_CAST "type"));
-  map[name] = prototype;
+  XMLString signified = xmlGetProp(node, BAD_CAST "name");
+  auto signifiedType = map[signified];
+  XMLString signifier(xmlGetProp(node, BAD_CAST "type"));
+  map[signifier] = signifiedType;
 }
 
 DEFINE_TA(pointerTypeProc) {
