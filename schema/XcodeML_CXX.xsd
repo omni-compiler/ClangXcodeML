@@ -441,7 +441,7 @@
 
   <!-- 5.6 usingDecl element (C++) -->
   <!-- FIXME: more strong restriction -->
-  <xsd:element usingDecl="">
+  <xsd:element name="usingDecl">
     <xsd:complexType>
       <xsd:sequence>
         <xsd:element ref="name" />
@@ -450,4 +450,62 @@
       <xsd:attributeGroup ref="SourceLocInfo" />
     </xsd:complexType>
   </xsd:element>
+
+  <!-- 6.1 exprStatement element -->
+  <xsd:element name="exprStatement">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element minOccurs="1" maxOccurs="1" ref="expression_element" />
+      </xsd:sequence>
+      <xsd:attributeGroup ref="SourceLocInfo" />
+    </xsd:complexType>
+  </xsd:element>
+
+  <!-- 6.2 compoundStatement element -->
+  <xsd:element name="compoundStatement">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element minOccurs="1" maxOccurs="1" ref="symbols" />
+        <xsd:element minOccurs="1" maxOccurs="1" ref="declarations" />
+        <xsd:element minOccurs="1" maxOccurs="1" ref="body" />
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+
+  <!-- 6.3 ifStatement element -->
+  <xsd:element name="ifStatement">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element minOccurs="1" maxOccurs="1" ref="condition" />
+        <xsd:element minOccurs="1" maxOccurs="1" ref="then" />
+        <xsd:element minOccurs="1" maxOccurs="1" ref="else" />
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+
+  <xsd:element name="condition">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element minOccurs="1" maxOccurs="1" ref="expression_element" />
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+
+  <xsd:element name="then">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element minOccurs="1" maxOccurs="1" ref="expression_element" />
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+
+  <xsd:element name="else">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element minOccurs="1" maxOccurs="1" ref="expression_element" />
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+
+
 </xsd:schema>
