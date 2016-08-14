@@ -9,7 +9,7 @@ using TypeRef = std::shared_ptr<Type>;
 /* data type identifier (3.1 data type identifier) */
 using DataTypeIdent = std::string;
 
-struct Environment;
+class Environment;
 
 enum class TypeKind {
  /*! basic data type (3.4 <basicType> element) */

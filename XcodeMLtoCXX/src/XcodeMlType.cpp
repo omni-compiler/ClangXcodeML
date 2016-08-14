@@ -4,9 +4,10 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <libxml/tree.h>
 #include "SymbolAnalyzer.h"
 #include "XcodeMlType.h"
-#include "XcodeMlEnvironment.h"
+#include "TypeAnalyzer.h"
 
 #include <iostream>
 
@@ -43,7 +44,7 @@ Pointer::Pointer(DataTypeIdent ident, TypeRef signified):
 {}
 
 std::string Pointer::makeDeclaration(std::string var, const Environment& env) {
-  auto refType = get(env, ref);
+  auto refType = env[ref];
   if (!refType) {
     return "INCOMPLETE_TYPE *" + var;
   }
@@ -80,7 +81,7 @@ Function::Function(DataTypeIdent ident, TypeRef r, const std::vector<std::tuple<
 
 std::string Function::makeDeclaration(std::string var, const Environment& env) {
   std::stringstream ss;
-  auto returnType(get(env, returnValue));
+  auto returnType(env[returnValue]);
   if (!returnType) {
     return "INCOMPLETE_TYPE *" + var;
   }
@@ -90,7 +91,7 @@ std::string Function::makeDeclaration(std::string var, const Environment& env) {
     << "(";
   for (auto param : params) {
     auto paramDTI(std::get<0>(param));
-    auto paramType(get(env, paramDTI));
+    auto paramType(env[paramDTI]);
     auto paramName(std::get<1>(param));
     if (!paramType) {
       return "INCOMPLETE_TYPE *" + var;
@@ -114,7 +115,7 @@ Array::Array(DataTypeIdent ident, TypeRef elem, size_t s):
 {}
 
 std::string Array::makeDeclaration(std::string var, const Environment& env) {
-  auto elementType(get(env, element));
+  auto elementType(env[element]);
   if (!elementType) {
     return "INCOMPLETE_TYPE *" + var;
   }

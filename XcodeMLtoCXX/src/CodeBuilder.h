@@ -8,7 +8,7 @@
 class SourceInfo {
 public:
   xmlXPathContextPtr ctxt;
-  TypeMap typeTable;
+  XcodeMl::Environment typeTable;
   /*! SymbolEntry stack in current scope. */
   SymbolMap symTable;
   unsigned int indentation;

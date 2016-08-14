@@ -16,15 +16,15 @@
 #include "XcodeMlType.h"
 #include "TypeAnalyzer.h"
 
-using TypeAnalyzer = XMLWalker<TypeMap&>;
+using TypeAnalyzer = XMLWalker<XcodeMl::Environment&>;
 
-const XcodeMl::TypeRef& TypeMap::operator[](
+const XcodeMl::TypeRef& XcodeMl::Environment::operator[](
   const std::string& dataTypeIdent
 ) const {
   return map.at(dataTypeIdent);
 }
 
-XcodeMl::TypeRef& TypeMap::operator[](
+XcodeMl::TypeRef& XcodeMl::Environment::operator[](
   const std::string& dataTypeIdent
 ) {
   if (map.find(dataTypeIdent) == map.end()) {
@@ -33,20 +33,20 @@ XcodeMl::TypeRef& TypeMap::operator[](
   return map[dataTypeIdent];
 }
 
-const XcodeMl::TypeRef& TypeMap::getReturnType(
+const XcodeMl::TypeRef& XcodeMl::Environment::getReturnType(
   const std::string& dataTypeIdent
 ) const {
   return returnMap.at(dataTypeIdent);
 }
 
-void TypeMap::setReturnType(
+void XcodeMl::Environment::setReturnType(
   const std::string& dataTypeIdent,
   const XcodeMl::TypeRef& type
 ) {
   returnMap[dataTypeIdent] = type;
 }
 
-const std::vector<std::string>& TypeMap::getKeys(void) const {
+const std::vector<std::string>& XcodeMl::Environment::getKeys(void) const {
   return keys;
 }
 
@@ -55,7 +55,7 @@ const std::vector<std::string>& TypeMap::getKeys(void) const {
  */
 #define TA_ARGS const TypeAnalyzer& w __attribute__((unused)), \
                 xmlNodePtr node __attribute__((unused)), \
-                TypeMap& map __attribute__((unused))
+                XcodeMl::Environment& map __attribute__((unused))
 /*!
  * \brief Define new TypeAnalyzer::Procedure named \c name.
  */
@@ -123,8 +123,8 @@ const std::vector<std::string> dataTypeIdents = {
 /*!
  * \brief Mapping from Data type identifiers to basic data types.
  */
-const TypeMap dataTypeIdentMap = [](const std::vector<std::string>& keys) {
-  TypeMap map;
+const XcodeMl::Environment dataTypeIdentMap = [](const std::vector<std::string>& keys) {
+  XcodeMl::Environment map;
   for (std::string key : keys) {
     map[key] = XcodeMl::makeReservedType(key);
   }
@@ -143,23 +143,23 @@ const TypeAnalyzer XcodeMLTypeAnalyzer({
  * \brief Traverse an XcodeML document and make mapping from data
  * type identifiers to data types defined in it.
  */
-TypeMap parseTypeTable(xmlDocPtr doc) {
+XcodeMl::Environment parseTypeTable(xmlDocPtr doc) {
   if (doc == nullptr) {
-    return TypeMap();
+    return XcodeMl::Environment();
   }
   xmlXPathContextPtr xpathCtx = xmlXPathNewContext(doc);
   if (xpathCtx == nullptr) {
-    return TypeMap();
+    return XcodeMl::Environment();
   }
   xmlXPathObjectPtr xpathObj = xmlXPathEvalExpression(
       BAD_CAST "/XcodeProgram/typeTable/*",
       xpathCtx);
   if (xpathObj == nullptr) {
     xmlXPathFreeContext(xpathCtx);
-    return TypeMap();
+    return XcodeMl::Environment();
   }
   const size_t len = length(xpathObj);
-  TypeMap map(dataTypeIdentMap);
+  XcodeMl::Environment map(dataTypeIdentMap);
   for (size_t i = 0; i < len; ++i) {
     xmlNodePtr node = nth(xpathObj, i);
     XcodeMLTypeAnalyzer.walk(node, map);

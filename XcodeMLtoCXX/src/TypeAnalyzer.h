@@ -5,7 +5,7 @@
  * \brief A mapping from data type identifiers
  * to actual data types.
  */
-class TypeMap {
+class XcodeMl::Environment {
 public:
   const XcodeMl::TypeRef& operator[](const std::string&) const;
   XcodeMl::TypeRef& operator[](const std::string&);
@@ -18,6 +18,6 @@ private:
   std::vector<std::string> keys;
 };
 
-TypeMap parseTypeTable(xmlDocPtr doc);
+XcodeMl::Environment parseTypeTable(xmlDocPtr doc);
 
 #endif /* !TYPEANALYZER_H */
