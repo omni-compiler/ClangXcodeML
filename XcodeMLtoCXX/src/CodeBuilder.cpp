@@ -10,6 +10,7 @@
 #include "XMLWalker.h"
 #include "SymbolAnalyzer.h"
 #include "XcodeMlType.h"
+#include "XcodeMlEnvironment.h"
 #include "TypeAnalyzer.h"
 #include "CodeBuilder.h"
 #include "LibXMLUtil.h"

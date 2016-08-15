@@ -7,6 +7,7 @@
 #include <libxml/tree.h>
 #include "SymbolAnalyzer.h"
 #include "XcodeMlType.h"
+#include "XcodeMlEnvironment.h"
 #include "TypeAnalyzer.h"
 
 #include <iostream>

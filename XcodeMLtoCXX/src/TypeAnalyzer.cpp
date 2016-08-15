@@ -14,41 +14,10 @@
 #include "XMLWalker.h"
 #include "SymbolAnalyzer.h"
 #include "XcodeMlType.h"
+#include "XcodeMlEnvironment.h"
 #include "TypeAnalyzer.h"
 
 using TypeAnalyzer = XMLWalker<XcodeMl::Environment&>;
-
-const XcodeMl::TypeRef& XcodeMl::Environment::operator[](
-  const std::string& dataTypeIdent
-) const {
-  return map.at(dataTypeIdent);
-}
-
-XcodeMl::TypeRef& XcodeMl::Environment::operator[](
-  const std::string& dataTypeIdent
-) {
-  if (map.find(dataTypeIdent) == map.end()) {
-    keys.push_back(dataTypeIdent);
-  }
-  return map[dataTypeIdent];
-}
-
-const XcodeMl::TypeRef& XcodeMl::Environment::getReturnType(
-  const std::string& dataTypeIdent
-) const {
-  return returnMap.at(dataTypeIdent);
-}
-
-void XcodeMl::Environment::setReturnType(
-  const std::string& dataTypeIdent,
-  const XcodeMl::TypeRef& type
-) {
-  returnMap[dataTypeIdent] = type;
-}
-
-const std::vector<std::string>& XcodeMl::Environment::getKeys(void) const {
-  return keys;
-}
 
 /*!
  * \brief Arguments to be passed to TypeAnalyzer::Procedure.
