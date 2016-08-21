@@ -162,6 +162,53 @@ std::string makeDecl(TypeRef type, std::string var, const Environment& env) {
   }
 }
 
+TypeRef makeReservedType(DataTypeIdent ident, std::string name) {
+  return std::make_shared<Reserved>(
+      ident,
+      name
+  );
+}
+
+TypeRef makePointerType(DataTypeIdent ident, TypeRef ref) {
+  return std::make_shared<Pointer>(
+      ident,
+      ref
+  );
+}
+
+TypeRef makeFunctionType(
+    DataTypeIdent ident,
+    TypeRef returnType,
+    const Function::Args& args
+) {
+  return std::make_shared<Function>(
+      ident,
+      returnType,
+      args
+  );
+}
+
+TypeRef makeArrayType(
+    DataTypeIdent ident,
+    TypeRef elemType,
+    size_t size
+) {
+  return std::make_shared<Array>(
+      ident,
+      elemType,
+      size
+  );
+}
+
+TypeRef makeStructType(
+    DataTypeIdent ident,
+    std::string name,
+    std::string tag,
+    SymbolMap&& fields
+) {
+  return std::make_shared<Struct>(ident, name, tag, std::move(fields));
+}
+
 std::string TypeRefToString(TypeRef type, const Environment& env) {
   return makeDecl(type, "", env);
 }
