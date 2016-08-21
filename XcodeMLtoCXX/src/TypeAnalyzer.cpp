@@ -41,7 +41,7 @@ DEFINE_TA(pointerTypeProc) {
   XMLString refName = xmlGetProp(node, BAD_CAST "ref");
   auto ref = map[refName];
   XMLString name(xmlGetProp(node, BAD_CAST "type"));
-  map[name] = makePointerType(ref);
+  map[name] = XcodeMl::makePointerType(name, ref);
 }
 
 DEFINE_TA(functionTypeProc) {
@@ -49,14 +49,14 @@ DEFINE_TA(functionTypeProc) {
   auto returnType = map[returnName];
   XMLString name(xmlGetProp(node, BAD_CAST "type"));
   map.setReturnType(name, returnType);
-  map[name] = makeFunctionType(returnType, {});
+  map[name] = XcodeMl::makeFunctionType(name, returnType, {});
 }
 
 DEFINE_TA(arrayTypeProc) {
   XMLString elemName = xmlGetProp(node, BAD_CAST "element_type");
   auto elemType = map[elemName];
   XMLString name(xmlGetProp(node, BAD_CAST "type"));
-  map[name] = makeArrayType(elemType, 0);
+  map[name] = XcodeMl::makeArrayType(name, elemType, 0);
 }
 
 DEFINE_TA(structTypeProc) {
@@ -65,7 +65,8 @@ DEFINE_TA(structTypeProc) {
   //xmlNodePtr symTab = findFirst(node, "../" xpathCtx)
   SymbolMap fields;
 
-  map[elemName] = XcodeMl::makeStructType(elemName, "", std::move(fields));
+  map[elemName] = XcodeMl::makeStructType(
+      elemName, elemName, "", std::move(fields));
 }
 
 const std::vector<std::string> dataTypeIdents = {
@@ -95,7 +96,7 @@ const std::vector<std::string> dataTypeIdents = {
 const XcodeMl::Environment dataTypeIdentMap = [](const std::vector<std::string>& keys) {
   XcodeMl::Environment map;
   for (std::string key : keys) {
-    map[key] = XcodeMl::makeReservedType(key);
+    map[key] = XcodeMl::makeReservedType(key, key);
   }
   return map;
 }(dataTypeIdents);
