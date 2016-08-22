@@ -95,6 +95,7 @@ std::string Function::makeDeclaration(std::string var, const Environment& env) {
     << " "
     << var
     << "(";
+  bool alreadyPrinted = false;
   for (auto param : params) {
     auto paramDTI(std::get<0>(param));
     auto paramType(env[paramDTI]);
@@ -102,7 +103,9 @@ std::string Function::makeDeclaration(std::string var, const Environment& env) {
     if (!paramType) {
       return "INCOMPLETE_TYPE *" + var;
     }
-    ss << makeDecl(paramType, paramName, env) << ", ";
+    ss << (alreadyPrinted ? ", " : "")
+      << makeDecl(paramType, paramName, env);
+    alreadyPrinted = true;
   }
   ss <<  ")";
   return ss.str();
