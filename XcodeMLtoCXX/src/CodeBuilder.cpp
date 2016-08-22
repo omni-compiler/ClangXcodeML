@@ -44,7 +44,8 @@ SymbolEntry parseSymbols(xmlNodePtr node, xmlXPathContextPtr ctxt) {
  * \return Data type identifier of \c name.
  */
 std::string findSymbolType(const SymbolMap& table, const std::string& name) {
-  for (auto entry : table) {
+  for (auto iter = table.rbegin(); iter != table.rend(); ++iter) {
+    auto entry(*iter);
     auto result(entry.find(name));
     if (result != entry.end()) {
       return result->second;
