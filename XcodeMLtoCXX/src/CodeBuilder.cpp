@@ -227,7 +227,7 @@ const CodeBuilder::Procedure handleScope =
   handleSymTableStack(
   EmptyProc)));
 
-DEFINE_CB(functionDefinitionProc) {
+DEFINE_CB(outputReturnTypeAndName) {
   xmlNodePtr nameElem = findFirst(
       node,
       "name|operator|constructor|destructor",
@@ -249,6 +249,9 @@ DEFINE_CB(functionDefinitionProc) {
   } else {
     assert(false);
   }
+}
+
+DEFINE_CB(outputParamsAndBody) {
   ss << "(";
 
   bool alreadyPrinted = false;
@@ -263,6 +266,11 @@ DEFINE_CB(functionDefinitionProc) {
   ss << ")" << std::endl;
   w.walkChildren(node, src, ss);
 }
+
+const CodeBuilder::Procedure functionDefinitionProc = merge(
+    static_cast<CodeBuilder::Procedure>(outputReturnTypeAndName),
+    handleSymTableStack(outputParamsAndBody)
+);
 
 DEFINE_CB(memberRefProc) {
   w.walkChildren(node, src, ss);
@@ -397,7 +405,7 @@ DEFINE_CB(varDeclProc) {
 }
 
 const CodeBuilder CXXBuilder({
-  { "functionDefinition", handleSymTableStack(functionDefinitionProc) },
+  { "functionDefinition", functionDefinitionProc },
   { "intConstant", EmptySNCProc },
   { "moeConstant", EmptySNCProc },
   { "booleanConstant", EmptySNCProc },
