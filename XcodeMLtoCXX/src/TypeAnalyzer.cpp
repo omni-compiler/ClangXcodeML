@@ -47,21 +47,21 @@ DEFINE_TA(pointerTypeProc) {
 DEFINE_TA(functionTypeProc) {
   XMLString returnName = xmlGetProp(node, BAD_CAST "return_type");
   auto returnType = map[returnName];
-  xmlXPathObjectPtr params = xmlXPathNodeEval(
+  xmlXPathObjectPtr paramsNode = xmlXPathNodeEval(
       node,
       BAD_CAST "params/*",
       ctxt
   );
-  XcodeMl::Function::Args args;
-  for (size_t i = 0, len = length(params); i < len; ++i) {
-    xmlNodePtr param = nth(params, i);
+  XcodeMl::Function::Params params;
+  for (size_t i = 0, len = length(paramsNode); i < len; ++i) {
+    xmlNodePtr param = nth(paramsNode, i);
     XMLString paramType(xmlGetProp(param, BAD_CAST "type"));
     XMLString paramName(xmlNodeGetContent(param));
-    args.emplace_back(paramType, paramName);
+    params.emplace_back(paramType, paramName);
   }
   XMLString name(xmlGetProp(node, BAD_CAST "type"));
   map.setReturnType(name, returnType);
-  map[name] = XcodeMl::makeFunctionType(name, returnType, args);
+  map[name] = XcodeMl::makeFunctionType(name, returnType, params);
 }
 
 DEFINE_TA(arrayTypeProc) {

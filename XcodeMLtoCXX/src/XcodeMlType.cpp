@@ -191,12 +191,12 @@ TypeRef makePointerType(DataTypeIdent ident, DataTypeIdent ref) {
 TypeRef makeFunctionType(
     DataTypeIdent ident,
     TypeRef returnType,
-    const Function::Args& args
+    const Function::Params& params
 ) {
   return std::make_shared<Function>(
       ident,
       returnType,
-      args
+      params
   );
 }
 

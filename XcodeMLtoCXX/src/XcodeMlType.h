@@ -69,15 +69,15 @@ private:
 
 class Function : public Type {
 public:
-  using Args = std::vector<std::tuple<DataTypeIdent, std::string>>;
+  using Params = std::vector<std::tuple<DataTypeIdent, std::string>>;
   Function(DataTypeIdent, TypeRef, const std::vector<DataTypeIdent>&);
-  Function(DataTypeIdent, TypeRef, const Args&);
+  Function(DataTypeIdent, TypeRef, const Params&);
   std::string makeDeclaration(std::string, const Environment&) override;
   ~Function() override;
 private:
   TypeKind getKind() override;
   DataTypeIdent returnValue;
-  Args params;
+  Params params;
 };
 
 class Array : public Type {
@@ -106,7 +106,7 @@ private:
 TypeRef makeReservedType(DataTypeIdent, std::string);
 TypeRef makePointerType(DataTypeIdent, TypeRef);
 TypeRef makePointerType(DataTypeIdent, DataTypeIdent);
-TypeRef makeFunctionType(DataTypeIdent, TypeRef, const Function::Args&);
+TypeRef makeFunctionType(DataTypeIdent, TypeRef, const Function::Params&);
 TypeRef makeArrayType(DataTypeIdent, TypeRef, size_t);
 TypeRef makeStructType(DataTypeIdent, std::string, std::string, SymbolMap &&);
 
