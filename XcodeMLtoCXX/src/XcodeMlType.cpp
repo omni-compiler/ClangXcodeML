@@ -44,6 +44,11 @@ Pointer::Pointer(DataTypeIdent ident, TypeRef signified):
   ref(signified->dataTypeIdent())
 {}
 
+Pointer::Pointer(DataTypeIdent ident, DataTypeIdent signified):
+  Type(ident),
+  ref(signified)
+{}
+
 std::string Pointer::makeDeclaration(std::string var, const Environment& env) {
   auto refType = env[ref];
   if (!refType) {
@@ -174,6 +179,10 @@ TypeRef makePointerType(DataTypeIdent ident, TypeRef ref) {
       ident,
       ref
   );
+}
+
+TypeRef makePointerType(DataTypeIdent ident, DataTypeIdent ref) {
+  return std::make_shared<Pointer>(ident, ref);
 }
 
 TypeRef makeFunctionType(

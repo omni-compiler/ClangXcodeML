@@ -59,6 +59,7 @@ private:
 class Pointer : public Type {
 public:
   Pointer(DataTypeIdent, TypeRef);
+  Pointer(DataTypeIdent, DataTypeIdent);
   std::string makeDeclaration(std::string, const Environment&) override;
   ~Pointer() override;
 private:
@@ -104,6 +105,7 @@ private:
 
 TypeRef makeReservedType(DataTypeIdent, std::string);
 TypeRef makePointerType(DataTypeIdent, TypeRef);
+TypeRef makePointerType(DataTypeIdent, DataTypeIdent);
 TypeRef makeFunctionType(DataTypeIdent, TypeRef, const Function::Args&);
 TypeRef makeArrayType(DataTypeIdent, TypeRef, size_t);
 TypeRef makeStructType(DataTypeIdent, std::string, std::string, SymbolMap &&);

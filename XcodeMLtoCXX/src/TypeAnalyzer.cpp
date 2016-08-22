@@ -39,9 +39,8 @@ DEFINE_TA(basicTypeProc) {
 
 DEFINE_TA(pointerTypeProc) {
   XMLString refName = xmlGetProp(node, BAD_CAST "ref");
-  auto ref = map[refName];
   XMLString name(xmlGetProp(node, BAD_CAST "type"));
-  map[name] = XcodeMl::makePointerType(name, ref);
+  map[name] = XcodeMl::makePointerType(name, refName);
 }
 
 DEFINE_TA(functionTypeProc) {
