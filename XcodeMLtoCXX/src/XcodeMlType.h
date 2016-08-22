@@ -4,7 +4,12 @@
 namespace XcodeMl {
 
 class Type;
-using TypeRef = std::shared_ptr<Type>; /* not nullable */
+using TypeRef = std::shared_ptr<Type>;
+
+/* data type identifier (3.1 data type identifier) */
+using DataTypeIdent = std::string;
+
+class Environment;
 
 enum class TypeKind {
  /*! basic data type (3.4 <basicType> element) */
@@ -20,34 +25,31 @@ enum class TypeKind {
 };
 
 TypeKind typeKind(TypeRef);
-std::string makeDecl(TypeRef, std::string);
+std::string makeDecl(TypeRef, std::string, const Environment&);
 
-TypeRef makeReservedType(std::string);
-TypeRef makePointerType(TypeRef);
-TypeRef makeFunctionType(TypeRef, const std::vector<TypeRef>&);
-TypeRef makeArrayType(TypeRef, size_t);
-TypeRef makeStructType(std::string, std::string, SymbolMap &&);
-
-std::string TypeRefToString(TypeRef);
+std::string TypeRefToString(TypeRef, const Environment& env);
 
 /*!
  * \brief A class that represents data types in XcodeML.
  */
 class Type {
 public:
+  Type(DataTypeIdent);
   virtual ~Type() = 0;
   friend TypeKind typeKind(TypeRef);
-  friend std::string makeDecl(TypeRef, std::string);
 protected:
   virtual TypeKind getKind() = 0;
 public:
-  virtual std::string makeDeclaration(std::string) = 0;
+  virtual std::string makeDeclaration(std::string, const Environment&) = 0;
+  DataTypeIdent dataTypeIdent();
+private:
+  DataTypeIdent ident;
 };
 
 class Reserved : public Type {
 public:
-  Reserved(std::string);
-  std::string makeDeclaration(std::string) override;
+  Reserved(DataTypeIdent, std::string);
+  std::string makeDeclaration(std::string, const Environment&) override;
   ~Reserved() override;
 private:
   TypeKind getKind() override;
@@ -56,41 +58,43 @@ private:
 
 class Pointer : public Type {
 public:
-  Pointer(TypeRef);
-  std::string makeDeclaration(std::string) override;
+  Pointer(DataTypeIdent, TypeRef);
+  Pointer(DataTypeIdent, DataTypeIdent);
+  std::string makeDeclaration(std::string, const Environment&) override;
   ~Pointer() override;
 private:
   TypeKind getKind() override;
-  TypeRef ref;
+  DataTypeIdent ref;
 };
 
 class Function : public Type {
 public:
-  Function(TypeRef, const std::vector<TypeRef>&);
-  Function(TypeRef, const std::vector<std::tuple<TypeRef,std::string>>&);
-  std::string makeDeclaration(std::string) override;
+  using Params = std::vector<std::tuple<DataTypeIdent, std::string>>;
+  Function(DataTypeIdent, TypeRef, const std::vector<DataTypeIdent>&);
+  Function(DataTypeIdent, TypeRef, const Params&);
+  std::string makeDeclaration(std::string, const Environment&) override;
   ~Function() override;
 private:
   TypeKind getKind() override;
-  TypeRef returnType;
-  std::vector<std::tuple<TypeRef,std::string>> params;
+  DataTypeIdent returnValue;
+  Params params;
 };
 
 class Array : public Type {
 public:
-  Array(TypeRef, size_t);
-  std::string makeDeclaration(std::string) override;
+  Array(DataTypeIdent, TypeRef, size_t);
+  std::string makeDeclaration(std::string, const Environment&) override;
   ~Array() override;
 private:
   TypeKind getKind() override;
-  TypeRef elementType;
+  DataTypeIdent element;
   std::shared_ptr<size_t> size;
 };
 
 class Struct : public Type {
 public:
-  Struct(std::string, std::string, SymbolMap &&);
-  std::string makeDeclaration(std::string) override;
+  Struct(DataTypeIdent, std::string, std::string, SymbolMap &&);
+  std::string makeDeclaration(std::string, const Environment&) override;
   ~Struct() override;
 private:
   std::string name;
@@ -98,6 +102,13 @@ private:
   SymbolMap fields;
   TypeKind getKind() override;
 };
+
+TypeRef makeReservedType(DataTypeIdent, std::string);
+TypeRef makePointerType(DataTypeIdent, TypeRef);
+TypeRef makePointerType(DataTypeIdent, DataTypeIdent);
+TypeRef makeFunctionType(DataTypeIdent, TypeRef, const Function::Params&);
+TypeRef makeArrayType(DataTypeIdent, TypeRef, size_t);
+TypeRef makeStructType(DataTypeIdent, std::string, std::string, SymbolMap &&);
 
 }
 #endif /* !XCODEMLTYPE_H */
