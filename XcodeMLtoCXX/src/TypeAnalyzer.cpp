@@ -17,13 +17,14 @@
 #include "XcodeMlEnvironment.h"
 #include "TypeAnalyzer.h"
 
-using TypeAnalyzer = XMLWalker<XcodeMl::Environment&>;
+using TypeAnalyzer = XMLWalker<xmlXPathContextPtr, XcodeMl::Environment&>;
 
 /*!
  * \brief Arguments to be passed to TypeAnalyzer::Procedure.
  */
 #define TA_ARGS const TypeAnalyzer& w __attribute__((unused)), \
                 xmlNodePtr node __attribute__((unused)), \
+                xmlXPathContextPtr ctxt __attribute__((unused)), \
                 XcodeMl::Environment& map __attribute__((unused))
 /*!
  * \brief Define new TypeAnalyzer::Procedure named \c name.
@@ -131,7 +132,7 @@ XcodeMl::Environment parseTypeTable(xmlDocPtr doc) {
   XcodeMl::Environment map(dataTypeIdentMap);
   for (size_t i = 0; i < len; ++i) {
     xmlNodePtr node = nth(xpathObj, i);
-    XcodeMLTypeAnalyzer.walk(node, map);
+    XcodeMLTypeAnalyzer.walk(node, xpathCtx, map);
   }
   return map;
 }
