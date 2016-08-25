@@ -10,6 +10,7 @@
 #include "XMLWalker.h"
 #include "SymbolAnalyzer.h"
 #include "XcodeMlType.h"
+#include "XcodeMlEnvironment.h"
 #include "TypeAnalyzer.h"
 #include "CodeBuilder.h"
 #include "LibXMLUtil.h"
@@ -43,7 +44,8 @@ SymbolEntry parseSymbols(xmlNodePtr node, xmlXPathContextPtr ctxt) {
  * \return Data type identifier of \c name.
  */
 std::string findSymbolType(const SymbolMap& table, const std::string& name) {
-  for (auto entry : table) {
+  for (auto iter = table.rbegin(); iter != table.rend(); ++iter) {
+    auto entry(*iter);
     auto result(entry.find(name));
     if (result != entry.end()) {
       return result->second;
@@ -225,7 +227,7 @@ const CodeBuilder::Procedure handleScope =
   handleSymTableStack(
   EmptyProc)));
 
-DEFINE_CB(functionDefinitionProc) {
+DEFINE_CB(outputReturnTypeAndName) {
   xmlNodePtr nameElem = findFirst(
       node,
       "name|operator|constructor|destructor",
@@ -237,7 +239,8 @@ DEFINE_CB(functionDefinitionProc) {
   if (kind == "name" || kind == "operator") {
     outputIndentation(w, node, src, ss);
     auto fnTypeName = findSymbolType(src.symTable, name);
-    ss << TypeRefToString(src.typeTable.getReturnType(fnTypeName))
+    auto returnType = src.typeTable.getReturnType(fnTypeName);
+    ss << TypeRefToString(returnType, src.typeTable)
       << " " << name;
   } else if (kind == "constructor") {
     ss << "<constructor>";
@@ -246,6 +249,9 @@ DEFINE_CB(functionDefinitionProc) {
   } else {
     assert(false);
   }
+}
+
+DEFINE_CB(outputParamsAndBody) {
   ss << "(";
 
   bool alreadyPrinted = false;
@@ -254,12 +260,17 @@ DEFINE_CB(functionDefinitionProc) {
       ss << ", ";
     }
     auto paramType(getIdentType(src, p.first));
-    ss << makeDecl(paramType, p.first);
+    ss << makeDecl(paramType, p.first, src.typeTable);
     alreadyPrinted = true;
   }
   ss << ")" << std::endl;
   w.walkChildren(node, src, ss);
 }
+
+const CodeBuilder::Procedure functionDefinitionProc = merge(
+    static_cast<CodeBuilder::Procedure>(outputReturnTypeAndName),
+    handleSymTableStack(outputParamsAndBody)
+);
 
 DEFINE_CB(memberRefProc) {
   w.walkChildren(node, src, ss);
@@ -384,7 +395,7 @@ DEFINE_CB(varDeclProc) {
   XMLString name(xmlNodeGetContent(nameElem));
   auto type = getIdentType(src, name);
   outputIndentation(w, node, src, ss);
-  ss << makeDecl(type, name);
+  ss << makeDecl(type, name, src.typeTable);
   xmlNodePtr valueElem = findFirst(node, "value", src.ctxt);
   if (valueElem) {
     ss << " = ";
@@ -394,7 +405,7 @@ DEFINE_CB(varDeclProc) {
 }
 
 const CodeBuilder CXXBuilder({
-  { "functionDefinition", handleSymTableStack(functionDefinitionProc) },
+  { "functionDefinition", functionDefinitionProc },
   { "intConstant", EmptySNCProc },
   { "moeConstant", EmptySNCProc },
   { "booleanConstant", EmptySNCProc },
@@ -450,7 +461,7 @@ void buildCode(xmlDocPtr doc, std::stringstream& ss) {
   for (auto t : typeNames) {
     XcodeMl::TypeRef ref = src.typeTable[t];
     if (ref) {
-      ss << "// " << ref << ":" << ref->makeDeclaration("X") << std::endl;
+      ss << "// " << ref << ":" << ref->makeDeclaration("X", src.typeTable) << std::endl;
       switch (typeKind(ref)) {
       case XcodeMl::TypeKind::Struct:
 	ss << "struct " << t << ";" << std::endl;
