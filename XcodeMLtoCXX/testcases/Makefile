@@ -1,5 +1,6 @@
 .SUFFIXES: .XcodeML .CXX
 .PHONY: test clean
+.PRECIOUS: %.XcodeML
 
 all: test
 

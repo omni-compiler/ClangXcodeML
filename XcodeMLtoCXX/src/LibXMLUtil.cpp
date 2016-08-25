@@ -32,3 +32,10 @@ xmlNodePtr findFirst(xmlNodePtr node, const char* xpathExpr, xmlXPathContextPtr 
   return matchedNodes->nodeTab[0];
 }
 
+size_t length(xmlXPathObjectPtr obj) {
+  return (obj->nodesetval)? obj->nodesetval->nodeNr:0;
+}
+
+xmlNodePtr nth(xmlXPathObjectPtr obj, size_t n) {
+  return obj->nodesetval->nodeTab[n];
+}
