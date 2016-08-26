@@ -4,12 +4,13 @@
 
 all: test
 
+ROOTDIR = ../../..
+CTOXCODEMLDIR = $(ROOTDIR)/CtoXcodeML/src
+XCODEMLTOCXXDIR = $(ROOTDIR)/XcodeMLtoCXX/src
 CXX = /usr/local/bin/clang++
 CXXFLAGS = -pedantic -fsyntax-only
-CTOXCODEMLDIR = ../../src/
-CTOXCODEML = ../../src/CtoXcodeML
-XCODEMLTOCXXDIR = ../
-XCODEMLTOCXX = ../XcodeMLtoCXX
+CTOXCODEML = $(CTOXCODEMLDIR)/CtoXcodeML
+XCODEMLTOCXX = $(XCODEMLTOCXXDIR)/XcodeMLtoCXX
 CXXTESTCASES = $(wildcard *.cpp)
 CXXTESTOBJECTS = $(CXXTESTCASES:.cpp=.CXX)
 
@@ -28,7 +29,7 @@ $(XCODEMLTOCXX):
 .XcodeML.CXX: $(XCODEMLTOCXX)
 	$(XCODEMLTOCXX) $< > $@
 
-test: $(CTOXCODEML) $(XCODEMLTOCXX) $(CXXTESTOBJECTS)
+check: $(CTOXCODEML) $(XCODEMLTOCXX) $(CXXTESTOBJECTS)
 	for testobj in $(CXXTESTOBJECTS); do  \
 		$(CXX) $(CXXFLAGS) $$testobj; \
 	done

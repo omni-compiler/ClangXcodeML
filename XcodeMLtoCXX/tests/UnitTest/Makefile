@@ -1,11 +1,14 @@
 .SUFFIXES: .cpp
 .PHONY: check
 
+XCODEMLTOCXXDIR = ../..
+XCODEMLTOCXXSRCDIR = $(XCODEMLTOCXXDIR)/src
+
 LLVM_CONFIG = /usr/local/bin/llvm-config
 CXX = /usr/local/bin/clang++
 CXXFLAGS = -O2 -std=c++11 \
 	`pkg-config --cflags libxml-2.0` \
-	-I../src \
+	-I$(XCODEMLTOCXXSRCDIR) \
 	-D__STDC_LIMIT_MACROS -D__STDC_CONSTANT_MACROS $(PCHFLAGS)
 
 USEDLIBS += -lpthread -ldl -ltinfo -lz
@@ -14,15 +17,17 @@ USEDLIBS += $(OTHERLIBS)
 
 TARGETS = $(patsubst %.cpp,%.out,$(wildcard *.cpp))
 
-OBJS = XcodeMlType.o \
+OBJNAMES = XcodeMlType.o \
 	LibXMLUtil.o \
 	CodeBuilder.o \
 	TypeAnalyzer.o \
 	XMLString.o \
 	XcodeMlEnvironment.o
 
+OBJS = $(addprefix $(XCODEMLTOCXXSRCDIR)/,$(OBJNAMES))
+
 %.out: %.cpp
-	$(CXX) $(CXXFLAGS) $(addprefix ../src/,$(OBJS)) $(USEDLIBS) -o$@ $^
+	$(CXX) $(CXXFLAGS) $(OBJS) $(USEDLIBS) -o$@ $^
 
 clean:
 	rm -f $(TARGETS)
