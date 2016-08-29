@@ -34,16 +34,20 @@ std::string TypeRefToString(TypeRef, const Environment& env);
  */
 class Type {
 public:
-  Type(DataTypeIdent);
+  Type(DataTypeIdent, bool = false, bool = false);
   virtual ~Type() = 0;
   friend TypeKind typeKind(TypeRef);
 protected:
   virtual TypeKind getKind() = 0;
 public:
   virtual std::string makeDeclaration(std::string, const Environment&) = 0;
+  bool isConst() const;
+  bool isVolatile() const;
   DataTypeIdent dataTypeIdent();
 private:
   DataTypeIdent ident;
+  bool constness;
+  bool volatility;
 };
 
 class Reserved : public Type {

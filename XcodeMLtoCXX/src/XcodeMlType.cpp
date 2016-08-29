@@ -14,11 +14,21 @@
 
 namespace XcodeMl {
 
-Type::Type(std::string id):
-  ident(id)
+Type::Type(std::string id, bool c, bool v):
+  ident(id),
+  constness(c),
+  volatility(v)
 {}
 
 Type::~Type() {}
+
+bool Type::isConst() const {
+  return constness;
+}
+
+bool Type::isVolatile() const {
+  return volatility;
+}
 
 DataTypeIdent Type::dataTypeIdent() {
   return ident;
