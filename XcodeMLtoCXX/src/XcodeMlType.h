@@ -41,6 +41,8 @@ public:
   virtual std::string makeDeclaration(std::string, const Environment&) = 0;
   bool isConst() const;
   bool isVolatile() const;
+  void setConst(bool);
+  void setVolatile(bool);
   DataTypeIdent dataTypeIdent();
 protected:
   Type(const Type&);

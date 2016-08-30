@@ -30,6 +30,14 @@ bool Type::isVolatile() const {
   return volatility;
 }
 
+void Type::setConst(bool c) {
+  constness = c;
+}
+
+void Type::setVolatile(bool v) {
+  volatility = v;
+}
+
 DataTypeIdent Type::dataTypeIdent() {
   return ident;
 }
