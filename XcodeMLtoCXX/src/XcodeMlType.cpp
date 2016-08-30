@@ -34,6 +34,12 @@ DataTypeIdent Type::dataTypeIdent() {
   return ident;
 }
 
+Type::Type(const Type& other):
+  ident(other.ident),
+  constness(other.constness),
+  volatility(other.volatility)
+{}
+
 Reserved::Reserved(DataTypeIdent ident, std::string dataType):
   Type(ident),
   name(dataType)
@@ -48,6 +54,16 @@ TypeKind Reserved::getKind() {
 }
 
 Reserved::~Reserved() = default;
+
+Type* Reserved::clone() const {
+  Reserved* copy = new Reserved(*this);
+  return copy;
+}
+
+Reserved::Reserved(const Reserved& other):
+  Type(other),
+  name(other.name)
+{}
 
 Pointer::Pointer(DataTypeIdent ident, TypeRef signified):
   Type(ident),
@@ -77,6 +93,16 @@ TypeKind Pointer::getKind() {
 }
 
 Pointer::~Pointer() = default;
+
+Type* Pointer::clone() const {
+  Pointer* copy = new Pointer(*this);
+  return copy;
+}
+
+Pointer::Pointer(const Pointer& other):
+  Type(other),
+  ref(other.ref)
+{}
 
 Function::Function(DataTypeIdent ident, TypeRef r, const std::vector<DataTypeIdent>& p):
   Type(ident),
@@ -127,6 +153,17 @@ TypeKind Function::getKind() {
 
 Function::~Function() = default;
 
+Type* Function::clone() const {
+  Function* copy = new Function(*this);
+  return copy;
+}
+
+Function::Function(const Function& other):
+  Type(other),
+  returnValue(other.returnValue),
+  params(other.params)
+{}
+
 Array::Array(DataTypeIdent ident, TypeRef elem, size_t s):
   Type(ident),
   element(elem->dataTypeIdent()),
@@ -147,6 +184,17 @@ TypeKind Array::getKind() {
 
 Array::~Array() = default;
 
+Type* Array::clone() const {
+  Array* copy = new Array(*this);
+  return copy;
+}
+
+Array::Array(const Array& other):
+  Type(other),
+  element(other.element),
+  size(other.size)
+{}
+
 Struct::Struct(DataTypeIdent ident, std::string n, std::string t, SymbolMap &&f)
   : Type(ident), name(n), tag(t), fields(f) {
   std::cerr << "Struct::Struct(" << n << ")" << std::endl;
@@ -160,6 +208,18 @@ std::string Struct::makeDeclaration(std::string var, const Environment&)
 }
 
 Struct::~Struct() = default;
+
+Type* Struct::clone() const {
+  Struct* copy = new Struct(*this);
+  return copy;
+}
+
+Struct::Struct(const Struct& other):
+  Type(other),
+  name(other.name),
+  tag(other.tag),
+  fields(other.fields)
+{}
 
 TypeKind Struct::getKind() {
   return TypeKind::Struct;

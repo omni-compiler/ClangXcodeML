@@ -36,14 +36,15 @@ class Type {
 public:
   Type(DataTypeIdent, bool = false, bool = false);
   virtual ~Type() = 0;
+  virtual Type* clone() const = 0;
   friend TypeKind typeKind(TypeRef);
-protected:
-  virtual TypeKind getKind() = 0;
-public:
   virtual std::string makeDeclaration(std::string, const Environment&) = 0;
   bool isConst() const;
   bool isVolatile() const;
   DataTypeIdent dataTypeIdent();
+protected:
+  Type(const Type&);
+  virtual TypeKind getKind() = 0;
 private:
   DataTypeIdent ident;
   bool constness;
@@ -55,6 +56,9 @@ public:
   Reserved(DataTypeIdent, std::string);
   std::string makeDeclaration(std::string, const Environment&) override;
   ~Reserved() override;
+  Type* clone() const override;
+protected:
+  Reserved(const Reserved&);
 private:
   TypeKind getKind() override;
   std::string name;
@@ -66,6 +70,9 @@ public:
   Pointer(DataTypeIdent, DataTypeIdent);
   std::string makeDeclaration(std::string, const Environment&) override;
   ~Pointer() override;
+  Type* clone() const override;
+protected:
+  Pointer(const Pointer&);
 private:
   TypeKind getKind() override;
   DataTypeIdent ref;
@@ -78,6 +85,9 @@ public:
   Function(DataTypeIdent, TypeRef, const Params&);
   std::string makeDeclaration(std::string, const Environment&) override;
   ~Function() override;
+  Type* clone() const override;
+protected:
+  Function(const Function&);
 private:
   TypeKind getKind() override;
   DataTypeIdent returnValue;
@@ -89,6 +99,9 @@ public:
   Array(DataTypeIdent, TypeRef, size_t);
   std::string makeDeclaration(std::string, const Environment&) override;
   ~Array() override;
+  Type* clone() const override;
+protected:
+  Array(const Array&);
 private:
   TypeKind getKind() override;
   DataTypeIdent element;
@@ -100,6 +113,9 @@ public:
   Struct(DataTypeIdent, std::string, std::string, SymbolMap &&);
   std::string makeDeclaration(std::string, const Environment&) override;
   ~Struct() override;
+  Type* clone() const override;
+protected:
+  Struct(const Struct&);
 private:
   std::string name;
   std::string tag;
