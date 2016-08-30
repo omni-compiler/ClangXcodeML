@@ -99,7 +99,7 @@ std::string Pointer::makeDeclaration(std::string var, const Environment& env) {
     case TypeKind::Function:
       return makeDecl(refType, "(*" + var + ")", env);
     default:
-      return makeDecl(refType, "*" + var, env);
+      return makeDecl(refType, "* " + var, env);
   }
 }
 
