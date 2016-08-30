@@ -5,10 +5,10 @@ all:
 	mv src/XcodeMLtoCXX .
 
 check:
-	$(MAKE) -C testcases
+	$(MAKE) -C tests
 
 clean :
 	rm XcodeMLtoCXX
 	for dir in $(cleandirs); do $(MAKE) clean -C $$dir; done
 
-cleandirs = src testcases
+cleandirs = src tests
