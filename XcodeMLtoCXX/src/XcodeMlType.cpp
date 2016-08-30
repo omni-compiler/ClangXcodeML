@@ -12,6 +12,13 @@
 
 #include <iostream>
 
+std::string cv_qualify(const XcodeMl::TypeRef& type, const std::string var) {
+  return
+      static_cast<std::string>(type->isConst() ? "const ":"") +
+      static_cast<std::string>(type->isVolatile() ? "volatile ":"") +
+      var;
+}
+
 namespace XcodeMl {
 
 Type::Type(std::string id, bool c, bool v):
@@ -242,7 +249,7 @@ TypeKind typeKind(TypeRef type) {
 
 std::string makeDecl(TypeRef type, std::string var, const Environment& env) {
   if (type) {
-    return type->makeDeclaration(var, env);
+    return type->makeDeclaration(cv_qualify(type, var), env);
   } else {
     return "UNKNOWN_TYPE";
   }
