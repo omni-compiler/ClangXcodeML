@@ -125,7 +125,7 @@ private:
   TypeKind getKind() override;
 };
 
-TypeRef makeReservedType(DataTypeIdent, std::string);
+TypeRef makeReservedType(DataTypeIdent, std::string, bool = false, bool = false);
 TypeRef makePointerType(DataTypeIdent, TypeRef);
 TypeRef makePointerType(DataTypeIdent, DataTypeIdent);
 TypeRef makeFunctionType(DataTypeIdent, TypeRef, const Function::Params&);

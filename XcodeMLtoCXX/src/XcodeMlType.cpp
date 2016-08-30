@@ -248,11 +248,14 @@ std::string makeDecl(TypeRef type, std::string var, const Environment& env) {
   }
 }
 
-TypeRef makeReservedType(DataTypeIdent ident, std::string name) {
-  return std::make_shared<Reserved>(
+TypeRef makeReservedType(DataTypeIdent ident, std::string name, bool c, bool v) {
+  auto type = std::make_shared<Reserved>(
       ident,
       name
   );
+  type->setConst(c);
+  type->setVolatile(v);
+  return type;
 }
 
 TypeRef makePointerType(DataTypeIdent ident, TypeRef ref) {
