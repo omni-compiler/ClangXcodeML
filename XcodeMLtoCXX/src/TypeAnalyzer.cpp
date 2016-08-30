@@ -33,9 +33,13 @@ using TypeAnalyzer = XMLWalker<xmlXPathContextPtr, XcodeMl::Environment&>;
 
 DEFINE_TA(basicTypeProc) {
   XMLString signified = xmlGetProp(node, BAD_CAST "name");
-  auto signifiedType = map[signified];
   XMLString signifier(xmlGetProp(node, BAD_CAST "type"));
-  map[signifier] = signifiedType;
+  map[signifier] = XcodeMl::makeReservedType(
+      signifier,
+      signified,
+      isTrueProp(node, "is_const", false),
+      isTrueProp(node, "is_volatile", false)
+  );
 }
 
 DEFINE_TA(pointerTypeProc) {
