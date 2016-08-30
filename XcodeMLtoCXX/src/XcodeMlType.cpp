@@ -12,17 +12,48 @@
 
 #include <iostream>
 
+std::string cv_qualify(const XcodeMl::TypeRef& type, const std::string var) {
+  return
+      static_cast<std::string>(type->isConst() ? "const ":"") +
+      static_cast<std::string>(type->isVolatile() ? "volatile ":"") +
+      var;
+}
+
 namespace XcodeMl {
 
-Type::Type(std::string id):
-  ident(id)
+Type::Type(std::string id, bool c, bool v):
+  ident(id),
+  constness(c),
+  volatility(v)
 {}
 
 Type::~Type() {}
 
+bool Type::isConst() const {
+  return constness;
+}
+
+bool Type::isVolatile() const {
+  return volatility;
+}
+
+void Type::setConst(bool c) {
+  constness = c;
+}
+
+void Type::setVolatile(bool v) {
+  volatility = v;
+}
+
 DataTypeIdent Type::dataTypeIdent() {
   return ident;
 }
+
+Type::Type(const Type& other):
+  ident(other.ident),
+  constness(other.constness),
+  volatility(other.volatility)
+{}
 
 Reserved::Reserved(DataTypeIdent ident, std::string dataType):
   Type(ident),
@@ -38,6 +69,16 @@ TypeKind Reserved::getKind() {
 }
 
 Reserved::~Reserved() = default;
+
+Type* Reserved::clone() const {
+  Reserved* copy = new Reserved(*this);
+  return copy;
+}
+
+Reserved::Reserved(const Reserved& other):
+  Type(other),
+  name(other.name)
+{}
 
 Pointer::Pointer(DataTypeIdent ident, TypeRef signified):
   Type(ident),
@@ -58,7 +99,7 @@ std::string Pointer::makeDeclaration(std::string var, const Environment& env) {
     case TypeKind::Function:
       return makeDecl(refType, "(*" + var + ")", env);
     default:
-      return makeDecl(refType, "*" + var, env);
+      return makeDecl(refType, "* " + var, env);
   }
 }
 
@@ -67,6 +108,16 @@ TypeKind Pointer::getKind() {
 }
 
 Pointer::~Pointer() = default;
+
+Type* Pointer::clone() const {
+  Pointer* copy = new Pointer(*this);
+  return copy;
+}
+
+Pointer::Pointer(const Pointer& other):
+  Type(other),
+  ref(other.ref)
+{}
 
 Function::Function(DataTypeIdent ident, TypeRef r, const std::vector<DataTypeIdent>& p):
   Type(ident),
@@ -117,6 +168,17 @@ TypeKind Function::getKind() {
 
 Function::~Function() = default;
 
+Type* Function::clone() const {
+  Function* copy = new Function(*this);
+  return copy;
+}
+
+Function::Function(const Function& other):
+  Type(other),
+  returnValue(other.returnValue),
+  params(other.params)
+{}
+
 Array::Array(DataTypeIdent ident, TypeRef elem, size_t s):
   Type(ident),
   element(elem->dataTypeIdent()),
@@ -137,6 +199,17 @@ TypeKind Array::getKind() {
 
 Array::~Array() = default;
 
+Type* Array::clone() const {
+  Array* copy = new Array(*this);
+  return copy;
+}
+
+Array::Array(const Array& other):
+  Type(other),
+  element(other.element),
+  size(other.size)
+{}
+
 Struct::Struct(DataTypeIdent ident, std::string n, std::string t, SymbolMap &&f)
   : Type(ident), name(n), tag(t), fields(f) {
   std::cerr << "Struct::Struct(" << n << ")" << std::endl;
@@ -151,6 +224,18 @@ std::string Struct::makeDeclaration(std::string var, const Environment&)
 
 Struct::~Struct() = default;
 
+Type* Struct::clone() const {
+  Struct* copy = new Struct(*this);
+  return copy;
+}
+
+Struct::Struct(const Struct& other):
+  Type(other),
+  name(other.name),
+  tag(other.tag),
+  fields(other.fields)
+{}
+
 TypeKind Struct::getKind() {
   return TypeKind::Struct;
 }
@@ -164,17 +249,20 @@ TypeKind typeKind(TypeRef type) {
 
 std::string makeDecl(TypeRef type, std::string var, const Environment& env) {
   if (type) {
-    return type->makeDeclaration(var, env);
+    return type->makeDeclaration(cv_qualify(type, var), env);
   } else {
     return "UNKNOWN_TYPE";
   }
 }
 
-TypeRef makeReservedType(DataTypeIdent ident, std::string name) {
-  return std::make_shared<Reserved>(
+TypeRef makeReservedType(DataTypeIdent ident, std::string name, bool c, bool v) {
+  auto type = std::make_shared<Reserved>(
       ident,
       name
   );
+  type->setConst(c);
+  type->setVolatile(v);
+  return type;
 }
 
 TypeRef makePointerType(DataTypeIdent ident, TypeRef ref) {
