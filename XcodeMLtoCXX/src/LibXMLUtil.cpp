@@ -1,9 +1,13 @@
 #include <cassert>
+#include <string>
+#include <sstream>
+#include <stdexcept>
 #include <libxml/tree.h>
 #include <libxml/parser.h>
 #include <libxml/xpath.h>
 #include <libxml/xpathInternals.h>
 #include "LibXMLUtil.h"
+#include "XMLString.h"
 
 /*!
  * \brief Search for an element that matches given XPath expression.
@@ -38,4 +42,17 @@ size_t length(xmlXPathObjectPtr obj) {
 
 xmlNodePtr nth(xmlXPathObjectPtr obj, size_t n) {
   return obj->nodesetval->nodeTab[n];
+}
+
+bool isTrueProp(xmlNodePtr node, const char* name, bool default_value) {
+  if (!xmlHasProp(node, BAD_CAST name)) {
+    return default_value;
+  }
+  std::string value = static_cast<XMLString>(xmlGetProp(node, BAD_CAST name));
+  if (value == "1" || value == "true") {
+    return true;
+  } else if (value == "0" || value == "false") {
+    return false;
+  }
+  throw std::runtime_error("Invalid attribute value");
 }
