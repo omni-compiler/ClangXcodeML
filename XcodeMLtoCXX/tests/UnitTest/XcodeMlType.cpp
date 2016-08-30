@@ -2,6 +2,7 @@
 #include <boost/test/included/unit_test.hpp>
 #include <memory>
 #include <string>
+#include <vector>
 #include <libxml/tree.h>
 #include "SymbolAnalyzer.h"
 #include "XcodeMlType.h"
@@ -56,6 +57,58 @@ BOOST_AUTO_TEST_CASE(makeXXXType_attr_test) {
   BOOST_CHECK_EQUAL(pointer2->dataTypeIdent(), "p2");
   BOOST_CHECK_EQUAL(function->dataTypeIdent(), "f1");
   BOOST_CHECK_EQUAL(structure->dataTypeIdent(), "s1");
+}
+
+BOOST_AUTO_TEST_CASE(cv_qualification_test) {
+  BOOST_TEST_CHECKPOINT("makeXXXType(...) returns cv-unqualified type");
+  auto rsv1 = XcodeMl::makeReservedType("rsv1", "int");
+  std::vector<XcodeMl::TypeRef> types = {
+    rsv1,
+    XcodeMl::makeReservedType("rsv2", "rsv1"),
+    XcodeMl::makePointerType("ptr1", "rsv2"),
+    XcodeMl::makePointerType("ptr1", rsv1),
+    XcodeMl::makeFunctionType("fun1", rsv1, {}),
+    XcodeMl::makeArrayType("arr1", rsv1, 10),
+    XcodeMl::makeStructType("str1", "name", "tag", {})
+  };
+  for (auto type : types) {
+    BOOST_TEST_MESSAGE("Checking cv-qualification of " + type->dataTypeIdent());
+    BOOST_CHECK( !(type->isConst()) );
+    BOOST_CHECK( !(type->isVolatile()) );
+  }
+
+  BOOST_TEST_CHECKPOINT("Type::setConst() changes constness");
+  for (auto type : types) {
+    BOOST_TEST_MESSAGE("Checking setConst() of " + type->dataTypeIdent());
+    type->setConst(true);
+    BOOST_CHECK(type->isConst());
+    type->setConst(false);
+    BOOST_CHECK( !(type->isConst()) );
+  }
+
+  BOOST_TEST_CHECKPOINT("Type::setVolatile() changes volatility");
+  for (auto type : types) {
+    BOOST_TEST_MESSAGE("Checking setVolatile() of " + type->dataTypeIdent());
+    type->setVolatile(true);
+    BOOST_CHECK(type->isVolatile());
+    type->setVolatile(false);
+    BOOST_CHECK( !(type->isVolatile()) );
+  }
+
+  BOOST_TEST_CHECKPOINT("makeReservedType(..., true, true) returns cv-qualified type");
+  using XcodeMl::makeReservedType;
+
+  const auto c = makeReservedType("c", "int", true, false);
+  BOOST_CHECK(c->isConst());
+  BOOST_CHECK( !(c->isVolatile()) );
+
+  const auto v = makeReservedType("v", "int", false, true);
+  BOOST_CHECK( !(v->isConst()) );
+  BOOST_CHECK(v->isVolatile());
+
+  const auto cv = makeReservedType("v", "int", true, true);
+  BOOST_CHECK(cv->isConst());
+  BOOST_CHECK(cv->isVolatile());
 }
 
 BOOST_AUTO_TEST_SUITE_END()
