@@ -106,7 +106,7 @@ public:
             return true; /* avoid traverse children */                  \
         }                                                               \
         bool ret = getDerived().TraverseChildOf##NAME(S);               \
-        ret &= !getDerived().PostVisit##NAME(S);                        \
+        ret &= getDerived().PostVisit##NAME(S);                         \
         return ret;                                                     \
     }                                                                   \
     bool TraverseChildOf##NAME(TYPE S) {                                \
@@ -121,7 +121,7 @@ public:
         if (SourceLocFor##NAME(S, SL)) {                                \
             setLocation(SL);                                            \
         }                                                               \
-        return Visit##NAME(S);                                          \
+        return getDerived().Visit##NAME(S);                             \
     }                                                                   \
     bool Visit##NAME(TYPE S) {                                          \
         (void)S;                                                        \
