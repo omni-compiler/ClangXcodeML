@@ -98,6 +98,21 @@ private:
 
 class Array : public Type {
 public:
+  struct Size {
+    enum class Kind {
+      Integer,
+      Variable,
+      /* Expression, // FIXME: Unimplemented */
+    };
+    Kind kind;
+    size_t size;
+    static Size makeIntegerSize(size_t);
+    static Size makeVariableSize();
+  private:
+    Size(Kind, size_t);
+  };
+
+public:
   Array(DataTypeIdent, TypeRef, size_t);
   std::string makeDeclaration(std::string, const Environment&) override;
   ~Array() override;
@@ -107,7 +122,7 @@ protected:
 private:
   TypeKind getKind() override;
   DataTypeIdent element;
-  std::shared_ptr<size_t> size;
+  Size size;
 };
 
 class Struct : public Type {

@@ -182,7 +182,7 @@ Function::Function(const Function& other):
 Array::Array(DataTypeIdent ident, TypeRef elem, size_t s):
   Type(ident),
   element(elem->dataTypeIdent()),
-  size(std::make_shared<size_t>(s))
+  size(Size::makeIntegerSize(s))
 {}
 
 std::string Array::makeDeclaration(std::string var, const Environment& env) {
@@ -209,6 +209,19 @@ Array::Array(const Array& other):
   element(other.element),
   size(other.size)
 {}
+
+Array::Size::Size(Kind k, size_t s):
+  kind(k),
+  size(s)
+{}
+
+Array::Size Array::Size::makeIntegerSize(size_t s) {
+  return Size(Kind::Integer, s);
+}
+
+Array::Size Array::Size::makeVariableSize() {
+  return Size(Kind::Variable, 0);
+}
 
 Struct::Struct(DataTypeIdent ident, std::string n, std::string t, SymbolMap &&f)
   : Type(ident), name(n), tag(t), fields(f) {
