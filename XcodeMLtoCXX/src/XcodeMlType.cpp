@@ -13,6 +13,9 @@
 #include <iostream>
 
 std::string cv_qualify(const XcodeMl::TypeRef& type, const std::string var) {
+  if (typeKind(type) == XcodeMl::TypeKind::Array) {
+    return var;
+  }
   return
       static_cast<std::string>(type->isConst() ? "const ":"") +
       static_cast<std::string>(type->isVolatile() ? "volatile ":"") +
@@ -190,7 +193,15 @@ std::string Array::makeDeclaration(std::string var, const Environment& env) {
   if (!elementType) {
     return "INCOMPLETE_TYPE *" + var;
   }
-  return makeDecl(elementType, var + "[]", env);
+  const std::string size_expression =
+    size.kind == Size::Kind::Integer ? std::to_string(size.size):"*";
+  const std::string declarator =
+    static_cast<std::string>("[") +
+    static_cast<std::string>(isConst() ? "const ":"") +
+    static_cast<std::string>(isVolatile() ? "volatile ":"") +
+    size_expression +
+    static_cast<std::string>("]");
+  return makeDecl(elementType, var + declarator, env);
 }
 
 TypeKind Array::getKind() {
