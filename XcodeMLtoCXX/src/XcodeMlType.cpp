@@ -200,6 +200,12 @@ Array::Array(DataTypeIdent ident, TypeRef elem, size_t s):
   size(Size::makeIntegerSize(s))
 {}
 
+Array::Array(DataTypeIdent ident, TypeRef elem, Array::Size s):
+  Type(ident),
+  element(elem->dataTypeIdent()),
+  size(s)
+{}
+
 std::string Array::makeDeclaration(std::string var, const Environment& env) {
   auto elementType(env[element]);
   if (!elementType) {
@@ -338,6 +344,18 @@ TypeRef makeArrayType(
     DataTypeIdent ident,
     TypeRef elemType,
     size_t size
+) {
+  return std::make_shared<Array>(
+      ident,
+      elemType,
+      size
+  );
+}
+
+TypeRef makeArrayType(
+    DataTypeIdent ident,
+    TypeRef elemType,
+    Array::Size size
 ) {
   return std::make_shared<Array>(
       ident,
