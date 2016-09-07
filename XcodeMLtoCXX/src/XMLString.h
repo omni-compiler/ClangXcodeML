@@ -9,13 +9,9 @@ public:
   XMLString(const xmlChar*);
   XMLString(const char*);
   const xmlChar* c_ptr() const;
-  operator std::string() {
-    std::stringstream ss;
-    ss << c_ptr();
-    return ss.str();
-  }
+  operator std::string() const;
 private:
-  const xmlChar* ptr;
+  std::string str;
 };
 
 XMLString operator+(const XMLString lhs, const XMLString rhs);
