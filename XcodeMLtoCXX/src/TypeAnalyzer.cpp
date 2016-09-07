@@ -75,7 +75,10 @@ DEFINE_TA(arrayTypeProc) {
   XMLString elemName = xmlGetProp(node, BAD_CAST "element_type");
   auto elemType = map[elemName];
   XMLString name(xmlGetProp(node, BAD_CAST "type"));
-  map[name] = XcodeMl::makeArrayType(name, elemType, 0);
+  auto array = XcodeMl::makeArrayType(name, elemType, 0);
+  array->setConst(isTrueProp(node, "is_const", false));
+  array->setVolatile(isTrueProp(node, "is_volatile", false));
+  map[name] = array;
 }
 
 DEFINE_TA(structTypeProc) {
