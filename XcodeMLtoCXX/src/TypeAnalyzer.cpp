@@ -72,10 +72,23 @@ DEFINE_TA(functionTypeProc) {
 }
 
 DEFINE_TA(arrayTypeProc) {
+  using XcodeMl::Array;
+
   XMLString elemName = xmlGetProp(node, BAD_CAST "element_type");
   auto elemType = map[elemName];
   XMLString name(xmlGetProp(node, BAD_CAST "type"));
-  auto array = XcodeMl::makeArrayType(name, elemType, 0);
+
+  const Array::Size size = [node]() {
+    if (!xmlHasProp(node, BAD_CAST "array_size")) {
+      return Array::Size::makeVariableSize();
+    }
+    const XMLString size_prop = xmlGetProp(node, BAD_CAST "array_size");
+    return size_prop == "*" ?
+      Array::Size::makeVariableSize() :
+      Array::Size::makeIntegerSize(std::stoi(size_prop));
+  }();
+
+  auto array = XcodeMl::makeArrayType(name, elemType, size);
   array->setConst(isTrueProp(node, "is_const", false));
   array->setVolatile(isTrueProp(node, "is_volatile", false));
   map[name] = array;
