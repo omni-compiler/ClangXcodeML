@@ -12,14 +12,18 @@
 
 #include <iostream>
 
-std::string cv_qualify(const XcodeMl::TypeRef& type, const std::string var) {
-  if (typeKind(type) == XcodeMl::TypeKind::Array) {
-    return var;
+std::string cv_qualify(
+    const XcodeMl::TypeRef& type,
+    const std::string& var
+) {
+  std::string str(var);
+  if (type->isConst()) {
+    str = type->addConstQualifier(str);
   }
-  return
-      static_cast<std::string>(type->isConst() ? "const ":"") +
-      static_cast<std::string>(type->isVolatile() ? "volatile ":"") +
-      var;
+  if (type->isVolatile()) {
+    str = type->addVolatileQualifier(str);
+  }
+  return str;
 }
 
 namespace XcodeMl {
@@ -31,6 +35,14 @@ Type::Type(std::string id, bool c, bool v):
 {}
 
 Type::~Type() {}
+
+std::string Type::addConstQualifier(std::string var) const {
+  return static_cast<std::string>("const ") + var;
+}
+
+std::string Type::addVolatileQualifier(std::string var) const {
+  return static_cast<std::string>("volatile ") + var;
+}
 
 bool Type::isConst() const {
   return constness;
@@ -220,6 +232,16 @@ Array::Array(const Array& other):
   element(other.element),
   size(other.size)
 {}
+
+std::string Array::addConstQualifier(std::string var) const {
+  // add cv-qualifiers in Array::makeDeclaration, not here
+  return var;
+}
+
+std::string Array::addVolatileQualifier(std::string var) const {
+  // add cv-qualifiers in Array::makeDeclaration, not here
+  return var;
+}
 
 Array::Size::Size(Kind k, size_t s):
   kind(k),

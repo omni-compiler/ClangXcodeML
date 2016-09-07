@@ -39,6 +39,8 @@ public:
   virtual Type* clone() const = 0;
   friend TypeKind typeKind(TypeRef);
   virtual std::string makeDeclaration(std::string, const Environment&) = 0;
+  virtual std::string addConstQualifier(std::string) const;
+  virtual std::string addVolatileQualifier(std::string) const;
   bool isConst() const;
   bool isVolatile() const;
   void setConst(bool);
@@ -117,6 +119,8 @@ public:
   std::string makeDeclaration(std::string, const Environment&) override;
   ~Array() override;
   Type* clone() const override;
+  std::string addConstQualifier(std::string) const override;
+  std::string addVolatileQualifier(std::string) const override;
 protected:
   Array(const Array&);
 private:
