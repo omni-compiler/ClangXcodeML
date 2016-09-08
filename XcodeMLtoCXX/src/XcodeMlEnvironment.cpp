@@ -25,6 +25,14 @@ namespace XcodeMl {
     return map[dataTypeIdent];
   }
 
+  const TypeRef& Environment::at(const std::string& dataTypeIdent) const {
+    return map.at(dataTypeIdent);
+  }
+
+  TypeRef& Environment::at(const std::string& dataTypeIdent) {
+    return map.at(dataTypeIdent);
+  }
+
   const TypeRef& Environment::getReturnType(
     const std::string& dataTypeIdent
   ) const {
