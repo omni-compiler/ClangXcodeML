@@ -94,6 +94,8 @@ SymbolMap parseGlobalSymbols(xmlDocPtr doc) {
  */
 #define DEFINE_CB(name) void name(CB_ARGS)
 
+DEFINE_CB(NullProc) {}
+
 DEFINE_CB(EmptyProc) {
   w.walkChildren(node, src, ss);
 }
@@ -403,6 +405,7 @@ DEFINE_CB(varDeclProc) {
 }
 
 const CodeBuilder CXXBuilder({
+  { "typeTable", NullProc },
   { "functionDefinition", functionDefinitionProc },
   { "intConstant", EmptySNCProc },
   { "moeConstant", EmptySNCProc },
