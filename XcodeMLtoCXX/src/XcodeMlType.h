@@ -59,6 +59,7 @@ public:
   std::string makeDeclaration(std::string, const Environment&) override;
   ~Reserved() override;
   Type* clone() const override;
+  static bool classof(const Type *);
 protected:
   Reserved(const Reserved&);
 private:
@@ -72,6 +73,7 @@ public:
   std::string makeDeclaration(std::string, const Environment&) override;
   ~Pointer() override;
   Type* clone() const override;
+  static bool classof(const Type *);
 protected:
   Pointer(const Pointer&);
 private:
@@ -86,6 +88,7 @@ public:
   std::string makeDeclaration(std::string, const Environment&) override;
   ~Function() override;
   Type* clone() const override;
+  static bool classof(const Type *);
 protected:
   Function(const Function&);
 private:
@@ -99,6 +102,7 @@ public:
   std::string makeDeclaration(std::string, const Environment&) override;
   ~Array() override;
   Type* clone() const override;
+  static bool classof(const Type *);
 protected:
   Array(const Array&);
 private:
@@ -112,6 +116,7 @@ public:
   std::string makeDeclaration(std::string, const Environment&) override;
   ~Struct() override;
   Type* clone() const override;
+  static bool classof(const Type *);
 protected:
   Struct(const Struct&);
 private:

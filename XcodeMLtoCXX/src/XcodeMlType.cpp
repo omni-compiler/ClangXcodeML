@@ -9,6 +9,7 @@
 #include "XcodeMlType.h"
 #include "XcodeMlEnvironment.h"
 #include "TypeAnalyzer.h"
+#include "llvm/Support/Casting.h"
 
 #include <iostream>
 
@@ -82,6 +83,10 @@ Reserved::Reserved(const Reserved& other):
   name(other.name)
 {}
 
+bool Reserved::classof(const Type* T) {
+  return T->getKind() == TypeKind::Reserved;
+}
+
 Pointer::Pointer(DataTypeIdent ident, TypeRef signified):
   Type(TypeKind::Pointer, ident),
   ref(signified->dataTypeIdent())
@@ -110,6 +115,10 @@ Pointer::~Pointer() = default;
 Type* Pointer::clone() const {
   Pointer* copy = new Pointer(*this);
   return copy;
+}
+
+bool Pointer::classof(const Type* T) {
+  return T->getKind() == TypeKind::Pointer;
 }
 
 Pointer::Pointer(const Pointer& other):
@@ -167,6 +176,10 @@ Type* Function::clone() const {
   return copy;
 }
 
+bool Function::classof(const Type* T) {
+  return T->getKind() == TypeKind::Function;
+}
+
 Function::Function(const Function& other):
   Type(other),
   returnValue(other.returnValue),
@@ -194,6 +207,10 @@ Type* Array::clone() const {
   return copy;
 }
 
+bool Array::classof(const Type* T) {
+  return T->getKind() == TypeKind::Array;
+}
+
 Array::Array(const Array& other):
   Type(other),
   element(other.element),
@@ -217,6 +234,10 @@ Struct::~Struct() = default;
 Type* Struct::clone() const {
   Struct* copy = new Struct(*this);
   return copy;
+}
+
+bool Struct::classof(const Type* T) {
+  return T->getKind() == TypeKind::Struct;
 }
 
 Struct::Struct(const Struct& other):
