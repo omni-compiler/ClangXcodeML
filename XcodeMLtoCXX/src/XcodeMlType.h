@@ -34,20 +34,20 @@ std::string TypeRefToString(TypeRef, const Environment& env);
  */
 class Type {
 public:
-  Type(DataTypeIdent, bool = false, bool = false);
+  Type(TypeKind, DataTypeIdent, bool = false, bool = false);
   virtual ~Type() = 0;
   virtual Type* clone() const = 0;
-  friend TypeKind typeKind(TypeRef);
   virtual std::string makeDeclaration(std::string, const Environment&) = 0;
   bool isConst() const;
   bool isVolatile() const;
   void setConst(bool);
   void setVolatile(bool);
   DataTypeIdent dataTypeIdent();
+  TypeKind getKind() const;
 protected:
   Type(const Type&);
-  virtual TypeKind getKind() = 0;
 private:
+  TypeKind kind;
   DataTypeIdent ident;
   bool constness;
   bool volatility;
@@ -59,10 +59,10 @@ public:
   std::string makeDeclaration(std::string, const Environment&) override;
   ~Reserved() override;
   Type* clone() const override;
+  static bool classof(const Type *);
 protected:
   Reserved(const Reserved&);
 private:
-  TypeKind getKind() override;
   std::string name;
 };
 
@@ -73,10 +73,10 @@ public:
   std::string makeDeclaration(std::string, const Environment&) override;
   ~Pointer() override;
   Type* clone() const override;
+  static bool classof(const Type *);
 protected:
   Pointer(const Pointer&);
 private:
-  TypeKind getKind() override;
   DataTypeIdent ref;
 };
 
@@ -88,10 +88,10 @@ public:
   std::string makeDeclaration(std::string, const Environment&) override;
   ~Function() override;
   Type* clone() const override;
+  static bool classof(const Type *);
 protected:
   Function(const Function&);
 private:
-  TypeKind getKind() override;
   DataTypeIdent returnValue;
   Params params;
 };
@@ -102,10 +102,10 @@ public:
   std::string makeDeclaration(std::string, const Environment&) override;
   ~Array() override;
   Type* clone() const override;
+  static bool classof(const Type *);
 protected:
   Array(const Array&);
 private:
-  TypeKind getKind() override;
   DataTypeIdent element;
   std::shared_ptr<size_t> size;
 };
@@ -116,13 +116,13 @@ public:
   std::string makeDeclaration(std::string, const Environment&) override;
   ~Struct() override;
   Type* clone() const override;
+  static bool classof(const Type *);
 protected:
   Struct(const Struct&);
 private:
   std::string name;
   std::string tag;
   SymbolMap fields;
-  TypeKind getKind() override;
 };
 
 TypeRef makeReservedType(DataTypeIdent, std::string, bool = false, bool = false);
