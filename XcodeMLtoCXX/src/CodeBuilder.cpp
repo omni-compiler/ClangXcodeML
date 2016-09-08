@@ -22,14 +22,12 @@ using CodeBuilder = XMLWalker<SourceInfo&, std::stringstream&>;
  * \pre \c node is <globalSymbols> or <symbols> element.
  */
 SymbolEntry parseSymbols(xmlNodePtr node, xmlXPathContextPtr ctxt) {
-  xmlXPathObjectPtr xpathObj = xmlXPathNodeEval(node, BAD_CAST "id", ctxt);
-  if (xpathObj == nullptr) {
+  if (!node) {
     return SymbolEntry();
   }
-  const size_t len = (xpathObj->nodesetval)? xpathObj->nodesetval->nodeNr:0;
   SymbolEntry entry;
-  for (size_t i = 0; i < len; ++i) {
-    xmlNodePtr idElem = xpathObj->nodesetval->nodeTab[i];
+  auto idElems = findNodes(node, "id", ctxt);
+  for (auto idElem : idElems) {
     xmlNodePtr nameElem = findFirst(idElem, "name", ctxt);
     XMLString type(xmlGetProp(idElem, BAD_CAST "type"));
     XMLString name(xmlNodeGetContent(nameElem));
