@@ -713,14 +713,13 @@ TypeTableVisitor::PreVisitDecl(Decl *D) {
           }
           xmlAddChild(tmpNode, basesNode);
         }
-        std::string class_name(RD->getName());
-        if (isNested(*RD)) {
+        if (RD && isNested(*RD)) {
           /* neither enblaced classes nor enblacing classes are normalizable */
           RecordDecl* enclosure(D->getDeclContext()->getOuterLexicalRecordContext());
           QualType enclosureType(enclosure->getTypeForDecl(), 0);
           typetableinfo->setNormalizability(enclosureType, false);
           typetableinfo->setNormalizability(T, false);
-        } else if (RD->isLocalClass() || class_name.empty()) {
+        } else if (RD && (RD->isLocalClass() || RD->getName().empty())) {
           typetableinfo->setNormalizability(T, false);
         } else {
           typetableinfo->setNormalizability(T, true);

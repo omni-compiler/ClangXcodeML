@@ -9,6 +9,7 @@
 #include "XcodeMlEnvironment.h"
 #include "TypeAnalyzer.h"
 #include "XcodeMlType.h"
+#include "llvm/Support/Casting.h"
 
 BOOST_AUTO_TEST_SUITE(xcodeml_type)
 
@@ -43,6 +44,9 @@ BOOST_AUTO_TEST_CASE(makeXXXType_attr_test) {
   const auto pointer2 = XcodeMl::makePointerType("p2", "ident1");
   BOOST_CHECK(typeKind(pointer2) == TypeKind::Pointer);
 
+  const auto array = XcodeMl::makeArrayType("a1", pointer2, 10);
+  BOOST_CHECK(typeKind(array) == TypeKind::Array);
+
   const auto function = XcodeMl::makeFunctionType("f1", reserved, {});
   BOOST_CHECK(typeKind(function) == TypeKind::Function);
 
@@ -55,6 +59,7 @@ BOOST_AUTO_TEST_CASE(makeXXXType_attr_test) {
   BOOST_CHECK_EQUAL(reserved->dataTypeIdent(), "ident1");
   BOOST_CHECK_EQUAL(pointer1->dataTypeIdent(), "p1");
   BOOST_CHECK_EQUAL(pointer2->dataTypeIdent(), "p2");
+  BOOST_CHECK_EQUAL(array->dataTypeIdent(), "a1");
   BOOST_CHECK_EQUAL(function->dataTypeIdent(), "f1");
   BOOST_CHECK_EQUAL(structure->dataTypeIdent(), "s1");
 }
@@ -109,6 +114,34 @@ BOOST_AUTO_TEST_CASE(cv_qualification_test) {
   const auto cv = makeReservedType("v", "int", true, true);
   BOOST_CHECK(cv->isConst());
   BOOST_CHECK(cv->isVolatile());
+}
+
+BOOST_AUTO_TEST_CASE(RTTI_test) {
+  using namespace XcodeMl;
+
+  const auto rsv = makeReservedType("int", "int");
+  const auto ptr = makePointerType("p2", "p1");
+  const auto fun = makeFunctionType("f1", rsv, {});
+  const auto arr = makeArrayType("a1", fun, 10);
+  const auto stt = makeStructType("s1", "name", "tag", {});
+
+  BOOST_TEST_CHECKPOINT("isa<T1>(makeT1Type(...)) is true");
+
+  using llvm::isa;
+  BOOST_CHECK(isa<Reserved>(rsv.get()));
+  BOOST_CHECK(isa<Pointer>(ptr.get()));
+  BOOST_CHECK(isa<Function>(fun.get()));
+  BOOST_CHECK(isa<Array>(arr.get()));
+  BOOST_CHECK(isa<Struct>(stt.get()));
+
+  BOOST_TEST_CHECKPOINT("cast<T1>(x) succeeds if x is T1");
+
+  using llvm::cast;
+  BOOST_CHECK(cast<Reserved>(rsv.get()));
+  BOOST_CHECK(cast<Pointer>(ptr.get()));
+  BOOST_CHECK(cast<Function>(fun.get()));
+  BOOST_CHECK(cast<Array>(arr.get()));
+  BOOST_CHECK(cast<Struct>(stt.get()));
 }
 
 BOOST_AUTO_TEST_SUITE_END()
