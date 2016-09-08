@@ -44,6 +44,9 @@ BOOST_AUTO_TEST_CASE(makeXXXType_attr_test) {
   const auto pointer2 = XcodeMl::makePointerType("p2", "ident1");
   BOOST_CHECK(typeKind(pointer2) == TypeKind::Pointer);
 
+  const auto array = XcodeMl::makeArrayType("a1", pointer2, 10);
+  BOOST_CHECK(typeKind(array) == TypeKind::Array);
+
   const auto function = XcodeMl::makeFunctionType("f1", reserved, {});
   BOOST_CHECK(typeKind(function) == TypeKind::Function);
 
@@ -56,6 +59,7 @@ BOOST_AUTO_TEST_CASE(makeXXXType_attr_test) {
   BOOST_CHECK_EQUAL(reserved->dataTypeIdent(), "ident1");
   BOOST_CHECK_EQUAL(pointer1->dataTypeIdent(), "p1");
   BOOST_CHECK_EQUAL(pointer2->dataTypeIdent(), "p2");
+  BOOST_CHECK_EQUAL(array->dataTypeIdent(), "a1");
   BOOST_CHECK_EQUAL(function->dataTypeIdent(), "f1");
   BOOST_CHECK_EQUAL(structure->dataTypeIdent(), "s1");
 }
