@@ -169,6 +169,7 @@ XcodeMl::Environment parseTypeTable(xmlDocPtr doc) {
     xmlNodePtr node = nth(xpathObj, i);
     XcodeMLTypeAnalyzer.walk(node, xpathCtx, map);
   }
+  xmlXPathFreeObject(xpathObj);
   return map;
 }
 
