@@ -9,6 +9,7 @@
 #include "XcodeMlEnvironment.h"
 #include "TypeAnalyzer.h"
 #include "XcodeMlType.h"
+#include "llvm/Support/Casting.h"
 
 BOOST_AUTO_TEST_SUITE(xcodeml_type)
 
@@ -109,6 +110,34 @@ BOOST_AUTO_TEST_CASE(cv_qualification_test) {
   const auto cv = makeReservedType("v", "int", true, true);
   BOOST_CHECK(cv->isConst());
   BOOST_CHECK(cv->isVolatile());
+}
+
+BOOST_AUTO_TEST_CASE(RTTI_test) {
+  using namespace XcodeMl;
+
+  const auto rsv = makeReservedType("int", "int");
+  const auto ptr = makePointerType("p2", "p1");
+  const auto fun = makeFunctionType("f1", rsv, {});
+  const auto arr = makeArrayType("a1", fun, 10);
+  const auto stt = makeStructType("s1", "name", "tag", {});
+
+  BOOST_TEST_CHECKPOINT("isa<T1>(makeT1Type(...)) is true");
+
+  using llvm::isa;
+  BOOST_CHECK(isa<Reserved>(rsv.get()));
+  BOOST_CHECK(isa<Pointer>(ptr.get()));
+  BOOST_CHECK(isa<Function>(fun.get()));
+  BOOST_CHECK(isa<Array>(arr.get()));
+  BOOST_CHECK(isa<Struct>(stt.get()));
+
+  BOOST_TEST_CHECKPOINT("cast<T1>(x) succeeds if x is T1");
+
+  using llvm::cast;
+  BOOST_CHECK(cast<Reserved>(rsv.get()));
+  BOOST_CHECK(cast<Pointer>(ptr.get()));
+  BOOST_CHECK(cast<Function>(fun.get()));
+  BOOST_CHECK(cast<Array>(arr.get()));
+  BOOST_CHECK(cast<Struct>(stt.get()));
 }
 
 BOOST_AUTO_TEST_SUITE_END()
