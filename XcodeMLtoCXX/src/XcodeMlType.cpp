@@ -277,7 +277,7 @@ Struct::Struct(DataTypeIdent ident, std::string n, std::string t, SymbolMap &&f)
 std::string Struct::makeDeclaration(std::string var, const Environment&)
 {
   std::stringstream ss;
-  ss << "struct " << name << " " << var;
+  ss << "struct " << tag << " " << var;
   return ss.str();
 }
 
