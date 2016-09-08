@@ -292,6 +292,11 @@ TypeKind Struct::getKind() {
   return TypeKind::Struct;
 }
 
+void Struct::setTagName(const std::string& tagname) {
+  assert(tag == "");
+  tag = tagname;
+}
+
 /*!
  * \brief Return the kind of \c type.
  */

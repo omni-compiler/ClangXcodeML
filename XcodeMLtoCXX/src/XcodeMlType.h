@@ -136,6 +136,7 @@ public:
   std::string makeDeclaration(std::string, const Environment&) override;
   ~Struct() override;
   Type* clone() const override;
+  void setTagName(const std::string&);
 protected:
   Struct(const Struct&);
 private:
