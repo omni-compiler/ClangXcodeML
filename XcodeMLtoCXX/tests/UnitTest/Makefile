@@ -33,6 +33,7 @@ clean:
 	rm -f $(TARGETS)
 
 check: $(TARGETS)
+	set -e; \
 	for testobj in $(TARGETS); do  \
 		./$$testobj; \
 	done

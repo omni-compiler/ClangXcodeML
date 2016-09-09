@@ -3,7 +3,13 @@
 TESTDIRS = UnitTest Compilability
 
 all:
-	for dir in $(TESTDIRS); do $(MAKE) -C $$dir check; done
+	set -e; \
+	for dir in $(TESTDIRS); do \
+		$(MAKE) -C $$dir check; \
+	done
 
 clean:
-	for dir in $(TESTDIRS); do $(MAKE) -C $$dir clean; done
+	set -e ; \
+	for dir in $(TESTDIRS); do \
+		$(MAKE) -C $$dir clean; \
+	done

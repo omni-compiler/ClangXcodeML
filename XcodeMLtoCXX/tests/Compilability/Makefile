@@ -30,6 +30,7 @@ $(XCODEMLTOCXX):
 	$(XCODEMLTOCXX) $< > $@
 
 check: $(CTOXCODEML) $(XCODEMLTOCXX) $(CXXTESTOBJECTS)
+	set -e; \
 	for testobj in $(CXXTESTOBJECTS); do  \
 		$(CXX) $(CXXFLAGS) $$testobj; \
 	done
