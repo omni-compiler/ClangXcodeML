@@ -6,6 +6,7 @@
 #include <vector>
 #include <libxml/tree.h>
 #include <libxml/xpath.h>
+#include "llvm/Support/Casting.h"
 #include "LibXMLUtil.h"
 #include "XMLString.h"
 #include "XMLWalker.h"
@@ -39,10 +40,32 @@ DEFINE_SB(typedefNameProc) {
      << ";" << std::endl;
 }
 
+static void emitStructDefinition(
+    const SourceInfo& src,
+    const XcodeMl::TypeRef type,
+    std::stringstream& ss
+) {
+  XcodeMl::Struct* structType = llvm::cast<XcodeMl::Struct>(type.get());
+  ss << "struct " << structType->tagName() << "{" << std::endl;
+  for (auto member : structType->members()) {
+    const auto memberType = src.typeTable.at(member.type());
+    ss << makeDecl(memberType, member.name(), src.typeTable)
+       << ";" << std::endl;
+  }
+  ss << "};" << std::endl;
+}
+
+DEFINE_SB(tagnameProc) {
+  const auto tagname = getName(node, src.ctxt);
+  const auto type = src.typeTable.at(static_cast<XMLString>( xmlGetProp(node, BAD_CAST "type") ));
+  emitStructDefinition(src, type, ss);
+}
+
 const SymbolsBuilder CXXSymbolsBuilder(
     "sclass",
     {
       { "typedef_name", typedefNameProc },
+      { "tagname", tagnameProc },
     });
 
 void buildSymbols(
