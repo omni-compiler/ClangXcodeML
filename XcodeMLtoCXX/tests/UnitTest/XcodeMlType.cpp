@@ -26,7 +26,7 @@ BOOST_AUTO_TEST_CASE(makeXXXType_nullability_test) {
 
   BOOST_CHECK(XcodeMl::makeArrayType("a1", intType, 10));
 
-  BOOST_CHECK(XcodeMl::makeStructType("s1", "name", "tag", {}));
+  BOOST_CHECK(XcodeMl::makeStructType("s1", "tag", {}));
 }
 
 BOOST_AUTO_TEST_CASE(makeXXXType_attr_test) {
@@ -50,7 +50,7 @@ BOOST_AUTO_TEST_CASE(makeXXXType_attr_test) {
   const auto function = XcodeMl::makeFunctionType("f1", reserved, {});
   BOOST_CHECK(typeKind(function) == TypeKind::Function);
 
-  const auto structure = XcodeMl::makeStructType("s1", "name", "tag", {});
+  const auto structure = XcodeMl::makeStructType("s1", "tag", {});
   BOOST_CHECK(typeKind(structure) == TypeKind::Struct);
 
 
@@ -74,7 +74,7 @@ BOOST_AUTO_TEST_CASE(cv_qualification_test) {
     XcodeMl::makePointerType("ptr1", rsv1),
     XcodeMl::makeFunctionType("fun1", rsv1, {}),
     XcodeMl::makeArrayType("arr1", rsv1, 10),
-    XcodeMl::makeStructType("str1", "name", "tag", {})
+    XcodeMl::makeStructType("str1", "tag", {})
   };
   for (auto type : types) {
     BOOST_TEST_MESSAGE("Checking cv-qualification of " + type->dataTypeIdent());
@@ -123,7 +123,7 @@ BOOST_AUTO_TEST_CASE(RTTI_test) {
   const auto ptr = makePointerType("p2", "p1");
   const auto fun = makeFunctionType("f1", rsv, {});
   const auto arr = makeArrayType("a1", fun, 10);
-  const auto stt = makeStructType("s1", "name", "tag", {});
+  const auto stt = makeStructType("s1", "tag", {});
 
   BOOST_TEST_CHECKPOINT("isa<T1>(makeT1Type(...)) is true");
 

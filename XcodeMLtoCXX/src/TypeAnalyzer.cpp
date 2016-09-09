@@ -98,11 +98,9 @@ DEFINE_TA(arrayTypeProc) {
 DEFINE_TA(structTypeProc) {
   // under construction
   XMLString elemName = xmlGetProp(node, BAD_CAST "type");
-  //xmlNodePtr symTab = findFirst(node, "../" xpathCtx)
-  SymbolMap fields;
+  XcodeMl::Struct::MemberList fields;
 
-  map[elemName] = XcodeMl::makeStructType(
-      elemName, elemName, "", std::move(fields));
+  map[elemName] = XcodeMl::makeStructType(elemName, "", fields);
 }
 
 static void addStructTagNames(

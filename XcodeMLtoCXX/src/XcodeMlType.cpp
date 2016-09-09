@@ -269,10 +269,14 @@ Array::Size Array::Size::makeVariableSize() {
   return Size(Kind::Variable, 0);
 }
 
-Struct::Struct(DataTypeIdent ident, std::string n, std::string t, SymbolMap &&f)
-  : Type(TypeKind::Struct, ident), name(n), tag(t), fields(f) {
-  std::cerr << "Struct::Struct(" << n << ")" << std::endl;
-}
+Struct::Struct(
+    const DataTypeIdent& ident,
+    const std::string& t,
+    const Struct::MemberList& f):
+  Type(TypeKind::Struct, ident),
+  tag(t),
+  fields(f)
+{}
 
 std::string Struct::makeDeclaration(std::string var, const Environment&)
 {
@@ -294,7 +298,6 @@ bool Struct::classof(const Type* T) {
 
 Struct::Struct(const Struct& other):
   Type(other),
-  name(other.name),
   tag(other.tag),
   fields(other.fields)
 {}
@@ -393,12 +396,11 @@ TypeRef makeArrayType(
 }
 
 TypeRef makeStructType(
-    DataTypeIdent ident,
-    std::string name,
-    std::string tag,
-    SymbolMap&& fields
+    const DataTypeIdent& ident,
+    const std::string& tag,
+    const Struct::MemberList& fields
 ) {
-  return std::make_shared<Struct>(ident, name, tag, std::move(fields));
+  return std::make_shared<Struct>(ident, tag, fields);
 }
 
 std::string TypeRefToString(TypeRef type, const Environment& env) {

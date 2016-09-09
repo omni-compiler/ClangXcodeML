@@ -147,7 +147,7 @@ public:
   using MemberList = std::vector<Member>;
 
 public:
-  Struct(DataTypeIdent, std::string, std::string, SymbolMap &&);
+  Struct(const DataTypeIdent&, const std::string&, const MemberList&);
   std::string makeDeclaration(std::string, const Environment&) override;
   ~Struct() override;
   Type* clone() const override;
@@ -156,9 +156,8 @@ public:
 protected:
   Struct(const Struct&);
 private:
-  std::string name;
   std::string tag;
-  SymbolMap fields;
+  MemberList fields;
 };
 
 TypeRef makeReservedType(DataTypeIdent, std::string, bool = false, bool = false);
@@ -167,7 +166,7 @@ TypeRef makePointerType(DataTypeIdent, DataTypeIdent);
 TypeRef makeFunctionType(DataTypeIdent, TypeRef, const Function::Params&);
 TypeRef makeArrayType(DataTypeIdent, TypeRef, size_t);
 TypeRef makeArrayType(DataTypeIdent, TypeRef, Array::Size);
-TypeRef makeStructType(DataTypeIdent, std::string, std::string, SymbolMap &&);
+TypeRef makeStructType(const DataTypeIdent&, const std::string&, const Struct::MemberList&);
 
 }
 #endif /* !XCODEMLTYPE_H */
