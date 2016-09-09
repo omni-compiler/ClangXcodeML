@@ -307,6 +307,14 @@ void Struct::setTagName(const std::string& tagname) {
   tag = tagname;
 }
 
+Struct::MemberList Struct::members() const {
+  return fields;
+}
+
+std::string Struct::tagName() const {
+  return tag;
+}
+
 Struct::Member::Member(
     const std::string& type,
     const std::string& name

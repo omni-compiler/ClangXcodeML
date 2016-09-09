@@ -152,6 +152,8 @@ public:
   ~Struct() override;
   Type* clone() const override;
   void setTagName(const std::string&);
+  MemberList members() const;
+  std::string tagName() const;
   static bool classof(const Type *);
 protected:
   Struct(const Struct&);
