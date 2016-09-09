@@ -30,7 +30,8 @@ CodeBuilder.o: \
 	TypeAnalyzer.h \
 	SymbolAnalyzer.h \
 	CodeBuilder.h \
-	XMLWalker.h
+	XMLWalker.h \
+	AttrProc.h
 TypeAnalyzer.o: \
 	XMLString.h \
 	LibXMLUtil.h \

@@ -8,6 +8,7 @@
 #include <libxml/xpath.h>
 #include "XMLString.h"
 #include "XMLWalker.h"
+#include "AttrProc.h"
 #include "SymbolAnalyzer.h"
 #include "XcodeMlType.h"
 #include "XcodeMlEnvironment.h"
