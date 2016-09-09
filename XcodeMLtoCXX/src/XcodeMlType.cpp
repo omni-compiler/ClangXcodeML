@@ -304,6 +304,22 @@ void Struct::setTagName(const std::string& tagname) {
   tag = tagname;
 }
 
+Struct::Member::Member(
+    const std::string& type,
+    const std::string& name
+):
+  dataTypeIdent(type),
+  name_(name)
+{}
+
+std::string Struct::Member::type() const {
+  return dataTypeIdent;
+}
+
+std::string Struct::Member::name() const {
+  return name_;
+}
+
 /*!
  * \brief Return the kind of \c type.
  */

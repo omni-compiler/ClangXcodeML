@@ -132,6 +132,21 @@ private:
 
 class Struct : public Type {
 public:
+  class Member {
+  public:
+    Member() = delete;
+    Member(const std::string&, const std::string&);
+    Member(const Member&) = default;
+    ~Member() = default;
+    std::string type() const;
+    std::string name() const;
+  private:
+    std::string dataTypeIdent;
+    std::string name_;
+  };
+  using MemberList = std::vector<Member>;
+
+public:
   Struct(DataTypeIdent, std::string, std::string, SymbolMap &&);
   std::string makeDeclaration(std::string, const Environment&) override;
   ~Struct() override;
