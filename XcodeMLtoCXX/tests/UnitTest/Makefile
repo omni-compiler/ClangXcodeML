@@ -22,7 +22,8 @@ OBJNAMES = XcodeMlType.o \
 	CodeBuilder.o \
 	TypeAnalyzer.o \
 	XMLString.o \
-	XcodeMlEnvironment.o
+	XcodeMlEnvironment.o \
+	SymbolsBuilder.o
 
 OBJS = $(addprefix $(XCODEMLTOCXXSRCDIR)/,$(OBJNAMES))
 

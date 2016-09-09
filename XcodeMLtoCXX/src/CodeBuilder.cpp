@@ -15,6 +15,7 @@
 #include "TypeAnalyzer.h"
 #include "SourceInfo.h"
 #include "CodeBuilder.h"
+#include "SymbolsBuilder.h"
 #include "LibXMLUtil.h"
 
 using CodeBuilder = XMLWalker<SourceInfo&, std::stringstream&>;
@@ -478,5 +479,7 @@ void buildCode(xmlDocPtr doc, std::stringstream& ss) {
   }
   ss << "// end of forward declarations" << std::endl << std::endl;
 
+  xmlNodePtr globalSymbols = findFirst(xmlDocGetRootElement(doc), "/XcodeProgram/globalSymbols", src.ctxt);
+  buildSymbols(globalSymbols, src, ss);
   CXXBuilder.walkAll(xmlDocGetRootElement(doc), src, ss);
 }
