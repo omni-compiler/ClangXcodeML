@@ -95,11 +95,19 @@ DEFINE_TA(arrayTypeProc) {
   map[name] = array;
 }
 
-DEFINE_TA(structTypeProc) {
-  // under construction
-  XMLString elemName = xmlGetProp(node, BAD_CAST "type");
-  XcodeMl::Struct::MemberList fields;
+static XcodeMl::Struct::Member makeMember(xmlNodePtr idNode) {
+  XMLString type = xmlGetProp(idNode, BAD_CAST "type");
+  XMLString name = xmlNodeGetContent(xmlFirstElementChild(idNode));
+  return XcodeMl::Struct::Member(type, name);
+}
 
+DEFINE_TA(structTypeProc) {
+  XMLString elemName = xmlGetProp(node, BAD_CAST "type");
+  std::vector<XcodeMl::Struct::Member> fields;
+  const auto symbols = findNodes(node, "symbols/id", ctxt);
+  for (auto& symbol : symbols) {
+    fields.push_back(makeMember(symbol));
+  }
   map[elemName] = XcodeMl::makeStructType(elemName, "", fields);
 }
 
