@@ -338,7 +338,8 @@ Struct::Member::Member(
     const std::string& name
 ):
   dataTypeIdent(type),
-  name_(name)
+  name_(name),
+  size()
 {}
 
 std::string Struct::Member::type() const {
@@ -347,6 +348,15 @@ std::string Struct::Member::type() const {
 
 std::string Struct::Member::name() const {
   return name_;
+}
+
+bool Struct::Member::isBitField() const {
+  return size.isValid();
+}
+
+size_t Struct::Member::getSize() const {
+  assert(isBitField());
+  return size.size();
 }
 
 /*!

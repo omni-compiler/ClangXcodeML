@@ -151,9 +151,12 @@ public:
     ~Member() = default;
     std::string type() const;
     std::string name() const;
+    bool isBitField() const;
+    size_t getSize() const;
   private:
     std::string dataTypeIdent;
     std::string name_;
+    BitSize size;
   };
   using MemberList = std::vector<Member>;
 
