@@ -342,6 +342,16 @@ Struct::Member::Member(
   size()
 {}
 
+Struct::Member::Member(
+    const std::string& type,
+    const std::string& name,
+    size_t s
+):
+  dataTypeIdent(type),
+  name_(name),
+  size(s)
+{}
+
 std::string Struct::Member::type() const {
   return dataTypeIdent;
 }

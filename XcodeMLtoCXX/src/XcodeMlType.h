@@ -147,6 +147,7 @@ public:
   public:
     Member() = delete;
     Member(const std::string&, const std::string&);
+    Member(const std::string&, const std::string&, size_t);
     Member(const Member&) = default;
     ~Member() = default;
     std::string type() const;
