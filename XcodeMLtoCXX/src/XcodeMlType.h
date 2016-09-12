@@ -99,6 +99,7 @@ private:
 class Array : public Type {
 public:
   Array(DataTypeIdent, TypeRef, size_t);
+  Array(DataTypeIdent, DataTypeIdent, size_t);
   std::string makeDeclaration(std::string, const Environment&) override;
   ~Array() override;
   Type* clone() const override;
@@ -130,6 +131,7 @@ TypeRef makePointerType(DataTypeIdent, TypeRef);
 TypeRef makePointerType(DataTypeIdent, DataTypeIdent);
 TypeRef makeFunctionType(DataTypeIdent, TypeRef, const Function::Params&);
 TypeRef makeArrayType(DataTypeIdent, TypeRef, size_t);
+TypeRef makeArrayType(DataTypeIdent, DataTypeIdent, size_t);
 TypeRef makeStructType(DataTypeIdent, std::string, std::string, SymbolMap &&);
 
 }
