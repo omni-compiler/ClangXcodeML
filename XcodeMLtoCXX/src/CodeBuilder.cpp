@@ -15,7 +15,7 @@
 #include "TypeAnalyzer.h"
 #include "SourceInfo.h"
 #include "CodeBuilder.h"
-#include "SymbolsBuilder.h"
+#include "SymbolBuilder.h"
 #include "LibXMLUtil.h"
 
 using CodeBuilder = XMLWalker<SourceInfo&, std::stringstream&>;

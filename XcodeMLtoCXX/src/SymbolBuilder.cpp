@@ -16,9 +16,9 @@
 #include "XcodeMlEnvironment.h"
 #include "SourceInfo.h"
 #include "TypeAnalyzer.h"
-#include "SymbolsBuilder.h"
+#include "SymbolBuilder.h"
 
-using SymbolsBuilder = AttrProc<SourceInfo&, std::stringstream&>;
+using SymbolBuilder = AttrProc<SourceInfo&, std::stringstream&>;
 
 #define SB_ARGS xmlNodePtr node __attribute__((unused)), \
                 SourceInfo& src __attribute__((unused)), \
@@ -61,7 +61,7 @@ DEFINE_SB(tagnameProc) {
   emitStructDefinition(src, type, ss);
 }
 
-const SymbolsBuilder CXXSymbolsBuilder(
+const SymbolBuilder CXXSymbolBuilder(
     "sclass",
     {
       { "typedef_name", typedefNameProc },
@@ -73,5 +73,5 @@ void buildSymbols(
     SourceInfo& src,
     std::stringstream& ss
 ) {
-  CXXSymbolsBuilder.walkAll(node, src, ss);
+  CXXSymbolBuilder.walkAll(node, src, ss);
 }
