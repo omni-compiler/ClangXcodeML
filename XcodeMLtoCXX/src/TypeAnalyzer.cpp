@@ -16,6 +16,7 @@
 #include "Symbol.h"
 #include "XcodeMlType.h"
 #include "XcodeMlEnvironment.h"
+#include "SymbolAnalyzer.h"
 #include "TypeAnalyzer.h"
 
 using TypeAnalyzer = XMLWalker<xmlXPathContextPtr, XcodeMl::Environment&>;
@@ -111,26 +112,6 @@ DEFINE_TA(structTypeProc) {
   map[elemName] = XcodeMl::makeStructType(elemName, "", fields);
 }
 
-static void addStructTagNames(
-    XcodeMl::Environment& map,
-    xmlNodePtr node,
-    xmlXPathContextPtr ctxt
-) {
-  auto idElems = findNodes(node, "id", ctxt);
-  for (xmlNodePtr idElem : idElems) {
-    XMLString sclass(xmlGetProp(idElem, BAD_CAST "sclass"));
-    if (sclass == "tagname") {
-      XMLString dataTypeIdent = xmlGetProp(idElem, BAD_CAST "type");
-      auto typeref = map.at(dataTypeIdent); // structType must exists
-      auto structType = llvm::cast<XcodeMl::Struct>(typeref.get());
-
-      xmlNodePtr nameNode(findFirst(idElem, "name", ctxt));
-      XMLString tag(xmlNodeGetContent(nameNode));
-      structType->setTagName(tag);
-    }
-  }
-}
-
 const std::vector<std::string> dataTypeIdents = {
   "void",
   "char",
@@ -197,18 +178,11 @@ XcodeMl::Environment parseTypeTable(xmlDocPtr doc) {
     XcodeMLTypeAnalyzer.walk(node, xpathCtx, map);
   }
   xmlXPathFreeObject(xpathObj);
-  xpathObj = xmlXPathEvalExpression(
-      BAD_CAST "/XcodeProgram/globalSymbols",
+  xmlNodePtr globalSymbols = findFirst(
+      xmlDocGetRootElement(doc),
+      "/XcodeProgram/globalSymbols",
       xpathCtx);
-  if (xpathObj == nullptr) {
-    xmlXPathFreeContext(xpathCtx);
-    return map;
-  }
-  for (size_t i = 0, len = length(xpathObj); i < len; ++i) {
-    xmlNodePtr node = nth(xpathObj, i);
-    addStructTagNames(map, node, xpathCtx);
-  }
-  xmlXPathFreeObject(xpathObj);
+  analyzeSymbols(globalSymbols, xpathCtx, map);
   return map;
 }
 

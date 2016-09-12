@@ -15,7 +15,8 @@ OBJS = XcodeMlType.o \
 	TypeAnalyzer.o \
 	XMLString.o \
 	XcodeMlEnvironment.o \
-	SymbolBuilder.o
+	SymbolBuilder.o \
+	SymbolAnalyzer.o
 
 XcodeMLtoCXX: $(OBJS)
 	$(CXX) $(CXXFLAGS) $(OBJS) $(USEDLIBS) -o XcodeMLtoCXX
@@ -38,6 +39,7 @@ TypeAnalyzer.o: \
 	XMLString.h \
 	LibXMLUtil.h \
 	Symbol.h \
+	SymbolAnalyzer.h \
 	XcodeMlType.h \
 	XcodeMlEnvironment.h \
 	TypeAnalyzer.h \
