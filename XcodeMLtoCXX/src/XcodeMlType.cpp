@@ -192,6 +192,12 @@ Array::Array(DataTypeIdent ident, TypeRef elem, size_t s):
   size(std::make_shared<size_t>(s))
 {}
 
+Array::Array(DataTypeIdent ident, DataTypeIdent elem, size_t s):
+  Type(TypeKind::Array, ident),
+  element(elem),
+  size(std::make_shared<size_t>(s))
+{}
+
 std::string Array::makeDeclaration(std::string var, const Environment& env) {
   auto elementType(env[element]);
   if (!elementType) {

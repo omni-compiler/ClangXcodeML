@@ -99,6 +99,7 @@ private:
 class Array : public Type {
 public:
   Array(DataTypeIdent, TypeRef, size_t);
+  Array(DataTypeIdent, DataTypeIdent, size_t);
   std::string makeDeclaration(std::string, const Environment&) override;
   ~Array() override;
   Type* clone() const override;
