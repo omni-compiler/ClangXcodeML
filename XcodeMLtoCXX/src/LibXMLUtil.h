@@ -1,6 +1,12 @@
 #ifndef LIBXMLUTIL_H
 #define LIBXMLUTIL_H
 
+struct XPathObjectReleaser {
+  void operator() (xmlXPathObjectPtr ptr);
+};
+
+using XPathObjectSPtr = std::unique_ptr<xmlXPathObject, XPathObjectReleaser>;
+
 xmlNodePtr findFirst(xmlNodePtr node, const char* xpathExpr, xmlXPathContextPtr xpathCtxt);
 std::vector<xmlNodePtr> findNodes(xmlNodePtr node, const char* xpathExpr, xmlXPathContextPtr xpathCtxt);
 size_t length(xmlXPathObjectPtr obj);

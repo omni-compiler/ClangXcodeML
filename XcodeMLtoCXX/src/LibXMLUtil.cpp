@@ -1,4 +1,5 @@
 #include <cassert>
+#include <memory>
 #include <string>
 #include <sstream>
 #include <stdexcept>
@@ -12,6 +13,10 @@
 
 static xmlXPathObjectPtr getNodeSet(
     xmlNodePtr, const char*, xmlXPathContextPtr);
+
+void XPathObjectReleaser::operator() (xmlXPathObjectPtr ptr) {
+  xmlXPathFreeObject(ptr);
+}
 
 /*!
  * \brief Search for an element that matches given XPath expression.
