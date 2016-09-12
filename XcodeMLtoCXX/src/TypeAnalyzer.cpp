@@ -88,37 +88,46 @@ DEFINE_TA(structTypeProc) {
       elemName, elemName, "", std::move(fields));
 }
 
-const std::vector<std::string> dataTypeIdents = {
+const std::vector<std::string> identicalFndDataTypeIdents = {
   "void",
   "char",
   "short",
   "int",
   "long",
-  "long_long",
-  "unsigned_char",
-  "unsigned_short",
   "unsigned",
-  "unsigned_long",
-  "unsigned_long_long",
   "float",
   "double",
-  "long_double",
   "wchar_t",
   "char16_t",
   "char32_t",
   "bool",
 };
 
+const std::vector<std::tuple<std::string, std::string>>
+nonidenticalFndDataTypeIdents = {
+  std::make_tuple("long_long", "long long"),
+  std::make_tuple("unsigned_char", "unsigned char"),
+  std::make_tuple("unsigned_short", "unsigned short"),
+  std::make_tuple("unsigned_long", "unsigned long"),
+  std::make_tuple("unsigned_long_long", "unsigned long long"),
+  std::make_tuple("long_double", "long double"),
+};
+
 /*!
  * \brief Mapping from Data type identifiers to basic data types.
  */
-const XcodeMl::Environment dataTypeIdentMap = [](const std::vector<std::string>& keys) {
+const XcodeMl::Environment FundamentalDataTypeIdentMap = []() {
   XcodeMl::Environment map;
-  for (std::string key : keys) {
+  for (std::string key : identicalFndDataTypeIdents) {
     map[key] = XcodeMl::makeReservedType(key, key);
   }
+  for (auto p : nonidenticalFndDataTypeIdents) {
+    std::string ident, type_name;
+    std::tie(ident, type_name) = p;
+    map[ident] = XcodeMl::makeReservedType(ident, type_name);
+  }
   return map;
-}(dataTypeIdents);
+}();
 
 const TypeAnalyzer XcodeMLTypeAnalyzer({
   { "basicType", basicTypeProc },
@@ -148,7 +157,7 @@ XcodeMl::Environment parseTypeTable(xmlDocPtr doc) {
     return XcodeMl::Environment();
   }
   const size_t len = length(xpathObj);
-  XcodeMl::Environment map(dataTypeIdentMap);
+  XcodeMl::Environment map(FundamentalDataTypeIdentMap);
   for (size_t i = 0; i < len; ++i) {
     xmlNodePtr node = nth(xpathObj, i);
     XcodeMLTypeAnalyzer.walk(node, xpathCtx, map);
