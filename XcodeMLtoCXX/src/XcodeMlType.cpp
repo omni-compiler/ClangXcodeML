@@ -164,9 +164,7 @@ std::string Function::makeDeclaration(std::string var, const Environment& env) {
   if (!returnType) {
     return "INCOMPLETE_TYPE *" + var;
   }
-  ss << makeDecl(returnType, "", env)
-    << " "
-    << var
+  ss << var
     << "(";
   bool alreadyPrinted = false;
   for (auto param : params) {
@@ -181,7 +179,7 @@ std::string Function::makeDeclaration(std::string var, const Environment& env) {
     alreadyPrinted = true;
   }
   ss <<  ")";
-  return ss.str();
+  return makeDecl(returnType, ss.str(), env);
 }
 
 Function::~Function() = default;
