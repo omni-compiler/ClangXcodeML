@@ -29,7 +29,7 @@ CodeBuilder.o: \
 	XcodeMlType.h \
 	XcodeMlEnvironment.h \
 	TypeAnalyzer.h \
-	SymbolAnalyzer.h \
+	Symbol.h \
 	CodeBuilder.h \
 	XMLWalker.h \
 	AttrProc.h \
@@ -37,13 +37,13 @@ CodeBuilder.o: \
 TypeAnalyzer.o: \
 	XMLString.h \
 	LibXMLUtil.h \
-	SymbolAnalyzer.h \
+	Symbol.h \
 	XcodeMlType.h \
 	XcodeMlEnvironment.h \
 	TypeAnalyzer.h \
 	XMLWalker.h
 XcodeMlType.o: \
-  SymbolAnalyzer.h \
+  Symbol.h \
 	TypeAnalyzer.h \
 	XcodeMlEnvironment.h
 

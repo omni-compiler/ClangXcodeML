@@ -1,5 +1,5 @@
-#ifndef SYMBOLANALYZER_H
-#define SYMBOLANALYZER_H
+#ifndef SYMBOL_H
+#define SYMBOL_H
 
 /*!
  * \brief Mapping from variable names(variables, constants, etc.)
@@ -13,4 +13,4 @@ using SymbolEntry = std::map<std::string,std::string>;
  */
 using SymbolMap = std::vector<SymbolEntry>;
 
-#endif /* !SYMBOLANALYZER_H */
+#endif /* !SYMBOL_H */

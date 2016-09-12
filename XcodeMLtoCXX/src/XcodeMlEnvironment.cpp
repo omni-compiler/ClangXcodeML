@@ -4,7 +4,7 @@
 #include <map>
 #include <memory>
 #include <cassert>
-#include "SymbolAnalyzer.h"
+#include "Symbol.h"
 #include "XcodeMlType.h"
 #include "XcodeMlEnvironment.h"
 
