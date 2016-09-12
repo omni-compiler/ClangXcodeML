@@ -131,6 +131,7 @@ TypeRef makePointerType(DataTypeIdent, TypeRef);
 TypeRef makePointerType(DataTypeIdent, DataTypeIdent);
 TypeRef makeFunctionType(DataTypeIdent, TypeRef, const Function::Params&);
 TypeRef makeArrayType(DataTypeIdent, TypeRef, size_t);
+TypeRef makeArrayType(DataTypeIdent, DataTypeIdent, size_t);
 TypeRef makeStructType(DataTypeIdent, std::string, std::string, SymbolMap &&);
 
 }

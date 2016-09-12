@@ -313,6 +313,14 @@ TypeRef makeArrayType(
   );
 }
 
+TypeRef makeArrayType(
+    DataTypeIdent ident,
+    DataTypeIdent elemType,
+    size_t size
+) {
+  return std::make_shared<Array>(ident, elemType, size);
+}
+
 TypeRef makeStructType(
     DataTypeIdent ident,
     std::string name,
