@@ -315,6 +315,24 @@ std::string Struct::tagName() const {
   return tag;
 }
 
+Struct::BitSize::BitSize():
+  valid(false),
+  size_(0)
+{}
+
+Struct::BitSize::BitSize(size_t s):
+  valid(true),
+  size_(s)
+{}
+
+bool Struct::BitSize::isValid() const {
+  return valid;
+}
+
+size_t Struct::BitSize::size() const {
+  return size_;
+}
+
 Struct::Member::Member(
     const std::string& type,
     const std::string& name

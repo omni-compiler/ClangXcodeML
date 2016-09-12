@@ -132,6 +132,17 @@ private:
 
 class Struct : public Type {
 public:
+  class BitSize { /* represents a size of bit-field */
+  public:
+    BitSize();
+    BitSize(size_t);
+    bool isValid() const;
+    size_t size() const;
+  private:
+    bool valid;
+    size_t size_;
+  };
+
   class Member {
   public:
     Member() = delete;
