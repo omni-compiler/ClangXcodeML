@@ -115,8 +115,8 @@ public:
   };
 
 public:
-  Array(DataTypeIdent, TypeRef, size_t);
-  Array(DataTypeIdent, TypeRef, Size);
+  Array(DataTypeIdent, DataTypeIdent, Size);
+  Array(DataTypeIdent, DataTypeIdent, size_t);
   std::string makeDeclaration(std::string, const Environment&) override;
   ~Array() override;
   Type* clone() const override;
@@ -182,7 +182,10 @@ TypeRef makePointerType(DataTypeIdent, TypeRef);
 TypeRef makePointerType(DataTypeIdent, DataTypeIdent);
 TypeRef makeFunctionType(DataTypeIdent, TypeRef, const Function::Params&);
 TypeRef makeArrayType(DataTypeIdent, TypeRef, size_t);
+TypeRef makeArrayType(DataTypeIdent, TypeRef, size_t);
 TypeRef makeArrayType(DataTypeIdent, TypeRef, Array::Size);
+TypeRef makeArrayType(DataTypeIdent, DataTypeIdent, Array::Size);
+TypeRef makeArrayType(DataTypeIdent, DataTypeIdent, size_t);
 TypeRef makeStructType(const DataTypeIdent&, const std::string&, const Struct::MemberList&);
 
 }

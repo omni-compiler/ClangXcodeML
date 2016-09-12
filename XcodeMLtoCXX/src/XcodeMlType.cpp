@@ -201,16 +201,16 @@ Function::Function(const Function& other):
   params(other.params)
 {}
 
-Array::Array(DataTypeIdent ident, TypeRef elem, size_t s):
+Array::Array(DataTypeIdent ident, DataTypeIdent elem, Array::Size s):
   Type(TypeKind::Array, ident),
-  element(elem->dataTypeIdent()),
-  size(Size::makeIntegerSize(s))
+  element(elem),
+  size(s)
 {}
 
-Array::Array(DataTypeIdent ident, TypeRef elem, Array::Size s):
+Array::Array(DataTypeIdent ident, DataTypeIdent elem, size_t s):
   Type(TypeKind::Array, ident),
-  element(elem->dataTypeIdent()),
-  size(s)
+  element(elem),
+  size(Size::makeIntegerSize(s))
 {}
 
 std::string Array::makeDeclaration(std::string var, const Environment& env) {
@@ -424,9 +424,17 @@ TypeRef makeArrayType(
 ) {
   return std::make_shared<Array>(
       ident,
-      elemType,
+      elemType->dataTypeIdent(),
       size
   );
+}
+
+TypeRef makeArrayType(
+    DataTypeIdent ident,
+    DataTypeIdent elemType,
+    size_t size
+) {
+  return std::make_shared<Array>(ident, elemType, size);
 }
 
 TypeRef makeArrayType(
@@ -436,9 +444,17 @@ TypeRef makeArrayType(
 ) {
   return std::make_shared<Array>(
       ident,
-      elemType,
+      elemType->dataTypeIdent(),
       size
   );
+}
+
+TypeRef makeArrayType(
+    DataTypeIdent ident,
+    DataTypeIdent elemName,
+    Array::Size size
+) {
+  return std::make_shared<Array>(ident, elemName, size);
 }
 
 TypeRef makeStructType(
