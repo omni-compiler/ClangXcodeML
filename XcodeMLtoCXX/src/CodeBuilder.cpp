@@ -230,31 +230,7 @@ const CodeBuilder::Procedure handleScope =
   handleSymTableStack(
   EmptyProc)));
 
-DEFINE_CB(outputReturnTypeAndName) {
-  xmlNodePtr nameElem = findFirst(
-      node,
-      "name|operator|constructor|destructor",
-      src.ctxt
-  );
-  XMLString name(xmlNodeGetContent(nameElem));
-
-  XMLString kind(nameElem->name);
-  if (kind == "name" || kind == "operator") {
-    outputIndentation(w, node, src, ss);
-    auto fnTypeName = findSymbolType(src.symTable, name);
-    auto returnType = src.typeTable.getReturnType(fnTypeName);
-    ss << TypeRefToString(returnType, src.typeTable)
-      << " " << name;
-  } else if (kind == "constructor") {
-    ss << "<constructor>";
-  } else if (kind == "destructor") {
-    ss << "<destructor>";
-  } else {
-    assert(false);
-  }
-}
-
-DEFINE_CB(outputParamsAndBody) {
+DEFINE_CB(outputParams) {
   ss << "(";
 
   bool alreadyPrinted = false;
@@ -266,14 +242,43 @@ DEFINE_CB(outputParamsAndBody) {
     ss << makeDecl(paramType, p.first, src.typeTable);
     alreadyPrinted = true;
   }
-  ss << ")" << std::endl;
-  w.walkChildren(node, src, ss);
+  ss << ")";
 }
 
-const CodeBuilder::Procedure functionDefinitionProc = merge(
-    static_cast<CodeBuilder::Procedure>(outputReturnTypeAndName),
-    handleSymTableStack(outputParamsAndBody)
-);
+DEFINE_CB(functionDefinitionProc) {
+  xmlNodePtr nameElem = findFirst(
+      node,
+      "name|operator|constructor|destructor",
+      src.ctxt
+  );
+  const XMLString name(xmlNodeGetContent(nameElem));
+  const XMLString kind(nameElem->name);
+  std::stringstream declarator;
+  if (kind == "name" || kind == "operator") {
+    declarator << name;
+  } else if (kind == "constructor") {
+    declarator << "<constructor>";
+  } else if (kind == "destructor") {
+    declarator << "<destructor>";
+  } else {
+    assert(false);
+  }
+  /*
+   * Traverse parameter list of the functionDefinition element
+   * instead of simply using Function::makeDeclaration(...).
+   */
+  (handleSymTableStack(outputParams))(w, node, src, declarator);
+  outputIndentation(w, node, src, ss);
+  if (kind == "constructor" || kind == "destructor") {
+    // Constructor and destructor have no return type.
+    ss << declarator.str();
+  } else {
+    const auto fnTypeName = findSymbolType(src.symTable, name);
+    auto returnType = src.typeTable.getReturnType(fnTypeName);
+    ss << makeDecl(returnType, declarator.str(), src.typeTable);
+  }
+  w.walkChildren(node, src, ss);
+}
 
 DEFINE_CB(memberRefProc) {
   w.walkChildren(node, src, ss);
