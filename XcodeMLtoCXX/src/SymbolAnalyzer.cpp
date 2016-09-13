@@ -25,18 +25,13 @@ using SymbolAnalyzer = AttrProc<xmlXPathContextPtr, XcodeMl::Environment&>;
 
 #define DEFINE_SA(name) static void name(SA_ARGS)
 
-static XMLString getName(xmlNodePtr idNode, xmlXPathContextPtr ctxt) {
-  xmlNodePtr nameNode = findFirst(idNode, "name", ctxt);
-  return xmlNodeGetContent(nameNode);
-}
-
 DEFINE_SA(tagnameProc) {
   XMLString dataTypeIdent = xmlGetProp(node, BAD_CAST "type");
   auto typeref = map.at(dataTypeIdent); // structType must exists
   auto structType = llvm::cast<XcodeMl::Struct>(typeref.get());
   xmlNodePtr nameNode(findFirst(node, "name", ctxt));
   XMLString tag(xmlNodeGetContent(nameNode));
-  structType->setTagName(getName(node, ctxt));
+  structType->setTagName(getNameFromIdNode(node, ctxt));
 }
 
 const SymbolAnalyzer CXXSymbolAnalyzer (

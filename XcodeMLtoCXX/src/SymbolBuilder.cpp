@@ -26,13 +26,8 @@ using SymbolBuilder = AttrProc<SourceInfo&, std::stringstream&>;
 
 #define DEFINE_SB(name) void name(SB_ARGS)
 
-static XMLString getName(xmlNodePtr idNode, xmlXPathContextPtr ctxt) {
-  xmlNodePtr nameNode = findFirst(idNode, "name", ctxt);
-  return xmlNodeGetContent(nameNode);
-}
-
 DEFINE_SB(typedefNameProc) {
-  const auto alias = getName(node, src.ctxt);
+  const auto alias = getNameFromIdNode(node, src.ctxt);
   const auto type = src.typeTable.at(
       static_cast<XMLString>(xmlGetProp(node, BAD_CAST "type")));
   ss << "typedef "
@@ -56,7 +51,7 @@ static void emitStructDefinition(
 }
 
 DEFINE_SB(tagnameProc) {
-  const auto tagname = getName(node, src.ctxt);
+  const auto tagname = getNameFromIdNode(node, src.ctxt);
   const auto type = src.typeTable.at(static_cast<XMLString>( xmlGetProp(node, BAD_CAST "type") ));
   emitStructDefinition(src, type, ss);
 }

@@ -76,6 +76,14 @@ std::vector<xmlNodePtr> findNodes(
   return nodes;
 }
 
+std::string getNameFromIdNode(
+    xmlNodePtr idNode,
+    xmlXPathContextPtr ctxt
+) {
+  xmlNodePtr nameNode = findFirst(idNode, "name", ctxt);
+  return static_cast<XMLString>(xmlNodeGetContent(nameNode));
+}
+
 static xmlXPathObjectPtr getNodeSet(
     xmlNodePtr node,
     const char* xpathExpr,
