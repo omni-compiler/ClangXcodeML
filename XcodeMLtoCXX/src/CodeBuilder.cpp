@@ -230,12 +230,14 @@ DEFINE_CB(outputParams) {
   ss << "(";
 
   bool alreadyPrinted = false;
-  for (auto p : src.symTable.back()) {
+  const auto params = findNodes(node, "params/name", src.ctxt);
+  for (auto p : params) {
     if (alreadyPrinted) {
       ss << ", ";
     }
-    auto paramType(getIdentType(src, p.first));
-    ss << makeDecl(paramType, p.first, src.typeTable);
+    XMLString name = xmlNodeGetContent(p);
+    auto paramType(getIdentType(src, name));
+    ss << makeDecl(paramType, name, src.typeTable);
     alreadyPrinted = true;
   }
   ss << ")";
