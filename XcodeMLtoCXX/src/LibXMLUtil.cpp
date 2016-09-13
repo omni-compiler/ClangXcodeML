@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <cassert>
 #include <memory>
 #include <string>
@@ -82,6 +83,10 @@ std::string getNameFromIdNode(
 ) {
   xmlNodePtr nameNode = findFirst(idNode, "name", ctxt);
   return static_cast<XMLString>(xmlNodeGetContent(nameNode));
+}
+
+bool isNaturalNumber(const std::string& prop) {
+  return std::all_of(prop.begin(), prop.end(), isdigit);
 }
 
 static xmlXPathObjectPtr getNodeSet(
