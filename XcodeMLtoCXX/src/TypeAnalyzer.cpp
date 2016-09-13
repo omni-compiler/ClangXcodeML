@@ -98,7 +98,15 @@ DEFINE_TA(arrayTypeProc) {
 static XcodeMl::Struct::Member makeMember(xmlNodePtr idNode) {
   XMLString type = xmlGetProp(idNode, BAD_CAST "type");
   XMLString name = xmlNodeGetContent(xmlFirstElementChild(idNode));
-  return XcodeMl::Struct::Member(type, name);
+  if (!xmlHasProp(idNode, BAD_CAST "bit_field")) {
+    return XcodeMl::Struct::Member(type, name);
+  }
+  XMLString bit_size = xmlGetProp(idNode, BAD_CAST "bit_field");
+  if (!isNaturalNumber(bit_size)) {
+    return XcodeMl::Struct::Member(type, name);
+      // FIXME: Don't ignore <bitField> element
+  }
+  return XcodeMl::Struct::Member(type, name, std::stoi(bit_size));
 }
 
 DEFINE_TA(structTypeProc) {
