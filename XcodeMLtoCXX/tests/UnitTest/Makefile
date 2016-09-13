@@ -28,8 +28,11 @@ OBJNAMES = XcodeMlType.o \
 
 OBJS = $(addprefix $(XCODEMLTOCXXSRCDIR)/,$(OBJNAMES))
 
-%.out: %.cpp
-	$(CXX) $(CXXFLAGS) $(OBJS) $(USEDLIBS) -o$@ $^
+$(OBJS):
+	$(MAKE) -C $(XCODEMLTOCXXSRCDIR) $@
+
+%.out: %.cpp $(OBJS)
+	$(CXX) $(CXXFLAGS) $(OBJS) $(USEDLIBS) -o$@ $<
 
 clean:
 	rm -f $(TARGETS)
