@@ -1,6 +1,6 @@
-.SUFFIXES: .XcodeML .CXX
+.SUFFIXES: .CXXasXcodeML
 .PHONY: test clean
-.PRECIOUS: %.XcodeML
+.PRECIOUS: %.CXXasXcodeML
 
 all: test
 
@@ -11,8 +11,8 @@ CXX = /usr/local/bin/clang++
 CXXFLAGS = -pedantic -fsyntax-only
 CTOXCODEML = $(CTOXCODEMLDIR)/CtoXcodeML
 XCODEMLTOCXX = $(XCODEMLTOCXXDIR)/XcodeMLtoCXX
-CXXTESTCASES = $(wildcard *.cpp)
-CXXTESTOBJECTS = $(CXXTESTCASES:.cpp=.CXX)
+CXXTESTCASES = $(wildcard *.src.cpp)
+CXXTESTOBJECTS = $(CXXTESTCASES:.src.cpp=.dst.cpp)
 
 $(CTOXCODEML):
 	$(MAKE) -C $(CTOXCODEMLDIR)
@@ -23,10 +23,10 @@ $(XCODEMLTOCXX):
 %.XcodeML: %.c $(CTOXCODEML)
 	$(CTOXCODEML) $< -- > $@
 
-%.XcodeML: %.cpp $(CTOXCODEML)
+%.CXXasXcodeML: %.src.cpp $(CTOXCODEML)
 	$(CTOXCODEML) $< -- > $@
 
-%.CXX: %.XcodeML $(XCODEMLTOCXX)
+%.dst.cpp: %.CXXasXcodeML $(XCODEMLTOCXX)
 	$(XCODEMLTOCXX) $< > $@
 
 check: $(CTOXCODEML) $(XCODEMLTOCXX) $(CXXTESTOBJECTS)
@@ -36,4 +36,4 @@ check: $(CTOXCODEML) $(XCODEMLTOCXX) $(CXXTESTOBJECTS)
 	done
 
 clean:
-	rm -f *.CXX *.XcodeML
+	rm -f *.dst.cpp *.XcodeML
