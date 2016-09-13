@@ -1,3 +1,4 @@
+void f(int i, int const ci, short * ps, short * const cps, short const * pcs, short const * const cpcs);
 void f(int i, int const ci, short * ps, short * const cps, short const * pcs, short const * const cpcs) {
   double d = 0;
   double const cd = 0;
