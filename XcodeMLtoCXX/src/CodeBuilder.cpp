@@ -280,6 +280,14 @@ DEFINE_CB(functionDefinitionProc) {
   w.walkChildren(node, src, ss);
 }
 
+DEFINE_CB(functionDeclProc) {
+  xmlNodePtr nameNode = findFirst(node, "name", src.ctxt);
+  XMLString name = xmlNodeGetContent(nameNode);
+  const auto fnType = getIdentType(src, name);
+  ss << makeDecl(fnType, name, src.typeTable)
+     << ";" << std::endl;
+}
+
 DEFINE_CB(memberRefProc) {
   w.walkChildren(node, src, ss);
   ss << "." << xmlGetProp(node, BAD_CAST "member");
@@ -415,6 +423,7 @@ DEFINE_CB(varDeclProc) {
 const CodeBuilder CXXBuilder({
   { "typeTable", NullProc },
   { "functionDefinition", functionDefinitionProc },
+  { "functionDecl", functionDeclProc },
   { "intConstant", EmptySNCProc },
   { "moeConstant", EmptySNCProc },
   { "booleanConstant", EmptySNCProc },
