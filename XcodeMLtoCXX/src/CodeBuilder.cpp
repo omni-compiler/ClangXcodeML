@@ -452,6 +452,10 @@ const CodeBuilder CXXBuilder({
   { "exprStatement", showChildElem("", ";\n") },
   { "returnStatement", returnStatementProc },
   { "varDecl", varDeclProc },
+
+  /* for CtoXcodeML */
+  { "Decl_Record", NullProc },
+    // Ignore Decl_Record (structs are already emitted)
 });
 
 /*!
