@@ -34,7 +34,10 @@ SymbolEntry parseSymbols(xmlNodePtr node, xmlXPathContextPtr ctxt) {
     xmlNodePtr nameElem = findFirst(idElem, "name", ctxt);
     XMLString type(xmlGetProp(idElem, BAD_CAST "type"));
     XMLString name(xmlNodeGetContent(nameElem));
-    entry[name] = type;
+    if (!static_cast<std::string>(name).empty()) {
+      // Ignore unnamed parameters such as <name type="int"/>
+      entry[name] = type;
+    }
   }
   return entry;
 }
@@ -236,7 +239,8 @@ DEFINE_CB(outputParams) {
       ss << ", ";
     }
     XMLString name = xmlNodeGetContent(p);
-    auto paramType(getIdentType(src, name));
+    XMLString typeName = xmlGetProp(p, BAD_CAST "type");
+    const auto paramType = src.typeTable.at(typeName);
     ss << makeDecl(paramType, name, src.typeTable);
     alreadyPrinted = true;
   }
