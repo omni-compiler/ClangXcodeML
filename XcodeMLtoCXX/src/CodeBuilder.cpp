@@ -65,19 +65,15 @@ XcodeMl::TypeRef getIdentType(const SourceInfo& src, const std::string& ident) {
   return src.typeTable[dataTypeIdent];
 }
 
-SymbolMap parseGlobalSymbols(xmlDocPtr doc) {
-  if (doc == nullptr) {
-    return SymbolMap();
-  }
-  xmlXPathContextPtr xpathCtx = xmlXPathNewContext(doc);
-  if (xpathCtx == nullptr) {
-    return SymbolMap();
-  }
+SymbolMap parseGlobalSymbols(
+    xmlNodePtr,
+    xmlXPathContextPtr xpathCtx,
+    std::stringstream&
+) {
   xmlXPathObjectPtr xpathObj = xmlXPathEvalExpression(
       BAD_CAST "/XcodeProgram/globalSymbols",
       xpathCtx);
   if (xpathObj == nullptr) {
-    xmlXPathFreeContext(xpathCtx);
     return SymbolMap();
   }
   assert(xpathObj->nodesetval->nodeTab[0]);
@@ -463,11 +459,15 @@ const CodeBuilder CXXBuilder({
  * \param[in] doc XcodeML document.
  * \param[out] ss Stringstream to flush C++ source code.
  */
-void buildCode(xmlDocPtr doc, std::stringstream& ss) {
+void buildCode(
+    xmlNodePtr rootNode,
+    xmlXPathContextPtr ctxt,
+    std::stringstream& ss
+) {
   SourceInfo src = {
-    xmlXPathNewContext(doc),
-    parseTypeTable(doc),
-    parseGlobalSymbols(doc),
+    ctxt,
+    parseTypeTable(rootNode, ctxt, ss),
+    parseGlobalSymbols(rootNode, ctxt, ss),
     0
   };
 
@@ -492,7 +492,7 @@ void buildCode(xmlDocPtr doc, std::stringstream& ss) {
   }
   ss << "// end of forward declarations" << std::endl << std::endl;
 
-  xmlNodePtr globalSymbols = findFirst(xmlDocGetRootElement(doc), "/XcodeProgram/globalSymbols", src.ctxt);
+  xmlNodePtr globalSymbols = findFirst(rootNode, "/XcodeProgram/globalSymbols", src.ctxt);
   buildSymbols(globalSymbols, src, ss);
-  CXXBuilder.walkAll(xmlDocGetRootElement(doc), src, ss);
+  CXXBuilder.walkAll(rootNode, src, ss);
 }

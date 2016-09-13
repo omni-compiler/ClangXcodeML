@@ -166,19 +166,15 @@ const TypeAnalyzer XcodeMLTypeAnalyzer({
  * \brief Traverse an XcodeML document and make mapping from data
  * type identifiers to data types defined in it.
  */
-XcodeMl::Environment parseTypeTable(xmlDocPtr doc) {
-  if (doc == nullptr) {
-    return XcodeMl::Environment();
-  }
-  xmlXPathContextPtr xpathCtx = xmlXPathNewContext(doc);
-  if (xpathCtx == nullptr) {
-    return XcodeMl::Environment();
-  }
+XcodeMl::Environment parseTypeTable(
+    xmlNodePtr rootNode,
+    xmlXPathContextPtr xpathCtx,
+    std::stringstream&
+) {
   xmlXPathObjectPtr xpathObj = xmlXPathEvalExpression(
       BAD_CAST "/XcodeProgram/typeTable/*",
       xpathCtx);
   if (xpathObj == nullptr) {
-    xmlXPathFreeContext(xpathCtx);
     return XcodeMl::Environment();
   }
   const size_t len = length(xpathObj);
@@ -189,7 +185,7 @@ XcodeMl::Environment parseTypeTable(xmlDocPtr doc) {
   }
   xmlXPathFreeObject(xpathObj);
   xmlNodePtr globalSymbols = findFirst(
-      xmlDocGetRootElement(doc),
+      rootNode,
       "/XcodeProgram/globalSymbols",
       xpathCtx);
   analyzeSymbols(globalSymbols, xpathCtx, map);

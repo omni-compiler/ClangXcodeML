@@ -25,8 +25,10 @@ int main(int argc, char** argv) {
   }
   std::string filename(argv[1]);
   xmlDocPtr doc = xmlParseFile(filename.c_str());
+  xmlNodePtr root = xmlDocGetRootElement(doc);
+  xmlXPathContextPtr ctxt = xmlXPathNewContext(doc);
   std::stringstream ss;
-  buildCode(doc, ss);
+  buildCode(root, ctxt, ss);
   std::cout << ss.str() << std::endl;
   return 0;
 }
