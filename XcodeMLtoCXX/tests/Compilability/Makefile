@@ -12,6 +12,7 @@ CFLAGS = -pedantic -fsyntax-only
 CXX = /usr/local/bin/clang++
 CXXFLAGS = -pedantic -fsyntax-only
 CTOXCODEML = $(CTOXCODEMLDIR)/CtoXcodeML
+CTOXCODEMLFLAGS = --
 XCODEMLTOCXX = $(XCODEMLTOCXXDIR)/XcodeMLtoCXX
 CTESTCASES = $(wildcard *.src.c)
 CTESTOBJECTS = $(CTESTCASES:.src.c=.dst.c)
@@ -25,13 +26,13 @@ $(XCODEMLTOCXX):
 	$(MAKE) -C $(XCODEMLTOCXXDIR)
 
 %.CasXcodeML: %.src.c $(CTOXCODEML)
-	$(CTOXCODEML) $< -- > $@
+	$(CTOXCODEML) $< $(CTOXCODEMLFLAGS) > $@
 
 %.dst.c: %.CasXcodeML $(XCODEMLTOCXX)
 	$(XCODEMLTOCXX) $< > $@
 
 %.CXXasXcodeML: %.src.cpp $(CTOXCODEML)
-	$(CTOXCODEML) $< -- > $@
+	$(CTOXCODEML) $< $(CTOXCODEMLFLAGS) > $@
 
 %.dst.cpp: %.CXXasXcodeML $(XCODEMLTOCXX)
 	$(XCODEMLTOCXX) $< > $@
