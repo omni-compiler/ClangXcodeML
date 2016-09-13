@@ -47,4 +47,4 @@ check: $(CTOXCODEML) $(XCODEMLTOCXX) $(CXXTESTOBJECTS) $(CTESTOBJECTS)
 	done
 
 clean:
-	rm -f *.dst.cpp *.XcodeML
+	rm -f *.dst.c *.dst.cpp *.CasXcodeML *.CXXasXcodeML
