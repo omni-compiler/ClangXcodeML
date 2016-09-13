@@ -6,7 +6,7 @@ all: test
 
 ROOTDIR = ../../..
 CTOXCODEMLDIR = $(ROOTDIR)/CtoXcodeML/src
-XCODEMLTOCXXDIR = $(ROOTDIR)/XcodeMLtoCXX/src
+XCODEMLTOCXXDIR = $(ROOTDIR)/XcodeMLtoCXX
 CXX = /usr/local/bin/clang++
 CXXFLAGS = -pedantic -fsyntax-only
 CTOXCODEML = $(CTOXCODEMLDIR)/CtoXcodeML
@@ -20,16 +20,17 @@ $(CTOXCODEML):
 $(XCODEMLTOCXX):
 	$(MAKE) -C $(XCODEMLTOCXXDIR)
 
-.c.XcodeML:
+%.XcodeML: %.c $(CTOXCODEML)
 	$(CTOXCODEML) $< -- > $@
 
-.cpp.XcodeML: $(CTOXCODEML)
+%.XcodeML: %.cpp $(CTOXCODEML)
 	$(CTOXCODEML) $< -- > $@
 
-.XcodeML.CXX: $(XCODEMLTOCXX)
+%.CXX: %.XcodeML $(XCODEMLTOCXX)
 	$(XCODEMLTOCXX) $< > $@
 
 check: $(CTOXCODEML) $(XCODEMLTOCXX) $(CXXTESTOBJECTS)
+	set -e; \
 	for testobj in $(CXXTESTOBJECTS); do  \
 		$(CXX) $(CXXFLAGS) $$testobj; \
 	done

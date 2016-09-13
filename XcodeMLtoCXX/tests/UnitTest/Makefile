@@ -22,17 +22,23 @@ OBJNAMES = XcodeMlType.o \
 	CodeBuilder.o \
 	TypeAnalyzer.o \
 	XMLString.o \
-	XcodeMlEnvironment.o
+	XcodeMlEnvironment.o \
+	SymbolAnalyzer.o \
+	SymbolBuilder.o
 
 OBJS = $(addprefix $(XCODEMLTOCXXSRCDIR)/,$(OBJNAMES))
 
-%.out: %.cpp
-	$(CXX) $(CXXFLAGS) $(OBJS) $(USEDLIBS) -o$@ $^
+$(OBJS):
+	$(MAKE) -C $(XCODEMLTOCXXSRCDIR) $@
+
+%.out: %.cpp $(OBJS)
+	$(CXX) $(CXXFLAGS) $(OBJS) $(USEDLIBS) -o$@ $<
 
 clean:
 	rm -f $(TARGETS)
 
 check: $(TARGETS)
+	set -e; \
 	for testobj in $(TARGETS); do  \
 		./$$testobj; \
 	done

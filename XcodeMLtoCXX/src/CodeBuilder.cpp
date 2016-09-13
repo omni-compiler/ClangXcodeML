@@ -8,11 +8,14 @@
 #include <libxml/xpath.h>
 #include "XMLString.h"
 #include "XMLWalker.h"
-#include "SymbolAnalyzer.h"
+#include "AttrProc.h"
+#include "Symbol.h"
 #include "XcodeMlType.h"
 #include "XcodeMlEnvironment.h"
 #include "TypeAnalyzer.h"
+#include "SourceInfo.h"
 #include "CodeBuilder.h"
+#include "SymbolBuilder.h"
 #include "LibXMLUtil.h"
 
 using CodeBuilder = XMLWalker<SourceInfo&, std::stringstream&>;
@@ -22,14 +25,12 @@ using CodeBuilder = XMLWalker<SourceInfo&, std::stringstream&>;
  * \pre \c node is <globalSymbols> or <symbols> element.
  */
 SymbolEntry parseSymbols(xmlNodePtr node, xmlXPathContextPtr ctxt) {
-  xmlXPathObjectPtr xpathObj = xmlXPathNodeEval(node, BAD_CAST "id", ctxt);
-  if (xpathObj == nullptr) {
+  if (!node) {
     return SymbolEntry();
   }
-  const size_t len = (xpathObj->nodesetval)? xpathObj->nodesetval->nodeNr:0;
   SymbolEntry entry;
-  for (size_t i = 0; i < len; ++i) {
-    xmlNodePtr idElem = xpathObj->nodesetval->nodeTab[i];
+  auto idElems = findNodes(node, "id", ctxt);
+  for (auto idElem : idElems) {
     xmlNodePtr nameElem = findFirst(idElem, "name", ctxt);
     XMLString type(xmlGetProp(idElem, BAD_CAST "type"));
     XMLString name(xmlNodeGetContent(nameElem));
@@ -94,7 +95,9 @@ SymbolMap parseGlobalSymbols(xmlDocPtr doc) {
 /*!
  * \brief Define new CodeBuilder::Procedure named \c name.
  */
-#define DEFINE_CB(name) void name(CB_ARGS)
+#define DEFINE_CB(name) static void name(CB_ARGS)
+
+DEFINE_CB(NullProc) {}
 
 DEFINE_CB(EmptyProc) {
   w.walkChildren(node, src, ss);
@@ -227,31 +230,7 @@ const CodeBuilder::Procedure handleScope =
   handleSymTableStack(
   EmptyProc)));
 
-DEFINE_CB(outputReturnTypeAndName) {
-  xmlNodePtr nameElem = findFirst(
-      node,
-      "name|operator|constructor|destructor",
-      src.ctxt
-  );
-  XMLString name(xmlNodeGetContent(nameElem));
-
-  XMLString kind(nameElem->name);
-  if (kind == "name" || kind == "operator") {
-    outputIndentation(w, node, src, ss);
-    auto fnTypeName = findSymbolType(src.symTable, name);
-    auto returnType = src.typeTable.getReturnType(fnTypeName);
-    ss << TypeRefToString(returnType, src.typeTable)
-      << " " << name;
-  } else if (kind == "constructor") {
-    ss << "<constructor>";
-  } else if (kind == "destructor") {
-    ss << "<destructor>";
-  } else {
-    assert(false);
-  }
-}
-
-DEFINE_CB(outputParamsAndBody) {
+DEFINE_CB(outputParams) {
   ss << "(";
 
   bool alreadyPrinted = false;
@@ -263,14 +242,50 @@ DEFINE_CB(outputParamsAndBody) {
     ss << makeDecl(paramType, p.first, src.typeTable);
     alreadyPrinted = true;
   }
-  ss << ")" << std::endl;
+  ss << ")";
+}
+
+DEFINE_CB(functionDefinitionProc) {
+  xmlNodePtr nameElem = findFirst(
+      node,
+      "name|operator|constructor|destructor",
+      src.ctxt
+  );
+  const XMLString name(xmlNodeGetContent(nameElem));
+  const XMLString kind(nameElem->name);
+  std::stringstream declarator;
+  if (kind == "name" || kind == "operator") {
+    declarator << name;
+  } else if (kind == "constructor") {
+    declarator << "<constructor>";
+  } else if (kind == "destructor") {
+    declarator << "<destructor>";
+  } else {
+    assert(false);
+  }
+  /*
+   * Traverse parameter list of the functionDefinition element
+   * instead of simply using Function::makeDeclaration(...).
+   */
+  (handleSymTableStack(outputParams))(w, node, src, declarator);
+  outputIndentation(w, node, src, ss);
+  if (kind == "constructor" || kind == "destructor") {
+    // Constructor and destructor have no return type.
+    ss << declarator.str();
+  } else {
+    const auto fnTypeName = findSymbolType(src.symTable, name);
+    auto returnType = src.typeTable.getReturnType(fnTypeName);
+    ss << makeDecl(returnType, declarator.str(), src.typeTable);
+  }
   w.walkChildren(node, src, ss);
 }
 
-const CodeBuilder::Procedure functionDefinitionProc = merge(
-    static_cast<CodeBuilder::Procedure>(outputReturnTypeAndName),
-    handleSymTableStack(outputParamsAndBody)
-);
+DEFINE_CB(functionDeclProc) {
+  const auto name = getNameFromIdNode(node, src.ctxt);
+  const auto fnType = getIdentType(src, name);
+  ss << makeDecl(fnType, name, src.typeTable)
+     << ";" << std::endl;
+}
 
 DEFINE_CB(memberRefProc) {
   w.walkChildren(node, src, ss);
@@ -405,7 +420,9 @@ DEFINE_CB(varDeclProc) {
 }
 
 const CodeBuilder CXXBuilder({
+  { "typeTable", NullProc },
   { "functionDefinition", functionDefinitionProc },
+  { "functionDecl", functionDeclProc },
   { "intConstant", EmptySNCProc },
   { "moeConstant", EmptySNCProc },
   { "booleanConstant", EmptySNCProc },
@@ -475,5 +492,7 @@ void buildCode(xmlDocPtr doc, std::stringstream& ss) {
   }
   ss << "// end of forward declarations" << std::endl << std::endl;
 
+  xmlNodePtr globalSymbols = findFirst(xmlDocGetRootElement(doc), "/XcodeProgram/globalSymbols", src.ctxt);
+  buildSymbols(globalSymbols, src, ss);
   CXXBuilder.walkAll(xmlDocGetRootElement(doc), src, ss);
 }
