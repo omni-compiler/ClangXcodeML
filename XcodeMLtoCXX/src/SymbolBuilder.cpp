@@ -44,8 +44,11 @@ static void emitStructDefinition(
   ss << "struct " << structType->tagName() << "{" << std::endl;
   for (auto member : structType->members()) {
     const auto memberType = src.typeTable.at(member.type());
-    ss << makeDecl(memberType, member.name(), src.typeTable)
-       << ";" << std::endl;
+    ss << makeDecl(memberType, member.name(), src.typeTable);
+    if (member.isBitField()) {
+      ss << " : " << member.getSize();
+    }
+    ss << ";" << std::endl;
   }
   ss << "};" << std::endl;
 }
