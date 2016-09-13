@@ -30,6 +30,8 @@ int main(int argc, char** argv) {
   std::stringstream ss;
   buildCode(root, ctxt, ss);
   std::cout << ss.str() << std::endl;
+  xmlXPathFreeContext(ctxt);
+  xmlFreeDoc(doc);
   return 0;
 }
 
