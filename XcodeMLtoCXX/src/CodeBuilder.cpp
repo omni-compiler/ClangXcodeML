@@ -281,8 +281,7 @@ DEFINE_CB(functionDefinitionProc) {
 }
 
 DEFINE_CB(functionDeclProc) {
-  xmlNodePtr nameNode = findFirst(node, "name", src.ctxt);
-  XMLString name = xmlNodeGetContent(nameNode);
+  const auto name = getNameFromIdNode(node, src.ctxt);
   const auto fnType = getIdentType(src, name);
   ss << makeDecl(fnType, name, src.typeTable)
      << ";" << std::endl;
