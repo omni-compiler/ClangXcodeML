@@ -24,7 +24,7 @@ using SymbolBuilder = AttrProc<SourceInfo&, std::stringstream&>;
                 SourceInfo& src __attribute__((unused)), \
                 std::stringstream& ss __attribute__((unused))
 
-#define DEFINE_SB(name) void name(SB_ARGS)
+#define DEFINE_SB(name) static void name(SB_ARGS)
 
 DEFINE_SB(typedefNameProc) {
   const auto alias = getNameFromIdNode(node, src.ctxt);

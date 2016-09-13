@@ -95,7 +95,7 @@ SymbolMap parseGlobalSymbols(xmlDocPtr doc) {
 /*!
  * \brief Define new CodeBuilder::Procedure named \c name.
  */
-#define DEFINE_CB(name) void name(CB_ARGS)
+#define DEFINE_CB(name) static void name(CB_ARGS)
 
 DEFINE_CB(NullProc) {}
 

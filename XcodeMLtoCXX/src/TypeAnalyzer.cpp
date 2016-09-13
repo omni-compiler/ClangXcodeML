@@ -31,7 +31,7 @@ using TypeAnalyzer = XMLWalker<xmlXPathContextPtr, XcodeMl::Environment&>;
 /*!
  * \brief Define new TypeAnalyzer::Procedure named \c name.
  */
-#define DEFINE_TA(name) void name(TA_ARGS)
+#define DEFINE_TA(name) static void name(TA_ARGS)
 
 DEFINE_TA(basicTypeProc) {
   XMLString signified = xmlGetProp(node, BAD_CAST "name");
