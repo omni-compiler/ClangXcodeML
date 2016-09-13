@@ -279,7 +279,9 @@ DEFINE_CB(functionDefinitionProc) {
     auto returnType = src.typeTable.getReturnType(fnTypeName);
     ss << makeDecl(returnType, declarator.str(), src.typeTable);
   }
+  ss << "{" << std::endl;
   w.walkChildren(node, src, ss);
+  ss << "}" << std::endl;
 }
 
 DEFINE_CB(functionDeclProc) {
