@@ -491,13 +491,6 @@ void buildCode(
     XcodeMl::TypeRef ref = src.typeTable[t];
     if (ref) {
       ss << "// " << ref << ":" << ref->makeDeclaration("X", src.typeTable) << std::endl;
-      switch (typeKind(ref)) {
-      case XcodeMl::TypeKind::Struct:
-	ss << "struct " << t << ";" << std::endl;
-	break;
-      default:
-	break;
-      }
     } else {
       ss << "// null ref" << std::endl;
     }
