@@ -9,12 +9,14 @@
 #include <libxml/parser.h>
 #include <libxml/xpath.h>
 #include <libxml/xpathInternals.h>
+#include "llvm/Support/Casting.h"
 #include "LibXMLUtil.h"
 #include "XMLString.h"
 #include "XMLWalker.h"
-#include "SymbolAnalyzer.h"
+#include "Symbol.h"
 #include "XcodeMlType.h"
 #include "XcodeMlEnvironment.h"
+#include "SymbolAnalyzer.h"
 #include "TypeAnalyzer.h"
 
 using TypeAnalyzer = XMLWalker<xmlXPathContextPtr, XcodeMl::Environment&>;
@@ -29,19 +31,26 @@ using TypeAnalyzer = XMLWalker<xmlXPathContextPtr, XcodeMl::Environment&>;
 /*!
  * \brief Define new TypeAnalyzer::Procedure named \c name.
  */
-#define DEFINE_TA(name) void name(TA_ARGS)
+#define DEFINE_TA(name) static void name(TA_ARGS)
 
 DEFINE_TA(basicTypeProc) {
   XMLString signified = xmlGetProp(node, BAD_CAST "name");
-  auto signifiedType = map[signified];
   XMLString signifier(xmlGetProp(node, BAD_CAST "type"));
-  map[signifier] = signifiedType;
+  map[signifier] = XcodeMl::makeReservedType(
+      signifier,
+      signified,
+      isTrueProp(node, "is_const", false),
+      isTrueProp(node, "is_volatile", false)
+  );
 }
 
 DEFINE_TA(pointerTypeProc) {
   XMLString refName = xmlGetProp(node, BAD_CAST "ref");
   XMLString name(xmlGetProp(node, BAD_CAST "type"));
-  map[name] = XcodeMl::makePointerType(name, refName);
+  auto pointer = XcodeMl::makePointerType(name, refName);
+  pointer->setConst(isTrueProp(node, "is_const", false));
+  pointer->setVolatile(isTrueProp(node, "is_volatile", false));
+  map[name] = pointer;
 }
 
 DEFINE_TA(functionTypeProc) {
@@ -65,53 +74,93 @@ DEFINE_TA(functionTypeProc) {
 }
 
 DEFINE_TA(arrayTypeProc) {
+  using XcodeMl::Array;
+
   XMLString elemName = xmlGetProp(node, BAD_CAST "element_type");
-  auto elemType = map[elemName];
   XMLString name(xmlGetProp(node, BAD_CAST "type"));
-  map[name] = XcodeMl::makeArrayType(name, elemType, 0);
+
+  const Array::Size size = [node]() {
+    if (!xmlHasProp(node, BAD_CAST "array_size")) {
+      return Array::Size::makeVariableSize();
+    }
+    const XMLString size_prop = xmlGetProp(node, BAD_CAST "array_size");
+    return size_prop == "*" ?
+      Array::Size::makeVariableSize() :
+      Array::Size::makeIntegerSize(std::stoi(size_prop));
+  }();
+
+  auto array = XcodeMl::makeArrayType(name, elemName, size);
+  array->setConst(isTrueProp(node, "is_const", false));
+  array->setVolatile(isTrueProp(node, "is_volatile", false));
+  map[name] = array;
+}
+
+static XcodeMl::Struct::Member makeMember(xmlNodePtr idNode) {
+  XMLString type = xmlGetProp(idNode, BAD_CAST "type");
+  XMLString name = xmlNodeGetContent(xmlFirstElementChild(idNode));
+  if (!xmlHasProp(idNode, BAD_CAST "bit_field")) {
+    return XcodeMl::Struct::Member(type, name);
+  }
+  XMLString bit_size = xmlGetProp(idNode, BAD_CAST "bit_field");
+  if (!isNaturalNumber(bit_size)) {
+    return XcodeMl::Struct::Member(type, name);
+      // FIXME: Don't ignore <bitField> element
+  }
+  return XcodeMl::Struct::Member(type, name, std::stoi(bit_size));
 }
 
 DEFINE_TA(structTypeProc) {
-  // under construction
   XMLString elemName = xmlGetProp(node, BAD_CAST "type");
-  //xmlNodePtr symTab = findFirst(node, "../" xpathCtx)
-  SymbolMap fields;
-
-  map[elemName] = XcodeMl::makeStructType(
-      elemName, elemName, "", std::move(fields));
+  std::vector<XcodeMl::Struct::Member> fields;
+  const auto symbols = findNodes(node, "symbols/id", ctxt);
+  for (auto& symbol : symbols) {
+    fields.push_back(makeMember(symbol));
+  }
+  map[elemName] = XcodeMl::makeStructType(elemName, "", fields);
 }
 
-const std::vector<std::string> dataTypeIdents = {
+const std::vector<std::string> identicalFndDataTypeIdents = {
   "void",
   "char",
   "short",
   "int",
   "long",
-  "long_long",
-  "unsigned_char",
-  "unsigned_short",
   "unsigned",
-  "unsigned_long",
-  "unsigned_long_long",
   "float",
   "double",
-  "long_double",
   "wchar_t",
   "char16_t",
   "char32_t",
   "bool",
 };
 
+const std::vector<std::tuple<std::string, std::string>>
+nonidenticalFndDataTypeIdents = {
+  std::make_tuple("long_long", "long long"),
+  std::make_tuple("unsigned_char", "unsigned char"),
+  std::make_tuple("unsigned_short", "unsigned short"),
+  std::make_tuple("unsigned_int", "unsigned int"),
+    // out of specification
+  std::make_tuple("unsigned_long", "unsigned long"),
+  std::make_tuple("unsigned_long_long", "unsigned long long"),
+  std::make_tuple("long_double", "long double"),
+};
+
 /*!
  * \brief Mapping from Data type identifiers to basic data types.
  */
-const XcodeMl::Environment dataTypeIdentMap = [](const std::vector<std::string>& keys) {
+const XcodeMl::Environment FundamentalDataTypeIdentMap = []() {
   XcodeMl::Environment map;
-  for (std::string key : keys) {
+  for (std::string key : identicalFndDataTypeIdents) {
     map[key] = XcodeMl::makeReservedType(key, key);
   }
+  for (auto p : nonidenticalFndDataTypeIdents) {
+    std::string ident, type_name;
+    std::tie(ident, type_name) = p;
+    map[ident] = XcodeMl::makeReservedType(ident, type_name);
+  }
   return map;
-}(dataTypeIdents);
+}();
 
 const TypeAnalyzer XcodeMLTypeAnalyzer({
   { "basicType", basicTypeProc },
@@ -125,27 +174,29 @@ const TypeAnalyzer XcodeMLTypeAnalyzer({
  * \brief Traverse an XcodeML document and make mapping from data
  * type identifiers to data types defined in it.
  */
-XcodeMl::Environment parseTypeTable(xmlDocPtr doc) {
-  if (doc == nullptr) {
-    return XcodeMl::Environment();
-  }
-  xmlXPathContextPtr xpathCtx = xmlXPathNewContext(doc);
-  if (xpathCtx == nullptr) {
-    return XcodeMl::Environment();
-  }
+XcodeMl::Environment parseTypeTable(
+    xmlNodePtr rootNode,
+    xmlXPathContextPtr xpathCtx,
+    std::stringstream&
+) {
   xmlXPathObjectPtr xpathObj = xmlXPathEvalExpression(
       BAD_CAST "/XcodeProgram/typeTable/*",
       xpathCtx);
   if (xpathObj == nullptr) {
-    xmlXPathFreeContext(xpathCtx);
     return XcodeMl::Environment();
   }
   const size_t len = length(xpathObj);
-  XcodeMl::Environment map(dataTypeIdentMap);
+  XcodeMl::Environment map(FundamentalDataTypeIdentMap);
   for (size_t i = 0; i < len; ++i) {
     xmlNodePtr node = nth(xpathObj, i);
     XcodeMLTypeAnalyzer.walk(node, xpathCtx, map);
   }
+  xmlXPathFreeObject(xpathObj);
+  xmlNodePtr globalSymbols = findFirst(
+      rootNode,
+      "/XcodeProgram/globalSymbols",
+      xpathCtx);
+  analyzeSymbols(globalSymbols, xpathCtx, map);
   return map;
 }
 

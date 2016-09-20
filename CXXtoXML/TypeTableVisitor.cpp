@@ -1,5 +1,5 @@
-#include "XcodeMlVisitorBase.h"
-#include "SymbolsVisitor.h"
+#include "XMLVisitorBase.h"
+#include "DeclarationsVisitor.h"
 #include "TypeTableVisitor.h"
 
 #include <iostream>
@@ -14,20 +14,20 @@ using namespace llvm;
 static cl::opt<bool>
 OptTraceTypeTable("trace-typeTable",
                   cl::desc("emit traces on <typeTable>"),
-                  cl::cat(C2XcodeMLCategory));
+                  cl::cat(CXX2XMLCategory));
 static cl::opt<bool>
 OptFullTraceTypeTable("fulltrace-typeTable",
                       cl::desc("emit full-traces on <typeTable>"),
-                      cl::cat(C2XcodeMLCategory));
+                      cl::cat(CXX2XMLCategory));
 static cl::opt<bool>
 OptDisableTypeTable("disable-typeTable",
                     cl::desc("disable <typeTable>"),
-                    cl::cat(C2XcodeMLCategory));
+                    cl::cat(CXX2XMLCategory));
 
 static cl::opt<std::string>
 OptTypeNameMap("typenamemap",
                cl::desc("a map file of typename substitution"),
-               cl::cat(C2XcodeMLCategory));
+               cl::cat(CXX2XMLCategory));
 
 static std::ifstream mapfile;
 static bool map_is_already_set = false;
@@ -668,8 +668,8 @@ TypeTableVisitor::PreVisitDecl(Decl *D) {
         newComment("PreVisitDecl::Enum(withDef)");
         typetableinfo->registerType(T, &tmpNode, curNode);
         TraverseChildOfDecl(D);
-        SymbolsVisitor SV(mangleContext, tmpNode, "symbols", typetableinfo);
-        SV.TraverseChildOfDecl(D);
+        DeclarationsVisitor DV(mangleContext, tmpNode, "symbols", typetableinfo);
+        DV.TraverseChildOfDecl(D);
         return false;
       } else {
         // just allocate a name.
@@ -693,7 +693,8 @@ TypeTableVisitor::PreVisitDecl(Decl *D) {
         newComment((comment + "(withDef)").c_str());
         typetableinfo->registerType(T, &tmpNode, curNode);
         curNode = tmpNode;
-        addName(TD, TD->getNameAsString().c_str());
+        addChild("name", TD->getNameAsString().c_str());
+
         CXXRecordDecl *RD(dyn_cast<CXXRecordDecl>(D));
         if (RD && RD->bases_begin() != RD->bases_end()) {
           for (auto base : RD->bases()) {
@@ -713,20 +714,21 @@ TypeTableVisitor::PreVisitDecl(Decl *D) {
           }
           xmlAddChild(tmpNode, basesNode);
         }
-        if (RD && isNested(*RD)) {
+        std::string class_name(RD->getName());
+        if (isNested(*RD)) {
           /* neither enblaced classes nor enblacing classes are normalizable */
           RecordDecl* enclosure(D->getDeclContext()->getOuterLexicalRecordContext());
           QualType enclosureType(enclosure->getTypeForDecl(), 0);
           typetableinfo->setNormalizability(enclosureType, false);
           typetableinfo->setNormalizability(T, false);
-        } else if (RD && (RD->isLocalClass() || RD->getName().empty())) {
+        } else if (RD->isLocalClass() || class_name.empty()) {
           typetableinfo->setNormalizability(T, false);
         } else {
           typetableinfo->setNormalizability(T, true);
         }
         TraverseChildOfDecl(D);
-        SymbolsVisitor SV(mangleContext, tmpNode, "symbols", typetableinfo);
-        SV.TraverseChildOfDecl(D);
+        DeclarationsVisitor DV(mangleContext, tmpNode, "symbols", typetableinfo);
+        DV.TraverseChildOfDecl(D);
         return false;
       } else {
         // just allocate a name.
@@ -796,12 +798,6 @@ TypeTableVisitor::PreVisitDecl(Decl *D) {
         curNode = xmlNewNode(nullptr, BAD_CAST "dummy"); 
       }
       return true;
-#if 0
-      TraverseChildOfDecl(D);
-      SymbolsVisitor SV(mangleContext, tmpNode, "params", typetableinfo);
-      SV.TraverseChildOfDecl(D);
-      return false;
-#endif
     }
   case Decl::MSProperty: return true;
   case Decl::NonTypeTemplateParm: return true;

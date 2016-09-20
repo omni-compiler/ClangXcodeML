@@ -4,7 +4,7 @@
 #include <map>
 #include <memory>
 #include <cassert>
-#include "SymbolAnalyzer.h"
+#include "Symbol.h"
 #include "XcodeMlType.h"
 #include "XcodeMlEnvironment.h"
 
@@ -23,6 +23,14 @@ namespace XcodeMl {
       keys.push_back(dataTypeIdent);
     }
     return map[dataTypeIdent];
+  }
+
+  const TypeRef& Environment::at(const std::string& dataTypeIdent) const {
+    return map.at(dataTypeIdent);
+  }
+
+  TypeRef& Environment::at(const std::string& dataTypeIdent) {
+    return map.at(dataTypeIdent);
   }
 
   const TypeRef& Environment::getReturnType(

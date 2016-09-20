@@ -34,16 +34,25 @@ std::string TypeRefToString(TypeRef, const Environment& env);
  */
 class Type {
 public:
-  Type(DataTypeIdent);
+  Type(TypeKind, DataTypeIdent, bool = false, bool = false);
   virtual ~Type() = 0;
-  friend TypeKind typeKind(TypeRef);
-protected:
-  virtual TypeKind getKind() = 0;
-public:
+  virtual Type* clone() const = 0;
   virtual std::string makeDeclaration(std::string, const Environment&) = 0;
+  virtual std::string addConstQualifier(std::string) const;
+  virtual std::string addVolatileQualifier(std::string) const;
+  bool isConst() const;
+  bool isVolatile() const;
+  void setConst(bool);
+  void setVolatile(bool);
   DataTypeIdent dataTypeIdent();
+  TypeKind getKind() const;
+protected:
+  Type(const Type&);
 private:
+  TypeKind kind;
   DataTypeIdent ident;
+  bool constness;
+  bool volatility;
 };
 
 class Reserved : public Type {
@@ -51,8 +60,11 @@ public:
   Reserved(DataTypeIdent, std::string);
   std::string makeDeclaration(std::string, const Environment&) override;
   ~Reserved() override;
+  Type* clone() const override;
+  static bool classof(const Type *);
+protected:
+  Reserved(const Reserved&);
 private:
-  TypeKind getKind() override;
   std::string name;
 };
 
@@ -62,8 +74,11 @@ public:
   Pointer(DataTypeIdent, DataTypeIdent);
   std::string makeDeclaration(std::string, const Environment&) override;
   ~Pointer() override;
+  Type* clone() const override;
+  static bool classof(const Type *);
+protected:
+  Pointer(const Pointer&);
 private:
-  TypeKind getKind() override;
   DataTypeIdent ref;
 };
 
@@ -74,41 +89,104 @@ public:
   Function(DataTypeIdent, TypeRef, const Params&);
   std::string makeDeclaration(std::string, const Environment&) override;
   ~Function() override;
+  Type* clone() const override;
+  static bool classof(const Type *);
+protected:
+  Function(const Function&);
 private:
-  TypeKind getKind() override;
   DataTypeIdent returnValue;
   Params params;
 };
 
 class Array : public Type {
 public:
-  Array(DataTypeIdent, TypeRef, size_t);
+  struct Size {
+    enum class Kind {
+      Integer,
+      Variable,
+      /* Expression, // FIXME: Unimplemented */
+    };
+    Kind kind;
+    size_t size;
+    static Size makeIntegerSize(size_t);
+    static Size makeVariableSize();
+  private:
+    Size(Kind, size_t);
+  };
+
+public:
+  Array(DataTypeIdent, DataTypeIdent, Size);
+  Array(DataTypeIdent, DataTypeIdent, size_t);
   std::string makeDeclaration(std::string, const Environment&) override;
   ~Array() override;
+  Type* clone() const override;
+  std::string addConstQualifier(std::string) const override;
+  std::string addVolatileQualifier(std::string) const override;
+  static bool classof(const Type *);
+protected:
+  Array(const Array&);
 private:
-  TypeKind getKind() override;
   DataTypeIdent element;
-  std::shared_ptr<size_t> size;
+  Size size;
 };
 
 class Struct : public Type {
 public:
-  Struct(DataTypeIdent, std::string, std::string, SymbolMap &&);
+  class BitSize { /* represents a size of bit-field */
+  public:
+    BitSize();
+    BitSize(size_t);
+    bool isValid() const;
+    size_t size() const;
+  private:
+    bool valid;
+    size_t size_;
+  };
+
+  class Member {
+  public:
+    Member() = delete;
+    Member(const std::string&, const std::string&);
+    Member(const std::string&, const std::string&, size_t);
+    Member(const Member&) = default;
+    ~Member() = default;
+    std::string type() const;
+    std::string name() const;
+    bool isBitField() const;
+    size_t getSize() const;
+  private:
+    std::string dataTypeIdent;
+    std::string name_;
+    BitSize size;
+  };
+  using MemberList = std::vector<Member>;
+
+public:
+  Struct(const DataTypeIdent&, const std::string&, const MemberList&);
   std::string makeDeclaration(std::string, const Environment&) override;
   ~Struct() override;
+  Type* clone() const override;
+  void setTagName(const std::string&);
+  MemberList members() const;
+  std::string tagName() const;
+  static bool classof(const Type *);
+protected:
+  Struct(const Struct&);
 private:
-  std::string name;
   std::string tag;
-  SymbolMap fields;
-  TypeKind getKind() override;
+  MemberList fields;
 };
 
-TypeRef makeReservedType(DataTypeIdent, std::string);
+TypeRef makeReservedType(DataTypeIdent, std::string, bool = false, bool = false);
 TypeRef makePointerType(DataTypeIdent, TypeRef);
 TypeRef makePointerType(DataTypeIdent, DataTypeIdent);
 TypeRef makeFunctionType(DataTypeIdent, TypeRef, const Function::Params&);
 TypeRef makeArrayType(DataTypeIdent, TypeRef, size_t);
-TypeRef makeStructType(DataTypeIdent, std::string, std::string, SymbolMap &&);
+TypeRef makeArrayType(DataTypeIdent, TypeRef, size_t);
+TypeRef makeArrayType(DataTypeIdent, TypeRef, Array::Size);
+TypeRef makeArrayType(DataTypeIdent, DataTypeIdent, Array::Size);
+TypeRef makeArrayType(DataTypeIdent, DataTypeIdent, size_t);
+TypeRef makeStructType(const DataTypeIdent&, const std::string&, const Struct::MemberList&);
 
 }
 #endif /* !XCODEMLTYPE_H */

@@ -11,6 +11,8 @@ namespace XcodeMl {
   public:
     const TypeRef& operator[](const std::string&) const;
     TypeRef& operator[](const std::string&);
+    const TypeRef& at(const std::string&) const;
+    TypeRef& at(const std::string&);
     const TypeRef& getReturnType(const std::string&) const;
     void setReturnType(const std::string&, const TypeRef&);
     const std::vector<std::string>& getKeys(void) const;

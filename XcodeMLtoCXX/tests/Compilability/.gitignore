@@ -1,0 +1,4 @@
+*.dst.cpp
+*.dst.c
+*.CasXcodeML
+*.CXXasXcodeML
