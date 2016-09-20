@@ -15,5 +15,6 @@ xmlNodePtr nth(xmlXPathObjectPtr obj, size_t n);
 /* Utility for XcodeML */
 bool isTrueProp(xmlNodePtr node, const char* name, bool default_value);
 std::string getNameFromIdNode(xmlNodePtr idNode, xmlXPathContextPtr ctxt);
+bool isNaturalNumber(const std::string&);
 
 #endif /* !LIBXMLUTIL_H */

@@ -2,7 +2,6 @@
 
 all:
 	$(MAKE) -C src
-	mv src/XcodeMLtoCXX .
 
 check:
 	$(MAKE) -C tests

@@ -98,7 +98,15 @@ DEFINE_TA(arrayTypeProc) {
 static XcodeMl::Struct::Member makeMember(xmlNodePtr idNode) {
   XMLString type = xmlGetProp(idNode, BAD_CAST "type");
   XMLString name = xmlNodeGetContent(xmlFirstElementChild(idNode));
-  return XcodeMl::Struct::Member(type, name);
+  if (!xmlHasProp(idNode, BAD_CAST "bit_field")) {
+    return XcodeMl::Struct::Member(type, name);
+  }
+  XMLString bit_size = xmlGetProp(idNode, BAD_CAST "bit_field");
+  if (!isNaturalNumber(bit_size)) {
+    return XcodeMl::Struct::Member(type, name);
+      // FIXME: Don't ignore <bitField> element
+  }
+  return XcodeMl::Struct::Member(type, name, std::stoi(bit_size));
 }
 
 DEFINE_TA(structTypeProc) {
@@ -166,19 +174,15 @@ const TypeAnalyzer XcodeMLTypeAnalyzer({
  * \brief Traverse an XcodeML document and make mapping from data
  * type identifiers to data types defined in it.
  */
-XcodeMl::Environment parseTypeTable(xmlDocPtr doc) {
-  if (doc == nullptr) {
-    return XcodeMl::Environment();
-  }
-  xmlXPathContextPtr xpathCtx = xmlXPathNewContext(doc);
-  if (xpathCtx == nullptr) {
-    return XcodeMl::Environment();
-  }
+XcodeMl::Environment parseTypeTable(
+    xmlNodePtr rootNode,
+    xmlXPathContextPtr xpathCtx,
+    std::stringstream&
+) {
   xmlXPathObjectPtr xpathObj = xmlXPathEvalExpression(
       BAD_CAST "/XcodeProgram/typeTable/*",
       xpathCtx);
   if (xpathObj == nullptr) {
-    xmlXPathFreeContext(xpathCtx);
     return XcodeMl::Environment();
   }
   const size_t len = length(xpathObj);
@@ -189,7 +193,7 @@ XcodeMl::Environment parseTypeTable(xmlDocPtr doc) {
   }
   xmlXPathFreeObject(xpathObj);
   xmlNodePtr globalSymbols = findFirst(
-      xmlDocGetRootElement(doc),
+      rootNode,
       "/XcodeProgram/globalSymbols",
       xpathCtx);
   analyzeSymbols(globalSymbols, xpathCtx, map);

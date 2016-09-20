@@ -34,7 +34,10 @@ SymbolEntry parseSymbols(xmlNodePtr node, xmlXPathContextPtr ctxt) {
     xmlNodePtr nameElem = findFirst(idElem, "name", ctxt);
     XMLString type(xmlGetProp(idElem, BAD_CAST "type"));
     XMLString name(xmlNodeGetContent(nameElem));
-    entry[name] = type;
+    if (!static_cast<std::string>(name).empty()) {
+      // Ignore unnamed parameters such as <name type="int"/>
+      entry[name] = type;
+    }
   }
   return entry;
 }
@@ -65,19 +68,15 @@ XcodeMl::TypeRef getIdentType(const SourceInfo& src, const std::string& ident) {
   return src.typeTable[dataTypeIdent];
 }
 
-SymbolMap parseGlobalSymbols(xmlDocPtr doc) {
-  if (doc == nullptr) {
-    return SymbolMap();
-  }
-  xmlXPathContextPtr xpathCtx = xmlXPathNewContext(doc);
-  if (xpathCtx == nullptr) {
-    return SymbolMap();
-  }
+SymbolMap parseGlobalSymbols(
+    xmlNodePtr,
+    xmlXPathContextPtr xpathCtx,
+    std::stringstream&
+) {
   xmlXPathObjectPtr xpathObj = xmlXPathEvalExpression(
       BAD_CAST "/XcodeProgram/globalSymbols",
       xpathCtx);
   if (xpathObj == nullptr) {
-    xmlXPathFreeContext(xpathCtx);
     return SymbolMap();
   }
   assert(xpathObj->nodesetval->nodeTab[0]);
@@ -234,12 +233,15 @@ DEFINE_CB(outputParams) {
   ss << "(";
 
   bool alreadyPrinted = false;
-  for (auto p : src.symTable.back()) {
+  const auto params = findNodes(node, "params/name", src.ctxt);
+  for (auto p : params) {
     if (alreadyPrinted) {
       ss << ", ";
     }
-    auto paramType(getIdentType(src, p.first));
-    ss << makeDecl(paramType, p.first, src.typeTable);
+    XMLString name = xmlNodeGetContent(p);
+    XMLString typeName = xmlGetProp(p, BAD_CAST "type");
+    const auto paramType = src.typeTable.at(typeName);
+    ss << makeDecl(paramType, name, src.typeTable);
     alreadyPrinted = true;
   }
   ss << ")";
@@ -277,7 +279,9 @@ DEFINE_CB(functionDefinitionProc) {
     auto returnType = src.typeTable.getReturnType(fnTypeName);
     ss << makeDecl(returnType, declarator.str(), src.typeTable);
   }
+  ss << "{" << std::endl;
   w.walkChildren(node, src, ss);
+  ss << "}" << std::endl;
 }
 
 DEFINE_CB(functionDeclProc) {
@@ -456,6 +460,10 @@ const CodeBuilder CXXBuilder({
   { "exprStatement", showChildElem("", ";\n") },
   { "returnStatement", returnStatementProc },
   { "varDecl", varDeclProc },
+
+  /* for CtoXcodeML */
+  { "Decl_Record", NullProc },
+    // Ignore Decl_Record (structs are already emitted)
 });
 
 /*!
@@ -463,11 +471,15 @@ const CodeBuilder CXXBuilder({
  * \param[in] doc XcodeML document.
  * \param[out] ss Stringstream to flush C++ source code.
  */
-void buildCode(xmlDocPtr doc, std::stringstream& ss) {
+void buildCode(
+    xmlNodePtr rootNode,
+    xmlXPathContextPtr ctxt,
+    std::stringstream& ss
+) {
   SourceInfo src = {
-    xmlXPathNewContext(doc),
-    parseTypeTable(doc),
-    parseGlobalSymbols(doc),
+    ctxt,
+    parseTypeTable(rootNode, ctxt, ss),
+    parseGlobalSymbols(rootNode, ctxt, ss),
     0
   };
 
@@ -479,20 +491,13 @@ void buildCode(xmlDocPtr doc, std::stringstream& ss) {
     XcodeMl::TypeRef ref = src.typeTable[t];
     if (ref) {
       ss << "// " << ref << ":" << ref->makeDeclaration("X", src.typeTable) << std::endl;
-      switch (typeKind(ref)) {
-      case XcodeMl::TypeKind::Struct:
-	ss << "struct " << t << ";" << std::endl;
-	break;
-      default:
-	break;
-      }
     } else {
       ss << "// null ref" << std::endl;
     }
   }
   ss << "// end of forward declarations" << std::endl << std::endl;
 
-  xmlNodePtr globalSymbols = findFirst(xmlDocGetRootElement(doc), "/XcodeProgram/globalSymbols", src.ctxt);
+  xmlNodePtr globalSymbols = findFirst(rootNode, "/XcodeProgram/globalSymbols", src.ctxt);
   buildSymbols(globalSymbols, src, ss);
-  CXXBuilder.walkAll(xmlDocGetRootElement(doc), src, ss);
+  CXXBuilder.walkAll(rootNode, src, ss);
 }

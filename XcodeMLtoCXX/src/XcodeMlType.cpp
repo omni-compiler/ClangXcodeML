@@ -8,7 +8,6 @@
 #include "Symbol.h"
 #include "XcodeMlType.h"
 #include "XcodeMlEnvironment.h"
-#include "TypeAnalyzer.h"
 #include "llvm/Support/Casting.h"
 
 #include <iostream>
