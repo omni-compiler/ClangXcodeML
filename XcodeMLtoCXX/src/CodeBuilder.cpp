@@ -302,9 +302,15 @@ DEFINE_CB(functionDefinitionProc) {
 
 DEFINE_CB(functionDeclProc) {
   const auto name = getNameFromIdNode(node, src.ctxt);
-  const auto fnType = getIdentType(src, name);
-  ss << makeDecl(fnType, name, src.typeTable)
-     << ";" << std::endl;
+  try {
+    const auto fnType = getIdentType(src, name);
+    ss << makeDecl(fnType, name, src.typeTable)
+       << ";" << std::endl;
+  } catch (const std::runtime_error& e) {
+    ss << "/* In <functionDecl>: "
+       << e.what()
+       << " */" << std::endl;
+  }
 }
 
 DEFINE_CB(memberRefProc) {
