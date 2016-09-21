@@ -379,16 +379,16 @@ void TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr tra
 
   case Type::Record:
     rawname = registerRecordType(T);
-    if (T->isStructureType()) {
+    if (T->getAsCXXRecordDecl()){
+      // XXX: temporary implementation
+      Node = createNode(T, "classType", traversingNode);
+      classTypeNodes.push_back(Node);
+    } else if (T->isStructureType()) {
       Node = createNode(T, "structType", traversingNode);
       structTypeNodes.push_back(Node);
     } else if (T->isUnionType()) {
       Node = createNode(T, "unionType", traversingNode);
       unionTypeNodes.push_back(Node);
-    } else if (T->isClassType()) {
-      // XXX: temporary implementation
-      Node = createNode(T, "classType", traversingNode);
-      classTypeNodes.push_back(Node);
     } else {
       // XXX: temporary implementation
       Node = createNode(T, "unknownRecordType", traversingNode);
