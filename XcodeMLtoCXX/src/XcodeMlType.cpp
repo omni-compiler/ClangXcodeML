@@ -397,6 +397,45 @@ AccessSpec accessSpec_of_string(const std::string& as) {
   }
 }
 
+ClassType::ClassType(
+    const DataTypeIdent& ident,
+    const std::string& className,
+    const MemberList& members_):
+  Type(TypeKind::Class, ident),
+  name_(className),
+  fields(members_)
+{}
+
+std::string ClassType::makeDeclaration(
+    std::string var,
+    const Environment&
+) {
+  return name_ + " " + var;
+}
+
+Type* ClassType::clone() const {
+  ClassType* copy = new ClassType(*this);
+  return copy;
+}
+
+ClassType::MemberList ClassType::members() const {
+  return fields;
+}
+
+std::string ClassType::name() const {
+  return name_;
+}
+
+bool ClassType::classof(const Type *T) {
+  return T->getKind() == TypeKind::Class;
+}
+
+ClassType::ClassType(const ClassType& other):
+  Type(other),
+  name_(other.name_),
+  fields(other.fields)
+{}
+
 /*!
  * \brief Return the kind of \c type.
  */
