@@ -6,6 +6,7 @@
 #include <vector>
 #include <libxml/tree.h>
 #include <libxml/xpath.h>
+#include "llvm/Support/Casting.h"
 #include "XMLString.h"
 #include "XMLWalker.h"
 #include "AttrProc.h"
@@ -247,6 +248,21 @@ DEFINE_CB(outputParams) {
   ss << ")";
 }
 
+DEFINE_CB(emitClassDefinition) {
+  const XMLString typeName(xmlGetProp(node, BAD_CAST "type"));
+  const auto type = src.typeTable.at(typeName);
+  XcodeMl::ClassType* classType =
+    llvm::cast<XcodeMl::ClassType>(type.get());
+  ss << "class " << classType->name() << "{" << std::endl;
+  for (auto& member : classType->members()) {
+    ss << string_of_accessSpec(member.access) << ": ";
+    const auto memberType = src.typeTable.at(member.type);
+    ss << makeDecl(memberType, member.name, src.typeTable)
+       << ";" << std::endl;
+  }
+  ss << "};" << std::endl;
+}
+
 DEFINE_CB(functionDefinitionProc) {
   xmlNodePtr nameElem = findFirst(
       node,
@@ -460,6 +476,7 @@ const CodeBuilder CXXBuilder({
   { "exprStatement", showChildElem("", ";\n") },
   { "returnStatement", returnStatementProc },
   { "varDecl", varDeclProc },
+  { "classDecl", emitClassDefinition },
 
   /* for CtoXcodeML */
   { "Decl_Record", NullProc },
