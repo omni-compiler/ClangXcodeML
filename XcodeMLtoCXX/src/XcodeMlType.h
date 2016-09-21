@@ -22,6 +22,8 @@ enum class TypeKind {
   Array,
   /*! C-Style struct (3.xx <structType> element) */
   Struct,
+  /*! C++-style class */
+  Class,
 };
 
 TypeKind typeKind(TypeRef);
@@ -174,6 +176,39 @@ protected:
   Struct(const Struct&);
 private:
   std::string tag;
+  MemberList fields;
+};
+
+enum class AccessSpec {
+  Public,
+  Private,
+  Protected,
+};
+
+std::string string_of_accessSpec(AccessSpec);
+AccessSpec accessSpec_of_string(const std::string&);
+
+class ClassType : public Type {
+public:
+  struct Member {
+    std::string name;
+    std::string type;
+    AccessSpec access;
+  };
+  using MemberList = std::vector<Member>;
+
+public:
+  ClassType(const DataTypeIdent&, const std::string&, const MemberList&);
+  std::string makeDeclaration(std::string, const Environment&) override;
+  ~ClassType() override = default;
+  Type* clone() const override;
+  MemberList members() const;
+  std::string name() const;
+  static bool classof(const Type *);
+protected:
+  ClassType(const ClassType&);
+private:
+  std::string name_;
   MemberList fields;
 };
 

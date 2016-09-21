@@ -119,6 +119,39 @@ DEFINE_TA(structTypeProc) {
   map[elemName] = XcodeMl::makeStructType(elemName, "", fields);
 }
 
+static XcodeMl::ClassType::Member makeClassMember(
+    xmlNodePtr idNode,
+    xmlXPathContextPtr ctxt
+) {
+  using XcodeMl::AccessSpec;
+  XMLString type = xmlGetProp(idNode, BAD_CAST "type");
+  std::string name = getNameFromIdNode(idNode, ctxt);
+  XMLString access = xmlGetProp(idNode, BAD_CAST "access");
+  AccessSpec as;
+  if (access == "public") {
+    as = AccessSpec::Public;
+  } else if (access == "private") {
+    as = AccessSpec::Private;
+  } else if (access == "protected") {
+    as = AccessSpec::Protected;
+  } else {
+    assert(false);
+  }
+  return {name, type, as};
+}
+
+DEFINE_TA(classTypeProc) {
+  XMLString elemName = xmlGetProp(node, BAD_CAST "type");
+  std::string className = getNameFromIdNode(node, ctxt);
+  std::vector<XcodeMl::ClassType::Member> members;
+  const auto ids = findNodes(node, "symbols/id", ctxt);
+  for (auto& id : ids) {
+    members.push_back(makeClassMember(id, ctxt));
+  }
+  map[elemName] = std::make_shared<XcodeMl::ClassType>(
+      elemName, className, members);
+}
+
 const std::vector<std::string> identicalFndDataTypeIdents = {
   "void",
   "char",
@@ -168,6 +201,7 @@ const TypeAnalyzer XcodeMLTypeAnalyzer({
   { "functionType", functionTypeProc },
   { "arrayType", arrayTypeProc },
   { "structType", structTypeProc },
+  { "classType", classTypeProc },
 });
 
 /*!
