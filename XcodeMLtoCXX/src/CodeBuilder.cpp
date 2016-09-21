@@ -56,7 +56,7 @@ std::string findSymbolType(const SymbolMap& table, const std::string& name) {
       return result->second;
     }
   }
-  assert(false); /* due to constraint of parameters */
+  throw std::runtime_error(name + " not found");
 }
 
 /*!
