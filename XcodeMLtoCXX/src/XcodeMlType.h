@@ -177,6 +177,15 @@ private:
   MemberList fields;
 };
 
+enum class AccessSpec {
+  Public,
+  Private,
+  Protected,
+};
+
+std::string string_of_accessSpec(AccessSpec);
+AccessSpec accessSpec_of_string(const std::string&);
+
 TypeRef makeReservedType(DataTypeIdent, std::string, bool = false, bool = false);
 TypeRef makePointerType(DataTypeIdent, TypeRef);
 TypeRef makePointerType(DataTypeIdent, DataTypeIdent);

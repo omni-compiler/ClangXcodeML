@@ -366,6 +366,37 @@ size_t Struct::Member::getSize() const {
   return size.size();
 }
 
+std::string string_of_accessSpec(AccessSpec as) {
+  switch (as) {
+    case AccessSpec::Public:
+      return "public";
+    case AccessSpec::Private:
+      return "private";
+    case AccessSpec::Protected:
+      return "private";
+    default:
+      assert(false);
+  }
+}
+
+AccessSpec accessSpec_of_string(const std::string& as) {
+  if (as == "public") {
+    return AccessSpec::Public;
+  } else if (as == "private") {
+    return AccessSpec::Private;
+  } else if (as == "protected") {
+    return AccessSpec::Protected;
+  } else {
+    const auto what =
+      static_cast<std::string>(
+          "Expected "
+          "\"public\", \"private\", ""\"protected\", "
+          "but got ")
+      + as;
+    throw std::invalid_argument(what);
+  }
+}
+
 /*!
  * \brief Return the kind of \c type.
  */
