@@ -790,6 +790,10 @@ TypeTableVisitor::PreVisitDecl(Decl *D) {
       if (xmlChildElementCount(tmpNode) == 0) {
         curNode = tmpNode;
         newChild("params");
+        if (FD->hasPrototype() && FD->parameters().empty()) {
+          newChild("name");
+          newProp("type", "void");
+        }
       } else {
         newComment("PreVisitDecl::Function: already the same type is registered");
         // ignore the children, but traverse them all
