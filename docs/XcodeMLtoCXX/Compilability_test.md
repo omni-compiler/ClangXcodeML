@@ -49,7 +49,7 @@ Compatibility テストおよび各テストケースの説明
 ## fundamental_type.src.c
 
 基本型(fundamental type)を扱うテスト。
-特に、`long long`, `long long int`を正しく復元できることを確認する。
+特に、`long long`, `long long int`, `unsigned int`を正しく復元できることを確認する。
 
     char c;
     short s;
