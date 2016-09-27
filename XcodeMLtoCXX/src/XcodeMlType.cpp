@@ -366,6 +366,76 @@ size_t Struct::Member::getSize() const {
   return size.size();
 }
 
+std::string string_of_accessSpec(AccessSpec as) {
+  switch (as) {
+    case AccessSpec::Public:
+      return "public";
+    case AccessSpec::Private:
+      return "private";
+    case AccessSpec::Protected:
+      return "private";
+    default:
+      assert(false);
+  }
+}
+
+AccessSpec accessSpec_of_string(const std::string& as) {
+  if (as == "public") {
+    return AccessSpec::Public;
+  } else if (as == "private") {
+    return AccessSpec::Private;
+  } else if (as == "protected") {
+    return AccessSpec::Protected;
+  } else {
+    const auto what =
+      static_cast<std::string>(
+          "Expected "
+          "\"public\", \"private\", ""\"protected\", "
+          "but got ")
+      + as;
+    throw std::invalid_argument(what);
+  }
+}
+
+ClassType::ClassType(
+    const DataTypeIdent& ident,
+    const std::string& className,
+    const MemberList& members_):
+  Type(TypeKind::Class, ident),
+  name_(className),
+  fields(members_)
+{}
+
+std::string ClassType::makeDeclaration(
+    std::string var,
+    const Environment&
+) {
+  return name_ + " " + var;
+}
+
+Type* ClassType::clone() const {
+  ClassType* copy = new ClassType(*this);
+  return copy;
+}
+
+ClassType::MemberList ClassType::members() const {
+  return fields;
+}
+
+std::string ClassType::name() const {
+  return name_;
+}
+
+bool ClassType::classof(const Type *T) {
+  return T->getKind() == TypeKind::Class;
+}
+
+ClassType::ClassType(const ClassType& other):
+  Type(other),
+  name_(other.name_),
+  fields(other.fields)
+{}
+
 /*!
  * \brief Return the kind of \c type.
  */
