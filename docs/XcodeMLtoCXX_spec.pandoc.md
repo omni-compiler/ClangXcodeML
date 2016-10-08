@@ -47,23 +47,23 @@ XcodeMLは、以下の特徴を持つ。
 ソースファイルに、#include指定されたファイルを再帰的にすべて展開したものを、翻訳単位と呼ぶ。
 翻訳単位はXcodeProgram要素で表現される。下記の XML schema で定義される。
 
-```
-  <xsd:element name="XcodeProgram">
-    <xsd:complexType>
-      <xsd:sequence>
-        <xsd:element minOccurs="0" maxOccurs="1" ref="nnsTable" />
-        <xsd:element minOccurs="1" maxOccurs="1" ref="typeTable" />
-        <xsd:element minOccurs="1" maxOccurs="1" ref="globalSymbols" />
-        <xsd:element minOccurs="1" maxOccurs="1" ref="globalDeclarations" />
-      </xsd:sequence>
-      <xsd:attribute name="compiler-info" use="optional" />
-      <xsd:attribute name="version" use="optional" />
-      <xsd:attribute name="time" use="optional" />
-      <xsd:attribute name="language" use="optional" />
-      <xsd:attribute name="source" use="optional" />
-    </xsd:complexType>
-  </xsd:element>
-```
+
+	  <xsd:element name="XcodeProgram">
+		<xsd:complexType>
+		  <xsd:sequence>
+			<xsd:element minOccurs="0" maxOccurs="1" ref="nnsTable" />
+			<xsd:element minOccurs="1" maxOccurs="1" ref="typeTable" />
+			<xsd:element minOccurs="1" maxOccurs="1" ref="globalSymbols" />
+			<xsd:element minOccurs="1" maxOccurs="1" ref="globalDeclarations" />
+		  </xsd:sequence>
+		  <xsd:attribute name="compiler-info" use="optional" />
+		  <xsd:attribute name="version" use="optional" />
+		  <xsd:attribute name="time" use="optional" />
+		  <xsd:attribute name="language" use="optional" />
+		  <xsd:attribute name="source" use="optional" />
+		</xsd:complexType>
+	  </xsd:element>
+
 
 
 XcodeMLファイルのトップレベルのXML要素は、XcodeProgram 要素である。XcodeProgram 要素は以下の子要素を含む。
