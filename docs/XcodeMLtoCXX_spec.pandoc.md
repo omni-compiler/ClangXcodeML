@@ -157,7 +157,7 @@ nns=”修飾子識別名”
     }
     NS::a = 10;        // (2)
 
-    namespace NSの存在を表現するために、以下のようなnnsTableが生成される。
+namespace NSの存在を表現するために、以下のようなnnsTableが生成される。
 
     <nnsTable>
       <nestedNameSpecifier nns=”Q0”>
@@ -363,19 +363,20 @@ basicType 要素は、他のデータ型識別要素にデータ型定義要素�
 実装では、データ型定義要素属性（constなど）を持たない基本データ型に対応するデータ型識別要素は定義されず、type="int" のようにデータ型識別名だけで表現されている。また、基本データ型以外の型（構造型など）に属性を付ける場合に、basicType要素を使用している。
 
 例:
+
     struct {int x; int y;} s;
     struct s const * volatile p;
 
 は次のXcodeMLに変換される。 basicType要素によって、”struct s const”を意味するデータ型識別名B0 が定義されている。
 
-  <structType type="S0">
-    <symbols>
-      <id type=”int”><name=”x”><./name></id>
-      <id type=”int”><name=”y”><./name></id>
-    </symbols>
-  </structType>
-  <basicType type="B0" is_const="1" name="S0"/>
-  <pointerType type="P0" is_volatile="1" ref="B0"/>
+	  <structType type="S0">
+		<symbols>
+		  <id type=”int”><name=”x”><./name></id>
+		  <id type=”int”><name=”y”><./name></id>
+		</symbols>
+	  </structType>
+	  <basicType type="B0" is_const="1" name="S0"/>
+	  <pointerType type="P0" is_volatile="1" ref="B0"/>
 
 ## pointerType要素
 pointerType要素はポインタのデータ型を定義する。
@@ -395,7 +396,7 @@ pointerType要素は、子要素を持たない。
 例:
 "int *" に対応するデータ型定義は以下のようになる。
 
-  <pointerType type=”P0123” ref=”int”/>
+	<pointerType type=”P0123” ref=”int”/>
 
 ## functionType要素
 funtionType要素は、関数型を定義する。
