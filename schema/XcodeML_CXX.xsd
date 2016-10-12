@@ -507,5 +507,166 @@
     </xsd:complexType>
   </xsd:element>
 
+  <!-- 6.4 whileStatement element -->
+  <xsd:element name="whileStatement">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element minOccurs="1" maxOccurs="1" ref="condition" />
+        <xsd:element minOccurs="1" maxOccurs="1" ref="body" />
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+
+  <!-- 6.5 doStatement element -->
+  <xsd:element name="doStatement">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element minOccurs="1" maxOccurs="1" ref="body" />
+        <xsd:element minOccurs="1" maxOccurs="1" ref="condition" />
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+
+  <!--- 6.6 forStatement element -->
+  <xsd:element name="forStatement">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element minOccurs="0" maxOccurs="1" ref="init" />
+        <xsd:element minOccurs="0" maxOccurs="1" ref="condition" />
+        <xsd:element minOccurs="0" maxOccurs="1" ref="iter" />
+        <xsd:element minOccurs="1" maxOccurs="1" ref="body" />
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+
+  <xsd:element name="iter">
+    <xsd:complexType>
+      <xsd:choice>
+        <xsd:element ref="expression_element" />
+        <xsd:element ref="symbols" />
+      </xsd:choice>
+    </xsd:complexType>
+  </xsd:element>
+
+  <!-- 6.7 rangeForStatement element -->
+  <xsd:element name="rangeForStatement">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element minOccurs="1" maxOccurs="1" ref="id" />
+        <xsd:element minOccurs="1" maxOccurs="1" ref="range" />
+        <xsd:element minOccurs="1" maxOccurs="1" ref="body" />
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+
+  <xsd:element name="range">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element minOccurs="1" maxOccurs="1" ref="expression_element" />
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+
+  <!-- 6.8 breakStatement element -->
+  <xsd:element name="breakStatement">
+    <xsd:complexType />
+  </xsd:element>
+
+  <!-- 6.9 continueStatement element -->
+  <xsd:element name="continueStatement">
+    <xsd:complexType />
+  </xsd:element>
+
+  <!-- 6.10 returnStatement element -->
+  <xsd:element name="returnStatement">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element minOccurs="1" maxOccurs="1" ref="expression_element" />
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+
+  <!-- 6.11 gotoStatement element -->
+  <xsd:element name="gotoStatement">
+    <xsd:complexType>
+      <xsd:choice>
+        <xsd:element ref="name" />
+        <xsd:element ref="expression_element" />
+      </xsd:choice>
+    </xsd:complexType>
+  </xsd:element>
+
+  <!-- 6.12 tryStatement element -->
+  <xsd:element name="tryStatement">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element minOccurs="1" maxOccurs="1" ref="body" />
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+
+  <!-- 6.13 throwStatement element -->
+  <xsd:element name="throwStatement">
+    <xsd:complexType />
+  </xsd:element>
+
+  <!-- 6.14 catchStatement element -->
+  <xsd:element name="catchStatement">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element minOccurs="1" maxOccurs="1" ref="params" />
+        <xsd:element minOccurs="1" maxOccurs="1" ref="body" />
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+
+  <!-- 6.15 statementLabel element -->
+  <xsd:element name="statementLabel">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element minOccurs="1" maxOccurs="1" ref="name" />
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+
+  <!-- 6.16 switchStatement element -->
+  <xsd:element name="switchStatement">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element minOccurs="1" maxOccurs="1" ref="value" />
+        <xsd:element minOccurs="1" maxOccurs="1" ref="body" />
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+
+  <!-- 6.17 caseLabel element -->
+  <xsd:element name="caseLabel">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element minOccurs="1" maxOccurs="1" ref="value" />
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+
+  <!-- 6.18 gccRangedCaseLabel element -->
+  <xsd:element name="gccRangedCaseLabel">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element minOccurs="1" maxOccurs="1" ref="value" />
+        <xsd:element minOccurs="1" maxOccurs="1" ref="value" />
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+
+  <!-- 6.19 defaultLabel element -->
+  <xsd:element name="defaultLabel">
+    <xsd:complexType />
+  </xsd:element>
+
+  <!-- 6.20 pragma element -->
+  <xsd:element name="pragma" type="xsd:string" />
+
+  <!-- 6.21 text element -->
+  <xsd:element name="text" type="xsd:string" />
 
 </xsd:schema>
