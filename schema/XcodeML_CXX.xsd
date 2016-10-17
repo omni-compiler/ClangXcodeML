@@ -669,4 +669,76 @@
   <!-- 6.21 text element -->
   <xsd:element name="text" type="xsd:string" />
 
+  <!-- 7 expression element attributes -->
+  <xsd:attributeGroup name="exprElemAttrs">
+    <xsd:attribute name="type" type="xsd:string" use="required" />
+    <xsd:attribute name="lvalue" type="ExtBool" use="optional" />
+  </xsd:attributeGroup>
+
+  <!-- 7.1 constant element -->
+  <xsd:element name="intConstant" type="xsd:string">
+    <xsd:attributeGroup ref="exprElemAttrs" />
+  </xsd:element>
+
+  <xsd:element name="longlongConstant" type="xsd:string">
+    <xsd:attributeGroup ref="exprElemAttrs" />
+  </xsd:element>
+
+  <xsd:element name="floatConstant" type="xsd:string">
+    <xsd:attributeGroup ref="exprElemAttrs" />
+  </xsd:element>
+
+  <xsd:element name="stringConstant" type="xsd:string">
+    <xsd:attributeGroup ref="exprElemAttrs" />
+  </xsd:element>
+
+  <xsd:element name="moeConstant" type="xsd:string">
+    <xsd:attributeGroup ref="exprElemAttrs" />
+  </xsd:element>
+
+  <xsd:element name="booleanConstant" type="xsd:string">
+    <xsd:attributeGroup ref="exprElemAttrs" />
+  </xsd:element>
+
+  <xsd:element name="funcAddr" type="xsd:string">
+    <xsd:attributeGroup ref="exprElemAttrs" />
+  </xsd:element>
+
+  <!-- 7.2 variable reference element (Var, varAddr arrayAddr) -->
+  <xsd:element name="Var" type="xsd:string">
+    <xsd:attributeGroup ref="exprElemAttrs" />
+    <xsd:attributeGroup ref="varRefElemAttrs" />
+  </xsd:element>
+
+  <xsd:element name="varAddr" type="xsd:string">
+    <xsd:attributeGroup ref="exprElemAttrs" />
+    <xsd:attributeGroup ref="varRefElemAttrs" />
+  </xsd:element>
+
+  <xsd:element name="arrayAddr" type="xsd:string">
+    <xsd:attributeGroup ref="exprElemAttrs" />
+    <xsd:attributeGroup ref="varRefElemAttrs" />
+  </xsd:element>
+
+  <xsd:attributeGroup name="varRefElemAttrs">
+    <xsd:attribute name="scope" type="ScopeVal" use="required" />
+  </xsd:attributeGroup>
+
+  <xsd:simpleType name="ScopeVal">
+    <xsd:restriction base="xsd:string">
+      <xsd:enumeration value="local" />
+      <xsd:enumeration value="global" />
+      <xsd:enumeration value="param" />
+    </xsd:restriction>
+  </xsd:simpleType>
+
+  <!-- 7.3 pointerType element -->
+  <xsd:complexType name="varRefElem">
+    <xsd:choice minOccurs="1" maxOccurs="1">
+      <xsd:element ref="Var" />
+      <xsd:element ref="varAddr" />
+      <xsd:element ref="arrayAddr" />
+    </xsd:choice>
+  </xsd:complexType>
+
 </xsd:schema>
