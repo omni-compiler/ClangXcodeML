@@ -732,7 +732,7 @@
     </xsd:restriction>
   </xsd:simpleType>
 
-  <!-- 7.3 pointerType element -->
+  <!-- 7.3 pointerRef element -->
   <xsd:complexType name="varRefElem">
     <xsd:choice minOccurs="1" maxOccurs="1">
       <xsd:element ref="Var" />
@@ -740,5 +740,80 @@
       <xsd:element ref="arrayAddr" />
     </xsd:choice>
   </xsd:complexType>
+
+  <xsd:element name="pointerRef">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element minOccures="1" maxOccures="1" ref="varRefElem" />
+      </xsd:sequence>
+    </xsd:complexType>
+    <xsd:attributeGroup ref="exprElemAttrs" />
+  </xsd:element>
+
+  <!-- 7.4 arrayRef element -->
+  <xsd:element name="arrayRef">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element minOccures="1" maxOccures="1" ref="arrayAddr" />
+        <xsd:element minOccures="1" maxOccures="1" ref="ElemAtSectionSeven" />
+      </xsd:sequence>
+    </xsd:complexType>
+    <xsd:attributeGroup ref="exprElemAttrs" />
+  </xsd:element>
+
+  <!-- 7.8 thisExpr element -->
+  <xsd:element name="thisExpr" />
+
+  <!-- 7.9 assignExpr element -->
+  <xsd:element name="assignExpr">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element minOccures="1" maxOccures="1" ref="ElemAtSectionSeven" />
+        <xsd:element minOccures="1" maxOccures="1" ref="ElemAtSectionSeven" />
+      </xsd:sequence>
+    </xsd:complexType>
+    <xsd:attributeGroup ref="exprElemAttrs" />
+  </xsd:element>
+
+  <!-- 7.10 binary operation elements -->
+  <xsd:element name="plusExpr">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element minOccures="1" maxOccures="1" ref="ElemAtSectionSeven" />
+        <xsd:element minOccures="1" maxOccures="1" ref="ElemAtSectionSeven" />
+      </xsd:sequence>
+    </xsd:complexType>
+    <xsd:attributeGroup ref="exprElemAttrs" />
+  </xsd:element>
+
+  <xsd:element name="minusExpr">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element minOccures="1" maxOccures="1" ref="ElemAtSectionSeven" />
+        <xsd:element minOccures="1" maxOccures="1" ref="ElemAtSectionSeven" />
+      </xsd:sequence>
+    </xsd:complexType>
+    <xsd:attributeGroup ref="exprElemAttrs" />
+  </xsd:element>
+
+  <xsd:element name="mulExpr">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element minOccures="1" maxOccures="1" ref="ElemAtSectionSeven" />
+        <xsd:element minOccures="1" maxOccures="1" ref="ElemAtSectionSeven" />
+      </xsd:sequence>
+    </xsd:complexType>
+    <xsd:attributeGroup ref="exprElemAttrs" />
+  </xsd:element>
+
+  <xsd:element name="divExpr">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element minOccures="1" maxOccures="1" ref="ElemAtSectionSeven" />
+        <xsd:element minOccures="1" maxOccures="1" ref="ElemAtSectionSeven" />
+      </xsd:sequence>
+    </xsd:complexType>
+    <xsd:attributeGroup ref="exprElemAttrs" />
+  </xsd:element>
 
 </xsd:schema>
