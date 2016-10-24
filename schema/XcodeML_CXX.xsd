@@ -1250,4 +1250,22 @@
     </xsd:complexType>
   </xsd:element>
 
+  <!-- 7.19 newExpr -->
+  <xsd:element name="newExpr">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element minOccurs="1" maxOccurs="1" ref="arguments" />
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+
+  <!-- 7.20 deleteExpr -->
+  <xsd:element name="deleteExpr">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element minOccurs="1" maxOccurs="1" ref="ElemAtSectionSeven" />
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+
 </xsd:schema>
