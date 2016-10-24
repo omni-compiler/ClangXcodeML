@@ -1199,4 +1199,55 @@
     </xsd:complexType>
   </xsd:element>
 
+  <!-- 7.16 cast elements -->
+  <xsd:element name="staticCast">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element minOccurs="1" maxOccurs="1" ref="ElemAtSectionSeven" />
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+
+  <xsd:element name="dynamicCast">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element minOccurs="1" maxOccurs="1" ref="ElemAtSectionSeven" />
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+
+  <xsd:element name="constCast">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element minOccurs="1" maxOccurs="1" ref="ElemAtSectionSeven" />
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+
+  <xsd:element name="reinterpretCast">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element minOccurs="1" maxOccurs="1" ref="ElemAtSectionSeven" />
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+
+  <!-- 7.17 condExpr elements -->
+  <xsd:element name="condExpr">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element minOccurs="2" maxOccurs="3" ref="ElemAtSectionSeven" />
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+
+  <!-- 7.18 gccCompoundExpr -->
+  <xsd:element name="gccCompoundExpr">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element minOccurs="1" maxOccurs="1" ref="compoundStatment" />
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+
 </xsd:schema>
