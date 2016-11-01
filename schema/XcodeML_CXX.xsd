@@ -676,48 +676,108 @@
   </xsd:attributeGroup>
 
   <!-- 7.1 constant element -->
-  <xsd:element name="intConstant" type="xsd:string">
-    <xsd:attributeGroup ref="exprElemAttrs" />
+  <xsd:element name="intConstant">
+    <xsd:complexType>
+      <xsd:simpleContent>
+        <xsd:extension base="xsd:string">
+          <xsd:attributeGroup ref="exprElemAttrs" />
+        </xsd:extension>
+      </xsd:simpleContent>
+    </xsd:complexType>
   </xsd:element>
 
-  <xsd:element name="longlongConstant" type="xsd:string">
-    <xsd:attributeGroup ref="exprElemAttrs" />
+  <xsd:element name="longlongConstant">
+    <xsd:complexType>
+      <xsd:simpleContent>
+        <xsd:extension base="xsd:string">
+          <xsd:attributeGroup ref="exprElemAttrs" />
+        </xsd:extension>
+      </xsd:simpleContent>
+    </xsd:complexType>
   </xsd:element>
 
-  <xsd:element name="floatConstant" type="xsd:string">
-    <xsd:attributeGroup ref="exprElemAttrs" />
+  <xsd:element name="floatConstant">
+    <xsd:complexType>
+      <xsd:simpleContent>
+        <xsd:extension base="xsd:string">
+          <xsd:attributeGroup ref="exprElemAttrs" />
+        </xsd:extension>
+      </xsd:simpleContent>
+    </xsd:complexType>
   </xsd:element>
 
-  <xsd:element name="stringConstant" type="xsd:string">
-    <xsd:attributeGroup ref="exprElemAttrs" />
+  <xsd:element name="stringConstant">
+    <xsd:complexType>
+      <xsd:simpleContent>
+        <xsd:extension base="xsd:string">
+          <xsd:attributeGroup ref="exprElemAttrs" />
+        </xsd:extension>
+      </xsd:simpleContent>
+    </xsd:complexType>
   </xsd:element>
 
-  <xsd:element name="moeConstant" type="xsd:string">
-    <xsd:attributeGroup ref="exprElemAttrs" />
+  <xsd:element name="moeConstant">
+    <xsd:complexType>
+      <xsd:simpleContent>
+        <xsd:extension base="xsd:string">
+          <xsd:attributeGroup ref="exprElemAttrs" />
+        </xsd:extension>
+      </xsd:simpleContent>
+    </xsd:complexType>
   </xsd:element>
 
-  <xsd:element name="booleanConstant" type="xsd:string">
-    <xsd:attributeGroup ref="exprElemAttrs" />
+  <xsd:element name="booleanConstant">
+    <xsd:complexType>
+      <xsd:simpleContent>
+        <xsd:extension base="xsd:string">
+          <xsd:attributeGroup ref="exprElemAttrs" />
+        </xsd:extension>
+      </xsd:simpleContent>
+    </xsd:complexType>
   </xsd:element>
 
-  <xsd:element name="funcAddr" type="xsd:string">
-    <xsd:attributeGroup ref="exprElemAttrs" />
+  <xsd:element name="funcAddr">
+    <xsd:complexType>
+      <xsd:simpleContent>
+        <xsd:extension base="xsd:string">
+          <xsd:attributeGroup ref="exprElemAttrs" />
+        </xsd:extension>
+      </xsd:simpleContent>
+    </xsd:complexType>
   </xsd:element>
 
   <!-- 7.2 variable reference element (Var, varAddr arrayAddr) -->
-  <xsd:element name="Var" type="xsd:string">
-    <xsd:attributeGroup ref="exprElemAttrs" />
-    <xsd:attributeGroup ref="varRefElemAttrs" />
+  <xsd:element name="Var">
+    <xsd:complexType>
+      <xsd:simpleContent>
+        <xsd:extension base="xsd:string">
+          <xsd:attributeGroup ref="exprElemAttrs" />
+          <xsd:attributeGroup ref="varRefElemAttrs" />
+        </xsd:extension>
+      </xsd:simpleContent>
+    </xsd:complexType>
   </xsd:element>
 
-  <xsd:element name="varAddr" type="xsd:string">
-    <xsd:attributeGroup ref="exprElemAttrs" />
-    <xsd:attributeGroup ref="varRefElemAttrs" />
+  <xsd:element name="varAddr">
+    <xsd:complexType>
+      <xsd:simpleContent>
+        <xsd:extension base="xsd:string">
+          <xsd:attributeGroup ref="exprElemAttrs" />
+          <xsd:attributeGroup ref="varRefElemAttrs" />
+        </xsd:extension>
+      </xsd:simpleContent>
+    </xsd:complexType>
   </xsd:element>
 
-  <xsd:element name="arrayAddr" type="xsd:string">
-    <xsd:attributeGroup ref="exprElemAttrs" />
-    <xsd:attributeGroup ref="varRefElemAttrs" />
+  <xsd:element name="arrayAddr">
+    <xsd:complexType>
+      <xsd:simpleContent>
+        <xsd:extension base="xsd:string">
+          <xsd:attributeGroup ref="exprElemAttrs" />
+          <xsd:attributeGroup ref="varRefElemAttrs" />
+        </xsd:extension>
+      </xsd:simpleContent>
+    </xsd:complexType>
   </xsd:element>
 
   <xsd:attributeGroup name="varRefElemAttrs">
