@@ -7,6 +7,16 @@
     </XcodeProgram>
   </xsl:template>
 
+  <xsl:template match="Decl_TranslationUnit">
+    <globalDeclarations>
+      <xsl:apply-templates />
+    </globalDeclarations>
+  </xsl:template>
+
+  <xsl:template match="clangAST">
+    <xsl:apply-templates />
+  </xsl:template>
+
   <xsl:template match="node()|@*">
     <xsl:copy>
       <xsl:apply-templates select="node()|@*"/>
