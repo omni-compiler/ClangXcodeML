@@ -17,6 +17,17 @@
     <xsl:apply-templates />
   </xsl:template>
 
+  <xsl:template match="Decl_Function">
+    <functionDefinition>
+      <name>
+        <xsl:value-of select="DeclarationNameInfo_Identifier" />
+      </name>
+      <body>
+        <xsl:apply-templates select="Stmt_CompoundStmt" />
+      </body>
+    </functionDefinition>
+  </xsl:template>
+
   <xsl:template match="node()|@*">
     <xsl:copy>
       <xsl:apply-templates select="node()|@*"/>
