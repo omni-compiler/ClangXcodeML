@@ -28,6 +28,20 @@
     </functionDefinition>
   </xsl:template>
 
+  <xsl:template match="Stmt_IfStmt">
+    <ifStatement>
+      <condition>
+        <xsl:apply-templates select="*[1]" />
+      </condition>
+      <then>
+        <xsl:apply-templates select="*[2]" />
+      </then>
+      <else>
+        <xsl:apply-templates select="*[3]" />
+      </else>
+    </ifStatement>
+  </xsl:template>
+
   <xsl:template match="node()|@*">
     <xsl:copy>
       <xsl:apply-templates select="node()|@*"/>
