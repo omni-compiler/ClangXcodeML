@@ -49,6 +49,16 @@
     </xsl:choose>
   </xsl:template>
 
+  <xsl:template match="Decl_Var">
+    <varDecl>
+      <name>
+        <xsl:attribute name="fullName">
+          <xsl:value-of select="fullName" />
+        </xsl:attribute>
+      </name>
+    </varDecl>
+  </xsl:template>
+
   <xsl:template match="Stmt_IfStmt">
     <ifStatement>
       <condition>
