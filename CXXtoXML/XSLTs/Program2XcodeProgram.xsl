@@ -18,14 +18,35 @@
   </xsl:template>
 
   <xsl:template match="Decl_Function">
-    <functionDefinition>
-      <name>
-        <xsl:value-of select="DeclarationNameInfo_Identifier" />
-      </name>
-      <body>
-        <xsl:apply-templates select="Stmt_CompoundStmt" />
-      </body>
-    </functionDefinition>
+    <xsl:choose>
+      <xsl:when test="Stmt_CompoundStmt">
+        <functionDefinition>
+          <name>
+            <xsl:value-of select="DeclarationNameInfo_Identifier" />
+          </name>
+          <body>
+            <xsl:apply-templates select="Stmt_CompoundStmt" />
+          </body>
+        </functionDefinition>
+      </xsl:when>
+      <xsl:when test="Stmt_CXXTryStmt">
+        <functionDefinition>
+          <name>
+            <xsl:value-of select="DeclarationNameInfo_Identifier" />
+          </name>
+          <body>
+            <xsl:apply-templates select="Stmt_CXXTryStmt" />
+          </body>
+        </functionDefinition>
+      </xsl:when>
+      <xsl:otherwise>
+        <functionDecl>
+          <name>
+            <xsl:value-of select="DeclarationNameInfo_Identifier" />
+          </name>
+        </functionDecl>
+      </xsl:otherwise>
+    </xsl:choose>
   </xsl:template>
 
   <xsl:template match="Stmt_IfStmt">
