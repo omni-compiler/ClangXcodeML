@@ -7,7 +7,7 @@
     </XcodeProgram>
   </xsl:template>
 
-  <xsl:template match="Decl_TranslationUnit">
+  <xsl:template match="clangDecl[@class=&quot;TranslationUnit&quot;]">
     <globalDeclarations>
       <xsl:apply-templates />
     </globalDeclarations>
@@ -17,39 +17,31 @@
     <xsl:apply-templates />
   </xsl:template>
 
-  <xsl:template match="Decl_Function">
+  <xsl:template match="clangDecl[@class=&quot;Function&quot;]">
     <xsl:choose>
-      <xsl:when test="Stmt_CompoundStmt">
+      <xsl:when test="clangStmt">
         <functionDefinition>
           <name>
-            <xsl:value-of select="DeclarationNameInfo_Identifier" />
+            <xsl:value-of select=
+              "clangDeclarationNameInfo[@class=&quot;Identifier&quot;]" />
           </name>
           <body>
-            <xsl:apply-templates select="Stmt_CompoundStmt" />
-          </body>
-        </functionDefinition>
-      </xsl:when>
-      <xsl:when test="Stmt_CXXTryStmt">
-        <functionDefinition>
-          <name>
-            <xsl:value-of select="DeclarationNameInfo_Identifier" />
-          </name>
-          <body>
-            <xsl:apply-templates select="Stmt_CXXTryStmt" />
+            <xsl:apply-templates select="clangStmt" />
           </body>
         </functionDefinition>
       </xsl:when>
       <xsl:otherwise>
         <functionDecl>
           <name>
-            <xsl:value-of select="DeclarationNameInfo_Identifier" />
+            <xsl:value-of select=
+              "clangDeclarationNameInfo[@class=&quot;Identifier&quot;]" />
           </name>
         </functionDecl>
       </xsl:otherwise>
     </xsl:choose>
   </xsl:template>
 
-  <xsl:template match="Decl_Var">
+  <xsl:template match="clangDecl[@class=&quot;Var&quot;]">
     <varDecl>
       <name>
         <xsl:attribute name="fullName">
@@ -59,7 +51,7 @@
     </varDecl>
   </xsl:template>
 
-  <xsl:template match="Stmt_IfStmt">
+  <xsl:template match="clangStmt[@class=&quot;IfStmt&quot;]">
     <ifStatement>
       <condition>
         <xsl:apply-templates select="*[1]" />
