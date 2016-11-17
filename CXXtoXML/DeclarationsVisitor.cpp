@@ -193,7 +193,7 @@ DeclarationsVisitor::PreVisitDeclarationNameInfo(DeclarationNameInfo NI) {
   DeclarationName DN = NI.getName();
   IdentifierInfo *II = DN.getAsIdentifierInfo();
 
-  newChild("clangDeclarationNameInfo:",
+  newChild("clangDeclarationNameInfo",
           II ? II->getNameStart() : nullptr);
   newProp("class", NameForDeclarationName(DN));
   return true;
