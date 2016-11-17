@@ -65,6 +65,12 @@
     </ifStatement>
   </xsl:template>
 
+  <xsl:template match="clangStmt[@class=&quot;ReturnStmt&quot;]">
+    <returnStmt>
+      <xsl:apply-templates />
+    </returnStmt>
+  </xsl:template>
+
   <xsl:template match="node()|@*">
     <xsl:copy>
       <xsl:apply-templates select="node()|@*"/>
