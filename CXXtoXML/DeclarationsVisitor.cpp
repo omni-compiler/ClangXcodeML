@@ -36,7 +36,7 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
     return true;
   }
 
-  newChild((std::string("Stmt_") + S->getStmtClassName()).c_str());
+  newChild((std::string("Stmt:") + S->getStmtClassName()).c_str());
   setLocation(S->getLocStart());
 
   const BinaryOperator *BO = dyn_cast<const BinaryOperator>(S);
@@ -124,7 +124,7 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
 
     }
     case UETT_VecStep:
-      newChild("Stmt_UnaryExprOrTypeTraitExpr_UETT_VecStep");
+      newChild("Stmt:UnaryExprOrTypeTraitExpr_UETT_VecStep");
       return true;
 
     //case UETT_OpenMPRequiredSimdAlign:
@@ -173,7 +173,7 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
   }
 
   // default: use the AST name simply.
-  newChild((std::string("Decl_") + D->getDeclKindName()).c_str());    
+  newChild((std::string("Decl:") + D->getDeclKindName()).c_str());    
   setLocation(D->getLocation());
   if (D->isImplicit()) {
     newProp("is_implicit", "1");
@@ -190,7 +190,7 @@ DeclarationsVisitor::PreVisitDeclarationNameInfo(DeclarationNameInfo NI) {
   DeclarationName DN = NI.getName();
   IdentifierInfo *II = DN.getAsIdentifierInfo();
 
-  newChild((std::string("DeclarationNameInfo_")
+  newChild((std::string("DeclarationNameInfo:")
             + NameForDeclarationName(DN)).c_str(),
           II ? II->getNameStart() : nullptr);
   return true;
