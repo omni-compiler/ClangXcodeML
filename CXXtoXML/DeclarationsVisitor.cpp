@@ -97,6 +97,13 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
     case UO_Extension: NExpr("unrayExtensionExpr", nullptr); // undefined by XcodeML
     }
   }
+
+  if (isa<IntegerLiteral>(S)) {
+    std::string literal = static_cast<IntegerLiteral*>(S)->
+      getValue().toString(10, true);
+    newProp("token", literal.c_str());
+  }
+
   UnaryExprOrTypeTraitExpr *UEOTTE = dyn_cast<UnaryExprOrTypeTraitExpr>(S);
   if (UEOTTE) {
     //7.8 sizeof, alignof
