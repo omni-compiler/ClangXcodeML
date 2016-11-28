@@ -3,6 +3,7 @@
 #include "DeclarationsVisitor.h"
 #include "InheritanceInfo.h"
 #include "clang/Basic/Builtins.h"
+#include "clang/Lex/Lexer.h"
 #include <map>
 
 using namespace clang;
@@ -99,9 +100,16 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
   }
 
   if (isa<IntegerLiteral>(S)) {
-    std::string literal = static_cast<IntegerLiteral*>(S)->
-      getValue().toString(10, true);
-    newProp("token", literal.c_str());
+    const unsigned INIT_BUFFER_SIZE = 32;
+    SmallVector<char, INIT_BUFFER_SIZE> buffer;
+    auto loc = static_cast<IntegerLiteral*>(S)->getLocation();
+    auto& CXT = mangleContext->getASTContext();
+    auto spelling = clang::Lexer::getSpelling(
+        loc,
+        buffer,
+        CXT.getSourceManager(),
+        CXT.getLangOpts());
+    newProp("token", spelling.str().c_str());
   }
 
   UnaryExprOrTypeTraitExpr *UEOTTE = dyn_cast<UnaryExprOrTypeTraitExpr>(S);
