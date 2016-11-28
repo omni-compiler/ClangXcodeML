@@ -71,15 +71,15 @@
     </returnStmt>
   </xsl:template>
 
-  <xsl:template match="node()|@*">
-    <xsl:copy>
-      <xsl:apply-templates select="node()|@*"/>
-    </xsl:copy>
-  </xsl:template>
-
   <xsl:template match="clangStmt[@class=&quot;CompoundStmt&quot;]">
     <compoundStmt>
       <xsl:apply-templates />
     </compoundStmt>
+  </xsl:template>
+
+  <xsl:template match="node()|@*">
+    <xsl:copy>
+      <xsl:apply-templates select="node()|@*"/>
+    </xsl:copy>
   </xsl:template>
 </xsl:stylesheet>
