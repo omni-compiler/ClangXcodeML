@@ -5,6 +5,8 @@
 #include "clang/Basic/Builtins.h"
 #include "clang/Lex/Lexer.h"
 #include <map>
+#include <experimental/optional>
+#include "OperationKinds.h"
 
 using namespace clang;
 using namespace llvm;
@@ -43,59 +45,22 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
 
   const BinaryOperator *BO = dyn_cast<const BinaryOperator>(S);
   if (BO) {
-    // XcodeML-C-0.9J.pdf: 7.6(assignExpr), 7.7, 7.10(commmaExpr)
-    switch (BO->getOpcode()) {
-    case BO_PtrMemD:   NExpr("memberPointerRef", nullptr);
-    case BO_PtrMemI:   NExpr("memberIndirectRef", nullptr); // undefined by XcodeML
-    case BO_Mul:       NExpr("mulExpr", nullptr);
-    case BO_Div:       NExpr("divExpr", nullptr);
-    case BO_Rem:       NExpr("modExpr", nullptr);
-    case BO_Add:       NExpr("plusExpr", nullptr);
-    case BO_Sub:       NExpr("minusExpr", nullptr);
-    case BO_Shl:       NExpr("LshiftExpr", nullptr);
-    case BO_Shr:       NExpr("RshiftExpr", nullptr);
-    case BO_LT:        NExpr("logLTExpr", nullptr);
-    case BO_GT:        NExpr("logGTExpr", nullptr);
-    case BO_LE:        NExpr("logLEExpr", nullptr);
-    case BO_GE:        NExpr("logGEExpr", nullptr);
-    case BO_EQ:        NExpr("logEQExpr", nullptr);
-    case BO_NE:        NExpr("logNEQExpr", nullptr);
-    case BO_And:       NExpr("bitAndExpr", nullptr);
-    case BO_Xor:       NExpr("bitXorExpr", nullptr);
-    case BO_Or:        NExpr("bitOrExpr", nullptr);
-    case BO_LAnd:      NExpr("logAndExpr", nullptr);
-    case BO_LOr:       NExpr("logOrExpr", nullptr);
-    case BO_Assign:    NExpr("assignExpr", nullptr);
-    case BO_Comma:     NExpr("commaExpr", nullptr);
-    case BO_MulAssign: NExpr("asgMulExpr", nullptr);
-    case BO_DivAssign: NExpr("asgDivExpr", nullptr);
-    case BO_RemAssign: NExpr("asgModExpr", nullptr);
-    case BO_AddAssign: NExpr("asgPlusExpr", nullptr);
-    case BO_SubAssign: NExpr("asgMinusExpr", nullptr);
-    case BO_ShlAssign: NExpr("asgLshiftExpr", nullptr);
-    case BO_ShrAssign: NExpr("asgRshiftExpr", nullptr);
-    case BO_AndAssign: NExpr("asgBitAndExpr", nullptr);
-    case BO_OrAssign:  NExpr("asgBitOrExpr", nullptr);
-    case BO_XorAssign: NExpr("asgBitXorExpr", nullptr);
+    auto namePtr = BOtoElemName(BO->getOpcode());
+    if (namePtr) {
+      newProp("binOpName", namePtr->c_str());
+    } else {
+      auto opName = BinaryOperator::getOpcodeStr(BO->getOpcode());
+      newProp("clangBinOpToken", opName.str().c_str());
     }
   }
   const UnaryOperator *UO = dyn_cast<const UnaryOperator>(S);
   if (UO) {
-    // XcodeML-C-0.9J.pdf 7.2(varAddr), 7.3(pointerRef), 7.8, 7.11
-    switch (UO->getOpcode()) {
-    case UO_PostInc:   NExpr("postIncrExpr", nullptr);
-    case UO_PostDec:   NExpr("postDecrExpr", nullptr);
-    case UO_PreInc:    NExpr("preIncrExpr", nullptr);
-    case UO_PreDec:    NExpr("preDecrExpr", nullptr);
-    case UO_AddrOf:    NExpr("AddrOfExpr", nullptr); // undefined by XcodeML
-    case UO_Deref:     NExpr("pointerRef", nullptr);
-    case UO_Plus:      NExpr("unaryPlusExpr", nullptr);
-    case UO_Minus:     NExpr("unaryMinusExpr", nullptr);
-    case UO_Not:       NExpr("bitNotExpr", nullptr);
-    case UO_LNot:      NExpr("logNotExpr", nullptr);
-    case UO_Real:      NExpr("unaryRealExpr", nullptr); // undefined by XcodeML
-    case UO_Imag:      NExpr("unaryImagExpr", nullptr); // undefined by XcodeML
-    case UO_Extension: NExpr("unrayExtensionExpr", nullptr); // undefined by XcodeML
+    auto namePtr = UOtoElemName(UO->getOpcode());
+    if (namePtr) {
+      newProp("unaryOpName", namePtr->c_str());
+    } else {
+      auto opName = UnaryOperator::getOpcodeStr(UO->getOpcode());
+      newProp("clangUnaryOpToken", opName.str().c_str());
     }
   }
 
