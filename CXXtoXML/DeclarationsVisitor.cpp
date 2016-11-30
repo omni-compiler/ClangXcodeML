@@ -99,6 +99,11 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
     }
   }
 
+  if (isa<clang::Expr>(S)) {
+    auto T = static_cast<Expr*>(S)->getType();
+    newProp("xcodemlType", typetableinfo->getTypeName(T).c_str());
+  }
+
   if (isa<IntegerLiteral>(S)) {
     const unsigned INIT_BUFFER_SIZE = 32;
     SmallVector<char, INIT_BUFFER_SIZE> buffer;
