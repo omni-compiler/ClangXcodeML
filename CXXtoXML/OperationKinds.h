@@ -1,5 +1,5 @@
-std::experimental::optional<std::string>
+const char*
 BOtoElemName(clang::BinaryOperatorKind);
 
-std::experimental::optional<std::string>
+const char*
 UOtoElemName(clang::UnaryOperatorKind);

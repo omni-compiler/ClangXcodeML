@@ -5,7 +5,6 @@
 #include "clang/Basic/Builtins.h"
 #include "clang/Lex/Lexer.h"
 #include <map>
-#include <experimental/optional>
 #include "OperationKinds.h"
 
 using namespace clang;
@@ -47,7 +46,7 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
   if (BO) {
     auto namePtr = BOtoElemName(BO->getOpcode());
     if (namePtr) {
-      newProp("binOpName", namePtr->c_str());
+      newProp("binOpName", namePtr);
     } else {
       auto opName = BinaryOperator::getOpcodeStr(BO->getOpcode());
       newProp("clangBinOpToken", opName.str().c_str());
@@ -57,7 +56,7 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
   if (UO) {
     auto namePtr = UOtoElemName(UO->getOpcode());
     if (namePtr) {
-      newProp("unaryOpName", namePtr->c_str());
+      newProp("unaryOpName", namePtr);
     } else {
       auto opName = UnaryOperator::getOpcodeStr(UO->getOpcode());
       newProp("clangUnaryOpToken", opName.str().c_str());

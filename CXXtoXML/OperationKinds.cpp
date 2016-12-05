@@ -1,12 +1,11 @@
 #include <map>
 #include <string>
-#include <experimental/optional>
 #include "clang/AST/OperationKinds.h"
 
-std::experimental::optional<std::string>
+const char*
 BOtoElemName(clang::BinaryOperatorKind BO) {
   using namespace clang;
-  const std::map<BinaryOperatorKind, std::string>
+  const std::map<BinaryOperatorKind, const char*>
     binOps = {
       {BO_PtrMemD, "memberPointerRef"},
       {BO_PtrMemI, "memberIndirectRef"}, // undefined by XcodeML
@@ -45,10 +44,10 @@ BOtoElemName(clang::BinaryOperatorKind BO) {
   return (iter == binOps.end() ? nullptr : iter->second);
 }
 
-std::experimental::optional<std::string>
+const char*
 UOtoElemName(clang::UnaryOperatorKind UO) {
   using namespace clang;
-  const std::map<UnaryOperatorKind, std::string>
+  const std::map<UnaryOperatorKind, const char*>
     unaryOps = {
       {UO_PostInc, "postIncrExpr"},
       {UO_PostDec, "postDecrExpr"},
