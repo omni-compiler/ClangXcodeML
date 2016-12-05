@@ -84,6 +84,12 @@
     </xsl:element>
   </xsl:template>
 
+  <xsl:template match="clangStmt[@class='IntegerLiteral']">
+    <intConstant>
+      <xsl:value-of select="@decimalNotation" />
+    </intConstant>
+  </xsl:template>
+
   <xsl:template match="node()|@*">
     <xsl:copy>
       <xsl:apply-templates select="node()|@*"/>
