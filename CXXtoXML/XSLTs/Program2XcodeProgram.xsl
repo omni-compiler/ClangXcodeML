@@ -77,6 +77,13 @@
     </compoundStmt>
   </xsl:template>
 
+  <xsl:template match="clangStmt[@class='BinaryOperator' and @binOpName]">
+    <xsl:element name="{@binOpName}">
+      <xsl:apply-templates select="*[1]" />
+      <xsl:apply-templates select="*[2]" />
+    </xsl:element>
+  </xsl:template>
+
   <xsl:template match="node()|@*">
     <xsl:copy>
       <xsl:apply-templates select="node()|@*"/>
