@@ -7,7 +7,7 @@
     </XcodeProgram>
   </xsl:template>
 
-  <xsl:template match="clangDecl[@class=&quot;TranslationUnit&quot;]">
+  <xsl:template match="clangDecl[@class='TranslationUnit']">
     <globalDeclarations>
       <xsl:apply-templates />
     </globalDeclarations>
@@ -17,13 +17,13 @@
     <xsl:apply-templates />
   </xsl:template>
 
-  <xsl:template match="clangDecl[@class=&quot;Function&quot;]">
+  <xsl:template match="clangDecl[@class='Function']">
     <xsl:choose>
       <xsl:when test="clangStmt">
         <functionDefinition>
           <name>
             <xsl:value-of select=
-              "clangDeclarationNameInfo[@class=&quot;Identifier&quot;]" />
+              "clangDeclarationNameInfo[@class='Identifier']" />
           </name>
           <body>
             <xsl:apply-templates select="clangStmt" />
@@ -34,14 +34,14 @@
         <functionDecl>
           <name>
             <xsl:value-of select=
-              "clangDeclarationNameInfo[@class=&quot;Identifier&quot;]" />
+              "clangDeclarationNameInfo[@class='Identifier']" />
           </name>
         </functionDecl>
       </xsl:otherwise>
     </xsl:choose>
   </xsl:template>
 
-  <xsl:template match="clangDecl[@class=&quot;Var&quot;]">
+  <xsl:template match="clangDecl[@class='Var']">
     <varDecl>
       <name>
         <xsl:attribute name="fullName">
@@ -51,7 +51,7 @@
     </varDecl>
   </xsl:template>
 
-  <xsl:template match="clangStmt[@class=&quot;IfStmt&quot;]">
+  <xsl:template match="clangStmt[@class='IfStmt']">
     <ifStatement>
       <condition>
         <xsl:apply-templates select="*[1]" />
@@ -65,13 +65,13 @@
     </ifStatement>
   </xsl:template>
 
-  <xsl:template match="clangStmt[@class=&quot;ReturnStmt&quot;]">
+  <xsl:template match="clangStmt[@class='ReturnStmt']">
     <returnStmt>
       <xsl:apply-templates />
     </returnStmt>
   </xsl:template>
 
-  <xsl:template match="clangStmt[@class=&quot;CompoundStmt&quot;]">
+  <xsl:template match="clangStmt[@class='CompoundStmt']">
     <compoundStmt>
       <xsl:apply-templates />
     </compoundStmt>
