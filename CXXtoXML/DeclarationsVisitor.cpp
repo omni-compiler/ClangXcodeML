@@ -71,14 +71,16 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
   if (isa<IntegerLiteral>(S)) {
     const unsigned INIT_BUFFER_SIZE = 32;
     SmallVector<char, INIT_BUFFER_SIZE> buffer;
-    auto loc = static_cast<IntegerLiteral*>(S)->getLocation();
+    auto IL = static_cast<IntegerLiteral*>(S);
     auto& CXT = mangleContext->getASTContext();
     auto spelling = clang::Lexer::getSpelling(
-        loc,
+        IL->getLocation(),
         buffer,
         CXT.getSourceManager(),
         CXT.getLangOpts());
     newProp("token", spelling.str().c_str());
+    std::string decimalNotation = IL->getValue().toString(10, true);
+    newProp("decimalNotation", decimalNotation.c_str());
   }
 
   UnaryExprOrTypeTraitExpr *UEOTTE = dyn_cast<UnaryExprOrTypeTraitExpr>(S);
