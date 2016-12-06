@@ -63,15 +63,14 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
     }
   }
 
-  if (isa<clang::Expr>(S)) {
-    auto T = static_cast<Expr*>(S)->getType();
+  if (auto E = dyn_cast<clang::Expr>(S)) {
+    auto T = E->getType();
     newProp("xcodemlType", typetableinfo->getTypeName(T).c_str());
   }
 
-  if (isa<IntegerLiteral>(S)) {
+  if (auto IL = dyn_cast<IntegerLiteral>(S)) {
     const unsigned INIT_BUFFER_SIZE = 32;
     SmallVector<char, INIT_BUFFER_SIZE> buffer;
-    auto IL = static_cast<IntegerLiteral*>(S);
     auto& CXT = mangleContext->getASTContext();
     auto spelling = clang::Lexer::getSpelling(
         IL->getLocation(),
