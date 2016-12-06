@@ -57,6 +57,10 @@ void XMLVisitorBaseImpl::newProp(const char *Name, const char *Val,
     xmlNewProp(N, BAD_CAST Name, BAD_CAST Val);
 }
 
+void XMLVisitorBaseImpl::newBoolProp(const char *Name, bool Val, xmlNodePtr N) {
+  newProp(Name, Val ? "1" : "0", N);
+}
+
 void XMLVisitorBaseImpl::newComment(const xmlChar *str, xmlNodePtr N) {
     if (!N) N = curNode;
     xmlChar Buf[BUFSIZ];

@@ -164,7 +164,7 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
   newProp("class", D->getDeclKindName());
   setLocation(D->getLocation());
   if (D->isImplicit()) {
-    newProp("is_implicit", "1");
+    newBoolProp("is_implicit", true);
   }
   if (D->getAccess() != AS_none) {
     const auto getAccessStr =
@@ -184,9 +184,9 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
     addChild("fullName", ND->getQualifiedNameAsString().c_str());
   }
   if (auto MD = dyn_cast<CXXMethodDecl>(D)) {
-    newProp("is_const", MD->isConst() ? "1" : "0");
-    newProp("is_static", MD->isStatic() ? "1" : "0");
-    newProp("is_virtual", MD->isVirtual() ? "1" : "0");
+    newBoolProp("is_const", MD->isConst());
+    newBoolProp("is_static", MD->isStatic());
+    newBoolProp("is_virtual", MD->isVirtual());
   }
   return true;
 }
