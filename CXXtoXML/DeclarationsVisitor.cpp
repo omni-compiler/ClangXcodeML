@@ -170,6 +170,11 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
   if (ND) {
     addChild("fullName", ND->getQualifiedNameAsString().c_str());
   }
+  if (auto MD = dyn_cast<CXXMethodDecl>(D)) {
+    newProp("is_const", MD->isConst() ? "1" : "0");
+    newProp("is_static", MD->isStatic() ? "1" : "0");
+    newProp("is_virtual", MD->isVirtual() ? "1" : "0");
+  }
   return true;
 }
 
