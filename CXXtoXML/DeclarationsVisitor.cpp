@@ -166,6 +166,19 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
   if (D->isImplicit()) {
     newProp("is_implicit", "1");
   }
+  if (D->getAccess() != AS_none) {
+    const auto getAccessStr =
+      [](clang::AccessSpecifier access) -> std::string {
+        switch (access) {
+          case AS_public: return "public";
+          case AS_private: return "private";
+          case AS_protected: return "protected";
+          case AS_none: abort();
+        }
+      };
+    newProp("access", getAccessStr(D->getAccess()).c_str());
+  }
+
   NamedDecl *ND = dyn_cast<NamedDecl>(D);
   if (ND) {
     addChild("fullName", ND->getQualifiedNameAsString().c_str());
