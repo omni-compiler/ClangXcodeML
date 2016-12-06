@@ -183,6 +183,12 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
   if (ND) {
     addChild("fullName", ND->getQualifiedNameAsString().c_str());
   }
+  if (auto FD = dyn_cast<FunctionDecl>(D)) {
+    newBoolProp("is_defaulted", FD->isDefaulted());
+    newBoolProp("is_deleted", FD->isDeletedAsWritten());
+    newBoolProp("is_pure", FD->isPure());
+    newBoolProp("is_variadic", FD->isVariadic());
+  }
   if (auto MD = dyn_cast<CXXMethodDecl>(D)) {
     newBoolProp("is_const", MD->isConst());
     newBoolProp("is_static", MD->isStatic());
