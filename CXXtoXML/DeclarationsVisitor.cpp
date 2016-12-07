@@ -159,16 +159,7 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
     newBoolProp("is_implicit", true);
   }
   if (D->getAccess() != AS_none) {
-    const auto getAccessStr =
-      [](clang::AccessSpecifier access) -> std::string {
-        switch (access) {
-          case AS_public: return "public";
-          case AS_private: return "private";
-          case AS_protected: return "protected";
-          case AS_none: abort();
-        }
-      };
-    newProp("access", getAccessStr(D->getAccess()).c_str());
+    newProp("access", AccessSpec(D->getAccess()).c_str());
   }
 
   NamedDecl *ND = dyn_cast<NamedDecl>(D);
