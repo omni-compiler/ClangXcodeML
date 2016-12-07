@@ -198,6 +198,53 @@ DeclarationsVisitor::PreVisitDeclarationNameInfo(DeclarationNameInfo NI) {
   return true;
 }
 
+static std::string
+SpecifierKindToString(
+    clang::NestedNameSpecifier::SpecifierKind kind)
+{
+  switch (kind) {
+    case NestedNameSpecifier::Identifier:
+      return "identifier";
+    case NestedNameSpecifier::Namespace:
+      return "namespace";
+    case NestedNameSpecifier::NamespaceAlias:
+      return "namespace_alias";
+    case NestedNameSpecifier::TypeSpec:
+      return "type_specifier";
+    case NestedNameSpecifier::TypeSpecWithTemplate:
+      return "type_specifier_with_template";
+    case NestedNameSpecifier::Global:
+      return "global";
+    case NestedNameSpecifier::Super:
+      return "MS_super";
+  }
+}
+
+bool
+DeclarationsVisitor::PreVisitNestedNameSpecifierLoc(
+    NestedNameSpecifierLoc N)
+{
+  auto nnsNode = addChild("clangNestedNameSpecifier");
+  for (auto NNS = N.getNestedNameSpecifier();
+      NNS;
+      NNS = NNS->getPrefix())
+  {
+    auto curNNSnode = xmlNewChild(
+        nnsNode,
+        nullptr,
+        BAD_CAST "nns",
+        BAD_CAST "");
+    auto addNNSProp = [curNNSnode](const char *Name, const char *Val) {
+      xmlNewProp(curNNSnode, BAD_CAST Name, BAD_CAST Val);
+    };
+    addNNSProp("kind", SpecifierKindToString(NNS->getKind()).c_str());
+    addNNSProp("is_dependent", NNS->isDependent() ? "1":"0");
+    addNNSProp(
+        "is_instantiation_dependent",
+        NNS->isInstantiationDependent() ? "1":"0");
+  }
+  return true;
+}
 ///
 /// Local Variables:
 /// indent-tabs-mode: nil
