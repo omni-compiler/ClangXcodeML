@@ -24,13 +24,6 @@ DeclarationsVisitor::getVisitorName() const {
   return OptTraceDeclarations ? "Declarations" : nullptr;
 }
 
-// helper macros
-
-#define NExpr(mes, content) do {                                        \
-    newChild(mes, content);                                             \
-    TraverseType(static_cast<Expr*>(S)->getType());                     \
-    return true;                                                        \
-  } while (0)
 bool
 DeclarationsVisitor::PreVisitStmt(Stmt *S) {
   if (!S) {
@@ -121,7 +114,6 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
 
   return true;
 }
-#undef NExpr
 
 bool
 DeclarationsVisitor::PreVisitType(QualType T) {
