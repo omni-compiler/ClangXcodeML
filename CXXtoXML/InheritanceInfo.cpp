@@ -17,7 +17,7 @@ const char* AccessSpec::c_str() const {
     case clang::AS_public : return "public";
     case clang::AS_private : return "private";
     case clang::AS_protected : return "protected";
-    default: return "none";
+    case clang::AS_none: return "none";
   }
 }
 
