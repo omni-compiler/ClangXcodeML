@@ -166,6 +166,13 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
   if (ND) {
     addChild("fullName", ND->getQualifiedNameAsString().c_str());
   }
+  if (auto ND = dyn_cast<NamespaceDecl>(D)) {
+    newBoolProp("is_inline", ND->isInline());
+    newBoolProp("is_anonymous", ND->isAnonymousNamespace());
+    if (! ND->isAnonymousNamespace()) {
+      newBoolProp("is_first_declared", ND->isOriginalNamespace());
+    }
+  }
   if (auto FD = dyn_cast<FunctionDecl>(D)) {
     newBoolProp("is_defaulted", FD->isDefaulted());
     newBoolProp("is_deleted", FD->isDeletedAsWritten());
