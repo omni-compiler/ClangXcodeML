@@ -220,6 +220,24 @@ SpecifierKindToString(
   }
 }
 
+static clang::IdentifierInfo*
+getAsIdentifierInfo(clang::NestedNameSpecifier *NNS) {
+  switch (NNS->getKind()) {
+    case NestedNameSpecifier::Identifier:
+      return NNS->getAsIdentifier();
+    case NestedNameSpecifier::Namespace:
+      return NNS->getAsNamespace()->getIdentifier();
+    case NestedNameSpecifier::NamespaceAlias:
+      return NNS->getAsNamespaceAlias()->getIdentifier();
+    case NestedNameSpecifier::Super:
+      return NNS->getAsRecordDecl()->getIdentifier();
+    case NestedNameSpecifier::TypeSpec:
+    case NestedNameSpecifier::TypeSpecWithTemplate:
+    case NestedNameSpecifier::Global:
+      return nullptr;
+  }
+}
+
 bool
 DeclarationsVisitor::PreVisitNestedNameSpecifierLoc(
     NestedNameSpecifierLoc N)
@@ -242,6 +260,13 @@ DeclarationsVisitor::PreVisitNestedNameSpecifierLoc(
     addNNSProp(
         "is_instantiation_dependent",
         NNS->isInstantiationDependent() ? "1":"0");
+    if (auto ident = getAsIdentifierInfo(NNS)) {
+      xmlNewTextChild(
+          curNNSnode,
+          nullptr,
+          BAD_CAST "name",
+          BAD_CAST ident->getNameStart());
+    }
   }
   return true;
 }
