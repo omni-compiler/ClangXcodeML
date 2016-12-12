@@ -153,7 +153,7 @@ public:
         return S ? S->getStmtClassName() : "NULL";
     }
     const char *NameForType(clang::QualType QT) {
-        return QT->getTypeClassName();
+        return !QT.isNull() ?  QT->getTypeClassName() : "NULL";
     }
     const char *NameForTypeLoc(clang::TypeLoc TL) {
         return !TL.isNull() ? TL.getType()->getTypeClassName() : "NULL";
