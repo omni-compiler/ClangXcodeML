@@ -122,7 +122,7 @@ DeclarationsVisitor::PreVisitType(QualType T) {
     return true;
   }
   newProp("type", typetableinfo->getTypeName(T).c_str());
-  return true;
+  return false;
 }
 
 bool
