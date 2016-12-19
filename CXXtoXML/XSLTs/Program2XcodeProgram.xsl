@@ -77,7 +77,9 @@
     </compoundStmt>
   </xsl:template>
 
-  <xsl:template match="clangStmt[@class='BinaryOperator' and @binOpName]">
+  <xsl:template match="clangStmt[
+    (@class='BinaryOperator' or @class='CompoundAssignOperator')
+    and @binOpName]">
     <xsl:element name="{@binOpName}">
       <xsl:apply-templates select="*[1]" />
       <xsl:apply-templates select="*[2]" />
