@@ -3,7 +3,6 @@
   <xsl:output method="xml" encoding="UTF-8"/>
   <xsl:template match="Program">
     <XcodeProgram>
-      <xsl:copy-of select="@*"/>
       <xsl:apply-templates />
     </XcodeProgram>
   </xsl:template>
@@ -22,7 +21,6 @@
     <xsl:choose>
       <xsl:when test="clangStmt">
         <functionDefinition>
-          <xsl:copy-of select="@*"/>
           <name>
             <xsl:value-of select=
               "clangDeclarationNameInfo[@class='Identifier']" />
@@ -34,7 +32,6 @@
       </xsl:when>
       <xsl:otherwise>
         <functionDecl>
-          <xsl:copy-of select="@*"/>
           <name>
             <xsl:value-of select=
               "clangDeclarationNameInfo[@class='Identifier']" />
@@ -46,7 +43,6 @@
 
   <xsl:template match="clangDecl[@class='Var']">
     <varDecl>
-      <xsl:copy-of select="@*"/>
       <name>
         <xsl:attribute name="fullName">
           <xsl:value-of select="fullName" />
@@ -96,7 +92,6 @@
     (@class='BinaryOperator' or @class='CompoundAssignOperator')
     and @binOpName]">
     <xsl:element name="{@binOpName}">
-      <xsl:copy-of select="@*"/>
       <xsl:apply-templates select="*[1]" />
       <xsl:apply-templates select="*[2]" />
     </xsl:element>
@@ -112,7 +107,6 @@
 
   <xsl:template match="clangStmt[@class='IntegerLiteral']">
     <intConstant>
-      <xsl:copy-of select="@*"/>
       <xsl:value-of select="@decimalNotation" />
     </intConstant>
   </xsl:template>
