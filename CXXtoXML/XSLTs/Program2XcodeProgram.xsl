@@ -75,6 +75,17 @@
     </returnStmt>
   </xsl:template>
 
+  <xsl:template match="clangStmt[@class='WhileStmt']">
+    <whileStatement>
+      <condition>
+        <xsl:apply-templates select="*[1]" />
+      </condition>
+      <body>
+        <xsl:apply-templates select="*[2]" />
+      </body>
+    </whileStatement>
+  </xsl:template>
+
   <xsl:template match="clangStmt[@class='CompoundStmt']">
     <compoundStmt>
       <xsl:apply-templates />
