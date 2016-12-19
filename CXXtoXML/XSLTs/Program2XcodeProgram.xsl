@@ -111,6 +111,19 @@
     </intConstant>
   </xsl:template>
 
+  <xsl:template match="@valueCategory">
+    <xsl:attribute name="reference">
+      <xsl:choose>
+        <xsl:when test=".=lvalue">
+          <xsl:text>lvalue</xsl:text>
+        </xsl:when>
+        <xsl:otherwise>
+          <xsl:text>rvalue</xsl:text>
+        </xsl:otherwise>
+      </xsl:choose>
+    </xsl:attribute>
+  </xsl:template>
+
   <xsl:template match="node()|@*">
     <xsl:copy>
       <xsl:apply-templates select="node()|@*"/>
