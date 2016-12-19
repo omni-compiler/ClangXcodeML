@@ -102,6 +102,14 @@
     </xsl:element>
   </xsl:template>
 
+  <xsl:template match="clangStmt[
+    @class='UnaryOperator' and @unaryOpName]">
+    <xsl:element name="{@unaryOpName}">
+      <xsl:copy-of select="@*" />
+      <xsl:apply-templates select="*[1]" />
+    </xsl:element>
+  </xsl:template>
+
   <xsl:template match="clangStmt[@class='IntegerLiteral']">
     <intConstant>
       <xsl:copy-of select="@*"/>
