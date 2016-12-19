@@ -64,6 +64,10 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
     newProp("xcodemlType", typetableinfo->getTypeName(T).c_str());
   }
 
+  if (auto CE = dyn_cast<clang::CastExpr>(S)) {
+    newProp("clangCastKind", CE->getCastKindName());
+  }
+
   if (auto IL = dyn_cast<IntegerLiteral>(S)) {
     const unsigned INIT_BUFFER_SIZE = 32;
     SmallVector<char, INIT_BUFFER_SIZE> buffer;
