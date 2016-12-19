@@ -57,6 +57,9 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
   }
 
   if (auto E = dyn_cast<clang::Expr>(S)) {
+    newProp("valueCategory",
+        E->isXValue() ? "xvalue" :
+        E->isRValue() ? "prvalue": "lvalue");
     auto T = E->getType();
     newProp("xcodemlType", typetableinfo->getTypeName(T).c_str());
   }
