@@ -48,6 +48,11 @@
           <xsl:value-of select="fullName" />
         </xsl:attribute>
       </name>
+      <xsl:if test="@has_init = 1">
+        <value>
+          <xsl:apply-templates select="clangStmt" />
+        </value>
+      </xsl:if>
     </varDecl>
   </xsl:template>
 
