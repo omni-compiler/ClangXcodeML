@@ -173,6 +173,11 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
   if (ND) {
     addChild("fullName", ND->getQualifiedNameAsString().c_str());
   }
+
+  if (auto VD = dyn_cast<VarDecl>(D)) {
+    newBoolProp("has_init", VD->hasInit());
+  }
+
   if (auto ND = dyn_cast<NamespaceDecl>(D)) {
     newBoolProp("is_inline", ND->isInline());
     newBoolProp("is_anonymous", ND->isAnonymousNamespace());
