@@ -249,30 +249,17 @@ bool
 DeclarationsVisitor::PreVisitNestedNameSpecifierLoc(
     NestedNameSpecifierLoc N)
 {
-  auto nnsNode = addChild("clangNestedNameSpecifier");
-  for (auto NNS = N.getNestedNameSpecifier();
-      NNS;
-      NNS = NNS->getPrefix())
-  {
-    auto curNNSnode = xmlNewChild(
-        nnsNode,
-        nullptr,
-        BAD_CAST "nns",
-        BAD_CAST "");
-    auto addNNSProp = [curNNSnode](const char *Name, const char *Val) {
-      xmlNewProp(curNNSnode, BAD_CAST Name, BAD_CAST Val);
-    };
-    addNNSProp("kind", SpecifierKindToString(NNS->getKind()).c_str());
-    addNNSProp("is_dependent", NNS->isDependent() ? "1":"0");
-    addNNSProp(
+  if (auto NNS = N.getNestedNameSpecifier()) {
+    newChild("clangNestedNameSpecifier");
+    newProp("kind", SpecifierKindToString(NNS->getKind()).c_str());
+    newProp("is_dependent", NNS->isDependent() ? "1":"0");
+    newProp(
         "is_instantiation_dependent",
         NNS->isInstantiationDependent() ? "1":"0");
     if (auto ident = getAsIdentifierInfo(NNS)) {
-      xmlNewTextChild(
-          curNNSnode,
-          nullptr,
-          BAD_CAST "name",
-          BAD_CAST ident->getNameStart());
+      newProp(
+          "name",
+          ident->getNameStart());
     }
   }
   return true;
