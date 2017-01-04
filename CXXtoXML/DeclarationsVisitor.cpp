@@ -175,6 +175,14 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
   // default: use the AST name simply.
   newChild((std::string("Decl:") + D->getDeclKindName()).c_str());    
   setLocation(D->getLocation());
+
+  auto &CXT = mangleContext->getASTContext();
+  auto &SM = CXT.getSourceManager();
+  if (auto RC = CXT.getRawCommentForDeclNoCache(D)) {
+    auto comment = static_cast<std::string>(RC->getRawText(SM));
+    addChild("comment", comment.c_str());
+  } 
+
   if (D->isImplicit()) {
     newProp("is_implicit", "1");
   }
