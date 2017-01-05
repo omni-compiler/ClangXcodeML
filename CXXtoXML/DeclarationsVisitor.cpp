@@ -162,6 +162,14 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
   newChild("clangDecl");
   newProp("class", D->getDeclKindName());
   setLocation(D->getLocation());
+
+  auto &CXT = mangleContext->getASTContext();
+  auto &SM = CXT.getSourceManager();
+  if (auto RC = CXT.getRawCommentForDeclNoCache(D)) {
+    auto comment = static_cast<std::string>(RC->getRawText(SM));
+    addChild("comment", comment.c_str());
+  } 
+
   if (D->isImplicit()) {
     newBoolProp("is_implicit", true);
   }
