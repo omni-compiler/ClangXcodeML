@@ -3,7 +3,9 @@
 #include "DeclarationsVisitor.h"
 #include "InheritanceInfo.h"
 #include "clang/Basic/Builtins.h"
+#include "clang/Lex/Lexer.h"
 #include <map>
+#include "OperationKinds.h"
 
 using namespace clang;
 using namespace llvm;
@@ -22,13 +24,6 @@ DeclarationsVisitor::getVisitorName() const {
   return OptTraceDeclarations ? "Declarations" : nullptr;
 }
 
-// helper macros
-
-#define NExpr(mes, content) do {                                        \
-    newChild(mes, content);                                             \
-    TraverseType(static_cast<Expr*>(S)->getType());                     \
-    return true;                                                        \
-  } while (0)
 bool
 DeclarationsVisitor::PreVisitStmt(Stmt *S) {
   if (!S) {
@@ -36,66 +31,57 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
     return true;
   }
 
-  newChild((std::string("Stmt:") + S->getStmtClassName()).c_str());
+  newChild("clangStmt");
+  newProp("class", S->getStmtClassName());
   setLocation(S->getLocStart());
 
   const BinaryOperator *BO = dyn_cast<const BinaryOperator>(S);
   if (BO) {
-    // XcodeML-C-0.9J.pdf: 7.6(assignExpr), 7.7, 7.10(commmaExpr)
-    switch (BO->getOpcode()) {
-    case BO_PtrMemD:   NExpr("memberPointerRef", nullptr);
-    case BO_PtrMemI:   NExpr("memberIndirectRef", nullptr); // undefined by XcodeML
-    case BO_Mul:       NExpr("mulExpr", nullptr);
-    case BO_Div:       NExpr("divExpr", nullptr);
-    case BO_Rem:       NExpr("modExpr", nullptr);
-    case BO_Add:       NExpr("plusExpr", nullptr);
-    case BO_Sub:       NExpr("minusExpr", nullptr);
-    case BO_Shl:       NExpr("LshiftExpr", nullptr);
-    case BO_Shr:       NExpr("RshiftExpr", nullptr);
-    case BO_LT:        NExpr("logLTExpr", nullptr);
-    case BO_GT:        NExpr("logGTExpr", nullptr);
-    case BO_LE:        NExpr("logLEExpr", nullptr);
-    case BO_GE:        NExpr("logGEExpr", nullptr);
-    case BO_EQ:        NExpr("logEQExpr", nullptr);
-    case BO_NE:        NExpr("logNEQExpr", nullptr);
-    case BO_And:       NExpr("bitAndExpr", nullptr);
-    case BO_Xor:       NExpr("bitXorExpr", nullptr);
-    case BO_Or:        NExpr("bitOrExpr", nullptr);
-    case BO_LAnd:      NExpr("logAndExpr", nullptr);
-    case BO_LOr:       NExpr("logOrExpr", nullptr);
-    case BO_Assign:    NExpr("assignExpr", nullptr);
-    case BO_Comma:     NExpr("commaExpr", nullptr);
-    case BO_MulAssign: NExpr("asgMulExpr", nullptr);
-    case BO_DivAssign: NExpr("asgDivExpr", nullptr);
-    case BO_RemAssign: NExpr("asgModExpr", nullptr);
-    case BO_AddAssign: NExpr("asgPlusExpr", nullptr);
-    case BO_SubAssign: NExpr("asgMinusExpr", nullptr);
-    case BO_ShlAssign: NExpr("asgLshiftExpr", nullptr);
-    case BO_ShrAssign: NExpr("asgRshiftExpr", nullptr);
-    case BO_AndAssign: NExpr("asgBitAndExpr", nullptr);
-    case BO_OrAssign:  NExpr("asgBitOrExpr", nullptr);
-    case BO_XorAssign: NExpr("asgBitXorExpr", nullptr);
+    auto namePtr = BOtoElemName(BO->getOpcode());
+    if (namePtr) {
+      newProp("binOpName", namePtr);
+    } else {
+      auto opName = BinaryOperator::getOpcodeStr(BO->getOpcode());
+      newProp("clangBinOpToken", opName.str().c_str());
     }
   }
   const UnaryOperator *UO = dyn_cast<const UnaryOperator>(S);
   if (UO) {
-    // XcodeML-C-0.9J.pdf 7.2(varAddr), 7.3(pointerRef), 7.8, 7.11
-    switch (UO->getOpcode()) {
-    case UO_PostInc:   NExpr("postIncrExpr", nullptr);
-    case UO_PostDec:   NExpr("postDecrExpr", nullptr);
-    case UO_PreInc:    NExpr("preIncrExpr", nullptr);
-    case UO_PreDec:    NExpr("preDecrExpr", nullptr);
-    case UO_AddrOf:    NExpr("AddrOfExpr", nullptr); // undefined by XcodeML
-    case UO_Deref:     NExpr("pointerRef", nullptr);
-    case UO_Plus:      NExpr("unaryPlusExpr", nullptr);
-    case UO_Minus:     NExpr("unaryMinusExpr", nullptr);
-    case UO_Not:       NExpr("bitNotExpr", nullptr);
-    case UO_LNot:      NExpr("logNotExpr", nullptr);
-    case UO_Real:      NExpr("unaryRealExpr", nullptr); // undefined by XcodeML
-    case UO_Imag:      NExpr("unaryImagExpr", nullptr); // undefined by XcodeML
-    case UO_Extension: NExpr("unrayExtensionExpr", nullptr); // undefined by XcodeML
+    auto namePtr = UOtoElemName(UO->getOpcode());
+    if (namePtr) {
+      newProp("unaryOpName", namePtr);
+    } else {
+      auto opName = UnaryOperator::getOpcodeStr(UO->getOpcode());
+      newProp("clangUnaryOpToken", opName.str().c_str());
     }
   }
+
+  if (auto E = dyn_cast<clang::Expr>(S)) {
+    newProp("valueCategory",
+        E->isXValue() ? "xvalue" :
+        E->isRValue() ? "prvalue": "lvalue");
+    auto T = E->getType();
+    newProp("xcodemlType", typetableinfo->getTypeName(T).c_str());
+  }
+
+  if (auto CE = dyn_cast<clang::CastExpr>(S)) {
+    newProp("clangCastKind", CE->getCastKindName());
+  }
+
+  if (auto IL = dyn_cast<IntegerLiteral>(S)) {
+    const unsigned INIT_BUFFER_SIZE = 32;
+    SmallVector<char, INIT_BUFFER_SIZE> buffer;
+    auto& CXT = mangleContext->getASTContext();
+    auto spelling = clang::Lexer::getSpelling(
+        IL->getLocation(),
+        buffer,
+        CXT.getSourceManager(),
+        CXT.getLangOpts());
+    newProp("token", spelling.str().c_str());
+    std::string decimalNotation = IL->getValue().toString(10, true);
+    newProp("decimalNotation", decimalNotation.c_str());
+  }
+
   UnaryExprOrTypeTraitExpr *UEOTTE = dyn_cast<UnaryExprOrTypeTraitExpr>(S);
   if (UEOTTE) {
     //7.8 sizeof, alignof
@@ -124,7 +110,8 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
 
     }
     case UETT_VecStep:
-      newChild("Stmt:UnaryExprOrTypeTraitExpr_UETT_VecStep");
+      newChild("clangStmt");
+      newProp("class", "UnaryExprOrTypeTraitExpr_UETT_VecStep");
       return true;
 
     //case UETT_OpenMPRequiredSimdAlign:
@@ -134,7 +121,6 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
 
   return true;
 }
-#undef NExpr
 
 bool
 DeclarationsVisitor::PreVisitType(QualType T) {
@@ -143,7 +129,7 @@ DeclarationsVisitor::PreVisitType(QualType T) {
     return true;
   }
   newProp("type", typetableinfo->getTypeName(T).c_str());
-  return true;
+  return false;
 }
 
 bool
@@ -173,14 +159,42 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
   }
 
   // default: use the AST name simply.
-  newChild((std::string("Decl:") + D->getDeclKindName()).c_str());    
+  newChild("clangDecl");
+  newProp("class", D->getDeclKindName());
   setLocation(D->getLocation());
   if (D->isImplicit()) {
-    newProp("is_implicit", "1");
+    newBoolProp("is_implicit", true);
   }
+  if (D->getAccess() != AS_none) {
+    newProp("access", AccessSpec(D->getAccess()).c_str());
+  }
+
   NamedDecl *ND = dyn_cast<NamedDecl>(D);
   if (ND) {
     addChild("fullName", ND->getQualifiedNameAsString().c_str());
+  }
+
+  if (auto VD = dyn_cast<VarDecl>(D)) {
+    newBoolProp("has_init", VD->hasInit());
+  }
+
+  if (auto ND = dyn_cast<NamespaceDecl>(D)) {
+    newBoolProp("is_inline", ND->isInline());
+    newBoolProp("is_anonymous", ND->isAnonymousNamespace());
+    if (! ND->isAnonymousNamespace()) {
+      newBoolProp("is_first_declared", ND->isOriginalNamespace());
+    }
+  }
+  if (auto FD = dyn_cast<FunctionDecl>(D)) {
+    newBoolProp("is_defaulted", FD->isDefaulted());
+    newBoolProp("is_deleted", FD->isDeletedAsWritten());
+    newBoolProp("is_pure", FD->isPure());
+    newBoolProp("is_variadic", FD->isVariadic());
+  }
+  if (auto MD = dyn_cast<CXXMethodDecl>(D)) {
+    newBoolProp("is_const", MD->isConst());
+    newBoolProp("is_static", MD->isStatic());
+    newBoolProp("is_virtual", MD->isVirtual());
   }
   return true;
 }
@@ -190,12 +204,71 @@ DeclarationsVisitor::PreVisitDeclarationNameInfo(DeclarationNameInfo NI) {
   DeclarationName DN = NI.getName();
   IdentifierInfo *II = DN.getAsIdentifierInfo();
 
-  newChild((std::string("DeclarationNameInfo:")
-            + NameForDeclarationName(DN)).c_str(),
+  newChild("clangDeclarationNameInfo",
           II ? II->getNameStart() : nullptr);
+  newProp("class", NameForDeclarationName(DN));
   return true;
 }
 
+static std::string
+SpecifierKindToString(
+    clang::NestedNameSpecifier::SpecifierKind kind)
+{
+  switch (kind) {
+    case NestedNameSpecifier::Identifier:
+      return "identifier";
+    case NestedNameSpecifier::Namespace:
+      return "namespace";
+    case NestedNameSpecifier::NamespaceAlias:
+      return "namespace_alias";
+    case NestedNameSpecifier::TypeSpec:
+      return "type_specifier";
+    case NestedNameSpecifier::TypeSpecWithTemplate:
+      return "type_specifier_with_template";
+    case NestedNameSpecifier::Global:
+      return "global";
+    case NestedNameSpecifier::Super:
+      return "MS_super";
+  }
+}
+
+static clang::IdentifierInfo*
+getAsIdentifierInfo(clang::NestedNameSpecifier *NNS) {
+  switch (NNS->getKind()) {
+    case NestedNameSpecifier::Identifier:
+      return NNS->getAsIdentifier();
+    case NestedNameSpecifier::Namespace:
+      return NNS->getAsNamespace()->getIdentifier();
+    case NestedNameSpecifier::NamespaceAlias:
+      return NNS->getAsNamespaceAlias()->getIdentifier();
+    case NestedNameSpecifier::Super:
+      return NNS->getAsRecordDecl()->getIdentifier();
+    case NestedNameSpecifier::TypeSpec:
+    case NestedNameSpecifier::TypeSpecWithTemplate:
+    case NestedNameSpecifier::Global:
+      return nullptr;
+  }
+}
+
+bool
+DeclarationsVisitor::PreVisitNestedNameSpecifierLoc(
+    NestedNameSpecifierLoc N)
+{
+  if (auto NNS = N.getNestedNameSpecifier()) {
+    newChild("clangNestedNameSpecifier");
+    newProp("kind", SpecifierKindToString(NNS->getKind()).c_str());
+    newProp("is_dependent", NNS->isDependent() ? "1":"0");
+    newProp(
+        "is_instantiation_dependent",
+        NNS->isInstantiationDependent() ? "1":"0");
+    if (auto ident = getAsIdentifierInfo(NNS)) {
+      newProp(
+          "name",
+          ident->getNameStart());
+    }
+  }
+  return true;
+}
 ///
 /// Local Variables:
 /// indent-tabs-mode: nil

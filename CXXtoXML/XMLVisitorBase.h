@@ -36,6 +36,7 @@ public:
     void newChild(const char *Name, const char *Content = nullptr);
     void newProp(const char *Name, int Val, xmlNodePtr N = nullptr);
     void newProp(const char *Name, const char *Val, xmlNodePtr N = nullptr);
+    void newBoolProp(const char *Name, bool Val, xmlNodePtr N = nullptr);
     void newComment(const xmlChar *str, xmlNodePtr RN = nullptr);
     void newComment(const char *str, xmlNodePtr RN = nullptr);
     void newComment(const std::string &str, xmlNodePtr RN = nullptr);
@@ -152,7 +153,7 @@ public:
         return S ? S->getStmtClassName() : "NULL";
     }
     const char *NameForType(clang::QualType QT) {
-        return QT->getTypeClassName();
+        return !QT.isNull() ?  QT->getTypeClassName() : "NULL";
     }
     const char *NameForTypeLoc(clang::TypeLoc TL) {
         return !TL.isNull() ? TL.getType()->getTypeClassName() : "NULL";

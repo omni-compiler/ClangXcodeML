@@ -23,7 +23,8 @@ OBJS =  CXXtoXML.o \
 	XMLVisitorBase.o \
 	TypeTableVisitor.o \
 	DeclarationsVisitor.o \
-	InheritanceInfo.o
+	InheritanceInfo.o \
+	OperationKinds.o
 
 CXXtoXML: $(RAVOBJS) $(OBJS)
 	$(CXX) $(CXXFLAGS) $(RAVOBJS) $(OBJS) $(USEDLIBS) -o CXXtoXML
@@ -54,11 +55,16 @@ DeclarationsVisitor.o: \
 	XMLRAV.h \
 	XMLVisitorBase.h \
 	InheritanceInfo.cpp \
-	InheritanceInfo.h
+	InheritanceInfo.h \
+	OperationKinds.cpp \
+	OperationKinds.h
 InheritanceInfo.o: \
 	InheritanceInfo.cpp \
 	InheritanceInfo.h \
 	Hash.h
+OperationKinds.o: \
+	OperationKinds.cpp \
+	OperationKinds.h
 
 distclean: clean
 	rm -f $(RAVOBJS)

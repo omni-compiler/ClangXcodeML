@@ -13,6 +13,7 @@ public:
     bool PreVisitAttr(clang::Attr *);
     bool PreVisitDecl(clang::Decl *);
     bool PreVisitDeclarationNameInfo(clang::DeclarationNameInfo);
+    bool PreVisitNestedNameSpecifierLoc(clang::NestedNameSpecifierLoc);
 };
 
 #endif /* !DECLARATIONSVISITOR_H */

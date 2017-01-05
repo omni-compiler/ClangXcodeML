@@ -24,6 +24,11 @@ OptDisableTypeTable("disable-typeTable",
                     cl::desc("disable <typeTable>"),
                     cl::cat(CXX2XMLCategory));
 
+static cl::opt<bool>
+OptIgnoreUnknownType("ignore-unknown-type",
+                      cl::desc("ignore unknown type"),
+                      cl::cat(CXX2XMLCategory));
+
 static cl::opt<std::string>
 OptTypeNameMap("typenamemap",
                cl::desc("a map file of typename substitution"),
@@ -448,7 +453,11 @@ std::string TypeTableInfo::getTypeName(QualType T)
   };
 
   std::string name = mapFromQualTypeToName[T];
-  assert(!name.empty());
+  if (OptIgnoreUnknownType && name.empty()) {
+    return "CXX2XML_UNKNOWN_TYPE";
+  } else {
+    assert(!name.empty());
+  }
 
   if (!map_is_already_set) {
     typenamemap["unsigned_int"] = "unsigned";
