@@ -445,7 +445,7 @@ arrayType要素は以下の属性を持つ。
 以下の子要素を持つ。
 
 * `arraySize`　－　配列のサイズ（要素数）を表す式。式要素ひとつを子要素に持つ。
-  サイズを数値で表現できない場合や、可変長配列の場合に指定する。arrayType要素がarraySize要素を持つ場合、`array_size`属性の値は"*"とする。
+  サイズを数値で表現できない場合や、可変長配列の場合に指定する。arrayType要素がarraySize要素を持つ場合、`array_size`属性の値は"\*"とする。
 
 例:
 "`int a[10]`"のaに対する`type_entry`は以下のようになる。
@@ -660,7 +660,7 @@ id要素は次の属性を持つことができる。
 
 * `name`要素　－　識別子の名前はname要素で指定する。
   要検討： 実装時に再検討。何もかもvalue要素にするのがよいか？
-* `bitField`要素　－　`unionType`と`class`要素においてメンバのビットフィールドの値を`bit_field`属性の数値として指定できないとき使用する。`bitField`要素は式を子要素に持つ。`bitField`要素を使用するとき、`bit_field` 属性の値は、"*" とする。
+* `bitField`要素　－　`unionType`と`class`要素においてメンバのビットフィールドの値を`bit_field`属性の数値として指定できないとき使用する。`bitField`要素は式を子要素に持つ。`bitField`要素を使用するとき、`bit_field` 属性の値は、"\*" とする。
 * `alignAs`要素　—　`structType`、`unionType`と`class`要素においてメンバの`alignment`を`align_as`属性の数値として指定できないとき、`alignAs`要素の子要素として式の要素で指定する。
 
 例:
@@ -2072,7 +2072,7 @@ C++対応版作成に当たって再検討していない。
 
 次の子要素を持つ。
 
-* arraySize　－　Co-Array次元を表す。arraySize要素を持つときの `array_size` 属性の値は "*" とする。
+* arraySize　－　Co-Array次元を表す。arraySize要素を持つときの `array_size` 属性の値は "\*" とする。
 
 例:
 
@@ -2110,7 +2110,7 @@ Co-Array型の変数への参照を表す。
 # その他の要素・属性
 
 ## `is_gccExtension`属性
-`is_gccExtension`属性は、GCCの __extension__ キーワードをXML要素の先頭に付加するかどうかを定義し、値は 0 または 1 (falseまたはtrue) である。
+`is_gccExtension`属性は、GCCの \_\_extension\_\_ キーワードをXML要素の先頭に付加するかどうかを定義し、値は 0 または 1 (falseまたはtrue) である。
 `is_gccExtension`属性は省略可能で、指定しないときは値 0を指定したときと同じ意味である。次のXML要素に `is_gccExtension` 属性を持つことができる。
 
 * id
@@ -2127,7 +2127,7 @@ Co-Array型の変数への参照を表す。
      </id>
 
 ## gccAsm要素、gccAsmDefinition要素、gccAsmStatement要素
-gccAsm 要素・gccAsmDefinition要素・gccAsmStatement要素は、GCCの asm/__asm__ キーワードを定義する。子要素として asm の引数の文字列を持つ。
+gccAsm 要素・gccAsmDefinition要素・gccAsmStatement要素は、GCCの asm/\_\_asm\_\_ キーワードを定義する。子要素として asm の引数の文字列を持つ。
 
 * gccAsm　－　asm式を表す。次の子要素を持つ。
 * stringConstant (1個)　－　アセンブラコードを表す。
@@ -2189,7 +2189,7 @@ gccAsm 要素・gccAsmDefinition要素・gccAsmStatement要素は、GCCの asm/_
        </gccAsmStatement>
 
 ## gccAttributes要素
-gccAttributes 要素はGCCの __attribute__ キーワードを定義する。子要素として、__attribute__の引数の文字列を持つ。gccAttributes 要素は、gccAttribute 要素を子要素に複数持つ。
+gccAttributes 要素はGCCの \_\_attribute\_\_ キーワードを定義する。子要素として、\_\_attribute\_\_の引数の文字列を持つ。gccAttributes 要素は、gccAttribute 要素を子要素に複数持つ。
 
 * 型を表すXML要素全てが gccAttributes 要素を子要素に持つ（0～1個）。
 * id 要素が gccAttributes 要素を子要素に持つ（0～1個）。
