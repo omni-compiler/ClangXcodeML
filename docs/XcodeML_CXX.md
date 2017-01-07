@@ -26,7 +26,7 @@ XcodeML/C++ 1.1J
 XcodeML/C++ 1.2J
 
 * 名前空間やテンプレートの表現方法について大幅改定作業を開始。2016/9/6
- 
+
 
 # はじめに
 この仕様書は、プログラミング言語CおよびC++に対してXcalableMP拡張をほどこした言語を取り扱うための中間表現形式であるXcodeMLを記述する。
@@ -121,7 +121,7 @@ XcodeMLの設計方針は、XcodeMLで表現されたプログラムを入力に
 このように考えると、「フェーズ１の正規化」と「フェーズ2の正規化」があり、フェーズ1の正規化は必ずおこなう（XcodeMLとして二種類の表現をするコースがそもそも準備されない）、という風に考える必要がある。
 
 ## nnsTableとnns属性
-nnsTable要素は、翻訳単位（2章）に対して一つだけ存在し、翻訳単位で使われているすべての名前修飾(nested namespace spcifier)についての情報を定義する。 
+nnsTable要素は、翻訳単位（2章）に対して一つだけ存在し、翻訳単位で使われているすべての名前修飾(nested namespace spcifier)についての情報を定義する。
 
 nns属性は、C++のスコープ解決演算子による修飾をおこなった形の「フルネーム」を指定するためのXML属性である。
 次章以降で解説する各種の要素のうち、ソースコード上での「名前」を表現する要素について、適宜挿入される共通の構造である。
@@ -149,7 +149,7 @@ nns="修飾子識別名"
 * memberArrayRef要素
 * memberArrayAddr要素
 
-例:  
+例:
 以下のプログラムで、
 
     namespace NS {
@@ -164,12 +164,12 @@ namespace NSの存在を表現するために、以下のようなnnsTableが生
         <namespaceName nns="global">NS</namespace>
       </nestedNameSpecifier>
     </nnsTable>
-    
+
 これを用いて、(1)および(2)におけるaは、以下のように表現される。
 
     <name type="int" nns="Q0">a</name>
 
-例:  
+例:
 以下のプログラムで、
 
     struct S {
@@ -216,7 +216,7 @@ C\_Front実装でもCtoXcodeML実装でもsymbols属性内ではvalue要素を�
 
 { } で囲まれた式の並びは、value要素のネストで表現する。
 
-例:  
+例:
 int型の初期値 1 に対応する表現は次のとおりになる。
 
     <value>
@@ -233,7 +233,7 @@ int型配列の初期値 { 1, 2 } に対応する表現は次のとおりにな�
     </value>
 
 # typeTable要素とデータ型定義要素
-typeTable要素は、翻訳単位（2章）に対して一つだけ存在し、翻訳単位で使われているすべてのデータ型についての情報を定義する。 
+typeTable要素は、翻訳単位（2章）に対して一つだけ存在し、翻訳単位で使われているすべてのデータ型についての情報を定義する。
 
     <typeTable>
       [ データ型定義要素
@@ -258,7 +258,7 @@ typeTable要素は、翻訳単位を表現するXcodeProgram要素（2章）の�
 すべてのデータ型定義要素は、型識別名（3.1節）を表すtype要素をもつ。
 データ型定義要素は、データ型定義要素属性（1.1節）をもつことができる。
 
-要検討：decltype対応 
+要検討：decltype対応
 decltype(式) は式の型を表すが、式はスコープをもつのでtypeTableの中に移動することができない。
 
 * 案1： 式の中のすべての名前に、スコープ名を付ける。decltype(main:x + main:y) など。→とても煩雑。scopenameを持たない { } の中に出現した場合は？
@@ -271,7 +271,7 @@ decltype(式) は式の型を表すが、式はスコープをもつのでtypeTa
 プログラム内において、データ型はデータ型識別名で区別される。その名前は、次のいずれかである。
 
 * 基本データ型（3.4節）
-* C, C++の基本データ型（C++拡張） 
+* C, C++の基本データ型（C++拡張）
 'void', 'char', 'short', 'int' , 'long', 'long_long', 'unsigned_char', 'unsigned_short', 'unsigned', 'unsigned_long', 'unsigned_long_long', 'float', 'double', 'long_double', 'wchar_t', 'char16_t', 'char32_t', 'bool' (_Bool型)
 * _Complex、_Imaginaryに対応する型
 'float_complex', 'double_complex', 'long_double_complex', 'float_imaginary', 'double_imaginary', 'long_double_imaginary'
@@ -345,7 +345,7 @@ int& n_alias = n_org;
     <basicType="B1" name="B2" reference="rvalue"/>
 
 ## basicType要素
-basicType 要素は、他のデータ型識別要素にデータ型定義要素属性を加えた、新しいデータ型定義要素を定義する。 
+basicType 要素は、他のデータ型識別要素にデータ型定義要素属性を加えた、新しいデータ型定義要素を定義する。
 
     <basicType/>
 
@@ -442,12 +442,12 @@ arrayType要素は以下の属性を持つ。
 
 以下の子要素を持つ。
 
-* arraySize　－　配列のサイズ（要素数）を表す式。式要素ひとつを子要素に持つ。 
+* arraySize　－　配列のサイズ（要素数）を表す式。式要素ひとつを子要素に持つ。
   サイズを数値で表現できない場合や、可変長配列の場合に指定する。arrayType要素がarraySize要素を持つ場合、array_size属性の値は"*"とする。
 
 例:
 "int a[10]"のaに対するtype_entryは以下のようになる。
-    
+
     <arrayType type="A011" element_type="int" array_size="10"/>
 
 ## unionType要素
@@ -584,7 +584,7 @@ enum型は、enumType要素で定義する。type要素で、メンバの識別�
 "enum { e1, e2, e3 = 10 } ee; "のeeに対するenumType要素は以下のようになる。
 
       <enumType name="E0">
-        <symbols> 
+        <symbols>
           <id>
             <name>e1</name>
           </id>
@@ -608,7 +608,7 @@ enum型は、enumType要素で定義する。type要素で、メンバの識別�
 
 以下の属性を持つ。
 
-    * type　－　パックされた型に与えられたデータ型識別名 
+    * type　－　パックされた型に与えられたデータ型識別名
     * elem_type　－　パックされる個々の型のデータ型識別名
 
 parameterPack要素は、子要素を持たない。
@@ -616,7 +616,7 @@ parameterPack要素は、子要素を持たない。
 例:
 以下の関数テンプレートの定義において、
 
-      template<typename T1, typename ... Types> 
+      template<typename T1, typename ... Types>
       T1 product(T1 val1, Types ... tail) {
         return val1 * product(tail...);
       }
@@ -633,7 +633,7 @@ id要素は、変数名や配列名、関数名、struct/unionのメンバ名、
 
     <id>
       name要素（2.1節）
-      
+
       [ bitField要素 ]
       [ alignAs要素 ]
     </id>
@@ -705,11 +705,11 @@ id要素は次の属性を持つことができる。
 大域的な（翻訳単位全体をスコープとする）変数、関数などの宣言と定義を行う。
 
     <globalDeclarations>
-      [ {    varDecl要素（5.4節）　or 
-    functionDecl要素（5.5節）　or 
-    usingDecl要素（5.6節） or 
-    functionDefinition要素（5.3節） or 
-    functionTemplate要素（8.3節） or 
+      [ {    varDecl要素（5.4節）　or
+    functionDecl要素（5.5節）　or
+    usingDecl要素（5.6節） or
+    functionDefinition要素（5.3節） or
+    functionTemplate要素（8.3節） or
     text要素（6.21節） }
       … ]
     </globalDeclarations>
@@ -727,14 +727,14 @@ id要素は次の属性を持つことができる。
 compoundStatement（6.2節）、class（3.9節）などをスコープとする変数、関数などの宣言と定義を行う。
 
     <declarations>
-      [ {    varDecl要素（5.4節）　or 
-    functionDecl要素（5.5節）　or 
-    usingDecl要素（5.6節） or 
-    functionDefinition要素（5.3節） or 
+      [ {    varDecl要素（5.4節）　or
+    functionDecl要素（5.5節）　or
+    usingDecl要素（5.6節） or
+    functionDefinition要素（5.3節） or
     text要素（6.21節） }
       … ]
     </declarations>
-    
+
 属性なし
 
 以下の子要素を持つ。
@@ -765,7 +765,7 @@ compoundStatement（6.2節）、class（3.9節）などをスコープとする�
 
 加えて、以下の子要素をもつ。
 
-* symbols要素　－　パラメータ（仮引数）のシンボルリスト。子要素はid要素の並び。 
+* symbols要素　－　パラメータ（仮引数）のシンボルリスト。子要素はid要素の並び。
 params要素　－　パラメータ（仮引数）の並び
 * body要素　－　関数本体。子要素として文（通常はcompoundStatement）を含む。関数に局所的な変数などの宣言は、body要素の中に記述される。body要素内にGCCのネストされた関数を表すfunctionDefinitionを含む場合がある。
 
@@ -775,7 +775,7 @@ params要素　－　パラメータ（仮引数）の並び
 例：
 関数の定義
 
-    struct sss *foo(struct sss *arg1, int nnn) 
+    struct sss *foo(struct sss *arg1, int nnn)
     {
       ・・・（略）・・・
 
@@ -854,7 +854,7 @@ functionDefinition要素の子要素。そのメンバ関数がデストラク�
 * value要素　—　paramsが関数またはラムダ関数の仮引数並びで、直前のname要素に対応する仮引数がデフォルト実引数をもつとき、それを表現する。
 * ellipsis　－　可変長引数を表す。paramsの最後の子要素に指定可能。
 
-params要素内のname要素は、引数の順序で並んでいなくてはならない。 
+params要素内のname要素は、引数の順序で並んでいなくてはならない。
 
 ## varDecl要素
 変数の宣言を行う。
@@ -884,7 +884,7 @@ params要素内のname要素は、引数の順序で並んでいなくてはな�
       </varDecl>
 
 ## functionDecl要素
-関数宣言を行う。 
+関数宣言を行う。
 
     <functionDecl>
       name要素（2.1節）
@@ -1210,9 +1210,9 @@ lvalue属性は、式の要素の属性からテータ型定義要素の属性�
 ## 定数の要素
 定数は以下のXML要素によって表現する。
 
-    <intConstant>10進数または16進数</intConstant> 
+    <intConstant>10進数または16進数</intConstant>
     <longlongConstant>16進数 16進数</longlongConstant>
-    <floatConstant>浮動小数点数</floatConstant> 
+    <floatConstant>浮動小数点数</floatConstant>
     <stringConstant>文字列</stringConstant>
     <moeConstant>列挙型メンバ名</moeConstant>
     <booleanConstant>真偽値</booleanConatant>
@@ -1236,7 +1236,7 @@ lvalue属性は、式の要素の属性からテータ型定義要素の属性�
 ## 変数参照の要素（Var要素、varAddr要素、arrayAddr要素）
 変数名への参照を表現する。それぞれ、v, &v, aに対応する（vは配列以外の変数、aは配列変数）。
 
-    <Var>変数名</Var> 
+    <Var>変数名</Var>
     <varAddr>変数名</varAddr>
     <arrayAddr>配列変数名</arrayAddr>
 
@@ -1329,7 +1329,7 @@ aが配列のとき、2015年10月現在のF\_Frontでは &a の参照をaの参
         <Var type="int" scope="local">i</Var>
       </arrayRef>
     </addrOfExpr>
-    
+
 のように表現される。ここでP232はint型へのポインタと宣言されている。後者はarrayAddr要素でないことに注意されたい。
 
 ## メンバの参照の要素（C++拡張）
@@ -1454,11 +1454,11 @@ name属性に変数名を指定し、子要素で構造体のアドレスを表�
 例：
 　以下のようなプログラムで、
 
-    typedef struct { int x, y; } two_int_t; 
-    int n = 20; 
+    typedef struct { int x, y; } two_int_t;
+    int n = 20;
     foo(&(two_int_t){ 1, n });
     goo((two_int_t){ .y=300 });
-    
+
 関数fooの引数は以下の表現となる。
 
     <compoundValueAddr type="P6">
@@ -1489,7 +1489,7 @@ thisExpr 要素は、C++の this に対応する。
 属性なし
 
 ## assignExpr 要素
-assignExpr 要素は、２つの式の要素をsub要素に持ち、代入を表す。 
+assignExpr 要素は、２つの式の要素をsub要素に持ち、代入を表す。
 
     <assignExpr>
       式の要素
@@ -1666,7 +1666,7 @@ Cのcastは、staticCastまたはconstCastまたはreinterpretCastで表現す�
 　→暗黙のキャストが入って同じ型にそろえられるので、その型を式全体の型と考えればよい（あるいは暗黙のキャストで対応できないほど型が食い違っている場合にはコンパイルエラーになるためそのようなソースコードは受理する必要がない）。
 
 ## gccCompoundExpr要素
-gcc拡張の複文式に対応する。 
+gcc拡張の複文式に対応する。
 
     <gccCompoundExpr>
       compoundStatement要素
@@ -1784,7 +1784,7 @@ captures要素はオプショナルに以下の属性をもつ。
 * typeName要素　－　型仮引数に対応するデータ型識別名を表現する。
 * value要素　—　子要素としてtypeName要素をもつ。関数テンプレートまたはメンバ関数テンプレートにおいて、直前のtypeName要素に対応する仮引数がデフォルト実引数をもつとき、それを表現する。
 
-typeName要素は、引数の順序で並んでいなければならない。 
+typeName要素は、引数の順序で並んでいなければならない。
 
 ## classTemplate要素
 データ型定義要素（3章）の一つ。クラスのテンプレートを以下のように表現する。
@@ -1963,7 +1963,7 @@ typeName要素は、引数の順序で並んでいなければならない。
 
 * typeName要素　－　型実引数に対応するデータ型識別名を表現する。
 
-typeName要素は、引数の順序で並んでいなければならない。 
+typeName要素は、引数の順序で並んでいなければならない。
 
 ## typeInstance要素
 データ型定義要素（3章）の一つ。型のテンプレートのインスタンスを表現する。
@@ -2127,7 +2127,7 @@ is_gccExtension属性は省略可能で、指定しないときは値 0を指定
 ## gccAsm要素、gccAsmDefinition要素、gccAsmStatement要素
 gccAsm 要素・gccAsmDefinition要素・gccAsmStatement要素は、GCCの asm/__asm__ キーワードを定義する。子要素として asm の引数の文字列を持つ。
 
-* gccAsm　－　asm式を表す。次の子要素を持つ。 
+* gccAsm　－　asm式を表す。次の子要素を持つ。
 * stringConstant (1個)　－　アセンブラコードを表す。
 * gccAsmDefinition　－　asm定義を表す。子要素はgccAsmと同じ。
 * gccAsmStatement　－　asm文を表す。
@@ -2141,9 +2141,9 @@ gccAsm 要素・gccAsmDefinition要素・gccAsmStatement要素は、GCCの asm/_
 * stringConstant (1個)　－　アセンブラコードを表す。
 * gccAsmOperands (2個)　－　1番目が出力オペランド、2番目が入力オペランドを表す。オペランドを省略する場合は、子要素を持たないタグを記述する。子要素にgccAsmOperand(複数)を持つ。
 * gccAsmClobbers (0-1個)　－　クロバーを表す。子要素に0個以上の stringConstant を持つ。
-* gccAsmOperand　－　入出力オペランドを表す。 
+* gccAsmOperand　－　入出力オペランドを表す。
 
-次の属性を持つ。 
+次の属性を持つ。
 
 * match (省略可) 　－　matching constraintの代わりに指定する識別子を表す（"[識別子]" に対応）。
 * constraint (省略不可) 　－　constraint/constraint modifierを表す。
@@ -2229,13 +2229,13 @@ gccAttributes 要素はGCCの __attribute__ キーワードを定義する。子
 id 要素、functionDefinition 要素の子要素に、gccAttributes を設定する例
 
      void func(void);
-     void func2(void) __attribute__(alias("func")); 
-      
+     void func2(void) __attribute__(alias("func"));
+
       void __attribute__((noreturn)) func() {
          ...
       }
-     
-     
+
+
      <typeTable>
        <functionType type="F0">
          <params>
@@ -2311,7 +2311,7 @@ is_modified属性はそのタグに対応する式、文、宣言がコンパイ
       int xyz;
       struct {    int x;   int y;} S;
       foo() {
-        int *p; 
+        int *p;
         p =  &xyz;    /* 文1 */
         a[4] = S.y;    /* 文2 */
       }
@@ -2326,7 +2326,7 @@ is_modified属性はそのタグに対応する式、文、宣言がコンパイ
           <varAddr type=" P70828">xyz</varAddr>
         </assignExpr>
       </exprStatement>
- 
+
 もしくは、
 
       <exprStatement>
@@ -2374,26 +2374,26 @@ is_modified属性はそのタグに対応する式、文、宣言がコンパイ
 
     <?xml version="1.0" encoding="ISO-8859-1"?>
     <XcodeProgram source="t3.c">
-      <!-- 
+      <!--
         typedef struct complex {
             double real;
             double img;
         } complex_t;
-        
+
         complex_t x;
         complex_t complex_add(complex_t x, double y);
-            
+
         main()
         {
             complex_t z;
-        
+
             x.real = 1.0;
             x.img = 2.0;
-            
+
             z = complex_add(x,1.0);
-        
+
             printf("z=(%f,%f)\n",z.real,z.img);
-        
+
         }
         complex_t complex_add(complex_t x, double y)
         {
