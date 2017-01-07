@@ -272,13 +272,13 @@ decltype(式) は式の型を表すが、式はスコープをもつのでtypeTa
 
 * 基本データ型（3.4節）
 * C, C++の基本データ型（C++拡張）
-'void', 'char', 'short', 'int' , 'long', 'long_long', 'unsigned_char', 'unsigned_short', 'unsigned', 'unsigned_long', 'unsigned_long_long', 'float', 'double', 'long_double', 'wchar_t', 'char16_t', 'char32_t', 'bool' (_Bool型)
-* _Complex、_Imaginaryに対応する型
-'float_complex', 'double_complex', 'long_double_complex', 'float_imaginary', 'double_imaginary', 'long_double_imaginary'
+`void`, `char`, `short`, `int` , `long`, `long_long`, `unsigned_char`, `unsigned_short`, `unsigned`, `unsigned_long`, `unsigned_long_long`, `float`, `double`, `long_double`, `wchar_t`, `char16_t`, `char32_t`, `bool` (`_Bool`型)
+* `_Complex`、`_Imaginary`に対応する型
+`float_complex`, `double_complex`, `long_double_complex`, `float_imaginary`, `double_imaginary`, `long_double_imaginary`
 * GCCの組み込み型
-'__builtin_va_arg'
+`__builtin_va_arg`
 * 型の抽象（C++） —　テンプレートの型仮引数の型の名前
-'any_class', 'any_typename'
+`any_class`, `any_typename`
 * 派生データ型とクラス
 
 他のデータ型識別名とは異なる、翻訳単位内でユニークな英数字の並び。
@@ -298,7 +298,7 @@ decltype(式) は式の型を表すが、式はスコープをもつのでtypeTa
 typeName要素は以下のように使用される。
 
 * 型を引数とする関数の呼出しで
-* sizeOfExpr（7.11節）、gccAlignOfExpr（7.11節）、builtin_op（11.5節）
+* `sizeOfExpr`（7.11節）、gccAlignOfExpr（7.11節）、`builtin_op`（11.5節）
 * テンプレートの定義の型仮引数として（8章）
 * テンプレートのインスタンスの型実引数として（9章）
 * 構造体とクラスの継承元（3.9.1項）
@@ -315,14 +315,14 @@ typeName要素は以下のように使用される。
 ## データ型定義要素属性
 データ型定義要素は共通に以下の属性を持つことができる。これらをデータ型定義要素属性と呼ぶ。
 
-* is_const　－　そのデータ型がconst修飾子をもつかどうか
-* is_volatile　－　そのデータ型がvolatile修飾子をもつかどうか
-* is_restrict　－　そのデータ型がrestrict修飾子をもつかどうか
-* is_static　－　そのデータ型がstatic属性をもつかどうか
-* reference(C++)　—　属性値がlvalueのとき左辺値参照、rvalueのとき右辺値参照を意味する。属性値がdefaultまたは属性が省略されているとき文脈依存であることを意味するが、lvalueまたはrvalueの値をもつことが望ましい。引数の値渡し（通常の場合）に対しては、defalutとする。
-* access（C++）　－　アクセス指定子に対応。"private", "protected"または"public"
-* is_virtual（C++）　—　そのメンバ関数がvirtual属性をもつかどうか。
-* is_userDefined（C++）　—　その演算がユーザ定義によりオーバーロードされているかどうか
+* `is_const`　－　そのデータ型がconst修飾子をもつかどうか
+* `is_volatile`　－　そのデータ型がvolatile修飾子をもつかどうか
+* `is_restrict`　－　そのデータ型がrestrict修飾子をもつかどうか
+* `is_static`　－　そのデータ型がstatic属性をもつかどうか
+* `reference`(C++)　—　属性値がlvalueのとき左辺値参照、rvalueのとき右辺値参照を意味する。属性値がdefaultまたは属性が省略されているとき文脈依存であることを意味するが、lvalueまたはrvalueの値をもつことが望ましい。引数の値渡し（通常の場合）に対しては、defalutとする。
+* `access`（C++）　－　アクセス指定子に対応。"private", "protected"または"public"
+* `is_virtual`（C++）　—　そのメンバ関数がvirtual属性をもつかどうか。
+* `is_userDefined`（C++）　—　その演算がユーザ定義によりオーバーロードされているかどうか
 
 `is_`　で始まる属性の値には、真を意味する1とtrue、および、偽を意味する0とfalseが許される。属性が省略されたとき、偽を意味する。
 
@@ -394,7 +394,7 @@ pointerType要素はポインタのデータ型を定義する。
 pointerType要素は、子要素を持たない。
 
 例:
-"int *" に対応するデータ型定義は以下のようになる。
+"`int *`" に対応するデータ型定義は以下のようになる。
 
 	<pointerType type="P0123" ref="int"/>
 
@@ -405,12 +405,12 @@ funtionType要素は、関数型を定義する。
     　　[ params要素（5.3.4節） ]
     </functionType>
 
-    属性（必須）: type, return_type
-属性（optional）: is_inline
+    属性（必須）: `type`, `return_type`
+属性（optional）: `is_inline`
 
-* type　－　この関数型に与えられたデータ型識別名
-* return_type　－　この関数型が返すデータのデータ型識別名
-* is_inline　－　この関数型がinline型であるかどうかの情報、0 または 1、false または true 省略時はfalseを意味する。
+* `type`　－　この関数型に与えられたデータ型識別名
+* `return_type`　－　この関数型が返すデータのデータ型識別名
+* `is_inline`　－　この関数型がinline型であるかどうかの情報、0 または 1、false または true 省略時はfalseを意味する。
 
 プロトタイプ宣言がある場合には、引数のXML要素に対応するparams要素を含む。
 
@@ -431,22 +431,22 @@ arrayType要素は、配列データ型を定義する。
       [ arraySize要素]
     </arrayType>
 
-属性（必須）: type, element_type
-属性（optional）: array_size, データ型定義要素属性
+属性（必須）: `type`, `element_type`
+属性（optional）: `array_size`, データ型定義要素属性
 
 arrayType要素は以下の属性を持つ。
 
-* type　－　この配列型に与えられたデータ型識別名
-* element_type　－　配列要素のデータ型識別名
-* array_size　－　配列のサイズ（要素数）。array_sizeと子要素のarraySizeを省略した場合は、サイズ未指定を意味する。array_size属性は子要素のarraySizeと同時に指定することはできない。
+* `type`　－　この配列型に与えられたデータ型識別名
+* `element_type`　－　配列要素のデータ型識別名
+* `array_size`　－　配列のサイズ（要素数）。`array_size`と子要素の`arraySize`を省略した場合は、サイズ未指定を意味する。`array_size`属性は子要素のarraySizeと同時に指定することはできない。
 
 以下の子要素を持つ。
 
-* arraySize　－　配列のサイズ（要素数）を表す式。式要素ひとつを子要素に持つ。
-  サイズを数値で表現できない場合や、可変長配列の場合に指定する。arrayType要素がarraySize要素を持つ場合、array_size属性の値は"*"とする。
+* `arraySize`　－　配列のサイズ（要素数）を表す式。式要素ひとつを子要素に持つ。
+  サイズを数値で表現できない場合や、可変長配列の場合に指定する。arrayType要素がarraySize要素を持つ場合、`array_size`属性の値は"*"とする。
 
 例:
-"int a[10]"のaに対するtype_entryは以下のようになる。
+"`int a[10]`"のaに対する`type_entry`は以下のようになる。
 
     <arrayType type="A011" element_type="int" array_size="10"/>
 
@@ -462,10 +462,10 @@ union(共用体)データ型は、unionType要素で定義する。
 
 unionType要素は以下の属性を持つ。
 
-* type　－　この共用体型のデータ型識別名
+* `type`　－　この共用体型のデータ型識別名
 
-unionType要素は、メンバに対する識別子の情報であるsymbols要素を持つ。 構造体・共用体のタグ名がある場合には、スコープに対応するシンボルテーブルに定義されている。
-メンバのビットフィールドは、id要素の bit_field 属性または id要素の子要素 であるbitField 要素に記述する（4.1節）。
+`unionType`要素は、メンバに対する識別子の情報である`symbols`要素を持つ。 構造体・共用体のタグ名がある場合には、スコープに対応するシンボルテーブルに定義されている。
+メンバのビットフィールドは、`id`要素の `bit_field` 属性または `id`要素の子要素 である`bitField` 要素に記述する（4.1節）。
 
 ## structType要素
 構造体を表現する。
@@ -485,8 +485,8 @@ unionType要素は、メンバに対する識別子の情報であるsymbols要�
 
 * type（必須）　－　この構造体に与えられたデータ型識別名
 
-メンバのビットフィールドは、id要素の bit_field 属性または id要素の子要素 であるbitField要素に記述する（4.1節）。
-構造体またはメンバの名前は、同じtype属性をもつid要素で指定する。
+メンバのビットフィールドは、`id`要素の `bit_field` 属性または `id`要素の子要素 である`bitField`要素に記述する（4.1節）。
+構造体またはメンバの名前は、同じ`type`属性をもつ`id`要素で指定する。
 
 例:
 以下の構造体宣言
@@ -533,15 +533,15 @@ unionType要素は、メンバに対する識別子の情報であるsymbols要�
 
 以下の子要素をもつ。
 
-* inheritedFrom要素　－　継承元の構造体またはクラス名のリスト
-* symbols要素　－　メンバ変数名とメンバ関数名のリスト
+* `inheritedFrom`要素　－　継承元の構造体またはクラス名のリスト
+* `symbols`要素　－　メンバ変数名とメンバ関数名のリスト
 
 以下の属性をもつ。
 
-* type（必須）　－　このクラスに与えられたデータ型識別名
+* `type`（必須）　－　このクラスに与えられたデータ型識別名
 
-メンバのビットフィールドは、id要素の bit_field 属性または id要素の子要素 であるbitField要素に記述する（4.1節）。
-構造体またはメンバの名前は、同じtype属性をもつid要素で指定する。typedef文またはusing文で指定された別名もまた、同じtype属性をもつid要素で指定する。
+メンバのビットフィールドは、`id`要素の `bit_field` 属性または id要素の子要素 である`bitField`要素に記述する（4.1節）。
+構造体またはメンバの名前は、同じ`type`属性をもつ`id`要素で指定する。typedef文またはusing文で指定された別名もまた、同じ`type`属性をもつ`id`要素で指定する。
 
 要検討：
 friend関数の宣言。friend関数はそのクラスのメンバ関数ではない。
@@ -603,13 +603,13 @@ enum型は、enumType要素で定義する。type要素で、メンバの識別�
 
     <parameterPack/>
 
-属性（必須）: type, element_type
+属性（必須）: `type`, `element_type`
 属性（optional）: データ型定義要素属性
 
 以下の属性を持つ。
 
-    * type　－　パックされた型に与えられたデータ型識別名
-    * elem_type　－　パックされる個々の型のデータ型識別名
+    * `type`　－　パックされた型に与えられたデータ型識別名
+    * `elem_type`　－　パックされる個々の型のデータ型識別名
 
 parameterPack要素は、子要素を持たない。
 
@@ -638,28 +638,28 @@ id要素は、変数名や配列名、関数名、struct/unionのメンバ名、
       [ alignAs要素 ]
     </id>
 
-属性（optional）: sclass, fspec, type, bit_field, align_as, is_gccThread, is_gccExtension
+属性（optional）: `sclass`, `fspec`, `type`, `bit_field`, `align_as`, `is_gccThread`, `is_gccExtension`
 
 id要素は次の属性を持つことができる。
 
-* sclass属性　－　storage class をあらわし、 'auto', 'param', 'extern', 'extern_def', 'static', 'register', 'label', 'tagname', 'moe', 'typedef_name', 'template_param'（C++、テンプレートの型仮引数名）, 'namespace_name'（C++）, , 'alias_name'（C++、using文による別名）のいずれか。
-* is_inline属性　－　関数の宣言がinline指定されていることを表す。
-* is_virtual属性　－　メンバー関数がvirtualであることを表す。
-* is_explicit属性　－　メンバー関数がexplicit指定されていることを表す。
-* 【要検討】storage class specifier以外のdecl-specifierである 'friend', 'constexpr'もここで表現するか？
+* `sclass`属性　－　storage class をあらわし、 `auto`, `param`, `extern`, `extern_def`, `static`, `register`, `label`, `tagname`, `moe`, `typedef_name`, `template_param`（C++、テンプレートの型仮引数名）, `namespace_name`（C++）, , `alias_name`（C++、using文による別名）のいずれか。
+* `is_inline`属性　－　関数の宣言がinline指定されていることを表す。
+* `is_virtual`属性　－　メンバー関数がvirtualであることを表す。
+* `is_explicit`属性　－　メンバー関数がexplicit指定されていることを表す。
+* 【要検討】storage class specifier以外のdecl-specifierである `friend`, `constexpr`もここで表現するか？
 * type属性　－　識別子のデータ型識別名
-* bit_field属性　－　structType、unionTypeとclass要素においてメンバのビットフィールドを数値で指定する。
-* is_thread_local属性　－　thread_local指定されていることを表す。
-* align_as属性　－　structType、unionTypeとclass要素において、メンバのalignmentを数値またはデータ型識別名で指定する。
-* is_gccThread属性　－　GCCの__threadキーワードが指定されているかどうかの情報、0または1、falseまたはtrue。
-* is_gccExtension属性
+* `bit_field`属性　－　structType、unionTypeとclass要素においてメンバのビットフィールドを数値で指定する。
+* `is_thread_local`属性　－　thread\_local指定されていることを表す。
+* `align_as`属性　－　structType、unionTypeとclass要素において、メンバのalignmentを数値またはデータ型識別名で指定する。
+* `is_gccThread`属性　－　GCCの\_\_threadキーワードが指定されているかどうかの情報、0または1、falseまたはtrue。
+* `is_gccExtension`属性
 
 以下の子要素を持つことができる。
 
-* name要素　－　識別子の名前はname要素で指定する。
+* `name`要素　－　識別子の名前はname要素で指定する。
   要検討： 実装時に再検討。何もかもvalue要素にするのがよいか？
-* bitField要素　－　unionTypeとclass要素においてメンバのビットフィールドの値をbit_field属性の数値として指定できないとき使用する。bitField要素は式を子要素に持つ。bitField要素を使用するとき、bit_field 属性の値は、"*" とする。
-* alignAs要素　—　structType、unionTypeとclass要素においてメンバのalignmentをalign_as属性の数値として指定できないとき、alignAs要素の子要素として式の要素で指定する。
+* `bitField`要素　－　`unionType`と`class`要素においてメンバのビットフィールドの値を`bit_field`属性の数値として指定できないとき使用する。`bitField`要素は式を子要素に持つ。`bitField`要素を使用するとき、`bit_field` 属性の値は、"*" とする。
+* `alignAs`要素　—　`structType`、`unionType`と`class`要素においてメンバの`alignment`を`align_as`属性の数値として指定できないとき、`alignAs`要素の子要素として式の要素で指定する。
 
 例:
 "int xyz;"の変数xyzに対するシンボルテーブルエントリは以下のようになる。
@@ -754,23 +754,23 @@ compoundStatement（6.2節）、class（3.9節）などをスコープとする�
       body要素
     </functionDefinition>
 
-属性(optional): is_gccExtension
+属性(optional): `is_gccExtension`
 
 以下のいずれか一つの子要素を持つ。
 
-* name要素　－　関数またはメンバ関数のときの、関数の名前
-* operator要素　—　演算子オーバーロードのときの、演算子の名前
-* constructor要素　—　構造体またはクラスのコンストラクタのとき
-* destructor要素　—　構造体またはクラスのデストラクタのとき
+* `name`要素　－　関数またはメンバ関数のときの、関数の名前
+* `operator`要素　—　演算子オーバーロードのときの、演算子の名前
+* `constructor`要素　—　構造体またはクラスのコンストラクタのとき
+* `destructor`要素　—　構造体またはクラスのデストラクタのとき
 
 加えて、以下の子要素をもつ。
 
-* symbols要素　－　パラメータ（仮引数）のシンボルリスト。子要素はid要素の並び。
-params要素　－　パラメータ（仮引数）の並び
-* body要素　－　関数本体。子要素として文（通常はcompoundStatement）を含む。関数に局所的な変数などの宣言は、body要素の中に記述される。body要素内にGCCのネストされた関数を表すfunctionDefinitionを含む場合がある。
+* `symbols`要素　－　パラメータ（仮引数）のシンボルリスト。子要素はid要素の並び。
+`params`要素　－　パラメータ（仮引数）の並び
+* `body`要素　－　関数本体。子要素として文（通常は`compoundStatement`）を含む。関数に局所的な変数などの宣言は、`body`要素の中に記述される。`body`要素内にGCCのネストされた関数を表す`functionDefinition`を含む場合がある。
 
 以下の属性を持つ
-* is_gccExtension属性
+* `is_gccExtension`属性
 
 例：
 関数の定義
@@ -825,9 +825,9 @@ functionDefinition要素の子要素。そのメンバ関数がコンストラ�
        … ]
     </constructor>
 
-属性(optional): is_explicit
+属性(optional): `is_explicit`
 
-name要素とvalue要素の組は初期化構文に対応する。
+`name`要素と`value`要素の組は初期化構文に対応する。
 
 要検討： コンストラクタのバリエーションに対応し切れていない。
 
@@ -1226,9 +1226,9 @@ lvalue属性は、式の要素の属性からテータ型定義要素の属性�
 * floatConstant要素　－　floatまたはdoubleまたはlong doubleの値を持つ定数を表す。浮動小数点数のリテラルを記述する。type属性には"float", "double"と"long_double"が許される。
 * stringConstant要素　－　内容にダブルクォーテーションで囲まない文字列を記述する。文字列中の特殊文字はXML（HTML）のルールに従ってクォートされる（’<’は＆lt;に置換されるなど）。type属性には、"char"と"wchar_t"が許される。C++ではこれらに加えて、"char16_t"と"char32_t"が許される。
 仕様変更：旧仕様ではtype属性を持たず、代わりに以下のように定義されている。
-* 属性に is_wide="[1|0|true|false]" (省略時0)を持ち、1またはtrueのときwchar_t型の文字列を表す。
+* 属性に `is_wide=`[1|0|true|false]` (省略時0)を持ち、1またはtrueのときwchar_t型の文字列を表す。
 * moeConstant要素　－　enum型の定数を表す。内容にenum定数（列挙型のメンバの名前）を記述する。type属性は列挙型のタイプ名を記述する。
-* booleanConstant要素　－　真理値リテラル。falseまたはtrue。type属性は"bool"のみ許される。
+* booleanConstant要素　－　真理値リテラル。falseまたはtrue。type属性は`bool`のみ許される。
 * funcAddr要素　－　関数のアドレスを表す。内容に関数名を記述する。type属性は、原則としてその関数のインスタンスの型とするが、翻訳時に不明な場合には別の表現とする。（詳細は実装時に検討する。）
 
 備考：longlongConstantだけ特別扱いするのは不自然。素直に10進数表記で表現する形にしたい。
@@ -1286,14 +1286,14 @@ aが配列のとき、2015年10月現在のF\_Frontでは &a の参照をaの参
 属性(必須): type
 
 例：
-式 *var1 （var1はint型へのポインタ）は以下のように表現される。
+式 `*var1` （var1はint型へのポインタ）は以下のように表現される。
 
     <pointerRef  type="int">
       <Var type="P0" scope="local">var1</Var>
     </pointerRef>
 
 要確認：
-　現状（2015年10月）のC\_Frontでは、*(&var_name) というパターンのとき
+　現状（2015年10月）のC\_Frontでは、`*(&var_name)` というパターンのとき
 
     <PointerRef><varAddr>var_name</varAddr></PointerRef>
 
@@ -1391,7 +1391,7 @@ arrayRef要素（7.4節）とmemberArrayRef要素、arrayAddr要素（7.2節）�
 +----------+--------------+-----------+--------------------+
 
 ## メンバポインタの参照の要素（C++）
-オブジェクトsのメンバへのポインタの参照s.*pを表現する。
+オブジェクト`s`のメンバへのポインタの参照`s.*p`を表現する。
 
     <memberPointer>
     　　式の要素
@@ -1497,7 +1497,7 @@ assignExpr 要素は、２つの式の要素をsub要素に持ち、代入を表
     </assignExpr>
 
 属性(必須): type
-属性（optional）: is_userDefined
+属性（optional）: `is_userDefined`
 
 第１の式を左辺、第２の式を右辺とする代入文を表現する。
 
@@ -1608,7 +1608,7 @@ arguments要素には引数の並びを指定する。
     </commaExpr>
 
 属性(必須): type
-属性（optional）: is_userDefined
+属性（optional）: `is_userDefined`
 
 ## インクリメント・デクリメント要素（postIncrExpr, postDecrExpr, preIncrExpr, preDecrExpr）
 postIncrExpr要素、postDecrExpr要素は、CおよびC++のポストインクリメント、デクリメント式を表す。preIncrExpr要素、preDecrExpr要素は、CおよびC++のプレインクリメント、デクリメント式を表す。
@@ -1618,7 +1618,7 @@ postIncrExpr要素、postDecrExpr要素は、CおよびC++のポストインク�
     </postIncrExpr> or </postDecrExpr> or </preIncrExpr> or </preDecrExpr >
 
 属性(必須): type
-属性（optional）: is_userDefined
+属性（optional）: `is_userDefined`
 
 ## castExpr要素（廃止予定）
 castExpr要素は型変換の式（旧仕様）、または複合リテラルを表す。
@@ -1628,7 +1628,7 @@ castExpr要素は型変換の式（旧仕様）、または複合リテラルを
     </castExpr>
 
 属性(必須): type
-属性（optional）: is_gccExtension
+属性（optional）: `is_gccExtension`
 
 以下の子要素を持つ。
 * castされる式、または、複合リテラルのリテラル部
@@ -1749,12 +1749,12 @@ symbols要素、params要素（5.3.4節）とbody要素は、functionDefinition�
       </byValue>
     </captures>
 
-属性(optional): default, is_mutable
+属性(optional): `default`, `is_mutable`
 
 captures要素はオプショナルに以下の属性をもつ。
 
-* default属性　－　"by_reference" のとき、スコープデフォルトが参照キャプチャ "[&]" であることを意味し、"by_value"のときデフォルトがコピーキャプチャ "[=]" であることを意味する。省略されたとき、キャプチャがないことを意味する。
-* is_mutable属性　－　1またはtrueのとき、mutable指定があることを意味する。0またはfalseまたは省略されたとき、mutable指定がないことを意味する。
+* default属性　－　"`by_reference`" のとき、スコープデフォルトが参照キャプチャ "[&]" であることを意味し、"`by_value`"のときデフォルトがコピーキャプチャ "[=]" であることを意味する。省略されたとき、キャプチャがないことを意味する。
+* `is_mutable`属性　－　1またはtrueのとき、mutable指定があることを意味する。0またはfalseまたは省略されたとき、mutable指定がないことを意味する。
 　子要素のbyReference要素で指定された名前の変数は参照キャプチャされ、byValue要素で指定された名前の変数はコピーキャプチャされる。それ以外の変数は、default属性の指定に従う。
 
 # テンプレート定義要素（C++）
@@ -2065,12 +2065,12 @@ C++対応版作成に当たって再検討していない。
 "#pragma xmp coarray" によって宣言された、Co-Array型を表す。 次の属性を持つ。
 
 * type　－　派生データ型名。
-* element_type　－　Co-Arrayの要素のデータ型名。データ型名に対応する型がcoArrayTypeのときは、２次元以上のCo-Array型を表す。
-* array_size　－　Co-Array次元を表す。
+* `element_type`　－　Co-Arrayの要素のデータ型名。データ型名に対応する型がcoArrayTypeのときは、２次元以上のCo-Array型を表す。
+* `array_size`　－　Co-Array次元を表す。
 
 次の子要素を持つ。
 
-* arraySize　－　Co-Array次元を表す。arraySize要素を持つときの array_size 属性の値は "*" とする。
+* arraySize　－　Co-Array次元を表す。arraySize要素を持つときの `array_size` 属性の値は "*" とする。
 
 例:
 
@@ -2107,9 +2107,9 @@ Co-Array型の変数への参照を表す。
 
 # その他の要素・属性
 
-## is_gccExtension属性
-is_gccExtension属性は、GCCの __extension__ キーワードをXML要素の先頭に付加するかどうかを定義し、値は 0 または 1 (falseまたはtrue) である。
-is_gccExtension属性は省略可能で、指定しないときは値 0を指定したときと同じ意味である。次のXML要素に is_gccExtension 属性を持つことができる。
+## `is_gccExtension`属性
+`is_gccExtension`属性は、GCCの __extension__ キーワードをXML要素の先頭に付加するかどうかを定義し、値は 0 または 1 (falseまたはtrue) である。
+`is_gccExtension`属性は省略可能で、指定しないときは値 0を指定したときと同じ意味である。次のXML要素に `is_gccExtension` 属性を持つことができる。
 
 * id
 * functionDefinition
@@ -2118,7 +2118,7 @@ is_gccExtension属性は省略可能で、指定しないときは値 0を指定
 
 例:
 
-"__extension__ typedef long long int64_t" に対応する定義は次のようになる。
+"`__extension__ typedef long long int64_t`" に対応する定義は次のようになる。
 
      <id type="long_long" sclass="typedef" is_gccExtension="1">
        <name>int64_t</name>
@@ -2134,7 +2134,7 @@ gccAsm 要素・gccAsmDefinition要素・gccAsmStatement要素は、GCCの asm/_
 
 次の属性を持つ。
 
-* is_volatile　－　volatile が指定されているかどうかの情報、0または1、falseまたはtrue。
+* `is_volatile`　－　volatile が指定されているかどうかの情報、0または1、falseまたはtrue。
 
 次の子要素を持つ。
 
@@ -2269,19 +2269,19 @@ id 要素、functionDefinition 要素の子要素に、gccAttributes を設定�
         </functionDefinition>
       </globalDeclarations>
 
-## builtin_op要素
-builtin_op要素はコンパイラ組み込みの関数呼び出しを表す。以下のXML要素をそれぞれ0～複数持つ。子要素の順番は関数引数の順番と一致していなければならない。
+## `builtin_op`要素
+`builtin_op`要素はコンパイラ組み込みの関数呼び出しを表す。以下のXML要素をそれぞれ0～複数持つ。子要素の順番は関数引数の順番と一致していなければならない。
 
 * 式　－　呼び出す関数の引数として、式を指定する。
 * typeName　－　呼び出す関数の引数として、型名を指定する。
 * gccMemberDesignator　－　呼び出す関数の引数として、構造体・共用体のメンバ指示子を指定する。属性に構造体・共用体の派生データ型名を示す ref、メンバ指示子の文字列を示す member を持つ。子要素に配列インデックスを表す式(0-1個)と、gccMemberDesignator要素(0-1個)を持つ。
 
-## is_gccSyntax属性
-is_gccSyntax属性はそのタグに対応する式、文、宣言がgcc拡張を使用しているかどうかを定義する。 値として0 または 1 (falseまたはtrue) を持つ。この属性は省略可能であり、省略された場合は値に0を指定した時と同じ意味になる。
+## `is_gccSyntax`属性
+`is_gccSyntax`属性はそのタグに対応する式、文、宣言がgcc拡張を使用しているかどうかを定義する。 値として0 または 1 (falseまたはtrue) を持つ。この属性は省略可能であり、省略された場合は値に0を指定した時と同じ意味になる。
 
-## is_modified属性
-is_modified属性はそのタグに対応する式、文、宣言がコンパイルの過程で変形されたかどうかを定義する。値として0 または 1 (falseまたはtrue) を持つ。この属性は省略可能であり、省略された場合は値に0を指定した時と同じ意味になる。
-次のXML要素に is_gccSyntax 属性、is_modified 属性を持つことができる。
+## `is_modified`属性
+`is_modified`属性はそのタグに対応する式、文、宣言がコンパイルの過程で変形されたかどうかを定義する。値として0 または 1 (falseまたはtrue) を持つ。この属性は省略可能であり、省略された場合は値に0を指定した時と同じ意味になる。
+次のXML要素に `is_gccSyntax` 属性、`is_modified` 属性を持つことができる。
 
 * varDecl
 * 文の要素
@@ -2300,7 +2300,7 @@ is_modified属性はそのタグに対応する式、文、宣言がコンパイ
 * 例外処理
 * noexceptキーワード
 * 属性
-* [[ noreturn ]] [[ carries_dependency ]]　[[ deprecated ]]
+* `[[ noreturn ]]` `[[ carries_dependency ]]` `[[ deprecated ]]`　
 
 
 ## コード例
