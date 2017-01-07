@@ -78,7 +78,7 @@ XcodeProgram要素は、属性として以下の情報を持つことができ�
 * compiler-info　－　CtoC コンパイラの情報
 * version　－　CtoC コンパイラのバージョン情報
 * time　－　コンパイルされた日時
-* language　－　ソース言語情報（Cの場合は “C”、C++の場合は “C++”）
+* language　－　ソース言語情報（Cの場合は "C"、C++の場合は "C++"）
 * source　－　ソース情報
 
 ## ソースコードの正規化
@@ -125,7 +125,7 @@ nnsTable要素は、翻訳単位（2章）に対して一つだけ存在し、�
 
 nns属性は、C++のスコープ解決演算子による修飾をおこなった形の「フルネーム」を指定するためのXML属性である。
 次章以降で解説する各種の要素のうち、ソースコード上での「名前」を表現する要素について、適宜挿入される共通の構造である。
-nns=”修飾子識別名”
+nns="修飾子識別名"
 下記の各属性に適宜挿入される。
 
 * nnsTable要素に含まれるもの：
@@ -160,14 +160,14 @@ nns=”修飾子識別名”
 namespace NSの存在を表現するために、以下のようなnnsTableが生成される。
 
     <nnsTable>
-      <nestedNameSpecifier nns=”Q0”>
-        <namespaceName nns=”global”>NS</namespace>
+      <nestedNameSpecifier nns="Q0">
+        <namespaceName nns="global">NS</namespace>
       </nestedNameSpecifier>
     </nnsTable>
     
 これを用いて、(1)および(2)におけるaは、以下のように表現される。
 
-    <name type=”int” nns=”Q0”>a</name>
+    <name type="int" nns="Q0">a</name>
 
 例:  
 以下のプログラムで、
@@ -190,12 +190,12 @@ namespace NSの存在を表現するために、以下のようなnnsTableが生
 
 (1)と(2)の右辺式は、それぞれ以下のように表現される。Sは変数でないのでmemberAddr要素は用いられず、data変数のスコープと解釈する。ただしS0はnnsTable内で構造体Sのスコープを表現するものとして定義されているとする。
 
-    <varAddr type="P0" scope="global" nns=”S0”>data</varAddr>
-    <varAddr type="P0" scope="global" nns=”S0”>foo</varAddr>
+    <varAddr type="P0" scope="global" nns="S0">data</varAddr>
+    <varAddr type="P0" scope="global" nns="S0">foo</varAddr>
 
 (3)の右辺式は、以下のように表現される。s1は変数名なので、s1.dataはmemberAddr要素で表現される。
 
-    <memberAddr type="P5" member=”data” nns=”S”>　…このnnsが必要か要検討
+    <memberAddr type="P5" member="data" nns="S">　…このnnsが必要か要検討
         <varAddr type="P4" scope="global">s1</varAddr>
     </memberAddr>
 
@@ -272,8 +272,8 @@ decltype(式) は式の型を表すが、式はスコープをもつのでtypeTa
 
 * 基本データ型（3.4節）
 * C, C++の基本データ型（C++拡張） 
-'void', 'char', 'short', 'int' , 'long', 'long_long', 'unsigned_char', 'unsigned_short', 'unsigned', 'unsigned_long', 'unsigned_long_long', 'float', 'double', 'long_double', 'wchar_t', ‘char16_t’, ‘char32_t’, 'bool' (_Bool型)
-* _Complex、_Imaginaryに対応する型 
+'void', 'char', 'short', 'int' , 'long', 'long_long', 'unsigned_char', 'unsigned_short', 'unsigned', 'unsigned_long', 'unsigned_long_long', 'float', 'double', 'long_double', 'wchar_t', 'char16_t', 'char32_t', 'bool' (_Bool型)
+* _Complex、_Imaginaryに対応する型
 'float_complex', 'double_complex', 'long_double_complex', 'float_imaginary', 'double_imaginary', 'long_double_imaginary'
 * GCCの組み込み型
 '__builtin_va_arg'
@@ -324,14 +324,14 @@ typeName要素は以下のように使用される。
 * is_virtual（C++）　—　そのメンバ関数がvirtual属性をもつかどうか。
 * is_userDefined（C++）　—　その演算がユーザ定義によりオーバーロードされているかどうか
 
-”is_”　で始まる属性の値には、真を意味する1とtrue、および、偽を意味する0とfalseが許される。属性が省略されたとき、偽を意味する。
+`is_`　で始まる属性の値には、真を意味する1とtrue、および、偽を意味する0とfalseが許される。属性が省略されたとき、偽を意味する。
 
 例: 左辺値参照と右辺値参照
 以下の参照（左辺値参照）の宣言があるとき、
 int& n_alias = n_org;
 変数n_aliasのデータ型識別要素は以下のようになる。
 
-    <basicType type="B0" name="int" reference=”lvalue”/>
+    <basicType type="B0" name="int" reference="lvalue"/>
 
 以下のコンストラクタ（ムーブコンストラクタ）の定義の引数に現れた右辺値参照について、
     struct Array {
@@ -342,7 +342,7 @@ int& n_alias = n_org;
     }
 仮引数objのデータ型識別要素は以下のようになる。
 
-    <basicType="B1" name="B2" reference=”rvalue”/>
+    <basicType="B1" name="B2" reference="rvalue"/>
 
 ## basicType要素
 basicType 要素は、他のデータ型識別要素にデータ型定義要素属性を加えた、新しいデータ型定義要素を定義する。 
@@ -367,12 +367,12 @@ basicType 要素は、他のデータ型識別要素にデータ型定義要素�
     struct {int x; int y;} s;
     struct s const * volatile p;
 
-は次のXcodeMLに変換される。 basicType要素によって、”struct s const”を意味するデータ型識別名B0 が定義されている。
+は次のXcodeMLに変換される。 basicType要素によって、"struct s const"を意味するデータ型識別名B0 が定義されている。
 
 	  <structType type="S0">
 		<symbols>
-		  <id type=”int”><name=”x”><./name></id>
-		  <id type=”int”><name=”y”><./name></id>
+		  <id type="int"><name="x"><./name></id>
+		  <id type="int"><name="y"><./name></id>
 		</symbols>
 	  </structType>
 	  <basicType type="B0" is_const="1" name="S0"/>
@@ -396,7 +396,7 @@ pointerType要素は、子要素を持たない。
 例:
 "int *" に対応するデータ型定義は以下のようになる。
 
-	<pointerType type=”P0123” ref=”int”/>
+	<pointerType type="P0123" ref="int"/>
 
 ## functionType要素
 funtionType要素は、関数型を定義する。
@@ -646,7 +646,7 @@ id要素は次の属性を持つことができる。
 * is_inline属性　－　関数の宣言がinline指定されていることを表す。
 * is_virtual属性　－　メンバー関数がvirtualであることを表す。
 * is_explicit属性　－　メンバー関数がexplicit指定されていることを表す。
-* 【要検討】storage class specifier以外のdecl-specifierである ‘friend’, ‘constexpr’もここで表現するか？
+* 【要検討】storage class specifier以外のdecl-specifierである 'friend', 'constexpr'もここで表現するか？
 * type属性　－　識別子のデータ型識別名
 * bit_field属性　－　structType、unionTypeとclass要素においてメンバのビットフィールドを数値で指定する。
 * is_thread_local属性　－　thread_local指定されていることを表す。
@@ -664,14 +664,14 @@ id要素は次の属性を持つことができる。
 例:
 "int xyz;"の変数xyzに対するシンボルテーブルエントリは以下のようになる。
 
-      <id sclass=”extern_def” type=”int”> 
+      <id sclass="extern_def" type="int">
        <name>xyz</name>
 
       </id>
 
-"int foo()"の関数fooに対するシンボルテーブルエントリは以下のようになる。なお、F6f168は、fooのデータ型に対するtype_id。
+"int foo()"の関数fooに対するシンボルテーブルエントリは以下のようになる。なお、F6f168は、fooのデータ型に対するtype\_id。
 
-      <id sclass=”extern_def” type=”F6f168”>
+      <id sclass="extern_def" type="F6f168">
        <name>foo</name>
       </id>
 
@@ -786,16 +786,16 @@ params要素　－　パラメータ（仮引数）の並び
     <functionDefinition>
       <name>foo</name>
       <symbols>
-        <id type=”P1” sclass=”param”>
+        <id type="P1" sclass="param">
           <name>arg1</name>
         </id>
-        <id type=”int” sclass=”param”>
+        <id type="int" sclass="param">
           <name>nnn</name>
         </id>
       </symbols>
       <params>
-        <name type=”P1”>arg1</name>
-        <name type=”int”>nnn</name>
+        <name type="P1">arg1</name>
+        <name type="int">nnn</name>
       </params>
       <body>
         <compoundStatement>
@@ -907,13 +907,13 @@ C++のusing宣言（using declaration）とusing指示（using directive）に�
 
 以下のようにusing文に対応する。
 
-* using指示 ”using namespace 名前空間名” の形のとき
+* using指示 "using namespace 名前空間名" の形のとき
 * namespace属性の値を1またはtrueとする。
 * 名前空間名をname要素とする。名前空間名にはスコープ名と「::」が含まれることがある。
-* using宣言 "using 名前” の形のとき
+* using宣言 "using 名前" の形のとき
 * namespace属性を持たないか、値を0またはfalseとする。
 * 名前をname要素とする。名前にはスコープ名と「::」が含まれることがある。
-* 別名宣言 "using 別名 = 型”　の形のとき、usingDecl要素では表現されない。typedefと同様、データ型定義要素（3章）で表現される。
+* 別名宣言 "using 別名 = 型"　の形のとき、usingDecl要素では表現されない。typedefと同様、データ型定義要素（3章）で表現される。
 
 # 文の要素
 Cの文の構文要素に対応するXML要素である。それぞれのXML要素には、文の元の行番号とファイル名を属性として付加することができる。
@@ -1220,15 +1220,15 @@ lvalue属性は、式の要素の属性からテータ型定義要素の属性�
 
 属性(必須): type
 
-* intConstant要素　－　整数の値を持つ定数を表す。数値として、十進数もしくは、16進数（0xから始まる）を記述する。type属性には”int”, ”long”, ”unsigned”, ”unsigned_long”, ”char”と”wchar_t”が許される。C++ではこれらに加えて、”char16_t”と”char32_t”が許される。
+* intConstant要素　－　整数の値を持つ定数を表す。数値として、十進数もしくは、16進数（0xから始まる）を記述する。type属性には"int", "long", "unsigned", "unsigned_long", "char"と"wchar_t"が許される。C++ではこれらに加えて、"char16_t"と"char32_t"が許される。
 備考：char16_tは必ず16ビット、char32_tは必ず32ビットだが、wchar_tは環境によって16ビットまたは32ビットであると定義されている。
-* longlongConstant要素　－　32ビット16進数(0xから始まる)の２つの数字を空白で区切って記述する。type属性には”long_long”と”unsigned_long_long”が許される。
-* floatConstant要素　－　floatまたはdoubleまたはlong doubleの値を持つ定数を表す。浮動小数点数のリテラルを記述する。type属性には”float”, ”double”と”long_double”が許される。
-* stringConstant要素　－　内容にダブルクォーテーションで囲まない文字列を記述する。文字列中の特殊文字はXML（HTML）のルールに従ってクォートされる（’<’は＆lt;に置換されるなど）。type属性には、”char”と”wchar_t”が許される。C++ではこれらに加えて、"char16_t”と”char32_t”が許される。
+* longlongConstant要素　－　32ビット16進数(0xから始まる)の２つの数字を空白で区切って記述する。type属性には"long_long"と"unsigned_long_long"が許される。
+* floatConstant要素　－　floatまたはdoubleまたはlong doubleの値を持つ定数を表す。浮動小数点数のリテラルを記述する。type属性には"float", "double"と"long_double"が許される。
+* stringConstant要素　－　内容にダブルクォーテーションで囲まない文字列を記述する。文字列中の特殊文字はXML（HTML）のルールに従ってクォートされる（’<’は＆lt;に置換されるなど）。type属性には、"char"と"wchar_t"が許される。C++ではこれらに加えて、"char16_t"と"char32_t"が許される。
 仕様変更：旧仕様ではtype属性を持たず、代わりに以下のように定義されている。
 * 属性に is_wide="[1|0|true|false]" (省略時0)を持ち、1またはtrueのときwchar_t型の文字列を表す。
 * moeConstant要素　－　enum型の定数を表す。内容にenum定数（列挙型のメンバの名前）を記述する。type属性は列挙型のタイプ名を記述する。
-* booleanConstant要素　－　真理値リテラル。falseまたはtrue。type属性は”bool”のみ許される。
+* booleanConstant要素　－　真理値リテラル。falseまたはtrue。type属性は"bool"のみ許される。
 * funcAddr要素　－　関数のアドレスを表す。内容に関数名を記述する。type属性は、原則としてその関数のインスタンスの型とするが、翻訳時に不明な場合には別の表現とする。（詳細は実装時に検討する。）
 
 備考：longlongConstantだけ特別扱いするのは不自然。素直に10進数表記で表現する形にしたい。
@@ -1253,11 +1253,11 @@ scope属性をつかって、局所変数を区別する。
 例：
 nがint型のとき、nのアドレスの参照 &n は、
 
-    <varAddr type=”P0” scope=”local”>n</varAddr>
+    <varAddr type="P0" scope="local">n</varAddr>
 
 と表現される。ここでP0は、typeTableの中で
 
-    <pointerType type=”P0” ref=”int”/>
+    <pointerType type="P0" ref="int"/>
 
 
 などと宣言されている。
@@ -1265,11 +1265,11 @@ nがint型のとき、nのアドレスの参照 &n は、
 例：
 aがint型の配列のとき、aの参照、すなわちa[0]のアドレスの参照は、
 
-    <arrayAddr type=”A5” scope=”local”>a</varAddr>
+    <arrayAddr type="A5" scope="local">a</varAddr>
 
 と表現される。ここでA5は、typeTableの中で
 
-    <arrayType type=”A5” element_type=”int” array_size=”3”/>
+    <arrayType type="A5" element_type="int" array_size="3"/>
 
 などと宣言されている。
 
@@ -1288,8 +1288,8 @@ aが配列のとき、2015年10月現在のF_Frontでは &a の参照をaの参�
 例：
 式 *var1 （var1はint型へのポインタ）は以下のように表現される。
 
-    <pointerRef  type=”int”>
-      <Var type=”P0” scope=”local”>var1</Var>
+    <pointerRef  type="int">
+      <Var type="P0" scope="local">var1</Var>
     </pointerRef>
 
 要確認：
@@ -1317,7 +1317,7 @@ aが配列のとき、2015年10月現在のF_Frontでは &a の参照をaの参�
 　int a[3]; と宣言されているとき、配列要素 a[i] の参照は、
 
     <arrayRef type="int">
-      <arrayAddr type="A5”scope="local">a</arrayAddr>
+      <arrayAddr type="A5"scope="local">a</arrayAddr>
       <Var type="int" scope="local">i</Var>
     </arrayRef>
 
@@ -1325,7 +1325,7 @@ aが配列のとき、2015年10月現在のF_Frontでは &a の参照をaの参�
 
     <addrOfExpr type="P232">
       <arrayRef type="int">
-        <arrayAddr type="A5”scope="local">a</arrayAddr>
+        <arrayAddr type="A5"scope="local">a</arrayAddr>
         <Var type="int" scope="local">i</Var>
       </arrayRef>
     </addrOfExpr>
@@ -1342,20 +1342,20 @@ aが配列のとき、2015年10月現在のF_Frontでは &a の参照をaの参�
 属性(必須): type, member
 
 * memberRef　－　配列以外のメンバを参照する。member属性にメンバ名を指定し、子要素でオブジェクトのアドレスを表現する。例えば、オブジェクトsのint型メンバnへの参照 s.n について、以下のように表現する。
-    <memberRef type=”int” member=”n”>
-        <varAddr type=”P0” scope=”local”>s</varAddr>
-    </memberRef> 
+    <memberRef type="int" member="n">
+        <varAddr type="P0" scope="local">s</varAddr>
+    </memberRef>
 * memberAddr　－　配列名以外のメンバのアドレスを参照する。member属性にメンバ名を指定し、子要素でオブジェクトのアドレスを表現する。例えば、オブジェクトsのint型メンバnのアドレス &s.n について、以下のように表現する。
-    <memberAddr type=”int” member=”n”>
-      <varAddr type=”P6” scope=”local”>s</varAddr>
+    <memberAddr type="int" member="n">
+      <varAddr type="P6" scope="local">s</varAddr>
     </memberAddr>
 * memberArrayRef　－　オブジェクトの配列メンバを参照する。member属性にメンバ名を指定し、子要素でオブジェクトのアドレスを表現する。例えば、オブジェクトsのint型配列メンバaへの参照 s.a について、以下のように表現する。
-    <memberArrayRef type=”A0” member=”a”>
-      <varAddr type=”P1” scope=”local”>s</varAddr>
+    <memberArrayRef type="A0" member="a">
+      <varAddr type="P1" scope="local">s</varAddr>
     </memberArrayRef>
 * memberArrayAddr　－　オブジェクトの配列メンバのアドレスを参照する。member属性にメンバ名を指定し、子要素でオブジェクトのアドレスを表現する。例えば、オブジェクトsのint型配列メンバaのアドレス &s.a について、以下のように表現する。
-    <memberArrayAddr type=”P24” member=”a”>
-      <varAddr type=”P7” scope=”local”>s</varAddr>
+    <memberArrayAddr type="P24" member="a">
+      <varAddr type="P7" scope="local">s</varAddr>
     </memberArrayAddr>
 
 　メンバの参照が入れ子になるとき、子要素の表現も入れ子になる。
@@ -1420,7 +1420,7 @@ name属性に変数名を指定し、子要素で構造体のアドレスを表�
 
 このとき、(3)の左辺は以下のように表現される。
 
-      <memberPointerRef type="P4" name=”d”>
+      <memberPointerRef type="P4" name="d">
         <varAddr type="P3" scope="global">s1</varAddr>
       </memberPointerRef>
 
@@ -1428,7 +1428,7 @@ name属性に変数名を指定し、子要素で構造体のアドレスを表�
 
       <functionCall type="int">
         <function>
-          <memberPointerRef type="P4" name=”f”>
+          <memberPointerRef type="P4" name="f">
             <varAddr type="P3" scope="global">s1</varAddr>
           </memberPointerRef>
         </function>
@@ -1753,7 +1753,7 @@ symbols要素、params要素（5.3.4節）とbody要素は、functionDefinition�
 
 captures要素はオプショナルに以下の属性をもつ。
 
-* default属性　－　“by_reference” のとき、スコープデフォルトが参照キャプチャ “[&]” であることを意味し、”by_value”のときデフォルトがコピーキャプチャ “[=]” であることを意味する。省略されたとき、キャプチャがないことを意味する。
+* default属性　－　"by_reference" のとき、スコープデフォルトが参照キャプチャ "[&]" であることを意味し、"by_value"のときデフォルトがコピーキャプチャ "[=]" であることを意味する。省略されたとき、キャプチャがないことを意味する。
 * is_mutable属性　－　1またはtrueのとき、mutable指定があることを意味する。0またはfalseまたは省略されたとき、mutable指定がないことを意味する。
 　子要素のbyReference要素で指定された名前の変数は参照キャプチャされ、byValue要素で指定された名前の変数はコピーキャプチャされる。それ以外の変数は、default属性の指定に従う。
 
@@ -1813,12 +1813,12 @@ typeName要素は、引数の順序で並んでいなければならない。
 
     <structTemplate>
       <symbols>
-        <id type=”S0” sclass=”template_param”>
+        <id type="S0" sclass="template_param">
           <name>T</name>
         </id>
       </symbols>
       <typeParams>
-        <typeName ref=”S0”>
+        <typeName ref="S0">
       </typeParams>
       <structType type="S1">
         <symbols>
@@ -1834,7 +1834,7 @@ typeName要素は、引数の順序で並んでいなければならない。
 
 ここで、データ型識別名S0はtypeTableの中で以下のように定義されている。
 
-    <basicType type="S0" name=”any_typename”/>
+    <basicType type="S0" name="any_typename"/>
 
 ## functionTemplate要素
 関数、メンバ関数、演算子オーバーロード、および、ユーザ定義リテラルのテンプレートを表現する。globalDeclaration要素（5.1節）とdeclaration要素（5.2節）の子要素。
@@ -1861,29 +1861,29 @@ typeName要素は、引数の順序で並んでいなければならない。
 
 型仮引数Tに対するデータ型識別名X0と、仮引数xの型const T&に対するデータ型識別名X1は、typeTableの中で以下のように定義される。
 
-    <basicType type="X0" name=”any_class”/>
-    <basicType type=”X1” is_const=”1” is_lvalue=”1” name=”X0”/>
+    <basicType type="X0" name="any_class"/>
+    <basicType type="X1" is_const="1" is_lvalue="1" name="X0"/>
 
 そして、関数テンプレートは以下のように定義される。
 
     <functionTemplate>
       <symbols>
-        <id type=”X0” sclass=”template_param”>
+        <id type="X0" sclass="template_param">
           <name>T</name>
         </id>
       </symbols>
       <typeParams>
-        <typeName ref=”X0”>
+        <typeName ref="X0">
       </typeParams>
       <functionDefinition>
         <name>square</name>
         <symbols>
-          <id type=”X1” sclass=”param”>
+          <id type="X1" sclass="param">
             <name>x</name>
           </id>
         </symbols>
         <typeParams>
-          <name type=”X1”>x</name>
+          <name type="X1">x</name>
         </typeParams>
         <body>
           ・・・（略）・・・
@@ -1925,19 +1925,19 @@ typeName要素は、引数の順序で並んでいなければならない。
 
 型仮引数Tに対するデータ型識別名X0と、std::mapの第２型引数T&　に対するデータ型識別名X0は、typeTableの中で以下のように定義される。
 
-    <basicType type="X0" name=”any_typename”/>
-    <basicType type=”X1” is_lvalue=”1” name=”X0”/>
+    <basicType type="X0" name="any_typename"/>
+    <basicType type="X1" is_lvalue="1" name="X0"/>
 
 そして、別名テンプレートは以下のように定義される。ここで、T0は他で定義されているstd::mapのデータ型識別名であり、std::mapのid要素のtype属性と一致している。T1はこのaliasTemplateで定義されたデータ型識別名であり、myMapのid要素のtype属性と一致している。
 
-    <aliasTemplate type=”T1” name=”T0”>
+    <aliasTemplate type="T1" name="T0">
       <symbols>
-        <id type=”X0” sclass=”template_param”>
+        <id type="X0" sclass="template_param">
           <name>T</name>
         </id>
       </symbols>
       <typeParams>
-        <typeName ref=”X0”>
+        <typeName ref="X0">
       </typeParams>
     </aliasTemplate>
 
@@ -1996,19 +1996,19 @@ typeName要素は、引数の順序で並んでいなければならない。
 
 のデータ型識別名TRI1は、以下のように表現される。
 
-    <typeInstance type=”TRI1” ref=”TRI0”>
+    <typeInstance type="TRI1" ref="TRI0">
       <typeParameters>
-        <typeName ref=”int”>
-        <typeName ref=”P0”>
-        <typeName ref=”P1”>
+        <typeName ref="int">
+        <typeName ref="P0">
+        <typeName ref="P1">
       </typeParameters>
     </typeInstance>
 
 ここで、P0とP1は、以下のように定義されているデータ型識別名である。
 
-    <pointerType type=”P0” ref=”int” />
-    <pointerType type=”P2” ref=”int” />
-    <pointerType type=”P1” ref=”P2” />
+    <pointerType type="P0" ref="int" />
+    <pointerType type="P2" ref="int" />
+    <pointerType type="P1" ref="P2" />
 
 ## functionInstance要素
 式の要素（7章）の一つ。関数とメンバ関数のテンプレートのインスタンスを表現する。
@@ -2030,8 +2030,8 @@ functionTemplate要素（8.3節）の例において、関数テンプレート
 
 のTに対するデータ型識別名は以下のX0、仮引数xの型const T&に対するデータ型識別名は以下のX1である。
 
-    <basicType type="X0" name=”any_class”/>
-    <basicType type=”X1” is_const=”1” is_lvalue=”1” name=”X0”/>
+    <basicType type="X0" name="any_class"/>
+    <basicType type="X1" is_const="1" is_lvalue="1" name="X0"/>
 
 ここで、このテンプレート関数の参照
 
@@ -2041,14 +2041,14 @@ functionTemplate要素（8.3節）の例において、関数テンプレート
 
     <functionInstance>
       <typeArguments>
-        <typeName ref=”int”/>
+        <typeName ref="int"/>
       </typeArguments>
-      <functionCall type=”X0”>
+      <functionCall type="X0">
         <function>
-          <funcAddr type=”P0”>square</funcAddr>
+          <funcAddr type="P0">square</funcAddr>
         </function>
         <arguments>
-    　　   <intConstant type=”init”>10</intConstant>
+    　　   <intConstant type="init">10</intConstant>
         </arguments>
       </functionCall>
     <functionInstance>
@@ -2292,7 +2292,7 @@ is_modified属性はそのタグに対応する式、文、宣言がコンパイ
 
 * 宣言
 * asm ( … )
-* 結合指定  extern “C” double x;
+* 結合指定  extern "C" double x;
 * クラス
 * 部分特殊化
 * final
