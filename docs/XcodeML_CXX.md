@@ -212,7 +212,7 @@ globalDeclarations要素、declarations要素中で、初期化式を持つ変�
 属性: なし
 
 備考：1.0版ではsymbols要素中でも用いることになっていたためこの節が2章におかれたのだと考えられるが、
-C_Front実装でもCtoXcodeML実装でもsymbols属性内ではvalue要素を用いない（つまり初期化式はglobalDeclarations要素やdeclarations要素の中で出現するのみである）ので、この節は2章に置く必要がなく、5章以降に配置するのが適切である。
+C\_Front実装でもCtoXcodeML実装でもsymbols属性内ではvalue要素を用いない（つまり初期化式はglobalDeclarations要素やdeclarations要素の中で出現するのみである）ので、この節は2章に置く必要がなく、5章以降に配置するのが適切である。
 
 { } で囲まれた式の並びは、value要素のネストで表現する。
 
@@ -1274,7 +1274,7 @@ aがint型の配列のとき、aの参照、すなわちa[0]のアドレスの�
 などと宣言されている。
 
 備考：
-aが配列のとき、2015年10月現在のF_Frontでは &a の参照をaの参照と同様arrayAddrで表現している。これに関連してOmni XMPでは型の不一致によるエラーが出ている（バグレポート439）。
+aが配列のとき、2015年10月現在のF\_Frontでは &a の参照をaの参照と同様arrayAddrで表現している。これに関連してOmni XMPでは型の不一致によるエラーが出ている（バグレポート439）。
 
 ## pointerRef要素
 式（ポインタ型）の指示先を表現する。
@@ -1293,7 +1293,7 @@ aが配列のとき、2015年10月現在のF_Frontでは &a の参照をaの参�
     </pointerRef>
 
 要確認：
-　現状（2015年10月）のC_Frontでは、*(&var_name) というパターンのとき
+　現状（2015年10月）のC\_Frontでは、*(&var_name) というパターンのとき
 
     <PointerRef><varAddr>var_name</varAddr></PointerRef>
 
@@ -1360,7 +1360,7 @@ aが配列のとき、2015年10月現在のF_Frontでは &a の参照をaの参�
 
 　メンバの参照が入れ子になるとき、子要素の表現も入れ子になる。
 
-要検討：構造体まわりの現在のC_Frontの変換仕様について
+要検討：構造体まわりの現在のC\_Frontの変換仕様について
 arrayRef要素（7.4節）とmemberArrayRef要素、arrayAddr要素（7.2節）とmemberArrayAddr要素は、それぞれ名前が似ているが意味の対称性がない。少なくとも名前を再考したい。他の点でも、今後構造体やクラスへの対応を考えると、整理しておきたいところ。
 
 +----------+--------------+-----------+--------------------+
@@ -1449,7 +1449,7 @@ name属性に変数名を指定し、子要素で構造体のアドレスを表�
 指示付きの初期化子（(T){ [2]=1, .x=2 } のような記述）に対応する表現は持たず、常に展開された表現に変換される（例参照）。
 
 備考：
-複合リテラルは、旧仕様書ではcastExpr要素で表現すると書かれているが、C_Frontの動作と食い違っている。本節はC_Frontの動作に合わせて書き起こした。
+複合リテラルは、旧仕様書ではcastExpr要素で表現すると書かれているが、C\_Frontの動作と食い違っている。本節はC\_Frontの動作に合わせて書き起こした。
 
 例：
 　以下のようなプログラムで、
@@ -1634,11 +1634,11 @@ castExpr要素は型変換の式（旧仕様）、または複合リテラルを
 * castされる式、または、複合リテラルのリテラル部
 
 備考：
-現在のC_Frontでは、複合リテラルにこの表現は使われておらず、compoundValue要素またはcompoundValueAddr要素（7.7節）が使われている。キャストはC++仕様のstatic_cast, const_castまたはreinterpret_castに変換して表現する方が、バリエーションの削減になるため望ましい。どちらの用途にも使われないのであれば、castExprは廃止すべきと考える。
-備考の備考：C++においてもCスタイルのキャストを書いた場合は static_cast等とは違う意味になるので、この仕様は残さざるを得ないと考える。
+現在のC\_Frontでは、複合リテラルにこの表現は使われておらず、compoundValue要素またはcompoundValueAddr要素（7.7節）が使われている。キャストはC++仕様のstatic\_cast, const\_castまたはreinterpret\_castに変換して表現する方が、バリエーションの削減になるため望ましい。どちらの用途にも使われないのであれば、castExprは廃止すべきと考える。
+備考の備考：C++においてもCスタイルのキャストを書いた場合は static\_cast等とは違う意味になるので、この仕様は残さざるを得ないと考える。
 
 ## キャスト要素（staticCast, dynamicCast, constCast, reinterpretCast）（C++）
-順に、C++のstatic_cast, dynamic_cast, const_castおよびreinterpret_castを表現する。
+順に、C++のstatic\_cast, dynamic\_cast, const\_castおよびreinterpret\_castを表現する。
 
     <staticCast> or <dynamicCast> or <constCast> or <reinterpretCast>
       式の要素
