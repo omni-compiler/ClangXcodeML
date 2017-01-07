@@ -28,7 +28,7 @@ XcodeML/C++ 1.2J
 * 名前空間やテンプレートの表現方法について大幅改定作業を開始。2016/9/6
 
 
-# はじめに
+# はじめに {#intro}
 この仕様書は、プログラミング言語CおよびC++に対してXcalableMP拡張をほどこした言語を取り扱うための中間表現形式であるXcodeMLを記述する。
 XcodeMLは、以下の特徴を持つ。
 
@@ -43,7 +43,7 @@ XcodeMLは、以下の特徴を持つ。
 * C++のtemplateについて、ソースコード上の構文構造そのものを表現するとともに、その翻訳単位内で実際に用いられたテンプレート引数に基づいた展開後の結果も表現する。
   これにより、XcodeMLからC++コードへの変換を可能とするとともに、各種のプログラム変換処理においてテンプレート展開後の姿を対象にした処理も可能となるようにしている。
 
-# 翻訳単位とXcodeProgram要素
+# 翻訳単位とXcodeProgram要素 {#program}
 ソースファイルに、#include指定されたファイルを再帰的にすべて展開したものを、翻訳単位と呼ぶ。
 翻訳単位はXcodeProgram要素で表現される。下記の XML schema で定義される。
 
@@ -81,7 +81,7 @@ XcodeProgram要素は、属性として以下の情報を持つことができ�
 * language　－　ソース言語情報（Cの場合は "C"、C++の場合は "C++"）
 * source　－　ソース情報
 
-## ソースコードの正規化
+## ソースコードの正規化 {#program.norm}
 XcodeMLの設計方針は、XcodeMLで表現されたプログラムを入力にとって各種の解析処理をおこなった上で処理結果をXcodeMLとして出力するという処理（以下、この種の処理を「XcodeML解析処理」と呼ぶことにする）に適した構造を持つ、ということを主眼においている。
 このため、プログラムの意味が同一となるような記述方法が複数存在する場合、そのいずれかに「正規化」して扱うという設計方針をおいている。
 具体的には次のとおりである。
@@ -120,7 +120,7 @@ XcodeMLの設計方針は、XcodeMLで表現されたプログラムを入力に
 また、解決結果だけがあれば情報は足りているので、「正規化されていないXcodeML」がもともとのソースコード上の構文的な構造を完全に反映する必要があるわけではない。
 このように考えると、「フェーズ１の正規化」と「フェーズ2の正規化」があり、フェーズ1の正規化は必ずおこなう（XcodeMLとして二種類の表現をするコースがそもそも準備されない）、という風に考える必要がある。
 
-## nnsTableとnns属性
+## nnsTableとnns属性 {#program.nns}
 nnsTable要素は、翻訳単位（2章）に対して一つだけ存在し、翻訳単位で使われているすべての名前修飾(nested namespace spcifier)についての情報を定義する。
 
 nns属性は、C++のスコープ解決演算子による修飾をおこなった形の「フルネーム」を指定するためのXML属性である。
@@ -199,7 +199,7 @@ namespace NSの存在を表現するために、以下のようなnnsTableが生
         <varAddr type="P4" scope="global">s1</varAddr>
     </memberAddr>
 
-## value要素
+## value要素 {#program.value}
 globalDeclarations要素、declarations要素中で、初期化式を持つ変数宣言を表現する際の初期値の式を表現する。
 
 ```
@@ -232,7 +232,7 @@ int型配列の初期値 { 1, 2 } に対応する表現は次のとおりにな�
       </value>
     </value>
 
-# typeTable要素とデータ型定義要素
+# typeTable要素とデータ型定義要素 {#type}
 typeTable要素は、翻訳単位（2章）に対して一つだけ存在し、翻訳単位で使われているすべてのデータ型についての情報を定義する。
 
     <typeTable>
@@ -267,7 +267,7 @@ decltype(式) は式の型を表すが、式はスコープをもつのでtypeTa
 
 　Clang ASTでは「型推論の結果の型」をAST上に保持しているので、その仕組みに合わせて考えるのであれば、すべて「解決結果の型」を扱えばよいことになる。これも「正規化」の一種と考えて扱うのがよいかもしれない。
 
-## データ型識別名
+## データ型識別名 {#type.ident}
 プログラム内において、データ型はデータ型識別名で区別される。その名前は、次のいずれかである。
 
 * 基本データ型（3.4節）
@@ -283,7 +283,7 @@ decltype(式) は式の型を表すが、式はスコープをもつのでtypeTa
 
 他のデータ型識別名とは異なる、翻訳単位内でユニークな英数字の並び。
 
-### typeName要素
+### typeName要素 {#type.typename}
 
     <typeName/>
 
@@ -312,7 +312,7 @@ typeName要素は以下のように使用される。
 備考：typeName属性をtypeTable以外でも用いるのであれば、この節は2章に置くべきでは？
 あるいは、そもそも中身の構造が違うのであればまったく別の要素として定義した方がよいのでは。
 
-## データ型定義要素属性
+## データ型定義要素属性 {#type.attr}
 データ型定義要素は共通に以下の属性を持つことができる。これらをデータ型定義要素属性と呼ぶ。
 
 * `is_const`　－　そのデータ型がconst修飾子をもつかどうか
@@ -346,7 +346,7 @@ typeName要素は以下のように使用される。
 
     <basicType="B1" name="B2" reference="rvalue"/>
 
-## basicType要素
+## basicType要素 #{type.basic}
 basicType 要素は、他のデータ型識別要素にデータ型定義要素属性を加えた、新しいデータ型定義要素を定義する。
 
     <basicType/>
@@ -380,7 +380,7 @@ basicType 要素は、他のデータ型識別要素にデータ型定義要素�
 	  <basicType type="B0" is_const="1" name="S0"/>
 	  <pointerType type="P0" is_volatile="1" ref="B0"/>
 
-## pointerType要素
+## pointerType要素 {#type.ptr}
 pointerType要素はポインタのデータ型を定義する。
 
     <pointerType/>
@@ -400,7 +400,7 @@ pointerType要素は、子要素を持たない。
 
 	<pointerType type="P0123" ref="int"/>
 
-## functionType要素
+## functionType要素 {#type.func}
 funtionType要素は、関数型を定義する。
 
     <functionType>
@@ -426,7 +426,7 @@ funtionType要素は、関数型を定義する。
         </params>
     </fucntionType>
 
-## arrayType要素
+## arrayType要素 {#type.array}
 arrayType要素は、配列データ型を定義する。
 
     <arrayType>
@@ -452,7 +452,7 @@ arrayType要素は以下の属性を持つ。
 
     <arrayType type="A011" element_type="int" array_size="10"/>
 
-## unionType要素
+## unionType要素 {#type.union}
 union(共用体)データ型は、unionType要素で定義する。
 
     <unionType>
@@ -469,7 +469,7 @@ unionType要素は以下の属性を持つ。
 `unionType`要素は、メンバに対する識別子の情報である`symbols`要素を持つ。 構造体・共用体のタグ名がある場合には、スコープに対応するシンボルテーブルに定義されている。
 メンバのビットフィールドは、`id`要素の `bit_field` 属性または `id`要素の子要素 である`bitField` 要素に記述する（4.1節）。
 
-## structType要素
+## structType要素 {#type.struct}
 構造体を表現する。
 
     <structType>
@@ -522,7 +522,7 @@ unionType要素は以下の属性を持つ。
 
 
 
-## class要素（C++）
+## class要素（C++） {#type.class}
 クラスを表現する。
 
     <class>
@@ -550,7 +550,7 @@ friend関数の宣言。friend関数はそのクラスのメンバ関数では�
 
 
 
-### inheritedFrom要素（C++）
+### inheritedFrom要素（C++） {#type.class.inherit}
 継承元の構造体またはクラスの並びを表現する。
 
     <inheritedFrom>
@@ -564,7 +564,7 @@ friend関数の宣言。friend関数はそのクラスのメンバ関数では�
 
 * typeName要素　－　継承する構造体またはクラスのデータ型識別名を示す。access属性により、public, privateまたはprotectedの区別を指定できる。
 
-## enumType要素
+## enumType要素 {#type.enum}
 enum型は、enumType要素で定義する。type要素で、メンバの識別子を指定する。
 
     <enumType>
@@ -600,7 +600,7 @@ enum型は、enumType要素で定義する。type要素で、メンバの識別�
         </symbols>
       </enumType>
 
-## parameterPack要素（C++）
+## parameterPack要素（C++） {#type.parampack}
 可変長引数を表現するための、仮引数の並びに対応する。
 
     <parameterPack/>
@@ -628,9 +628,9 @@ parameterPack要素は、子要素を持たない。
     <parameterPack type="K0" ref="typename"/>
 
 
-# シンボルリスト
+# シンボルリスト {#symb}
 
-## id要素
+## id要素 {#symb.id}
 id要素は、変数名や配列名、関数名、struct/unionのメンバ名、 関数の引数、compound statementの局所変数名を定義する。
 
     <id>
@@ -677,7 +677,7 @@ id要素は次の属性を持つことができる。
        <name>foo</name>
       </id>
 
-## globalSymbols要素
+## globalSymbols要素 {#symb.global}
 大域のスコープを持つ識別子を定義する。
 
     <globalSymbols>
@@ -689,7 +689,7 @@ id要素は次の属性を持つことができる。
 
 子要素として、大域のスコープを持つ識別子のid要素の並びを持つ。
 
-## symbols要素
+## symbols要素 {#symb.local}
 局所スコープを持つ識別子を定義する。
 
     <symbols>
@@ -701,9 +701,9 @@ id要素は次の属性を持つことができる。
 
 子要素として、定義する識別子に対するid要素を持つ。
 
-# globalDeclarations要素とdeclarations要素
+# globalDeclarations要素とdeclarations要素 {#decl}
 
-## globalDeclarations要素
+## globalDeclarations要素 {#decl.global}
 大域的な（翻訳単位全体をスコープとする）変数、関数などの宣言と定義を行う。
 
     <globalDeclarations>
@@ -725,7 +725,7 @@ id要素は次の属性を持つことができる。
 * functionDecl要素　－　関数の宣言
 * text要素　－　ディレクティブなど任意のテキストを表す
 
-## declarations要素
+## declarations要素 {#decl.local}
 compoundStatement（6.2節）、class（3.9節）などをスコープとする変数、関数などの宣言と定義を行う。
 
     <declarations>
@@ -746,7 +746,7 @@ compoundStatement（6.2節）、class（3.9節）などをスコープとする�
 * functionDecl要素　－　関数の宣言
 * text要素　－　ディレクティブなど任意のテキストを表す
 
-## functionDefinition要素
+## functionDefinition要素 {#decl.fndef}
 関数定義、メンバ関数の定義、コンストラクターの定義、デストラクターの定義、および、演算子オーバーロードの定義を行う。以下のいずれか一つの子要素を持つ。
 
     <functionDefinition>
@@ -806,7 +806,7 @@ compoundStatement（6.2節）、class（3.9節）などをスコープとする�
       </body>
     </functionDefinition>
 
-### operator要素（C++）
+### operator要素（C++） {#decl.op}
 functionDefinition要素の子要素。演算子オーバーロードを定義するとき、name要素の代わりに指定する。
 
     <operator>演算子名</operator>
@@ -818,7 +818,7 @@ functionDefinition要素の子要素。演算子オーバーロードを定義�
     <operator>plusExpr</operator>
     <operator>_my_op</operator>
 
-### constructor要素（C++）
+### constructor要素（C++） {#decl.ctor}
 functionDefinition要素の子要素。そのメンバ関数がコンストラクタのとき、name要素の代わりに指定する。
 
     <constructor>
@@ -833,12 +833,12 @@ functionDefinition要素の子要素。そのメンバ関数がコンストラ�
 
 要検討： コンストラクタのバリエーションに対応し切れていない。
 
-### destructor要素（C++）
+### destructor要素（C++） {#decl.dtor}
 functionDefinition要素の子要素。そのメンバ関数がデストラクタであるとき、name要素の代わりに指定する。
 
     <destructor/>
 
-### params要素
+### params要素 {#decl.params}
 関数の引数の並びを指定する。
 
     <params>
@@ -858,7 +858,7 @@ functionDefinition要素の子要素。そのメンバ関数がデストラク�
 
 params要素内のname要素は、引数の順序で並んでいなくてはならない。
 
-## varDecl要素
+## varDecl要素 {#decl.var}
 変数の宣言を行う。
 
     <varDecl>
@@ -885,7 +885,7 @@ params要素内のname要素は、引数の順序で並んでいなくてはな�
         </value>
       </varDecl>
 
-## functionDecl要素
+## functionDecl要素 {#decl.func}
 関数宣言を行う。
 
     <functionDecl>
@@ -898,7 +898,7 @@ params要素内のname要素は、引数の順序で並んでいなくてはな�
 
 * name要素　－　関数名を指定する
 
-## usingDecl要素（C++）
+## usingDecl要素（C++） {#decl.using}
 C++のusing宣言（using declaration）とusing指示（using directive）に対応する。
 
     <usingDecl>
@@ -917,14 +917,14 @@ C++のusing宣言（using declaration）とusing指示（using directive）に�
 * 名前をname要素とする。名前にはスコープ名と「::」が含まれることがある。
 * 別名宣言 "using 別名 = 型"　の形のとき、usingDecl要素では表現されない。typedefと同様、データ型定義要素（3章）で表現される。
 
-# 文の要素
+# 文の要素 {#stmt}
 Cの文の構文要素に対応するXML要素である。それぞれのXML要素には、文の元の行番号とファイル名を属性として付加することができる。
 
 * lineno　－　文番号を値として持つ
 * file　－　この文が含まれているファイル名
 
 
-## exprStatement要素
+## exprStatement要素 {#stmt.expr}
 式で表現される文を表す。式の要素（7章）を持つ。
 
     <exprStatement>
@@ -933,7 +933,7 @@ Cの文の構文要素に対応するXML要素である。それぞれのXML要�
 
 属性(optional): lineno, file
 
-## compoundStatement要素
+## compoundStatement要素 {#stmt.comp}
 複文を表現する。
 
     <compoundStatement>
@@ -950,7 +950,7 @@ Cの文の構文要素に対応するXML要素である。それぞれのXML要�
 * declarations要素　－　このスコープの中で定義される宣言
 * body 要素　－　複文本体。文の要素の並び。
 
-## ifStatement要素
+## ifStatement要素 {#stmt.if}
 if文を表現する。
 
     <ifStatement>
@@ -967,7 +967,7 @@ if文を表現する。
 * then要素　－　then部の文を子要素として含む
 * else要素　－　else部の文を子要素として含む
 
-## whileStatment要素
+## whileStatment要素 {#stmt.while}
 while文を表現する。
 
     <whileStatement>
@@ -982,7 +982,7 @@ while文を表現する。
 * condition 要素　－　条件式を子要素として含む
 * body 要素　－　本体の文を子要素として含む
 
-## doStatement要素
+## doStatement要素 {#stmt.do}
 do文を表現する。
 
     <doStatement>
@@ -997,7 +997,7 @@ do文を表現する。
 * body要素　－　本体を表す、文の要素の並びを含む
 * condition要素　－　条件式を表す式の要素を含む
 
-## forStatement要素
+## forStatement要素 {#stmt.for}
 for文（従来仕様）を表現する。
 
     <forStatement>
@@ -1026,7 +1026,7 @@ init要素は、for文の中の初期化式または宣言文を表現する。
 
 　init要素は、forStatement要素の中だけに現れる。初期化式を意味する式の要素を含むか、または、0個以上の局所変数の宣言を意味するsymbols要素を含む。
 
-## rangeForStatement要素（C++）
+## rangeForStatement要素（C++） {#stmt.rangefor}
 C++仕様のfor文
 
     for ( for-range-declaration : expression ) statement
@@ -1047,21 +1047,21 @@ C++仕様のfor文
 * range要素　－　配列やコンテナを表す式の要素（7章）を含む。
 * body要素　－　for文の本体を表す、文の要素（6章）の並びを含む。
 
-## breakStatement要素
+## breakStatement要素 {#stmt.break}
 break文を表現する。
 
     <breakStatement/>
 
 属性(optional): lineno, file
 
-## continueStatement要素
+## continueStatement要素 {#stmt.cont}
 continue文を表現する。
 
     <continueStatement/>
 
 属性(optional): lineno, file
 
-## returnStatment要素
+## returnStatment要素 {#stmt.ret}
 return文を表現する。
 
     <returnStatement>
@@ -1072,7 +1072,7 @@ return文を表現する。
 
 returnする式を、子要素として持つことができる。
 
-## gotoStatement要素
+## gotoStatement要素 {#stmt.goto}
 goto文を表現する。
 
     <gotoStatement>
@@ -1086,7 +1086,7 @@ goto文を表現する。
 * name要素　－　ラベル名の名前を指定する。
 * 式の要素　－　ジャンプ先のアドレス値を指定する。
 
-## tryStatement要素（C++）
+## tryStatement要素（C++） {#stmt.try}
 try構文を表現する。
 
     <tryStatement>
@@ -1099,7 +1099,7 @@ try構文を表現する。
 
 * body要素　－　本体を表す、文の要素（6章）の並びを含む
 
-## catchStatement要素（C++）
+## catchStatement要素（C++） {#stmt.catch}
 catch構文を表現する。
 
     <catchStatement>
@@ -1114,7 +1114,7 @@ catch構文を表現する。
 * params要素　—　内容は1つのname要素または1つのellipsisでなければならない。補足する例外の型を示す。
 * body要素　－　本体を表す、文の要素（6章）の並びを含む
 
-## statementLabel要素
+## statementLabel要素 {#stmt.label}
 goto文のターゲットのラベルを表す。
 
     <statementLabel>
@@ -1127,7 +1127,7 @@ goto文のターゲットのラベルを表す。
 
 * name要素　－　ラベル名の名前を指定する。
 
-## switchStatement要素
+## switchStatement要素 {#stmt.switch}
 switch文を表現する。
 
     <statementLabel>
@@ -1142,7 +1142,7 @@ switch文を表現する。
 * value要素　－　switchする値を表す式の要素（0章）
 * body要素　－　switch文の本体を表す文の要素（0章）であり、多くの場合compoundStatement要素（6.2節）となる。caseLabel要素（6.17節）とgccRangedCaseLabel要素（6.18節）とdefaultLabel要素（6.19節）を含むことができる。
 
-## caseLabel要素
+## caseLabel要素 {#stmt.case}
 switch文のcase文を表す。switch要素の中のbody要素の中のcompoundStatementの中だけに現れることができる。
 
     <caseLabel>
@@ -1155,7 +1155,7 @@ caseの値を子要素としてもつ。
 
 * value要素　－　caseの値を指定する。
 
-## gccRangedCaseLabel要素
+## gccRangedCaseLabel要素 {#stmt.gccrangecase}
 gcc拡張のcase文での範囲指定を表す。switch要素の中のbody要素の中のcompoundStatementの中だけに現れることができる。
 
     <gccRangedCaseLabel>
@@ -1170,14 +1170,14 @@ caseの値を要素としてもつ。
 * value要素　－　caseの値の下限値を指定する。
 * value要素　－　caseの値の上限値を指定する。
 
-## defaultLabel要素
+## defaultLabel要素 {#stmt.default}
 switch文のdefaultラベルを表す。switch要素の中のbody要素の中のcompoundStatementの中だけに現れることができる。
 
     <defaultLabel/>
 
 属性(optional): lineno, file
 
-## pragma要素
+## pragma要素 {#stmt.pragma}
 pragma要素は#pragma文を表す。
 
     <pragma>文字列</pragma>
@@ -1186,7 +1186,7 @@ pragma要素は#pragma文を表す。
 
 \#pragmaに指定する文字列を持つ。
 
-## text要素
+## text要素 {#stmt.text}
 text要素は任意のテキストを表し、コンパイラに依存したディレクティブなどの情報を要素として持つために使用する。
 
     <text>文字列</text>
@@ -1196,7 +1196,7 @@ text要素は任意のテキストを表し、コンパイラに依存したデ�
 内容に任意の文字列を持つ。この要素は globalDeclarasions にも出現する。
 
 
-# 式の要素
+# 式の要素 {#expr}
 式の構文要素に対応するXML要素である。式の要素には、本章に記述されたXML要素以外に、以下のものがある。
 
 * functionInstance要素（9.3節）
@@ -1209,7 +1209,7 @@ text要素は任意のテキストを表し、コンパイラに依存したデ�
 要検討：
 lvalue属性は、式の要素の属性からテータ型定義要素の属性に移動したい。
 
-## 定数の要素
+## 定数の要素 {#expr.constant}
 定数は以下のXML要素によって表現する。
 
     <intConstant>10進数または16進数</intConstant>
@@ -1235,7 +1235,7 @@ lvalue属性は、式の要素の属性からテータ型定義要素の属性�
 
 備考：longlongConstantだけ特別扱いするのは不自然。素直に10進数表記で表現する形にしたい。
 
-## 変数参照の要素（Var要素、varAddr要素、arrayAddr要素）
+## 変数参照の要素（Var要素、varAddr要素、arrayAddr要素） {#expr.var}
 変数名への参照を表現する。それぞれ、v, &v, aに対応する（vは配列以外の変数、aは配列変数）。
 
     <Var>変数名</Var>
@@ -1278,7 +1278,7 @@ aがint型の配列のとき、aの参照、すなわちa[0]のアドレスの�
 備考：
 aが配列のとき、2015年10月現在のF\_Frontでは &a の参照をaの参照と同様arrayAddrで表現している。これに関連してOmni XMPでは型の不一致によるエラーが出ている（バグレポート439）。
 
-## pointerRef要素
+## pointerRef要素 {#expr.pointer}
 式（ポインタ型）の指示先を表現する。
 
     <pointerRef>
@@ -1305,7 +1305,7 @@ aが配列のとき、2015年10月現在のF\_Frontでは &a の参照をaの参
 
 と表現している。なぜこのパターンに限って簡単化しているのか不明。
 
-## arrayRef要素
+## arrayRef要素 {#expr.array}
 配列要素a[i]への参照を表現する。
 
     <arrayRef>
@@ -1334,7 +1334,7 @@ aが配列のとき、2015年10月現在のF\_Frontでは &a の参照をaの参
 
 のように表現される。ここでP232はint型へのポインタと宣言されている。後者はarrayAddr要素でないことに注意されたい。
 
-## メンバの参照の要素（C++拡張）
+## メンバの参照の要素（C++拡張） {#expr.member}
 構造型、クラス、または共用型のオブジェクトをsとするとき、sのメンバmへの参照s.m、sのメンバmのアドレスの参照&s.m、sのメンバ配列aの要素への参照s.a[i]、および、sのメンバ配列aの要素のアドレスの参照&s.a[i]を、それぞれ以下のように表現する。
 
     <memberRef> or <memberAddr> or <memberArrayRef> or <memberArrayAddr>
@@ -1392,7 +1392,7 @@ arrayRef要素（7.4節）とmemberArrayRef要素、arrayAddr要素（7.2節）�
 |          | Var i        |           | Var i              |
 +----------+--------------+-----------+--------------------+
 
-## メンバポインタの参照の要素（C++）
+## メンバポインタの参照の要素（C++） {#expr.memberpointer}
 オブジェクト`s`のメンバへのポインタの参照`s.*p`を表現する。
 
     <memberPointer>
@@ -1439,7 +1439,7 @@ name属性に変数名を指定し、子要素で構造体のアドレスを表�
         </arguments>
       </functionCall>
 
-## 複合リテラルの要素（新規）
+## 複合リテラルの要素（新規） {#expr.compval}
 型Tの複合リテラル (T){ … } および型Tの複合リテラルのアドレス &(T){ … } を表現する。
 
     <compoundValue> or <compoundValueAddr>
@@ -1483,14 +1483,14 @@ name属性に変数名を指定し、子要素で構造体のアドレスを表�
       </value>
     </compoundValue>
 
-## thisExpr要素（C++）
+## thisExpr要素（C++） {#expr.this}
 thisExpr 要素は、C++の this に対応する。
 
     <thisExpr/>
 
 属性なし
 
-## assignExpr 要素
+## assignExpr 要素 {#expr.assign}
 assignExpr 要素は、２つの式の要素をsub要素に持ち、代入を表す。
 
     <assignExpr>
@@ -1503,7 +1503,7 @@ assignExpr 要素は、２つの式の要素をsub要素に持ち、代入を表
 
 第１の式を左辺、第２の式を右辺とする代入文を表現する。
 
-## 2項演算式の要素
+## 2項演算式の要素 {expr.binary}
 二項演算式を表現する。被演算子の２つのXML要素を内容に指定する。
 
     <二項演算要素名>
@@ -1550,7 +1550,7 @@ assignExpr 要素は、２つの式の要素をsub要素に持ち、代入を表
 備考：
 　Cでは代入演算の第１オペランドは必ずlvalue（左辺式）だったが、C++では演算子のオーバーロードがあるためその限りではなくなった。
 
-## 単項演算式の要素
+## 単項演算式の要素 {#expr.unary}
 単項演算式を表現する。被演算子を内容に指定する。
 
     <単項演算要素名>
@@ -1576,7 +1576,7 @@ assignExpr 要素は、２つの式の要素をsub要素に持ち、代入を表
 * gccAlignOfExpr　－　GCCの__alignof__演算子を表す。子要素に式またはtypeName要素を指定する。
 * gccLabelAddr　－　GCCの&&単項演算子を表す。内容にラベル名を指定する。
 
-## functionCall要素
+## functionCall要素 {#expr.call}
 functionCall要素は関数呼び出しを表す。
 
     <functionCall>
@@ -1593,7 +1593,7 @@ memberRef　　　メンバ関数呼び出しの時のメンバアクセスの�
 operator　　　グローバル関数の形の演算子オーバーロードの呼び出しの場合の演算子名を指定する。
 arguments要素には引数の並びを指定する。
 
-### arguments要素
+### arguments要素 {expr.arguments}
 実引数（actual argument）の0個以上の並びを表現する。
 
     <arguments>
@@ -1601,7 +1601,7 @@ arguments要素には引数の並びを指定する。
       ... ]
     </arguments>
 
-## commaExpr要素
+## commaExpr要素 {#expr.comma}
 コンマ式（第１オペランドと第２オペランドを評価し、第２オペランドの値を返す式）を表す。
 
     <commaExpr>
@@ -1612,7 +1612,7 @@ arguments要素には引数の並びを指定する。
 属性(必須): type
 属性（optional）: `is_userDefined`
 
-## インクリメント・デクリメント要素（postIncrExpr, postDecrExpr, preIncrExpr, preDecrExpr）
+## インクリメント・デクリメント要素（postIncrExpr, postDecrExpr, preIncrExpr, preDecrExpr） {expr.increment}
 postIncrExpr要素、postDecrExpr要素は、CおよびC++のポストインクリメント、デクリメント式を表す。preIncrExpr要素、preDecrExpr要素は、CおよびC++のプレインクリメント、デクリメント式を表す。
 
     <postIncrExpr> or <postDecrExpr> or <preIncrExpr> or <preDecrExpr>
@@ -1622,7 +1622,7 @@ postIncrExpr要素、postDecrExpr要素は、CおよびC++のポストインク�
 属性(必須): type
 属性（optional）: `is_userDefined`
 
-## castExpr要素（廃止予定）
+## castExpr要素（廃止予定） {#expr.cast}
 castExpr要素は型変換の式（旧仕様）、または複合リテラルを表す。
 
     <castExpr>
@@ -1639,7 +1639,7 @@ castExpr要素は型変換の式（旧仕様）、または複合リテラルを
 現在のC\_Frontでは、複合リテラルにこの表現は使われておらず、compoundValue要素またはcompoundValueAddr要素（7.7節）が使われている。キャストはC++仕様のstatic\_cast, const\_castまたはreinterpret\_castに変換して表現する方が、バリエーションの削減になるため望ましい。どちらの用途にも使われないのであれば、castExprは廃止すべきと考える。
 備考の備考：C++においてもCスタイルのキャストを書いた場合は static\_cast等とは違う意味になるので、この仕様は残さざるを得ないと考える。
 
-## キャスト要素（staticCast, dynamicCast, constCast, reinterpretCast）（C++）
+## キャスト要素（staticCast, dynamicCast, constCast, reinterpretCast）（C++） {#expr.cppcast}
 順に、C++のstatic\_cast, dynamic\_cast, const\_castおよびreinterpret\_castを表現する。
 
     <staticCast> or <dynamicCast> or <constCast> or <reinterpretCast>
@@ -1650,7 +1650,7 @@ castExpr要素は型変換の式（旧仕様）、または複合リテラルを
 
 Cのcastは、staticCastまたはconstCastまたはreinterpretCastで表現する。
 
-## condExpr要素
+## condExpr要素 {#expr.cond}
 三項演算 x ? y : z を表現する。
 
     <condExpr>
@@ -1667,7 +1667,7 @@ Cのcastは、staticCastまたはconstCastまたはreinterpretCastで表現す�
 選択される式のtype属性が異なるとき、condExpr要素のtype属性はどうするべきか？
 　→暗黙のキャストが入って同じ型にそろえられるので、その型を式全体の型と考えればよい（あるいは暗黙のキャストで対応できないほど型が食い違っている場合にはコンパイルエラーになるためそのようなソースコードは受理する必要がない）。
 
-## gccCompoundExpr要素
+## gccCompoundExpr要素 {#expr.gcccomp}
 gcc拡張の複文式に対応する。
 
     <gccCompoundExpr>
@@ -1678,7 +1678,7 @@ gcc拡張の複文式に対応する。
 
 * compoundStatement要素　－　複文式の内容を指定する。
 
-## newExpr要素とnewExprArray要素
+## newExpr要素とnewExprArray要素 {#expr.new}
 new演算子またはnew[]演算子から成る式を表現する。
 
     <newExpr>
@@ -1695,7 +1695,7 @@ new演算子またはnew[]演算子から成る式を表現する。
 
 第１と第２の書式は、それぞれnew演算子とnew[]演算子による領域確保を表現する。確保されるデータは、type属性の型をもつ。第１の書式の子要素は、コンストラクタに渡されるパラメタを表す。第２の書式の子要素は、確保する配列の長さを表す。
 
-## deleteExpr要素とdeleteArrayExpr要素
+## deleteExpr要素とdeleteArrayExpr要素 {#expr.delete}
 delete演算子またはdelete[]演算子から成る式を表現する。
 
     <deleteExpr>
@@ -1712,7 +1712,7 @@ delete演算子またはdelete[]演算子から成る式を表現する。
 
 第１と第２の書式は、それぞれdelete演算子とdelete[]演算子による領域解放を表現する。子要素は、解放する領域へのポインタである。
 
-## throwExpr要素（C++）
+## throwExpr要素（C++） {#expr.throw}
 throw式を表現する。
 
     <throwExpr>
@@ -1723,7 +1723,7 @@ throw式を表現する。
 
 子要素として式の要素をもつ。式の要素は投げられる例外を表す。
 
-## lambdaExpr要素
+## lambdaExpr要素 {#expr.lambda}
 C＋＋のラムダ式を表現する。
 
     <lambdaExpr>
@@ -1737,7 +1737,7 @@ C＋＋のラムダ式を表現する。
 
 symbols要素、params要素（5.3.4節）とbody要素は、functionDefinition要素（5.2節）の子要素と同様である。
 
-### captures要素
+### captures要素 {#expr.captures}
 　captures要素は以下の表現である。
 
     <captures>
@@ -1759,7 +1759,7 @@ captures要素はオプショナルに以下の属性をもつ。
 * `is_mutable`属性　－　1またはtrueのとき、mutable指定があることを意味する。0またはfalseまたは省略されたとき、mutable指定がないことを意味する。
 　子要素のbyReference要素で指定された名前の変数は参照キャプチャされ、byValue要素で指定された名前の変数はコピーキャプチャされる。それ以外の変数は、default属性の指定に従う。
 
-# テンプレート定義要素（C++）
+# テンプレート定義要素（C++） {#temp}
 テンプレート定義要素には、以下のものがある。
 
 * classTemplate要素（8.2節）　—　クラステンプレートを定義する。
@@ -1768,7 +1768,7 @@ captures要素はオプショナルに以下の属性をもつ。
 
 これらのテンプレート定義要素は、共通して型仮引数を表現するtypeParams要素（8.1節）をもつ。
 
-## typeParams要素
+## typeParams要素 {#temp.typeparams}
 テンプレートの型仮引数の並びを指定する。
 
     <typeParams>
@@ -1788,7 +1788,7 @@ captures要素はオプショナルに以下の属性をもつ。
 
 typeName要素は、引数の順序で並んでいなければならない。
 
-## classTemplate要素
+## classTemplate要素 {#temp.class}
 データ型定義要素（3章）の一つ。クラスのテンプレートを以下のように表現する。
 
     <classTemplate>
@@ -1838,7 +1838,7 @@ typeName要素は、引数の順序で並んでいなければならない。
 
     <basicType type="S0" name="any_typename"/>
 
-## functionTemplate要素
+## functionTemplate要素 {#temp.func}
 関数、メンバ関数、演算子オーバーロード、および、ユーザ定義リテラルのテンプレートを表現する。globalDeclaration要素（5.1節）とdeclaration要素（5.2節）の子要素。
 
     <functionTemplate>
@@ -1893,7 +1893,7 @@ typeName要素は、引数の順序で並んでいなければならない。
       </functionDefinition>
     </functionTemplate>
 
-## aliasTemplate要素
+## aliasTemplate要素 {#temp.alias}
 データ型定義要素（3章）の一つ。エイリアステンプレートを表現する。
 
     <aliasTemplate>
@@ -1943,7 +1943,7 @@ typeName要素は、引数の順序で並んでいなければならない。
       </typeParams>
     </aliasTemplate>
 
-# テンプレートインスタンス要素（C++）
+# テンプレートインスタンス要素（C++） {#temp.instance}
 テンプレートインスタンス要素には、以下のものがある。
 
 * typeInstance要素（9.2節）　—　構造型、クラス、および型の別名のテンプレートについて、型実引数を与えて具体化する。
@@ -1951,7 +1951,7 @@ typeName要素は、引数の順序で並んでいなければならない。
 
 これらのテンプレートインスタンス要素は、共通して型実引数を表現するtypeArtuments要素（9.1節）をもつ。
 
-## typeArguments要素
+## typeArguments要素 {#temp.typearg}
 テンプレートのインスタンスの型実引数の並びを指定する。
 
     <typeArguments>
@@ -1967,7 +1967,7 @@ typeName要素は、引数の順序で並んでいなければならない。
 
 typeName要素は、引数の順序で並んでいなければならない。
 
-## typeInstance要素
+## typeInstance要素 {#temp.typeinstance}
 データ型定義要素（3章）の一つ。型のテンプレートのインスタンスを表現する。
 
     <typeInstance>
@@ -2012,7 +2012,7 @@ typeName要素は、引数の順序で並んでいなければならない。
     <pointerType type="P2" ref="int" />
     <pointerType type="P1" ref="P2" />
 
-## functionInstance要素
+## functionInstance要素 {#temp.funcinstance}
 式の要素（7章）の一つ。関数とメンバ関数のテンプレートのインスタンスを表現する。
 
     <functionInstance>
@@ -2058,12 +2058,12 @@ functionTemplate要素（8.3節）の例において、関数テンプレート
 ここで、funcAddr要素のtype属性P0は、関数squareへのポインタを意味するデータ型識別名である。
 
 
-# XcalableMP固有の要素
+# XcalableMP固有の要素 {#xmp}
 
 備考：
 C++対応版作成に当たって再検討していない。
 
-## coArrayType要素
+## coArrayType要素 {#xmp.coarray.type}
 "#pragma xmp coarray" によって宣言された、Co-Array型を表す。 次の属性を持つ。
 
 * type　－　派生データ型名。
@@ -2085,21 +2085,21 @@ C++対応版作成に当たって再検討していない。
     <coArrayType type="C1" element_type="A1"/>
     <coArrayType type="C2" element_type="C1" array_size="2"/>
 
-## coArrayRef要素
+## coArrayRef要素 {#xmp.coarray.ref}
 Co-Array型の変数への参照を表す。
 次の子要素を持つ。
 
 * 1番目の式　－　Co-Array変数を表す式。
 * 2番目以降の式　－　Co-Array次元を表す式。複数の次元を持つ場合は、複数の式を指定する。
 
-## subArrayRef要素
+## subArrayRef要素 {#xmp.subarray.ref}
 部分配列の参照を表す。
 次の子要素を持つ。子要素を省略することはできない。
 
 * 第一のXML要素として配列を表す式をもつ。
 * 2番目以降の式　－　添字または添字3つ組を表す式。複数の次元を持つ場合は、複数の式を指定する。
 
-## indexRange要素
+## indexRange要素 {#xmp.idx}
 3つ組(triplet)を表す。
 次の子要素を持つ。子要素を省略することはできない。
 
@@ -2107,9 +2107,9 @@ Co-Array型の変数への参照を表す。
 * upperBound　－　上限のインデックスを表す。子要素に式を持つ。
 * step　－　インデックスの刻み幅を表す。子要素に式を持つ。
 
-# その他の要素・属性
+# その他の要素・属性 {#other}
 
-## `is_gccExtension`属性
+## `is_gccExtension`属性 {#other.isgcc}
 `is_gccExtension`属性は、GCCの \_\_extension\_\_ キーワードをXML要素の先頭に付加するかどうかを定義し、値は 0 または 1 (falseまたはtrue) である。
 `is_gccExtension`属性は省略可能で、指定しないときは値 0を指定したときと同じ意味である。次のXML要素に `is_gccExtension` 属性を持つことができる。
 
@@ -2126,7 +2126,7 @@ Co-Array型の変数への参照を表す。
        <name>int64_t</name>
      </id>
 
-## gccAsm要素、gccAsmDefinition要素、gccAsmStatement要素
+## gccAsm要素、gccAsmDefinition要素、gccAsmStatement要素 {#other.gcc.asm}
 gccAsm 要素・gccAsmDefinition要素・gccAsmStatement要素は、GCCの asm/\_\_asm\_\_ キーワードを定義する。子要素として asm の引数の文字列を持つ。
 
 * gccAsm　－　asm式を表す。次の子要素を持つ。
@@ -2188,7 +2188,7 @@ gccAsm 要素・gccAsmDefinition要素・gccAsmStatement要素は、GCCの asm/\
          </gccAsmOperands>
        </gccAsmStatement>
 
-## gccAttributes要素
+## gccAttributes要素 {#other.gcc.attr}
 gccAttributes 要素はGCCの \_\_attribute\_\_ キーワードを定義する。子要素として、\_\_attribute\_\_の引数の文字列を持つ。gccAttributes 要素は、gccAttribute 要素を子要素に複数持つ。
 
 * 型を表すXML要素全てが gccAttributes 要素を子要素に持つ（0～1個）。
@@ -2271,17 +2271,17 @@ id 要素、functionDefinition 要素の子要素に、gccAttributes を設定�
         </functionDefinition>
       </globalDeclarations>
 
-## `builtin_op`要素
+## `builtin_op`要素 {#other.builtinop}
 `builtin_op`要素はコンパイラ組み込みの関数呼び出しを表す。以下のXML要素をそれぞれ0～複数持つ。子要素の順番は関数引数の順番と一致していなければならない。
 
 * 式　－　呼び出す関数の引数として、式を指定する。
 * typeName　－　呼び出す関数の引数として、型名を指定する。
 * gccMemberDesignator　－　呼び出す関数の引数として、構造体・共用体のメンバ指示子を指定する。属性に構造体・共用体の派生データ型名を示す ref、メンバ指示子の文字列を示す member を持つ。子要素に配列インデックスを表す式(0-1個)と、gccMemberDesignator要素(0-1個)を持つ。
 
-## `is_gccSyntax`属性
+## `is_gccSyntax`属性 {#other.isgccsyntax}
 `is_gccSyntax`属性はそのタグに対応する式、文、宣言がgcc拡張を使用しているかどうかを定義する。 値として0 または 1 (falseまたはtrue) を持つ。この属性は省略可能であり、省略された場合は値に0を指定した時と同じ意味になる。
 
-## `is_modified`属性
+## `is_modified`属性 {#other.modified}
 `is_modified`属性はそのタグに対応する式、文、宣言がコンパイルの過程で変形されたかどうかを定義する。値として0 または 1 (falseまたはtrue) を持つ。この属性は省略可能であり、省略された場合は値に0を指定した時と同じ意味になる。
 次のXML要素に `is_gccSyntax` 属性、`is_modified` 属性を持つことができる。
 
@@ -2289,7 +2289,7 @@ id 要素、functionDefinition 要素の子要素に、gccAttributes を設定�
 * 文の要素
 * 式の要素
 
-# 未検討項目
+# 未検討項目 {#tbc}
 以下の項目については、本ドキュメントで触れていない。
 
 * 宣言
