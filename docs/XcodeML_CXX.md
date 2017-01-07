@@ -1,7 +1,7 @@
 ﻿% XcodeML/C++ 仕様書
-  V1.2J (Sep 30, 2016)
+  V1.2J
 % XcalableMP/Omni Compiler Project
-%
+% Sep 30, 2016
 
 
 改版履歴
