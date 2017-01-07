@@ -328,7 +328,9 @@ typeName要素は以下のように使用される。
 
 例: 左辺値参照と右辺値参照
 以下の参照（左辺値参照）の宣言があるとき、
-int& n_alias = n_org;
+
+    int& n_alias = n_org;
+
 変数n_aliasのデータ型識別要素は以下のようになる。
 
     <basicType type="B0" name="int" reference="lvalue"/>
