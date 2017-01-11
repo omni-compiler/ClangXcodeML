@@ -733,7 +733,7 @@ TypeTableVisitor::PreVisitDecl(Decl *D) {
       }
       std::string class_name(RD->getName());
       if (isNested(*RD)) {
-        /* neither enblaced classes nor enblacing classes are normalizable */
+        /* neither this class nor `enclosureType` is normalizable */
         RecordDecl* enclosure(D->getDeclContext()->getOuterLexicalRecordContext());
         QualType enclosureType(enclosure->getTypeForDecl(), 0);
         typetableinfo->setNormalizability(enclosureType, false);
