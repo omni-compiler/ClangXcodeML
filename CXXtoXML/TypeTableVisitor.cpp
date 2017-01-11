@@ -705,6 +705,9 @@ TypeTableVisitor::PreVisitDecl(Decl *D) {
         addChild("name", TD->getNameAsString().c_str());
 
         CXXRecordDecl *RD(dyn_cast<CXXRecordDecl>(D));
+        if (!RD) {
+          return true;
+        }
         if (RD && RD->bases_begin() != RD->bases_end()) {
           for (auto base : RD->bases()) {
             BaseClass baseClass(base.getType(), base.getAccessSpecifier(), base.isVirtual());
