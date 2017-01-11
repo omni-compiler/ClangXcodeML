@@ -697,7 +697,12 @@ TypeTableVisitor::PreVisitDecl(Decl *D) {
         return false;
       }
       QualType T(TD->getTypeForDecl(), 0);
-      if (TD->isCompleteDefinition()) {
+      if (!TD->isCompleteDefinition()) {
+        // just allocate a name.
+        newComment(comment.c_str());
+        typetableinfo->registerType(T, nullptr, curNode);
+        return true;
+      } else {
         xmlNodePtr tmpNode;
         newComment((comment + "(withDef)").c_str());
         typetableinfo->registerType(T, &tmpNode, curNode);
@@ -742,11 +747,6 @@ TypeTableVisitor::PreVisitDecl(Decl *D) {
         DeclarationsVisitor DV(mangleContext, tmpNode, "symbols", typetableinfo);
         DV.TraverseChildOfDecl(D);
         return false;
-      } else {
-        // just allocate a name.
-        newComment(comment.c_str());
-        typetableinfo->registerType(T, nullptr, curNode);
-        return true;
       }
     }
   case Decl::ClassTemplateSpecialization: return true;
