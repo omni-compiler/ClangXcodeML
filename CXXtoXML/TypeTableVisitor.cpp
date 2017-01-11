@@ -708,7 +708,7 @@ TypeTableVisitor::PreVisitDecl(Decl *D) {
         if (!RD) {
           return true;
         }
-        if (RD && RD->bases_begin() != RD->bases_end()) {
+        if (RD->bases_begin() != RD->bases_end()) {
           for (auto base : RD->bases()) {
             BaseClass baseClass(base.getType(), base.getAccessSpecifier(), base.isVirtual());
             typetableinfo->addInheritance(T, baseClass);
