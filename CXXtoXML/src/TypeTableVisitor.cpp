@@ -575,7 +575,7 @@ TypeTableVisitor::PreVisitStmt(Stmt *S) {
   }
   Expr *E = dyn_cast<Expr>(S);
 
-  if (E && S->getStmtClass() != Stmt::StringLiteralClass) {
+  if (E) {
     TraverseType(E->getType());
   }
 
