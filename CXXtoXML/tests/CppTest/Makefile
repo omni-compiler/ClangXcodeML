@@ -1,5 +1,6 @@
 .SUFFIXES: .xml
 .PHONY: test clean
+.DELETE_ON_ERROR:
 
 all: test
 
