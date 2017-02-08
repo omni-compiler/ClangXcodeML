@@ -1,29 +1,29 @@
-#ifndef XMLWALKER_H
-#define XMLWALKER_H
+#ifndef CLANGASTWALKER_H
+#define CLANGASTWALKER_H
 
 /*!
  * \brief A class that combines procedures into a single one
  * that traverses XML node and visits each element.
- * \tparam ...T parameter type required by procedures in XMLWalker.
+ * \tparam ...T parameter type required by procedures in ClangASTWalker.
  *
  * It has a mapping from XML element names to procedures
- * (std::function<void(xmlNodePtr, const XMLWalker&, T...)>). Once
- * XMLWalker<T...>::walkAll() runs, it performs pre-order traversal of
+ * (std::function<void(xmlNodePtr, const ClangASTWalker&, T...)>). Once
+ * ClangASTWalker<T...>::walkAll() runs, it performs pre-order traversal of
  * given XML elements and their descendants until it finds an element
  * whose name is registered with the map. Finally it executes
  * a corresponding procedure.
  */
 template<typename... T>
-class XMLWalker {
+class ClangASTWalker {
 public:
   using Key = std::tuple<std::string, std::string>;
   /*!
-   * \brief Procedure to be registered with XMLWalker.
+   * \brief Procedure to be registered with ClangASTWalker.
    */
-  using Procedure = std::function<void(const XMLWalker&, xmlNodePtr, T...)>;
-  XMLWalker() = default;
-  XMLWalker(std::initializer_list<std::tuple<std::string, Procedure>>);
-  XMLWalker(std::map<std::string, Procedure>&&);
+  using Procedure = std::function<void(const ClangASTWalker&, xmlNodePtr, T...)>;
+  ClangASTWalker() = default;
+  ClangASTWalker(std::initializer_list<std::tuple<std::string, Procedure>>);
+  ClangASTWalker(std::map<std::string, Procedure>&&);
   void walkAll(xmlNodePtr, T...) const;
   void walkChildren(xmlNodePtr, T...) const;
   void walk(xmlNodePtr, T...) const;
@@ -33,12 +33,12 @@ private:
 };
 
 template<typename... T>
-XMLWalker<T...>::XMLWalker(std::map<std::string,Procedure>&& initMap):
+ClangASTWalker<T...>::ClangASTWalker(std::map<std::string,Procedure>&& initMap):
   map(initMap)
 {}
 
 template<typename... T>
-XMLWalker<T...>::XMLWalker(std::initializer_list<std::tuple<std::string, typename XMLWalker<T...>::Procedure>> pairs):
+ClangASTWalker<T...>::ClangASTWalker(std::initializer_list<std::tuple<std::string, typename ClangASTWalker<T...>::Procedure>> pairs):
   map()
 {
   for (auto p : pairs) {
@@ -52,7 +52,7 @@ XMLWalker<T...>::XMLWalker(std::initializer_list<std::tuple<std::string, typenam
  * \param args... Arguments to be passed to registered procedures.
  */
 template<typename... T>
-void XMLWalker<T...>::walkAll(xmlNodePtr node, T... args) const {
+void ClangASTWalker<T...>::walkAll(xmlNodePtr node, T... args) const {
   if (!node) {
     return;
   }
@@ -67,7 +67,7 @@ void XMLWalker<T...>::walkAll(xmlNodePtr node, T... args) const {
 }
 
 template<typename... T>
-void XMLWalker<T...>::walkChildren(xmlNodePtr node, T... args) const {
+void ClangASTWalker<T...>::walkChildren(xmlNodePtr node, T... args) const {
   if (node) {
     walkAll(node->children, args...);
   }
@@ -81,7 +81,7 @@ void XMLWalker<T...>::walkChildren(xmlNodePtr node, T... args) const {
  * \pre \c node is an XML element node.
  */
 template<typename... T>
-void XMLWalker<T...>::walk(xmlNodePtr node, T... args) const {
+void ClangASTWalker<T...>::walk(xmlNodePtr node, T... args) const {
   assert(node && node->type == XML_ELEMENT_NODE);
   bool traverseChildren = true;
   XMLString elemName = node->name;
@@ -103,7 +103,7 @@ void XMLWalker<T...>::walk(xmlNodePtr node, T... args) const {
  * \return false if \c key already exists.
  */
 template<typename... T>
-bool XMLWalker<T...>::registerProc(std::string key, Procedure value) {
+bool ClangASTWalker<T...>::registerProc(std::string key, Procedure value) {
   auto iter = map.find(key);
   if (iter != map.end()) {
     return false;
@@ -127,4 +127,4 @@ typename std::function<void(T...)> merge(
   };
 }
 
-#endif /* !XMLWALKER_H */
+#endif /* !CLANGASTWALKER_H */
