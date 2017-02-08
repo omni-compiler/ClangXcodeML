@@ -112,7 +112,7 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
       }
     }
     OS.str();
-    newChild("stringConstant", literalAsString.c_str()); // do not emit type
+    newProp("stringLiteral", literalAsString.c_str());
   }
 
   UnaryExprOrTypeTraitExpr *UEOTTE = dyn_cast<UnaryExprOrTypeTraitExpr>(S);
