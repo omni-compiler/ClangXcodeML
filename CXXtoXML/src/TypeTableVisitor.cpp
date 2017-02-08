@@ -573,9 +573,8 @@ TypeTableVisitor::PreVisitStmt(Stmt *S) {
   if (!S) {
     return false;
   }
-  Expr *E = dyn_cast<Expr>(S);
 
-  if (E) {
+  if (auto E = dyn_cast<Expr>(S)) {
     TraverseType(E->getType());
   }
 
