@@ -16,6 +16,7 @@
 template<typename... T>
 class XMLWalker {
 public:
+  using Key = std::tuple<std::string, std::string>;
   /*!
    * \brief Procedure to be registered with XMLWalker.
    */
