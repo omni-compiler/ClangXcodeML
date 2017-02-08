@@ -22,23 +22,23 @@ public:
    */
   using Procedure = std::function<void(const ClangASTWalker&, xmlNodePtr, T...)>;
   ClangASTWalker() = default;
-  ClangASTWalker(std::initializer_list<std::tuple<std::string, Procedure>>);
-  ClangASTWalker(std::map<std::string, Procedure>&&);
+  ClangASTWalker(std::initializer_list<std::tuple<Key, Procedure>>);
+  ClangASTWalker(std::map<Key, Procedure>&&);
   void walkAll(xmlNodePtr, T...) const;
   void walkChildren(xmlNodePtr, T...) const;
   void walk(xmlNodePtr, T...) const;
-  bool registerProc(std::string, Procedure);
+  bool registerProc(Key, Procedure);
 private:
-  std::map<std::string, Procedure> map;
+  std::map<Key, Procedure> map;
 };
 
 template<typename... T>
-ClangASTWalker<T...>::ClangASTWalker(std::map<std::string,Procedure>&& initMap):
+ClangASTWalker<T...>::ClangASTWalker(std::map<Key,Procedure>&& initMap):
   map(initMap)
 {}
 
 template<typename... T>
-ClangASTWalker<T...>::ClangASTWalker(std::initializer_list<std::tuple<std::string, typename ClangASTWalker<T...>::Procedure>> pairs):
+ClangASTWalker<T...>::ClangASTWalker(std::initializer_list<std::tuple<Key, typename ClangASTWalker<T...>::Procedure>> pairs):
   map()
 {
   for (auto p : pairs) {
@@ -103,7 +103,7 @@ void ClangASTWalker<T...>::walk(xmlNodePtr node, T... args) const {
  * \return false if \c key already exists.
  */
 template<typename... T>
-bool ClangASTWalker<T...>::registerProc(std::string key, Procedure value) {
+bool ClangASTWalker<T...>::registerProc(Key key, Procedure value) {
   auto iter = map.find(key);
   if (iter != map.end()) {
     return false;
