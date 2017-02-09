@@ -82,6 +82,39 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
     newProp("decimalNotation", decimalNotation.c_str());
   }
 
+  if (auto SL = dyn_cast<StringLiteral>(S)) {
+    StringRef Data = SL->getString();
+    std::string literalAsString;
+    raw_string_ostream OS(literalAsString);
+
+    for (unsigned i = 0, e = Data.size(); i != e; ++i) {
+      unsigned char C = Data[i];
+      if (C == '"' || C == '\\') {
+        OS << '\\' << (char)C;
+        continue;
+      }
+      if (isprint(C)) {
+        OS << (char)C;
+        continue;
+      }
+      switch (C) {
+      case '\b': OS << "\\b"; break;
+      case '\f': OS << "\\f"; break;
+      case '\n': OS << "\\n"; break;
+      case '\r': OS << "\\r"; break;
+      case '\t': OS << "\\t"; break;
+      default:
+        OS << '\\';
+        OS << ((C >> 6) & 0x7) + '0';
+        OS << ((C >> 3) & 0x7) + '0';
+        OS << ((C >> 0) & 0x7) + '0';
+        break;
+      }
+    }
+    OS.str();
+    newProp("stringLiteral", literalAsString.c_str());
+  }
+
   UnaryExprOrTypeTraitExpr *UEOTTE = dyn_cast<UnaryExprOrTypeTraitExpr>(S);
   if (UEOTTE) {
     //7.8 sizeof, alignof
