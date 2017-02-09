@@ -696,54 +696,56 @@ TypeTableVisitor::PreVisitDecl(Decl *D) {
         return false;
       }
       QualType T(TD->getTypeForDecl(), 0);
-      if (TD->isCompleteDefinition()) {
-        xmlNodePtr tmpNode;
-        newComment((comment + "(withDef)").c_str());
-        typetableinfo->registerType(T, &tmpNode, curNode);
-        curNode = tmpNode;
-        addChild("name", TD->getNameAsString().c_str());
-
-        CXXRecordDecl *RD(dyn_cast<CXXRecordDecl>(D));
-        if (RD && RD->bases_begin() != RD->bases_end()) {
-          for (auto base : RD->bases()) {
-            BaseClass baseClass(base.getType(), base.getAccessSpecifier(), base.isVirtual());
-            typetableinfo->addInheritance(T, baseClass);
-          }
-          xmlNodePtr basesNode = xmlNewNode(nullptr, BAD_CAST "inheritedFrom");
-          for (BaseClass baseClass : typetableinfo->getBaseClasses(T)) {
-            std::string name = typetableinfo->getTypeName(baseClass.type());
-            xmlNodePtr typeNameNode = xmlNewNode(nullptr, BAD_CAST "typeName");
-            xmlNewProp(typeNameNode, BAD_CAST "ref", BAD_CAST name.c_str());
-            xmlNewProp(typeNameNode, BAD_CAST "access", BAD_CAST baseClass.access().c_str());
-            if (baseClass.isVirtual()) {
-              xmlNewProp(typeNameNode, BAD_CAST "is_virtual", BAD_CAST "1");
-            }
-            xmlAddChild(basesNode, typeNameNode);
-          }
-          xmlAddChild(tmpNode, basesNode);
-        }
-        std::string class_name(RD->getName());
-        if (isNested(*RD)) {
-          /* neither enblaced classes nor enblacing classes are normalizable */
-          RecordDecl* enclosure(D->getDeclContext()->getOuterLexicalRecordContext());
-          QualType enclosureType(enclosure->getTypeForDecl(), 0);
-          typetableinfo->setNormalizability(enclosureType, false);
-          typetableinfo->setNormalizability(T, false);
-        } else if (RD->isLocalClass() || class_name.empty()) {
-          typetableinfo->setNormalizability(T, false);
-        } else {
-          typetableinfo->setNormalizability(T, true);
-        }
-        TraverseChildOfDecl(D);
-        DeclarationsVisitor DV(mangleContext, tmpNode, "symbols", typetableinfo);
-        DV.TraverseChildOfDecl(D);
-        return false;
-      } else {
+      if (!TD->isCompleteDefinition()) {
         // just allocate a name.
         newComment(comment.c_str());
         typetableinfo->registerType(T, nullptr, curNode);
         return true;
       }
+      xmlNodePtr tmpNode;
+      newComment((comment + "(withDef)").c_str());
+      typetableinfo->registerType(T, &tmpNode, curNode);
+      curNode = tmpNode;
+      addChild("name", TD->getNameAsString().c_str());
+
+      CXXRecordDecl *RD(dyn_cast<CXXRecordDecl>(D));
+      if (!RD) {
+        return true;
+      }
+      if (RD->bases_begin() != RD->bases_end()) {
+        for (auto base : RD->bases()) {
+          BaseClass baseClass(base.getType(), base.getAccessSpecifier(), base.isVirtual());
+          typetableinfo->addInheritance(T, baseClass);
+        }
+        xmlNodePtr basesNode = xmlNewNode(nullptr, BAD_CAST "inheritedFrom");
+        for (BaseClass baseClass : typetableinfo->getBaseClasses(T)) {
+          std::string name = typetableinfo->getTypeName(baseClass.type());
+          xmlNodePtr typeNameNode = xmlNewNode(nullptr, BAD_CAST "typeName");
+          xmlNewProp(typeNameNode, BAD_CAST "ref", BAD_CAST name.c_str());
+          xmlNewProp(typeNameNode, BAD_CAST "access", BAD_CAST baseClass.access().c_str());
+          if (baseClass.isVirtual()) {
+            xmlNewProp(typeNameNode, BAD_CAST "is_virtual", BAD_CAST "1");
+          }
+          xmlAddChild(basesNode, typeNameNode);
+        }
+        xmlAddChild(tmpNode, basesNode);
+      }
+      std::string class_name(RD->getName());
+      if (isNested(*RD)) {
+        /* neither this class nor `enclosureType` is normalizable */
+        RecordDecl* enclosure(D->getDeclContext()->getOuterLexicalRecordContext());
+        QualType enclosureType(enclosure->getTypeForDecl(), 0);
+        typetableinfo->setNormalizability(enclosureType, false);
+        typetableinfo->setNormalizability(T, false);
+      } else if (RD->isLocalClass() || class_name.empty()) {
+        typetableinfo->setNormalizability(T, false);
+      } else {
+        typetableinfo->setNormalizability(T, true);
+      }
+      TraverseChildOfDecl(D);
+      DeclarationsVisitor DV(mangleContext, tmpNode, "symbols", typetableinfo);
+      DV.TraverseChildOfDecl(D);
+      return false;
     }
   case Decl::ClassTemplateSpecialization: return true;
   case Decl::ClassTemplatePartialSpecialization: return true;
