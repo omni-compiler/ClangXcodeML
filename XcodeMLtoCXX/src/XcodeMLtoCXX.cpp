@@ -16,6 +16,7 @@
 #include "XcodeMlEnvironment.h"
 #include "XMLWalker.h"
 #include "TypeAnalyzer.h"
+#include "SourceInfo.h"
 #include "CodeBuilder.h"
 
 int main(int argc, char** argv) {

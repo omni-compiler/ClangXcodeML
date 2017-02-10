@@ -19,8 +19,6 @@
 #include "SymbolBuilder.h"
 #include "LibXMLUtil.h"
 
-using CodeBuilder = XMLWalker<SourceInfo&, std::stringstream&>;
-
 /*!
  * \brief Traverse XcodeML node and make SymbolEntry.
  * \pre \c node is <globalSymbols> or <symbols> element.
