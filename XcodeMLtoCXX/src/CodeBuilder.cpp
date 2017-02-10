@@ -247,6 +247,10 @@ DEFINE_CB(outputParams) {
   ss << ")";
 }
 
+DEFINE_CB(clangStmtProc) {
+  ClangStmtHandler.walk(node, w, src, ss);
+}
+
 DEFINE_CB(emitClassDefinition) {
   const XMLString typeName(xmlGetProp(node, BAD_CAST "type"));
   const auto type = src.typeTable.at(typeName);
@@ -445,6 +449,8 @@ DEFINE_CB(varDeclProc) {
 }
 
 const CodeBuilder CXXBuilder({
+  { "clangStmt", clangStmtProc },
+
   { "typeTable", NullProc },
   { "functionDefinition", functionDefinitionProc },
   { "functionDecl", functionDeclProc },
