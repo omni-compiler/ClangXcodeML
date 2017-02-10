@@ -23,6 +23,7 @@ public:
   XMLWalker() = default;
   XMLWalker(std::initializer_list<std::tuple<std::string, Procedure>>);
   XMLWalker(std::map<std::string, Procedure>&&);
+  const Procedure& operator[](const std::string&) const;
   void walkAll(xmlNodePtr, T...) const;
   void walkChildren(xmlNodePtr, T...) const;
   void walk(xmlNodePtr, T...) const;
@@ -43,6 +44,14 @@ XMLWalker<T...>::XMLWalker(std::initializer_list<std::tuple<std::string, typenam
   for (auto p : pairs) {
     registerProc(std::get<0>(p), std::get<1>(p));
   }
+}
+
+template<typename... T>
+auto
+XMLWalker<T...>::operator [](const std::string& key) const
+  -> const XMLWalker::Procedure&
+{
+  return map.at(key);
 }
 
 /*!
