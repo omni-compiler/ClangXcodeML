@@ -17,7 +17,8 @@ OBJS = XcodeMlType.o \
 	XMLString.o \
 	XcodeMlEnvironment.o \
 	SymbolBuilder.o \
-	SymbolAnalyzer.o
+	SymbolAnalyzer.o \
+	ClangClassHandler.o
 
 $(XCODEMLTOCXX): $(OBJS)
 	$(CXX) $(CXXFLAGS) $(OBJS) $(USEDLIBS) -o $(XCODEMLTOCXX)

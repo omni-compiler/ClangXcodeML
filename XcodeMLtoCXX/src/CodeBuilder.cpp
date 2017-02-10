@@ -16,6 +16,7 @@
 #include "TypeAnalyzer.h"
 #include "SourceInfo.h"
 #include "CodeBuilder.h"
+#include "ClangClassHandler.h"
 #include "SymbolBuilder.h"
 #include "LibXMLUtil.h"
 
