@@ -80,7 +80,10 @@ SymbolMap parseGlobalSymbols(
       || !xmlXPathCastNodeSetToBoolean(xpathObj->nodesetval)) {
     return SymbolMap();
   }
-  assert(xpathObj->nodesetval->nodeTab[0]);
+  assert(xpathObj
+      && xpathObj->nodesetval
+      && xpathObj->nodesetval->nodeTab
+      && xpathObj->nodesetval->nodeTab[0]);
   auto initialEntry(parseSymbols(xpathObj->nodesetval->nodeTab[0], xpathCtx));
   return {initialEntry};
 }
