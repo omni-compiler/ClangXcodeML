@@ -868,12 +868,7 @@ TypeTableVisitor::PreVisitTypeLoc(TypeLoc TL) {
     newChild("TypeTableVisitor::PreVisitTypeLoc");
   }
 
-  const auto T = TL.getType();
-  if (T.isNull()) {
-    return false;
-  };
-  typetableinfo->registerType(T, nullptr, curNode);
-
+  (void)TL;
   return true;
 }
 
