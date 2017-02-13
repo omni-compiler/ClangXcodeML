@@ -76,7 +76,7 @@ SymbolMap parseGlobalSymbols(
   xmlXPathObjectPtr xpathObj = xmlXPathEvalExpression(
       BAD_CAST "/XcodeProgram/globalSymbols",
       xpathCtx);
-  if (xpathObj == nullptr) {
+  if (xpathObj == nullptr || xpathObj->nodesetval == nullptr) {
     return SymbolMap();
   }
   assert(xpathObj->nodesetval->nodeTab[0]);
