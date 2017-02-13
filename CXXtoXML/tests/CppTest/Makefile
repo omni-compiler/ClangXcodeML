@@ -9,6 +9,8 @@ CXXTOXMLDIR = $(ROOTDIR)/CXXtoXML
 CXXTOXML = $(CXXTOXMLDIR)/src/CXXtoXML
 CXXTOXMLFLAGS = --
 CXXTOXMLXSLTDIR = $(CXXTOXMLDIR)/src/XSLTs
+XCODEMLTOCXXDIR = $(ROOTDIR)/XcodeMLtoCXX
+XCODEMLTOCXX = $(XCODEMLTOCXXDIR)/XcodeMLtoCXX
 CXXTESTCASES = $(wildcard *.cc)
 CXXTESTOBJECTS = $(CXXTESTCASES:.cc=.xml)
 
@@ -25,6 +27,9 @@ $(CXXTOXML):
 		| xsltproc $(CXXTOXMLXSLTDIR)/Program2XcodeProgram.xsl - \
 		| xmllint --format - \
 		> $@
+
+%.generated.cpp: %.xcodeml
+	$(XCODEMLTOCXX) $< > $@
 
 check: $(CXXTOXML) $(CXXTESTOBJECTS)
 
