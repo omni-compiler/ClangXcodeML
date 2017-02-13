@@ -19,6 +19,7 @@ TARGETS = $(patsubst %.cpp,%.out,$(wildcard *.cpp))
 
 OBJNAMES = XcodeMlType.o \
 	LibXMLUtil.o \
+	ClangClassHandler.o \
 	CodeBuilder.o \
 	TypeAnalyzer.o \
 	XMLString.o \
