@@ -1,4 +1,5 @@
 #include <functional>
+#include <iostream>
 #include <sstream>
 #include <memory>
 #include <map>
@@ -78,6 +79,9 @@ SymbolMap parseGlobalSymbols(
       xpathCtx);
   if (xpathObj == nullptr
       || !xmlXPathCastNodeSetToBoolean(xpathObj->nodesetval)) {
+    std::cerr
+      << "Warning: This document does not have globalSymbols element"
+      << std::endl;
     return SymbolMap();
   }
   assert(xpathObj
