@@ -10,7 +10,6 @@ public:
     const char *getVisitorName() const override;
     bool PreVisitStmt(clang::Stmt *);
     bool PreVisitType(clang::QualType);
-    bool PreVisitTypeLoc(clang::TypeLoc);
     bool PreVisitAttr(clang::Attr *);
     bool PreVisitDecl(clang::Decl *);
     bool PreVisitDeclarationNameInfo(clang::DeclarationNameInfo);
