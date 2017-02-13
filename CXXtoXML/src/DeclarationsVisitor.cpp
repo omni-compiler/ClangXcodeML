@@ -168,9 +168,6 @@ DeclarationsVisitor::PreVisitType(QualType T) {
 bool
 DeclarationsVisitor::PreVisitTypeLoc(TypeLoc TL) {
   newChild("clangTypeLoc");
-
-  const auto T = TL.getType();
-  newProp("xcodemlType", typetableinfo->getTypeName(T).c_str());
   return true;
 }
 
