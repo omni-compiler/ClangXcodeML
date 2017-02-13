@@ -34,7 +34,9 @@ SymbolEntry parseSymbols(xmlNodePtr node, xmlXPathContextPtr ctxt) {
   for (auto idElem : idElems) {
     xmlNodePtr nameElem = findFirst(idElem, "name", ctxt);
     XMLString type(xmlGetProp(idElem, BAD_CAST "type"));
+    assert(length(type) != 0);
     XMLString name(xmlNodeGetContent(nameElem));
+    assert(length(name) != 0);
     if (!static_cast<std::string>(name).empty()) {
       // Ignore unnamed parameters such as <name type="int"/>
       entry[name] = type;
