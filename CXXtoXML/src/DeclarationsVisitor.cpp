@@ -166,6 +166,12 @@ DeclarationsVisitor::PreVisitType(QualType T) {
 }
 
 bool
+DeclarationsVisitor::PreVisitTypeLoc(TypeLoc TL) {
+  newChild("clangTypeLoc");
+  return true;
+}
+
+bool
 DeclarationsVisitor::PreVisitAttr(Attr *A) {
   if (!A) {
     newComment("Attr:NULL");
