@@ -93,10 +93,10 @@
   </xsl:template>
 
   <xsl:template match="clangStmt[@class='CompoundStmt']">
-    <compoundStmt>
+    <compoundStatement>
       <xsl:apply-templates select="@*" />
       <xsl:apply-templates />
-    </compoundStmt>
+    </compoundStatement>
   </xsl:template>
 
   <xsl:template match="clangStmt[
