@@ -13,6 +13,8 @@ XCODEMLTOCXXDIR = $(ROOTDIR)/XcodeMLtoCXX
 XCODEMLTOCXX = $(XCODEMLTOCXXDIR)/XcodeMLtoCXX
 CXXTESTCASES = $(wildcard *.cc)
 CXXTESTOBJECTS = $(CXXTESTCASES:.cc=.xml)
+CXXDECOMPTESTOBJECTS = $(CXXTESTCASES:.cc=.generated.cpp)
+CXXFLAGS = -pedantic -fsyntax-only
 
 $(CXXTOXML):
 	$(MAKE) -C $(CXXTOXMLDIR)
@@ -31,7 +33,11 @@ $(CXXTOXML):
 %.generated.cpp: %.xcodeml
 	$(XCODEMLTOCXX) $< > $@
 
-check: $(CXXTOXML) $(CXXTESTOBJECTS)
+check: $(CXXTOXML) $(CXXTESTOBJECTS) $(CXXDECOMPTESTOBJECTS)
+	set -e; \
+	for testobj in $(CXXDECOMPTESTOBJECTS); do  \
+		$(CXX) $(CXXFLAGS) $$testobj; \
+	done
 
 clean:
-	rm -f *.xml
+	rm -f *.xml *.generated.cpp
