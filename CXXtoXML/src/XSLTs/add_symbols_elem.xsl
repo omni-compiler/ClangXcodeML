@@ -3,6 +3,28 @@
   xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
   <xsl:output method="xml" encoding="UTF-8"/>
 
+  <xsl:template match="/Program">
+    <Program>
+      <xsl:apply-templates select="@*" />
+
+      <xsl:apply-templates select="typeTable" />
+
+      <globalSymbols>
+        <xsl:for-each
+          select="clangAST/clangDecl[@class='TranslationUnit']/clangDecl">
+          <id>
+            <name>
+              <xsl:value-of select="fullName" />
+            </name>
+          </id>
+        </xsl:for-each>
+      </globalSymbols>
+
+      <xsl:apply-templates select="clangAST" />
+
+    </Program>
+  </xsl:template>
+
   <xsl:template match="clangStmt[@class='CompoundStmt']">
     <clangStmt>
       <xsl:apply-templates select="@*" />
