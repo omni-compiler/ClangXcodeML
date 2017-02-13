@@ -26,6 +26,9 @@
             <xsl:value-of select=
               "clangDeclarationNameInfo[@class='Identifier']" />
           </name>
+
+          <xsl:apply-templates select="params" />
+
           <body>
             <xsl:apply-templates select="clangStmt" />
           </body>
