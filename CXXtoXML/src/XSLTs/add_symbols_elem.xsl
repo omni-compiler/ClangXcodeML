@@ -13,6 +13,9 @@
         <xsl:for-each
           select="clangAST/clangDecl[@class='TranslationUnit']/clangDecl">
           <id>
+            <xsl:attribute name="type">
+              <xsl:value-of select="@xcodemlType" />
+            </xsl:attribute>
             <name>
               <xsl:value-of select="fullName" />
             </name>
