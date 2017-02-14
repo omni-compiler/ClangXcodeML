@@ -50,9 +50,7 @@
     <varDecl>
       <xsl:apply-templates select="@*" />
       <name>
-        <xsl:attribute name="fullName">
-          <xsl:value-of select="fullName" />
-        </xsl:attribute>
+        <xsl:value-of select="fullName" />
       </name>
       <xsl:if test="@has_init = 1">
         <value>
