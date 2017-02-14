@@ -215,6 +215,11 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
     addChild("fullName", ND->getQualifiedNameAsString().c_str());
   }
 
+  if (auto VD = dyn_cast<ValueDecl>(D)) {
+    const auto T = VD->getType();
+    newProp("xcodemlType", typetableinfo->getTypeName(T).c_str());
+  }
+
   if (auto VD = dyn_cast<VarDecl>(D)) {
     newBoolProp("has_init", VD->hasInit());
   }
