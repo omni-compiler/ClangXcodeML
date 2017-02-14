@@ -11,6 +11,7 @@
 #include "clang/Driver/Options.h"
 #include "llvm/Option/OptTable.h"
 #include "llvm/Support/Signals.h"
+#include "DumpTypeTable.h"
 
 #include <libxml/xmlsave.h>
 #include <time.h>
@@ -23,6 +24,11 @@ using namespace llvm;
 
 static cl::extrahelp CommonHelp(CommonOptionsParser::HelpMessage);
 static std::unique_ptr<opt::OptTable> Options(createDriverOptTable());
+
+static cl::opt<bool>
+OptDumpTypeTable("dump-typeTable",
+                      cl::desc("dump typeTable information"),
+                      cl::cat(CXX2XMLCategory));
 
 class XMLASTConsumer : public ASTConsumer {
     xmlNodePtr rootNode;
@@ -105,8 +111,10 @@ int main(int argc, const char **argv) {
                    OptionsParser.getSourcePathList());
     Tool.appendArgumentsAdjuster(clang::tooling::getClangSyntaxOnlyAdjuster());
 
-    std::unique_ptr<FrontendActionFactory> FrontendFactory
-        = newFrontendActionFactory<XMLASTDumpAction>();
+    std::unique_ptr<FrontendActionFactory> FrontendFactory =
+      OptDumpTypeTable ?
+          newFrontendActionFactory<TypeTableDumpAction>()
+        : newFrontendActionFactory<XMLASTDumpAction>();
     return Tool.run(FrontendFactory.get());
 }
 
