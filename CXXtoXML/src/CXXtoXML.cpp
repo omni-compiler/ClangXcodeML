@@ -26,9 +26,10 @@ static cl::extrahelp CommonHelp(CommonOptionsParser::HelpMessage);
 static std::unique_ptr<opt::OptTable> Options(createDriverOptTable());
 
 static cl::opt<bool>
-OptDumpTypeMap("dump-typemap",
-                      cl::desc("dump correspondence between type and data type identifier"),
-                      cl::cat(CXX2XMLCategory));
+OptDumpTypeMap(
+    "dump-typemap",
+    cl::desc("dump correspondence between type and data type identifier"),
+    cl::cat(CXX2XMLCategory));
 
 class XMLASTConsumer : public ASTConsumer {
     xmlNodePtr rootNode;
