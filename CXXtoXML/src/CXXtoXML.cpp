@@ -26,8 +26,8 @@ static cl::extrahelp CommonHelp(CommonOptionsParser::HelpMessage);
 static std::unique_ptr<opt::OptTable> Options(createDriverOptTable());
 
 static cl::opt<bool>
-OptDumpTypeTable("dump-typeTable",
-                      cl::desc("dump typeTable information"),
+OptDumpTypeMap("dump-typemap",
+                      cl::desc("dump correspondence between type and data type identifier"),
                       cl::cat(CXX2XMLCategory));
 
 class XMLASTConsumer : public ASTConsumer {
@@ -112,7 +112,7 @@ int main(int argc, const char **argv) {
     Tool.appendArgumentsAdjuster(clang::tooling::getClangSyntaxOnlyAdjuster());
 
     std::unique_ptr<FrontendActionFactory> FrontendFactory =
-      OptDumpTypeTable ?
+      OptDumpTypeMap ?
           newFrontendActionFactory<TypeTableDumpAction>()
         : newFrontendActionFactory<XMLASTDumpAction>();
     return Tool.run(FrontendFactory.get());
