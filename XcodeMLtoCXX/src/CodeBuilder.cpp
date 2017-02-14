@@ -521,20 +521,6 @@ void buildCode(
     0
   };
 
-
-  // emit forward declarations
-  ss << "// forward declarations" << std::endl;
-  const std::vector<std::string> &typeNames = src.typeTable.getKeys();
-  for (auto t : typeNames) {
-    XcodeMl::TypeRef ref = src.typeTable[t];
-    if (ref) {
-      ss << "// " << ref << ":" << ref->makeDeclaration("X", src.typeTable) << std::endl;
-    } else {
-      ss << "// null ref" << std::endl;
-    }
-  }
-  ss << "// end of forward declarations" << std::endl << std::endl;
-
   xmlNodePtr globalSymbols = findFirst(rootNode, "/XcodeProgram/globalSymbols", src.ctxt);
   buildSymbols(globalSymbols, src, ss);
   CXXBuilder.walkAll(rootNode, src, ss);
