@@ -76,9 +76,9 @@
   </xsl:template>
 
   <xsl:template match="clangStmt[@class='ReturnStmt']">
-    <returnStmt>
+    <returnStatement>
       <xsl:apply-templates />
-    </returnStmt>
+    </returnStatement>
   </xsl:template>
 
   <xsl:template match="clangStmt[@class='WhileStmt']">
