@@ -35,6 +35,9 @@
       <symbols>
         <xsl:for-each select="clangStmt[@class='DeclStmt']/*">
           <id>
+            <xsl:attribute name="type">
+              <xsl:value-of select="@xcodemlType" />
+            </xsl:attribute>
             <name>
               <xsl:value-of select="fullName" />
             </name>
