@@ -23,6 +23,7 @@ OBJS =  CXXtoXML.o \
 	XMLVisitorBase.o \
 	TypeTableVisitor.o \
 	DeclarationsVisitor.o \
+	DumpTypeTable.o \
 	InheritanceInfo.o \
 	OperationKinds.o
 
@@ -37,7 +38,8 @@ CXXtoXML.o: \
 	XMLRAV.h \
 	XMLVisitorBase.h \
 	TypeTableVisitor.h \
-	DeclarationsVisitor.h
+	DeclarationsVisitor.h \
+	DumpTypeTable.h
 XMLVisitorBase.o: \
 	XMLVisitorBase.cpp \
 	XMLRAV.h \
@@ -58,6 +60,9 @@ DeclarationsVisitor.o: \
 	InheritanceInfo.h \
 	OperationKinds.cpp \
 	OperationKinds.h
+DumpTypeTable.o: \
+	DumpTypeTable.h \
+	TypeTableVisitor.h
 InheritanceInfo.o: \
 	InheritanceInfo.cpp \
 	InheritanceInfo.h \
