@@ -560,6 +560,14 @@ bool TypeTableInfo::isNormalizable(clang::QualType T) {
   return normalizability[T];
 }
 
+void TypeTableInfo::dump() {
+  for (auto& pair : mapFromNameToQualType) {
+    auto name = pair.first;
+    auto type = pair.second;
+    std::cerr << name << ": " << type.getAsString() << std::endl;
+  }
+}
+
 const char *
 TypeTableVisitor::getVisitorName() const {
   return OptTraceTypeTable ? "TypeTable" : nullptr;

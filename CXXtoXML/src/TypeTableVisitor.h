@@ -63,6 +63,7 @@ public:
     bool hasBaseClass(clang::QualType type);
     void setNormalizability(clang::QualType, bool);
     bool isNormalizable(clang::QualType);
+    void dump();
 };
 
 class TypeTableVisitor
