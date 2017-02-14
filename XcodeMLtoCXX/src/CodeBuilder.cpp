@@ -459,7 +459,7 @@ DEFINE_CB(varDeclProc) {
 }
 
 const CodeBuilder CXXBuilder({
-  { "clangStmt", clangStmtProc },
+  //{ "clangStmt", clangStmtProc },
 
   { "typeTable", NullProc },
   { "functionDefinition", functionDefinitionProc },
