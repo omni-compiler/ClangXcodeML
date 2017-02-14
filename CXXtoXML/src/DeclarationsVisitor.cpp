@@ -220,8 +220,8 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
     newProp("xcodemlType", typetableinfo->getTypeName(T).c_str());
   }
 
-  if (auto TND = dyn_cast<TypedefNameDecl>(D)) {
-    const auto T = TND->getUnderlyingType();
+  if (auto TD = dyn_cast<TypeDecl>(D)) {
+    const auto T = QualType( TD->getTypeForDecl(), 0 );
     newProp("xcodemlType", typetableinfo->getTypeName(T).c_str());
   }
 
