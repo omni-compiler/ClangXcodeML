@@ -128,6 +128,13 @@
     </intConstant>
   </xsl:template>
 
+  <xsl:template match="clangStmt[@class='StringLiteral']">
+    <stringConstant>
+      <xsl:apply-templates select="@*" />
+      <xsl:value-of select="@stringLiteral" />
+    </stringConstant>
+  </xsl:template>
+
   <xsl:template match="@valueCategory">
     <xsl:attribute name="reference">
       <xsl:choose>
