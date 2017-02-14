@@ -148,6 +148,12 @@
     </xsl:attribute>
   </xsl:template>
 
+  <xsl:template match="@xcodemlType">
+    <xsl:attribute name="type">
+      <xsl:value-of select="." />
+    </xsl:attribute>
+  </xsl:template>
+
   <xsl:template match="node()|@*">
     <xsl:copy>
       <xsl:apply-templates select="node()|@*"/>
