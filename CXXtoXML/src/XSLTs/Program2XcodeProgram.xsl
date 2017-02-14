@@ -100,6 +100,10 @@
     </compoundStatement>
   </xsl:template>
 
+  <xsl:template match="clangStmt[@class='DeclStmt']">
+    <xsl:apply-templates select="*[1]" />
+  </xsl:template>
+
   <xsl:template match="clangStmt[
     (@class='BinaryOperator' or @class='CompoundAssignOperator')
     and @binOpName]">
