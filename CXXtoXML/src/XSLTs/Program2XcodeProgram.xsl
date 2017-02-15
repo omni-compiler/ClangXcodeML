@@ -114,6 +114,18 @@
     </xsl:element>
   </xsl:template>
 
+  <xsl:template match="clangStmt[@class='CallExpr']">
+    <functionCall>
+      <xsl:apply-templates select="@*" />
+      <function>
+        <xsl:apply-templates select="*[1]" />
+      </function>
+      <arguments>
+        <xsl:apply-templates select="*[position() &gt; 1]" />
+      </arguments>
+    </functionCall>
+  </xsl:template>
+
   <xsl:template match="clangStmt[
     @class='UnaryOperator' and @unaryOpName]">
     <xsl:element name="{@unaryOpName}">
