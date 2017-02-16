@@ -277,7 +277,7 @@ C\_Front実装でもCtoXcodeML実装でも`symbols`属性内では`value`要素�
 ## データ型識別名 {#sec:type.ident}
 プログラム内において、データ型はデータ型識別名で区別される。その名前は、次のいずれかである。
 
-* 基本データ型(3.4節)
+* 基本データ型
 * C, C++の基本データ型(C++拡張)
 
     `void`, `char`, `short`, `int` , `long`, `long_long`, `unsigned_char`, `unsigned_short`, `unsigned`, `unsigned_long`, `unsigned_long_long`, `float`, `double`, `long_double`, `wchar_t`, `char16_t`, `char32_t`, `bool` (`_Bool`型)
