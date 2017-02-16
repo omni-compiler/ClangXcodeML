@@ -1668,7 +1668,7 @@ Cでは代入演算の第1オペランドは必ずlvalue(左辺式)だったが�
 属性(必須): `type`
 属性(optional): `is_userDefined`
 
-## インクリメント・デクリメント要素(`postIncrExpr`, `postDecrExpr`, `preIncrExpr`, `preDecrExpr`) {expr.increment}
+## インクリメント・デクリメント要素(`postIncrExpr`, `postDecrExpr`, `preIncrExpr`, `preDecrExpr`) {#sec:expr.increment}
 `postIncrExpr`要素、`postDecrExpr`要素は、CおよびC++のポストインクリメント、デクリメント式を表す。`preIncrExpr`要素、`preDecrExpr`要素は、CおよびC++のプレインクリメント、デクリメント式を表す。
 
     <postIncrExpr> or <postDecrExpr> or <preIncrExpr> or <preDecrExpr>
