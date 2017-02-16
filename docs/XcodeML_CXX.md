@@ -125,7 +125,9 @@ nnsTable要素は、翻訳単位（2章）に対して一つだけ存在し、�
 
 nns属性は、C++のスコープ解決演算子による修飾をおこなった形の「フルネーム」を指定するためのXML属性である。
 次章以降で解説する各種の要素のうち、ソースコード上での「名前」を表現する要素について、適宜挿入される共通の構造である。
-nns="修飾子識別名"
+
+    nns="修飾子識別名"
+
 下記の各属性に適宜挿入される。
 
 * nnsTable要素に含まれるもの：
@@ -336,12 +338,14 @@ typeName要素は以下のように使用される。
     <basicType type="B0" name="int" reference="lvalue"/>
 
 以下のコンストラクタ（ムーブコンストラクタ）の定義の引数に現れた右辺値参照について、
+
     struct Array {
       int *p, len;
       Array( Array&& obj ) : p(obj.p), len(obj.len) {
         obj.p = nullptr;  obj.len = 0;
       }
     }
+
 仮引数objのデータ型識別要素は以下のようになる。
 
     <basicType="B1" name="B2" reference="rvalue"/>
