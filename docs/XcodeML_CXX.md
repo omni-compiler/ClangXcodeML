@@ -1377,21 +1377,28 @@ aが配列のとき、2015年10月現在のF\_Frontでは &a の参照をaの参
 属性(必須): type, member
 
 * memberRef　－　配列以外のメンバを参照する。member属性にメンバ名を指定し、子要素でオブジェクトのアドレスを表現する。例えば、オブジェクトsのint型メンバnへの参照 s.n について、以下のように表現する。
-    <memberRef type="int" member="n">
-        <varAddr type="P0" scope="local">s</varAddr>
-    </memberRef>
+
+        <memberRef type="int" member="n">
+            <varAddr type="P0" scope="local">s</varAddr>
+        </memberRef>
+
 * memberAddr　－　配列名以外のメンバのアドレスを参照する。member属性にメンバ名を指定し、子要素でオブジェクトのアドレスを表現する。例えば、オブジェクトsのint型メンバnのアドレス &s.n について、以下のように表現する。
-    <memberAddr type="int" member="n">
-      <varAddr type="P6" scope="local">s</varAddr>
-    </memberAddr>
+
+        <memberAddr type="int" member="n">
+          <varAddr type="P6" scope="local">s</varAddr>
+        </memberAddr>
+
 * memberArrayRef　－　オブジェクトの配列メンバを参照する。member属性にメンバ名を指定し、子要素でオブジェクトのアドレスを表現する。例えば、オブジェクトsのint型配列メンバaへの参照 s.a について、以下のように表現する。
-    <memberArrayRef type="A0" member="a">
-      <varAddr type="P1" scope="local">s</varAddr>
-    </memberArrayRef>
+
+        <memberArrayRef type="A0" member="a">
+          <varAddr type="P1" scope="local">s</varAddr>
+        </memberArrayRef>
+
 * memberArrayAddr　－　オブジェクトの配列メンバのアドレスを参照する。member属性にメンバ名を指定し、子要素でオブジェクトのアドレスを表現する。例えば、オブジェクトsのint型配列メンバaのアドレス &s.a について、以下のように表現する。
-    <memberArrayAddr type="P24" member="a">
-      <varAddr type="P7" scope="local">s</varAddr>
-    </memberArrayAddr>
+
+        <memberArrayAddr type="P24" member="a">
+          <varAddr type="P7" scope="local">s</varAddr>
+        </memberArrayAddr>
 
 　メンバの参照が入れ子になるとき、子要素の表現も入れ子になる。
 
