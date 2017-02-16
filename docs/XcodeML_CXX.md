@@ -279,13 +279,21 @@ decltype(式) は式の型を表すが、式はスコープをもつのでtypeTa
 
 * 基本データ型（3.4節）
 * C, C++の基本データ型（C++拡張）
-`void`, `char`, `short`, `int` , `long`, `long_long`, `unsigned_char`, `unsigned_short`, `unsigned`, `unsigned_long`, `unsigned_long_long`, `float`, `double`, `long_double`, `wchar_t`, `char16_t`, `char32_t`, `bool` (`_Bool`型)
+
+    `void`, `char`, `short`, `int` , `long`, `long_long`, `unsigned_char`, `unsigned_short`, `unsigned`, `unsigned_long`, `unsigned_long_long`, `float`, `double`, `long_double`, `wchar_t`, `char16_t`, `char32_t`, `bool` (`_Bool`型)
+
 * `_Complex`、`_Imaginary`に対応する型
-`float_complex`, `double_complex`, `long_double_complex`, `float_imaginary`, `double_imaginary`, `long_double_imaginary`
+
+    `float_complex`, `double_complex`, `long_double_complex`, `float_imaginary`, `double_imaginary`, `long_double_imaginary`
+
 * GCCの組み込み型
-`__builtin_va_arg`
+
+    `__builtin_va_arg`
+
 * 型の抽象（C++） —　テンプレートの型仮引数の型の名前
-`any_class`, `any_typename`
+
+    `any_class`, `any_typename`
+
 * 派生データ型とクラス
 
 他のデータ型識別名とは異なる、翻訳単位内でユニークな英数字の並び。
@@ -665,7 +673,9 @@ id要素は次の属性を持つことができる。
 * `is_inline`属性　－　関数の宣言がinline指定されていることを表す。
 * `is_virtual`属性　－　メンバー関数がvirtualであることを表す。
 * `is_explicit`属性　－　メンバー関数がexplicit指定されていることを表す。
-* 【要検討】storage class specifier以外のdecl-specifierである `friend`, `constexpr`もここで表現するか？
+
+    【要検討】storage class specifier以外のdecl-specifierである `friend`, `constexpr`もここで表現するか？
+
 * type属性　－　識別子のデータ型識別名
 * `bit_field`属性　－　structType、unionTypeとclass要素においてメンバのビットフィールドを数値で指定する。
 * `is_thread_local`属性　－　thread\_local指定されていることを表す。
