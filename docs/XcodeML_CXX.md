@@ -249,6 +249,7 @@ C\_Front実装でもCtoXcodeML実装でも`symbols`属性内では`value`要素�
 |   … ]
 | \</typeTable\>
 
+
 属性(optional): なし
 
 `typeTable`要素は、翻訳単位を表現する`XcodeProgram`要素([-@sec:program]章)の直接の子要素であり、データ型を定義するデータ型定義要素の列からなる。データ型定義要素には以下の要素がある。
@@ -306,6 +307,7 @@ C\_Front実装でもCtoXcodeML実装でも`symbols`属性内では`value`要素�
 | \<typeName/\>
 
 属性(必須): `ref`
+
 属性(optional): `access`
 
 以下の属性をもつことができる。
@@ -375,6 +377,7 @@ C\_Front実装でもCtoXcodeML実装でも`symbols`属性内では`value`要素�
     <basicType/>
 
 属性(必須): `type`, `name`
+
 属性(optional): `alignas`, データ型定義要素属性
 
 以下の属性を持つ。
@@ -411,6 +414,7 @@ C\_Front実装でもCtoXcodeML実装でも`symbols`属性内では`value`要素�
 | \<pointerType/\>
 
 属性(必須): `type`, `ref`
+
 属性(optional): データ型定義要素属性
 
 以下の属性を持つ。
@@ -434,6 +438,7 @@ C\_Front実装でもCtoXcodeML実装でも`symbols`属性内では`value`要素�
 | \</functionType\>
 
 属性(必須): `type`, `return_type`
+
 属性(optional): `is_inline`
 
 * `type`　－　この関数型に与えられたデータ型識別名
@@ -461,6 +466,7 @@ C\_Front実装でもCtoXcodeML実装でも`symbols`属性内では`value`要素�
 | \</arrayType\>
 
 属性(必須): `type`, `element_type`
+
 属性(optional): `array_size`, データ型定義要素属性
 
 `arrayType`要素は以下の属性を持つ。
@@ -487,6 +493,7 @@ union(共用体)データ型は、`unionType`要素で定義する。
 | \</unionType\>
 
 属性(必須): `type`
+
 属性(optional): データ型定義要素属性
 
 `unionType`要素は以下の属性を持つ。
@@ -504,6 +511,7 @@ union(共用体)データ型は、`unionType`要素で定義する。
 | \</structType\>
 
 属性(必須): `type`
+
 属性(optional): `lineno`, `file`, `inherited`, データ型定義要素属性
 
 以下の子要素をもつ。
@@ -559,6 +567,7 @@ union(共用体)データ型は、`unionType`要素で定義する。
 | \</class\>
 
 属性(必須): `type`
+
 属性(optional): `lineno`, `file`, `inherited`, データ型定義要素属性
 
 以下の子要素をもつ。
@@ -602,6 +611,7 @@ enum型は、`enumType`要素で定義する。`type`要素で、メンバの識
 | \</enumType\>
 
 属性(必須): `type`
+
 属性(optional): データ型定義要素属性
 
 次の子要素を持つ。
@@ -636,6 +646,7 @@ enum型は、`enumType`要素で定義する。`type`要素で、メンバの識
 | \<parameterPack/\>
 
 属性(必須): `type`, `element_type`
+
 属性(optional): データ型定義要素属性
 
 以下の属性を持つ。
@@ -669,6 +680,7 @@ enum型は、`enumType`要素で定義する。`type`要素で、メンバの識
 |   [ bitField要素 ]
 |   [ alignAs要素 ]
 | \</id\>
+
 
 属性(optional): `sclass`, `fspec`, `type`, `bit_field`, `align_as`, `is_gccThread`, `is_gccExtension`
 
@@ -791,6 +803,7 @@ enum型は、`enumType`要素で定義する。`type`要素で、メンバの識
 |   body要素
 | \</functionDefinition\>
 
+
 属性(optional): `is_gccExtension`
 
 以下のいずれか一つの子要素を持つ。
@@ -862,6 +875,7 @@ enum型は、`enumType`要素で定義する。`type`要素で、メンバの識
 |       value要素([-@sec:program.value]節) }
 |    … ]
 | \</constructor\>
+
 
 属性(optional): `is_explicit`
 
@@ -941,6 +955,7 @@ C++のusing宣言(using declaration)とusing指示(using directive)に対応す�
 |   name要素
 | \</usingDecl\>
 
+
 属性(optional): `lineno`, `file`, `namespace`
 
 以下のようにusing文に対応する。
@@ -967,6 +982,7 @@ Cの文の構文要素に対応するXML要素である。それぞれのXML要�
 |   式の要素(0章)
 | \</exprStatement\>
 
+
 属性(optional): `lineno`, `file`
 
 ## `compoundStatement`要素 {#sec:stmt.comp}
@@ -977,6 +993,7 @@ Cの文の構文要素に対応するXML要素である。それぞれのXML要�
 |   declarations要素([-@sec:decl.local]節)
 |   body要素
 | \</compoundStatement\>
+
 
 属性(optional): `lineno`, `file`
 
@@ -995,6 +1012,7 @@ if文を表現する。
 |   else要素
 | \</ifStatement\>
 
+
 属性(optional): `lineno`, `file`
 
 以下の子要素を持つ。
@@ -1011,6 +1029,7 @@ while文を表現する。
 |   body要素
 | \</whileStatement\>
 
+
 属性(optional): `lineno`, `file`
 
 以下の子要素を持つ
@@ -1025,6 +1044,7 @@ do文を表現する。
 |   body要素
 |   condition要素
 | \</doStatement\>
+
 
 属性(optional): `lineno`, `file`
 
@@ -1042,6 +1062,7 @@ for文(従来仕様)を表現する。
 |   [ iter要素 ]
 |   body要素
 | \</forStatement\>
+
 
 属性(optional): `lineno`, `file`
 
@@ -1075,6 +1096,7 @@ C++仕様のfor文
 |   body要素
 | \</rangeForStatement\>
 
+
 属性(optional): `lineno`, `file`
 
 以下の子要素を持つ。
@@ -1088,12 +1110,14 @@ break文を表現する。
 
 | \<breakStatement/\>
 
+
 属性(optional): `lineno`, `file`
 
 ## `continueStatement`要素 {#sec:stmt.cont}
 continue文を表現する。
 
 | \<continueStatement/\>
+
 
 属性(optional): `lineno`, `file`
 
@@ -1103,6 +1127,7 @@ return文を表現する。
 | \<returnStatement\>
 |   [ 式の要素 ]
 | \</returnStatement\>
+
 
 属性(optional): `lineno`, `file`
 
@@ -1114,6 +1139,7 @@ goto文を表現する。
 | \<gotoStatement\>
 |   name要素 or 式の要素
 | \</gotoStatement\>
+
 
 属性(optional): `lineno`, `file`
 
@@ -1129,6 +1155,7 @@ try構文を表現する。
 |   body要素
 | \</tryStatement\>
 
+
 属性(optional): `lineno`, `file`
 
 以下の子要素を持つ。
@@ -1142,6 +1169,7 @@ catch構文を表現する。
 |   params要素([-@sec:decl.params]節)
 |   body要素
 | \</catchStatement\>
+
 
 属性(optional): `lineno`, `file`
 
@@ -1171,6 +1199,7 @@ switch文を表現する。
 |   body要素
 | \</statementLabel\>
 
+
 属性(optional): `lineno`, `file`
 
 以下の子要素を持つ。
@@ -1184,6 +1213,7 @@ switch文のcase文を表す。`switch`要素の中の`body`要素の中の`comp
 | \<caseLabel\>
 |   value要素
 | \</caseLabel\>
+
 
 属性(optional): `lineno`, `file`
 
@@ -1199,6 +1229,7 @@ gcc拡張のcase文での範囲指定を表す。switch要素の中の`body`要�
 |   value要素
 | \</gccRangedCaseLabel\>
 
+
 属性(optional): `lineno`, `file`
 
 caseの値を要素としてもつ。
@@ -1211,12 +1242,14 @@ switch文のdefaultラベルを表す。`switch`要素の中の`body`要素の�
 
 | \<defaultLabel/\>
 
+
 属性(optional): `lineno`, `file`
 
 ## `pragma`要素 {#sec:stmt.pragma}
 `pragma`要素は#pragma文を表す。
 
 | \<pragma\>文字列\</pragma\>
+
 
 属性(optional): `lineno`, `file`
 
@@ -1226,6 +1259,7 @@ switch文のdefaultラベルを表す。`switch`要素の中の`body`要素の�
 `text`要素は任意のテキストを表し、コンパイラに依存したディレクティブなどの情報を要素として持つために使用する。
 
 | \<text\>文字列\</text\>
+
 
 属性(optional): `lineno`, `file`
 
@@ -1556,6 +1590,7 @@ switch文のdefaultラベルを表す。`switch`要素の中の`body`要素の�
 | \</assignExpr\>
 
 属性(必須): `type`
+
 属性(optional): `is_userDefined`
 
 第1の式を左辺、第2の式を右辺とする代入文を表現する。
@@ -1668,6 +1703,7 @@ Cでは代入演算の第1オペランドは必ずlvalue(左辺式)だったが�
 | \</commaExpr\>
 
 属性(必須): `type`
+
 属性(optional): `is_userDefined`
 
 ## インクリメント・デクリメント要素(`postIncrExpr`, `postDecrExpr`, `preIncrExpr`, `preDecrExpr`) {#sec:expr.increment}
@@ -1678,6 +1714,7 @@ Cでは代入演算の第1オペランドは必ずlvalue(左辺式)だったが�
 | \</postIncrExpr\> or \</postDecrExpr\> or \</preIncrExpr\> or \</preDecrExpr \>
 
 属性(必須): `type`
+
 属性(optional): `is_userDefined`
 
 ## `castExpr`要素(廃止予定) {#sec:expr.cast}
@@ -1688,6 +1725,7 @@ Cでは代入演算の第1オペランドは必ずlvalue(左辺式)だったが�
 | \</castExpr\>
 
 属性(必須): `type`
+
 属性(optional): `is_gccExtension`
 
 以下の子要素を持つ。
@@ -1780,6 +1818,7 @@ throw式を表現する。
 |  [ 式の要素 ]
 | \</throwExpr\>
 
+
 属性(optional): `lineno`, `file`
 
 子要素として式の要素をもつ。式の要素は投げられる例外を表す。
@@ -1811,6 +1850,7 @@ C++のラムダ式を表現する。
 |     … ]
 |   \</byValue\>
 | \</captures\>
+
 
 属性(optional): `default`, `is_mutable`
 
@@ -1857,6 +1897,7 @@ C++のラムダ式を表現する。
 |   typeParams要素([-@sec:type.typeparams]節)
 |   class要素([-@sec:type.class]節)
 | \</classTemplate\>
+
 
 属性(optional): `lineno`, `file`
 
@@ -1908,6 +1949,7 @@ C++のラムダ式を表現する。
 |   typeParams要素([-@sec:temp.typeparams]節)
 |   functionDefinition要素([-@sec:decl.fndef]節)
 | \</functionTemplate\>
+
 
 属性(optional): `lineno`, `file`
 
@@ -1965,6 +2007,7 @@ C++のラムダ式を表現する。
 | \</aliasTemplate\>
 
 属性(必須): `type`, `name`
+
 属性(optional): `lineno`, `file`
 
 以下の属性を持つ。
@@ -2038,6 +2081,7 @@ C++のラムダ式を表現する。
 | \<typeInstance\>
 |   typeArguments要素([-@sec:temp.typearg]節)
 | \</typeInstance\>
+
 
 属性(optional): `type`, `ref`
 
