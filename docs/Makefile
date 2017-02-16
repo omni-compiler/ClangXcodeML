@@ -11,6 +11,7 @@ XcodeML_CXX.docx: reference.docx XcodeML_CXX.md
 
 XcodeML_CXX.html: XcodeML_CXX.md
 	pandoc \
+		-s \
 		--filter pandoc-crossref \
 		--toc \
 		--number-sections \
