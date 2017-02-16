@@ -1260,8 +1260,11 @@ lvalue属性は、式の要素の属性からテータ型定義要素の属性�
 * longlongConstant要素　－　32ビット16進数(0xから始まる)の２つの数字を空白で区切って記述する。type属性には"`long_long`"と"`unsigned_long_long`"が許される。
 * floatConstant要素　－　floatまたはdoubleまたはlong doubleの値を持つ定数を表す。浮動小数点数のリテラルを記述する。type属性には"`float`", "`double`"と"`long_double`"が許される。
 * stringConstant要素　－　内容にダブルクォーテーションで囲まない文字列を記述する。文字列中の特殊文字はXML（HTML）のルールに従ってクォートされる（’<’は＆lt;に置換されるなど）。type属性には、"`char`"と"`wchar_t`"が許される。C++ではこれらに加えて、"`char16_t`"と"`char32_t`"が許される。
-仕様変更：旧仕様ではtype属性を持たず、代わりに以下のように定義されている。
-* 属性に `is_wide=`[1|0|true|false]` (省略時0)を持ち、1またはtrueのときwchar_t型の文字列を表す。
+
+    仕様変更：旧仕様ではtype属性を持たず、代わりに以下のように定義されている。
+
+    > 属性に `is_wide=`[1|0|true|false]` (省略時0)を持ち、1またはtrueのときwchar_t型の文字列を表す。
+
 * moeConstant要素　－　enum型の定数を表す。内容にenum定数（列挙型のメンバの名前）を記述する。type属性は列挙型のタイプ名を記述する。
 * booleanConstant要素　－　真理値リテラル。falseまたはtrue。type属性は`bool`のみ許される。
 * funcAddr要素　－　関数のアドレスを表す。内容に関数名を記述する。type属性は、原則としてその関数のインスタンスの型とするが、翻訳時に不明な場合には別の表現とする。（詳細は実装時に検討する。）
