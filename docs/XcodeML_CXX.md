@@ -1649,7 +1649,7 @@ Cでは代入演算の第1オペランドは必ずlvalue(左辺式)だったが�
 `operator`　　　グローバル関数の形の演算子オーバーロードの呼び出しの場合の演算子名を指定する。
 `arguments`要素には引数の並びを指定する。
 
-### `arguments`要素 {expr.arguments}
+### `arguments`要素 {#sec:expr.arguments}
 実引数(actual argument)の0個以上の並びを表現する。
 
     <arguments>
