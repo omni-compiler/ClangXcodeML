@@ -1335,7 +1335,8 @@ aが配列のとき、2015年10月現在のF\_Frontでは &a の参照をaの参
     </pointerRef>
 
 要確認：
-　現状（2015年10月）のC\_Frontでは、`*(&var_name)` というパターンのとき
+
+現状（2015年10月）のC\_Frontでは、`*(&var_name)` というパターンのとき
 
     <PointerRef><varAddr>var_name</varAddr></PointerRef>
 
@@ -1356,7 +1357,8 @@ aが配列のとき、2015年10月現在のF\_Frontでは &a の参照をaの参
 属性(必須): type
 
 例：
-　int a[3]; と宣言されているとき、配列要素 a[i] の参照は、
+
+int a[3]; と宣言されているとき、配列要素 a[i] の参照は、
 
     <arrayRef type="int">
       <arrayAddr type="A5"scope="local">a</arrayAddr>
@@ -1407,7 +1409,7 @@ aが配列のとき、2015年10月現在のF\_Frontでは &a の参照をaの参
           <varAddr type="P7" scope="local">s</varAddr>
         </memberArrayAddr>
 
-　メンバの参照が入れ子になるとき、子要素の表現も入れ子になる。
+メンバの参照が入れ子になるとき、子要素の表現も入れ子になる。
 
 要検討：構造体まわりの現在のC\_Frontの変換仕様について
 arrayRef要素（7.4節）とmemberArrayRef要素、arrayAddr要素（7.2節）とmemberArrayAddr要素は、それぞれ名前が似ているが意味の対称性がない。少なくとも名前を再考したい。他の点でも、今後構造体やクラスへの対応を考えると、整理しておきたいところ。
