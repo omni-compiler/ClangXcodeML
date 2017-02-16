@@ -1782,7 +1782,7 @@ throw式を表現する。
 子要素として式の要素をもつ。式の要素は投げられる例外を表す。
 
 ## lambdaExpr要素 {#expr.lambda}
-C＋＋のラムダ式を表現する。
+C++のラムダ式を表現する。
 
     <lambdaExpr>
       captures要素
