@@ -1613,19 +1613,19 @@ Cでは代入演算の第１オペランドは必ずlvalue（左辺式）だっ�
 単項演算要素名には以下のものがある。
 
 * 算術単項演算子
-* unaryMinusExpr　－　符号反転
-* bitNotExpr　－　ビット反転
+  * unaryMinusExpr　－　符号反転
+  * bitNotExpr　－　ビット反転
 * 論理単項演算子
-* logNotExpr　－　論理否定
+  * logNotExpr　－　論理否定
 * sizeof演算子
-* sizeOfExpr　－　子要素として式の要素またはtypeName要素を指定する。
+  * sizeOfExpr　－　子要素として式の要素またはtypeName要素を指定する。
 * alignof演算子（C++）
-* alignOfExpr　－　子要素として式の要素またはtypeName要素を指定する。
+  * alignOfExpr　－　子要素として式の要素またはtypeName要素を指定する。
 * typeid演算子（C++）
-* typeidExpr　－　子要素として式の要素またはtypeName要素を指定する。
+  * typeidExpr　－　子要素として式の要素またはtypeName要素を指定する。
 * GCC拡張の演算子
-* gccAlignOfExpr　－　GCCの__alignof__演算子を表す。子要素に式またはtypeName要素を指定する。
-* gccLabelAddr　－　GCCの&&単項演算子を表す。内容にラベル名を指定する。
+  * gccAlignOfExpr　－　GCCの__alignof__演算子を表す。子要素に式またはtypeName要素を指定する。
+  * gccLabelAddr　－　GCCの&&単項演算子を表す。内容にラベル名を指定する。
 
 ## functionCall要素 {#expr.call}
 functionCall要素は関数呼び出しを表す。
