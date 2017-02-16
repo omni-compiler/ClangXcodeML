@@ -896,7 +896,7 @@ enum型は、`enumType`要素で定義する。`type`要素で、メンバの識
 変数の宣言を行う。
 
     <varDecl>
-      name要素(2.1節)
+      name要素
       [ value要素(2.2節) ]
     </varDecl>
 
@@ -923,7 +923,7 @@ enum型は、`enumType`要素で定義する。`type`要素で、メンバの識
 関数宣言を行う。
 
     <functionDecl>
-      name要素(2.1節)
+      name要素
     </functionDecl>
 
 属性なし
@@ -936,7 +936,7 @@ enum型は、`enumType`要素で定義する。`type`要素で、メンバの識
 C++のusing宣言(using declaration)とusing指示(using directive)に対応する。
 
     <usingDecl>
-      name要素(2.1節)
+      name要素
     </usingDecl>
 
 属性(optional): `lineno`, `file`, `namespace`
