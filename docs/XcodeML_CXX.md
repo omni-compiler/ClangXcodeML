@@ -131,25 +131,25 @@ nns属性は、C++のスコープ解決演算子による修飾をおこなっ�
 下記の各属性に適宜挿入される。
 
 * nnsTable要素に含まれるもの：
-* napespaceName要素（※仮称）
-* classname要素（※仮称）
+  * napespaceName要素（※仮称）
+  * classname要素（※仮称）
 * typeTable要素およびlocalTypeTableに含まれるもの：
-* name要素
+  * name要素
 * globalSymbols要素および（symbols要素に含まれるもの：
-* name要素
+  * name要素
 * globalDeclarations 要素およびdeclarations要素に含まれるもの：
-* name要素
-* operator要素
-* Var要素
-* varAddr要素
-* function要素
-* funcAddr要素
-* arrayRef要素
-* arrayAddr要素
-* memberRef要素
-* memberAddr要素
-* memberArrayRef要素
-* memberArrayAddr要素
+  * name要素
+  * operator要素
+  * Var要素
+  * varAddr要素
+  * function要素
+  * funcAddr要素
+  * arrayRef要素
+  * arrayAddr要素
+  * memberRef要素
+  * memberAddr要素
+  * memberArrayRef要素
+  * memberArrayAddr要素
 
 例:
 
@@ -304,7 +304,7 @@ decltype(式) は式の型を表すが、式はスコープをもつのでtypeTa
 typeName要素は以下のように使用される。
 
 * 型を引数とする関数の呼出しで
-* `sizeOfExpr`（7.11節）、gccAlignOfExpr（7.11節）、`builtin_op`（11.5節）
+  * `sizeOfExpr`（7.11節）、gccAlignOfExpr（7.11節）、`builtin_op`（11.5節）
 * テンプレートの定義の型仮引数として（8章）
 * テンプレートのインスタンスの型実引数として（9章）
 * 構造体とクラスの継承元（3.9.1項）
@@ -930,11 +930,11 @@ C++のusing宣言（using declaration）とusing指示（using directive）に�
 以下のようにusing文に対応する。
 
 * using指示 "using namespace 名前空間名" の形のとき
-* namespace属性の値を1またはtrueとする。
-* 名前空間名をname要素とする。名前空間名にはスコープ名と「::」が含まれることがある。
+  * namespace属性の値を1またはtrueとする。
+  * 名前空間名をname要素とする。名前空間名にはスコープ名と「::」が含まれることがある。
 * using宣言 "using 名前" の形のとき
-* namespace属性を持たないか、値を0またはfalseとする。
-* 名前をname要素とする。名前にはスコープ名と「::」が含まれることがある。
+  * namespace属性を持たないか、値を0またはfalseとする。
+  * 名前をname要素とする。名前にはスコープ名と「::」が含まれることがある。
 * 別名宣言 "using 別名 = 型"　の形のとき、usingDecl要素では表現されない。typedefと同様、データ型定義要素（3章）で表現される。
 
 # 文の要素 {#stmt}
