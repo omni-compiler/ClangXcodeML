@@ -28,7 +28,7 @@ XcodeML/C++ 1.2J
 * 名前空間やテンプレートの表現方法について大幅改定作業を開始。2016/9/6
 
 
-# はじめに {#intro}
+# はじめに {#sec:intro}
 この仕様書は、プログラミング言語CおよびC++に対してXcalableMP拡張をほどこした言語を取り扱うための中間表現形式であるXcodeMLを記述する。
 XcodeMLは、以下の特徴を持つ。
 
@@ -43,7 +43,7 @@ XcodeMLは、以下の特徴を持つ。
 * C++のtemplateについて、ソースコード上の構文構造そのものを表現するとともに、その翻訳単位内で実際に用いられたテンプレート引数に基づいた展開後の結果も表現する。
   これにより、XcodeMLからC++コードへの変換を可能とするとともに、各種のプログラム変換処理においてテンプレート展開後の姿を対象にした処理も可能となるようにしている。
 
-# 翻訳単位と`XcodeProgram`要素 {#program}
+# 翻訳単位と`XcodeProgram`要素 {#sec:program}
 ソースファイルに、`#include`指定されたファイルを再帰的にすべて展開したものを、翻訳単位と呼ぶ。
 翻訳単位は`XcodeProgram`要素で表現される。下記の XML schema で定義される。
 
@@ -81,7 +81,7 @@ XcodeMLファイルのトップレベルのXML要素は、`XcodeProgram` 要素�
 * `language`　－　ソース言語情報(Cの場合は "`C`"、C++の場合は "`C++`")
 * `source`　－　ソース情報
 
-## ソースコードの正規化 {#program.norm}
+## ソースコードの正規化 {#sec:program.norm}
 XcodeMLの設計方針は、XcodeMLで表現されたプログラムを入力にとって各種の解析処理をおこなった上で処理結果をXcodeMLとして出力するという処理(以下、この種の処理を「XcodeML解析処理」と呼ぶことにする)に適した構造を持つ、ということを主眼においている。
 このため、プログラムの意味が同一となるような記述方法が複数存在する場合、そのいずれかに「正規化」して扱うという設計方針をおいている。
 具体的には次のとおりである。
@@ -120,7 +120,7 @@ XcodeMLの設計方針は、XcodeMLで表現されたプログラムを入力に
 また、解決結果だけがあれば情報は足りているので、「正規化されていないXcodeML」がもともとのソースコード上の構文的な構造を完全に反映する必要があるわけではない。
 このように考えると、「フェーズ1の正規化」と「フェーズ2の正規化」があり、フェーズ1の正規化は必ずおこなう(XcodeMLとして二種類の表現をするコースがそもそも準備されない)、という風に考える必要がある。
 
-## `nnsTable`と`nns`属性 {#program.nns}
+## `nnsTable`と`nns`属性 {#sec:program.nns}
 `nnsTable`要素は、翻訳単位(2章)に対して一つだけ存在し、翻訳単位で使われているすべての名前修飾(nested namespace spcifier)についての情報を定義する。
 
 `nns`属性は、C++のスコープ解決演算子による修飾をおこなった形の「フルネーム」を指定するためのXML属性である。
@@ -204,7 +204,7 @@ XcodeMLの設計方針は、XcodeMLで表現されたプログラムを入力に
         <varAddr type="P4" scope="global">s1</varAddr>
     </memberAddr>
 
-## `value`要素 {#program.value}
+## `value`要素 {#sec:program.value}
 `globalDeclarations`要素、`declarations`要素中で、初期化式を持つ変数宣言を表現する際の初期値の式を表現する。
 
 ```
@@ -238,7 +238,7 @@ C\_Front実装でもCtoXcodeML実装でも`symbols`属性内では`value`要素�
       </value>
     </value>
 
-# `typeTable`要素とデータ型定義要素 {#type}
+# `typeTable`要素とデータ型定義要素 {#sec:type}
 `typeTable`要素は、翻訳単位(2章)に対して一つだけ存在し、翻訳単位で使われているすべてのデータ型についての情報を定義する。
 
     <typeTable>
@@ -274,7 +274,7 @@ C\_Front実装でもCtoXcodeML実装でも`symbols`属性内では`value`要素�
 
 　Clang ASTでは「型推論の結果の型」をAST上に保持しているので、その仕組みに合わせて考えるのであれば、すべて「解決結果の型」を扱えばよいことになる。これも「正規化」の一種と考えて扱うのがよいかもしれない。
 
-## データ型識別名 {#type.ident}
+## データ型識別名 {#sec:type.ident}
 プログラム内において、データ型はデータ型識別名で区別される。その名前は、次のいずれかである。
 
 * 基本データ型(3.4節)
@@ -298,7 +298,7 @@ C\_Front実装でもCtoXcodeML実装でも`symbols`属性内では`value`要素�
 
 他のデータ型識別名とは異なる、翻訳単位内でユニークな英数字の並び。
 
-### `typeName`要素 {#type.typename}
+### `typeName`要素 {#sec:type.typename}
 
     <typeName/>
 
@@ -329,7 +329,7 @@ C\_Front実装でもCtoXcodeML実装でも`symbols`属性内では`value`要素�
 備考:`typeName`属性を`typeTable`以外でも用いるのであれば、この節は2章に置くべきでは？
 あるいは、そもそも中身の構造が違うのであればまったく別の要素として定義した方がよいのでは。
 
-## データ型定義要素属性 {#type.attr}
+## データ型定義要素属性 {#sec:type.attr}
 データ型定義要素は共通に以下の属性を持つことができる。これらをデータ型定義要素属性と呼ぶ。
 
 * `is_const`　－　そのデータ型がconst修飾子をもつかどうか
@@ -402,7 +402,7 @@ C\_Front実装でもCtoXcodeML実装でも`symbols`属性内では`value`要素�
 	  <basicType type="B0" is_const="1" name="S0"/>
 	  <pointerType type="P0" is_volatile="1" ref="B0"/>
 
-## `pointerType`要素 {#type.ptr}
+## `pointerType`要素 {#sec:type.ptr}
 `pointerType`要素はポインタのデータ型を定義する。
 
     <pointerType/>
@@ -423,7 +423,7 @@ C\_Front実装でもCtoXcodeML実装でも`symbols`属性内では`value`要素�
 
 	<pointerType type="P0123" ref="int"/>
 
-## `functionType`要素 {#type.func}
+## `functionType`要素 {#sec:type.func}
 `funtionType`要素は、関数型を定義する。
 
     <functionType>
@@ -450,7 +450,7 @@ C\_Front実装でもCtoXcodeML実装でも`symbols`属性内では`value`要素�
         </params>
     </fucntionType>
 
-## `arrayType`要素 {#type.array}
+## `arrayType`要素 {#sec:type.array}
 `arrayType`要素は、配列データ型を定義する。
 
     <arrayType>
@@ -476,7 +476,7 @@ C\_Front実装でもCtoXcodeML実装でも`symbols`属性内では`value`要素�
 
     <arrayType type="A011" element_type="int" array_size="10"/>
 
-## `unionType`要素 {#type.union}
+## `unionType`要素 {#sec:type.union}
 union(共用体)データ型は、`unionType`要素で定義する。
 
     <unionType>
@@ -493,7 +493,7 @@ union(共用体)データ型は、`unionType`要素で定義する。
 `unionType`要素は、メンバに対する識別子の情報である`symbols`要素を持つ。 構造体・共用体のタグ名がある場合には、スコープに対応するシンボルテーブルに定義されている。
 メンバのビットフィールドは、`id`要素の `bit_field` 属性または `id`要素の子要素 である`bitField` 要素に記述する(4.1節)。
 
-## `structType`要素 {#type.struct}
+## `structType`要素 {#sec:type.struct}
 構造体を表現する。
 
     <structType>
@@ -547,7 +547,7 @@ union(共用体)データ型は、`unionType`要素で定義する。
 
 
 
-## `class`要素(C++) {#type.class}
+## `class`要素(C++) {#sec:type.class}
 クラスを表現する。
 
     <class>
@@ -576,7 +576,7 @@ friend関数の宣言。friend関数はそのクラスのメンバ関数では�
 
 
 
-### inheritedFrom要素(C++) {#type.class.inherit}
+### inheritedFrom要素(C++) {#sec:type.class.inherit}
 継承元の構造体またはクラスの並びを表現する。
 
     <inheritedFrom>
@@ -590,7 +590,7 @@ friend関数の宣言。friend関数はそのクラスのメンバ関数では�
 
 * `typeName`要素　－　継承する構造体またはクラスのデータ型識別名を示す。`access`属性により、`public`, `private`または`protected`の区別を指定できる。
 
-## `enumType`要素 {#type.enum}
+## `enumType`要素 {#sec:type.enum}
 enum型は、`enumType`要素で定義する。`type`要素で、メンバの識別子を指定する。
 
     <enumType>
@@ -627,7 +627,7 @@ enum型は、`enumType`要素で定義する。`type`要素で、メンバの識
         </symbols>
       </enumType>
 
-## `parameterPack`要素(C++) {#type.parampack}
+## `parameterPack`要素(C++) {#sec:type.parampack}
 可変長引数を表現するための、仮引数の並びに対応する。
 
     <parameterPack/>
@@ -656,9 +656,9 @@ enum型は、`enumType`要素で定義する。`type`要素で、メンバの識
     <parameterPack type="K0" ref="typename"/>
 
 
-# シンボルリスト {#symb}
+# シンボルリスト {#sec:symb}
 
-## `id`要素 {#symb.id}
+## `id`要素 {#sec:symb.id}
 `id`要素は、変数名や配列名、関数名、struct/unionのメンバ名、 関数の引数、compound statementの局所変数名を定義する。
 
     <id>
@@ -710,7 +710,7 @@ enum型は、`enumType`要素で定義する。`type`要素で、メンバの識
        <name>foo</name>
       </id>
 
-## `globalSymbols`要素 {#symb.global}
+## `globalSymbols`要素 {#sec:symb.global}
 大域のスコープを持つ識別子を定義する。
 
     <globalSymbols>
@@ -722,7 +722,7 @@ enum型は、`enumType`要素で定義する。`type`要素で、メンバの識
 
 子要素として、大域のスコープを持つ識別子の`id`要素の並びを持つ。
 
-## `symbols`要素 {#symb.local}
+## `symbols`要素 {#sec:symb.local}
 局所スコープを持つ識別子を定義する。
 
     <symbols>
@@ -734,9 +734,9 @@ enum型は、`enumType`要素で定義する。`type`要素で、メンバの識
 
 子要素として、定義する識別子に対する`id`要素を持つ。
 
-# `globalDeclarations`要素と`declarations`要素 {#decl}
+# `globalDeclarations`要素と`declarations`要素 {#sec:decl}
 
-## `globalDeclarations`要素 {#decl.global}
+## `globalDeclarations`要素 {#sec:decl.global}
 大域的な(翻訳単位全体をスコープとする)変数、関数などの宣言と定義を行う。
 
     <globalDeclarations>
@@ -758,7 +758,7 @@ enum型は、`enumType`要素で定義する。`type`要素で、メンバの識
 * `functionDecl`要素　－　関数の宣言
 * `text`要素　－　ディレクティブなど任意のテキストを表す
 
-## `declarations`要素 {#decl.local}
+## `declarations`要素 {#sec:decl.local}
 `compoundStatement`(6.2節)、`class`(3.9節)などをスコープとする変数、関数などの宣言と定義を行う。
 
     <declarations>
@@ -779,7 +779,7 @@ enum型は、`enumType`要素で定義する。`type`要素で、メンバの識
 * `functionDecl`要素　－　関数の宣言
 * `text`要素　－　ディレクティブなど任意のテキストを表す
 
-## `functionDefinition`要素 {#decl.fndef}
+## `functionDefinition`要素 {#sec:decl.fndef}
 関数定義、メンバ関数の定義、コンストラクターの定義、デストラクターの定義、および、演算子オーバーロードの定義を行う。以下のいずれか一つの子要素を持つ。
 
     <functionDefinition>
@@ -840,7 +840,7 @@ enum型は、`enumType`要素で定義する。`type`要素で、メンバの識
       </body>
     </functionDefinition>
 
-### `operator`要素(C++) {#decl.op}
+### `operator`要素(C++) {#sec:decl.op}
 `functionDefinition`要素の子要素。演算子オーバーロードを定義するとき、`name`要素の代わりに指定する。
 
     <operator>演算子名</operator>
@@ -852,7 +852,7 @@ enum型は、`enumType`要素で定義する。`type`要素で、メンバの識
     <operator>plusExpr</operator>
     <operator>_my_op</operator>
 
-### `constructor`要素(C++) {#decl.ctor}
+### `constructor`要素(C++) {#sec:decl.ctor}
 `functionDefinition`要素の子要素。そのメンバ関数がコンストラクタのとき、`name`要素の代わりに指定する。
 
     <constructor>
@@ -867,12 +867,12 @@ enum型は、`enumType`要素で定義する。`type`要素で、メンバの識
 
 要検討: コンストラクタのバリエーションに対応し切れていない。
 
-### `destructor`要素(C++) {#decl.dtor}
+### `destructor`要素(C++) {#sec:decl.dtor}
 `functionDefinition`要素の子要素。そのメンバ関数がデストラクタであるとき、`name`要素の代わりに指定する。
 
     <destructor/>
 
-### `params`要素 {#decl.params}
+### `params`要素 {#sec:decl.params}
 関数の引数の並びを指定する。
 
     <params>
@@ -892,7 +892,7 @@ enum型は、`enumType`要素で定義する。`type`要素で、メンバの識
 
 `params`要素内の`name`要素は、引数の順序で並んでいなくてはならない。
 
-## `varDecl`要素 {#decl.var}
+## `varDecl`要素 {#sec:decl.var}
 変数の宣言を行う。
 
     <varDecl>
@@ -919,7 +919,7 @@ enum型は、`enumType`要素で定義する。`type`要素で、メンバの識
         </value>
       </varDecl>
 
-## `functionDecl`要素 {#decl.func}
+## `functionDecl`要素 {#sec:decl.func}
 関数宣言を行う。
 
     <functionDecl>
@@ -932,7 +932,7 @@ enum型は、`enumType`要素で定義する。`type`要素で、メンバの識
 
 * `name`要素　－　関数名を指定する
 
-## `usingDecl`要素(C++) {#decl.using}
+## `usingDecl`要素(C++) {#sec:decl.using}
 C++のusing宣言(using declaration)とusing指示(using directive)に対応する。
 
     <usingDecl>
@@ -951,14 +951,14 @@ C++のusing宣言(using declaration)とusing指示(using directive)に対応す�
   * 名前を`name`要素とする。名前にはスコープ名と「`::`」が含まれることがある。
 * 別名宣言 "`using 別名 = 型`"　の形のとき、`usingDecl`要素では表現されない。typedefと同様、データ型定義要素(3章)で表現される。
 
-# 文の要素 {#stmt}
+# 文の要素 {#sec:stmt}
 Cの文の構文要素に対応するXML要素である。それぞれのXML要素には、文の元の行番号とファイル名を属性として付加することができる。
 
 * `lineno`　－　文番号を値として持つ
 * `file`　－　この文が含まれているファイル名
 
 
-## `exprStatement`要素 {#stmt.expr}
+## `exprStatement`要素 {#sec:stmt.expr}
 式で表現される文を表す。式の要素(7章)を持つ。
 
     <exprStatement>
@@ -967,7 +967,7 @@ Cの文の構文要素に対応するXML要素である。それぞれのXML要�
 
 属性(optional): `lineno`, `file`
 
-## `compoundStatement`要素 {#stmt.comp}
+## `compoundStatement`要素 {#sec:stmt.comp}
 複文を表現する。
 
     <compoundStatement>
@@ -984,7 +984,7 @@ Cの文の構文要素に対応するXML要素である。それぞれのXML要�
 * `declarations`要素　－　このスコープの中で定義される宣言
 * `body` 要素　－　複文本体。文の要素の並び。
 
-## `ifStatement`要素 {#stmt.if}
+## `ifStatement`要素 {#sec:stmt.if}
 if文を表現する。
 
     <ifStatement>
@@ -1001,7 +1001,7 @@ if文を表現する。
 * `then`要素　－　then部の文を子要素として含む
 * `else`要素　－　else部の文を子要素として含む
 
-## `whileStatment`要素 {#stmt.while}
+## `whileStatment`要素 {#sec:stmt.while}
 while文を表現する。
 
     <whileStatement>
@@ -1016,7 +1016,7 @@ while文を表現する。
 * `condition` 要素　－　条件式を子要素として含む
 * `body` 要素　－　本体の文を子要素として含む
 
-## `doStatement`要素 {#stmt.do}
+## `doStatement`要素 {#sec:stmt.do}
 do文を表現する。
 
     <doStatement>
@@ -1031,7 +1031,7 @@ do文を表現する。
 * `body`要素　－　本体を表す、文の要素の並びを含む
 * `condition`要素　－　条件式を表す式の要素を含む
 
-## `forStatement`要素 {#stmt.for}
+## `forStatement`要素 {#sec:stmt.for}
 for文(従来仕様)を表現する。
 
     <forStatement>
@@ -1060,7 +1060,7 @@ for文(従来仕様)を表現する。
 
 　`init`要素は、`forStatement`要素の中だけに現れる。初期化式を意味する式の要素を含むか、または、0個以上の局所変数の宣言を意味する`symbols`要素を含む。
 
-## `rangeForStatement`要素(C++) {#stmt.rangefor}
+## `rangeForStatement`要素(C++) {#sec:stmt.rangefor}
 C++仕様のfor文
 
     for ( for-range-declaration : expression ) statement
@@ -1081,21 +1081,21 @@ C++仕様のfor文
 * `range`要素　－　配列やコンテナを表す式の要素(7章)を含む。
 * `body`要素　－　for文の本体を表す、文の要素(6章)の並びを含む。
 
-## `breakStatement`要素 {#stmt.break}
+## `breakStatement`要素 {#sec:stmt.break}
 break文を表現する。
 
     <breakStatement/>
 
 属性(optional): `lineno`, `file`
 
-## `continueStatement`要素 {#stmt.cont}
+## `continueStatement`要素 {#sec:stmt.cont}
 continue文を表現する。
 
     <continueStatement/>
 
 属性(optional): `lineno`, `file`
 
-## `returnStatment`要素 {#stmt.ret}
+## `returnStatment`要素 {#sec:stmt.ret}
 return文を表現する。
 
     <returnStatement>
@@ -1106,7 +1106,7 @@ return文を表現する。
 
 returnする式を、子要素として持つことができる。
 
-## `gotoStatement`要素 {#stmt.goto}
+## `gotoStatement`要素 {#sec:stmt.goto}
 goto文を表現する。
 
     <gotoStatement>
@@ -1120,7 +1120,7 @@ goto文を表現する。
 * `name`要素　－　ラベル名の名前を指定する。
 * 式の要素　－　ジャンプ先のアドレス値を指定する。
 
-## `tryStatement`要素(C++) {#stmt.try}
+## `tryStatement`要素(C++) {#sec:stmt.try}
 try構文を表現する。
 
     <tryStatement>
@@ -1133,7 +1133,7 @@ try構文を表現する。
 
 * `body`要素　－　本体を表す、文の要素(6章)の並びを含む
 
-## `catchStatement`要素(C++) {#stmt.catch}
+## `catchStatement`要素(C++) {#sec:stmt.catch}
 catch構文を表現する。
 
     <catchStatement>
@@ -1148,7 +1148,7 @@ catch構文を表現する。
 * `params`要素　—　内容は1つの`name`要素または1つの`ellipsis`でなければならない。補足する例外の型を示す。
 * `body`要素　－　本体を表す、文の要素(6章)の並びを含む
 
-## `statementLabel`要素 {#stmt.label}
+## `statementLabel`要素 {#sec:stmt.label}
 goto文のターゲットのラベルを表す。
 
     <statementLabel>
@@ -1161,7 +1161,7 @@ goto文のターゲットのラベルを表す。
 
 * `name`要素　－　ラベル名の名前を指定する。
 
-## `switchStatement`要素 {#stmt.switch}
+## `switchStatement`要素 {#sec:stmt.switch}
 switch文を表現する。
 
     <statementLabel>
@@ -1176,7 +1176,7 @@ switch文を表現する。
 * `value`要素　－　switchする値を表す式の要素(0章)
 * `body`要素　－　switch文の本体を表す文の要素(0章)であり、多くの場合`compoundStatement`要素(6.2節)となる。`caseLabel`要素(6.17節)と`gccRangedCaseLabel`要素(6.18節)と`defaultLabel`要素(6.19節)を含むことができる。
 
-## `caseLabel`要素 {#stmt.case}
+## `caseLabel`要素 {#sec:stmt.case}
 switch文のcase文を表す。`switch`要素の中の`body`要素の中の`compoundStatement`の中だけに現れることができる。
 
     <caseLabel>
@@ -1189,7 +1189,7 @@ caseの値を子要素としてもつ。
 
 * `value`要素　－　caseの値を指定する。
 
-## `gccRangedCaseLabel`要素 {#stmt.gccrangecase}
+## `gccRangedCaseLabel`要素 {#sec:stmt.gccrangecase}
 gcc拡張のcase文での範囲指定を表す。switch要素の中の`body`要素の中の`compoundStatement`の中だけに現れることができる。
 
     <gccRangedCaseLabel>
@@ -1204,14 +1204,14 @@ caseの値を要素としてもつ。
 * `value`要素　－　caseの値の下限値を指定する。
 * `value`要素　－　caseの値の上限値を指定する。
 
-## `defaultLabel`要素 {#stmt.default}
+## `defaultLabel`要素 {#sec:stmt.default}
 switch文のdefaultラベルを表す。`switch`要素の中の`body`要素の中の`compoundStatement`の中だけに現れることができる。
 
     <defaultLabel/>
 
 属性(optional): `lineno`, `file`
 
-## `pragma`要素 {#stmt.pragma}
+## `pragma`要素 {#sec:stmt.pragma}
 `pragma`要素は#pragma文を表す。
 
     <pragma>文字列</pragma>
@@ -1220,7 +1220,7 @@ switch文のdefaultラベルを表す。`switch`要素の中の`body`要素の�
 
 \#pragmaに指定する文字列を持つ。
 
-## `text`要素 {#stmt.text}
+## `text`要素 {#sec:stmt.text}
 `text`要素は任意のテキストを表し、コンパイラに依存したディレクティブなどの情報を要素として持つために使用する。
 
     <text>文字列</text>
@@ -1230,7 +1230,7 @@ switch文のdefaultラベルを表す。`switch`要素の中の`body`要素の�
 内容に任意の文字列を持つ。この要素は `globalDeclarasions` にも出現する。
 
 
-# 式の要素 {#expr}
+# 式の要素 {#sec:expr}
 式の構文要素に対応するXML要素である。式の要素には、本章に記述されたXML要素以外に、以下のものがある。
 
 * `functionInstance`要素(9.3節)
@@ -1243,7 +1243,7 @@ switch文のdefaultラベルを表す。`switch`要素の中の`body`要素の�
 要検討:
 `lvalue`属性は、式の要素の属性からテータ型定義要素の属性に移動したい。
 
-## 定数の要素 {#expr.constant}
+## 定数の要素 {#sec:expr.constant}
 定数は以下のXML要素によって表現する。
 
     <intConstant>10進数または16進数</intConstant>
@@ -1272,7 +1272,7 @@ switch文のdefaultラベルを表す。`switch`要素の中の`body`要素の�
 
 備考:`longlongConstant`だけ特別扱いするのは不自然。素直に10進数表記で表現する形にしたい。
 
-## 変数参照の要素(`Var`要素、`varAddr`要素、`arrayAddr`要素) {#expr.var}
+## 変数参照の要素(`Var`要素、`varAddr`要素、`arrayAddr`要素) {#sec:expr.var}
 変数名への参照を表現する。それぞれ、`v`, `&v`, `a`に対応する(`v`は配列以外の変数、`a`は配列変数)。
 
     <Var>変数名</Var>
@@ -1318,7 +1318,7 @@ switch文のdefaultラベルを表す。`switch`要素の中の`body`要素の�
 
 `a`が配列のとき、2015年10月現在のF\_Frontでは `&a` の参照を`a`の参照と同様`arrayAddr`で表現している。これに関連してOmni XMPでは型の不一致によるエラーが出ている(バグレポート439)。
 
-## `pointerRef`要素 {#expr.pointer}
+## `pointerRef`要素 {#sec:expr.pointer}
 式(ポインタ型)の指示先を表現する。
 
     <pointerRef>
@@ -1347,7 +1347,7 @@ switch文のdefaultラベルを表す。`switch`要素の中の`body`要素の�
 
 と表現している。なぜこのパターンに限って簡単化しているのか不明。
 
-## `arrayRef`要素 {#expr.array}
+## `arrayRef`要素 {#sec:expr.array}
 配列要素`a[i]`への参照を表現する。
 
     <arrayRef>
@@ -1377,7 +1377,7 @@ switch文のdefaultラベルを表す。`switch`要素の中の`body`要素の�
 
 のように表現される。ここで`P232`はint型へのポインタと宣言されている。後者は`arrayAddr`要素でないことに注意されたい。
 
-## メンバの参照の要素(C++拡張) {#expr.member}
+## メンバの参照の要素(C++拡張) {#sec:expr.member}
 構造型、クラス、または共用型のオブジェクトを`s`とするとき、`s`のメンバ`m`への参照`s.m`、`s`のメンバ`m`のアドレスの参照`&s.m`、`s`のメンバ配列`a`の要素への参照`s.a[i]`、および、`s`のメンバ配列`a`の要素のアドレスの参照`&s.a[i]`を、それぞれ以下のように表現する。
 
     <memberRef> or <memberAddr> or <memberArrayRef> or <memberArrayAddr>
@@ -1443,7 +1443,7 @@ switch文のdefaultラベルを表す。`switch`要素の中の`body`要素の�
 |          |`Var i`       |           | `Var i`            |
 +----------+--------------+-----------+--------------------+
 
-## メンバポインタの参照の要素(C++) {#expr.memberpointer}
+## メンバポインタの参照の要素(C++) {#sec:expr.memberpointer}
 オブジェクト`s`のメンバへのポインタの参照`s.*p`を表現する。
 
     <memberPointer>
@@ -1492,7 +1492,7 @@ switch文のdefaultラベルを表す。`switch`要素の中の`body`要素の�
         </arguments>
       </functionCall>
 
-## 複合リテラルの要素(新規) {#expr.compval}
+## 複合リテラルの要素(新規) {#sec:expr.compval}
 型`T`の複合リテラル `(T){ … }` および型Tの複合リテラルのアドレス `&(T){ … }` を表現する。
 
     <compoundValue> or <compoundValueAddr>
@@ -1538,14 +1538,14 @@ switch文のdefaultラベルを表す。`switch`要素の中の`body`要素の�
       </value>
     </compoundValue>
 
-## `thisExpr`要素(C++) {#expr.this}
+## `thisExpr`要素(C++) {#sec:expr.this}
 `thisExpr` 要素は、C++の this に対応する。
 
     <thisExpr/>
 
 属性なし
 
-## `assignExpr` 要素 {#expr.assign}
+## `assignExpr` 要素 {#sec:expr.assign}
 `assignExpr` 要素は、2つの式の要素をsub要素に持ち、代入を表す。
 
     <assignExpr>
@@ -1606,7 +1606,7 @@ switch文のdefaultラベルを表す。`switch`要素の中の`body`要素の�
 
 Cでは代入演算の第1オペランドは必ずlvalue(左辺式)だったが、C++では演算子のオーバーロードがあるためその限りではなくなった。
 
-## 単項演算式の要素 {#expr.unary}
+## 単項演算式の要素 {#sec:expr.unary}
 単項演算式を表現する。被演算子を内容に指定する。
 
     <単項演算要素名>
@@ -1632,7 +1632,7 @@ Cでは代入演算の第1オペランドは必ずlvalue(左辺式)だったが�
   * `gccAlignOfExpr`　－　GCCの\_\_alignof\_\_演算子を表す。子要素に式または`typeName`要素を指定する。
   * `gccLabelAddr`　－　GCCの\&\&単項演算子を表す。内容にラベル名を指定する。
 
-## `functionCall`要素 {#expr.call}
+## `functionCall`要素 {#sec:expr.call}
 `functionCall`要素は関数呼び出しを表す。
 
     <functionCall>
@@ -1657,7 +1657,7 @@ Cでは代入演算の第1オペランドは必ずlvalue(左辺式)だったが�
       ... ]
     </arguments>
 
-## `commaExpr`要素 {#expr.comma}
+## `commaExpr`要素 {#sec:expr.comma}
 コンマ式(第1オペランドと第2オペランドを評価し、第2オペランドの値を返す式)を表す。
 
     <commaExpr>
@@ -1678,7 +1678,7 @@ Cでは代入演算の第1オペランドは必ずlvalue(左辺式)だったが�
 属性(必須): `type`
 属性(optional): `is_userDefined`
 
-## `castExpr`要素(廃止予定) {#expr.cast}
+## `castExpr`要素(廃止予定) {#sec:expr.cast}
 `castExpr`要素は型変換の式(旧仕様)、または複合リテラルを表す。
 
     <castExpr>
@@ -1697,7 +1697,7 @@ Cでは代入演算の第1オペランドは必ずlvalue(左辺式)だったが�
 
 備考の備考:C++においてもCスタイルのキャストを書いた場合は static\_cast等とは違う意味になるので、この仕様は残さざるを得ないと考える。
 
-## キャスト要素(`staticCast`, `dynamicCast`, `constCast`, `reinterpretCast`)(C++) {#expr.cppcast}
+## キャスト要素(`staticCast`, `dynamicCast`, `constCast`, `reinterpretCast`)(C++) {#sec:expr.cppcast}
 順に、C++のstatic\_cast, dynamic\_cast, const\_castおよびreinterpret\_castを表現する。
 
     <staticCast> or <dynamicCast> or <constCast> or <reinterpretCast>
@@ -1708,7 +1708,7 @@ Cでは代入演算の第1オペランドは必ずlvalue(左辺式)だったが�
 
 Cのcastは、`staticCast`または`constCast`または`reinterpretCast`で表現する。
 
-## `condExpr`要素 {#expr.cond}
+## `condExpr`要素 {#sec:expr.cond}
 三項演算 `x ? y : z` を表現する。
 
     <condExpr>
@@ -1726,7 +1726,7 @@ Cのcastは、`staticCast`または`constCast`または`reinterpretCast`で表�
 選択される式の`type`属性が異なるとき、`condExpr`要素の`type`属性はどうするべきか？
 　→暗黙のキャストが入って同じ型にそろえられるので、その型を式全体の型と考えればよい(あるいは暗黙のキャストで対応できないほど型が食い違っている場合にはコンパイルエラーになるためそのようなソースコードは受理する必要がない)。
 
-## `gccCompoundExpr`要素 {#expr.gcccomp}
+## `gccCompoundExpr`要素 {#sec:expr.gcccomp}
 gcc拡張の複文式に対応する。
 
     <gccCompoundExpr>
@@ -1737,7 +1737,7 @@ gcc拡張の複文式に対応する。
 
 * `compoundStatement`要素　－　複文式の内容を指定する。
 
-## `newExpr`要素と`newExprArray`要素 {#expr.new}
+## `newExpr`要素と`newExprArray`要素 {#sec:expr.new}
 new演算子またはnew[]演算子から成る式を表現する。
 
     <newExpr>
@@ -1754,7 +1754,7 @@ new演算子またはnew[]演算子から成る式を表現する。
 
 第1と第2の書式は、それぞれnew演算子とnew[]演算子による領域確保を表現する。確保されるデータは、`type`属性の型をもつ。第1の書式の子要素は、コンストラクタに渡されるパラメタを表す。第2の書式の子要素は、確保する配列の長さを表す。
 
-## `deleteExpr`要素と`deleteArrayExpr`要素 {#expr.delete}
+## `deleteExpr`要素と`deleteArrayExpr`要素 {#sec:expr.delete}
 delete演算子またはdelete[]演算子から成る式を表現する。
 
     <deleteExpr>
@@ -1771,7 +1771,7 @@ delete演算子またはdelete[]演算子から成る式を表現する。
 
 第1と第2の書式は、それぞれdelete演算子とdelete[]演算子による領域解放を表現する。子要素は、解放する領域へのポインタである。
 
-## `throwExpr`要素(C++) {#expr.throw}
+## `throwExpr`要素(C++) {#sec:expr.throw}
 throw式を表現する。
 
     <throwExpr>
@@ -1782,7 +1782,7 @@ throw式を表現する。
 
 子要素として式の要素をもつ。式の要素は投げられる例外を表す。
 
-## `lambdaExpr`要素 {#expr.lambda}
+## `lambdaExpr`要素 {#sec:expr.lambda}
 C++のラムダ式を表現する。
 
     <lambdaExpr>
@@ -1796,7 +1796,7 @@ C++のラムダ式を表現する。
 
 `symbols`要素、`params`要素(5.3.4節)と`body`要素は、`functionDefinition`要素(5.2節)の子要素と同様である。
 
-### `captures`要素 {#expr.captures}
+### `captures`要素 {#sec:expr.captures}
 `captures`要素は以下の表現である。
 
     <captures>
@@ -1818,7 +1818,7 @@ C++のラムダ式を表現する。
 * `is_mutable`属性　－　`1`または`true`のとき、mutable指定があることを意味する。`0`または`false`または省略されたとき、mutable指定がないことを意味する。
 　子要素の`byReference`要素で指定された名前の変数は参照キャプチャされ、`byValue`要素で指定された名前の変数はコピーキャプチャされる。それ以外の変数は、`default`属性の指定に従う。
 
-# テンプレート定義要素(C++) {#temp}
+# テンプレート定義要素(C++) {#sec:temp}
 テンプレート定義要素には、以下のものがある。
 
 * `classTemplate`要素(8.2節)　—　クラステンプレートを定義する。
@@ -1827,7 +1827,7 @@ C++のラムダ式を表現する。
 
 これらのテンプレート定義要素は、共通して型仮引数を表現する`typeParams`要素(8.1節)をもつ。
 
-## `typeParams`要素 {#temp.typeparams}
+## `typeParams`要素 {#sec:temp.typeparams}
 テンプレートの型仮引数の並びを指定する。
 
     <typeParams>
@@ -1847,7 +1847,7 @@ C++のラムダ式を表現する。
 
 `typeName`要素は、引数の順序で並んでいなければならない。
 
-## `classTemplate`要素 {#temp.class}
+## `classTemplate`要素 {#sec:temp.class}
 データ型定義要素(3章)の一つ。クラスのテンプレートを以下のように表現する。
 
     <classTemplate>
@@ -1898,7 +1898,7 @@ C++のラムダ式を表現する。
 
     <basicType type="S0" name="any_typename"/>
 
-## `functionTemplate`要素 {#temp.func}
+## `functionTemplate`要素 {#sec:temp.func}
 関数、メンバ関数、演算子オーバーロード、および、ユーザ定義リテラルのテンプレートを表現する。`globalDeclaration`要素(5.1節)と`declaration`要素(5.2節)の子要素。
 
     <functionTemplate>
@@ -1954,7 +1954,7 @@ C++のラムダ式を表現する。
       </functionDefinition>
     </functionTemplate>
 
-## `aliasTemplate`要素 {#temp.alias}
+## `aliasTemplate`要素 {#sec:temp.alias}
 データ型定義要素(3章)の一つ。エイリアステンプレートを表現する。
 
     <aliasTemplate>
@@ -2006,7 +2006,7 @@ C++のラムダ式を表現する。
       </typeParams>
     </aliasTemplate>
 
-# テンプレートインスタンス要素(C++) {#temp.instance}
+# テンプレートインスタンス要素(C++) {#sec:temp.instance}
 テンプレートインスタンス要素には、以下のものがある。
 
 * `typeInstance`要素(9.2節)　—　構造型、クラス、および型の別名のテンプレートについて、型実引数を与えて具体化する。
@@ -2014,7 +2014,7 @@ C++のラムダ式を表現する。
 
 これらのテンプレートインスタンス要素は、共通して型実引数を表現する`typeArtuments`要素(9.1節)をもつ。
 
-## `typeArguments`要素 {#temp.typearg}
+## `typeArguments`要素 {#sec:temp.typearg}
 テンプレートのインスタンスの型実引数の並びを指定する。
 
     <typeArguments>
@@ -2030,7 +2030,7 @@ C++のラムダ式を表現する。
 
 `typeName`要素は、引数の順序で並んでいなければならない。
 
-## `typeInstance`要素 {#temp.typeinstance}
+## `typeInstance`要素 {#sec:temp.typeinstance}
 データ型定義要素(3章)の一つ。型のテンプレートのインスタンスを表現する。
 
     <typeInstance>
@@ -2077,7 +2077,7 @@ C++のラムダ式を表現する。
     <pointerType type="P2" ref="int" />
     <pointerType type="P1" ref="P2" />
 
-## `functionInstance`要素 {#temp.funcinstance}
+## `functionInstance`要素 {#sec:temp.funcinstance}
 式の要素(7章)の一つ。関数とメンバ関数のテンプレートのインスタンスを表現する。
 
     <functionInstance>
@@ -2124,13 +2124,13 @@ C++のラムダ式を表現する。
 ここで、`funcAddr`要素の`type`属性`P0`は、関数`square`へのポインタを意味するデータ型識別名である。
 
 
-# XcalableMP固有の要素 {#xmp}
+# XcalableMP固有の要素 {#sec:xmp}
 
 備考:
 
 C++対応版作成に当たって再検討していない。
 
-## `coArrayType`要素 {#xmp.coarray.type}
+## `coArrayType`要素 {#sec:xmp.coarray.type}
 "`#pragma xmp coarray`" によって宣言された、Co-Array型を表す。 次の属性を持つ。
 
 * `type`　－　派生データ型名。
@@ -2152,21 +2152,21 @@ C++対応版作成に当たって再検討していない。
     <coArrayType type="C1" element_type="A1"/>
     <coArrayType type="C2" element_type="C1" array_size="2"/>
 
-## `coArrayRef`要素 {#xmp.coarray.ref}
+## `coArrayRef`要素 {#sec:xmp.coarray.ref}
 Co-Array型の変数への参照を表す。
 次の子要素を持つ。
 
 * 1番目の式　－　Co-Array変数を表す式。
 * 2番目以降の式　－　Co-Array次元を表す式。複数の次元を持つ場合は、複数の式を指定する。
 
-## `subArrayRef`要素 {#xmp.subarray.ref}
+## `subArrayRef`要素 {#sec:xmp.subarray.ref}
 部分配列の参照を表す。
 次の子要素を持つ。子要素を省略することはできない。
 
 * 第一のXML要素として配列を表す式をもつ。
 * 2番目以降の式　－　添字または添字3つ組を表す式。複数の次元を持つ場合は、複数の式を指定する。
 
-## `indexRange`要素 {#xmp.idx}
+## `indexRange`要素 {#sec:xmp.idx}
 3つ組(triplet)を表す。
 次の子要素を持つ。子要素を省略することはできない。
 
@@ -2174,9 +2174,9 @@ Co-Array型の変数への参照を表す。
 * `upperBound`　－　上限のインデックスを表す。子要素に式を持つ。
 * `step`　－　インデックスの刻み幅を表す。子要素に式を持つ。
 
-# その他の要素・属性 {#other}
+# その他の要素・属性 {#sec:other}
 
-## `is_gccExtension`属性 {#other.isgcc}
+## `is_gccExtension`属性 {#sec:other.isgcc}
 `is_gccExtension`属性は、GCCの \_\_extension\_\_ キーワードをXML要素の先頭に付加するかどうかを定義し、値は `0` または `1` (`false`または`true`) である。
 `is_gccExtension`属性は省略可能で、指定しないときは値 `0`を指定したときと同じ意味である。次のXML要素に `is_gccExtension` 属性を持つことができる。
 
@@ -2193,7 +2193,7 @@ Co-Array型の変数への参照を表す。
        <name>int64_t</name>
      </id>
 
-## `gccAsm`要素、`gccAsmDefinition`要素、`gccAsmStatement`要素 {#other.gcc.asm}
+## `gccAsm`要素、`gccAsmDefinition`要素、`gccAsmStatement`要素 {#sec:other.gcc.asm}
 `gccAsm` 要素・`gccAsmDefinition`要素・`gccAsmStatement`要素は、GCCの asm/\_\_asm\_\_ キーワードを定義する。子要素として asm の引数の文字列を持つ。
 
 * `gccAsm`　－　asm式を表す。次の子要素を持つ。
@@ -2255,7 +2255,7 @@ Co-Array型の変数への参照を表す。
          </gccAsmOperands>
        </gccAsmStatement>
 
-## `gccAttributes`要素 {#other.gcc.attr}
+## `gccAttributes`要素 {#sec:other.gcc.attr}
 `gccAttributes` 要素はGCCの \_\_attribute\_\_ キーワードを定義する。子要素として、\_\_attribute\_\_の引数の文字列を持つ。`gccAttributes` 要素は、`gccAttribute` 要素を子要素に複数持つ。
 
 * 型を表すXML要素全てが `gccAttributes` 要素を子要素に持つ(0～1個)。
@@ -2339,17 +2339,17 @@ Co-Array型の変数への参照を表す。
         </functionDefinition>
       </globalDeclarations>
 
-## `builtin_op`要素 {#other.builtinop}
+## `builtin_op`要素 {#sec:other.builtinop}
 `builtin_op`要素はコンパイラ組み込みの関数呼び出しを表す。以下のXML要素をそれぞれ0～複数持つ。子要素の順番は関数引数の順番と一致していなければならない。
 
 * 式　－　呼び出す関数の引数として、式を指定する。
 * `typeName`　－　呼び出す関数の引数として、型名を指定する。
 * `gccMemberDesignator`　－　呼び出す関数の引数として、構造体・共用体のメンバ指示子を指定する。属性に構造体・共用体の派生データ型名を示す ref、メンバ指示子の文字列を示す member を持つ。子要素に配列インデックスを表す式(0-1個)と、`gccMemberDesignator`要素(0-1個)を持つ。
 
-## `is_gccSyntax`属性 {#other.isgccsyntax}
+## `is_gccSyntax`属性 {#sec:other.isgccsyntax}
 `is_gccSyntax`属性はそのタグに対応する式、文、宣言がgcc拡張を使用しているかどうかを定義する。 値として`0` または `1` (`false`または`true`) を持つ。この属性は省略可能であり、省略された場合は値に`0`を指定した時と同じ意味になる。
 
-## `is_modified`属性 {#other.modified}
+## `is_modified`属性 {#sec:other.modified}
 `is_modified`属性はそのタグに対応する式、文、宣言がコンパイルの過程で変形されたかどうかを定義する。値として`0` または `1` (`false`または`true`) を持つ。この属性は省略可能であり、省略された場合は値に`0`を指定した時と同じ意味になる。
 次のXML要素に `is_gccSyntax` 属性、`is_modified` 属性を持つことができる。
 
@@ -2357,7 +2357,7 @@ Co-Array型の変数への参照を表す。
 * 文の要素
 * 式の要素
 
-# 未検討項目 {#tbc}
+# 未検討項目 {#sec:tbc}
 以下の項目については、本ドキュメントで触れていない。
 
 * 宣言
