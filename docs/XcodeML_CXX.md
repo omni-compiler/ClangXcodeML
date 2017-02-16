@@ -783,7 +783,7 @@ enum型は、`enumType`要素で定義する。`type`要素で、メンバの識
 関数定義、メンバ関数の定義、コンストラクターの定義、デストラクターの定義、および、演算子オーバーロードの定義を行う。以下のいずれか一つの子要素を持つ。
 
     <functionDefinition>
-      name要素(2.1節) or operator要素(5.3.1) or constructor要素(5.3.2) or descructor要素(5.3.3)
+      name要素 or operator要素(5.3.1) or constructor要素(5.3.2) or descructor要素(5.3.3)
       symbols要素(4.3節)
       params要素(5.3.4)
       body要素
@@ -856,7 +856,7 @@ enum型は、`enumType`要素で定義する。`type`要素で、メンバの識
 `functionDefinition`要素の子要素。そのメンバ関数がコンストラクタのとき、`name`要素の代わりに指定する。
 
     <constructor>
-       [ {    name要素(2.1節)
+       [ {    name要素
           value要素(2.2節) }
        … ]
     </constructor>
@@ -876,7 +876,7 @@ enum型は、`enumType`要素で定義する。`type`要素で、メンバの識
 関数の引数の並びを指定する。
 
     <params>
-      [ { name要素(2.1節)
+      [ { name要素
         [ value要素(2.2節) ] }
       … ]
       [ ellipsis ]
