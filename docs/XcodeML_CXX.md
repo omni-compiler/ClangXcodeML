@@ -409,7 +409,7 @@ C\_Front実装でもCtoXcodeML実装でも`symbols`属性内では`value`要素�
 	  <pointerType type="P0" is_volatile="1" ref="B0"/>
 
 ## `pointerType`要素 {#sec:type.ptr}
-`pointerType`要素はポインタのデータ型を定義する。
+`pointerType`要素はポインタ型またはリファレンス型を定義する。
 
 | \<pointerType/\>
 
