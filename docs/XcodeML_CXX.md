@@ -152,6 +152,7 @@ nns属性は、C++のスコープ解決演算子による修飾をおこなっ�
 * memberArrayAddr要素
 
 例:
+
 以下のプログラムで、
 
     namespace NS {
@@ -172,6 +173,7 @@ namespace NSの存在を表現するために、以下のようなnnsTableが生
     <name type="int" nns="Q0">a</name>
 
 例:
+
 以下のプログラムで、
 
     struct S {
@@ -219,6 +221,7 @@ C\_Front実装でもCtoXcodeML実装でもsymbols属性内ではvalue要素を�
 { } で囲まれた式の並びは、value要素のネストで表現する。
 
 例:
+
 int型の初期値 1 に対応する表現は次のとおりになる。
 
     <value>
@@ -261,6 +264,7 @@ typeTable要素は、翻訳単位を表現するXcodeProgram要素（2章）の�
 データ型定義要素は、データ型定義要素属性（1.1節）をもつことができる。
 
 要検討：decltype対応
+
 decltype(式) は式の型を表すが、式はスコープをもつのでtypeTableの中に移動することができない。
 
 * 案1： 式の中のすべての名前に、スコープ名を付ける。decltype(main:x + main:y) など。→とても煩雑。scopenameを持たない { } の中に出現した場合は？
@@ -305,7 +309,9 @@ typeName要素は以下のように使用される。
 * テンプレートのインスタンスの型実引数として（9章）
 * 構造体とクラスの継承元（3.9.1項）
 
-例： 式　sizeof(int) は以下のように表現される。
+例：
+
+式　sizeof(int) は以下のように表現される。
 
     <sizeOfExpr>
     　　<typeName ref="int"/>
@@ -329,6 +335,7 @@ typeName要素は以下のように使用される。
 `is_`　で始まる属性の値には、真を意味する1とtrue、および、偽を意味する0とfalseが許される。属性が省略されたとき、偽を意味する。
 
 例: 左辺値参照と右辺値参照
+
 以下の参照（左辺値参照）の宣言があるとき、
 
     int& n_alias = n_org;
@@ -400,6 +407,7 @@ pointerType要素はポインタのデータ型を定義する。
 pointerType要素は、子要素を持たない。
 
 例:
+
 "`int *`" に対応するデータ型定義は以下のようになる。
 
 	<pointerType type="P0123" ref="int"/>
@@ -495,6 +503,7 @@ unionType要素は以下の属性を持つ。
 構造体またはメンバの名前は、同じ`type`属性をもつ`id`要素で指定する。
 
 例:
+
 以下の構造体宣言
 
     struct {
@@ -550,6 +559,7 @@ unionType要素は以下の属性を持つ。
 構造体またはメンバの名前は、同じ`type`属性をもつ`id`要素で指定する。typedef文またはusing文で指定された別名もまた、同じ`type`属性をもつ`id`要素で指定する。
 
 要検討：
+
 friend関数の宣言。friend関数はそのクラスのメンバ関数ではない。
 
 
@@ -587,6 +597,7 @@ enum型は、enumType要素で定義する。type要素で、メンバの識別�
 メンバの識別子は、スコープに対応するシンボルテーブルにクラスmoeとして定義されている。 enumのタグ名がある場合には、スコープに対応するシンボルテーブルに定義されている。
 
 例:
+
 "enum { e1, e2, e3 = 10 } ee; "のeeに対するenumType要素は以下のようになる。
 
       <enumType name="E0">
@@ -620,6 +631,7 @@ enum型は、enumType要素で定義する。type要素で、メンバの識別�
 parameterPack要素は、子要素を持たない。
 
 例:
+
 以下の関数テンプレートの定義において、
 
       template<typename T1, typename ... Types>
@@ -663,11 +675,14 @@ id要素は次の属性を持つことができる。
 以下の子要素を持つことができる。
 
 * `name`要素　－　識別子の名前はname要素で指定する。
-  要検討： 実装時に再検討。何もかもvalue要素にするのがよいか？
+
+    要検討： 実装時に再検討。何もかもvalue要素にするのがよいか？
+
 * `bitField`要素　－　`unionType`と`class`要素においてメンバのビットフィールドの値を`bit_field`属性の数値として指定できないとき使用する。`bitField`要素は式を子要素に持つ。`bitField`要素を使用するとき、`bit_field` 属性の値は、"\*" とする。
 * `alignAs`要素　—　`structType`、`unionType`と`class`要素においてメンバの`alignment`を`align_as`属性の数値として指定できないとき、`alignAs`要素の子要素として式の要素で指定する。
 
 例:
+
 "int xyz;"の変数xyzに対するシンボルテーブルエントリは以下のようになる。
 
       <id sclass="extern_def" type="int">
@@ -779,6 +794,7 @@ compoundStatement（6.2節）、class（3.9節）などをスコープとする�
 * `is_gccExtension`属性
 
 例：
+
 関数の定義
 
     struct sss *foo(struct sss *arg1, int nnn)
