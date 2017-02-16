@@ -1565,36 +1565,36 @@ assignExpr 要素は、２つの式の要素をsub要素に持ち、代入を表
 二項演算要素名には以下のものがある。
 
 * 算術二項演算子
-* plusExpr　－　加算
-* minusExpr　－　減算
-* mulExpr　－　乗算
-* divExpr　－　除算
-* modExpr　－　剰余
-* LshiftExpr　－　左シフト
-* RshiftExpr　－　右シフト
-* bitAndExpr　－　ビット論理積
-* bitOrExpr　－　ビット論理和
-* bitXorExpr　－　ビット論理　排他和
+  * plusExpr　－　加算
+  * minusExpr　－　減算
+  * mulExpr　－　乗算
+  * divExpr　－　除算
+  * modExpr　－　剰余
+  * LshiftExpr　－　左シフト
+  * RshiftExpr　－　右シフト
+  * bitAndExpr　－　ビット論理積
+  * bitOrExpr　－　ビット論理和
+  * bitXorExpr　－　ビット論理　排他和
 * 代入演算子
-* asgPlusExpr　－　加算
-* asgMinusExpr　－　減算
-* asgMulExpr　－　乗算
-* asgDivExpr　－　除算
-* asgModExpr　－　剰余
-* asgLshiftExpr　－　左シフト
-* asgRshiftExpr　－　右シフト
-* asgBitAndExpr　－　ビット論理積
-* asgBitOrExpr　－　ビット論理和
-* asgBitXorExpr　－　ビット論理　排他和
+  * asgPlusExpr　－　加算
+  * asgMinusExpr　－　減算
+  * asgMulExpr　－　乗算
+  * asgDivExpr　－　除算
+  * asgModExpr　－　剰余
+  * asgLshiftExpr　－　左シフト
+  * asgRshiftExpr　－　右シフト
+  * asgBitAndExpr　－　ビット論理積
+  * asgBitOrExpr　－　ビット論理和
+  * asgBitXorExpr　－　ビット論理　排他和
 * 論理二項演算子
-* logEQExpr　－　等価
-* logNEQExpr　－　非等価
-* logGEExpr　－　大なり、または同値
-* logGTExpr　－　大なり
-* logLEExpr　－　小なり、または等価
-* logLTExpr　－　小なり
-* logAndExpr　－　論理積
-* logOrExpr　－　論理和
+  * logEQExpr　－　等価
+  * logNEQExpr　－　非等価
+  * logGEExpr　－　大なり、または同値
+  * logGTExpr　－　大なり
+  * logLEExpr　－　小なり、または等価
+  * logLTExpr　－　小なり
+  * logAndExpr　－　論理積
+  * logOrExpr　－　論理和
 
 備考：
 　Cでは代入演算の第１オペランドは必ずlvalue（左辺式）だったが、C++では演算子のオーバーロードがあるためその限りではなくなった。
