@@ -3,6 +3,9 @@
 % XcalableMP/Omni Compiler Project
 % Sep 30, 2016
 
+---
+linkReferences: True
+---
 
 改版履歴
 XcodeML/C Version 0.91J
