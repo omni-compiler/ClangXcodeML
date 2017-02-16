@@ -341,7 +341,7 @@ typeName要素は以下のように使用される。
 * `is_virtual`（C++）　—　そのメンバ関数がvirtual属性をもつかどうか。
 * `is_userDefined`（C++）　—　その演算がユーザ定義によりオーバーロードされているかどうか
 
-`is_`　で始まる属性の値には、真を意味する1とtrue、および、偽を意味する0とfalseが許される。属性が省略されたとき、偽を意味する。
+"`is_`"　で始まる属性の値には、真を意味する1とtrue、および、偽を意味する0とfalseが許される。属性が省略されたとき、偽を意味する。
 
 例: 左辺値参照と右辺値参照
 
@@ -349,7 +349,7 @@ typeName要素は以下のように使用される。
 
     int& n_alias = n_org;
 
-変数n_aliasのデータ型識別要素は以下のようになる。
+変数`n_alias`のデータ型識別要素は以下のようになる。
 
     <basicType type="B0" name="int" reference="lvalue"/>
 
@@ -440,7 +440,7 @@ funtionType要素は、関数型を定義する。
 プロトタイプ宣言がある場合には、引数のXML要素に対応するparams要素を含む。
 
 例:
-"double foo(int a,int b)" のfooに対するデータ型は以下のようになる。
+"`double foo(int a,int b)`" の`foo`に対するデータ型は以下のようになる。
 
     <functionType type="F0457" return_type="double">
         <params>
@@ -482,7 +482,7 @@ union(共用体)データ型は、unionType要素で定義する。
       symbols要素
     </unionType>
 
-    属性（必須）: type
+属性（必須）: type
 属性（optional）: データ型定義要素属性
 
 unionType要素は以下の属性を持つ。
@@ -1255,11 +1255,11 @@ lvalue属性は、式の要素の属性からテータ型定義要素の属性�
 
 属性(必須): type
 
-* intConstant要素　－　整数の値を持つ定数を表す。数値として、十進数もしくは、16進数（0xから始まる）を記述する。type属性には"int", "long", "unsigned", "unsigned_long", "char"と"wchar_t"が許される。C++ではこれらに加えて、"char16_t"と"char32_t"が許される。
-備考：char16_tは必ず16ビット、char32_tは必ず32ビットだが、wchar_tは環境によって16ビットまたは32ビットであると定義されている。
-* longlongConstant要素　－　32ビット16進数(0xから始まる)の２つの数字を空白で区切って記述する。type属性には"long_long"と"unsigned_long_long"が許される。
-* floatConstant要素　－　floatまたはdoubleまたはlong doubleの値を持つ定数を表す。浮動小数点数のリテラルを記述する。type属性には"float", "double"と"long_double"が許される。
-* stringConstant要素　－　内容にダブルクォーテーションで囲まない文字列を記述する。文字列中の特殊文字はXML（HTML）のルールに従ってクォートされる（’<’は＆lt;に置換されるなど）。type属性には、"char"と"wchar_t"が許される。C++ではこれらに加えて、"char16_t"と"char32_t"が許される。
+* intConstant要素　－　整数の値を持つ定数を表す。数値として、十進数もしくは、16進数（0xから始まる）を記述する。type属性には"`int`", "`long`", "`unsigned`", "`unsigned_long`", "`char`"と"`wchar_t`"が許される。C++ではこれらに加えて、"`char16_t`"と"`char32_t`"が許される。
+備考：`char16_t`は必ず16ビット、`char32_t`は必ず32ビットだが、`wchar_t`は環境によって16ビットまたは32ビットであると定義されている。
+* longlongConstant要素　－　32ビット16進数(0xから始まる)の２つの数字を空白で区切って記述する。type属性には"`long_long`"と"`unsigned_long_long`"が許される。
+* floatConstant要素　－　floatまたはdoubleまたはlong doubleの値を持つ定数を表す。浮動小数点数のリテラルを記述する。type属性には"`float`", "`double`"と"`long_double`"が許される。
+* stringConstant要素　－　内容にダブルクォーテーションで囲まない文字列を記述する。文字列中の特殊文字はXML（HTML）のルールに従ってクォートされる（’<’は＆lt;に置換されるなど）。type属性には、"`char`"と"`wchar_t`"が許される。C++ではこれらに加えて、"`char16_t`"と"`char32_t`"が許される。
 仕様変更：旧仕様ではtype属性を持たず、代わりに以下のように定義されている。
 * 属性に `is_wide=`[1|0|true|false]` (省略時0)を持ち、1またはtrueのときwchar_t型の文字列を表す。
 * moeConstant要素　－　enum型の定数を表す。内容にenum定数（列挙型のメンバの名前）を記述する。type属性は列挙型のタイプ名を記述する。
