@@ -98,18 +98,18 @@ XcodeMLの設計方針は、XcodeMLで表現されたプログラムを入力に
 * データ型の宣言のうち、下記に述べる「複雑な型」に該当しないものについては、その宣言内容は`typeTable`で表現し、`globalDeclarations`要素の中には持ち込まない。
   これにより、XcodeML解析処理部が新たな型をXcodeMLに追加する際、そのソースコード上での配置を考える必要がない。
   これに対し、下記にのべるような「複雑な型」については、その宣言を包んでいる構文要素(主に`compoundStatement`要素)内で`localTypeTable`要素を用いて表現する方向で検討中である。
-  * ローカルクラス
-  * 入れ子のクラス(クラス内に別のクラス宣言を持つ場合、その両方ともが複雑な型とみなされる※要検討)
-  * 無名クラス
-  * テンプレート(展開前、すなわちテンプレートパラメータを持つ構文内での定義)
+    * ローカルクラス
+    * 入れ子のクラス(クラス内に別のクラス宣言を持つ場合、その両方ともが複雑な型とみなされる※要検討)
+    * 無名クラス
+    * テンプレート(展開前、すなわちテンプレートパラメータを持つ構文内での定義)
 * C++のクラス(構造体、共用体を含む)のメソッドの定義は、クラス宣言内で書く方法と、クラス宣言の外で書く方法の二種類の定義方法がある。
   これについては、すべて「クラス宣言の外に書く方法」に相当する形のXcodeMLとして表現する。
   前述の「複雑な型」でなければ`globalDeclarations`要素に、「複雑な型」の場合にはその宣言を包んでいる構文要素の子要素の`declarations`に、それぞれ必要な定義が所属することになる。
 * クラスのメンバや親クラスについてのアクセス指定子は、個々のメンバ・親クラスに対してそれぞれ指定されている形で扱う。
   すなわち、ソースコード上に実際にどこにアクセス指定子が書かれていたかはXcodeMLでは表現せず、各メンバにどのようなアクセス指定がかかっていたかのみを表現する。
 * 名前空間を用いた名前については、次の節で解説する`nns`属性によって修飾子を表現する形で扱う。
-  * 名前の定義については、構文的な`namespace｛｝`の入れ子構造はXcodeMLでは表現せず、個々の名前がどのようなnamespaceに所属すべきかのみを表現していることになる。
-  * 名前の使用については、`using namespace`による名前空間のインポートをXcodeMLでは表現せず、全ての名前を修飾子つきの形で扱う。
+    * 名前の定義については、構文的な`namespace｛｝`の入れ子構造はXcodeMLでは表現せず、個々の名前がどのようなnamespaceに所属すべきかのみを表現していることになる。
+    * 名前の使用については、`using namespace`による名前空間のインポートをXcodeMLでは表現せず、全ての名前を修飾子つきの形で扱う。
 * 演算子オーバーロードを用いた式については、XcodeMLでは演算子としては扱わず、 `operator` キーワードを明示指定した関数呼び出しに相当する形で扱う。
   同じ演算子に対するオーバーロード方法にはクラスメソッドの形のものとグローバル関数の形のものがあり、このどちらの呼び出しになっているかが明示される形になる。
   また、それぞれ`nns`属性がつくので、ADRによる名前空間検索の解決結果も反映される。
@@ -134,25 +134,25 @@ XcodeMLの設計方針は、XcodeMLで表現されたプログラムを入力に
 下記の各属性に適宜挿入される。
 
 * `nnsTable`要素に含まれるもの:
-  * `napespaceName`要素(※仮称)
-  * `classname`要素(※仮称)
+    * `napespaceName`要素(※仮称)
+    * `classname`要素(※仮称)
 * `typeTable`要素および`localTypeTable`に含まれるもの:
-  * `name`要素
+    * `name`要素
 * `globalSymbols`要素および(`symbols`要素に含まれるもの:
-  * `name`要素
+    * `name`要素
 * `globalDeclarations` 要素および`declarations`要素に含まれるもの:
-  * `name`要素
-  * `operator`要素
-  * `Var`要素
-  * `varAddr`要素
-  * `function`要素
-  * `funcAddr`要素
-  * `arrayRef`要素
-  * `arrayAddr`要素
-  * `memberRef`要素
-  * `memberAddr`要素
-  * `memberArrayRef`要素
-  * `memberArrayAddr`要素
+    * `name`要素
+    * `operator`要素
+    * `Var`要素
+    * `varAddr`要素
+    * `function`要素
+    * `funcAddr`要素
+    * `arrayRef`要素
+    * `arrayAddr`要素
+    * `memberRef`要素
+    * `memberAddr`要素
+    * `memberArrayRef`要素
+    * `memberArrayAddr`要素
 
 例:
 
@@ -316,7 +316,7 @@ C\_Front実装でもCtoXcodeML実装でも`symbols`属性内では`value`要素�
 `typeName`要素は以下のように使用される。
 
 * 型を引数とする関数の呼出しで
-  * `sizeOfExpr`([-@sec:expr.unary]節)、`gccAlignOfExpr`([-@sec:expr.unary]節)、`builtin_op`([-@sec:other.builtinop]節)
+    * `sizeOfExpr`([-@sec:expr.unary]節)、`gccAlignOfExpr`([-@sec:expr.unary]節)、`builtin_op`([-@sec:other.builtinop]節)
 * テンプレートの定義の型仮引数として([-@sec:temp]章)
 * テンプレートのインスタンスの型実引数として([-@sec:temp.instance]章)
 * 構造体とクラスの継承元([-@sec:type.class.inherit]項)
@@ -947,11 +947,11 @@ C++のusing宣言(using declaration)とusing指示(using directive)に対応す�
 以下のようにusing文に対応する。
 
 * using指示 "`using namespace 名前空間名`" の形のとき
-  * `namespace`属性の値を`1`または`true`とする。
-  * 名前空間名を`name`要素とする。名前空間名にはスコープ名と「`::`」が含まれることがある。
+    * `namespace`属性の値を`1`または`true`とする。
+    * 名前空間名を`name`要素とする。名前空間名にはスコープ名と「`::`」が含まれることがある。
 * using宣言 "`using 名前`" の形のとき
-  * `namespace`属性を持たないか、値を`0`または`false`とする。
-  * 名前を`name`要素とする。名前にはスコープ名と「`::`」が含まれることがある。
+    * `namespace`属性を持たないか、値を`0`または`false`とする。
+    * 名前を`name`要素とする。名前にはスコープ名と「`::`」が含まれることがある。
 * 別名宣言 "`using 別名 = 型`"　の形のとき、`usingDecl`要素では表現されない。typedefと同様、データ型定義要素([-@sec:type]章)で表現される。
 
 # 文の要素 {#sec:stmt}
@@ -1574,36 +1574,36 @@ switch文のdefaultラベルを表す。`switch`要素の中の`body`要素の�
 二項演算要素名には以下のものがある。
 
 * 算術二項演算子
-  * `plusExpr`　－　加算
-  * `minusExpr`　－　減算
-  * `mulExpr`　－　乗算
-  * `divExpr`　－　除算
-  * `modExpr`　－　剰余
-  * `LshiftExpr`　－　左シフト
-  * `RshiftExpr`　－　右シフト
-  * `bitAndExpr`　－　ビット論理積
-  * `bitOrExpr`　－　ビット論理和
-  * `bitXorExpr`　－　ビット論理　排他和
+    * `plusExpr`　－　加算
+    * `minusExpr`　－　減算
+    * `mulExpr`　－　乗算
+    * `divExpr`　－　除算
+    * `modExpr`　－　剰余
+    * `LshiftExpr`　－　左シフト
+    * `RshiftExpr`　－　右シフト
+    * `bitAndExpr`　－　ビット論理積
+    * `bitOrExpr`　－　ビット論理和
+    * `bitXorExpr`　－　ビット論理　排他和
 * 代入演算子
-  * `asgPlusExpr`　－　加算
-  * `asgMinusExpr`　－　減算
-  * `asgMulExpr`　－　乗算
-  * `asgDivExpr`　－　除算
-  * `asgModExpr`　－　剰余
-  * `asgLshiftExpr`　－　左シフト
-  * `asgRshiftExpr`　－　右シフト
-  * `asgBitAndExpr`　－　ビット論理積
-  * `asgBitOrExpr`　－　ビット論理和
-  * `asgBitXorExpr`　－　ビット論理　排他和
+    * `asgPlusExpr`　－　加算
+    * `asgMinusExpr`　－　減算
+    * `asgMulExpr`　－　乗算
+    * `asgDivExpr`　－　除算
+    * `asgModExpr`　－　剰余
+    * `asgLshiftExpr`　－　左シフト
+    * `asgRshiftExpr`　－　右シフト
+    * `asgBitAndExpr`　－　ビット論理積
+    * `asgBitOrExpr`　－　ビット論理和
+    * `asgBitXorExpr`　－　ビット論理　排他和
 * 論理二項演算子
-  * `logEQExpr`　－　等価
-  * `logNEQExpr`　－　非等価
-  * `logGEExpr`　－　大なり、または同値
-  * `logGTExpr`　－　大なり
-  * `logLEExpr`　－　小なり、または等価
-  * `logLTExpr`　－　小なり
-  * `logAndExpr`　－　論理積
-  * `logOrExpr`　－　論理和
+    * `logEQExpr`　－　等価
+    * `logNEQExpr`　－　非等価
+    * `logGEExpr`　－　大なり、または同値
+    * `logGTExpr`　－　大なり
+    * `logLEExpr`　－　小なり、または等価
+    * `logLTExpr`　－　小なり
+    * `logAndExpr`　－　論理積
+    * `logOrExpr`　－　論理和
 
 備考:
 
@@ -1621,19 +1621,19 @@ Cでは代入演算の第1オペランドは必ずlvalue(左辺式)だったが�
 単項演算要素名には以下のものがある。
 
 * 算術単項演算子
-  * `unaryMinusExpr`　－　符号反転
-  * `bitNotExpr`　－　ビット反転
+    * `unaryMinusExpr`　－　符号反転
+    * `bitNotExpr`　－　ビット反転
 * 論理単項演算子
-  * `logNotExpr`　－　論理否定
+    * `logNotExpr`　－　論理否定
 * sizeof演算子
-  * `sizeOfExpr`　－　子要素として式の要素または`typeName`要素を指定する。
+    * `sizeOfExpr`　－　子要素として式の要素または`typeName`要素を指定する。
 * alignof演算子(C++)
-  * `alignOfExpr`　－　子要素として式の要素または`typeName`要素を指定する。
+    * `alignOfExpr`　－　子要素として式の要素または`typeName`要素を指定する。
 * typeid演算子(C++)
-  * `typeidExpr`　－　子要素として式の要素または`typeName`要素を指定する。
+    * `typeidExpr`　－　子要素として式の要素または`typeName`要素を指定する。
 * GCC拡張の演算子
-  * `gccAlignOfExpr`　－　GCCの\_\_alignof\_\_演算子を表す。子要素に式または`typeName`要素を指定する。
-  * `gccLabelAddr`　－　GCCの\&\&単項演算子を表す。内容にラベル名を指定する。
+    * `gccAlignOfExpr`　－　GCCの\_\_alignof\_\_演算子を表す。子要素に式または`typeName`要素を指定する。
+    * `gccLabelAddr`　－　GCCの\&\&単項演算子を表す。内容にラベル名を指定する。
 
 ## `functionCall`要素 {#sec:expr.call}
 `functionCall`要素は関数呼び出しを表す。
