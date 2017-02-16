@@ -662,7 +662,7 @@ enum型は、`enumType`要素で定義する。`type`要素で、メンバの識
 `id`要素は、変数名や配列名、関数名、struct/unionのメンバ名、 関数の引数、compound statementの局所変数名を定義する。
 
     <id>
-      name要素(2.1節)
+      name要素
 
       [ bitField要素 ]
       [ alignAs要素 ]
