@@ -1289,6 +1289,7 @@ scope属性をつかって、局所変数を区別する。
 * scope属性　－　"local", "global", "param"のいずれか
 
 例：
+
 nがint型のとき、nのアドレスの参照 &n は、
 
     <varAddr type="P0" scope="local">n</varAddr>
@@ -1301,6 +1302,7 @@ nがint型のとき、nのアドレスの参照 &n は、
 などと宣言されている。
 
 例：
+
 aがint型の配列のとき、aの参照、すなわちa[0]のアドレスの参照は、
 
     <arrayAddr type="A5" scope="local">a</varAddr>
@@ -1312,6 +1314,7 @@ aがint型の配列のとき、aの参照、すなわちa[0]のアドレスの�
 などと宣言されている。
 
 備考：
+
 aが配列のとき、2015年10月現在のF\_Frontでは &a の参照をaの参照と同様arrayAddrで表現している。これに関連してOmni XMPでは型の不一致によるエラーが出ている（バグレポート439）。
 
 ## pointerRef要素 {#expr.pointer}
@@ -1324,6 +1327,7 @@ aが配列のとき、2015年10月現在のF\_Frontでは &a の参照をaの参
 属性(必須): type
 
 例：
+
 式 `*var1` （var1はint型へのポインタ）は以下のように表現される。
 
     <pointerRef  type="int">
