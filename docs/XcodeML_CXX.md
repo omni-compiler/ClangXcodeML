@@ -366,7 +366,7 @@ C\_Front実装でもCtoXcodeML実装でも`symbols`属性内では`value`要素�
 
     <basicType="B1" name="B2" reference="rvalue"/>
 
-## `basicType`要素 #{type.basic}
+## `basicType`要素 {#type.basic}
 `basicType` 要素は、他のデータ型識別要素にデータ型定義要素属性を加えた、新しいデータ型定義要素を定義する。
 
     <basicType/>
