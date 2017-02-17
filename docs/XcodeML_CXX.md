@@ -430,6 +430,38 @@ C\_Front実装でもCtoXcodeML実装でも`symbols`属性内では`value`要素�
 
 	<pointerType type="P0123" ref="int"/>
 
+## `referenceType`要素 {#sec:type.ref}
+`referenceType`要素はリファレンス型を定義する。
+
+| \<referenceType/\>
+
+属性(必須): `type`, `ref`
+
+属性(optional): `kind`
+
+以下の属性を持つ。
+
+* `type`　－　この型に与えられたデータ型識別名
+* `ref`　－　このリファレンスが参照するデータ型のデータ型識別名
+* `kind`　－　
+  リファレンスの種類。
+  "`lvalue`"のときlvalueリファレンス、"`rvalue`"のときrvalueリファレンスを意味する。
+  省略時の値は"`lvalue`"である。
+
+`referenceType`要素は、子要素を持たない。
+
+例:
+
+    void f(const int& )
+
+は次のXcodeMLに変換される。
+
+	<referenceType type="R0" ref="int"/>
+
+"`int &`" に対応するデータ型定義は以下のようになる。
+
+	<referenceType type="R0" ref="int"/>
+
 ## `functionType`要素 {#sec:type.func}
 `funtionType`要素は、関数型を定義する。
 
