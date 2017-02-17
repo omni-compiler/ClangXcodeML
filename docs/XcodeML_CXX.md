@@ -979,7 +979,7 @@ Cの文の構文要素に対応するXML要素である。それぞれのXML要�
 式で表現される文を表す。式の要素([-@sec:expr]章)を持つ。
 
 | `<exprStatement>`
-|   式の要素(0章)
+|   式の要素([-@sec:expr]章)
 | `</exprStatement>`
 
 
@@ -1676,7 +1676,7 @@ Cでは代入演算の第1オペランドは必ずlvalue(左辺式)だったが�
 |   `<function>`または`<memberRef>`または`<operator>`
 |     式の要素
 |   `</function>`または`</memberRef>`または`</operator>`
-|   `arguments`要素(7.12.1項)
+|   `arguments`要素([-@sec:expr.arguments]項)
 | `</functionCall>`
 
 属性(必須): `type`
@@ -1781,7 +1781,7 @@ gcc拡張の複文式に対応する。
 new演算子またはnew[]演算子から成る式を表現する。
 
 | `<newExpr>`
-|   `arguments`要素(7.12.1項)
+|   `arguments`要素([-@sec:expr.arguments]項)
 | `</newExpr>`
 
 属性(必須): `type`
