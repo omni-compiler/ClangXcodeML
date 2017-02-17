@@ -927,6 +927,8 @@ enum型は、`enumType`要素で定義する。`type`要素で、メンバの識
 ## `varDecl`要素 {#sec:decl.var}
 変数の宣言を行う。
 
+リファレンス型でない変数の宣言に対応する`varDecl`要素は次の形式に従う。
+
 | \<varDecl\>
 |   name要素
 |   [ value要素([-@sec:program.value]節) ]
@@ -950,6 +952,23 @@ enum型は、`enumType`要素で定義する。`type`要素で、メンバの識
           <intConstant type="int">2</intConstant>
         </value>
       </varDecl>
+
+リファレンス型変数の宣言に対応する`varDecl`要素は次の形式に従う。
+
+| \<varDecl\>
+|   name要素
+|   value要素([-@sec:program.value]節)
+| \</varDecl\>
+
+属性なし
+
+変数宣言を行う識別子の名前を`name`要素で指定する。 以下の子要素を持つ。
+
+* `name`要素　－　
+  宣言する変数に対する`name`要素を持つ。
+* `value`要素　－　
+  初期化式を表現する式の要素([-@sec:expr])を子要素に持つ。
+  リスト初期化の場合、`value`要素に複数の式を指定する。
 
 ## `functionDecl`要素 {#sec:decl.func}
 関数宣言を行う。
