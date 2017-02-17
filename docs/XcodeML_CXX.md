@@ -436,6 +436,16 @@ C\_Front実装でもCtoXcodeML実装でも`symbols`属性内では`value`要素�
 
 	<pointerType type="P0123" ref="int"/>
 
+例:
+
+    const int& x = 0;
+
+は以下のXcodeMLに変換される。
+`basicType`要素によって、"`const int`"を意味するデータ型識別名`B0`が定義されている。
+
+    <basicType type="B0" is_const="1" name="int"/>
+    <pointerType type="P0124" ref="B0" is_lvalue_reference="1" />
+
 ## `functionType`要素 {#sec:type.func}
 `funtionType`要素は、関数型を定義する。
 
