@@ -126,6 +126,12 @@
     </functionCall>
   </xsl:template>
 
+  <xsl:template match="clangDeclarationNameInfo[@class='Identifier']">
+    <Var>
+      <xsl:value-of select="." />
+    </Var>
+  </xsl:template>
+
   <xsl:template match="clangStmt[
     @class='UnaryOperator' and @unaryOpName]">
     <xsl:element name="{@unaryOpName}">
