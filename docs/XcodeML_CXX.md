@@ -1204,8 +1204,8 @@ switch文を表現する。
 
 以下の子要素を持つ。
 
-* `value`要素　－　switchする値を表す式の要素([-@sec:???]章)
-* `body`要素　－　switch文の本体を表す文の要素([-@sec:???]章)であり、多くの場合`compoundStatement`要素([-@sec:stmt.comp]節)となる。`caseLabel`要素([-@sec:stmt.label]節)と`gccRangedCaseLabel`要素([-@sec:stmt.gccrangecase]節)と`defaultLabel`要素([-@sec:stmt.default]節)を含むことができる。
+* `value`要素　－　switchする値を表す式の要素([-@sec:program.value]章)
+* `body`要素　－　switch文の本体を表す文の要素([-@sec:stmt]章)であり、多くの場合`compoundStatement`要素([-@sec:stmt.comp]節)となる。`caseLabel`要素([-@sec:stmt.label]節)と`gccRangedCaseLabel`要素([-@sec:stmt.gccrangecase]節)と`defaultLabel`要素([-@sec:stmt.default]節)を含むことができる。
 
 ## `caseLabel`要素 {#sec:stmt.case}
 switch文のcase文を表す。`switch`要素の中の`body`要素の中の`compoundStatement`の中だけに現れることができる。
@@ -1496,7 +1496,7 @@ switch文のdefaultラベルを表す。`switch`要素の中の`body`要素の�
 
 例:
 
-以下のプログラムで、(1)はメンバ変数へのポインタの宣言、(2)はメンバ関数へのポインタの宣言であり、それぞれメンバ変数、メンバ関数をポイントするよう初期化されている([-@sec:???]節の例参照)。(3)の右辺により`s1.foo`が引数`3`で呼び出され、左辺`s1.data`に代入される。
+以下のプログラムで、(1)はメンバ変数へのポインタの宣言、(2)はメンバ関数へのポインタの宣言であり、それぞれメンバ変数、メンバ関数をポイントするよう初期化されている([-@sec:program.nns]節の例参照)。(3)の右辺により`s1.foo`が引数`3`で呼び出され、左辺`s1.data`に代入される。
 
     struct S {
       int data;
