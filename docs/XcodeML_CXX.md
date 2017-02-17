@@ -970,6 +970,26 @@ enum型は、`enumType`要素で定義する。`type`要素で、メンバの識
   初期化式を表現する式の要素([-@sec:expr])を子要素に持つ。
   リスト初期化の場合、`value`要素に複数の式を指定する。
 
+例:
+
+    int x = 0;
+    int& rx = x;
+
+    <varDecl>
+      <name>x</name>
+      <value>
+        <intConstant type="int">0</intConstant>
+      </value>
+    </varDecl>
+    <varDecl>
+      <name>rx</name>
+      <value>
+        <varAddr type="R1">x</varAddr>
+      </value>
+    </varDecl>
+
+ここで`R1`は"`int&`"に対応するデータ型識別名として定義されている。
+
 ## `functionDecl`要素 {#sec:decl.func}
 関数宣言を行う。
 
