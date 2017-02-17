@@ -754,7 +754,7 @@ enum型は、`enumType`要素で定義する。`type`要素で、メンバの識
 大域的な(翻訳単位全体をスコープとする)変数、関数などの宣言と定義を行う。
 
 | `<globalDeclarations>`
-|   [ {    `varDecl`要素([-@sec:decl.var]節)　or
+|   [ {`varDecl`要素([-@sec:decl.var]節)　or
 | `functionDecl`要素([-@sec:decl.func]節)　or
 | `usingDecl`要素([-@sec:decl.using]節) or
 | `functionDefinition`要素([-@sec:decl.fndef]節) or
@@ -776,7 +776,7 @@ enum型は、`enumType`要素で定義する。`type`要素で、メンバの識
 `compoundStatement`([-@sec:stmt.comp]節)、`class`([-@sec:type.class]節)などをスコープとする変数、関数などの宣言と定義を行う。
 
 | `<declarations>`
-|   [ {    `varDecl`要素([-@sec:decl.var]節)　or
+|   [ {`varDecl`要素([-@sec:decl.var]節)　or
 | `functionDecl`要素([-@sec:decl.func]節)　or
 | `usingDecl`要素([-@sec:decl.using]節) or
 | `functionDefinition`要素([-@sec:decl.fndef]節) or
