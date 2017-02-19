@@ -24,8 +24,11 @@ public:
   Stream& operator <<(const std::string&);
 
 private:
+  void outputIndentation();
+
   std::stringstream ss;
   size_t curIndent;
+  bool alreadyIndented;
   char lastChar;
 };
 

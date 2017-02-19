@@ -38,4 +38,16 @@ Stream& Stream::operator <<(const newline_t&) {
   return *this;
 }
 
+void Stream::outputIndentation() {
+  if (alreadyIndented) {
+    return;
+  }
+
+  for (size_t i = 0; i < curIndent; ++i) {
+    ss << "\t";
+  }
+  lastChar = '\t';
+  alreadyIndented = true;
+}
+
 }
