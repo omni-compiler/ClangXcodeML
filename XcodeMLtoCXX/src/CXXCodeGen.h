@@ -17,6 +17,8 @@ class Stream {
 public:
   Stream() = default;
   std::string str();
+  void indent(size_t);
+  void unindent(size_t);
   Stream& operator <<(const space_t&);
   Stream& operator <<(const newline_t&);
   Stream& operator <<(const std::string&);
