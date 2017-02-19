@@ -37,6 +37,32 @@ Stream& Stream::operator <<(const newline_t&) {
   return *this;
 }
 
+static bool shouldInterleaveSpace(char last, char next) {
+  const std::string operators = "+-*/%^&|!><";
+  const std::string repeatables = "+-><&|=";
+  return
+    (isalpha(last) && isalpha(next)) ||
+    (operators.find(last) != std::string::npos && next == '=') ||
+    (last == next && repeatables.find(last) != std::string::npos) ||
+    (last == '-' && next == '>') || // `->`
+    (last == '>' && next == '*'); // `->*`
+}
+
+Stream& Stream::operator <<(const std::string& token) {
+  if (token.empty()) {
+    return *this;
+  }
+
+  outputIndentation();
+
+  if (shouldInterleaveSpace(lastChar, token[0])) {
+    emit(" ");
+  }
+  emit(token);
+
+  return *this;
+}
+
 void Stream::outputIndentation() {
   if (alreadyIndented) {
     return;
