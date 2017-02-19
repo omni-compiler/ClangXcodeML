@@ -18,4 +18,13 @@ std::string Stream::str() {
   return  ss.str();
 }
 
+Stream& Stream::operator <<(const space_t&) {
+  const std::string separaters = "\n\t ";
+  if (separaters.find(lastChar) != std::string::npos) {
+    ss << " ";
+    lastChar = " ";
+  }
+  return *this;
+}
+
 }
