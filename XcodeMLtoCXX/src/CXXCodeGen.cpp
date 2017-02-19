@@ -51,4 +51,12 @@ void Stream::outputIndentation() {
   alreadyIndented = true;
 }
 
+void Stream::emit(const std::string& str) {
+  if (str.empty()) {
+    return;
+  }
+  ss << str;
+  lastChar = str.back();
+}
+
 }

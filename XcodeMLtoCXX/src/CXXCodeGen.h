@@ -25,6 +25,7 @@ public:
 
 private:
   void outputIndentation();
+  void emit(const std::string&);
 
   std::stringstream ss;
   size_t curIndent;
