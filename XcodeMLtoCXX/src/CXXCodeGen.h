@@ -15,7 +15,7 @@ extern const newline_t newline;
 
 class Stream {
 public:
-  Stream() = default;
+  Stream();
   std::string str();
   void indent(size_t);
   void unindent(size_t);

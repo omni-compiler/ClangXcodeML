@@ -10,6 +10,13 @@ const space_t space = {};
 
 const newline_t newline = {};
 
+Stream::Stream():
+  ss(),
+  curIndent(0),
+  alreadyIndented(false),
+  lastChar('\n')
+{}
+
 std::string Stream::str() {
   return  ss.str();
 }
