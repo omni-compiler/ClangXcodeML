@@ -27,4 +27,10 @@ Stream& Stream::operator <<(const space_t&) {
   return *this;
 }
 
+Stream& Stream::operator <<(const newline_t&) {
+  ss << "\n";
+  lastChar = "\n";
+  return *this;
+}
+
 }
