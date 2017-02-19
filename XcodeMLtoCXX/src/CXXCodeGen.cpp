@@ -26,15 +26,13 @@ void Stream::unindent(size_t amount) {
 Stream& Stream::operator <<(const space_t&) {
   const std::string separaters = "\n\t ";
   if (separaters.find(lastChar) != std::string::npos) {
-    ss << " ";
-    lastChar = " ";
+    emit(" ");
   }
   return *this;
 }
 
 Stream& Stream::operator <<(const newline_t&) {
-  ss << "\n";
-  lastChar = "\n";
+  emit("\n");
   alreadyIndented = false;
   return *this;
 }
