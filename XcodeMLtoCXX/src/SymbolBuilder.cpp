@@ -49,7 +49,7 @@ static void emitStructDefinition(
     const auto memberType = src.typeTable.at(member.type());
     ss << makeDecl(memberType, member.name(), src.typeTable);
     if (member.isBitField()) {
-      ss << " : " << member.getSize();
+      ss << " : " << std::to_string(member.getSize());
     }
     ss << ";" << cxxgen::newline;
   }
