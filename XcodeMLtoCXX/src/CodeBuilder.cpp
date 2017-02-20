@@ -106,15 +106,8 @@ DEFINE_CB(EmptyProc) {
   w.walkChildren(node, src, ss);
 }
 
-DEFINE_CB(outputIndentation) {
-  for (unsigned int i = 0; i < src.indentation; ++i) {
-    ss << '\t';
-  }
-}
-
 CodeBuilder::Procedure outputStringLn(std::string str) {
   return [str](CB_ARGS) {
-    outputIndentation(w, node, src, ss);
     ss << str << cxxgen::newline;
   };
 }
@@ -291,7 +284,6 @@ DEFINE_CB(functionDefinitionProc) {
    * instead of simply using Function::makeDeclaration(...).
    */
   (handleSymTableStack(outputParams))(w, node, src, declarator);
-  outputIndentation(w, node, src, ss);
   if (kind == "constructor" || kind == "destructor") {
     // Constructor and destructor have no return type.
     ss << declarator.str();
@@ -352,7 +344,6 @@ const auto compoundStatementProc = handleScope;
 DEFINE_CB(whileStatementProc) {
   auto cond = findFirst(node, "condition", src.ctxt),
        body = findFirst(node, "body", src.ctxt);
-  outputIndentation(w, node, src, ss);
   ss << "while (";
   w.walk(cond, src, ss);
   ss << ")" << cxxgen::newline;
@@ -362,10 +353,8 @@ DEFINE_CB(whileStatementProc) {
 DEFINE_CB(doStatementProc) {
   auto cond = findFirst(node, "condition", src.ctxt),
        body = findFirst(node, "body", src.ctxt);
-  outputIndentation(w, node, src, ss);
   ss << "do ";
   handleScope(w, body, src, ss);
-  outputIndentation(w, node, src, ss);
   ss << "while (";
   w.walk(cond, src, ss);
   ss  << ");" << cxxgen::newline;
@@ -376,7 +365,6 @@ DEFINE_CB(forStatementProc) {
        cond = findFirst(node, "condition", src.ctxt),
        iter = findFirst(node, "iter", src.ctxt),
        body = findFirst(node, "body", src.ctxt);
-  outputIndentation(w, node, src, ss);
   ss << "for (";
   if (init) {
     w.walk(init, src, ss);
@@ -396,12 +384,10 @@ DEFINE_CB(forStatementProc) {
 DEFINE_CB(returnStatementProc) {
   xmlNodePtr child = xmlFirstElementChild(node);
   if (child) {
-    outputIndentation(w, node, src, ss);
     ss << "return ";
     w.walkAll(child, src, ss);
     ss << ";" << cxxgen::newline;
   } else {
-    outputIndentation(w, node, src, ss);
     ss << "return;" << cxxgen::newline;
   }
 }
@@ -444,7 +430,6 @@ DEFINE_CB(varDeclProc) {
   xmlNodePtr nameElem = findFirst(node, "name", src.ctxt);
   XMLString name(xmlNodeGetContent(nameElem));
   auto type = getIdentType(src, name);
-  outputIndentation(w, node, src, ss);
   ss << makeDecl(type, name, src.typeTable);
   xmlNodePtr valueElem = findFirst(node, "value", src.ctxt);
   if (valueElem) {
