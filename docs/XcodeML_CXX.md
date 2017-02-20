@@ -414,7 +414,7 @@ C\_Front実装でもCtoXcodeML実装でも`symbols`属性内では`value`要素�
 
 属性(必須): `type`, `ref`
 
-属性(optional): `is_lvalue_reference`,`is_rvalue_reference`, データ型定義要素属性
+属性(optional): `reference`, データ型定義要素属性
 
 以下の属性を持つ。
 
