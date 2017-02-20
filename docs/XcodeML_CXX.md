@@ -952,10 +952,10 @@ enum型は、`enumType`要素で定義する。`type`要素で、メンバの識
 
 リファレンス型変数の宣言に対応する`varDecl`要素は次の形式に従う。
 
-| \<varDecl\>
-|   name要素
-|   value要素([-@sec:program.value]節)
-| \</varDecl\>
+| `<varDecl>`
+|   `name`要素
+|   `value`要素([-@sec:program.value]節)
+| `</varDecl>`
 
 属性なし
 
