@@ -11,7 +11,6 @@ public:
   XcodeMl::Environment typeTable;
   /*! SymbolEntry stack in current scope. */
   SymbolMap symTable;
-  unsigned int indentation;
 };
 
 #endif /* !SOURCEINFO_H */

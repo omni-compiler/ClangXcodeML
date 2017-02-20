@@ -212,10 +212,10 @@ CodeBuilder::Procedure handleIndentation(
   const CodeBuilder::Procedure mainProc
 ) {
   const CodeBuilder::Procedure indent = [](CB_ARGS) {
-    src.indentation++;
+    ss.indent(1);
   };
   const CodeBuilder::Procedure outdent = [](CB_ARGS) {
-    src.indentation--;
+    ss.unindent(1);
   };
   return merge(indent, merge(mainProc, outdent));
 }
@@ -496,8 +496,7 @@ void buildCode(
   SourceInfo src = {
     ctxt,
     parseTypeTable(rootNode, ctxt, ss),
-    parseGlobalSymbols(rootNode, ctxt, ss),
-    0
+    parseGlobalSymbols(rootNode, ctxt, ss)
   };
 
 
