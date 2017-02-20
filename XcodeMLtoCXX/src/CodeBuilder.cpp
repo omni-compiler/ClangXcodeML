@@ -22,7 +22,7 @@
 
 namespace cxxgen = CXXCodeGen;
 
-using CodeBuilder = XMLWalker<SourceInfo&, std::stringstream&>;
+using CodeBuilder = XMLWalker<SourceInfo&, cxxgen::Stream&>;
 
 /*!
  * \brief Traverse XcodeML node and make SymbolEntry.
@@ -94,7 +94,7 @@ SymbolMap parseGlobalSymbols(
 #define CB_ARGS const CodeBuilder& w __attribute__((unused)), \
                 xmlNodePtr node __attribute__((unused)), \
                 SourceInfo& src __attribute__((unused)), \
-                std::stringstream& ss __attribute__((unused))
+                cxxgen::Stream& ss __attribute__((unused))
 /*!
  * \brief Define new CodeBuilder::Procedure named \c name.
  */
@@ -274,7 +274,7 @@ DEFINE_CB(functionDefinitionProc) {
   );
   const XMLString name(xmlNodeGetContent(nameElem));
   const XMLString kind(nameElem->name);
-  std::stringstream declarator;
+  cxxgen::Stream declarator;
   if (kind == "name" || kind == "operator") {
     declarator << name;
   } else if (kind == "constructor") {
@@ -523,7 +523,10 @@ void buildCode(
   }
   ss << "// end of forward declarations" << std::endl << std::endl;
 
+  cxxgen::Stream out;
   xmlNodePtr globalSymbols = findFirst(rootNode, "/XcodeProgram/globalSymbols", src.ctxt);
   buildSymbols(globalSymbols, src, ss);
-  CXXBuilder.walkAll(rootNode, src, ss);
+  CXXBuilder.walkAll(rootNode, src, out);
+
+  ss << out.str();
 }

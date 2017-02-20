@@ -21,11 +21,11 @@
 
 namespace cxxgen = CXXCodeGen;
 
-using SymbolBuilder = AttrProc<SourceInfo&, std::stringstream&>;
+using SymbolBuilder = AttrProc<SourceInfo&, cxxgen::Stream&>;
 
 #define SB_ARGS xmlNodePtr node __attribute__((unused)), \
                 SourceInfo& src __attribute__((unused)), \
-                std::stringstream& ss __attribute__((unused))
+                cxxgen::Stream& ss __attribute__((unused))
 
 #define DEFINE_SB(name) static void name(SB_ARGS)
 
@@ -41,7 +41,7 @@ DEFINE_SB(typedefNameProc) {
 static void emitStructDefinition(
     const SourceInfo& src,
     const XcodeMl::TypeRef type,
-    std::stringstream& ss
+    cxxgen::Stream& ss
 ) {
   XcodeMl::Struct* structType = llvm::cast<XcodeMl::Struct>(type.get());
   ss << "struct " << structType->tagName() << "{" << std::endl;
@@ -74,5 +74,7 @@ void buildSymbols(
     SourceInfo& src,
     std::stringstream& ss
 ) {
-  CXXSymbolBuilder.walkAll(node, src, ss);
+  cxxgen::Stream out;
+  CXXSymbolBuilder.walkAll(node, src, out);
+  ss << out.str();
 }
