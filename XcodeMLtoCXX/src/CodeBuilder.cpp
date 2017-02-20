@@ -10,6 +10,7 @@
 #include "XMLString.h"
 #include "XMLWalker.h"
 #include "AttrProc.h"
+#include "CXXCodeGen.h"
 #include "Symbol.h"
 #include "XcodeMlType.h"
 #include "XcodeMlEnvironment.h"
@@ -18,6 +19,8 @@
 #include "CodeBuilder.h"
 #include "SymbolBuilder.h"
 #include "LibXMLUtil.h"
+
+namespace cxxgen = CXXCodeGen;
 
 using CodeBuilder = XMLWalker<SourceInfo&, std::stringstream&>;
 

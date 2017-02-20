@@ -11,12 +11,15 @@
 #include "XMLString.h"
 #include "XMLWalker.h"
 #include "AttrProc.h"
+#include "CXXCodeGen.h"
 #include "Symbol.h"
 #include "XcodeMlType.h"
 #include "XcodeMlEnvironment.h"
 #include "SourceInfo.h"
 #include "TypeAnalyzer.h"
 #include "SymbolBuilder.h"
+
+namespace cxxgen = CXXCodeGen;
 
 using SymbolBuilder = AttrProc<SourceInfo&, std::stringstream&>;
 
