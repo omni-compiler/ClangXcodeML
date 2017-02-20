@@ -160,7 +160,7 @@ CodeBuilder::Procedure showBinOp(std::string Operator) {
 }
 
 const CodeBuilder::Procedure EmptySNCProc = [](CB_ARGS) {
-  ss << xmlNodeGetContent(node);
+  ss << XMLString(xmlNodeGetContent(node));
 };
 
 /*!
@@ -318,7 +318,7 @@ DEFINE_CB(functionDeclProc) {
 
 DEFINE_CB(memberRefProc) {
   w.walkChildren(node, src, ss);
-  ss << "." << xmlGetProp(node, BAD_CAST "member");
+  ss << "." << XMLString(xmlGetProp(node, BAD_CAST "member"));
 }
 
 DEFINE_CB(memberAddrProc) {
@@ -328,7 +328,7 @@ DEFINE_CB(memberAddrProc) {
 
 DEFINE_CB(memberPointerRefProc) {
   w.walkChildren(node, src, ss);
-  ss << ".*" << xmlGetProp(node, BAD_CAST "name");
+  ss << ".*" << XMLString(xmlGetProp(node, BAD_CAST "name"));
 }
 
 DEFINE_CB(compoundValueProc) {
