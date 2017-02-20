@@ -30,7 +30,7 @@ OBJNAMES = XcodeMlType.o \
 OBJS = $(addprefix $(XCODEMLTOCXXSRCDIR)/,$(OBJNAMES))
 
 $(OBJS):
-	$(MAKE) -C $(XCODEMLTOCXXSRCDIR) $@
+	$(MAKE) -C $(XCODEMLTOCXXSRCDIR) $(notdir $@)
 
 %.out: %.cpp $(OBJS)
 	$(CXX) $(CXXFLAGS) $(OBJS) $(USEDLIBS) -o$@ $<
