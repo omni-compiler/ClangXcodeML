@@ -10,6 +10,7 @@ USEDLIBS += $(OTHERLIBS)
 XCODEMLTOCXX = ../XcodeMLtoCXX
 
 OBJS = XcodeMlType.o \
+	CXXCodeGen.o \
 	XcodeMLtoCXX.o \
 	LibXMLUtil.o \
 	CodeBuilder.o \

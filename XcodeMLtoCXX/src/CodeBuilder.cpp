@@ -10,6 +10,7 @@
 #include "XMLString.h"
 #include "XMLWalker.h"
 #include "AttrProc.h"
+#include "CXXCodeGen.h"
 #include "Symbol.h"
 #include "XcodeMlType.h"
 #include "XcodeMlEnvironment.h"
@@ -19,7 +20,9 @@
 #include "SymbolBuilder.h"
 #include "LibXMLUtil.h"
 
-using CodeBuilder = XMLWalker<SourceInfo&, std::stringstream&>;
+namespace cxxgen = CXXCodeGen;
+
+using CodeBuilder = XMLWalker<SourceInfo&, cxxgen::Stream&>;
 
 /*!
  * \brief Traverse XcodeML node and make SymbolEntry.
@@ -91,7 +94,7 @@ SymbolMap parseGlobalSymbols(
 #define CB_ARGS const CodeBuilder& w __attribute__((unused)), \
                 xmlNodePtr node __attribute__((unused)), \
                 SourceInfo& src __attribute__((unused)), \
-                std::stringstream& ss __attribute__((unused))
+                cxxgen::Stream& ss __attribute__((unused))
 /*!
  * \brief Define new CodeBuilder::Procedure named \c name.
  */
@@ -103,16 +106,9 @@ DEFINE_CB(EmptyProc) {
   w.walkChildren(node, src, ss);
 }
 
-DEFINE_CB(outputIndentation) {
-  for (unsigned int i = 0; i < src.indentation; ++i) {
-    ss << '\t';
-  }
-}
-
 CodeBuilder::Procedure outputStringLn(std::string str) {
   return [str](CB_ARGS) {
-    outputIndentation(w, node, src, ss);
-    ss << str << std::endl;
+    ss << str << cxxgen::newline;
   };
 }
 
@@ -157,7 +153,7 @@ CodeBuilder::Procedure showBinOp(std::string Operator) {
 }
 
 const CodeBuilder::Procedure EmptySNCProc = [](CB_ARGS) {
-  ss << xmlNodeGetContent(node);
+  ss << XMLString(xmlNodeGetContent(node));
 };
 
 /*!
@@ -216,10 +212,10 @@ CodeBuilder::Procedure handleIndentation(
   const CodeBuilder::Procedure mainProc
 ) {
   const CodeBuilder::Procedure indent = [](CB_ARGS) {
-    src.indentation++;
+    ss.indent(1);
   };
   const CodeBuilder::Procedure outdent = [](CB_ARGS) {
-    src.indentation--;
+    ss.unindent(1);
   };
   return merge(indent, merge(mainProc, outdent));
 }
@@ -253,14 +249,16 @@ DEFINE_CB(emitClassDefinition) {
   const auto type = src.typeTable.at(typeName);
   XcodeMl::ClassType* classType =
     llvm::cast<XcodeMl::ClassType>(type.get());
-  ss << "class " << classType->name() << "{" << std::endl;
+  ss << "class " << classType->name() << "{" << cxxgen::newline;
+  ss.indent(1);
   for (auto& member : classType->members()) {
     ss << string_of_accessSpec(member.access) << ": ";
     const auto memberType = src.typeTable.at(member.type);
     ss << makeDecl(memberType, member.name, src.typeTable)
-       << ";" << std::endl;
+       << ";" << cxxgen::newline;
   }
-  ss << "};" << std::endl;
+  ss.unindent(1);
+  ss << "};" << cxxgen::newline;
 }
 
 DEFINE_CB(functionDefinitionProc) {
@@ -271,7 +269,7 @@ DEFINE_CB(functionDefinitionProc) {
   );
   const XMLString name(xmlNodeGetContent(nameElem));
   const XMLString kind(nameElem->name);
-  std::stringstream declarator;
+  cxxgen::Stream declarator;
   if (kind == "name" || kind == "operator") {
     declarator << name;
   } else if (kind == "constructor") {
@@ -286,7 +284,6 @@ DEFINE_CB(functionDefinitionProc) {
    * instead of simply using Function::makeDeclaration(...).
    */
   (handleSymTableStack(outputParams))(w, node, src, declarator);
-  outputIndentation(w, node, src, ss);
   if (kind == "constructor" || kind == "destructor") {
     // Constructor and destructor have no return type.
     ss << declarator.str();
@@ -295,9 +292,11 @@ DEFINE_CB(functionDefinitionProc) {
     auto returnType = src.typeTable.getReturnType(fnTypeName);
     ss << makeDecl(returnType, declarator.str(), src.typeTable);
   }
-  ss << "{" << std::endl;
+  ss << "{" << cxxgen::newline;
+  ss.indent(1);
   w.walkChildren(node, src, ss);
-  ss << "}" << std::endl;
+  ss.unindent(1);
+  ss << "}" << cxxgen::newline;
 }
 
 DEFINE_CB(functionDeclProc) {
@@ -305,17 +304,17 @@ DEFINE_CB(functionDeclProc) {
   try {
     const auto fnType = getIdentType(src, name);
     ss << makeDecl(fnType, name, src.typeTable)
-       << ";" << std::endl;
+       << ";" << cxxgen::newline;
   } catch (const std::runtime_error& e) {
     ss << "/* In <functionDecl>: "
        << e.what()
-       << " */" << std::endl;
+       << " */" << cxxgen::newline;
   }
 }
 
 DEFINE_CB(memberRefProc) {
   w.walkChildren(node, src, ss);
-  ss << "." << xmlGetProp(node, BAD_CAST "member");
+  ss << "." << XMLString(xmlGetProp(node, BAD_CAST "member"));
 }
 
 DEFINE_CB(memberAddrProc) {
@@ -325,12 +324,14 @@ DEFINE_CB(memberAddrProc) {
 
 DEFINE_CB(memberPointerRefProc) {
   w.walkChildren(node, src, ss);
-  ss << ".*" << xmlGetProp(node, BAD_CAST "name");
+  ss << ".*" << XMLString(xmlGetProp(node, BAD_CAST "name"));
 }
 
 DEFINE_CB(compoundValueProc) {
   ss << "{";
+  ss.indent(1);
   w.walkChildren(node, src, ss);
+  ss.unindent(1);
   ss << "}";
 }
 
@@ -343,23 +344,20 @@ const auto compoundStatementProc = handleScope;
 DEFINE_CB(whileStatementProc) {
   auto cond = findFirst(node, "condition", src.ctxt),
        body = findFirst(node, "body", src.ctxt);
-  outputIndentation(w, node, src, ss);
   ss << "while (";
   w.walk(cond, src, ss);
-  ss << ")" << std::endl;
+  ss << ")" << cxxgen::newline;
   handleScope(w, body, src, ss);
 }
 
 DEFINE_CB(doStatementProc) {
   auto cond = findFirst(node, "condition", src.ctxt),
        body = findFirst(node, "body", src.ctxt);
-  outputIndentation(w, node, src, ss);
   ss << "do ";
   handleScope(w, body, src, ss);
-  outputIndentation(w, node, src, ss);
   ss << "while (";
   w.walk(cond, src, ss);
-  ss  << ");" << std::endl;
+  ss  << ");" << cxxgen::newline;
 }
 
 DEFINE_CB(forStatementProc) {
@@ -367,7 +365,6 @@ DEFINE_CB(forStatementProc) {
        cond = findFirst(node, "condition", src.ctxt),
        iter = findFirst(node, "iter", src.ctxt),
        body = findFirst(node, "body", src.ctxt);
-  outputIndentation(w, node, src, ss);
   ss << "for (";
   if (init) {
     w.walk(init, src, ss);
@@ -380,21 +377,25 @@ DEFINE_CB(forStatementProc) {
   if (iter) {
     w.walk(iter, src, ss);
   }
-  ss << ")" << std::endl;
+  ss << ")" << cxxgen::newline;
   handleScope(w, body, src, ss);
 }
 
 DEFINE_CB(returnStatementProc) {
   xmlNodePtr child = xmlFirstElementChild(node);
   if (child) {
-    outputIndentation(w, node, src, ss);
     ss << "return ";
     w.walkAll(child, src, ss);
-    ss << ";" << std::endl;
+    ss << ";" << cxxgen::newline;
   } else {
-    outputIndentation(w, node, src, ss);
-    ss << "return;" << std::endl;
+    ss << "return;" << cxxgen::newline;
   }
+}
+
+DEFINE_CB(exprStatementProc) {
+  const auto showChild = showChildElem("", ";");
+  showChild(w, node, src, ss);
+  ss << cxxgen::newline;
 }
 
 DEFINE_CB(functionCallProc) {
@@ -435,14 +436,13 @@ DEFINE_CB(varDeclProc) {
   xmlNodePtr nameElem = findFirst(node, "name", src.ctxt);
   XMLString name(xmlNodeGetContent(nameElem));
   auto type = getIdentType(src, name);
-  outputIndentation(w, node, src, ss);
   ss << makeDecl(type, name, src.typeTable);
   xmlNodePtr valueElem = findFirst(node, "value", src.ctxt);
   if (valueElem) {
     ss << " = ";
     w.walk(valueElem, src, ss);
   }
-  ss << ";" << std::endl;
+  ss << ";" << cxxgen::newline;
 }
 
 const CodeBuilder CXXBuilder({
@@ -479,7 +479,7 @@ const CodeBuilder CXXBuilder({
   { "functionCall", functionCallProc },
   { "arguments", argumentsProc },
   { "condExpr", condExprProc },
-  { "exprStatement", showChildElem("", ";\n") },
+  { "exprStatement", exprStatementProc },
   { "returnStatement", returnStatementProc },
   { "varDecl", varDeclProc },
   { "classDecl", emitClassDefinition },
@@ -502,8 +502,7 @@ void buildCode(
   SourceInfo src = {
     ctxt,
     parseTypeTable(rootNode, ctxt, ss),
-    parseGlobalSymbols(rootNode, ctxt, ss),
-    0
+    parseGlobalSymbols(rootNode, ctxt, ss)
   };
 
 
@@ -520,7 +519,10 @@ void buildCode(
   }
   ss << "// end of forward declarations" << std::endl << std::endl;
 
+  cxxgen::Stream out;
   xmlNodePtr globalSymbols = findFirst(rootNode, "/XcodeProgram/globalSymbols", src.ctxt);
   buildSymbols(globalSymbols, src, ss);
-  CXXBuilder.walkAll(rootNode, src, ss);
+  CXXBuilder.walkAll(rootNode, src, out);
+
+  ss << out.str();
 }

@@ -20,6 +20,7 @@ TARGETS = $(patsubst %.cpp,%.out,$(wildcard *.cpp))
 OBJNAMES = XcodeMlType.o \
 	LibXMLUtil.o \
 	CodeBuilder.o \
+	CXXCodeGen.o \
 	TypeAnalyzer.o \
 	XMLString.o \
 	XcodeMlEnvironment.o \
@@ -29,7 +30,7 @@ OBJNAMES = XcodeMlType.o \
 OBJS = $(addprefix $(XCODEMLTOCXXSRCDIR)/,$(OBJNAMES))
 
 $(OBJS):
-	$(MAKE) -C $(XCODEMLTOCXXSRCDIR) $@
+	$(MAKE) -C $(XCODEMLTOCXXSRCDIR) $(notdir $@)
 
 %.out: %.cpp $(OBJS)
 	$(CXX) $(CXXFLAGS) $(OBJS) $(USEDLIBS) -o$@ $<
