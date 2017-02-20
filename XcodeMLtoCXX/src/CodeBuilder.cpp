@@ -392,6 +392,12 @@ DEFINE_CB(returnStatementProc) {
   }
 }
 
+DEFINE_CB(exprStatementProc) {
+  const auto showChild = showChildElem("", ";");
+  showChild(w, node, src, ss);
+  ss << cxxgen::newline;
+}
+
 DEFINE_CB(functionCallProc) {
   xmlNodePtr function = findFirst(node, "function/*", src.ctxt);
   w.walk(function, src, ss);
@@ -473,7 +479,7 @@ const CodeBuilder CXXBuilder({
   { "functionCall", functionCallProc },
   { "arguments", argumentsProc },
   { "condExpr", condExprProc },
-  { "exprStatement", showChildElem("", ";\n") },
+  { "exprStatement", exprStatementProc },
   { "returnStatement", returnStatementProc },
   { "varDecl", varDeclProc },
   { "classDecl", emitClassDefinition },
