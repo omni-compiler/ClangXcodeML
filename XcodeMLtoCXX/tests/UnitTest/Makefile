@@ -20,6 +20,7 @@ TARGETS = $(patsubst %.cpp,%.out,$(wildcard *.cpp))
 OBJNAMES = XcodeMlType.o \
 	LibXMLUtil.o \
 	CodeBuilder.o \
+	CXXCodeGen.o \
 	TypeAnalyzer.o \
 	XMLString.o \
 	XcodeMlEnvironment.o \
