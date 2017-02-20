@@ -1,7 +1,7 @@
 ﻿% XcodeML/C++ 仕様書
   V1.3alpha J
 % XcalableMP/Omni Compiler Project
-% Sep 30, 2016
+%
 
 ---
 linkReferences: True
