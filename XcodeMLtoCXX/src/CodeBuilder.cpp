@@ -115,7 +115,7 @@ DEFINE_CB(outputIndentation) {
 CodeBuilder::Procedure outputStringLn(std::string str) {
   return [str](CB_ARGS) {
     outputIndentation(w, node, src, ss);
-    ss << str << std::endl;
+    ss << str << cxxgen::newline;
   };
 }
 
@@ -256,14 +256,14 @@ DEFINE_CB(emitClassDefinition) {
   const auto type = src.typeTable.at(typeName);
   XcodeMl::ClassType* classType =
     llvm::cast<XcodeMl::ClassType>(type.get());
-  ss << "class " << classType->name() << "{" << std::endl;
+  ss << "class " << classType->name() << "{" << cxxgen::newline;
   for (auto& member : classType->members()) {
     ss << string_of_accessSpec(member.access) << ": ";
     const auto memberType = src.typeTable.at(member.type);
     ss << makeDecl(memberType, member.name, src.typeTable)
-       << ";" << std::endl;
+       << ";" << cxxgen::newline;
   }
-  ss << "};" << std::endl;
+  ss << "};" << cxxgen::newline;
 }
 
 DEFINE_CB(functionDefinitionProc) {
@@ -298,9 +298,9 @@ DEFINE_CB(functionDefinitionProc) {
     auto returnType = src.typeTable.getReturnType(fnTypeName);
     ss << makeDecl(returnType, declarator.str(), src.typeTable);
   }
-  ss << "{" << std::endl;
+  ss << "{" << cxxgen::newline;
   w.walkChildren(node, src, ss);
-  ss << "}" << std::endl;
+  ss << "}" << cxxgen::newline;
 }
 
 DEFINE_CB(functionDeclProc) {
@@ -308,11 +308,11 @@ DEFINE_CB(functionDeclProc) {
   try {
     const auto fnType = getIdentType(src, name);
     ss << makeDecl(fnType, name, src.typeTable)
-       << ";" << std::endl;
+       << ";" << cxxgen::newline;
   } catch (const std::runtime_error& e) {
     ss << "/* In <functionDecl>: "
        << e.what()
-       << " */" << std::endl;
+       << " */" << cxxgen::newline;
   }
 }
 
@@ -349,7 +349,7 @@ DEFINE_CB(whileStatementProc) {
   outputIndentation(w, node, src, ss);
   ss << "while (";
   w.walk(cond, src, ss);
-  ss << ")" << std::endl;
+  ss << ")" << cxxgen::newline;
   handleScope(w, body, src, ss);
 }
 
@@ -362,7 +362,7 @@ DEFINE_CB(doStatementProc) {
   outputIndentation(w, node, src, ss);
   ss << "while (";
   w.walk(cond, src, ss);
-  ss  << ");" << std::endl;
+  ss  << ");" << cxxgen::newline;
 }
 
 DEFINE_CB(forStatementProc) {
@@ -383,7 +383,7 @@ DEFINE_CB(forStatementProc) {
   if (iter) {
     w.walk(iter, src, ss);
   }
-  ss << ")" << std::endl;
+  ss << ")" << cxxgen::newline;
   handleScope(w, body, src, ss);
 }
 
@@ -393,10 +393,10 @@ DEFINE_CB(returnStatementProc) {
     outputIndentation(w, node, src, ss);
     ss << "return ";
     w.walkAll(child, src, ss);
-    ss << ";" << std::endl;
+    ss << ";" << cxxgen::newline;
   } else {
     outputIndentation(w, node, src, ss);
-    ss << "return;" << std::endl;
+    ss << "return;" << cxxgen::newline;
   }
 }
 
@@ -445,7 +445,7 @@ DEFINE_CB(varDeclProc) {
     ss << " = ";
     w.walk(valueElem, src, ss);
   }
-  ss << ";" << std::endl;
+  ss << ";" << cxxgen::newline;
 }
 
 const CodeBuilder CXXBuilder({

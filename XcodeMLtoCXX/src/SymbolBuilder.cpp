@@ -35,7 +35,7 @@ DEFINE_SB(typedefNameProc) {
       static_cast<XMLString>(xmlGetProp(node, BAD_CAST "type")));
   ss << "typedef "
      << makeDecl(type, alias, src.typeTable)
-     << ";" << std::endl;
+     << ";" << cxxgen::newline;
 }
 
 static void emitStructDefinition(
@@ -44,16 +44,16 @@ static void emitStructDefinition(
     cxxgen::Stream& ss
 ) {
   XcodeMl::Struct* structType = llvm::cast<XcodeMl::Struct>(type.get());
-  ss << "struct " << structType->tagName() << "{" << std::endl;
+  ss << "struct " << structType->tagName() << "{" << cxxgen::newline;
   for (auto member : structType->members()) {
     const auto memberType = src.typeTable.at(member.type());
     ss << makeDecl(memberType, member.name(), src.typeTable);
     if (member.isBitField()) {
       ss << " : " << member.getSize();
     }
-    ss << ";" << std::endl;
+    ss << ";" << cxxgen::newline;
   }
-  ss << "};" << std::endl;
+  ss << "};" << cxxgen::newline;
 }
 
 DEFINE_SB(tagnameProc) {
