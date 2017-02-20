@@ -341,7 +341,6 @@ C\_Front実装でもCtoXcodeML実装でも`symbols`属性内では`value`要素�
 * `is_volatile`　－　そのデータ型がvolatile修飾子をもつかどうか
 * `is_restrict`　－　そのデータ型がrestrict修飾子をもつかどうか
 * `is_static`　－　そのデータ型がstatic属性をもつかどうか
-* `reference`(C++)　—　属性値がlvalueのとき左辺値参照、rvalueのとき右辺値参照を意味する。属性値が`default`または属性が省略されているとき文脈依存であることを意味するが、`lvalue`または`rvalue`の値をもつことが望ましい。引数の値渡し(通常の場合)に対しては、`defalut`とする。
 * `access`(C++)　－　アクセス指定子に対応。"`private`", "`protected`"または"`public`"
 * `is_virtual`(C++)　—　そのメンバ関数がvirtual属性をもつかどうか。
 * `is_userDefined`(C++)　—　その演算がユーザ定義によりオーバーロードされているかどうか
