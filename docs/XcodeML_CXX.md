@@ -421,12 +421,10 @@ C\_Front実装でもCtoXcodeML実装でも`symbols`属性内では`value`要素�
 
 * `type`　－　この型に与えられたデータ型識別名
 * `ref`　－　このポインタが指すデータのデータ型識別名
-* `is_lvalue_reference`　－　
-  真(`1`または`true`)のときlvalueリファレンス型であることを意味する。
-  省略時の値は`false`である。
-* `is_rvalue_reference`　－　
-  真(`1`または`true`)のときrvalueリファレンス型であることを意味する。
-  省略時の値は`false`である。
+* `reference`　－　
+  属性が指定されたとき、この型がリファレンス型であることを表す。
+  "`lvalue`"のときlvalueリファレンス型であることを意味し、
+  "`rvalue`"のときrvalueリファレンス型であることを意味する。
 
 `pointerType`要素は、子要素を持たない。
 
