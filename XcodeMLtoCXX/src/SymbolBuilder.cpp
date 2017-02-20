@@ -45,6 +45,7 @@ static void emitStructDefinition(
 ) {
   XcodeMl::Struct* structType = llvm::cast<XcodeMl::Struct>(type.get());
   ss << "struct " << structType->tagName() << "{" << cxxgen::newline;
+  ss.indent(1);
   for (auto member : structType->members()) {
     const auto memberType = src.typeTable.at(member.type());
     ss << makeDecl(memberType, member.name(), src.typeTable);
@@ -53,6 +54,7 @@ static void emitStructDefinition(
     }
     ss << ";" << cxxgen::newline;
   }
+  ss.unindent(1);
   ss << "};" << cxxgen::newline;
 }
 

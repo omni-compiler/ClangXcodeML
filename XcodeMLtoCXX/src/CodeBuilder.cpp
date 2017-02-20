@@ -257,12 +257,14 @@ DEFINE_CB(emitClassDefinition) {
   XcodeMl::ClassType* classType =
     llvm::cast<XcodeMl::ClassType>(type.get());
   ss << "class " << classType->name() << "{" << cxxgen::newline;
+  ss.indent(1);
   for (auto& member : classType->members()) {
     ss << string_of_accessSpec(member.access) << ": ";
     const auto memberType = src.typeTable.at(member.type);
     ss << makeDecl(memberType, member.name, src.typeTable)
        << ";" << cxxgen::newline;
   }
+  ss.unindent(1);
   ss << "};" << cxxgen::newline;
 }
 
@@ -299,7 +301,9 @@ DEFINE_CB(functionDefinitionProc) {
     ss << makeDecl(returnType, declarator.str(), src.typeTable);
   }
   ss << "{" << cxxgen::newline;
+  ss.indent(1);
   w.walkChildren(node, src, ss);
+  ss.unindent(1);
   ss << "}" << cxxgen::newline;
 }
 
@@ -333,7 +337,9 @@ DEFINE_CB(memberPointerRefProc) {
 
 DEFINE_CB(compoundValueProc) {
   ss << "{";
+  ss.indent(1);
   w.walkChildren(node, src, ss);
+  ss.unindent(1);
   ss << "}";
 }
 
