@@ -17,6 +17,8 @@ USEDLIBS += $(OTHERLIBS)
 
 TARGETS = $(basename $(wildcard *.cpp))
 
+all: $(TARGETS)
+
 OBJNAMES = XcodeMlType.o \
 	LibXMLUtil.o \
 	CodeBuilder.o \
