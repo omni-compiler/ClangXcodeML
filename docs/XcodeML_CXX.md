@@ -1389,6 +1389,12 @@ switch文のdefaultラベルを表す。`switch`要素の中の`body`要素の�
 
 | `<varAddr>`変数名`</varAddr>`
 
+この要素は以下と等価である。
+
+| `<addrOfExpr>`
+|   `<Var>`変数名`</Var>`
+| `</addrOfExpr>`
+
 属性(必須): `type`, `scope`
 
 例:
@@ -1408,6 +1414,12 @@ switch文のdefaultラベルを表す。`switch`要素の中の`body`要素の�
 配列の先頭へのアドレス参照を表現する。
 
 | `<arrayAddr>`配列変数名`</arrayAddr>`
+
+この要素は以下と等価である。
+
+| `<addrOfExpr>`
+|   `<Var>`配列変数名`</Var>`
+| `</addrOfExpr>`
 
 例:
 
