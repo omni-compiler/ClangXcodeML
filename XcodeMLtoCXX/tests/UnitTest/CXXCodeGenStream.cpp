@@ -9,6 +9,8 @@
 
 namespace cxxgen = CXXCodeGen;
 
+namespace {
+
 struct Fixture {
   cxxgen::Stream stream;
 };
@@ -104,3 +106,5 @@ BOOST_AUTO_TEST_CASE(space_interleaving_test) {
 }
 
 BOOST_AUTO_TEST_SUITE_END()
+
+}
