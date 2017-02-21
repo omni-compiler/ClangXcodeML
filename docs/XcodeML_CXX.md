@@ -1580,13 +1580,25 @@ pointerRef要素は次の属性を持つことができる。
 
 ## `memberArrayAddr`要素(C++拡張) {#sec:expr.memberarrayaddr}
 
-| `<memberArrayAddr>`
+構造型、クラス、または共用型のオブジェクトがもつ配列型のメンバへのアドレス参照を表現する。
+
+| `<memberArrayAddr type="`データ型識別名`" member="`メンバ名`">`
 | 　　式の要素
 | `</memberArrayAddr>`
 
 属性(必須): `type`, `member`
 
-* `memberArrayAddr`　－　オブジェクトの配列メンバのアドレスを参照する。`member`属性にメンバ名を指定し、子要素でオブジェクトのアドレスを表現する。例えば、オブジェクト`s`のint型配列メンバ`a`のアドレス `&s.a` について、以下のように表現する。
+この要素は以下と等価である。
+
+| `<addrOfExpr type="` データ型識別名 `" >`
+|   `<memberArrayRef member="` メンバ名 `">`
+|   　　式の要素
+|   `</memberRef>`
+| `<addrOfExpr>`
+
+例:
+
+オブジェクト`s`のint型配列メンバ`a`のアドレス `&s.a` について、以下のように表現する。
 
         <memberArrayAddr type="P24" member="a">
           <varAddr type="P7" scope="local">s</varAddr>
