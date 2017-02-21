@@ -20,4 +20,10 @@ BOOST_AUTO_TEST_CASE(empty_string_test) {
   BOOST_CHECK(stream.str().empty());
 }
 
+BOOST_AUTO_TEST_CASE(simple_string_output_test) {
+  BOOST_TEST_CHECKPOINT("Stream accepts a string");
+  stream << "string";
+  BOOST_CHECK(stream.str() == "string");
+}
+
 BOOST_AUTO_TEST_SUITE_END()
