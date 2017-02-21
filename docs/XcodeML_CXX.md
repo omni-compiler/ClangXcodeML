@@ -1385,19 +1385,6 @@ switch文のdefaultラベルを表す。`switch`要素の中の`body`要素の�
 
 例:
 
-`n`がint型のとき、`n`のアドレスの参照 `&n` は、
-
-    <varAddr type="P0" scope="local">n</varAddr>
-
-と表現される。ここで`P0`は、`typeTable`の中で
-
-    <pointerType type="P0" ref="int"/>
-
-
-などと宣言されている。
-
-例:
-
 `a`がint型の配列のとき、`a`の参照、すなわち`a[0]`のアドレスの参照は、
 
     <arrayAddr type="A5" scope="local">a</varAddr>
@@ -1419,6 +1406,18 @@ switch文のdefaultラベルを表す。`switch`要素の中の`body`要素の�
 | `<varAddr>`変数名`</varAddr>`
 
 属性(必須): `type`, `scope`
+
+例:
+
+`n`がint型のとき、`n`のアドレスの参照 `&n` は、
+
+    <varAddr type="P0" scope="local">n</varAddr>
+
+と表現される。ここで`P0`は、`typeTable`の中で
+
+    <pointerType type="P0" ref="int"/>
+
+などと宣言されている。
 
 ## `arrayAddr`要素 {#sec:expr.arrayaddr}
 
