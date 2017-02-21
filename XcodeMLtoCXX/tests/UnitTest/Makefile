@@ -32,6 +32,10 @@ OBJS = $(addprefix $(XCODEMLTOCXXSRCDIR)/,$(OBJNAMES))
 $(OBJS):
 	$(MAKE) -C $(XCODEMLTOCXXSRCDIR) $(notdir $@)
 
+XcodeMlType: \
+	$(XCODEMLTOCXXSRCDIR)/XcodeMlEnvironment.o \
+	$(XCODEMLTOCXXSRCDIR)/XcodeMlType.o
+
 clean:
 	rm -f $(TARGETS)
 
