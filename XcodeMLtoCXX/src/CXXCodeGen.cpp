@@ -31,8 +31,8 @@ void Stream::unindent(size_t amount) {
 }
 
 Stream& Stream::operator <<(const space_t&) {
-  const std::string separaters = "\n\t ";
-  if (separaters.find(lastChar) == std::string::npos) {
+  const std::string separators = "\n\t ";
+  if (separators.find(lastChar) == std::string::npos) {
     emit(" ");
   }
   return *this;
