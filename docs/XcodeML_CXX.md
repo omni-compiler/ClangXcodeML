@@ -1383,6 +1383,16 @@ switch文のdefaultラベルを表す。`switch`要素の中の`body`要素の�
 
 * `scope`属性　－　"`local`", "`global`", "`param`"のいずれか
 
+## `addrOfExpr` 要素 {#sec:expr.addrof}
+
+式へのアドレス参照を表現する。
+
+| `<addrOfExpr>`
+|   式の要素
+| `</addrOfExpr>`
+
+属性(必須): `type`
+
 ## `varAddr`要素 {#sec:expr.varaddr}
 
 配列以外の変数へのアドレス参照を表現する。
