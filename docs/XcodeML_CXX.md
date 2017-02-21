@@ -1383,22 +1383,6 @@ switch文のdefaultラベルを表す。`switch`要素の中の`body`要素の�
 
 * `scope`属性　－　"`local`", "`global`", "`param`"のいずれか
 
-例:
-
-`a`がint型の配列のとき、`a`の参照、すなわち`a[0]`のアドレスの参照は、
-
-    <arrayAddr type="A5" scope="local">a</varAddr>
-
-と表現される。ここで`A5`は、`typeTable`の中で
-
-    <arrayType type="A5" element_type="int" array_size="3"/>
-
-などと宣言されている。
-
-備考:
-
-`a`が配列のとき、2015年10月現在のF\_Frontでは `&a` の参照を`a`の参照と同様`arrayAddr`で表現している。これに関連してOmni XMPでは型の不一致によるエラーが出ている(バグレポート439)。
-
 ## `varAddr`要素 {#sec:expr.varaddr}
 
 配列以外の変数へのアドレス参照を表現する。
@@ -1424,6 +1408,23 @@ switch文のdefaultラベルを表す。`switch`要素の中の`body`要素の�
 配列の先頭へのアドレス参照を表現する。
 
 | `<arrayAddr>`配列変数名`</arrayAddr>`
+
+例:
+
+`a`がint型の配列のとき、`a`の参照、すなわち`a[0]`のアドレスの参照は、
+
+    <arrayAddr type="A5" scope="local">a</varAddr>
+
+と表現される。ここで`A5`は、`typeTable`の中で
+
+    <arrayType type="A5" element_type="int" array_size="3"/>
+
+などと宣言されている。
+
+備考:
+
+`a`が配列のとき、2015年10月現在のF\_Frontでは `&a` の参照を`a`の参照と同様`arrayAddr`で表現している。
+これに関連してOmni XMPでは型の不一致によるエラーが出ている(バグレポート439)。
 
 ## `pointerRef`要素 {#sec:expr.pointer}
 式(ポインタ型またはリファレンス型)の指示先を表現する。
