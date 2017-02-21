@@ -73,4 +73,34 @@ BOOST_AUTO_TEST_CASE(space_redundancy_test) {
   }
 }
 
+BOOST_AUTO_TEST_CASE(space_interleaving_test) {
+  BOOST_TEST_CHECKPOINT("Stream separates some strings with a space");
+
+  using TestCase = std::pair<std::string, std::string>;
+  const std::vector<TestCase> testcases = {
+    {"abcd", "efg"},
+    {"HIJK", "LMN"},
+    {"opqr", "STU"},
+    {"VW", "xyz"},
+    {"123", "456"},
+    {"HAL", "9000"},
+    {"clang_", "xcodeml"},
+    {"clang", "_xcodeml"},
+    {"clang_", "_xcodeml"},
+    {"1", "_"},
+    {"_", "1"},
+    {"+", "+"},
+    {"+", "="},
+  };
+
+  for (auto&& tc : testcases) {
+    BOOST_TEST_MESSAGE("Checking \"" +
+        tc.first + "\" + \"" + tc.second + "\"");
+    const auto answer = tc.first + " " + tc.second;
+    cxxgen::Stream stream;
+    stream << tc.first << tc.second;
+    BOOST_CHECK(stream.str() == answer);
+  }
+}
+
 BOOST_AUTO_TEST_SUITE_END()
