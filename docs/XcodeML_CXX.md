@@ -1509,9 +1509,21 @@ pointerRef要素は次の属性を持つことができる。
 ## メンバの参照の要素(C++拡張) {#sec:expr.member}
 構造型、クラス、または共用型のオブジェクトを`s`とするとき、`s`のメンバ`m`への参照`s.m`、`s`のメンバ`m`のアドレスの参照`&s.m`、`s`のメンバ配列`a`の要素への参照`s.a[i]`、および、`s`のメンバ配列`a`の要素のアドレスの参照`&s.a[i]`を、それぞれ以下のように表現する。
 
-| `<memberRef>` or `<memberAddr>` or `<memberArrayRef>` or `<memberArrayAddr>`
+| `<memberRef>`
 | 　　式の要素
-| `</memberRef>` or `</memberAddr>` or `</memberArrayRef>` or `</memberArrayAddr>`
+| `</memberRef>`
+
+| `<memberAddr>`
+| 　　式の要素
+| `</memberAddr>`
+
+| `<memberArrayRef>`
+| 　　式の要素
+| `</memberArrayRef>`
+
+| `<memberArrayAddr>`
+| 　　式の要素
+| `</memberArrayAddr>`
 
 属性(必須): `type`, `member`
 
