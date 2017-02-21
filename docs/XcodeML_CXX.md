@@ -347,29 +347,6 @@ int型配列の初期値 `{ 1, 2 }` に対応する表現は次のとおりに�
 
 "`is_`"　で始まる属性の値には、真を意味する`1`と`true`、および、偽を意味する`0`と`false`が許される。属性が省略されたとき、偽を意味する。
 
-例: 左辺値参照と右辺値参照
-
-以下の参照(左辺値参照)の宣言があるとき、
-
-    int& n_alias = n_org;
-
-変数`n_alias`のデータ型識別要素は以下のようになる。
-
-    <basicType type="B0" name="int" reference="lvalue"/>
-
-以下のコンストラクタ(ムーブコンストラクタ)の定義の引数に現れた右辺値参照について、
-
-    struct Array {
-      int *p, len;
-      Array( Array&& obj ) : p(obj.p), len(obj.len) {
-        obj.p = nullptr;  obj.len = 0;
-      }
-    }
-
-仮引数`obj`のデータ型識別要素は以下のようになる。
-
-    <basicType="B1" name="B2" reference="rvalue"/>
-
 ## `basicType`要素 {#sec:type.basic}
 `basicType` 要素は、他のデータ型識別要素にデータ型定義要素属性を加えた、新しいデータ型定義要素を定義する。
 
@@ -442,6 +419,29 @@ int型配列の初期値 `{ 1, 2 }` に対応する表現は次のとおりに�
 
     <basicType type="B0" is_const="1" name="int"/>
     <pointerType type="P0124" ref="B0" is_lvalue_reference="1" />
+
+例: 左辺値参照と右辺値参照
+
+以下の参照(左辺値参照)の宣言があるとき、
+
+    int& n_alias = n_org;
+
+変数`n_alias`のデータ型識別要素は以下のようになる。
+
+    <basicType type="B0" name="int" reference="lvalue"/>
+
+以下のコンストラクタ(ムーブコンストラクタ)の定義の引数に現れた右辺値参照について、
+
+    struct Array {
+      int *p, len;
+      Array( Array&& obj ) : p(obj.p), len(obj.len) {
+        obj.p = nullptr;  obj.len = 0;
+      }
+    }
+
+仮引数`obj`のデータ型識別要素は以下のようになる。
+
+    <basicType="B1" name="B2" reference="rvalue"/>
 
 ## `functionType`要素 {#sec:type.func}
 `funtionType`要素は、関数型を定義する。
