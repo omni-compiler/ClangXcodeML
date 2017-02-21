@@ -964,8 +964,16 @@ enum型は、`enumType`要素で定義する。`type`要素で、メンバの識
 * `name`要素　－　
   宣言する変数に対する`name`要素を持つ。
 * `value`要素　－　
-  初期化式を表現する式の要素([-@sec:expr])を子要素に持つ。
-  リスト初期化の場合、`value`要素に複数の式を指定する。
+  初期化式を表現する。ここで、`value`要素は次の形式に従う。
+
+    |   `<value>`
+    |     `<addrOfExpr` `is_expedient=` `"1"` または `"true">`
+    |       式の要素
+    |     `</addrOfExpr>`
+    |   `</value>`
+
+    `value`要素の子要素である`addrOfExpr`要素の`is_expedient`属性値は"1"または"true"でなければならない。
+    その他にデータ型定義要素属性をもってもよい。
 
 例:
 
@@ -981,7 +989,9 @@ enum型は、`enumType`要素で定義する。`type`要素で、メンバの識
     <varDecl>
       <name>rx</name>
       <value>
-        <varAddr type="R1">x</varAddr>
+        <addrOfExpr type="R1" is_expedient="true">
+          <Var type="int">x</Var>
+        </addrOfExpr>
       </value>
     </varDecl>
 
