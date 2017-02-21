@@ -39,7 +39,7 @@ XcodeMlType: \
 	$(XCODEMLTOCXXSRCDIR)/XcodeMlType.o
 
 clean:
-	rm -f $(TARGETS)
+	rm -f $(TARGETS) $(addsuffix .o, $(TARGETS))
 
 check: $(TARGETS)
 	set -e; \
