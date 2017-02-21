@@ -420,9 +420,9 @@ int型配列の初期値 `{ 1, 2 }` に対応する表現は次のとおりに�
     <basicType type="B0" is_const="1" name="int"/>
     <pointerType type="P0124" ref="B0" is_lvalue_reference="1" />
 
-例: 左辺値参照と右辺値参照
+例:
 
-以下の参照(左辺値参照)の宣言があるとき、
+以下の(lvalue)リファレンスの宣言があるとき、
 
     int& n_alias = n_org;
 
@@ -430,7 +430,7 @@ int型配列の初期値 `{ 1, 2 }` に対応する表現は次のとおりに�
 
     <basicType type="B0" name="int" reference="lvalue"/>
 
-以下のコンストラクタ(ムーブコンストラクタ)の定義の引数に現れた右辺値参照について、
+以下のコンストラクタ(ムーブコンストラクタ)の定義の引数に現れたrvalueリファレンスについて、
 
     struct Array {
       int *p, len;
