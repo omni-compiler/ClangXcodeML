@@ -1506,26 +1506,12 @@ pointerRef要素は次の属性を持つことができる。
 
 のように表現される。ここで`P232`はint型へのポインタと宣言されている。後者は`arrayAddr`要素でないことに注意されたい。
 
-## メンバの参照の要素(C++拡張) {#sec:expr.member}
+## `memberRef`要素(C++拡張) {#sec:expr.memberref}
 構造型、クラス、または共用型のオブジェクトを`s`とするとき、`s`のメンバ`m`への参照`s.m`、`s`のメンバ`m`のアドレスの参照`&s.m`、`s`のメンバ配列`a`の要素への参照`s.a[i]`、および、`s`のメンバ配列`a`の要素のアドレスの参照`&s.a[i]`を、それぞれ以下のように表現する。
 
 | `<memberRef>`
 | 　　式の要素
 | `</memberRef>`
-
-| `<memberAddr>`
-| 　　式の要素
-| `</memberAddr>`
-
-| `<memberArrayRef>`
-| 　　式の要素
-| `</memberArrayRef>`
-
-| `<memberArrayAddr>`
-| 　　式の要素
-| `</memberArrayAddr>`
-
-属性(必須): `type`, `member`
 
 * `memberRef`　－　配列以外のメンバを参照する。`member`属性にメンバ名を指定し、子要素でオブジェクトのアドレスを表現する。例えば、オブジェクト`s`のint型メンバ`n`への参照 `s.n` について、以下のように表現する。
 
@@ -1533,17 +1519,37 @@ pointerRef要素は次の属性を持つことができる。
             <varAddr type="P0" scope="local">s</varAddr>
         </memberRef>
 
+## `memberAddr`要素(C++拡張) {#sec:expr.memberaddr}
+
+| `<memberAddr>`
+| 　　式の要素
+| `</memberAddr>`
+
 * `memberAddr`　－　配列名以外のメンバのアドレスを参照する。`member`属性にメンバ名を指定し、子要素でオブジェクトのアドレスを表現する。例えば、オブジェクト`s`のint型メンバ`n`のアドレス `&s.n` について、以下のように表現する。
 
         <memberAddr type="int" member="n">
           <varAddr type="P6" scope="local">s</varAddr>
         </memberAddr>
 
+## `memberArrayRef`要素(C++拡張) {#sec:expr.memberarrayref}
+
+| `<memberArrayRef>`
+| 　　式の要素
+| `</memberArrayRef>`
+
 * `memberArrayRef`　－　オブジェクトの配列メンバを参照する。`member`属性にメンバ名を指定し、子要素でオブジェクトのアドレスを表現する。例えば、オブジェクト`s`のint型配列メンバ`a`への参照 `s.a` について、以下のように表現する。
 
         <memberArrayRef type="A0" member="a">
           <varAddr type="P1" scope="local">s</varAddr>
         </memberArrayRef>
+
+## `memberArrayAddr`要素(C++拡張) {#sec:expr.memberarrayaddr}
+
+| `<memberArrayAddr>`
+| 　　式の要素
+| `</memberArrayAddr>`
+
+属性(必須): `type`, `member`
 
 * `memberArrayAddr`　－　オブジェクトの配列メンバのアドレスを参照する。`member`属性にメンバ名を指定し、子要素でオブジェクトのアドレスを表現する。例えば、オブジェクト`s`のint型配列メンバ`a`のアドレス `&s.a` について、以下のように表現する。
 
