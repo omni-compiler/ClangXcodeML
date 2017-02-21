@@ -32,9 +32,6 @@ OBJS = $(addprefix $(XCODEMLTOCXXSRCDIR)/,$(OBJNAMES))
 $(OBJS):
 	$(MAKE) -C $(XCODEMLTOCXXSRCDIR) $(notdir $@)
 
-%.out: %.cpp $(OBJS)
-	$(CXX) $(CXXFLAGS) $(OBJS) $(USEDLIBS) -o$@ $<
-
 clean:
 	rm -f $(TARGETS)
 
