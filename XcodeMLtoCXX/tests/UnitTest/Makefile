@@ -15,7 +15,7 @@ USEDLIBS += -lpthread -ldl -ltinfo -lz
 USEDLIBS += `pkg-config --libs libxml-2.0`
 USEDLIBS += $(OTHERLIBS)
 
-TARGETS = $(patsubst %.cpp,%.out,$(wildcard *.cpp))
+TARGETS = $(basename $(wildcard *.cpp))
 
 OBJNAMES = XcodeMlType.o \
 	LibXMLUtil.o \
