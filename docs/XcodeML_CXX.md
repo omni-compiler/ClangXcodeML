@@ -1371,18 +1371,13 @@ switch文のdefaultラベルを表す。`switch`要素の中の`body`要素の�
 
 備考:`longlongConstant`だけ特別扱いするのは不自然。素直に10進数表記で表現する形にしたい。
 
-## 変数参照の要素(`Var`要素、`varAddr`要素、`arrayAddr`要素) {#sec:expr.var}
-変数名への参照を表現する。それぞれ、`v`, `&v`, `a`に対応する(`v`は配列以外の変数、`a`は配列変数)。
+## `Var`要素 {#sec:expr.var}
+
+配列以外の変数への参照を表現する。
 
 | `<Var>`変数名`</Var>`
-| `<varAddr>`変数名`</varAddr>`
-| `<arrayAddr>`配列変数名`</arrayAddr>`
 
 属性(必須): `type`, `scope`
-
-* `Var`要素　－　配列以外の変数を参照する式。内容に変数名を指定する。
-* `varAddr`要素　－　配列以外の変数のアドレスを参照する式。内容に変数名を指定する。
-* `arrayAddr`要素　－　配列の先頭アドレスを参照する式。内容に配列変数名を指定する。
 
 `scope`属性をつかって、局所変数を区別する。
 
@@ -1416,6 +1411,20 @@ switch文のdefaultラベルを表す。`switch`要素の中の`body`要素の�
 備考:
 
 `a`が配列のとき、2015年10月現在のF\_Frontでは `&a` の参照を`a`の参照と同様`arrayAddr`で表現している。これに関連してOmni XMPでは型の不一致によるエラーが出ている(バグレポート439)。
+
+## `varAddr`要素 {#sec:expr.varaddr}
+
+配列以外の変数へのアドレス参照を表現する。
+
+| `<varAddr>`変数名`</varAddr>`
+
+属性(必須): `type`, `scope`
+
+## `arrayAddr`要素 {#sec:expr.arrayaddr}
+
+配列の先頭へのアドレス参照を表現する。
+
+| `<arrayAddr>`配列変数名`</arrayAddr>`
 
 ## `pointerRef`要素 {#sec:expr.pointer}
 式(ポインタ型またはリファレンス型)の指示先を表現する。
