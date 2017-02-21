@@ -36,8 +36,8 @@ BOOST_AUTO_TEST_CASE(newline_output_test) {
 
 BOOST_AUTO_TEST_CASE(space_output_test) {
   BOOST_TEST_CHECKPOINT("Stream accepts a space_t");
-  stream << cxxgen::space;
-  BOOST_CHECK(stream.str() == " ");
+  stream << "string" << cxxgen::space;
+  BOOST_CHECK(stream.str() == "string ");
 }
 
 BOOST_AUTO_TEST_CASE(char_output_test) {
