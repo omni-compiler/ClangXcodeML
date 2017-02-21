@@ -418,7 +418,7 @@ int型配列の初期値 `{ 1, 2 }` に対応する表現は次のとおりに�
 `basicType`要素によって、"`const int`"を意味するデータ型識別名`B0`が定義されている。
 
     <basicType type="B0" is_const="1" name="int"/>
-    <pointerType type="P0124" ref="B0" is_lvalue_reference="1" />
+    <pointerType type="P0124" ref="B0" reference="lvalue" />
 
 例:
 
@@ -428,7 +428,7 @@ int型配列の初期値 `{ 1, 2 }` に対応する表現は次のとおりに�
 
 変数`n_alias`のデータ型識別要素は以下のようになる。
 
-    <basicType type="B0" name="int" reference="lvalue"/>
+    <pointerType type="P0" ref="int" reference="lvalue"/>
 
 以下のコンストラクタ(ムーブコンストラクタ)の定義の引数に現れたrvalueリファレンスについて、
 
@@ -440,8 +440,9 @@ int型配列の初期値 `{ 1, 2 }` に対応する表現は次のとおりに�
     }
 
 仮引数`obj`のデータ型識別要素は以下のようになる。
+ここで"`S0`"は"`Array`"に対応するデータ型識別名として定義されている。
 
-    <basicType="B1" name="B2" reference="rvalue"/>
+    <pointerType type="B2" ref="S0" reference="rvalue"/>
 
 ## `functionType`要素 {#sec:type.func}
 `funtionType`要素は、関数型を定義する。
