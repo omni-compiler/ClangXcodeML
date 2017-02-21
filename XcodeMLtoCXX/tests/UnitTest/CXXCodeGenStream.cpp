@@ -17,7 +17,6 @@ BOOST_AUTO_TEST_CASE(empty_string_test) {
   BOOST_TEST_CHECKPOINT(
       "Stream::str() is an empty string after initialization");
 
-  cxxgen::Stream stream;
   BOOST_CHECK(stream.str().empty());
 }
 
