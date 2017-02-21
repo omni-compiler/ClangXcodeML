@@ -38,6 +38,9 @@ XcodeMlType: \
 	$(XCODEMLTOCXXSRCDIR)/XcodeMlEnvironment.o \
 	$(XCODEMLTOCXXSRCDIR)/XcodeMlType.o
 
+CXXCodeGenStream: \
+	$(XCODEMLTOCXXSRCDIR)/CXXCodeGen.o
+
 clean:
 	rm -f $(TARGETS) $(addsuffix .o, $(TARGETS))
 
