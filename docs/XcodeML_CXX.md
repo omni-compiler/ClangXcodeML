@@ -1958,10 +1958,12 @@ nested-name-specifier定義要素には以下の要素がある。
 |   `name`要素
 | `</className>`
 
-属性(必須): `nns`
+属性(必須): `nns`, `type`
 
 * `nns` -
   このnested-name-specifierに与えられたnested-name-specifier識別名
+* `type` -
+  typeTableにおいてこのクラス型に与えられたデータ型識別名
 
 以下の子要素を持つ。
 
@@ -1976,10 +1978,12 @@ enumを表現する。
 |   `name`要素
 | `</enumName>`
 
-属性(必須): `nns`
+属性(必須): `nns`, `type`
 
 * `nns` -
   このnested-name-specifierに与えられたnested-name-specifier識別名
+* `type` -
+  typeTableにおいてこのenum型に与えられたデータ型識別名
 
 以下の子要素を持つ。
 
