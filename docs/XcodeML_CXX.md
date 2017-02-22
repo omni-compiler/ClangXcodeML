@@ -1421,19 +1421,13 @@ switch文のdefaultラベルを表す。`switch`要素の中の`body`要素の�
 
 ## `arrayAddr`要素 {#sec:expr.arrayaddr}
 
-配列の先頭へのアドレス参照を表現する。
+配列型変数への参照を表現する。
 
 | `<arrayAddr>`配列変数名`</arrayAddr>`
 
-この要素は以下と等価である。
-
-| `<addrOfExpr>`
-|   `<Var>`配列変数名`</Var>`
-| `</addrOfExpr>`
-
 例:
 
-`a`がint型の配列のとき、`a`の参照、すなわち`a[0]`のアドレスの参照は、
+`a`がint型の配列のとき、`a`の参照は、
 
     <arrayAddr type="A5" scope="local">a</varAddr>
 
