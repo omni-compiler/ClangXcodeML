@@ -15,12 +15,15 @@ USEDLIBS += -lpthread -ldl -ltinfo -lz
 USEDLIBS += `pkg-config --libs libxml-2.0`
 USEDLIBS += $(OTHERLIBS)
 
-TARGETS = $(patsubst %.cpp,%.out,$(wildcard *.cpp))
+TARGETS = $(basename $(wildcard *.cpp))
+
+all: $(TARGETS)
 
 OBJNAMES = XcodeMlType.o \
 	LibXMLUtil.o \
 	ClangClassHandler.o \
 	CodeBuilder.o \
+	CXXCodeGen.o \
 	TypeAnalyzer.o \
 	XMLString.o \
 	XcodeMlEnvironment.o \
@@ -30,13 +33,17 @@ OBJNAMES = XcodeMlType.o \
 OBJS = $(addprefix $(XCODEMLTOCXXSRCDIR)/,$(OBJNAMES))
 
 $(OBJS):
-	$(MAKE) -C $(XCODEMLTOCXXSRCDIR) $@
+	$(MAKE) -C $(XCODEMLTOCXXSRCDIR) $(notdir $@)
 
-%.out: %.cpp $(OBJS)
-	$(CXX) $(CXXFLAGS) $(OBJS) $(USEDLIBS) -o$@ $<
+XcodeMlType: \
+	$(XCODEMLTOCXXSRCDIR)/XcodeMlEnvironment.o \
+	$(XCODEMLTOCXXSRCDIR)/XcodeMlType.o
+
+CXXCodeGenStream: \
+	$(XCODEMLTOCXXSRCDIR)/CXXCodeGen.o
 
 clean:
-	rm -f $(TARGETS)
+	rm -f $(TARGETS) $(addsuffix .o, $(TARGETS))
 
 check: $(TARGETS)
 	set -e; \

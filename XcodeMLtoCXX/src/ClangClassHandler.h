@@ -4,7 +4,7 @@
 using ClangClassHandler = AttrProc<
   const CodeBuilder&,
   SourceInfo&,
-  std::stringstream&>;
+  CXXCodeGen::Stream&>;
 
 extern const ClangClassHandler ClangStmtHandler;
 

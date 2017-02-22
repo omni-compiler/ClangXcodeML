@@ -10,6 +10,7 @@
 #include <cassert>
 #include <memory>
 #include <vector>
+#include "CXXCodeGen.h"
 #include "XMLString.h"
 #include "Symbol.h"
 #include "XcodeMlType.h"

@@ -11,6 +11,7 @@
 #include "XMLString.h"
 #include "XMLWalker.h"
 #include "AttrProc.h"
+#include "CXXCodeGen.h"
 #include "Symbol.h"
 #include "XcodeMlType.h"
 #include "XcodeMlEnvironment.h"
@@ -18,11 +19,13 @@
 #include "TypeAnalyzer.h"
 #include "SymbolBuilder.h"
 
-using SymbolBuilder = AttrProc<SourceInfo&, std::stringstream&>;
+namespace cxxgen = CXXCodeGen;
+
+using SymbolBuilder = AttrProc<SourceInfo&, cxxgen::Stream&>;
 
 #define SB_ARGS xmlNodePtr node __attribute__((unused)), \
                 SourceInfo& src __attribute__((unused)), \
-                std::stringstream& ss __attribute__((unused))
+                cxxgen::Stream& ss __attribute__((unused))
 
 #define DEFINE_SB(name) static void name(SB_ARGS)
 
@@ -32,25 +35,27 @@ DEFINE_SB(typedefNameProc) {
       static_cast<XMLString>(xmlGetProp(node, BAD_CAST "type")));
   ss << "typedef "
      << makeDecl(type, alias, src.typeTable)
-     << ";" << std::endl;
+     << ";" << cxxgen::newline;
 }
 
 static void emitStructDefinition(
     const SourceInfo& src,
     const XcodeMl::TypeRef type,
-    std::stringstream& ss
+    cxxgen::Stream& ss
 ) {
   XcodeMl::Struct* structType = llvm::cast<XcodeMl::Struct>(type.get());
-  ss << "struct " << structType->tagName() << "{" << std::endl;
+  ss << "struct " << structType->tagName() << "{" << cxxgen::newline;
+  ss.indent(1);
   for (auto member : structType->members()) {
     const auto memberType = src.typeTable.at(member.type());
     ss << makeDecl(memberType, member.name(), src.typeTable);
     if (member.isBitField()) {
-      ss << " : " << member.getSize();
+      ss << " : " << std::to_string(member.getSize());
     }
-    ss << ";" << std::endl;
+    ss << ";" << cxxgen::newline;
   }
-  ss << "};" << std::endl;
+  ss.unindent(1);
+  ss << "};" << cxxgen::newline;
 }
 
 DEFINE_SB(tagnameProc) {
@@ -71,5 +76,7 @@ void buildSymbols(
     SourceInfo& src,
     std::stringstream& ss
 ) {
-  CXXSymbolBuilder.walkAll(node, src, ss);
+  cxxgen::Stream out;
+  CXXSymbolBuilder.walkAll(node, src, out);
+  ss << out.str();
 }

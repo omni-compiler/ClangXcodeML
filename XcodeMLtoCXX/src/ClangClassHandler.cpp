@@ -8,6 +8,7 @@
 #include <libxml/xpath.h>
 #include "llvm/Support/Casting.h"
 #include "LibXMLUtil.h"
+#include "CXXCodeGen.h"
 #include "XMLString.h"
 #include "XMLWalker.h"
 #include "AttrProc.h"
@@ -18,10 +19,12 @@
 #include "CodeBuilder.h"
 #include "ClangClassHandler.h"
 
+namespace cxxgen = CXXCodeGen;
+
 #define CCH_ARGS xmlNodePtr node __attribute__((unused)), \
                  const CodeBuilder& w __attribute__((unused)), \
                  SourceInfo& src __attribute__((unused)), \
-                 std::stringstream& ss __attribute__((unused))
+                 cxxgen::Stream& ss __attribute__((unused))
 
 #define DEFINE_CCH(name) static void name(CCH_ARGS)
 

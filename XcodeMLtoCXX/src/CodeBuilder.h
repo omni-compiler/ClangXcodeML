@@ -1,7 +1,7 @@
 #ifndef CODEBUILDER_H
 #define CODEBUILDER_H
 
-using CodeBuilder = XMLWalker<SourceInfo&, std::stringstream&>;
+using CodeBuilder = XMLWalker<SourceInfo&, CXXCodeGen::Stream&>;
 
 void buildCode(xmlNodePtr, xmlXPathContextPtr, std::stringstream&);
 
