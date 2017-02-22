@@ -1887,6 +1887,18 @@ nested-name-specifier定義要素には以下の要素がある。
 * `decltypeSpecName`要素
 
 ## `globalName`要素 {#sec:nns.global}
+
+グローバル名前空間を表現する。
+
+| `<globalName />`
+
+属性(必須): `nns`
+
+* `nns` -
+  このnested-name-specifierに与えられたnested-name-specifier識別名
+
+`globalName`要素は、子要素をもたない。
+
 ## `namespaceName`要素 {#sec:nns.namespace}
 ## `namespaceAliasName`要素 {#sec:nns.namespacealias}
 ## `className`要素 {#sec:nns.class}
