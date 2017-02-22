@@ -1878,6 +1878,7 @@ nested-name-specifier定義要素には以下の要素がある。
 
 * `globalName`要素
 * `namespaceName`要素
+* `unnamedNamespaceName`要素
 * `namespaceAliasName`要素
 * `className`要素
 * `enumName`要素
@@ -1923,6 +1924,30 @@ nested-name-specifier定義要素には以下の要素がある。
 
 * `name`要素 -
   名前空間名
+* `attributes`要素 -
+  アトリビュートの並び
+
+## `unnamedNamespaceName`要素 {#sec:nns.unnamednamespace}
+
+無名名前空間を表現する。
+
+| `<unnamedNamespaceName>`
+|   `attributes`要素
+| `</unnamedNamespaceName>`
+
+属性(必須): `nns`
+
+属性(optional): `is_inline`
+
+* `nns` -
+  このnested-name-specifierに与えられたnested-name-specifier識別名
+* `is_inline` -
+  "`1`"または"`true`"のとき、inline名前空間であることを意味する。
+  "`0`"または"`false`"のとき、inline名前空間ではないことを意味する。
+  省略時の値は"`false`"である。
+
+以下の子要素を持つ。
+
 * `attributes`要素 -
   アトリビュートの並び
 
