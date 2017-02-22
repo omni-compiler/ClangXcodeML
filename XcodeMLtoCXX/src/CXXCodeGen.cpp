@@ -31,8 +31,8 @@ void Stream::unindent(size_t amount) {
 }
 
 Stream& Stream::operator <<(const space_t&) {
-  const std::string separaters = "\n\t ";
-  if (separaters.find(lastChar) != std::string::npos) {
+  const std::string separators = "\n\t ";
+  if (separators.find(lastChar) == std::string::npos) {
     emit(" ");
   }
   return *this;
@@ -44,11 +44,16 @@ Stream& Stream::operator <<(const newline_t&) {
   return *this;
 }
 
+static bool isAllowedInIdent(char c) {
+  /* FIXME: C++ allows universal character */
+  return isalnum(c) || c == '_';
+}
+
 static bool shouldInterleaveSpace(char last, char next) {
   const std::string operators = "+-*/%^&|!><";
   const std::string repeatables = "+-><&|=";
   return
-    (isalpha(last) && isalpha(next)) ||
+    (isAllowedInIdent(last) && isAllowedInIdent(next)) ||
     (operators.find(last) != std::string::npos && next == '=') ||
     (last == next && repeatables.find(last) != std::string::npos) ||
     (last == '-' && next == '>') || // `->`

@@ -472,6 +472,7 @@ const CodeBuilder CXXBuilder({
   { "mulExpr", showBinOp(" * ") },
   { "divExpr", showBinOp(" / ") },
   { "modExpr", showBinOp(" % ") },
+  { "logEQExpr", showBinOp(" == ")},
   { "unaryMinusExpr", showUnaryOp("-") },
   { "binNotExpr", showUnaryOp("~") },
   { "logNotExpr", showUnaryOp("!") },
