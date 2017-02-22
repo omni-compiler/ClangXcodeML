@@ -1991,6 +1991,25 @@ enumを表現する。
   enum名
 
 ## `typedefTypeName`要素 {#sec:nns.typedef}
+
+typedef名を表現する。
+
+| `<typedefTypeName>`
+|   `name`要素
+| `</typedefTypeName>`
+
+属性(必須): `nns`, `type`
+
+* `nns` -
+  このnested-name-specifierに与えられたnested-name-specifier識別名
+* `type` -
+  typeTableにおいてこの型と等価な型に与えられたデータ型識別名
+
+以下の子要素を持つ。
+
+* `name`要素 -
+  typedef名
+
 ## `templateParamTypeName`要素 {#sec:nns.templateparam}
 ## `simpleTemplateIdName`要素 {#sec:nns.simpletemplateid}
 ## `decltypeSpecName`要素 {#sec:nns.decltype}
