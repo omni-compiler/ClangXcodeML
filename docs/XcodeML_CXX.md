@@ -1886,6 +1886,16 @@ nested-name-specifier定義要素には以下の要素がある。
 * `simpleTemplateIdName`要素
 * `decltypeSpecName`要素
 
+## `globalName`要素 {#sec:nns.global}
+## `namespaceName`要素 {#sec:nns.namespace}
+## `namespaceAliasName`要素 {#sec:nns.namespacealias}
+## `className`要素 {#sec:nns.class}
+## `enumName`要素 {#sec:nns.enum}
+## `typedefTypeName`要素 {#sec:nns.typedef}
+## `templateParamTypeName`要素 {#sec:nns.templateparam}
+## `simpleTemplateIdName`要素 {#sec:nns.simpletemplateid}
+## `decltypeSpecName`要素 {#sec:nns.decltype}
+
 # テンプレート定義要素(C++) {#sec:temp}
 テンプレート定義要素には、以下のものがある。
 
