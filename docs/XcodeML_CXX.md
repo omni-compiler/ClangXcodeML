@@ -1879,7 +1879,6 @@ nested-name-specifier定義要素には以下の要素がある。
 * `globalName`要素
 * `namespaceName`要素
 * `unnamedNamespaceName`要素
-* `namespaceAliasName`要素
 * `className`要素
 * `enumName`要素
 * `typedefTypeName`要素
@@ -1951,7 +1950,6 @@ nested-name-specifier定義要素には以下の要素がある。
 * `attributes`要素 -
   アトリビュートの並び
 
-## `namespaceAliasName`要素 {#sec:nns.namespacealias}
 ## `className`要素 {#sec:nns.class}
 ## `enumName`要素 {#sec:nns.enum}
 ## `typedefTypeName`要素 {#sec:nns.typedef}
