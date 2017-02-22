@@ -1951,6 +1951,23 @@ nested-name-specifier定義要素には以下の要素がある。
   アトリビュートの並び
 
 ## `className`要素 {#sec:nns.class}
+
+クラスを表現する。
+
+| `<className>`
+|   `name`要素
+| `</className>`
+
+属性(必須): `nns`
+
+* `nns` -
+  このnested-name-specifierに与えられたnested-name-specifier識別名
+
+以下の子要素を持つ。
+
+* `name`要素 -
+  クラス名
+
 ## `enumName`要素 {#sec:nns.enum}
 ## `typedefTypeName`要素 {#sec:nns.typedef}
 ## `templateParamTypeName`要素 {#sec:nns.templateparam}
