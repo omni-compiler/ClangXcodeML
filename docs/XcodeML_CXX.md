@@ -1860,6 +1860,22 @@ C++のラムダ式を表現する。
 * `is_mutable`属性　－　`1`または`true`のとき、mutable指定があることを意味する。`0`または`false`または省略されたとき、mutable指定がないことを意味する。
 　子要素の`byReference`要素で指定された名前の変数は参照キャプチャされ、`byValue`要素で指定された名前の変数はコピーキャプチャされる。それ以外の変数は、`default`属性の指定に従う。
 
+# `nnsTable`要素とnested-name-specifier定義要素 {#sec:nns}
+`nnsTable`要素は、翻訳単位([-@sec:program]章)に対して一つだけ存在し、
+翻訳単位で使われているすべてのnested-name-specifierについての情報を定義する。
+
+| `<nnsTable>`
+|   [ nested-name-specifier型定義要素
+|   … ]
+| `</nnsTable>`
+
+属性なし
+
+
+`nnsTable`要素は、翻訳単位を表現する`XcodeProgram`要素([-@sec:program]章)の直接の子要素であり、
+nested-name-specifierを定義するnested-name-specifier定義要素の列からなる。
+nested-name-specifier定義要素には以下の要素がある。
+
 # テンプレート定義要素(C++) {#sec:temp}
 テンプレート定義要素には、以下のものがある。
 
