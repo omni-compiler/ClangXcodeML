@@ -1876,6 +1876,16 @@ C++のラムダ式を表現する。
 nested-name-specifierを定義するnested-name-specifier定義要素の列からなる。
 nested-name-specifier定義要素には以下の要素がある。
 
+* `globalName`要素
+* `namespaceName`要素
+* `namespaceAliasName`要素
+* `className`要素
+* `enumName`要素
+* `typedefTypeName`要素
+* `templateParamTypeName`要素
+* `simpleTemplateIdName`要素
+* `decltypeSpecName`要素
+
 # テンプレート定義要素(C++) {#sec:temp}
 テンプレート定義要素には、以下のものがある。
 
