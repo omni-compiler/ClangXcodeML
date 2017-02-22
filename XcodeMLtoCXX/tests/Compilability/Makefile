@@ -1,6 +1,7 @@
 .SUFFIXES: .CXXasXcodeML
 .PHONY: test clean
 .PRECIOUS: %.CXXasXcodeML %.CasXcodeML
+.DELETE_ON_ERROR:
 
 all: test
 
