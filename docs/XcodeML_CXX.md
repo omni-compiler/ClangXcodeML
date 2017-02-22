@@ -1429,7 +1429,7 @@ switch文のdefaultラベルを表す。`switch`要素の中の`body`要素の�
 
 `a`がint型の配列のとき、`a`の参照は、
 
-    <arrayAddr type="A5" scope="local">a</varAddr>
+    <arrayAddr type="A5" scope="local">a</arrayAddr>
 
 と表現される。ここで`A5`は、`typeTable`の中で
 
