@@ -1969,6 +1969,23 @@ nested-name-specifier定義要素には以下の要素がある。
   クラス名
 
 ## `enumName`要素 {#sec:nns.enum}
+
+enumを表現する。
+
+| `<enumName>`
+|   `name`要素
+| `</enumName>`
+
+属性(必須): `nns`
+
+* `nns` -
+  このnested-name-specifierに与えられたnested-name-specifier識別名
+
+以下の子要素を持つ。
+
+* `name`要素 -
+  enum名
+
 ## `typedefTypeName`要素 {#sec:nns.typedef}
 ## `templateParamTypeName`要素 {#sec:nns.templateparam}
 ## `simpleTemplateIdName`要素 {#sec:nns.simpletemplateid}
