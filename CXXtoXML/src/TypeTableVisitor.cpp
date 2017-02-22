@@ -456,10 +456,9 @@ std::string TypeTableInfo::getTypeName(QualType T)
   };
 
   std::string name = mapFromQualTypeToName[T];
-  if (OptIgnoreUnknownType && name.empty()) {
+  if (name.empty()) {
+    assert(OptIgnoreUnknownType);
     return "CXX2XML_UNKNOWN_TYPE";
-  } else {
-    assert(!name.empty());
   }
 
   if (!map_is_already_set) {
