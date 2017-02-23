@@ -216,7 +216,12 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
   if (ND) {
     addChild("fullName", ND->getQualifiedNameAsString().c_str());
     if (ND->isLinkageValid()) {
-      newProp("linkage", stringifyLinkage(ND->getFormalLinkage()));
+      const auto FL = ND->getFormalLinkage(),
+                 LI = ND->getLinkageInternal();
+      newProp("linkage", stringifyLinkage(FL));
+      if (FL != LI) {
+        newProp("clang_linkage_internal", stringifyLinkage(LI));
+      }
     } else {
       // should not be executed
       newBoolProp("clang_has_invalid_linkage", true);
