@@ -71,7 +71,7 @@ XcodeMLは、以下の特徴を持つ。
 
 XcodeMLファイルのトップレベルのXML要素は、`XcodeProgram` 要素である。`XcodeProgram` 要素は以下の子要素を含む。
 
-* `nnsTable` (C++のみ)　– 翻訳単位で利用されている名前空間の情報([-@sec:program.nns]節)
+* `nnsTable` (C++のみ)　– 翻訳単位で利用されている名前空間の情報([-@sec:nns.attr]節)
 * `typeTable`要素　– プログラムで利用されているデータ型の情報([-@sec:type]章)
 * `globalSymbols`要素 – プログラムで利用されている大域変数の情報([-@sec:symb.global]節)
 * `globalDeclarations` 要素 – 関数、変数宣言などの情報([-@sec:decl.global]節)
@@ -1412,7 +1412,7 @@ switch文のdefaultラベルを表す。`switch`要素の中の`body`要素の�
 
 例:
 
-以下のプログラムで、(1)はメンバ変数へのポインタの宣言、(2)はメンバ関数へのポインタの宣言であり、それぞれメンバ変数、メンバ関数をポイントするよう初期化されている([-@sec:program.nns]節の例参照)。(3)の右辺により`s1.foo`が引数`3`で呼び出され、左辺`s1.data`に代入される。
+以下のプログラムで、(1)はメンバ変数へのポインタの宣言、(2)はメンバ関数へのポインタの宣言であり、それぞれメンバ変数、メンバ関数をポイントするよう初期化されている([-@sec:nns.attr]節の例参照)。(3)の右辺により`s1.foo`が引数`3`で呼び出され、左辺`s1.data`に代入される。
 
     struct S {
       int data;
@@ -1802,7 +1802,7 @@ nested-name-specifier定義要素には以下の要素がある。
 * `simpleTemplateIdName`要素
 * `decltypeSpecName`要素
 
-## `nnsTable`と`nns`属性 {#sec:program.nns}
+## `nnsTable`と`nns`属性 {#sec:nns.attr}
 `nnsTable`要素は、翻訳単位([-@sec:program]章)に対して一つだけ存在し、翻訳単位で使われているすべての名前修飾(nested namespace spcifier)についての情報を定義する。
 
 `nns`属性は、C++のスコープ解決演算子による修飾をおこなった形の「フルネーム」を指定するためのXML属性である。
