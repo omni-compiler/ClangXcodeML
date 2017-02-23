@@ -5,6 +5,8 @@
 #include "clang/Basic/Builtins.h"
 #include "clang/Lex/Lexer.h"
 #include <map>
+
+#include "ClangUtil.h"
 #include "OperationKinds.h"
 
 using namespace clang;
@@ -216,6 +218,8 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
   }
 
   if (auto VD = dyn_cast<VarDecl>(D)) {
+    newProp("language_linkage",
+        stringifyLanguageLinkage(VD->getLanguageLinkage()));
     newBoolProp("has_init", VD->hasInit());
   }
 
@@ -227,6 +231,8 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
     }
   }
   if (auto FD = dyn_cast<FunctionDecl>(D)) {
+    newProp("language_linkage",
+        stringifyLanguageLinkage(FD->getLanguageLinkage()));
     newBoolProp("is_defaulted", FD->isDefaulted());
     newBoolProp("is_deleted", FD->isDeletedAsWritten());
     newBoolProp("is_pure", FD->isPure());
