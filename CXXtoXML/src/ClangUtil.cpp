@@ -17,3 +17,19 @@ const char* stringifyLanguageLinkage(LanguageLinkage ll) {
   }
 }
 
+const char *stringifyLinkage(Linkage l) {
+  switch (l) {
+    case NoLinkage:
+      return "NoLinkage";
+    case InternalLinkage:
+      return "InternalLinkage";
+    case ExternalLinkage:
+      return "ExternalLinkage";
+
+    case UniqueExternalLinkage:
+      // external linkage but within unnamed namespace
+      return "UniqueExternalLinkage";
+    case VisibleNoLinkage:
+      return "VisibleNoLinkage";
+  }
+}
