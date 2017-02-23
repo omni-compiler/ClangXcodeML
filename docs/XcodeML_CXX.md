@@ -144,7 +144,6 @@ XcodeMLの設計方針は、XcodeMLで表現されたプログラムを入力に
     * `name`要素
     * `operator`要素
     * `Var`要素
-    * `varAddr`要素
     * `function`要素
     * `funcAddr`要素
     * `arrayRef`要素
@@ -1392,32 +1391,6 @@ switch文のdefaultラベルを表す。`switch`要素の中の`body`要素の�
 | `</addrOfExpr>`
 
 属性(必須): `type`
-
-## `varAddr`要素 {#sec:expr.varaddr}
-
-配列以外の変数へのアドレス参照を表現する。
-
-| `<varAddr>`変数名`</varAddr>`
-
-この要素は以下と等価である。
-
-| `<addrOfExpr>`
-|   `<Var>`変数名`</Var>`
-| `</addrOfExpr>`
-
-属性(必須): `type`, `scope`
-
-例:
-
-`n`がint型のとき、`n`のアドレスの参照 `&n` は、
-
-    <varAddr type="P0" scope="local">n</varAddr>
-
-と表現される。ここで`P0`は、`typeTable`の中で
-
-    <pointerType type="P0" ref="int"/>
-
-などと宣言されている。
 
 ## `arrayAddr`要素 {#sec:expr.arrayaddr}
 
