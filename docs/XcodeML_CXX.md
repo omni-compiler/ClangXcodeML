@@ -1802,7 +1802,7 @@ nested-name-specifier定義要素には以下の要素がある。
 * `simpleTemplateIdName`要素
 * `decltypeSpecName`要素
 
-## `nnsTable`と`nns`属性 {#sec:nns.attr}
+## `nns`属性 {#sec:nns.attr}
 
 `nns`属性は、C++のスコープ解決演算子による修飾をおこなった形の「フルネーム」を指定するためのXML属性である。
 ソースコード上での「名前」を表現する各要素について、適宜挿入される共通の構造である。
