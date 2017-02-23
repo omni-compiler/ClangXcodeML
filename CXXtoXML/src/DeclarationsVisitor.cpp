@@ -218,8 +218,11 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
   }
 
   if (auto VD = dyn_cast<VarDecl>(D)) {
-    newProp("language_linkage",
-        stringifyLanguageLinkage(VD->getLanguageLinkage()));
+    const auto ll = VD->getLanguageLinkage();
+    if (ll != NoLanguageLinkage) {
+      newProp("language_linkage",
+          stringifyLanguageLinkage(ll));
+    }
     newBoolProp("has_init", VD->hasInit());
   }
 
@@ -231,8 +234,11 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
     }
   }
   if (auto FD = dyn_cast<FunctionDecl>(D)) {
-    newProp("language_linkage",
-        stringifyLanguageLinkage(FD->getLanguageLinkage()));
+    const auto ll = FD->getLanguageLinkage();
+    if (ll != NoLanguageLinkage) {
+      newProp("language_linkage",
+          stringifyLanguageLinkage(ll));
+    }
     newBoolProp("is_defaulted", FD->isDefaulted());
     newBoolProp("is_deleted", FD->isDeletedAsWritten());
     newBoolProp("is_pure", FD->isPure());
