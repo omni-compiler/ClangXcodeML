@@ -1778,7 +1778,7 @@ C++のラムダ式を表現する。
 
 # `nnsTable`要素とnested-name-specifier定義要素 {#sec:nns}
 `nnsTable`要素は、翻訳単位([-@sec:program]章)に対して一つだけ存在し、
-翻訳単位で使われているすべてのnested-name-specifierについての情報を定義する。
+翻訳単位で使われているすべての名前修飾(nested namespace spcifier)についての情報を定義する。
 
 | `<nnsTable>`
 |   [ nested-name-specifier型定義要素
@@ -1803,7 +1803,6 @@ nested-name-specifier定義要素には以下の要素がある。
 * `decltypeSpecName`要素
 
 ## `nnsTable`と`nns`属性 {#sec:nns.attr}
-`nnsTable`要素は、翻訳単位([-@sec:program]章)に対して一つだけ存在し、翻訳単位で使われているすべての名前修飾(nested namespace spcifier)についての情報を定義する。
 
 `nns`属性は、C++のスコープ解決演算子による修飾をおこなった形の「フルネーム」を指定するためのXML属性である。
 次章以降で解説する各種の要素のうち、ソースコード上での「名前」を表現する要素について、適宜挿入される共通の構造である。
