@@ -215,6 +215,12 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
   NamedDecl *ND = dyn_cast<NamedDecl>(D);
   if (ND) {
     addChild("fullName", ND->getQualifiedNameAsString().c_str());
+    if (ND->isLinkageValid()) {
+      newProp("linkage", stringifyLinkage(ND->getFormalLinkage()));
+    } else {
+      // should not be executed
+      newBoolProp("clang_has_invalid_linkage", true);
+    }
   }
 
   if (auto VD = dyn_cast<VarDecl>(D)) {
