@@ -1891,19 +1891,6 @@ nested-name-specifier定義要素には以下の要素がある。
         <varAddr type="P4" scope="global">s1</varAddr>
     </memberAddr>
 
-## `globalName`要素 {#sec:nns.global}
-
-グローバル名前空間を表現する。
-
-| `<globalName />`
-
-属性(必須): `nns`
-
-* `nns` -
-  このnested-name-specifierに与えられたnested-name-specifier識別名
-
-`globalName`要素は、子要素をもたない。
-
 ## `namespaceName`要素 {#sec:nns.namespace}
 
 無名でない名前空間を表現する。
