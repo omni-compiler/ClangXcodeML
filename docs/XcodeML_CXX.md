@@ -123,90 +123,6 @@ XcodeMLの設計方針は、XcodeMLで表現されたプログラムを入力に
 また、解決結果だけがあれば情報は足りているので、「正規化されていないXcodeML」がもともとのソースコード上の構文的な構造を完全に反映する必要があるわけではない。
 このように考えると、「フェーズ1の正規化」と「フェーズ2の正規化」があり、フェーズ1の正規化は必ずおこなう(XcodeMLとして二種類の表現をするコースがそもそも準備されない)、という風に考える必要がある。
 
-## `nnsTable`と`nns`属性 {#sec:program.nns}
-`nnsTable`要素は、翻訳単位([-@sec:program]章)に対して一つだけ存在し、翻訳単位で使われているすべての名前修飾(nested namespace spcifier)についての情報を定義する。
-
-`nns`属性は、C++のスコープ解決演算子による修飾をおこなった形の「フルネーム」を指定するためのXML属性である。
-次章以降で解説する各種の要素のうち、ソースコード上での「名前」を表現する要素について、適宜挿入される共通の構造である。
-
-    nns="修飾子識別名"
-
-下記の各属性に適宜挿入される。
-
-* `nnsTable`要素に含まれるもの:
-    * `napespaceName`要素(※仮称)
-    * `classname`要素(※仮称)
-* `typeTable`要素および`localTypeTable`に含まれるもの:
-    * `name`要素
-* `globalSymbols`要素および(`symbols`要素に含まれるもの:
-    * `name`要素
-* `globalDeclarations` 要素および`declarations`要素に含まれるもの:
-    * `name`要素
-    * `operator`要素
-    * `Var`要素
-    * `varAddr`要素
-    * `function`要素
-    * `funcAddr`要素
-    * `arrayRef`要素
-    * `arrayAddr`要素
-    * `memberRef`要素
-    * `memberAddr`要素
-    * `memberArrayRef`要素
-    * `memberArrayAddr`要素
-
-例:
-
-以下のプログラムで、
-
-    namespace NS {
-      int a;            // (1)
-    }
-    NS::a = 10;        // (2)
-
-`namespace NS`の存在を表現するために、以下のような`nnsTable`が生成される。
-
-    <nnsTable>
-      <nestedNameSpecifier nns="Q0">
-        <namespaceName nns="global">NS</namespace>
-      </nestedNameSpecifier>
-    </nnsTable>
-
-これを用いて、(1)および(2)における`a`は、以下のように表現される。
-
-    <name type="int" nns="Q0">a</name>
-
-例:
-
-以下のプログラムで、
-
-    struct S {
-        int data;
-        int foo(int n) { return n + 1; }
-    };
-
-    int S :: *d = &S :: data;        // (1)
-    int (S :: *f)(int) = &S :: foo;        // (2)
-    struct S s1;
-    int *p = &s1.data;            // (3)
-
- (1),(2)の`d`と`f`の名前は、それぞれ以下のように表現される。`MP1`は`S`のメンバーへのポインタ(int型を指すもの)の型であり、`MP2`は`S`のメンバ関数へのポインタ(intを引数にとりintを戻り値とする関数を指すもの)の型である。
-
-・・・※ここは「その`typeTable`がどう表現されるか」を加筆すべきである。
-
-    <name type="MP1" >d</name>
-    <name type="MP2" >f</name>
-
-(1)と(2)の右辺式は、それぞれ以下のように表現される。`S`は変数でないので`memberAddr`要素は用いられず、`data`変数のスコープと解釈する。ただし`S0`は`nnsTable`内で構造体`S`のスコープを表現するものとして定義されているとする。
-
-    <varAddr type="P0" scope="global" nns="S0">data</varAddr>
-    <varAddr type="P0" scope="global" nns="S0">foo</varAddr>
-
-(3)の右辺式は、以下のように表現される。`s1`は変数名なので、`s1.data`は`memberAddr`要素で表現される。
-
-    <memberAddr type="P5" member="data" nns="S">　…このnnsが必要か要検討
-        <varAddr type="P4" scope="global">s1</varAddr>
-    </memberAddr>
-
 ## `value`要素 {#sec:program.value}
 `globalDeclarations`要素、`declarations`要素中で、初期化式を持つ変数宣言を表現する際の初期値の式を表現する。
 
@@ -1885,6 +1801,90 @@ nested-name-specifier定義要素には以下の要素がある。
 * `templateParamTypeName`要素
 * `simpleTemplateIdName`要素
 * `decltypeSpecName`要素
+
+## `nnsTable`と`nns`属性 {#sec:program.nns}
+`nnsTable`要素は、翻訳単位([-@sec:program]章)に対して一つだけ存在し、翻訳単位で使われているすべての名前修飾(nested namespace spcifier)についての情報を定義する。
+
+`nns`属性は、C++のスコープ解決演算子による修飾をおこなった形の「フルネーム」を指定するためのXML属性である。
+次章以降で解説する各種の要素のうち、ソースコード上での「名前」を表現する要素について、適宜挿入される共通の構造である。
+
+    nns="修飾子識別名"
+
+下記の各属性に適宜挿入される。
+
+* `nnsTable`要素に含まれるもの:
+    * `napespaceName`要素(※仮称)
+    * `classname`要素(※仮称)
+* `typeTable`要素および`localTypeTable`に含まれるもの:
+    * `name`要素
+* `globalSymbols`要素および(`symbols`要素に含まれるもの:
+    * `name`要素
+* `globalDeclarations` 要素および`declarations`要素に含まれるもの:
+    * `name`要素
+    * `operator`要素
+    * `Var`要素
+    * `varAddr`要素
+    * `function`要素
+    * `funcAddr`要素
+    * `arrayRef`要素
+    * `arrayAddr`要素
+    * `memberRef`要素
+    * `memberAddr`要素
+    * `memberArrayRef`要素
+    * `memberArrayAddr`要素
+
+例:
+
+以下のプログラムで、
+
+    namespace NS {
+      int a;            // (1)
+    }
+    NS::a = 10;        // (2)
+
+`namespace NS`の存在を表現するために、以下のような`nnsTable`が生成される。
+
+    <nnsTable>
+      <nestedNameSpecifier nns="Q0">
+        <namespaceName nns="global">NS</namespace>
+      </nestedNameSpecifier>
+    </nnsTable>
+
+これを用いて、(1)および(2)における`a`は、以下のように表現される。
+
+    <name type="int" nns="Q0">a</name>
+
+例:
+
+以下のプログラムで、
+
+    struct S {
+        int data;
+        int foo(int n) { return n + 1; }
+    };
+
+    int S :: *d = &S :: data;        // (1)
+    int (S :: *f)(int) = &S :: foo;        // (2)
+    struct S s1;
+    int *p = &s1.data;            // (3)
+
+ (1),(2)の`d`と`f`の名前は、それぞれ以下のように表現される。`MP1`は`S`のメンバーへのポインタ(int型を指すもの)の型であり、`MP2`は`S`のメンバ関数へのポインタ(intを引数にとりintを戻り値とする関数を指すもの)の型である。
+
+・・・※ここは「その`typeTable`がどう表現されるか」を加筆すべきである。
+
+    <name type="MP1" >d</name>
+    <name type="MP2" >f</name>
+
+(1)と(2)の右辺式は、それぞれ以下のように表現される。`S`は変数でないので`memberAddr`要素は用いられず、`data`変数のスコープと解釈する。ただし`S0`は`nnsTable`内で構造体`S`のスコープを表現するものとして定義されているとする。
+
+    <varAddr type="P0" scope="global" nns="S0">data</varAddr>
+    <varAddr type="P0" scope="global" nns="S0">foo</varAddr>
+
+(3)の右辺式は、以下のように表現される。`s1`は変数名なので、`s1.data`は`memberAddr`要素で表現される。
+
+    <memberAddr type="P5" member="data" nns="S">　…このnnsが必要か要検討
+        <varAddr type="P4" scope="global">s1</varAddr>
+    </memberAddr>
 
 ## `globalName`要素 {#sec:nns.global}
 
