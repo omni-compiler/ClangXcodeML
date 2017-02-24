@@ -1438,22 +1438,13 @@ switch文のdefaultラベルを表す。`switch`要素の中の`body`要素の�
 これに関連してOmni XMPでは型の不一致によるエラーが出ている(バグレポート439)。
 
 ## `pointerRef`要素 {#sec:expr.pointer}
-式(ポインタ型またはリファレンス型)の指示先を表現する。
+式(ポインタ型)の指示先を表現する。
 
 | `<pointerRef>`
 |   式の参照
 | `</pointerRef>`
 
 属性(必須): `type`
-
-属性(optional): `is_expedient`
-
-pointerRef要素は次の属性を持つことができる。
-
-* `is_expedient`属性　－　
-  "`1`"または"`true`"のとき、式がリファレンスであることを表す。
-  "`0`"または"`false`"のとき、式がポインタであることを表す。
-  省略時の値は"`false`"である。
 
 例:
 
