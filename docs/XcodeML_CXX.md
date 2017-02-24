@@ -382,7 +382,7 @@ int型配列の初期値 `{ 1, 2 }` に対応する表現は次のとおりに�
 	  <pointerType type="P0" is_volatile="1" ref="B0"/>
 
 ## `pointerType`要素 {#sec:type.ptr}
-`pointerType`要素はポインタ型またはリファレンス型を定義する。
+`pointerType`要素はポインタのデータ型を定義する。
 
 | `<pointerType/>`
 
