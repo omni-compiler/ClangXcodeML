@@ -41,4 +41,4 @@ check: $(CXXTOXML) $(CXXTESTOBJECTS) $(CXXDECOMPTESTOBJECTS)
 	done
 
 clean:
-	rm -f *.xml *.generated.cpp
+	rm -f *.xml *.generated.cpp *.xcodeml
