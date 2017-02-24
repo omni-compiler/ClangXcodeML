@@ -1002,7 +1002,7 @@ enum型は、`enumType`要素で定義する。`type`要素で、メンバの識
     <varDecl>
       <name>rx</name>
       <value>
-        <varAddr type="R1">x</varAddr>
+        <Var type="R1">x</Var>
       </value>
     </varDecl>
 
