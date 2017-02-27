@@ -447,11 +447,15 @@ std::string TypeTableInfo::getTypeName(QualType T)
     return "nullType";
   };
 
-  std::string name = mapFromQualTypeToName[T];
-  if (OptIgnoreUnknownType && name.empty()) {
-    return "CXX2XML_UNKNOWN_TYPE";
+  const auto iter = mapFromQualTypeToName.find(T);
+  std::string name;
+  if (iter != mapFromQualTypeToName.end()) {
+    name = iter->second;
   } else {
-    assert(!name.empty());
+    xmlNodePtr dummy1 = xmlNewNode(nullptr, BAD_CAST "dummy1"),
+               dummy2 = xmlNewNode(nullptr, BAD_CAST "dummy2");
+    registerType(T, &dummy1, dummy2);
+    name = mapFromQualTypeToName[T];
   }
 
   if (!map_is_already_set) {
