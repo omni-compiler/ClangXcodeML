@@ -26,6 +26,18 @@ DeclarationsVisitor::getVisitorName() const {
 }
 
 static std::string
+getSpelling(clang::Expr *E, const clang::ASTContext& CXT) {
+  const unsigned INIT_BUFFER_SIZE = 32;
+  SmallVector<char, INIT_BUFFER_SIZE> buffer;
+  auto spelling = clang::Lexer::getSpelling(
+      E->getExprLoc(),
+      buffer,
+      CXT.getSourceManager(),
+      CXT.getLangOpts());
+  return spelling.str();
+}
+
+static std::string
 unsignedToHexString(unsigned u) {
   std::stringstream ss;
   ss << std::hex << "0x" << u;
