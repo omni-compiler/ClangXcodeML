@@ -146,6 +146,13 @@
     </implicitCastExpr>
   </xsl:template>
 
+  <xsl:template match="clangStmt[@class='CharacterLiteral']">
+    <intConstant>
+      <xsl:apply-templates select="@*" />
+      <xsl:value-of select="@hexadecimalNotation" />
+    </intConstant>
+  </xsl:template>
+
   <xsl:template match="clangStmt[@class='IntegerLiteral']">
     <intConstant>
       <xsl:apply-templates select="@*" />
