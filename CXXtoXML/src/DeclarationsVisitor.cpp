@@ -91,6 +91,8 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
   if (auto CL = dyn_cast<CharacterLiteral>(S)) {
     newProp("hexadecimalNotation",
         unsignedToHexString(CL->getValue()).c_str());
+    newProp("token",
+        getSpelling(CL, mangleContext->getASTContext()).c_str());
   }
 
   if (auto IL = dyn_cast<IntegerLiteral>(S)) {
