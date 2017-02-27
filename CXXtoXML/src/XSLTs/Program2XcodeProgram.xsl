@@ -153,6 +153,10 @@
     </stringConstant>
   </xsl:template>
 
+  <xsl:template match="clangStmt[@class='CXXThisExpr']">
+    <thisExpr />
+  </xsl:template>
+
   <xsl:template match="@valueCategory">
     <xsl:attribute name="reference">
       <xsl:choose>
