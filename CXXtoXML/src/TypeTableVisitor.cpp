@@ -444,9 +444,7 @@ std::string TypeTableInfo::getTypeName(QualType T)
   if (iter != mapFromQualTypeToName.end()) {
     name = iter->second;
   } else {
-    xmlNodePtr dummy1 = xmlNewNode(nullptr, BAD_CAST "dummy1"),
-               dummy2 = xmlNewNode(nullptr, BAD_CAST "dummy2");
-    registerType(T, &dummy1, dummy2);
+    registerType(T, nullptr, nullptr);
     name = mapFromQualTypeToName[T];
   }
 
