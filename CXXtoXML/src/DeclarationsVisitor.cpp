@@ -76,6 +76,11 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
     newProp("clangCastKind", CE->getCastKindName());
   }
 
+  if (auto CL = dyn_cast<CharacterLiteral>(S)) {
+    newProp("hexadecimalNotation",
+        unsignedToHexString(CL->getValue()).c_str());
+  }
+
   if (auto IL = dyn_cast<IntegerLiteral>(S)) {
     const unsigned INIT_BUFFER_SIZE = 32;
     SmallVector<char, INIT_BUFFER_SIZE> buffer;
