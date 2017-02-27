@@ -66,24 +66,6 @@ public:
     void dump();
 };
 
-class TypeTableVisitor
-    : public XMLVisitorBase<TypeTableVisitor> {
-public:
-    // use base constructors
-    using XMLVisitorBase::XMLVisitorBase;
-
-    const char *getVisitorName() const override;
-    bool PreVisitStmt(clang::Stmt *);
-    bool PreVisitDecl(clang::Decl *);
-    bool PreVisitType(clang::QualType);
-    bool PreVisitAttr(clang::Attr *);
-    bool PreVisitNestedNameSpecifierLoc(clang::NestedNameSpecifierLoc);
-    bool PreVisitTypeLoc(clang::TypeLoc);
-    bool PreVisitDeclarationNameInfo(clang::DeclarationNameInfo);
-    bool PreVisitConstructorInitializer(clang::CXXCtorInitializer *CI);
-    bool FullTrace(void) const;
-};
-
 #endif /* !TYPETABLEVISITOR_H */
 
 ///

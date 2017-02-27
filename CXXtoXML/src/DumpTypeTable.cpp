@@ -27,10 +27,7 @@ TypeTableDumpASTConsumer::HandleTranslationUnit(ASTContext & CXT) {
   InheritanceInfo *II = &inheritanceinfo;
   TypeTableInfo typetableinfo(MC, II);
   TypeTableInfo *TTI = &typetableinfo;
-  TypeTableVisitor TTV(MC, dummyRoot, "typeTable", TTI);
   Decl *D = CXT.getTranslationUnitDecl();
-
-  TTV.TraverseDecl(D);
 
   TTI->dump();
 }
