@@ -5,6 +5,7 @@
 #include "clang/Basic/Builtins.h"
 #include "clang/Lex/Lexer.h"
 #include <map>
+#include <sstream>
 #include "OperationKinds.h"
 
 using namespace clang;
@@ -22,6 +23,13 @@ OptDisableDeclarations("disable-declarations",
 const char *
 DeclarationsVisitor::getVisitorName() const {
   return OptTraceDeclarations ? "Declarations" : nullptr;
+}
+
+static std::string
+unsignedToHexString(unsigned u) {
+  std::stringstream ss;
+  ss << std::hex << "0x" << u;
+  return ss.str();
 }
 
 bool
