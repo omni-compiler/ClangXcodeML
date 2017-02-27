@@ -213,9 +213,6 @@ void TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr tra
   };
 
   if (!T.isCanonical()) {
-    if (OptTraceTypeTable) {
-      xmlAddChild(traversingNode, xmlNewComment(BAD_CAST "registerType: not canonoical"));
-    }
     registerType(T.getCanonicalType(), retNode, traversingNode);
     mapFromQualTypeToName[T] = mapFromQualTypeToName[T.getCanonicalType()];
     return;
@@ -429,11 +426,6 @@ void TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr tra
   }
   mapFromNameToQualType[rawname] = T;
   mapFromQualTypeToXmlNodePtr[T] = Node;
-
-  if (traversingNode && OptTraceTypeTable) {
-    std::string comment = "registerType: " + rawname + "(" + getTypeName(T) + ")";
-    xmlAddChild(traversingNode, xmlNewComment(BAD_CAST comment.c_str()));
-  }
 }
 
 void TypeTableInfo::registerLabelType(void)
