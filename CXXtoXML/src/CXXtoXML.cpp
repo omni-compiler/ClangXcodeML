@@ -43,11 +43,9 @@ public:
         InheritanceInfo *II = &inheritanceinfo;
         TypeTableInfo typetableinfo(MC, II);
         TypeTableInfo *TTI = &typetableinfo;
-        TypeTableVisitor TTV(MC, rootNode, "typeTable", TTI);
         DeclarationsVisitor DV(MC, rootNode, "clangAST", TTI);
         Decl *D = CXT.getTranslationUnitDecl();
 
-        TTV.TraverseDecl(D);
         DV.TraverseDecl(D);
     }
 #if 0
