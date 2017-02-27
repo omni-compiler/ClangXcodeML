@@ -11,7 +11,6 @@
 #include "clang/Driver/Options.h"
 #include "llvm/Option/OptTable.h"
 #include "llvm/Support/Signals.h"
-#include "DumpTypeTable.h"
 
 #include <libxml/xmlsave.h>
 #include <time.h>
@@ -111,9 +110,7 @@ int main(int argc, const char **argv) {
     Tool.appendArgumentsAdjuster(clang::tooling::getClangSyntaxOnlyAdjuster());
 
     std::unique_ptr<FrontendActionFactory> FrontendFactory =
-      OptDumpTypeMap ?
-          newFrontendActionFactory<TypeTableDumpAction>()
-        : newFrontendActionFactory<XMLASTDumpAction>();
+      newFrontendActionFactory<XMLASTDumpAction>();
     return Tool.run(FrontendFactory.get());
 }
 
