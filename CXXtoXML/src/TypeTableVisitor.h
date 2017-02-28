@@ -31,6 +31,8 @@ class TypeTableInfo {
     std::vector<xmlNodePtr> enumTypeNodes;
     std::vector<xmlNodePtr> classTypeNodes;
     std::vector<xmlNodePtr> otherTypeNodes;
+    std::unordered_map<clang::QualType, xmlNodePtr> TypeElements;
+
     bool useLabelType;
 
     xmlNodePtr createNode(clang::QualType T, const char *fieldname,
