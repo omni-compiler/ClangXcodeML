@@ -513,6 +513,30 @@ void TypeTableInfo::pushTypeTableStack(xmlNodePtr typeTableNode) {
       std::make_tuple(typeTableNode, std::vector<QualType>()));
 }
 
+void TypeTableInfo::popTypeTableStack() {
+  assert(!typeTableStack.empty());
+  const auto typeTableNode = std::get<0>(typeTableStack.top());
+  const auto latestTypes = std::get<1>(typeTableStack.top());
+  for (auto T : latestTypes) {
+    mapFromQualTypeToName.erase(T);
+
+    if (TypeElements.find(T) != TypeElements.end()) {
+      /*
+       * If data type definition element exists,
+       * add it to current typeTable.
+       * Fundamental types do not have data type definition elements.
+       * (Example: `int`)
+       */
+      xmlAddChild(typeTableNode, TypeElements[T]);
+      TypeElements.erase(T);
+    }
+
+    const auto name = mapFromQualTypeToName[T];
+    mapFromNameToQualType.erase(name);
+  }
+  typeTableStack.pop();
+}
+
 void TypeTableInfo::dump() {
   for (auto& pair : mapFromNameToQualType) {
     auto name = pair.first;

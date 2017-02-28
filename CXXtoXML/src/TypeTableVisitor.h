@@ -60,6 +60,7 @@ public:
     void setNormalizability(clang::QualType, bool);
     bool isNormalizable(clang::QualType);
     void pushTypeTableStack(xmlNodePtr);
+    void popTypeTableStack();
     void dump();
 };
 
