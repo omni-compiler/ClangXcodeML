@@ -241,6 +241,11 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
 }
 
 bool
+DeclarationsVisitor::PostVisitDecl(Decl* D) {
+  return true;
+}
+
+bool
 DeclarationsVisitor::PreVisitDeclarationNameInfo(DeclarationNameInfo NI) {
   DeclarationName DN = NI.getName();
   IdentifierInfo *II = DN.getAsIdentifierInfo();
