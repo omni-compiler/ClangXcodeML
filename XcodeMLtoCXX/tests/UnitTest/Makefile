@@ -21,6 +21,7 @@ all: $(TARGETS)
 
 OBJNAMES = XcodeMlType.o \
 	LibXMLUtil.o \
+	ClangClassHandler.o \
 	CodeBuilder.o \
 	CXXCodeGen.o \
 	TypeAnalyzer.o \
