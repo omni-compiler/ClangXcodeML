@@ -17,7 +17,7 @@ CXXDECOMPTESTOBJECTS = $(CXXTESTCASES:.cc=.generated.cpp)
 CXXFLAGS = -pedantic -fsyntax-only
 
 $(CXXTOXML):
-	$(MAKE) -C $(CXXTOXMLDIR)
+	$(MAKE) -C $(CXXTOXMLDIR)/src
 
 %.xml: %.cc $(CXXTOXML)
 	$(CXXTOXML) $< $(CXXTOXMLFLAGS) > $@
