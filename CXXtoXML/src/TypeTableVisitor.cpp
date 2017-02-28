@@ -288,6 +288,9 @@ void TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr tra
       if (PT) {
         registerType(PT->getPointeeType(), nullptr, traversingNode);
       }
+      if (const auto RT = dyn_cast<ReferenceType>(T)) {
+        registerType(RT->getPointeeType(), nullptr, traversingNode);
+      }
       rawname = registerPointerType(T);
       Node = createNode(T, "pointerType", traversingNode);
       if (PT) {
@@ -453,10 +456,9 @@ std::string TypeTableInfo::getTypeName(QualType T)
   };
 
   std::string name = mapFromQualTypeToName[T];
-  if (OptIgnoreUnknownType && name.empty()) {
+  if (name.empty()) {
+    assert(OptIgnoreUnknownType);
     return "CXX2XML_UNKNOWN_TYPE";
-  } else {
-    assert(!name.empty());
   }
 
   if (!map_is_already_set) {
@@ -637,9 +639,6 @@ TypeTableVisitor::PreVisitDecl(Decl *D) {
   }
 
   if (!D) {
-    return false;
-  }
-  if (D->isImplicit()) {
     return false;
   }
 

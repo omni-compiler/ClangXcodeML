@@ -10,12 +10,14 @@
 #include <cassert>
 #include <memory>
 #include <vector>
+#include "CXXCodeGen.h"
 #include "XMLString.h"
 #include "Symbol.h"
 #include "XcodeMlType.h"
 #include "XcodeMlEnvironment.h"
 #include "XMLWalker.h"
 #include "TypeAnalyzer.h"
+#include "SourceInfo.h"
 #include "CodeBuilder.h"
 
 int main(int argc, char** argv) {

@@ -5,6 +5,7 @@
 #include "clang/Basic/Builtins.h"
 #include "clang/Lex/Lexer.h"
 #include <map>
+#include <sstream>
 #include "OperationKinds.h"
 
 using namespace clang;
@@ -22,6 +23,25 @@ OptDisableDeclarations("disable-declarations",
 const char *
 DeclarationsVisitor::getVisitorName() const {
   return OptTraceDeclarations ? "Declarations" : nullptr;
+}
+
+static std::string
+getSpelling(clang::Expr *E, const clang::ASTContext& CXT) {
+  const unsigned INIT_BUFFER_SIZE = 32;
+  SmallVector<char, INIT_BUFFER_SIZE> buffer;
+  auto spelling = clang::Lexer::getSpelling(
+      E->getExprLoc(),
+      buffer,
+      CXT.getSourceManager(),
+      CXT.getLangOpts());
+  return spelling.str();
+}
+
+static std::string
+unsignedToHexString(unsigned u) {
+  std::stringstream ss;
+  ss << std::hex << "0x" << u;
+  return ss.str();
 }
 
 bool
@@ -66,6 +86,13 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
 
   if (auto CE = dyn_cast<clang::CastExpr>(S)) {
     newProp("clangCastKind", CE->getCastKindName());
+  }
+
+  if (auto CL = dyn_cast<CharacterLiteral>(S)) {
+    newProp("hexadecimalNotation",
+        unsignedToHexString(CL->getValue()).c_str());
+    newProp("token",
+        getSpelling(CL, mangleContext->getASTContext()).c_str());
   }
 
   if (auto IL = dyn_cast<IntegerLiteral>(S)) {
@@ -213,6 +240,16 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
   NamedDecl *ND = dyn_cast<NamedDecl>(D);
   if (ND) {
     addChild("fullName", ND->getQualifiedNameAsString().c_str());
+  }
+
+  if (auto VD = dyn_cast<ValueDecl>(D)) {
+    const auto T = VD->getType();
+    newProp("xcodemlType", typetableinfo->getTypeName(T).c_str());
+  }
+
+  if (auto TD = dyn_cast<TypeDecl>(D)) {
+    const auto T = QualType( TD->getTypeForDecl(), 0 );
+    newProp("xcodemlType", typetableinfo->getTypeName(T).c_str());
   }
 
   if (auto VD = dyn_cast<VarDecl>(D)) {
