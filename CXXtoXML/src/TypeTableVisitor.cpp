@@ -64,16 +64,7 @@ TypeTableInfo::TypeTableInfo(MangleContext *MC, InheritanceInfo *II) :
   seqForClassType = 0;
   seqForOtherType = 0;
 
-  basicTypeNodes.clear();
-  pointerTypeNodes.clear();
-  functionTypeNodes.clear();
-  arrayTypeNodes.clear();
-  structTypeNodes.clear();
-  unionTypeNodes.clear();
-  enumTypeNodes.clear();
-  classTypeNodes.clear();
-  otherTypeNodes.clear();
-
+  TypeElements.clear();
   useLabelType = false;
 }
 
@@ -245,7 +236,7 @@ void TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
       rawname = registerBasicType(T);
       // XXX: temporary imcompletearray
       Node = createNode(T, "basicType", nullptr);
-      basicTypeNodes.push_back(Node);
+      pushType(T, Node);
     } else {
       const Type *Tptr = T.getTypePtrOrNull();
       ASTContext &CXT = mangleContext->getASTContext();
@@ -272,7 +263,7 @@ void TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
     } else {
       Node = createNode(T, "complexType", nullptr);
     }
-    otherTypeNodes.push_back(Node);
+    pushType(T, Node);
     break;
 
   case Type::Pointer:
@@ -291,7 +282,7 @@ void TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
         xmlNewProp(Node, BAD_CAST "ref",
                    BAD_CAST getTypeName(PT->getPointeeType()).c_str());
       }
-      pointerTypeNodes.push_back(Node);
+      pushType(T, Node);
     }
     break;
 
@@ -310,7 +301,7 @@ void TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
         xmlNewProp(Node, BAD_CAST "array_size",
                    BAD_CAST CAT->getSize().toString(10, false).c_str());
       }
-      arrayTypeNodes.push_back(Node);
+      pushType(T, Node);
     }
     break;
 
@@ -328,7 +319,7 @@ void TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
         xmlNewProp(Node, BAD_CAST "element_type",
                    BAD_CAST getTypeName(AT->getElementType()).c_str());
       }
-      arrayTypeNodes.push_back(Node);
+      pushType(T, Node);
     }
     break;
 
@@ -338,7 +329,7 @@ void TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
     rawname = registerOtherType(T);
     // XXX: temporary implementation
     Node = createNode(T, "vectorType", nullptr);
-    arrayTypeNodes.push_back(Node);
+    pushType(T, Node);
     break;
 
   case Type::FunctionProto:
@@ -354,7 +345,7 @@ void TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
         xmlNewProp(Node, BAD_CAST "return_type",
                    BAD_CAST getTypeName(FT->getReturnType()).c_str());
       }
-      functionTypeNodes.push_back(Node);
+      pushType(T, Node);
     }
     break;
 
@@ -364,7 +355,7 @@ void TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
     rawname = registerOtherType(T);
     // XXX: temporary implementation
     Node = createNode(T, "typedefType", nullptr);
-    otherTypeNodes.push_back(Node);
+    pushType(T, Node);
     break;
 
   case Type::Adjusted:
@@ -376,32 +367,32 @@ void TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
     rawname = registerOtherType(T);
     // XXX: temporary implementation
     Node = createNode(T, "otherType", nullptr);
-    otherTypeNodes.push_back(Node);
+    pushType(T, Node);
     break;
 
   case Type::Record:
     rawname = registerRecordType(T);
     if (T->isStructureType()) {
       Node = createNode(T, "structType", nullptr);
-      structTypeNodes.push_back(Node);
+      pushType(T, Node);
     } else if (T->isUnionType()) {
       Node = createNode(T, "unionType", nullptr);
-      unionTypeNodes.push_back(Node);
+      pushType(T, Node);
     } else if (T->isClassType()) {
       // XXX: temporary implementation
       Node = createNode(T, "classType", nullptr);
-      classTypeNodes.push_back(Node);
+      pushType(T, Node);
     } else {
       // XXX: temporary implementation
       Node = createNode(T, "unknownRecordType", nullptr);
-      otherTypeNodes.push_back(Node);
+      pushType(T, Node);
     }
     break;
 
   case Type::Enum:
     rawname = registerEnumType(T);
     Node = createNode(T, "enumType", nullptr);
-    enumTypeNodes.push_back(Node);
+    pushType(T, Node);
     break;
 
   case Type::Elaborated:
@@ -422,7 +413,7 @@ void TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
     rawname = registerOtherType(T);
     // XXX: temporary implementation
     Node = createNode(T, "otherType", nullptr);
-    otherTypeNodes.push_back(Node);
+    pushType(T, Node);
     break;
   }
 

@@ -22,15 +22,6 @@ class TypeTableInfo {
     int seqForClassType;
     int seqForOtherType;
 
-    std::vector<xmlNodePtr> basicTypeNodes;
-    std::vector<xmlNodePtr> pointerTypeNodes;
-    std::vector<xmlNodePtr> functionTypeNodes;
-    std::vector<xmlNodePtr> arrayTypeNodes;
-    std::vector<xmlNodePtr> structTypeNodes;
-    std::vector<xmlNodePtr> unionTypeNodes;
-    std::vector<xmlNodePtr> enumTypeNodes;
-    std::vector<xmlNodePtr> classTypeNodes;
-    std::vector<xmlNodePtr> otherTypeNodes;
     std::unordered_map<clang::QualType, xmlNodePtr> TypeElements;
 
     bool useLabelType;
