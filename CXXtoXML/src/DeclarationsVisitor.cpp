@@ -210,6 +210,11 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
     newProp("access", AccessSpec(D->getAccess()).c_str());
   }
 
+  if (isa<TranslationUnitDecl>(D)) {
+    auto typetable = addChild("xcodemlTypeTable");
+    typetableinfo->pushTypeTableStack(typetable);
+  }
+
   NamedDecl *ND = dyn_cast<NamedDecl>(D);
   if (ND) {
     addChild("fullName", ND->getQualifiedNameAsString().c_str());
@@ -242,6 +247,9 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
 
 bool
 DeclarationsVisitor::PostVisitDecl(Decl* D) {
+  if (isa<TranslationUnitDecl>(D)) {
+    typetableinfo->popTypeTableStack();
+  }
   return true;
 }
 
