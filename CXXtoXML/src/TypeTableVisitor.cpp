@@ -214,7 +214,8 @@ void TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
     return;
   }
 
-  if (!mapFromQualTypeToName[T].empty()) {
+  if (mapFromQualTypeToXmlNodePtr.find(T) !=
+      mapFromQualTypeToXmlNodePtr.end()) {
     if (retNode != nullptr) {
       *retNode = mapFromQualTypeToXmlNodePtr[T];
     }
