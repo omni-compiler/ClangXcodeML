@@ -277,6 +277,9 @@ void TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
       if (PT) {
         registerType(PT->getPointeeType(), nullptr, nullptr);
       }
+      if (const auto RT = dyn_cast<ReferenceType>(T)) {
+        registerType(RT->getPointeeType(), nullptr, traversingNode);
+      }
       rawname = registerPointerType(T);
       Node = createNode(T, "pointerType", nullptr);
       if (PT) {

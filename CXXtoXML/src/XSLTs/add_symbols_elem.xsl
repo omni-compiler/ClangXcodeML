@@ -18,6 +18,9 @@
         <xsl:for-each
           select="clangAST/clangDecl[@class='TranslationUnit']/clangDecl">
           <id>
+            <xsl:attribute name="type">
+              <xsl:value-of select="@xcodemlType" />
+            </xsl:attribute>
             <name>
               <xsl:value-of select="fullName" />
             </name>
@@ -37,6 +40,9 @@
       <symbols>
         <xsl:for-each select="clangStmt[@class='DeclStmt']/*">
           <id>
+            <xsl:attribute name="type">
+              <xsl:value-of select="@xcodemlType" />
+            </xsl:attribute>
             <name>
               <xsl:value-of select="fullName" />
             </name>
@@ -46,6 +52,26 @@
 
       <xsl:apply-templates />
     </clangStmt>
+  </xsl:template>
+
+  <xsl:template match="clangDecl[@class='Function']">
+    <clangDecl>
+      <xsl:apply-templates select="@*" />
+
+      <params>
+        <xsl:for-each
+          select="TypeLoc[@class='FunctionProto']
+            /clangDecl[@class='ParmVar']">
+          <id>
+            <name>
+              <xsl:value-of select="fullName" />
+            </name>
+          </id>
+        </xsl:for-each>
+      </params>
+
+      <xsl:apply-templates />
+    </clangDecl>
   </xsl:template>
 
   <xsl:template match="node()|@*">

@@ -36,7 +36,15 @@ namespace XcodeMl {
   const TypeRef& Environment::getReturnType(
     const std::string& dataTypeIdent
   ) const {
-    return returnMap.at(dataTypeIdent);
+    try {
+      return returnMap.at(dataTypeIdent);
+    } catch (const std::out_of_range& e) {
+      const auto msg =
+        std::string("return type of '")
+        + dataTypeIdent
+        + "' not found in XcodeMl::Environment";
+      throw std::out_of_range(msg);
+    }
   }
 
   void Environment::setReturnType(

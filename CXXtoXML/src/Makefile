@@ -20,6 +20,7 @@ USEDLIBS += $(OTHERLIBS)
 
 RAVOBJS = XMLRAV.o
 OBJS =  CXXtoXML.o \
+	ClangUtil.o \
 	XMLVisitorBase.o \
 	TypeTableVisitor.o \
 	DeclarationsVisitor.o \
@@ -29,6 +30,8 @@ OBJS =  CXXtoXML.o \
 CXXtoXML: $(RAVOBJS) $(OBJS)
 	$(CXX) $(CXXFLAGS) $(RAVOBJS) $(OBJS) $(USEDLIBS) -o CXXtoXML
 
+ClangUtil.o: \
+	ClangUtil.h
 XMLRAV.o: \
 	XMLRAV.cpp \
 	XMLRAV.h

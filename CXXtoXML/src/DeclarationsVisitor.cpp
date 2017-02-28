@@ -5,6 +5,8 @@
 #include "clang/Basic/Builtins.h"
 #include "clang/Lex/Lexer.h"
 #include <map>
+#include <sstream>
+#include "ClangUtil.h"
 #include "OperationKinds.h"
 
 using namespace clang;
@@ -22,6 +24,25 @@ OptDisableDeclarations("disable-declarations",
 const char *
 DeclarationsVisitor::getVisitorName() const {
   return OptTraceDeclarations ? "Declarations" : nullptr;
+}
+
+static std::string
+getSpelling(clang::Expr *E, const clang::ASTContext& CXT) {
+  const unsigned INIT_BUFFER_SIZE = 32;
+  SmallVector<char, INIT_BUFFER_SIZE> buffer;
+  auto spelling = clang::Lexer::getSpelling(
+      E->getExprLoc(),
+      buffer,
+      CXT.getSourceManager(),
+      CXT.getLangOpts());
+  return spelling.str();
+}
+
+static std::string
+unsignedToHexString(unsigned u) {
+  std::stringstream ss;
+  ss << std::hex << "0x" << u;
+  return ss.str();
 }
 
 bool
@@ -66,6 +87,13 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
 
   if (auto CE = dyn_cast<clang::CastExpr>(S)) {
     newProp("clangCastKind", CE->getCastKindName());
+  }
+
+  if (auto CL = dyn_cast<CharacterLiteral>(S)) {
+    newProp("hexadecimalNotation",
+        unsignedToHexString(CL->getValue()).c_str());
+    newProp("token",
+        getSpelling(CL, mangleContext->getASTContext()).c_str());
   }
 
   if (auto IL = dyn_cast<IntegerLiteral>(S)) {
@@ -218,9 +246,35 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
   NamedDecl *ND = dyn_cast<NamedDecl>(D);
   if (ND) {
     addChild("fullName", ND->getQualifiedNameAsString().c_str());
+    if (ND->isLinkageValid()) {
+      const auto FL = ND->getFormalLinkage(),
+                 LI = ND->getLinkageInternal();
+      newProp("linkage", stringifyLinkage(FL));
+      if (FL != LI) {
+        newProp("clang_linkage_internal", stringifyLinkage(LI));
+      }
+    } else {
+      // should not be executed
+      newBoolProp("clang_has_invalid_linkage", true);
+    }
+  }
+
+  if (auto VD = dyn_cast<ValueDecl>(D)) {
+    const auto T = VD->getType();
+    newProp("xcodemlType", typetableinfo->getTypeName(T).c_str());
+  }
+
+  if (auto TD = dyn_cast<TypeDecl>(D)) {
+    const auto T = QualType( TD->getTypeForDecl(), 0 );
+    newProp("xcodemlType", typetableinfo->getTypeName(T).c_str());
   }
 
   if (auto VD = dyn_cast<VarDecl>(D)) {
+    const auto ll = VD->getLanguageLinkage();
+    if (ll != NoLanguageLinkage) {
+      newProp("language_linkage",
+          stringifyLanguageLinkage(ll));
+    }
     newBoolProp("has_init", VD->hasInit());
   }
 
@@ -232,6 +286,11 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
     }
   }
   if (auto FD = dyn_cast<FunctionDecl>(D)) {
+    const auto ll = FD->getLanguageLinkage();
+    if (ll != NoLanguageLinkage) {
+      newProp("language_linkage",
+          stringifyLanguageLinkage(ll));
+    }
     newBoolProp("is_defaulted", FD->isDefaulted());
     newBoolProp("is_deleted", FD->isDeletedAsWritten());
     newBoolProp("is_pure", FD->isPure());
