@@ -2,6 +2,8 @@
 #define TYPETABLEVISITOR_H
 
 #include "InheritanceInfo.h"
+#include <stack>
+#include <tuple>
 #include <unordered_map>
 
 class TypeTableInfo {
@@ -11,6 +13,7 @@ class TypeTableInfo {
     std::unordered_map<clang::QualType, xmlNodePtr> mapFromQualTypeToXmlNodePtr;
     InheritanceInfo *inheritanceinfo;
     std::unordered_map<clang::QualType, bool> normalizability;
+    std::stack<std::tuple<xmlNodePtr, std::vector<clang::QualType>>> typeTableStack;
 
     int seqForBasicType;
     int seqForPointerType;
