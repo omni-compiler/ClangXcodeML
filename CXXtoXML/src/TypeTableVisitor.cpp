@@ -508,6 +508,11 @@ bool TypeTableInfo::isNormalizable(clang::QualType T) {
   return normalizability[T];
 }
 
+void TypeTableInfo::pushTypeTableStack(xmlNodePtr typeTableNode) {
+  typeTableStack.push(
+      std::make_tuple(typeTableNode, std::vector<QualType>()));
+}
+
 void TypeTableInfo::dump() {
   for (auto& pair : mapFromNameToQualType) {
     auto name = pair.first;

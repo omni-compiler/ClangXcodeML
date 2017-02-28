@@ -59,6 +59,7 @@ public:
     bool hasBaseClass(clang::QualType type);
     void setNormalizability(clang::QualType, bool);
     bool isNormalizable(clang::QualType);
+    void pushTypeTableStack(xmlNodePtr);
     void dump();
 };
 
