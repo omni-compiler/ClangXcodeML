@@ -203,6 +203,11 @@ xmlNodePtr TypeTableInfo::createNode(QualType T, const char *fieldname, xmlNodeP
   return N;
 }
 
+void TypeTableInfo::pushType(const QualType& T, xmlNodePtr node) {
+  std::get<1>(typeTableStack.top()).push_back(T);
+  TypeElements[T] = node;
+}
+
 void TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
   bool isQualified = false;
   xmlNodePtr Node = nullptr;

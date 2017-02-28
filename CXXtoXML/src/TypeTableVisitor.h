@@ -44,6 +44,7 @@ class TypeTableInfo {
     std::string registerRecordType(clang::QualType T); // "S*", "U*", or "C*"
     std::string registerEnumType(clang::QualType T); // "E*"
     std::string registerOtherType(clang::QualType T); // "O*"
+    void pushType(const clang::QualType&, xmlNodePtr);
 
 public:
     TypeTableInfo() = delete;
