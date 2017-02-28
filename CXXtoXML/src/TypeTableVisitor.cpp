@@ -488,43 +488,6 @@ std::string TypeTableInfo::getTypeNameForLabel(void)
   }
 }
 
-void TypeTableInfo::emitAllTypeNode(xmlNodePtr ParentNode)
-{
-  for (xmlNodePtr N : basicTypeNodes) {
-    xmlAddChild(ParentNode, N);
-  }
-  for (xmlNodePtr N : pointerTypeNodes) {
-    xmlAddChild(ParentNode, N);
-  }
-  if (useLabelType) {
-    xmlNodePtr N = xmlNewNode(nullptr, BAD_CAST "pointerType");
-    xmlNewProp(N, BAD_CAST "type", BAD_CAST getTypeNameForLabel().c_str());
-    xmlNewProp(N, BAD_CAST "ref", BAD_CAST "void");
-    xmlAddChild(ParentNode, N);
-  }
-  for (xmlNodePtr N : arrayTypeNodes) {
-    xmlAddChild(ParentNode, N);
-  }
-  for (xmlNodePtr N : structTypeNodes) {
-    xmlAddChild(ParentNode, N);
-  }
-  for (xmlNodePtr N : unionTypeNodes) {
-    xmlAddChild(ParentNode, N);
-  }
-  for (xmlNodePtr N : enumTypeNodes) {
-    xmlAddChild(ParentNode, N);
-  }
-  for (xmlNodePtr N : classTypeNodes) {
-    xmlAddChild(ParentNode, N);
-  }
-  for (xmlNodePtr N : functionTypeNodes) {
-    xmlAddChild(ParentNode, N);
-  }
-  for (xmlNodePtr N : otherTypeNodes) {
-    xmlAddChild(ParentNode, N);
-  }
-}
-
 std::vector<BaseClass> TypeTableInfo::getBaseClasses(clang::QualType type) {
   return inheritanceinfo->getInheritance(type);
 }

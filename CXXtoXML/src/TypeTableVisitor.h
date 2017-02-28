@@ -51,7 +51,6 @@ public:
     void registerLabelType(void);
     std::string getTypeName(clang::QualType T);
     std::string getTypeNameForLabel(void);
-    void emitAllTypeNode(xmlNodePtr ParentNode);
     std::vector<BaseClass> getBaseClasses(clang::QualType type);
     void addInheritance(clang::QualType derived, BaseClass base);
     bool hasBaseClass(clang::QualType type);
