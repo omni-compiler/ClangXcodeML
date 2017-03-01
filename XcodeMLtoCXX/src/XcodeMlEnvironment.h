@@ -20,6 +20,7 @@ namespace XcodeMl {
     using TypeMap = std::map<std::string, TypeRef>;
     TypeRef& at_or_throw(TypeMap&, const std::string&, const std::string&)
       const;
+    const TypeRef& at_or_throw(const TypeMap&, const std::string&, const std::string&) const;
     std::map<std::string, TypeRef> map;
     std::map<std::string, TypeRef> returnMap;
     std::vector<std::string> keys;

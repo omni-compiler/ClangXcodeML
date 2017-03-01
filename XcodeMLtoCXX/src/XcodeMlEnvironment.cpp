@@ -73,4 +73,18 @@ namespace XcodeMl {
     }
   }
 
+  const TypeRef& Environment::at_or_throw(
+      const Environment::TypeMap& map,
+      const std::string& key,
+      const std::string& name
+  ) const {
+    try {
+      return map.at(key);
+    } catch (const std::out_of_range& e) {
+      const auto msg =
+        name + " '" + key + "' not found in XcodeMl::Environment";
+      throw std::out_of_range(msg);
+    }
+  }
+
 }
