@@ -14,7 +14,7 @@ namespace XcodeMl {
   const TypeRef& Environment::operator[](
     const std::string& dataTypeIdent
   ) const {
-    return map.at(dataTypeIdent);
+    return at_or_throw(map, dataTypeIdent, "Data type");
   }
 
   TypeRef& Environment::operator[](
@@ -27,25 +27,17 @@ namespace XcodeMl {
   }
 
   const TypeRef& Environment::at(const std::string& dataTypeIdent) const {
-    return map.at(dataTypeIdent);
+    return at_or_throw(map, dataTypeIdent, "Data type");
   }
 
   TypeRef& Environment::at(const std::string& dataTypeIdent) {
-    return map.at(dataTypeIdent);
+    return at_or_throw(map, dataTypeIdent, "Data type");
   }
 
   const TypeRef& Environment::getReturnType(
     const std::string& dataTypeIdent
   ) const {
-    try {
-      return returnMap.at(dataTypeIdent);
-    } catch (const std::out_of_range& e) {
-      const auto msg =
-        std::string("return type of '")
-        + dataTypeIdent
-        + "' not found in XcodeMl::Environment";
-      throw std::out_of_range(msg);
-    }
+    return at_or_throw(returnMap, dataTypeIdent, "Return type of");
   }
 
   void Environment::setReturnType(
