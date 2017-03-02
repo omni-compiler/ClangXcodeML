@@ -13,7 +13,9 @@
  * whose name is registered with the map. Finally it executes
  * a corresponding procedure.
  */
-template<typename... T>
+template<
+  typename ReturnT,
+  typename... T>
 class XMLWalker {
 public:
   /*!
