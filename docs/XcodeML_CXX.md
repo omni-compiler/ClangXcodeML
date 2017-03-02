@@ -1748,6 +1748,20 @@ Cでは代入演算の第1オペランドは必ずlvalue(左辺式)だったが�
 
 Cのcastは、`staticCast`または`constCast`または`reinterpretCast`で表現する。
 
+## `implicitCastExpr`要素 {#sec:expr.implicitcast}
+
+C++の標準型変換を表現する。
+
+| `<implicitCastExpr>`
+|   式の要素 or `value`要素
+| `</implicitCastExpr>`
+
+属性(必須): `type`
+
+以下の子要素を持つ。
+
+* キャストされる式、または、複合リテラルのリテラル部
+
 ## `condExpr`要素 {#sec:expr.cond}
 三項演算 `x ? y : z` を表現する。
 
