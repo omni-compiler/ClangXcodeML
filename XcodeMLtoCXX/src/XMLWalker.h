@@ -120,19 +120,4 @@ bool XMLWalker<T...>::registerProc(std::string key, Procedure value) {
   return true;
 }
 
-/*!
- * \brief Merge two procedures into one that executes them in order.
- * \param lhs Procedure that runs first.
- * \param rhs Procedure that runs second.
- */
-template<typename... T>
-typename std::function<void(T...)> merge(
-    typename std::function<void(T...)> lhs,
-    typename std::function<void(T...)> rhs) {
-  return [lhs, rhs](T... args) {
-    lhs(args ...);
-    rhs(args ...);
-  };
-}
-
 #endif /* !XMLWALKER_H */

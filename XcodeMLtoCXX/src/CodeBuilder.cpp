@@ -131,8 +131,11 @@ CodeBuilder::Procedure handleBrackets(
     std::string closing,
     CodeBuilder::Procedure mainProc
 ) {
-  return merge(outputString(opening),
-               merge(mainProc, outputString(closing)));
+  return [opening, closing, mainProc](CB_ARGS) {
+    ss << opening;
+    mainProc(w, node, src, ss);
+    ss << closing;
+  };
 }
 
 CodeBuilder::Procedure handleBracketsLn(
@@ -140,8 +143,11 @@ CodeBuilder::Procedure handleBracketsLn(
     std::string closing,
     CodeBuilder::Procedure mainProc
 ) {
-  return merge(outputStringLn(opening),
-               merge(mainProc,outputStringLn(closing)));
+  return [opening, closing, mainProc](CB_ARGS) {
+    ss << opening << cxxgen::newline;
+    mainProc(w, node, src, ss);
+    ss << closing << cxxgen::newline;
+  };
 }
 
 /*!
@@ -213,19 +219,21 @@ CodeBuilder::Procedure handleSymTableStack(
   const CodeBuilder::Procedure pop = [](CB_ARGS) {
     src.symTable.pop_back();
   };
-  return merge(push, merge(mainProc, pop));
+  return [push, mainProc, pop](CB_ARGS) {
+    push(w, node, src, ss);
+    mainProc(w, node, src, ss);
+    pop(w, node, src, ss);
+  };
 }
 
 CodeBuilder::Procedure handleIndentation(
   const CodeBuilder::Procedure mainProc
 ) {
-  const CodeBuilder::Procedure indent = [](CB_ARGS) {
+  return [mainProc](CB_ARGS) {
     ss.indent(1);
-  };
-  const CodeBuilder::Procedure outdent = [](CB_ARGS) {
+    mainProc(w, node, src, ss);
     ss.unindent(1);
   };
-  return merge(indent, merge(mainProc, outdent));
 }
 
 const CodeBuilder::Procedure handleScope =
