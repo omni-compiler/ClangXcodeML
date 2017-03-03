@@ -9,7 +9,7 @@ using TypeRef = std::shared_ptr<Type>;
 /* data type identifier (3.1 data type identifier) */
 using DataTypeIdent = std::string;
 
-using CodeFragment = std::string;
+using CodeFragment = CXXCodeGen::StringTreeRef;
 
 class Environment;
 
