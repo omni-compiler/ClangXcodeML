@@ -17,6 +17,7 @@ OBJS = XcodeMlType.o \
 	TypeAnalyzer.o \
 	XMLString.o \
 	XcodeMlEnvironment.o \
+	StringTree.o \
 	SymbolBuilder.o \
 	SymbolAnalyzer.o \
 	ClangClassHandler.o
