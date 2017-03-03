@@ -12,6 +12,7 @@
 #include "XMLWalker.h"
 #include "AttrProc.h"
 #include "CXXCodeGen.h"
+#include "StringTree.h"
 #include "Symbol.h"
 #include "XcodeMlType.h"
 #include "XcodeMlEnvironment.h"
