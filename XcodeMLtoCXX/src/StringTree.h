@@ -51,6 +51,9 @@ private:
   std::string token;
 };
 
+StringTreeRef makeInnerNode(const std::vector<StringTreeRef>&);
+StringTreeRef makeTokenNode(const std::string&);
+
 }
 
 #endif /* !STRINGTREE_H */
