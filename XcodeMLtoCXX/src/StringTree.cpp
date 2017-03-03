@@ -106,6 +106,11 @@ makeTokenNode(const std::string& s) {
   return std::make_shared<TokenNode>(s);
 }
 
+StringTreeRef
+makeVoidNode() {
+  return std::make_shared<TokenNode>("");
+}
+
 CXXCodeGen::StringTreeRef operator+(
     const StringTreeRef& lhs,
     const StringTreeRef& rhs)
