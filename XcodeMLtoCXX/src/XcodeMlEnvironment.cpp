@@ -4,6 +4,7 @@
 #include <map>
 #include <memory>
 #include <cassert>
+#include "StringTree.h"
 #include "Symbol.h"
 #include "XcodeMlType.h"
 #include "XcodeMlEnvironment.h"
