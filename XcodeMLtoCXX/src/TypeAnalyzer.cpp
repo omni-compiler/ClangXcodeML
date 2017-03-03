@@ -22,6 +22,9 @@
 
 using TypeAnalyzer = XMLWalker<void, xmlXPathContextPtr, XcodeMl::Environment&>;
 
+using CXXCodeGen::makeTokenNode;
+using CXXCodeGen::makeVoidNode;
+
 /*!
  * \brief Arguments to be passed to TypeAnalyzer::Procedure.
  */
@@ -39,7 +42,7 @@ DEFINE_TA(basicTypeProc) {
   XMLString signifier(xmlGetProp(node, BAD_CAST "type"));
   map[signifier] = XcodeMl::makeReservedType(
       signifier,
-      signified,
+      makeTokenNode(signified),
       isTrueProp(node, "is_const", false),
       isTrueProp(node, "is_volatile", false)
   );
@@ -67,7 +70,9 @@ DEFINE_TA(functionTypeProc) {
     xmlNodePtr param = nth(paramsNode, i);
     XMLString paramType(xmlGetProp(param, BAD_CAST "type"));
     XMLString paramName(xmlNodeGetContent(param));
-    params.emplace_back(paramType, paramName);
+    params.emplace_back(
+        paramType,
+        makeTokenNode( paramName ));
   }
   XMLString name(xmlGetProp(node, BAD_CAST "type"));
   map.setReturnType(name, returnType);
@@ -100,14 +105,21 @@ static XcodeMl::Struct::Member makeMember(xmlNodePtr idNode) {
   XMLString type = xmlGetProp(idNode, BAD_CAST "type");
   XMLString name = xmlNodeGetContent(xmlFirstElementChild(idNode));
   if (!xmlHasProp(idNode, BAD_CAST "bit_field")) {
-    return XcodeMl::Struct::Member(type, name);
+    return XcodeMl::Struct::Member(
+        type,
+        makeTokenNode( name ));
   }
   XMLString bit_size = xmlGetProp(idNode, BAD_CAST "bit_field");
   if (!isNaturalNumber(bit_size)) {
-    return XcodeMl::Struct::Member(type, name);
+    return XcodeMl::Struct::Member(
+        type,
+        makeTokenNode(name));
       // FIXME: Don't ignore <bitField> element
   }
-  return XcodeMl::Struct::Member(type, name, std::stoi(bit_size));
+  return XcodeMl::Struct::Member(
+      type,
+      makeTokenNode( name ),
+      std::stoi(bit_size));
 }
 
 DEFINE_TA(structTypeProc) {
@@ -117,7 +129,10 @@ DEFINE_TA(structTypeProc) {
   for (auto& symbol : symbols) {
     fields.push_back(makeMember(symbol));
   }
-  map[elemName] = XcodeMl::makeStructType(elemName, "", fields);
+  map[elemName] = XcodeMl::makeStructType(
+      elemName,
+      makeVoidNode(),
+      fields);
 }
 
 static XcodeMl::ClassType::Member makeClassMember(
@@ -138,7 +153,10 @@ static XcodeMl::ClassType::Member makeClassMember(
   } else {
     assert(false);
   }
-  return {name, type, as};
+  return {
+    makeTokenNode( name ),
+      type,
+      as };
 }
 
 DEFINE_TA(classTypeProc) {
@@ -150,7 +168,9 @@ DEFINE_TA(classTypeProc) {
     members.push_back(makeClassMember(id, ctxt));
   }
   map[elemName] = std::make_shared<XcodeMl::ClassType>(
-      elemName, className, members);
+      elemName,
+      makeTokenNode( className ),
+      members);
 }
 
 const std::vector<std::string> identicalFndDataTypeIdents = {
@@ -186,12 +206,16 @@ nonidenticalFndDataTypeIdents = {
 const XcodeMl::Environment FundamentalDataTypeIdentMap = []() {
   XcodeMl::Environment map;
   for (std::string key : identicalFndDataTypeIdents) {
-    map[key] = XcodeMl::makeReservedType(key, key);
+    map[key] = XcodeMl::makeReservedType(
+        key,
+        makeTokenNode( key ));
   }
   for (auto p : nonidenticalFndDataTypeIdents) {
     std::string ident, type_name;
     std::tie(ident, type_name) = p;
-    map[ident] = XcodeMl::makeReservedType(ident, type_name);
+    map[ident] = XcodeMl::makeReservedType(
+        ident,
+        makeTokenNode( type_name ));
   }
   return map;
 }();
