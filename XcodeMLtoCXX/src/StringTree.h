@@ -62,5 +62,9 @@ StringTreeRef makeTokenNode(const std::string&);
 
 }
 
+CXXCodeGen::StringTreeRef operator+(
+    const CXXCodeGen::StringTreeRef&,
+    const CXXCodeGen::StringTreeRef&);
+
 #endif /* !STRINGTREE_H */
 
