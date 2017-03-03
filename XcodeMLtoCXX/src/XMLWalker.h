@@ -21,11 +21,15 @@ public:
   /*!
    * \brief Procedure to be registered with XMLWalker.
    */
-  using Procedure = std::function<void(const XMLWalker&, xmlNodePtr, T...)>;
+  using Procedure = std::function<
+    ReturnT(const XMLWalker&, xmlNodePtr, T...)>;
 
   XMLWalker() = default;
 
-  XMLWalker(std::initializer_list<std::tuple<std::string, Procedure>> pairs):
+  XMLWalker(
+      const std::function<ReturnT(const std::vector<ReturnT>&)> f,
+      std::initializer_list<std::tuple<std::string, Procedure>> pairs):
+    fold(f),
     map()
   {
     for (auto p : pairs) {
@@ -33,7 +37,10 @@ public:
     }
   }
 
-  XMLWalker(std::map<std::string, Procedure>&& initMap):
+  XMLWalker(
+      const std::function<ReturnT(const std::vector<ReturnT>&)> f,
+      std::map<std::string, Procedure>&& initMap):
+    fold(f),
     map(initMap)
   {}
 
@@ -46,9 +53,10 @@ public:
    * \param node XML element to traverse first
    * \param args... Arguments to be passed to registered procedures.
    */
-  void walkAll(xmlNodePtr node, T... args) const {
+  std::vector<ReturnT> walkAll(xmlNodePtr node, T... args) const {
+    std::vector<ReturnT> values;
     if (!node) {
-      return;
+      return values;
     }
     for (xmlNodePtr cur =
           node->type == XML_ELEMENT_NODE ?
@@ -56,13 +64,16 @@ public:
          cur;
          cur = xmlNextElementSibling(cur))
     {
-      walk(cur, args...);
+      values.push_back(walk(cur, args...));
     }
+    return values;
   }
 
-  void walkChildren(xmlNodePtr node, T... args) const {
+  std::vector<ReturnT> walkChildren(xmlNodePtr node, T... args) const {
     if (node) {
-      walkAll(node->children, args...);
+      return walkAll(node->children, args...);
+    } else {
+      return {};
     }
   }
 
@@ -73,17 +84,14 @@ public:
    * \pre \c node is not null.
    * \pre \c node is an XML element node.
    */
-  void walk(xmlNodePtr node, T... args) const {
+  ReturnT walk(xmlNodePtr node, T... args) const {
     assert(node && node->type == XML_ELEMENT_NODE);
-    bool traverseChildren = true;
     XMLString elemName = node->name;
     auto iter = map.find(elemName);
     if (iter != map.end()) {
-      (iter->second)(*this, node, args...);
-      traverseChildren = false;
-    }
-    if (traverseChildren) {
-      walkAll(node->children, args...);
+      return (iter->second)(*this, node, args...);
+    } else {
+      return fold(walkAll(node->children, args...));
     }
   }
 
@@ -104,6 +112,7 @@ public:
   }
 
 private:
+  std::function<ReturnT(const std::vector<ReturnT>&)> fold;
   std::map<std::string, Procedure> map;
 };
 
