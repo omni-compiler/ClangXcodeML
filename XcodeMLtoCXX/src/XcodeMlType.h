@@ -29,9 +29,9 @@ enum class TypeKind {
 };
 
 TypeKind typeKind(TypeRef);
-std::string makeDecl(TypeRef, std::string, const Environment&);
+CodeFragment makeDecl(TypeRef, CodeFragment, const Environment&);
 
-std::string TypeRefToString(TypeRef, const Environment& env);
+CodeFragment TypeRefToString(TypeRef, const Environment& env);
 
 /*!
  * \brief A class that represents data types in XcodeML.
@@ -41,9 +41,9 @@ public:
   Type(TypeKind, DataTypeIdent, bool = false, bool = false);
   virtual ~Type() = 0;
   virtual Type* clone() const = 0;
-  virtual std::string makeDeclaration(std::string, const Environment&) = 0;
-  virtual std::string addConstQualifier(std::string) const;
-  virtual std::string addVolatileQualifier(std::string) const;
+  virtual CodeFragment makeDeclaration(CodeFragment, const Environment&) = 0;
+  virtual CodeFragment addConstQualifier(CodeFragment) const;
+  virtual CodeFragment addVolatileQualifier(CodeFragment) const;
   bool isConst() const;
   bool isVolatile() const;
   void setConst(bool);
@@ -61,22 +61,22 @@ private:
 
 class Reserved : public Type {
 public:
-  Reserved(DataTypeIdent, std::string);
-  std::string makeDeclaration(std::string, const Environment&) override;
+  Reserved(DataTypeIdent, CodeFragment);
+  CodeFragment makeDeclaration(CodeFragment, const Environment&) override;
   ~Reserved() override;
   Type* clone() const override;
   static bool classof(const Type *);
 protected:
   Reserved(const Reserved&);
 private:
-  std::string name;
+  CodeFragment name;
 };
 
 class Pointer : public Type {
 public:
   Pointer(DataTypeIdent, TypeRef);
   Pointer(DataTypeIdent, DataTypeIdent);
-  std::string makeDeclaration(std::string, const Environment&) override;
+  CodeFragment makeDeclaration(CodeFragment, const Environment&) override;
   ~Pointer() override;
   Type* clone() const override;
   static bool classof(const Type *);
@@ -88,10 +88,10 @@ private:
 
 class Function : public Type {
 public:
-  using Params = std::vector<std::tuple<DataTypeIdent, std::string>>;
+  using Params = std::vector<std::tuple<DataTypeIdent, CodeFragment>>;
   Function(DataTypeIdent, TypeRef, const std::vector<DataTypeIdent>&);
   Function(DataTypeIdent, TypeRef, const Params&);
-  std::string makeDeclaration(std::string, const Environment&) override;
+  CodeFragment makeDeclaration(CodeFragment, const Environment&) override;
   ~Function() override;
   Type* clone() const override;
   static bool classof(const Type *);
@@ -121,11 +121,11 @@ public:
 public:
   Array(DataTypeIdent, DataTypeIdent, Size);
   Array(DataTypeIdent, DataTypeIdent, size_t);
-  std::string makeDeclaration(std::string, const Environment&) override;
+  CodeFragment makeDeclaration(CodeFragment, const Environment&) override;
   ~Array() override;
   Type* clone() const override;
-  std::string addConstQualifier(std::string) const override;
-  std::string addVolatileQualifier(std::string) const override;
+  CodeFragment addConstQualifier(CodeFragment) const override;
+  CodeFragment addVolatileQualifier(CodeFragment) const override;
   static bool classof(const Type *);
 protected:
   Array(const Array&);
@@ -150,34 +150,34 @@ public:
   class Member {
   public:
     Member() = delete;
-    Member(const std::string&, const std::string&);
-    Member(const std::string&, const std::string&, size_t);
+    Member(const DataTypeIdent&, const CodeFragment&);
+    Member(const DataTypeIdent&, const CodeFragment&, size_t);
     Member(const Member&) = default;
     ~Member() = default;
-    std::string type() const;
-    std::string name() const;
+    DataTypeIdent type() const;
+    CodeFragment name() const;
     bool isBitField() const;
     size_t getSize() const;
   private:
-    std::string dataTypeIdent;
-    std::string name_;
+    DataTypeIdent dataTypeIdent;
+    CodeFragment name_;
     BitSize size;
   };
   using MemberList = std::vector<Member>;
 
 public:
-  Struct(const DataTypeIdent&, const std::string&, const MemberList&);
-  std::string makeDeclaration(std::string, const Environment&) override;
+  Struct(const DataTypeIdent&, const CodeFragment&, const MemberList&);
+  CodeFragment makeDeclaration(CodeFragment, const Environment&) override;
   ~Struct() override;
   Type* clone() const override;
-  void setTagName(const std::string&);
+  void setTagName(const CodeFragment&);
   MemberList members() const;
-  std::string tagName() const;
+  CodeFragment tagName() const;
   static bool classof(const Type *);
 protected:
   Struct(const Struct&);
 private:
-  std::string tag;
+  CodeFragment tag;
   MemberList fields;
 };
 
@@ -193,28 +193,28 @@ AccessSpec accessSpec_of_string(const std::string&);
 class ClassType : public Type {
 public:
   struct Member {
-    std::string name;
-    std::string type;
+    CodeFragment name;
+    DataTypeIdent type;
     AccessSpec access;
   };
   using MemberList = std::vector<Member>;
 
 public:
-  ClassType(const DataTypeIdent&, const std::string&, const MemberList&);
-  std::string makeDeclaration(std::string, const Environment&) override;
+  ClassType(const DataTypeIdent&, const CodeFragment&, const MemberList&);
+  CodeFragment makeDeclaration(CodeFragment, const Environment&) override;
   ~ClassType() override = default;
   Type* clone() const override;
   MemberList members() const;
-  std::string name() const;
+  CodeFragment name() const;
   static bool classof(const Type *);
 protected:
   ClassType(const ClassType&);
 private:
-  std::string name_;
+  CodeFragment name_;
   MemberList fields;
 };
 
-TypeRef makeReservedType(DataTypeIdent, std::string, bool = false, bool = false);
+TypeRef makeReservedType(DataTypeIdent, CodeFragment, bool = false, bool = false);
 TypeRef makePointerType(DataTypeIdent, TypeRef);
 TypeRef makePointerType(DataTypeIdent, DataTypeIdent);
 TypeRef makeFunctionType(DataTypeIdent, TypeRef, const Function::Params&);
@@ -223,7 +223,7 @@ TypeRef makeArrayType(DataTypeIdent, TypeRef, size_t);
 TypeRef makeArrayType(DataTypeIdent, TypeRef, Array::Size);
 TypeRef makeArrayType(DataTypeIdent, DataTypeIdent, Array::Size);
 TypeRef makeArrayType(DataTypeIdent, DataTypeIdent, size_t);
-TypeRef makeStructType(const DataTypeIdent&, const std::string&, const Struct::MemberList&);
+TypeRef makeStructType(const DataTypeIdent&, const CodeFragment&, const Struct::MemberList&);
 
 }
 #endif /* !XCODEMLTYPE_H */
