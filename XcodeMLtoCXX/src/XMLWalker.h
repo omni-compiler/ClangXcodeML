@@ -45,7 +45,7 @@ public:
   {}
 
   const Procedure& operator[](const std::string& key) const {
-    map.at(key);
+    return map.at(key);
   }
 
   /*!
