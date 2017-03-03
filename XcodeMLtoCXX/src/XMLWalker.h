@@ -24,8 +24,6 @@ public:
   using Procedure = std::function<
     ReturnT(const XMLWalker&, xmlNodePtr, T...)>;
 
-  XMLWalker() = default;
-
   XMLWalker(
       const std::function<ReturnT(const std::vector<ReturnT>&)> f,
       std::initializer_list<std::tuple<std::string, Procedure>> pairs):
