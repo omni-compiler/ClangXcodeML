@@ -101,4 +101,13 @@ makeTokenNode(const std::string& s) {
   return std::make_shared<TokenNode>(s);
 }
 
+CXXCodeGen::StringTreeRef operator+(
+    const StringTreeRef& lhs,
+    const StringTreeRef& rhs)
+{
+  auto ret = lhs->lift();
+  ret->amend(rhs);
+  return StringTreeRef( ret );
+}
+
 } // namespace CXXCodeGen
