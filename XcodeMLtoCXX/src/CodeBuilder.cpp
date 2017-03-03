@@ -257,7 +257,11 @@ DEFINE_CB(outputParams) {
     XMLString name = xmlNodeGetContent(p);
     XMLString typeName = xmlGetProp(p, BAD_CAST "type");
     const auto paramType = src.typeTable.at(typeName);
-    ret = ret + makeTokenNode(makeDecl(paramType, name, src.typeTable));
+    ret = ret +
+      makeDecl(
+          paramType,
+          makeTokenNode( name ),
+          src.typeTable);
     alreadyPrinted = true;
   }
   return ret + makeTokenNode(")");
@@ -273,14 +277,16 @@ DEFINE_CB(emitClassDefinition) {
   XcodeMl::ClassType* classType =
     llvm::cast<XcodeMl::ClassType>(type.get());
   auto acc = makeTokenNode("class") +
-             makeTokenNode(classType->name()) +
+             classType->name() +
              makeTokenNode("{");
   for (auto& member : classType->members()) {
     const auto memberType = src.typeTable.at(member.type);
     acc = acc + makeTokenNode(string_of_accessSpec(member.access)) +
           makeTokenNode(":") +
-          makeTokenNode(
-              makeDecl(memberType, member.name, src.typeTable)) +
+          makeDecl(
+              memberType,
+              member.name,
+              src.typeTable) +
           makeTokenNode(";");
   }
   return acc + makeTokenNode("}") + makeTokenNode(";");
@@ -315,8 +321,11 @@ DEFINE_CB(functionDefinitionProc) {
   } else {
     const auto fnTypeName = findSymbolType(src.symTable, name);
     auto returnType = src.typeTable.getReturnType(fnTypeName);
-    acc = acc + makeTokenNode(
-        makeDecl(returnType, "FIXME", src.typeTable));
+    acc = acc +
+        makeDecl(
+            returnType,
+            makeTokenNode( "FIXME" ),
+            src.typeTable);
   }
   acc = acc + makeTokenNode( "{" );
   acc = acc + makeInnerNode(w.walkChildren(node, src));
@@ -328,8 +337,10 @@ DEFINE_CB(functionDeclProc) {
   try {
     const auto fnType = getIdentType(src, name);
     return
-      makeTokenNode(
-        makeDecl(fnType, name, src.typeTable)) +
+      makeDecl(
+          fnType,
+          makeTokenNode(name),
+          src.typeTable) +
       makeTokenNode(";");
   } catch (const std::runtime_error& e) {
     return
@@ -474,7 +485,10 @@ DEFINE_CB(varDeclProc) {
   xmlNodePtr nameElem = findFirst(node, "name", src.ctxt);
   XMLString name(xmlNodeGetContent(nameElem));
   auto type = getIdentType(src, name);
-  auto acc = makeTokenNode(makeDecl(type, name, src.typeTable));
+  auto acc = makeDecl(
+      type,
+      makeTokenNode(name),
+      src.typeTable);
   xmlNodePtr valueElem = findFirst(node, "value", src.ctxt);
   if (valueElem) {
     acc = acc + makeTokenNode("=") + w.walk(valueElem, src);
@@ -548,6 +562,7 @@ void buildCode(
   };
 
   xmlNodePtr globalSymbols = findFirst(rootNode, "/XcodeProgram/globalSymbols", src.ctxt);
-  buildSymbols(globalSymbols, src, ss);
+  buildSymbols(globalSymbols, src)
+    ->flush(ss);
   makeInnerNode( CXXBuilder.walkAll(rootNode, src) )->flush(ss);
 }
