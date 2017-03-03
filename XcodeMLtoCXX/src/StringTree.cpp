@@ -71,7 +71,7 @@ TokenNode::clone() const {
 
 void
 TokenNode::flush(std::stringstream& ss) const {
-  ss << token;
+  ss << token << " ";
 }
 
 InnerNode*
