@@ -114,4 +114,73 @@ private:
   std::map<std::string, Procedure> map;
 };
 
+template<
+  typename... T>
+class XMLWalker<void, T...> {
+public:
+  using Procedure = std::function<
+    void(const XMLWalker&, xmlNodePtr, T...)>;
+
+  XMLWalker(
+      std::initializer_list<std::tuple<std::string, Procedure>> pairs):
+    map()
+  {
+    for (auto p : pairs) {
+      registerProc(std::get<0>(p), std::get<1>(p));
+    }
+  }
+
+  XMLWalker(
+      std::map<std::string, Procedure>&& initMap):
+    map(initMap)
+  {}
+
+  const Procedure& operator[](const std::string& key) const {
+    return map.at(key);
+  }
+
+  void walkAll(xmlNodePtr node, T... args) const {
+    if (!node) {
+      return;
+    }
+    for (xmlNodePtr cur =
+          node->type == XML_ELEMENT_NODE ?
+            node : xmlNextElementSibling(node) ;
+         cur;
+         cur = xmlNextElementSibling(cur))
+    {
+      walk(cur, args...);
+    }
+  }
+
+  void walkChildren(xmlNodePtr node, T... args) const {
+    if (node) {
+      walkAll(node->children, args...);
+    }
+  }
+
+  void walk(xmlNodePtr node, T... args) const {
+    assert(node && node->type == XML_ELEMENT_NODE);
+    XMLString elemName = node->name;
+    auto iter = map.find(elemName);
+    if (iter != map.end()) {
+      (iter->second)(*this, node, args...);
+    } else {
+      walkAll(node->children, args...);
+    }
+  }
+
+  bool registerProc(std::string key, Procedure value) {
+    auto iter = map.find(key);
+    if (iter != map.end()) {
+      return false;
+    }
+    map[key] = value;
+    return true;
+  }
+
+private:
+  std::map<std::string, Procedure> map;
+};
+
 #endif /* !XMLWALKER_H */
