@@ -18,7 +18,12 @@
 #include "SourceInfo.h"
 #include "SymbolAnalyzer.h"
 
-using SymbolAnalyzer = AttrProc<xmlXPathContextPtr, XcodeMl::Environment&>;
+using SymbolAnalyzer = AttrProc<
+  void,
+  xmlXPathContextPtr,
+  XcodeMl::Environment&>;
+
+using CXXCodeGen::makeTokenNode;
 
 #define SA_ARGS xmlNodePtr node __attribute__((unused)), \
                 xmlXPathContextPtr ctxt __attribute__((unused)), \
