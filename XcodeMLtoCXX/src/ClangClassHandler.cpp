@@ -9,6 +9,7 @@
 #include "llvm/Support/Casting.h"
 #include "LibXMLUtil.h"
 #include "CXXCodeGen.h"
+#include "StringTree.h"
 #include "XMLString.h"
 #include "XMLWalker.h"
 #include "AttrProc.h"
@@ -29,7 +30,7 @@ namespace cxxgen = CXXCodeGen;
 #define DEFINE_CCH(name) static void name(CCH_ARGS)
 
 DEFINE_CCH(callExprProc) {
-  (w["functionCall"])(w, node, src, ss);
+  (w["functionCall"])(w, node, src);
 }
 
 const ClangClassHandler ClangStmtHandler(
