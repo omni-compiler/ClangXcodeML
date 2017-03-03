@@ -36,6 +36,7 @@ public:
   StringTree* clone() const override;
   void flush(std::stringstream&) const override;
   InnerNode* lift() const override;
+  void amend(const StringTreeRef&);
 protected:
   InnerNode(const InnerNode&) = default;
 private:
