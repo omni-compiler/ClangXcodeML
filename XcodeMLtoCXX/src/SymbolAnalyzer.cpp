@@ -37,7 +37,8 @@ DEFINE_SA(tagnameProc) {
   auto structType = llvm::cast<XcodeMl::Struct>(typeref.get());
   xmlNodePtr nameNode(findFirst(node, "name", ctxt));
   XMLString tag(xmlNodeGetContent(nameNode));
-  structType->setTagName(getNameFromIdNode(node, ctxt));
+  structType->setTagName(
+      makeTokenNode(getNameFromIdNode(node, ctxt)));
 }
 
 const SymbolAnalyzer CXXSymbolAnalyzer (
