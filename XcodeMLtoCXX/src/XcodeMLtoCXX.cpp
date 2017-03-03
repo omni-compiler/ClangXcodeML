@@ -11,6 +11,7 @@
 #include <memory>
 #include <vector>
 #include "CXXCodeGen.h"
+#include "StringTree.h"
 #include "XMLString.h"
 #include "Symbol.h"
 #include "XcodeMlType.h"
