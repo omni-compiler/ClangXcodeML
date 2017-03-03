@@ -10,12 +10,15 @@ enum class StringTreeKind {
   Token,
 };
 
+class InnerNode;
+
 class StringTree {
 public:
   explicit StringTree(StringTreeKind);
   virtual ~StringTree() = 0;
   virtual StringTree* clone() const = 0;
   virtual void flush(std::stringstream&) const = 0;
+  virtual InnerNode* lift() const = 0;
   StringTreeKind getKind() const;
 protected:
   StringTree(const StringTree&) = default;
@@ -32,6 +35,7 @@ public:
   ~InnerNode() = default;
   StringTree* clone() const override;
   void flush(std::stringstream&) const override;
+  InnerNode* lift() const override;
 protected:
   InnerNode(const InnerNode&) = default;
 private:
@@ -45,6 +49,7 @@ public:
   ~TokenNode() = default;
   StringTree* clone() const override;
   void flush(std::stringstream&) const override;
+  InnerNode* lift() const override;
 protected:
   TokenNode(const TokenNode&) = default;
 private:

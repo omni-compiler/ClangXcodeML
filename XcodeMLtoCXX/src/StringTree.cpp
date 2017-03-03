@@ -47,6 +47,12 @@ InnerNode::flush(std::stringstream& ss) const {
   }
 }
 
+InnerNode*
+InnerNode::lift() const {
+  InnerNode* copy = new InnerNode(*this);
+  return copy;
+}
+
 bool
 TokenNode::classof(const StringTree* node) {
   return node->getKind() == StringTreeKind::Token;
@@ -66,6 +72,15 @@ TokenNode::clone() const {
 void
 TokenNode::flush(std::stringstream& ss) const {
   ss << token;
+}
+
+InnerNode*
+TokenNode::lift() const {
+  std::vector<StringTreeRef> v({
+      std::make_shared<TokenNode>(token)
+      });
+  InnerNode* node = new InnerNode(v);
+  return node;
 }
 
 StringTreeRef
