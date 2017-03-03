@@ -68,4 +68,14 @@ TokenNode::flush(std::stringstream& ss) const {
   ss << token;
 }
 
+StringTreeRef
+makeInnerNode(const std::vector<StringTreeRef>& v) {
+  return std::make_shared<InnerNode>(v);
+}
+
+StringTreeRef
+makeTokenNode(const std::string& s) {
+  return std::make_shared<TokenNode>(s);
+}
+
 } // namespace CXXCodeGen
