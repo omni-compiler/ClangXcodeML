@@ -111,13 +111,14 @@ makeVoidNode() {
   return std::make_shared<TokenNode>("");
 }
 
+} // namespace CXXCodeGen
+
 CXXCodeGen::StringTreeRef operator+(
-    const StringTreeRef& lhs,
-    const StringTreeRef& rhs)
+    const CXXCodeGen::StringTreeRef& lhs,
+    const CXXCodeGen::StringTreeRef& rhs)
 {
   auto ret = lhs->lift();
   ret->amend(rhs);
-  return StringTreeRef( ret );
+  return CXXCodeGen::StringTreeRef( ret );
 }
 
-} // namespace CXXCodeGen
