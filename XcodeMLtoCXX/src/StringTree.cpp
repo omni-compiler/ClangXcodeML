@@ -97,6 +97,11 @@ makeInnerNode(const std::vector<StringTreeRef>& v) {
 }
 
 StringTreeRef
+makeNewLineNode() {
+  return std::make_shared<TokenNode>("\n");
+}
+
+StringTreeRef
 makeTokenNode(const std::string& s) {
   return std::make_shared<TokenNode>(s);
 }
