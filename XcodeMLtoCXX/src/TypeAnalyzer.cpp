@@ -19,7 +19,7 @@
 #include "SymbolAnalyzer.h"
 #include "TypeAnalyzer.h"
 
-using TypeAnalyzer = XMLWalker<xmlXPathContextPtr, XcodeMl::Environment&>;
+using TypeAnalyzer = XMLWalker<void, xmlXPathContextPtr, XcodeMl::Environment&>;
 
 /*!
  * \brief Arguments to be passed to TypeAnalyzer::Procedure.
