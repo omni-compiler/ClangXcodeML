@@ -83,6 +83,14 @@ TokenNode::lift() const {
   return node;
 }
 
+void
+InnerNode::amend(const StringTreeRef& node) {
+  std::unique_ptr<InnerNode> IN( node->lift() );
+  std::copy(
+      IN->children.begin(), IN->children.end(),
+      std::back_inserter(children));
+}
+
 StringTreeRef
 makeInnerNode(const std::vector<StringTreeRef>& v) {
   return std::make_shared<InnerNode>(v);
