@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include <libxml/tree.h>
+#include "StringTree.h"
 #include "Symbol.h"
 #include "XcodeMlType.h"
 #include "XcodeMlEnvironment.h"
@@ -13,6 +14,8 @@
 #include <iostream>
 
 using XcodeMl::CodeFragment;
+using CXXCodeGen::makeTokenNode;
+using CXXCodeGen::makeVoidNode;
 
 CodeFragment cv_qualify(
     const XcodeMl::TypeRef& type,
@@ -40,11 +43,11 @@ Type::Type(TypeKind k, DataTypeIdent id, bool c, bool v):
 Type::~Type() {}
 
 CodeFragment Type::addConstQualifier(CodeFragment var) const {
-  return static_cast<CodeFragment>("const ") + var;
+  return makeTokenNode("const") + var;
 }
 
 CodeFragment Type::addVolatileQualifier(CodeFragment var) const {
-  return static_cast<CodeFragment>("volatile ") + var;
+  return makeTokenNode("volatile") + var;
 }
 
 bool Type::isConst() const {
@@ -84,7 +87,7 @@ Reserved::Reserved(DataTypeIdent ident, CodeFragment dataType):
 {}
 
 CodeFragment Reserved::makeDeclaration(CodeFragment var, const Environment&) {
-  return name + " " + var;
+  return name + var;
 }
 
 Reserved::~Reserved() = default;
@@ -116,13 +119,16 @@ Pointer::Pointer(DataTypeIdent ident, DataTypeIdent signified):
 CodeFragment Pointer::makeDeclaration(CodeFragment var, const Environment& env) {
   auto refType = env[ref];
   if (!refType) {
-    return "INCOMPLETE_TYPE *" + var;
+    return makeTokenNode( "INCOMPLETE_TYPE *" ) + var;
   }
   switch (typeKind(refType)) {
     case TypeKind::Function:
-      return makeDecl(refType, "(*" + var + ")", env);
+      return makeDecl(
+          refType,
+          makeTokenNode("(*") + var + makeTokenNode( ")" ),
+          env);
     default:
-      return makeDecl(refType, "* " + var, env);
+      return makeDecl(refType, makeTokenNode("*") + var, env);
   }
 }
 
@@ -149,7 +155,7 @@ Function::Function(DataTypeIdent ident, TypeRef r, const std::vector<DataTypeIde
 {
   // FIXME: initialization cost
   for (size_t i = 0; i < p.size(); ++i) {
-    params[i] = std::make_tuple(p[i], "");
+    params[i] = std::make_tuple(p[i], makeVoidNode());
   }
 }
 
@@ -163,24 +169,25 @@ CodeFragment Function::makeDeclaration(CodeFragment var, const Environment& env)
   std::stringstream ss;
   auto returnType(env[returnValue]);
   if (!returnType) {
-    return "INCOMPLETE_TYPE *" + var;
+    return makeTokenNode("INCOMPLETE_TYPE *") + var;
   }
-  ss << var
-    << "(";
+  auto decl = var + makeTokenNode("(");
   bool alreadyPrinted = false;
   for (auto param : params) {
     auto paramDTI(std::get<0>(param));
     auto paramType(env[paramDTI]);
     auto paramName(std::get<1>(param));
     if (!paramType) {
-      return "INCOMPLETE_TYPE *" + var;
+      return makeTokenNode( "INCOMPLETE_TYPE *" ) + var;
     }
-    ss << (alreadyPrinted ? ", " : "")
-      << makeDecl(paramType, paramName, env);
+    if (alreadyPrinted) {
+      decl = decl + makeTokenNode(",");
+    }
+    decl = decl + makeDecl(paramType, paramName, env);
     alreadyPrinted = true;
   }
-  ss <<  ")";
-  return makeDecl(returnType, ss.str(), env);
+  decl = decl + makeTokenNode(")");
+  return makeDecl(returnType, decl, env);
 }
 
 Function::~Function() = default;
@@ -215,16 +222,18 @@ Array::Array(DataTypeIdent ident, DataTypeIdent elem, size_t s):
 CodeFragment Array::makeDeclaration(CodeFragment var, const Environment& env) {
   auto elementType(env[element]);
   if (!elementType) {
-    return "INCOMPLETE_TYPE *" + var;
+    return makeTokenNode("INCOMPLETE_TYPE *") + var;
   }
   const CodeFragment size_expression =
-    size.kind == Size::Kind::Integer ? std::to_string(size.size):"*";
+    size.kind == Size::Kind::Integer ?
+        makeTokenNode(std::to_string(size.size))
+      : makeTokenNode("*");
   const CodeFragment declarator =
-    static_cast<CodeFragment>("[") +
-    static_cast<CodeFragment>(isConst() ? "const ":"") +
-    static_cast<CodeFragment>(isVolatile() ? "volatile ":"") +
+    makeTokenNode("[") +
+    (isConst() ? makeTokenNode("const") : makeVoidNode()) +
+    (isConst() ? makeTokenNode("volatile") : makeVoidNode()) +
     size_expression +
-    static_cast<CodeFragment>("]");
+    makeTokenNode("]");
   return makeDecl(elementType, var + declarator, env);
 }
 
@@ -279,9 +288,7 @@ Struct::Struct(
 
 CodeFragment Struct::makeDeclaration(CodeFragment var, const Environment&)
 {
-  std::stringstream ss;
-  ss << "struct " << tag << " " << var;
-  return ss.str();
+  return makeTokenNode("struct") + tag + var;
 }
 
 Struct::~Struct() = default;
@@ -302,7 +309,6 @@ Struct::Struct(const Struct& other):
 {}
 
 void Struct::setTagName(const CodeFragment& tagname) {
-  assert(tag == "");
   tag = tagname;
 }
 
@@ -412,7 +418,7 @@ CodeFragment ClassType::makeDeclaration(
     CodeFragment var,
     const Environment&
 ) {
-  return name_ + " " + var;
+  return name_ + var;
 }
 
 Type* ClassType::clone() const {
@@ -449,7 +455,7 @@ CodeFragment makeDecl(TypeRef type, CodeFragment var, const Environment& env) {
   if (type) {
     return type->makeDeclaration(cv_qualify(type, var), env);
   } else {
-    return "UNKNOWN_TYPE";
+    return makeTokenNode( "UNKNOWN_TYPE" );
   }
 }
 
@@ -535,7 +541,7 @@ TypeRef makeStructType(
 }
 
 CodeFragment TypeRefToString(TypeRef type, const Environment& env) {
-  return makeDecl(type, "", env);
+  return makeDecl(type, makeTokenNode( "" ), env);
 }
 
 }
