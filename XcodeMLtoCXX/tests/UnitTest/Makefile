@@ -24,6 +24,7 @@ OBJNAMES = XcodeMlType.o \
 	ClangClassHandler.o \
 	CodeBuilder.o \
 	CXXCodeGen.o \
+	StringTree.o \
 	TypeAnalyzer.o \
 	XMLString.o \
 	XcodeMlEnvironment.o \
@@ -36,6 +37,7 @@ $(OBJS):
 	$(MAKE) -C $(XCODEMLTOCXXSRCDIR) $(notdir $@)
 
 XcodeMlType: \
+	$(XCODEMLTOCXXSRCDIR)/StringTree.o \
 	$(XCODEMLTOCXXSRCDIR)/XcodeMlEnvironment.o \
 	$(XCODEMLTOCXXSRCDIR)/XcodeMlType.o
 
