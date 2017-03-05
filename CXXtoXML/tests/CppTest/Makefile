@@ -1,5 +1,5 @@
 .SUFFIXES: .xml .xcodeml
-.PHONY: test clean
+.PHONY: check clean
 .DELETE_ON_ERROR:
 
 all: test
