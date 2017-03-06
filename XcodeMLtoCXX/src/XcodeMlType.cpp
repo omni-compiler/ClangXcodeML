@@ -408,10 +408,10 @@ AccessSpec accessSpec_of_string(const std::string& as) {
 ClassType::ClassType(
     const DataTypeIdent& ident,
     const CodeFragment& className,
-    const MemberList& members_):
+    xmlNodePtr node):
   Type(TypeKind::Class, ident),
   name_(className),
-  fields(members_)
+  declNode(node)
 {}
 
 CodeFragment ClassType::makeDeclaration(
@@ -426,8 +426,8 @@ Type* ClassType::clone() const {
   return copy;
 }
 
-ClassType::MemberList ClassType::members() const {
-  return fields;
+xmlNodePtr ClassType::getNode() const {
+  return declNode;
 }
 
 CodeFragment ClassType::name() const {
@@ -441,7 +441,7 @@ bool ClassType::classof(const Type *T) {
 ClassType::ClassType(const ClassType& other):
   Type(other),
   name_(other.name_),
-  fields(other.fields)
+  declNode(other.declNode)
 {}
 
 /*!

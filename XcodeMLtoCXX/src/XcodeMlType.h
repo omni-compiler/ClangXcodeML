@@ -192,18 +192,18 @@ AccessSpec accessSpec_of_string(const std::string&);
 
 class ClassType : public Type {
 public:
-  ClassType(const DataTypeIdent&, const CodeFragment&, const MemberList&);
+  ClassType(const DataTypeIdent&, const CodeFragment&, xmlNodePtr);
   CodeFragment makeDeclaration(CodeFragment, const Environment&) override;
   ~ClassType() override = default;
   Type* clone() const override;
-  MemberList members() const;
+  xmlNodePtr getNode() const;
   CodeFragment name() const;
   static bool classof(const Type *);
 protected:
   ClassType(const ClassType&);
 private:
   CodeFragment name_;
-  MemberList fields;
+  xmlNodePtr declNode; // nullable
 };
 
 TypeRef makeReservedType(DataTypeIdent, CodeFragment, bool = false, bool = false);
