@@ -3,6 +3,22 @@
   xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
   <xsl:output method="xml" encoding="UTF-8"/>
 
+  <xsl:template name="emit-id-lists-in-externC">
+    <xsl:for-each select="clangDecl">
+      <id>
+        <name>
+          <xsl:value-of select="fullName" />
+        </name>
+      </id>
+    </xsl:for-each>
+
+    <xsl:for-each
+      select="
+        clangDecl[@class='LinkageSpec']">
+      <xsl:call-template name="emit-id-lists-in-externC" />
+    </xsl:for-each>
+  </xsl:template>
+
   <xsl:template name="select-friend-declarations">
     <xsl:for-each
       select="
