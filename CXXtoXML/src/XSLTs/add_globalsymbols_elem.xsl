@@ -58,6 +58,10 @@
                   and (clangDecl[@class='Function'])">
           <id>
             <name>
+              <xsl:attribute name="type">
+                <xsl:value-of
+                  select="clangDecl[@class='Function']/@xcodemlType" />
+              </xsl:attribute>
               <xsl:value-of
                 select="clangDecl[@class='Function']/fullName" />
             </name>
