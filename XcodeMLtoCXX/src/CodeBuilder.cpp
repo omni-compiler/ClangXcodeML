@@ -283,21 +283,14 @@ DEFINE_CB(emitClassDefinition) {
   const auto type = src.typeTable.at(typeName);
   XcodeMl::ClassType* classType =
     llvm::cast<XcodeMl::ClassType>(type.get());
-  auto acc = makeTokenNode("class") +
-             classType->name() +
-             makeTokenNode("{") +
-             makeNewLineNode();
-  for (auto& member : classType->members()) {
-    const auto memberType = src.typeTable.at(member.type);
-    acc = acc + makeTokenNode(string_of_accessSpec(member.access)) +
-          makeTokenNode(":") +
-          makeDecl(
-              memberType,
-              member.name,
-              src.typeTable) +
-          makeTokenNode(";");
+  auto declNode = classType->getNode();
+  if (!declNode) {
+    return  makeTokenNode("class") +
+            classType->name() +
+            makeTokenNode(";") +
+            makeNewLineNode();
   }
-  return acc + makeTokenNode("}") + makeTokenNode(";");
+  return w.walk(declNode, src) + makeTokenNode(";");
 }
 
 DEFINE_CB(functionDefinitionProc) {
