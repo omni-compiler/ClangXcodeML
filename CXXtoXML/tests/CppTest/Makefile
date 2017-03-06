@@ -19,6 +19,9 @@ CXXFLAGS = -pedantic -fsyntax-only
 $(CXXTOXML):
 	$(MAKE) -C $(CXXTOXMLDIR)/src
 
+$(XCODEMLTOCXX):
+	$(MAKE) -C $(XCODEMLTOCXXDIR)
+
 %.xml: %.cc $(CXXTOXML)
 	$(CXXTOXML) $< $(CXXTOXMLFLAGS) > $@
 
@@ -31,7 +34,7 @@ $(CXXTOXML):
 		| xmllint --format - \
 		> $@
 
-%.generated.cpp: %.xcodeml
+%.generated.cpp: %.xcodeml $(XCODEMLTOCXX)
 	$(XCODEMLTOCXX) $< > $@
 
 check: $(CXXTOXML) $(CXXTESTOBJECTS) $(CXXDECOMPTESTOBJECTS)

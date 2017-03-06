@@ -12,6 +12,7 @@ public:
     bool PreVisitType(clang::QualType);
     bool PreVisitAttr(clang::Attr *);
     bool PreVisitDecl(clang::Decl *);
+    bool PostVisitDecl(clang::Decl *);
     bool PreVisitDeclarationNameInfo(clang::DeclarationNameInfo);
     bool PreVisitNestedNameSpecifierLoc(clang::NestedNameSpecifierLoc);
 };
