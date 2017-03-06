@@ -19,7 +19,7 @@
     </xsl:for-each>
   </xsl:template>
 
-  <xsl:template name="select-friend-declarations">
+  <xsl:template name="emit-id-lists-of-friends">
     <xsl:for-each
       select="
         clangDecl[@class='Friend']/
@@ -48,7 +48,7 @@
     <xsl:for-each
       select="
         clangDecl[@class='CXXRecord']">
-      <xsl:call-template name="select-friend-declarations" />
+      <xsl:call-template name="emit-id-lists-of-friends" />
     </xsl:for-each>
   </xsl:template>
 
@@ -76,7 +76,7 @@
             clangAST/
             clangDecl[@class='TranslationUnit']/
             clangDecl[@class='CXXRecord']">
-          <xsl:call-template name="select-friend-declarations" />
+          <xsl:call-template name="emit-id-lists-of-friends" />
         </xsl:for-each>
 
         <xsl:for-each
