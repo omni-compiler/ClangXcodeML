@@ -111,6 +111,15 @@ makeVoidNode() {
   return std::make_shared<TokenNode>("");
 }
 
+StringTreeRef
+insertNewLines(const std::vector<StringTreeRef>& strs) {
+  auto acc = makeVoidNode();
+  for (auto& str : strs) {
+    acc = acc + str + makeNewLineNode();
+  }
+  return acc;
+}
+
 } // namespace CXXCodeGen
 
 CXXCodeGen::StringTreeRef operator+(
