@@ -135,30 +135,6 @@ DEFINE_TA(structTypeProc) {
       fields);
 }
 
-static XcodeMl::ClassType::Member makeClassMember(
-    xmlNodePtr idNode,
-    xmlXPathContextPtr ctxt
-) {
-  using XcodeMl::AccessSpec;
-  XMLString type = xmlGetProp(idNode, BAD_CAST "type");
-  std::string name = getNameFromIdNode(idNode, ctxt);
-  XMLString access = xmlGetProp(idNode, BAD_CAST "access");
-  AccessSpec as;
-  if (access == "public") {
-    as = AccessSpec::Public;
-  } else if (access == "private") {
-    as = AccessSpec::Private;
-  } else if (access == "protected") {
-    as = AccessSpec::Protected;
-  } else {
-    assert(false);
-  }
-  return {
-    makeTokenNode( name ),
-      type,
-      as };
-}
-
 DEFINE_TA(classTypeProc) {
   XMLString elemName = xmlGetProp(node, BAD_CAST "type");
   std::string className = getNameFromIdNode(node, ctxt);
