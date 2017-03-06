@@ -8,7 +8,7 @@
       <xsl:choose>
         <!-- language linkage specification -->
         <xsl:when test="@class = 'LinkageSpec'">
-          <xsl:call-template name="emit-id-lists-in-externC" />
+          <xsl:call-template name="emit-id-list" />
         </xsl:when>
 
         <!-- C++ class declaration -->
@@ -31,22 +31,6 @@
           </id>
         </xsl:otherwise>
       </xsl:choose>
-    </xsl:for-each>
-  </xsl:template>
-
-  <xsl:template name="emit-id-lists-in-externC">
-    <xsl:for-each select="clangDecl">
-      <id>
-        <name>
-          <xsl:value-of select="fullName" />
-        </name>
-      </id>
-    </xsl:for-each>
-
-    <xsl:for-each
-      select="
-        clangDecl[@class='LinkageSpec']">
-      <xsl:call-template name="emit-id-lists-in-externC" />
     </xsl:for-each>
   </xsl:template>
 
