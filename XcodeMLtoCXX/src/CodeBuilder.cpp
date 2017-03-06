@@ -122,6 +122,10 @@ DEFINE_CB(EmptyProc) {
   return makeInnerNode( w.walkChildren(node, src) );
 }
 
+DEFINE_CB(walkChildrenWithInsertingNewLines) {
+  return insertNewLines( w.walkChildren(node, src) );
+}
+
 CodeBuilder::Procedure outputStringLn(std::string str) {
   return [str](CB_ARGS) {
     return makeTokenNode(str) + makeNewLineNode();
