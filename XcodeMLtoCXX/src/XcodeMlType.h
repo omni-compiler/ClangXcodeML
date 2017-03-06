@@ -192,14 +192,6 @@ AccessSpec accessSpec_of_string(const std::string&);
 
 class ClassType : public Type {
 public:
-  struct Member {
-    CodeFragment name;
-    DataTypeIdent type;
-    AccessSpec access;
-  };
-  using MemberList = std::vector<Member>;
-
-public:
   ClassType(const DataTypeIdent&, const CodeFragment&, const MemberList&);
   CodeFragment makeDeclaration(CodeFragment, const Environment&) override;
   ~ClassType() override = default;
