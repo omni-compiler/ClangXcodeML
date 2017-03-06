@@ -245,7 +245,8 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
 
   NamedDecl *ND = dyn_cast<NamedDecl>(D);
   if (ND) {
-    addChild("fullName", ND->getQualifiedNameAsString().c_str());
+    addChild("name", ND->getNameAsString().c_str());
+    newProp("fullName", ND->getQualifiedNameAsString().c_str());
     if (ND->isLinkageValid()) {
       const auto FL = ND->getFormalLinkage(),
                  LI = ND->getLinkageInternal();
