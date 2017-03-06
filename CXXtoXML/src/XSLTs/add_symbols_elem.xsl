@@ -3,12 +3,12 @@
   xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
   <xsl:output method="xml" encoding="UTF-8"/>
 
-  <xsl:template name="emit-id-list">
+  <xsl:template name="emit-id-list-in-namespace">
     <xsl:for-each select="clangDecl">
       <xsl:choose>
         <!-- language linkage specification -->
         <xsl:when test="@class = 'LinkageSpec'">
-          <xsl:call-template name="emit-id-list" />
+          <xsl:call-template name="emit-id-list-in-namespace" />
         </xsl:when>
 
         <!-- C++ class declaration -->
@@ -87,7 +87,7 @@
       <globalSymbols>
         <xsl:for-each
           select="clangAST/clangDecl[@class='TranslationUnit']">
-          <xsl:call-template name="emit-id-list"/>
+          <xsl:call-template name="emit-id-list-in-namespace"/>
         </xsl:for-each>
       </globalSymbols>
 
