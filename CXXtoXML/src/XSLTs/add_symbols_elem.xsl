@@ -14,6 +14,26 @@
         </name>
       </id>
     </xsl:for-each>
+    <!--
+         A function defined in a friend declaration belongs
+         to the namespace that encloses the class.
+
+         Example:
+          ```
+          namespace NS {
+            class A {
+              class B {
+                friend void func() { } // belongs to NS
+              };
+            };
+          }
+          ```
+     -->
+    <xsl:for-each
+      select="
+        clangDecl[@class='CXXRecord']">
+      <xsl:call-template name="select-friend-declarations" />
+    </xsl:for-each>
   </xsl:template>
 
   <xsl:template match="/Program">
