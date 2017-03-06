@@ -278,7 +278,8 @@ DEFINE_CB(emitClassDefinition) {
     llvm::cast<XcodeMl::ClassType>(type.get());
   auto acc = makeTokenNode("class") +
              classType->name() +
-             makeTokenNode("{");
+             makeTokenNode("{") +
+             makeNewLineNode();
   for (auto& member : classType->members()) {
     const auto memberType = src.typeTable.at(member.type);
     acc = acc + makeTokenNode(string_of_accessSpec(member.access)) +
