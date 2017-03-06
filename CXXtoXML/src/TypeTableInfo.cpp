@@ -141,8 +141,6 @@ std::string TypeTableInfo::registerRecordType(QualType T){
     OS << "Struct" << seqForStructType++;
   } else if (T->isUnionType()) {
     OS << "Union" << seqForUnionType++;
-  } else if (T->isClassType()) {
-    OS << "Class" << seqForClassType++;
   } else {
     abort();
   }
@@ -376,15 +374,15 @@ void TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
 
   case Type::Record:
     rawname = registerRecordType(T);
-    if (T->isStructureType()) {
+    if (T->getAsCXXRecordDecl()) {
+      // XXX: temporary implementation
+      Node = createNode(T, "classType", nullptr);
+      pushType(T, Node);
+    } else if (T->isStructureType()) {
       Node = createNode(T, "structType", nullptr);
       pushType(T, Node);
     } else if (T->isUnionType()) {
       Node = createNode(T, "unionType", nullptr);
-      pushType(T, Node);
-    } else if (T->isClassType()) {
-      // XXX: temporary implementation
-      Node = createNode(T, "classType", nullptr);
       pushType(T, Node);
     } else {
       // XXX: temporary implementation
