@@ -16,7 +16,7 @@
           <id>
             <name><xsl:value-of select="fullName" /></name>
           </id>
-          <xsl:call-template name="emit-id-lists-of-friends" />
+          <xsl:call-template name="emit-id-lists-in-class" />
         </xsl:when>
 
         <!-- otherwise, this declaration shall introduce a name -->
@@ -50,7 +50,7 @@
     </xsl:for-each>
   </xsl:template>
 
-  <xsl:template name="emit-id-lists-of-friends">
+  <xsl:template name="emit-id-lists-in-class">
     <!--
          A function defined in a friend declaration belongs
          to the namespace that encloses the class.
@@ -85,7 +85,7 @@
           <id>
             <name><xsl:value-of select="fullName" /></name>
           </id>
-          <xsl:call-template name="emit-id-lists-of-friends" />
+          <xsl:call-template name="emit-id-lists-in-class" />
         </xsl:when>
 
         <!-- otherwise, emit nothing -->
