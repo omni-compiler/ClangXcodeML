@@ -26,6 +26,7 @@ using CXXCodeGen::StringTreeRef;
 using CXXCodeGen::makeInnerNode;
 using CXXCodeGen::makeTokenNode;
 using CXXCodeGen::makeVoidNode;
+using CXXCodeGen::separateByBlankLines;
 
 using SymbolBuilder = AttrProc<StringTreeRef, SourceInfo&>;
 
@@ -85,5 +86,6 @@ StringTreeRef buildSymbols(
     xmlNodePtr node,
     SourceInfo& src
 ) {
-  return makeInnerNode( CXXSymbolBuilder.walkAll(node, src) );
+  return separateByBlankLines(
+      CXXSymbolBuilder.walkAll(node, src));
 }
