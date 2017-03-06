@@ -247,7 +247,7 @@ const CodeBuilder::Procedure handleScope =
   handleBracketsLn("{", "}",
   handleIndentation(
   handleSymTableStack(
-  EmptyProc)));
+  walkChildrenWithInsertingNewLines)));
 
 DEFINE_CB(outputParams) {
   auto ret = makeTokenNode("(");
