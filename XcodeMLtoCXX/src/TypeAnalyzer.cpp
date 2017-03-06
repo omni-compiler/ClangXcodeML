@@ -162,15 +162,15 @@ static XcodeMl::ClassType::Member makeClassMember(
 DEFINE_TA(classTypeProc) {
   XMLString elemName = xmlGetProp(node, BAD_CAST "type");
   std::string className = getNameFromIdNode(node, ctxt);
-  std::vector<XcodeMl::ClassType::Member> members;
-  const auto ids = findNodes(node, "symbols/id", ctxt);
-  for (auto& id : ids) {
-    members.push_back(makeClassMember(id, ctxt));
-  }
+  // std::vector<XcodeMl::ClassType::Member> members;
+  // const auto ids = findNodes(node, "symbols/id", ctxt);
+  // for (auto& id : ids) {
+  //   members.push_back(makeClassMember(id, ctxt));
+  // }
   map[elemName] = std::make_shared<XcodeMl::ClassType>(
       elemName,
       makeTokenNode( className ),
-      members);
+      nullptr);
 }
 
 const std::vector<std::string> identicalFndDataTypeIdents = {
