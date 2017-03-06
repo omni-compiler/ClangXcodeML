@@ -7,6 +7,22 @@
     </XcodeProgram>
   </xsl:template>
 
+  <xsl:template match="enumType">
+    <enumType>
+      <xsl:apply-templates select="@*" />
+      <symbols>
+        <xsl:for-each select="symbols/clangDecl[@class='EnumConstant']" >
+          <id>
+            <name>
+              <xsl:apply-templates select="fullName/@*" />
+              <xsl:value-of select="fullName" />
+            </name>
+          </id>
+        </xsl:for-each>
+      </symbols>
+    </enumType>
+  </xsl:template>
+
   <xsl:template match="clangDecl[@class='TranslationUnit']">
     <globalDeclarations>
       <xsl:apply-templates />
