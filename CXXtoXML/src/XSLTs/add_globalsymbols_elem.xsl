@@ -19,6 +19,18 @@
           <xsl:call-template name="emit-id-lists-in-class" />
         </xsl:when>
 
+        <!-- typedef declaration -->
+        <xsl:when test="@class = 'Typedef'">
+          <id sclass="typedef_name">
+            <xsl:attribute name="type">
+              <xsl:value-of select="@xcodemlTypedefType" />
+            </xsl:attribute>
+            <name>
+              <xsl:value-of select="fullName" />
+            </name>
+          </id>
+        </xsl:when>
+
         <!-- otherwise, this declaration shall introduce a name -->
         <xsl:otherwise>
           <id>
