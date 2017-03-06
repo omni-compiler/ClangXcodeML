@@ -2,6 +2,8 @@
 #define TYPETABLEVISITOR_H
 
 #include "InheritanceInfo.h"
+#include <stack>
+#include <tuple>
 #include <unordered_map>
 
 class TypeTableInfo {
@@ -11,6 +13,7 @@ class TypeTableInfo {
     std::unordered_map<clang::QualType, xmlNodePtr> mapFromQualTypeToXmlNodePtr;
     InheritanceInfo *inheritanceinfo;
     std::unordered_map<clang::QualType, bool> normalizability;
+    std::stack<std::tuple<xmlNodePtr, std::vector<clang::QualType>>> typeTableStack;
 
     int seqForBasicType;
     int seqForPointerType;
@@ -22,15 +25,8 @@ class TypeTableInfo {
     int seqForClassType;
     int seqForOtherType;
 
-    std::vector<xmlNodePtr> basicTypeNodes;
-    std::vector<xmlNodePtr> pointerTypeNodes;
-    std::vector<xmlNodePtr> functionTypeNodes;
-    std::vector<xmlNodePtr> arrayTypeNodes;
-    std::vector<xmlNodePtr> structTypeNodes;
-    std::vector<xmlNodePtr> unionTypeNodes;
-    std::vector<xmlNodePtr> enumTypeNodes;
-    std::vector<xmlNodePtr> classTypeNodes;
-    std::vector<xmlNodePtr> otherTypeNodes;
+    std::unordered_map<clang::QualType, xmlNodePtr> TypeElements;
+
     bool useLabelType;
 
     xmlNodePtr createNode(clang::QualType T, const char *fieldname,
@@ -42,6 +38,7 @@ class TypeTableInfo {
     std::string registerRecordType(clang::QualType T); // "S*", "U*", or "C*"
     std::string registerEnumType(clang::QualType T); // "E*"
     std::string registerOtherType(clang::QualType T); // "O*"
+    void pushType(const clang::QualType&, xmlNodePtr);
 
 public:
     TypeTableInfo() = delete;
@@ -57,31 +54,14 @@ public:
     void registerLabelType(void);
     std::string getTypeName(clang::QualType T);
     std::string getTypeNameForLabel(void);
-    void emitAllTypeNode(xmlNodePtr ParentNode);
     std::vector<BaseClass> getBaseClasses(clang::QualType type);
     void addInheritance(clang::QualType derived, BaseClass base);
     bool hasBaseClass(clang::QualType type);
     void setNormalizability(clang::QualType, bool);
     bool isNormalizable(clang::QualType);
+    void pushTypeTableStack(xmlNodePtr);
+    void popTypeTableStack();
     void dump();
-};
-
-class TypeTableVisitor
-    : public XMLVisitorBase<TypeTableVisitor> {
-public:
-    // use base constructors
-    using XMLVisitorBase::XMLVisitorBase;
-
-    const char *getVisitorName() const override;
-    bool PreVisitStmt(clang::Stmt *);
-    bool PreVisitDecl(clang::Decl *);
-    bool PreVisitType(clang::QualType);
-    bool PreVisitAttr(clang::Attr *);
-    bool PreVisitNestedNameSpecifierLoc(clang::NestedNameSpecifierLoc);
-    bool PreVisitTypeLoc(clang::TypeLoc);
-    bool PreVisitDeclarationNameInfo(clang::DeclarationNameInfo);
-    bool PreVisitConstructorInitializer(clang::CXXCtorInitializer *CI);
-    bool FullTrace(void) const;
 };
 
 #endif /* !TYPETABLEVISITOR_H */
