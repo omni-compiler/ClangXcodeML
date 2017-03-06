@@ -51,16 +51,6 @@
   </xsl:template>
 
   <xsl:template name="emit-id-lists-of-friends">
-    <xsl:for-each
-      select="
-        clangDecl[@class='Friend']/
-        clangDecl[@class='Function']">
-      <id>
-        <name>
-          <xsl:value-of select="fullName" />
-        </name>
-      </id>
-    </xsl:for-each>
     <!--
          A function defined in a friend declaration belongs
          to the namespace that encloses the class.
@@ -76,6 +66,16 @@
           }
           ```
      -->
+    <xsl:for-each
+      select="
+        clangDecl[@class='Friend']/
+        clangDecl[@class='Function']">
+      <id>
+        <name>
+          <xsl:value-of select="fullName" />
+        </name>
+      </id>
+    </xsl:for-each>
     <xsl:for-each
       select="
         clangDecl[@class='CXXRecord']">
