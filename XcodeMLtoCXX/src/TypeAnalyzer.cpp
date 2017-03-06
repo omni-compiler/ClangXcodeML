@@ -162,6 +162,7 @@ const std::vector<std::string> identicalFndDataTypeIdents = {
   "char16_t",
   "char32_t",
   "bool",
+  "__int128",
 };
 
 const std::vector<std::tuple<std::string, std::string>>
@@ -174,6 +175,7 @@ nonidenticalFndDataTypeIdents = {
   std::make_tuple("unsigned_long", "unsigned long"),
   std::make_tuple("unsigned_long_long", "unsigned long long"),
   std::make_tuple("long_double", "long double"),
+  std::make_tuple("unsigned___int128", "unsigned __int128"),
 };
 
 /*!
