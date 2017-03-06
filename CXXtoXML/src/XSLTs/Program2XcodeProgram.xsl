@@ -83,6 +83,15 @@
     </classDecl>
   </xsl:template>
 
+  <xsl:template match="clangDecl[@class='Field']">
+    <varDecl>
+      <xsl:apply-templates select="@*" />
+      <name>
+        <xsl:value-of select="fullName" />
+      </name>
+    </varDecl>
+  </xsl:template>
+
   <xsl:template match="clangStmt[@class='IfStmt']">
     <ifStatement>
       <xsl:apply-templates select="@*" />
