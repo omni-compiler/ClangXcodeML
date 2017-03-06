@@ -68,7 +68,31 @@
           }
           ```
      -->
-    <xsl:for-each select="clangDecl">
+    <xsl:for-each
+        select="clangDecl[position() &gt; 1]">
+        <!--
+             Temporarily ignore first node
+             Example:
+                 class A {
+                   int x;
+                   void f() { }
+                 };
+
+                 <clangDecl class="CXXRecord" xcodemlType="Class0">
+                   <fullName>A</fullName>
+                   <clangDecl class="CXXRecord" is_implicit="1" xcodemlType="Class0"> // ignore this node
+                     <fullName>A::A</fullName>
+                   </clangDecl>
+                   <clangDecl class="Field" xcodemlType="int">
+                     <fullName>A::x</fullName>
+                     // ...
+                   </clangDecl>
+                   <clangDecl class="CXXMethod" xcodemlType="Function1">
+                     <fullName>A::f</fullName>
+                     // ...
+                   </clangDecl>
+                 </clangDecl>
+        -->
       <xsl:choose>
         <!-- friend function declaration or definition -->
         <xsl:when
