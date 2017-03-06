@@ -3,6 +3,19 @@
   xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
   <xsl:output method="xml" encoding="UTF-8"/>
 
+  <xsl:template name="select-friend-declarations">
+    <xsl:for-each
+      select="
+        clangDecl[@class='Friend']/
+        clangDecl[@class='Function']">
+      <id>
+        <name>
+          <xsl:value-of select="fullName" />
+        </name>
+      </id>
+    </xsl:for-each>
+  </xsl:template>
+
   <xsl:template match="/Program">
     <Program>
       <xsl:apply-templates select="@*" />
