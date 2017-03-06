@@ -29,6 +29,9 @@ using cxxgen::StringTreeRef;
 using cxxgen::makeTokenNode;
 using cxxgen::makeInnerNode;
 using cxxgen::makeNewLineNode;
+using cxxgen::makeVoidNode;
+
+using cxxgen::separateByBlankLines;
 
 /*!
  * \brief Traverse XcodeML node and make SymbolEntry.
@@ -569,5 +572,7 @@ void buildCode(
   xmlNodePtr globalSymbols = findFirst(rootNode, "/XcodeProgram/globalSymbols", src.ctxt);
   buildSymbols(globalSymbols, src)
     ->flush(ss);
-  makeInnerNode( CXXBuilder.walkAll(rootNode, src) )->flush(ss);
+  separateByBlankLines(
+      CXXBuilder.walkAll(rootNode, src))
+    ->flush(ss);
 }
