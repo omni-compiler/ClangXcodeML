@@ -99,11 +99,11 @@
             test="(@class = 'Friend')
                   and (clangDecl[@class='Function'])">
           <id>
+            <xsl:attribute name="type">
+              <xsl:value-of
+                select="clangDecl[@class='Function']/@xcodemlType" />
+            </xsl:attribute>
             <name>
-              <xsl:attribute name="type">
-                <xsl:value-of
-                  select="clangDecl[@class='Function']/@xcodemlType" />
-              </xsl:attribute>
               <xsl:value-of
                 select="clangDecl[@class='Function']/fullName" />
             </name>
