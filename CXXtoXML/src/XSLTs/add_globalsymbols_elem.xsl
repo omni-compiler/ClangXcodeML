@@ -128,7 +128,13 @@
     <Program>
       <xsl:apply-templates select="@*" />
 
-      <xsl:apply-templates select="typeTable" />
+      <typeTable>
+        <xsl:apply-templates
+            select="
+            clangAST/
+            clangDecl[@class='TranslationUnit']/
+            xcodemlTypeTable/*"/>
+      </typeTable>
 
       <globalSymbols>
         <xsl:for-each
@@ -141,6 +147,8 @@
 
     </Program>
   </xsl:template>
+
+  <xsl:template match="xcodemlTypeTable" />
 
   <xsl:template match="node()|@*">
     <xsl:copy>
