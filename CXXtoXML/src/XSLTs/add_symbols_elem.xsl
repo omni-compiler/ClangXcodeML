@@ -36,24 +36,6 @@
     </xsl:for-each>
   </xsl:template>
 
-  <xsl:template name="emit-id-elements">
-    <xsl:for-each select="clangDecl">
-      <id>
-        <xsl:attribute name="type">
-          <xsl:value-of select="@xcodemlType" />
-        </xsl:attribute>
-        <name>
-          <xsl:value-of select="fullName" />
-        </name>
-      </id>
-    </xsl:for-each>
-
-    <xsl:for-each
-      select="clangDecl[@class='CXXRecord']">
-      <xsl:call-template name="select-friend-declarations" />
-    </xsl:for-each>
-  </xsl:template>
-
   <xsl:template match="/Program">
     <Program>
       <xsl:apply-templates select="@*" />
