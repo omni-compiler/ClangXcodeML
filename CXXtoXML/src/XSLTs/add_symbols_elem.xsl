@@ -66,20 +66,31 @@
           }
           ```
      -->
-    <xsl:for-each
-      select="
-        clangDecl[@class='Friend']/
-        clangDecl[@class='Function']">
-      <id>
-        <name>
-          <xsl:value-of select="fullName" />
-        </name>
-      </id>
-    </xsl:for-each>
-    <xsl:for-each
-      select="
-        clangDecl[@class='CXXRecord']">
-      <xsl:call-template name="emit-id-lists-of-friends" />
+    <xsl:for-each select="clangDecl">
+      <xsl:choose>
+        <!-- friend function declaration or definition -->
+        <xsl:when
+            test="(@class = 'Friend')
+                  and (clangDecl[@class='Function'])">
+          <id>
+            <name>
+              <xsl:value-of
+                select="clangDecl[@class='Function']/fullName" />
+            </name>
+          </id>
+        </xsl:when>
+
+        <!-- child class declaration -->
+        <xsl:when test="@class = 'CXXRecord'">
+          <id>
+            <name><xsl:value-of select="fullName" /></name>
+          </id>
+          <xsl:call-template name="emit-id-lists-of-friends" />
+        </xsl:when>
+
+        <!-- otherwise, emit nothing -->
+        <xsl:otherwise />
+      </xsl:choose>
     </xsl:for-each>
   </xsl:template>
 
