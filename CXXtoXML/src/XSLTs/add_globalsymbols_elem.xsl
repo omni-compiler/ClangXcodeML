@@ -81,10 +81,10 @@
                  <clangDecl class="CXXRecord" xcodemlType="Class0">
                    <name>A</name>
                    <clangDecl class="CXXRecord" is_implicit="1" xcodemlType="Class0"> // ignore this node
-                     <name>A::A</name>
+                     <name>A</name>
                    </clangDecl>
                    <clangDecl class="Field" xcodemlType="int">
-                     <name>A::x</name>
+                     <name>x</name>
                      // ...
                    </clangDecl>
                    <clangDecl class="CXXMethod" xcodemlType="Function1">
