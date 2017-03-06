@@ -120,6 +120,15 @@ insertNewLines(const std::vector<StringTreeRef>& strs) {
   return acc;
 }
 
+StringTreeRef
+separateByBlankLines(const std::vector<StringTreeRef>& strs) {
+  auto acc = makeVoidNode();
+  for (auto& str : strs) {
+    acc = acc + str + makeNewLineNode() + makeNewLineNode();
+  }
+  return acc;
+}
+
 } // namespace CXXCodeGen
 
 CXXCodeGen::StringTreeRef operator+(
