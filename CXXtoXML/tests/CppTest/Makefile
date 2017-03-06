@@ -27,6 +27,7 @@ $(CXXTOXML):
 		| xsltproc $(CXXTOXMLXSLTDIR)/drop_prop_file.xsl - \
 		| xsltproc $(CXXTOXMLXSLTDIR)/drop_prop_lineno.xsl - \
 		| xsltproc $(CXXTOXMLXSLTDIR)/add_symbols_elem.xsl - \
+		| xsltproc $(CXXTOXMLXSLTDIR)/add_globalsymbols_elem.xsl - \
 		| xsltproc $(CXXTOXMLXSLTDIR)/Program2XcodeProgram.xsl - \
 		| xmllint --format - \
 		> $@
