@@ -91,31 +91,8 @@
 
       <globalSymbols>
         <xsl:for-each
-          select="clangAST/clangDecl[@class='TranslationUnit']/clangDecl">
-          <id>
-            <xsl:attribute name="type">
-              <xsl:value-of select="@xcodemlType" />
-            </xsl:attribute>
-            <name>
-              <xsl:value-of select="fullName" />
-            </name>
-          </id>
-        </xsl:for-each>
-
-        <xsl:for-each
-          select="
-            clangAST/
-            clangDecl[@class='TranslationUnit']/
-            clangDecl[@class='CXXRecord']">
-          <xsl:call-template name="emit-id-lists-of-friends" />
-        </xsl:for-each>
-
-        <xsl:for-each
-          select="
-            clangAST/
-            clangDecl[@class='TranslationUnit']/
-            clangDecl[@class='LinkageSpec']">
-          <xsl:call-template name="emit-id-lists-in-externC" />
+          select="clangAST/clangDecl[@class='TranslationUnit']">
+          <xsl:call-template name="emit-id-list"/>
         </xsl:for-each>
       </globalSymbols>
 
