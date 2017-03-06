@@ -332,7 +332,7 @@ DEFINE_CB(functionDefinitionProc) {
             makeTokenNode( "FIXME" ),
             src.typeTable);
   }
-  acc = acc + makeTokenNode( "{" );
+  acc = acc + makeTokenNode( "{" ) + makeNewLineNode();
   acc = acc + makeInnerNode(w.walkChildren(node, src));
   return acc + makeTokenNode("}");
 }
