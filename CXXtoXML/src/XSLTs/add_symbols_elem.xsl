@@ -3,6 +3,37 @@
   xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
   <xsl:output method="xml" encoding="UTF-8"/>
 
+  <xsl:template name="emit-id-list">
+    <xsl:for-each select="clangDecl">
+      <xsl:choose>
+        <!-- language linkage specification -->
+        <xsl:when test="@class = 'LinkageSpec'">
+          <xsl:call-template name="emit-id-lists-in-externC" />
+        </xsl:when>
+
+        <!-- C++ class declaration -->
+        <xsl:when test="@class = 'CXXRecord'">
+          <id>
+            <name><xsl:value-of select="fullName" /></name>
+          </id>
+          <xsl:call-template name="emit-id-lists-of-friends" />
+        </xsl:when>
+
+        <!-- otherwise, this declaration shall introduce a name -->
+        <xsl:otherwise>
+          <id>
+            <xsl:attribute name="type">
+              <xsl:value-of select="@xcodemlType" />
+            </xsl:attribute>
+            <name>
+              <xsl:value-of select="fullName" />
+            </name>
+          </id>
+        </xsl:otherwise>
+      </xsl:choose>
+    </xsl:for-each>
+  </xsl:template>
+
   <xsl:template name="emit-id-lists-in-externC">
     <xsl:for-each select="clangDecl">
       <id>
