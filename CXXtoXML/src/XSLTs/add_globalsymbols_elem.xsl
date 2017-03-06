@@ -31,8 +31,14 @@
           </id>
         </xsl:when>
 
-        <!-- otherwise, this declaration shall introduce a name -->
-        <xsl:otherwise>
+        <!--
+             otherwise, emit an <id> node if this <clangDecl>
+             node has name and type
+        -->
+        <xsl:when
+            test="
+            (fullName)
+            and @xcodemlType">
           <id>
             <xsl:attribute name="type">
               <xsl:value-of select="@xcodemlType" />
@@ -41,7 +47,7 @@
               <xsl:value-of select="fullName" />
             </name>
           </id>
-        </xsl:otherwise>
+        </xsl:when>
       </xsl:choose>
     </xsl:for-each>
   </xsl:template>
