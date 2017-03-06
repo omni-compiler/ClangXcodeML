@@ -264,6 +264,12 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
     newProp("xcodemlType", typetableinfo->getTypeName(T).c_str());
   }
 
+  if (auto TND = dyn_cast<TypedefNameDecl>(D)) {
+    const auto T = TND->getUnderlyingType();
+    newProp( "xcodemlTypedefType",
+        typetableinfo->getTypeName(T).c_str());
+  }
+
   if (auto VD = dyn_cast<VarDecl>(D)) {
     const auto ll = VD->getLanguageLinkage();
     if (ll != NoLanguageLinkage) {
