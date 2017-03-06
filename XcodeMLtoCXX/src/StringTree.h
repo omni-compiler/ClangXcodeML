@@ -62,6 +62,8 @@ StringTreeRef makeNewLineNode();
 StringTreeRef makeInnerNode(const std::vector<StringTreeRef>&);
 StringTreeRef makeTokenNode(const std::string&);
 
+StringTreeRef insertNewLines(const std::vector<StringTreeRef>&);
+
 }
 
 CXXCodeGen::StringTreeRef operator+(
