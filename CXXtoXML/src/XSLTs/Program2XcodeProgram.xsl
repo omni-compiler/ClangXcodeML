@@ -14,8 +14,8 @@
         <xsl:for-each select="symbols/clangDecl[@class='EnumConstant']" >
           <id>
             <name>
-              <xsl:apply-templates select="fullName/@*" />
-              <xsl:value-of select="fullName" />
+              <xsl:apply-templates select="name/@*" />
+              <xsl:value-of select="name" />
             </name>
           </id>
         </xsl:for-each>
@@ -66,7 +66,7 @@
     <varDecl>
       <xsl:apply-templates select="@*" />
       <name>
-        <xsl:value-of select="fullName" />
+        <xsl:value-of select="name" />
       </name>
       <xsl:if test="@has_init = 1">
         <value>
@@ -87,7 +87,7 @@
     <varDecl>
       <xsl:apply-templates select="@*" />
       <name>
-        <xsl:value-of select="fullName" />
+        <xsl:value-of select="name" />
       </name>
     </varDecl>
   </xsl:template>

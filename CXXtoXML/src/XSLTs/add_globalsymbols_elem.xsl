@@ -14,7 +14,7 @@
         <!-- C++ class declaration -->
         <xsl:when test="@class = 'CXXRecord'">
           <id>
-            <name><xsl:value-of select="fullName" /></name>
+            <name><xsl:value-of select="name" /></name>
           </id>
           <xsl:call-template name="emit-id-lists-in-class" />
         </xsl:when>
@@ -26,7 +26,7 @@
               <xsl:value-of select="@xcodemlTypedefType" />
             </xsl:attribute>
             <name>
-              <xsl:value-of select="fullName" />
+              <xsl:value-of select="name" />
             </name>
           </id>
         </xsl:when>
@@ -37,14 +37,14 @@
         -->
         <xsl:when
             test="
-            (fullName)
+            (name)
             and @xcodemlType">
           <id>
             <xsl:attribute name="type">
               <xsl:value-of select="@xcodemlType" />
             </xsl:attribute>
             <name>
-              <xsl:value-of select="fullName" />
+              <xsl:value-of select="name" />
             </name>
           </id>
         </xsl:when>
@@ -79,16 +79,16 @@
                  };
 
                  <clangDecl class="CXXRecord" xcodemlType="Class0">
-                   <fullName>A</fullName>
+                   <name>A</name>
                    <clangDecl class="CXXRecord" is_implicit="1" xcodemlType="Class0"> // ignore this node
-                     <fullName>A::A</fullName>
+                     <name>A::A</name>
                    </clangDecl>
                    <clangDecl class="Field" xcodemlType="int">
-                     <fullName>A::x</fullName>
+                     <name>A::x</name>
                      // ...
                    </clangDecl>
                    <clangDecl class="CXXMethod" xcodemlType="Function1">
-                     <fullName>A::f</fullName>
+                     <name>A::f</name>
                      // ...
                    </clangDecl>
                  </clangDecl>
@@ -105,7 +105,7 @@
             </xsl:attribute>
             <name>
               <xsl:value-of
-                select="clangDecl[@class='Function']/fullName" />
+                select="clangDecl[@class='Function']/name" />
             </name>
           </id>
         </xsl:when>
@@ -113,7 +113,7 @@
         <!-- child class declaration -->
         <xsl:when test="@class = 'CXXRecord'">
           <id>
-            <name><xsl:value-of select="fullName" /></name>
+            <name><xsl:value-of select="name" /></name>
           </id>
           <xsl:call-template name="emit-id-lists-in-class" />
         </xsl:when>

@@ -14,7 +14,7 @@
               <xsl:value-of select="@xcodemlType" />
             </xsl:attribute>
             <name>
-              <xsl:value-of select="fullName" />
+              <xsl:value-of select="name" />
             </name>
           </id>
         </xsl:for-each>
@@ -34,7 +34,7 @@
             /clangDecl[@class='ParmVar']">
           <id>
             <name>
-              <xsl:value-of select="fullName" />
+              <xsl:value-of select="name" />
             </name>
           </id>
         </xsl:for-each>
