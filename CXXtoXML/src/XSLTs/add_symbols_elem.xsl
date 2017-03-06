@@ -34,6 +34,14 @@
             </name>
           </id>
         </xsl:for-each>
+
+        <xsl:for-each
+          select="
+            clangAST/
+            clangDecl[@class='TranslationUnit']/
+            clangDecl[@class='CXXRecord']">
+          <xsl:call-template name="select-friend-declarations" />
+        </xsl:for-each>
       </globalSymbols>
 
       <xsl:apply-templates select="clangAST" />
