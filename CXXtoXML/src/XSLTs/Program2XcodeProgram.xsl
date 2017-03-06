@@ -76,6 +76,13 @@
     </varDecl>
   </xsl:template>
 
+  <xsl:template match="clangDecl[@class='CXXRecord']">
+    <classDecl>
+      <xsl:apply-templates select="@*" />
+      <xsl:apply-templates select="clangDecl" />
+    </classDecl>
+  </xsl:template>
+
   <xsl:template match="clangStmt[@class='IfStmt']">
     <ifStatement>
       <xsl:apply-templates select="@*" />
