@@ -1,5 +1,5 @@
 #include "XMLVisitorBase.h"
-#include "TypeTableVisitor.h"
+#include "TypeTableInfo.h"
 #include "DeclarationsVisitor.h"
 #include "InheritanceInfo.h"
 #include "clang/Basic/Builtins.h"

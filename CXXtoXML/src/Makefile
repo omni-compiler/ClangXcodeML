@@ -22,7 +22,7 @@ RAVOBJS = XMLRAV.o
 OBJS =  CXXtoXML.o \
 	ClangUtil.o \
 	XMLVisitorBase.o \
-	TypeTableVisitor.o \
+	TypeTableInfo.o \
 	DeclarationsVisitor.o \
 	InheritanceInfo.o \
 	OperationKinds.o
@@ -39,22 +39,22 @@ CXXtoXML.o: \
 	CXXtoXML.cpp \
 	XMLRAV.h \
 	XMLVisitorBase.h \
-	TypeTableVisitor.h \
+	TypeTableInfo.h \
 	DeclarationsVisitor.h
 XMLVisitorBase.o: \
 	XMLVisitorBase.cpp \
 	XMLRAV.h \
 	XMLVisitorBase.h
-TypeTableVisitor.o: \
-	TypeTableVisitor.cpp \
-	TypeTableVisitor.h \
+TypeTableInfo.o: \
+	TypeTableInfo.cpp \
+	TypeTableInfo.h \
 	DeclarationsVisitor.h \
 	XMLRAV.h \
 	XMLVisitorBase.h
 DeclarationsVisitor.o: \
 	DeclarationsVisitor.cpp \
 	DeclarationsVisitor.h \
-	TypeTableVisitor.h \
+	TypeTableInfo.h \
 	XMLRAV.h \
 	XMLVisitorBase.h \
 	InheritanceInfo.cpp \

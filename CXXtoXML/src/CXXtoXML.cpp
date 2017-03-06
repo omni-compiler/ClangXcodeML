@@ -1,6 +1,6 @@
 #include "XMLVisitorBase.h"
 
-#include "TypeTableVisitor.h"
+#include "TypeTableInfo.h"
 #include "DeclarationsVisitor.h"
 
 #include "clang/AST/ASTConsumer.h"

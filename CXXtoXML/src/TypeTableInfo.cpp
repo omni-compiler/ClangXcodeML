@@ -1,6 +1,6 @@
 #include "XMLVisitorBase.h"
 #include "DeclarationsVisitor.h"
-#include "TypeTableVisitor.h"
+#include "TypeTableInfo.h"
 
 #include <iostream>
 #include <sstream>
