@@ -71,7 +71,7 @@ XcodeMLは、以下の特徴を持つ。
 
 XcodeMLファイルのトップレベルのXML要素は、`XcodeProgram` 要素である。`XcodeProgram` 要素は以下の子要素を含む。
 
-* `nnsTable` (C++のみ)　– 翻訳単位で利用されている名前空間の情報([-@sec:program.nns]節)
+* `nnsTable` (C++のみ)　– 翻訳単位で利用されている名前空間の情報([-@sec:nns.attr]節)
 * `typeTable`要素　– プログラムで利用されているデータ型の情報([-@sec:type]章)
 * `globalSymbols`要素 – プログラムで利用されている大域変数の情報([-@sec:symb.global]節)
 * `globalDeclarations` 要素 – 関数、変数宣言などの情報([-@sec:decl.global]節)
@@ -122,90 +122,6 @@ XcodeMLの設計方針は、XcodeMLで表現されたプログラムを入力に
 ただし、下記の`nns`の話やoperator呼び出しの種類、`decltype`による型などは、ソースコードには書かれていないがClangAST的には解決結果が保持されているので、これらは「正規化されていないXcodeML」の時点で情報を付与しておくべきである。
 また、解決結果だけがあれば情報は足りているので、「正規化されていないXcodeML」がもともとのソースコード上の構文的な構造を完全に反映する必要があるわけではない。
 このように考えると、「フェーズ1の正規化」と「フェーズ2の正規化」があり、フェーズ1の正規化は必ずおこなう(XcodeMLとして二種類の表現をするコースがそもそも準備されない)、という風に考える必要がある。
-
-## `nnsTable`と`nns`属性 {#sec:program.nns}
-`nnsTable`要素は、翻訳単位([-@sec:program]章)に対して一つだけ存在し、翻訳単位で使われているすべての名前修飾(nested namespace spcifier)についての情報を定義する。
-
-`nns`属性は、C++のスコープ解決演算子による修飾をおこなった形の「フルネーム」を指定するためのXML属性である。
-次章以降で解説する各種の要素のうち、ソースコード上での「名前」を表現する要素について、適宜挿入される共通の構造である。
-
-    nns="修飾子識別名"
-
-下記の各属性に適宜挿入される。
-
-* `nnsTable`要素に含まれるもの:
-    * `napespaceName`要素(※仮称)
-    * `classname`要素(※仮称)
-* `typeTable`要素および`localTypeTable`に含まれるもの:
-    * `name`要素
-* `globalSymbols`要素および(`symbols`要素に含まれるもの:
-    * `name`要素
-* `globalDeclarations` 要素および`declarations`要素に含まれるもの:
-    * `name`要素
-    * `operator`要素
-    * `Var`要素
-    * `varAddr`要素
-    * `function`要素
-    * `funcAddr`要素
-    * `arrayRef`要素
-    * `arrayAddr`要素
-    * `memberRef`要素
-    * `memberAddr`要素
-    * `memberArrayRef`要素
-    * `memberArrayAddr`要素
-
-例:
-
-以下のプログラムで、
-
-    namespace NS {
-      int a;            // (1)
-    }
-    NS::a = 10;        // (2)
-
-`namespace NS`の存在を表現するために、以下のような`nnsTable`が生成される。
-
-    <nnsTable>
-      <nestedNameSpecifier nns="Q0">
-        <namespaceName nns="global">NS</namespace>
-      </nestedNameSpecifier>
-    </nnsTable>
-
-これを用いて、(1)および(2)における`a`は、以下のように表現される。
-
-    <name type="int" nns="Q0">a</name>
-
-例:
-
-以下のプログラムで、
-
-    struct S {
-        int data;
-        int foo(int n) { return n + 1; }
-    };
-
-    int S :: *d = &S :: data;        // (1)
-    int (S :: *f)(int) = &S :: foo;        // (2)
-    struct S s1;
-    int *p = &s1.data;            // (3)
-
- (1),(2)の`d`と`f`の名前は、それぞれ以下のように表現される。`MP1`は`S`のメンバーへのポインタ(int型を指すもの)の型であり、`MP2`は`S`のメンバ関数へのポインタ(intを引数にとりintを戻り値とする関数を指すもの)の型である。
-
-・・・※ここは「その`typeTable`がどう表現されるか」を加筆すべきである。
-
-    <name type="MP1" >d</name>
-    <name type="MP2" >f</name>
-
-(1)と(2)の右辺式は、それぞれ以下のように表現される。`S`は変数でないので`memberAddr`要素は用いられず、`data`変数のスコープと解釈する。ただし`S0`は`nnsTable`内で構造体`S`のスコープを表現するものとして定義されているとする。
-
-    <varAddr type="P0" scope="global" nns="S0">data</varAddr>
-    <varAddr type="P0" scope="global" nns="S0">foo</varAddr>
-
-(3)の右辺式は、以下のように表現される。`s1`は変数名なので、`s1.data`は`memberAddr`要素で表現される。
-
-    <memberAddr type="P5" member="data" nns="S">　…このnnsが必要か要検討
-        <varAddr type="P4" scope="global">s1</varAddr>
-    </memberAddr>
 
 ## `value`要素 {#sec:program.value}
 `globalDeclarations`要素、`declarations`要素中で、初期化式を持つ変数宣言を表現する際の初期値の式を表現する。
@@ -259,7 +175,7 @@ int型配列の初期値 `{ 1, 2 }` に対応する表現は次のとおりに�
 * `functionType`要素([-@sec:type.func]節)
 * `arrayType`要素([-@sec:type.array]節)
 * `unionType`要素([-@sec:type.union]節)
-* `structType`要素と`class`要素([-@sec:type.struct]節)
+* `structType`要素と`classType`要素([-@sec:type.struct]節)
 * `enumType`要素([-@sec:type.enum]節)
 * `typeInstance`要素([-@sec:temp.funcinstance]節)
 * `classTemplate`要素([-@sec:temp.class]節)
@@ -341,34 +257,10 @@ int型配列の初期値 `{ 1, 2 }` に対応する表現は次のとおりに�
 * `is_volatile`　－　そのデータ型がvolatile修飾子をもつかどうか
 * `is_restrict`　－　そのデータ型がrestrict修飾子をもつかどうか
 * `is_static`　－　そのデータ型がstatic属性をもつかどうか
-* `reference`(C++)　—　属性値がlvalueのとき左辺値参照、rvalueのとき右辺値参照を意味する。属性値が`default`または属性が省略されているとき文脈依存であることを意味するが、`lvalue`または`rvalue`の値をもつことが望ましい。引数の値渡し(通常の場合)に対しては、`defalut`とする。
 * `access`(C++)　－　アクセス指定子に対応。"`private`", "`protected`"または"`public`"
 * `is_virtual`(C++)　—　そのメンバ関数がvirtual属性をもつかどうか。
 
 "`is_`"　で始まる属性の値には、真を意味する`1`と`true`、および、偽を意味する`0`と`false`が許される。属性が省略されたとき、偽を意味する。
-
-例: 左辺値参照と右辺値参照
-
-以下の参照(左辺値参照)の宣言があるとき、
-
-    int& n_alias = n_org;
-
-変数`n_alias`のデータ型識別要素は以下のようになる。
-
-    <basicType type="B0" name="int" reference="lvalue"/>
-
-以下のコンストラクタ(ムーブコンストラクタ)の定義の引数に現れた右辺値参照について、
-
-    struct Array {
-      int *p, len;
-      Array( Array&& obj ) : p(obj.p), len(obj.len) {
-        obj.p = nullptr;  obj.len = 0;
-      }
-    }
-
-仮引数`obj`のデータ型識別要素は以下のようになる。
-
-    <basicType="B1" name="B2" reference="rvalue"/>
 
 ## `basicType`要素 {#sec:type.basic}
 `basicType` 要素は、他のデータ型識別要素にデータ型定義要素属性を加えた、新しいデータ型定義要素を定義する。
@@ -408,18 +300,22 @@ int型配列の初期値 `{ 1, 2 }` に対応する表現は次のとおりに�
 	  <pointerType type="P0" is_volatile="1" ref="B0"/>
 
 ## `pointerType`要素 {#sec:type.ptr}
-`pointerType`要素はポインタのデータ型を定義する。
+`pointerType`要素はポインタ型またはリファレンス型を定義する。
 
 | `<pointerType/>`
 
 属性(必須): `type`, `ref`
 
-属性(optional): データ型定義要素属性
+属性(optional): `reference`, データ型定義要素属性
 
 以下の属性を持つ。
 
 * `type`　－　この型に与えられたデータ型識別名
 * `ref`　－　このポインタが指すデータのデータ型識別名
+* `reference`　－　
+  属性が指定されたとき、この型がリファレンス型であることを表す。
+  "`lvalue`"のときlvalueリファレンス型であることを意味し、
+  "`rvalue`"のときrvalueリファレンス型であることを意味する。
 
 `pointerType`要素は、子要素を持たない。
 
@@ -428,6 +324,40 @@ int型配列の初期値 `{ 1, 2 }` に対応する表現は次のとおりに�
 "`int *`" に対応するデータ型定義は以下のようになる。
 
 	<pointerType type="P0123" ref="int"/>
+
+例:
+
+    const int& x = 0;
+
+は以下のXcodeMLに変換される。
+`basicType`要素によって、"`const int`"を意味するデータ型識別名`B0`が定義されている。
+
+    <basicType type="B0" is_const="1" name="int"/>
+    <pointerType type="P0124" ref="B0" reference="lvalue" />
+
+例:
+
+以下の(lvalue)リファレンスの宣言があるとき、
+
+    int& n_alias = n_org;
+
+変数`n_alias`のデータ型識別要素は以下のようになる。
+
+    <pointerType type="P0" ref="int" reference="lvalue"/>
+
+以下のコンストラクタ(ムーブコンストラクタ)の定義の引数に現れたrvalueリファレンスについて、
+
+    struct Array {
+      int *p, len;
+      Array( Array&& obj ) : p(obj.p), len(obj.len) {
+        obj.p = nullptr;  obj.len = 0;
+      }
+    }
+
+仮引数`obj`のデータ型識別要素は以下のようになる。
+ここで"`S0`"は"`Array`"に対応するデータ型識別名として定義されている。
+
+    <pointerType type="B2" ref="S0" reference="rvalue"/>
 
 ## `functionType`要素 {#sec:type.func}
 `funtionType`要素は、関数型を定義する。
@@ -557,13 +487,13 @@ union(共用体)データ型は、`unionType`要素で定義する。
 
 
 
-## `class`要素(C++) {#sec:type.class}
+## `classType`要素(C++) {#sec:type.class}
 クラスを表現する。
 
-| `<class>`
+| `<classType>`
 | 　 [ `inheritedFrom`要素([-@sec:type.class.inherit]) ]
 |   `symbols`要素([-@sec:symb.local]節)
-| `</class>`
+| `</classType>`
 
 属性(必須): `type`
 
@@ -693,9 +623,9 @@ enum型は、`enumType`要素で定義する。`type`要素で、メンバの識
     【要検討】storage class specifier以外のdecl-specifierである `friend`, `constexpr`もここで表現するか？
 
 * `type`属性　－　識別子のデータ型識別名
-* `bit_field`属性　－　`structType`、`unionType`と`class`要素においてメンバのビットフィールドを数値で指定する。
+* `bit_field`属性　－　`structType`、`unionType`と`classType`要素においてメンバのビットフィールドを数値で指定する。
 * `is_thread_local`属性　－　thread\_local指定されていることを表す。
-* `align_as`属性　－　`structType`、`unionType`と`class`要素において、メンバのalignmentを数値またはデータ型識別名で指定する。
+* `align_as`属性　－　`structType`、`unionType`と`classType`要素において、メンバのalignmentを数値またはデータ型識別名で指定する。
 * `is_gccThread`属性　－　GCCの`__thread`キーワードが指定されているかどうかの情報、`0`または`1`、`false`または`true`。
 * `is_gccExtension`属性
 
@@ -705,8 +635,8 @@ enum型は、`enumType`要素で定義する。`type`要素で、メンバの識
 
     要検討: 実装時に再検討。何もかも`value`要素にするのがよいか？
 
-* `bitField`要素　－　`unionType`と`class`要素においてメンバのビットフィールドの値を`bit_field`属性の数値として指定できないとき使用する。`bitField`要素は式を子要素に持つ。`bitField`要素を使用するとき、`bit_field` 属性の値は、"`*`" とする。
-* `alignAs`要素　—　`structType`、`unionType`と`class`要素においてメンバのalignmentを`align_as`属性の数値として指定できないとき、`alignAs`要素の子要素として式の要素で指定する。
+* `bitField`要素　－　`unionType`と`classType`要素においてメンバのビットフィールドの値を`bit_field`属性の数値として指定できないとき使用する。`bitField`要素は式を子要素に持つ。`bitField`要素を使用するとき、`bit_field` 属性の値は、"`*`" とする。
+* `alignAs`要素　—　`structType`、`unionType`と`classType`要素においてメンバのalignmentを`align_as`属性の数値として指定できないとき、`alignAs`要素の子要素として式の要素で指定する。
 
 例:
 
@@ -772,7 +702,7 @@ enum型は、`enumType`要素で定義する。`type`要素で、メンバの識
 * `text`要素　－　ディレクティブなど任意のテキストを表す
 
 ## `declarations`要素 {#sec:decl.local}
-`compoundStatement`([-@sec:stmt.comp]節)、`class`([-@sec:type.class]節)などをスコープとする変数、関数などの宣言と定義を行う。
+`compoundStatement`([-@sec:stmt.comp]節)、`classType`([-@sec:type.class]節)などをスコープとする変数、関数などの宣言と定義を行う。
 
 | `<declarations>`
 |   [ {`varDecl`要素([-@sec:decl.var]節)　or
@@ -910,6 +840,8 @@ enum型は、`enumType`要素で定義する。`type`要素で、メンバの識
 ## `varDecl`要素 {#sec:decl.var}
 変数の宣言を行う。
 
+リファレンス型でない変数の宣言に対応する`varDecl`要素は次の形式に従う。
+
 | `<varDecl>`
 |   `name`要素
 |   [ `value`要素([-@sec:program.value]節) ]
@@ -933,6 +865,53 @@ enum型は、`enumType`要素で定義する。`type`要素で、メンバの識
           <intConstant type="int">2</intConstant>
         </value>
       </varDecl>
+
+リファレンス型変数の宣言に対応する`varDecl`要素は次の形式に従う。
+
+| `<varDecl>`
+|   `name`要素
+|   `value`要素([-@sec:program.value]節)
+| `</varDecl>`
+
+属性なし
+
+変数宣言を行う識別子の名前を`name`要素で指定する。 以下の子要素を持つ。
+
+* `name`要素　－　
+  宣言する変数に対する`name`要素を持つ。
+* `value`要素　－　
+  初期化式を表現する。ここで、`value`要素は次の形式に従う。
+
+    |   `<value>`
+    |     `<addrOfExpr` `is_expedient=` `"1"` または `"true">`
+    |       式の要素
+    |     `</addrOfExpr>`
+    |   `</value>`
+
+    `value`要素の子要素である`addrOfExpr`要素の`is_expedient`属性値は"1"または"true"でなければならない。
+    その他にデータ型定義要素属性をもってもよい。
+
+例:
+
+    int x = 0;
+    int& rx = x;
+
+    <varDecl>
+      <name>x</name>
+      <value>
+        <intConstant type="int">0</intConstant>
+      </value>
+    </varDecl>
+    <varDecl>
+      <name>rx</name>
+      <value>
+        <addrOfExpr type="R1" is_expedient="true">
+          <Var type="int">x</Var>
+        </addrOfExpr>
+      </value>
+    </varDecl>
+
+ここで`R1`は"`int&`"に対応するデータ型識別名として定義されている。
 
 ## `functionDecl`要素 {#sec:decl.func}
 関数宣言を行う。
@@ -1307,41 +1286,39 @@ switch文のdefaultラベルを表す。`switch`要素の中の`body`要素の�
 
 備考:`longlongConstant`だけ特別扱いするのは不自然。素直に10進数表記で表現する形にしたい。
 
-## 変数参照の要素(`Var`要素、`varAddr`要素、`arrayAddr`要素) {#sec:expr.var}
-変数名への参照を表現する。それぞれ、`v`, `&v`, `a`に対応する(`v`は配列以外の変数、`a`は配列変数)。
+## `Var`要素 {#sec:expr.var}
+
+配列以外の変数への参照を表現する。
 
 | `<Var>`変数名`</Var>`
-| `<varAddr>`変数名`</varAddr>`
-| `<arrayAddr>`配列変数名`</arrayAddr>`
 
 属性(必須): `type`, `scope`
-
-* `Var`要素　－　配列以外の変数を参照する式。内容に変数名を指定する。
-* `varAddr`要素　－　配列以外の変数のアドレスを参照する式。内容に変数名を指定する。
-* `arrayAddr`要素　－　配列の先頭アドレスを参照する式。内容に配列変数名を指定する。
 
 `scope`属性をつかって、局所変数を区別する。
 
 * `scope`属性　－　"`local`", "`global`", "`param`"のいずれか
 
+## `addrOfExpr` 要素 {#sec:expr.addrof}
+
+式へのアドレス参照を表現する。
+
+| `<addrOfExpr>`
+|   式の要素
+| `</addrOfExpr>`
+
+属性(必須): `type`
+
+## `arrayAddr`要素 {#sec:expr.arrayaddr}
+
+配列型変数への参照を表現する。
+
+| `<arrayAddr>`配列変数名`</arrayAddr>`
+
 例:
 
-`n`がint型のとき、`n`のアドレスの参照 `&n` は、
+`a`がint型の配列のとき、`a`の参照は、
 
-    <varAddr type="P0" scope="local">n</varAddr>
-
-と表現される。ここで`P0`は、`typeTable`の中で
-
-    <pointerType type="P0" ref="int"/>
-
-
-などと宣言されている。
-
-例:
-
-`a`がint型の配列のとき、`a`の参照、すなわち`a[0]`のアドレスの参照は、
-
-    <arrayAddr type="A5" scope="local">a</varAddr>
+    <arrayAddr type="A5" scope="local">a</arrayAddr>
 
 と表現される。ここで`A5`は、`typeTable`の中で
 
@@ -1351,16 +1328,26 @@ switch文のdefaultラベルを表す。`switch`要素の中の`body`要素の�
 
 備考:
 
-`a`が配列のとき、2015年10月現在のF\_Frontでは `&a` の参照を`a`の参照と同様`arrayAddr`で表現している。これに関連してOmni XMPでは型の不一致によるエラーが出ている(バグレポート439)。
+`a`が配列のとき、2015年10月現在のF\_Frontでは `&a` の参照を`a`の参照と同様`arrayAddr`で表現している。
+これに関連してOmni XMPでは型の不一致によるエラーが出ている(バグレポート439)。
 
 ## `pointerRef`要素 {#sec:expr.pointer}
-式(ポインタ型)の指示先を表現する。
+式(ポインタ型またはリファレンス型)の指示先を表現する。
 
 | `<pointerRef>`
 |   式の参照
 | `</pointerRef>`
 
 属性(必須): `type`
+
+属性(optional): `is_expedient`
+
+pointerRef要素は次の属性を持つことができる。
+
+* `is_expedient`属性　－　
+  "`1`"または"`true`"のとき、式がリファレンスであることを表す。
+  "`0`"または"`false`"のとき、式がポインタであることを表す。
+  省略時の値は"`false`"である。
 
 例:
 
@@ -1412,40 +1399,51 @@ switch文のdefaultラベルを表す。`switch`要素の中の`body`要素の�
 
 のように表現される。ここで`P232`はint型へのポインタと宣言されている。後者は`arrayAddr`要素でないことに注意されたい。
 
-## メンバの参照の要素(C++拡張) {#sec:expr.member}
-構造型、クラス、または共用型のオブジェクトを`s`とするとき、`s`のメンバ`m`への参照`s.m`、`s`のメンバ`m`のアドレスの参照`&s.m`、`s`のメンバ配列`a`の要素への参照`s.a[i]`、および、`s`のメンバ配列`a`の要素のアドレスの参照`&s.a[i]`を、それぞれ以下のように表現する。
+## `memberRef`要素(C++拡張) {#sec:expr.memberref}
 
-| `<memberRef>` or `<memberAddr>` or `<memberArrayRef>` or `<memberArrayAddr>`
+構造型、クラス、または共用型のオブジェクトがもつ配列以外のメンバへの参照を表現する。
+
+| `<memberRef>`
 | 　　式の要素
-| `</memberRef>` or `</memberAddr>` or `</memberArrayRef>` or `</memberArrayAddr>`
+| `</memberRef>`
 
 属性(必須): `type`, `member`
 
-* `memberRef`　－　配列以外のメンバを参照する。`member`属性にメンバ名を指定し、子要素でオブジェクトのアドレスを表現する。例えば、オブジェクト`s`のint型メンバ`n`への参照 `s.n` について、以下のように表現する。
+* `member`属性　－　
+  参照するメンバをメンバ名で指定する。
+
+`memberRef`要素は、子要素としてオブジェクトを表現する式の要素をもつ。
+
+例:
+
+オブジェクト`s`のint型メンバ`n`への参照 `s.n` について、以下のように表現する。
 
         <memberRef type="int" member="n">
             <varAddr type="P0" scope="local">s</varAddr>
         </memberRef>
 
-* `memberAddr`　－　配列名以外のメンバのアドレスを参照する。`member`属性にメンバ名を指定し、子要素でオブジェクトのアドレスを表現する。例えば、オブジェクト`s`のint型メンバ`n`のアドレス `&s.n` について、以下のように表現する。
+## `memberArrayRef`要素(C++拡張) {#sec:expr.memberarrayref}
 
-        <memberAddr type="int" member="n">
-          <varAddr type="P6" scope="local">s</varAddr>
-        </memberAddr>
+構造型、クラス、または共用型のオブジェクトがもつ配列型のメンバへの参照を表現する。
 
-* `memberArrayRef`　－　オブジェクトの配列メンバを参照する。`member`属性にメンバ名を指定し、子要素でオブジェクトのアドレスを表現する。例えば、オブジェクト`s`のint型配列メンバ`a`への参照 `s.a` について、以下のように表現する。
+| `<memberArrayRef>`
+| 　　式の要素
+| `</memberArrayRef>`
+
+属性(必須): `type`, `member`
+
+* `member`属性　－　
+  参照するメンバをメンバ名で指定する。
+
+`memberArrayRef`要素は、子要素としてオブジェクトを表現する式の要素をもつ。
+
+例:
+
+オブジェクト`s`のint型配列メンバ`a`への参照 `s.a` について、以下のように表現する。
 
         <memberArrayRef type="A0" member="a">
           <varAddr type="P1" scope="local">s</varAddr>
         </memberArrayRef>
-
-* `memberArrayAddr`　－　オブジェクトの配列メンバのアドレスを参照する。`member`属性にメンバ名を指定し、子要素でオブジェクトのアドレスを表現する。例えば、オブジェクト`s`のint型配列メンバ`a`のアドレス `&s.a` について、以下のように表現する。
-
-        <memberArrayAddr type="P24" member="a">
-          <varAddr type="P7" scope="local">s</varAddr>
-        </memberArrayAddr>
-
-メンバの参照が入れ子になるとき、子要素の表現も入れ子になる。
 
 要検討:構造体まわりの現在のC\_Frontの変換仕様について
 
@@ -1495,7 +1493,7 @@ switch文のdefaultラベルを表す。`switch`要素の中の`body`要素の�
 
 例:
 
-以下のプログラムで、(1)はメンバ変数へのポインタの宣言、(2)はメンバ関数へのポインタの宣言であり、それぞれメンバ変数、メンバ関数をポイントするよう初期化されている([-@sec:program.nns]節の例参照)。(3)の右辺により`s1.foo`が引数`3`で呼び出され、左辺`s1.data`に代入される。
+以下のプログラムで、(1)はメンバ変数へのポインタの宣言、(2)はメンバ関数へのポインタの宣言であり、それぞれメンバ変数、メンバ関数をポイントするよう初期化されている([-@sec:nns.attr]節の例参照)。(3)の右辺により`s1.foo`が引数`3`で呼び出され、左辺`s1.data`に代入される。
 
     struct S {
       int data;
@@ -1869,6 +1867,273 @@ C++のラムダ式を表現する。
 * `is_mutable`属性　－　`1`または`true`のとき、mutable指定があることを意味する。`0`または`false`または省略されたとき、mutable指定がないことを意味する。
 　子要素の`byReference`要素で指定された名前の変数は参照キャプチャされ、`byValue`要素で指定された名前の変数はコピーキャプチャされる。それ以外の変数は、`default`属性の指定に従う。
 
+# `nnsTable`要素とNNS定義要素 {#sec:nns}
+`nnsTable`要素は、翻訳単位([-@sec:program]章)に対して一つだけ存在し、
+翻訳単位で使われているすべての名前修飾についての情報を定義する。
+
+| `<nnsTable>`
+|   [ NNS定義要素
+|   … ]
+| `</nnsTable>`
+
+属性なし
+
+
+`nnsTable`要素は、翻訳単位を表現する`XcodeProgram`要素([-@sec:program]章)の直接の子要素であり、
+NNSを定義するNNS定義要素の列からなる。
+NNS定義要素には以下の要素がある。
+
+* `globalNNS`要素
+* `namespaceNNS`要素
+* `unnamedNamespaceNNS`要素
+* `classNNS`要素
+* `enumNNS`要素
+* `typedefTypeNNS`要素
+* `templateParamTypeNNS`要素
+* `simpleTemplateIdNNS`要素
+
+## `nns`属性 {#sec:nns.attr}
+
+`nns`属性は、C++のスコープ解決演算子による修飾をおこなった形の「フルネーム」を指定するためのXML属性である。
+ソースコード上での「名前」を表現する各要素について、適宜挿入される共通の構造である。
+
+    nns="修飾子識別名"
+
+下記の各要素に適宜挿入される。
+
+* `nnsTable`要素に含まれるもの:
+    * `napespaceNNS`要素
+    * `classNNS`要素
+* `typeTable`要素および`localTypeTable`に含まれるもの:
+    * `name`要素
+* `globalSymbols`要素および(`symbols`要素に含まれるもの:
+    * `name`要素
+* `globalDeclarations` 要素および`declarations`要素に含まれるもの:
+    * `name`要素
+    * `operator`要素
+    * `Var`要素
+    * `function`要素
+    * `funcAddr`要素
+    * `arrayRef`要素
+    * `arrayAddr`要素
+    * `memberRef`要素
+    * `memberArrayRef`要素
+
+どんな文字列も修飾子識別名として定義することができる。
+ただし、以下の識別名は利用を予約されている。
+
+* `global` -
+  グローバル名前空間
+
+例:
+
+以下のプログラムで、
+
+    namespace NS {
+      int a;            // (1)
+    }
+    NS::a = 10;        // (2)
+
+`namespace NS`の存在を表現するために、以下のような`nnsTable`が生成される。
+
+    <nnsTable>
+      <nestedNameSpecifier nns="Q0">
+        <namespaceNNS nns="global">NS</namespace>
+      </nestedNameSpecifier>
+    </nnsTable>
+
+これを用いて、(1)および(2)における`a`は、以下のように表現される。
+
+    <name type="int" nns="Q0">a</name>
+
+例:
+
+以下のプログラムで、
+
+    struct S {
+        int data;
+        int foo(int n) { return n + 1; }
+    };
+
+    int S :: *d = &S :: data;        // (1)
+    int (S :: *f)(int) = &S :: foo;        // (2)
+    struct S s1;
+    int *p = &s1.data;            // (3)
+
+ (1),(2)の`d`と`f`の名前は、それぞれ以下のように表現される。`MP1`は`S`のメンバーへのポインタ(int型を指すもの)の型であり、`MP2`は`S`のメンバ関数へのポインタ(intを引数にとりintを戻り値とする関数を指すもの)の型である。
+
+・・・※ここは「その`typeTable`がどう表現されるか」を加筆すべきである。
+
+    <name type="MP1" >d</name>
+    <name type="MP2" >f</name>
+
+(1)と(2)の右辺式は、それぞれ以下のように表現される。`S`は変数でないので`memberAddr`要素は用いられず、`data`変数のスコープと解釈する。ただし`S0`は`nnsTable`内で構造体`S`のスコープを表現するものとして定義されているとする。
+
+    <varAddr type="P0" scope="global" nns="S0">data</varAddr>
+    <varAddr type="P0" scope="global" nns="S0">foo</varAddr>
+
+(3)の右辺式は、以下のように表現される。`s1`は変数名なので、`s1.data`は`memberAddr`要素で表現される。
+
+    <memberAddr type="P5" member="data" nns="S">　…このnnsが必要か要検討
+        <varAddr type="P4" scope="global">s1</varAddr>
+    </memberAddr>
+
+## `namespaceNNS`要素 {#sec:nns.namespace}
+
+無名でない名前空間を表現する。
+
+| `<namespaceNNS>`
+|   `name`要素
+|   `attributes`要素
+| `</namespaceNNS>`
+
+属性(必須): `nns`
+
+属性(optional): `is_inline`
+
+* `nns` -
+  このNNSに与えられたNNS識別名
+* `is_inline` -
+  "`1`"または"`true`"のとき、inline名前空間であることを意味する。
+  "`0`"または"`false`"のとき、inline名前空間ではないことを意味する。
+  省略時の値は"`false`"である。
+
+以下の子要素を持つ。
+
+* `name`要素 -
+  名前空間名
+* `attributes`要素 -
+  アトリビュートの並び
+
+## `unnamedNamespaceNNS`要素 {#sec:nns.unnamednamespace}
+
+無名名前空間を表現する。
+
+| `<unnamedNamespaceNNS>`
+|   `attributes`要素
+| `</unnamedNamespaceNNS>`
+
+属性(必須): `nns`
+
+属性(optional): `is_inline`
+
+* `nns` -
+  このNNSに与えられたNNS識別名
+* `is_inline` -
+  "`1`"または"`true`"のとき、inline名前空間であることを意味する。
+  "`0`"または"`false`"のとき、inline名前空間ではないことを意味する。
+  省略時の値は"`false`"である。
+
+以下の子要素を持つ。
+
+* `attributes`要素 -
+  アトリビュートの並び
+
+## `classNNS`要素 {#sec:nns.class}
+
+クラスを表現する。
+
+| `<classNNS>`
+|   `name`要素
+| `</classNNS>`
+
+属性(必須): `nns`, `type`
+
+* `nns` -
+  このNNSに与えられたNNS識別名
+* `type` -
+  typeTableにおいてこのクラス型に与えられたデータ型識別名
+
+以下の子要素を持つ。
+
+* `name`要素 -
+  クラス名
+
+## `enumNNS`要素 {#sec:nns.enum}
+
+enumを表現する。
+
+| `<enumNNS>`
+|   `name`要素
+| `</enumNNS>`
+
+属性(必須): `nns`, `type`
+
+* `nns` -
+  このNNSに与えられたNNS識別名
+* `type` -
+  typeTableにおいてこのenum型に与えられたデータ型識別名
+
+以下の子要素を持つ。
+
+* `name`要素 -
+  enum名
+
+## `typedefTypeNNS`要素 {#sec:nns.typedef}
+
+typedef名を表現する。
+
+| `<typedefTypeNNS>`
+|   `name`要素
+| `</typedefTypeNNS>`
+
+属性(必須): `nns`, `type`
+
+* `nns` -
+  このNNSに与えられたNNS識別名
+* `type` -
+  typeTableにおいてこの型と等価な型に与えられたデータ型識別名
+
+以下の子要素を持つ。
+
+* `name`要素 -
+  typedef名
+
+## `templateParamTypeNNS`要素 {#sec:nns.templateparam}
+
+型テンプレート仮引数を表現する。
+
+| `<templateParamTypeNNS>`
+| `name`要素
+| `<templateParamTypeNNS>`
+
+属性(必須): `nns`
+
+* `nns` -
+  このNNSに与えられたNNS識別名
+
+以下の子要素を持つ。
+
+* `name`要素 -
+  仮引数名
+
+## `simpleTemplateIdNNS`要素 {#sec:nns.simpletemplateid}
+
+実引数を与えられたクラステンプレートを表現する。
+
+| `<simpleTemplateIdNNS>`
+|   `<template>`
+|     `name`要素
+|   `</template>`
+|   `<arguments>`
+|     [ `name`要素
+|     ... ]
+|   `</arguments>`
+| `</simpleTemplateIdNNS>`
+
+属性(必須): `nns`
+
+* `nns` -
+  このNNSに与えられたNNS識別名
+
+以下の子要素を持つ。
+
+* `template`要素 -
+  テンプレート名
+
+* `arguments` -
+  テンプレート実引数の並び
+
 # テンプレート定義要素(C++) {#sec:temp}
 テンプレート定義要素には、以下のものがある。
 
@@ -1904,7 +2169,7 @@ C++のラムダ式を表現する。
 | `<classTemplate>`
 |   `symbols`要素([-@sec:symb.local]節)
 |   `typeParams`要素([-@sec:type.typeparams]節)
-|   `class`要素([-@sec:type.class]節)
+|   `classType`要素([-@sec:type.class]節)
 | `</classTemplate>`
 
 
@@ -1914,7 +2179,7 @@ C++のラムダ式を表現する。
 
 * `symbols`要素　—　型仮引数に関する`id`要素を子要素として持つ。
 * `typeParams`要素　—　子要素として`typeName`要素の並びを持つ。
-* `structType`要素または`class`要素　—　構造体またはクラスの定義
+* `structType`要素または`classType`要素　—　構造体またはクラスの定義
 
 例:
 
