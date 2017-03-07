@@ -45,8 +45,8 @@ SymbolEntry parseSymbols(xmlNodePtr node, xmlXPathContextPtr ctxt) {
   auto idElems = findNodes(node, "id", ctxt);
   for (auto idElem : idElems) {
     xmlNodePtr nameElem = findFirst(idElem, "name", ctxt);
-    XMLString type(xmlGetProp(idElem, BAD_CAST "type"));
-    assert(length(type) != 0);
+    const auto type = getProp(idElem, "type");
+    assert(type.length() != 0);
     XMLString name(xmlNodeGetContent(nameElem));
     if (!static_cast<std::string>(name).empty()) {
       // Ignore unnamed parameters such as <name type="int"/>
@@ -262,7 +262,7 @@ DEFINE_CB(outputParams) {
       ret = ret + makeTokenNode(", ");
     }
     XMLString name = xmlNodeGetContent(p);
-    XMLString typeName = xmlGetProp(p, BAD_CAST "type");
+    const auto typeName = getProp(p, "type");
     const auto paramType = src.typeTable.at(typeName);
     ret = ret +
       makeDecl(
@@ -279,7 +279,7 @@ DEFINE_CB(clangStmtProc) {
 }
 
 DEFINE_CB(emitClassDefinition) {
-  const XMLString typeName(xmlGetProp(node, BAD_CAST "type"));
+  const auto typeName = getProp(node, "type");
   const auto type = src.typeTable.at(typeName);
   XcodeMl::ClassType* classType =
     llvm::cast<XcodeMl::ClassType>(type.get());
@@ -355,7 +355,7 @@ DEFINE_CB(memberRefProc) {
   return
     makeInnerNode(w.walkChildren(node, src)) +
     makeTokenNode(".") +
-    makeTokenNode(XMLString(xmlGetProp(node, BAD_CAST "member")));
+    makeTokenNode(getProp(node, "member"));
 }
 
 DEFINE_CB(memberAddrProc) {
@@ -368,7 +368,7 @@ DEFINE_CB(memberPointerRefProc) {
   return
     makeInnerNode(w.walkChildren(node, src)) +
     makeTokenNode(".*") +
-    makeTokenNode(XMLString(xmlGetProp(node, BAD_CAST "name")));
+    makeTokenNode(getProp(node, "name"));
 }
 
 DEFINE_CB(compoundValueProc) {
