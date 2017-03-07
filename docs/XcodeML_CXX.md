@@ -1776,12 +1776,12 @@ C++のラムダ式を表現する。
 * `is_mutable`属性　－　`1`または`true`のとき、mutable指定があることを意味する。`0`または`false`または省略されたとき、mutable指定がないことを意味する。
 　子要素の`byReference`要素で指定された名前の変数は参照キャプチャされ、`byValue`要素で指定された名前の変数はコピーキャプチャされる。それ以外の変数は、`default`属性の指定に従う。
 
-# `nnsTable`要素とnested-name-specifier定義要素 {#sec:nns}
+# `nnsTable`要素とNNS定義要素 {#sec:nns}
 `nnsTable`要素は、翻訳単位([-@sec:program]章)に対して一つだけ存在し、
 翻訳単位で使われているすべての名前修飾(nested namespace spcifier)についての情報を定義する。
 
 | `<nnsTable>`
-|   [ nested-name-specifier型定義要素
+|   [ NNS型定義要素
 |   … ]
 | `</nnsTable>`
 
@@ -1789,8 +1789,8 @@ C++のラムダ式を表現する。
 
 
 `nnsTable`要素は、翻訳単位を表現する`XcodeProgram`要素([-@sec:program]章)の直接の子要素であり、
-nested-name-specifierを定義するnested-name-specifier定義要素の列からなる。
-nested-name-specifier定義要素には以下の要素がある。
+NNSを定義するNNS定義要素の列からなる。
+NNS定義要素には以下の要素がある。
 
 * `globalName`要素
 * `namespaceName`要素
@@ -1905,7 +1905,7 @@ nested-name-specifier定義要素には以下の要素がある。
 属性(optional): `is_inline`
 
 * `nns` -
-  このnested-name-specifierに与えられたnested-name-specifier識別名
+  このNNSに与えられたNNS識別名
 * `is_inline` -
   "`1`"または"`true`"のとき、inline名前空間であることを意味する。
   "`0`"または"`false`"のとき、inline名前空間ではないことを意味する。
@@ -1931,7 +1931,7 @@ nested-name-specifier定義要素には以下の要素がある。
 属性(optional): `is_inline`
 
 * `nns` -
-  このnested-name-specifierに与えられたnested-name-specifier識別名
+  このNNSに与えられたNNS識別名
 * `is_inline` -
   "`1`"または"`true`"のとき、inline名前空間であることを意味する。
   "`0`"または"`false`"のとき、inline名前空間ではないことを意味する。
@@ -1953,7 +1953,7 @@ nested-name-specifier定義要素には以下の要素がある。
 属性(必須): `nns`, `type`
 
 * `nns` -
-  このnested-name-specifierに与えられたnested-name-specifier識別名
+  このNNSに与えられたNNS識別名
 * `type` -
   typeTableにおいてこのクラス型に与えられたデータ型識別名
 
@@ -1973,7 +1973,7 @@ enumを表現する。
 属性(必須): `nns`, `type`
 
 * `nns` -
-  このnested-name-specifierに与えられたnested-name-specifier識別名
+  このNNSに与えられたNNS識別名
 * `type` -
   typeTableにおいてこのenum型に与えられたデータ型識別名
 
@@ -1993,7 +1993,7 @@ typedef名を表現する。
 属性(必須): `nns`, `type`
 
 * `nns` -
-  このnested-name-specifierに与えられたnested-name-specifier識別名
+  このNNSに与えられたNNS識別名
 * `type` -
   typeTableにおいてこの型と等価な型に与えられたデータ型識別名
 
