@@ -2003,6 +2003,23 @@ typedef名を表現する。
   typedef名
 
 ## `templateParamTypeNNS`要素 {#sec:nns.templateparam}
+
+型テンプレート仮引数を表現する。
+
+| `<templateParamTypeNNS>`
+| `name`要素
+| `<templateParamTypeNNS>`
+
+属性(必須): `nns`
+
+* `nns` -
+  このNNSに与えられたNNS識別名
+
+以下の子要素を持つ。
+
+* `name`要素 -
+  仮引数名
+
 ## `simpleTemplateIdNNS`要素 {#sec:nns.simpletemplateid}
 ## `decltypeSpecNNS`要素 {#sec:nns.decltype}
 
