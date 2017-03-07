@@ -1781,7 +1781,7 @@ C++のラムダ式を表現する。
 翻訳単位で使われているすべての名前修飾(nested namespace spcifier)についての情報を定義する。
 
 | `<nnsTable>`
-|   [ NNS型定義要素
+|   [ NNS定義要素
 |   … ]
 | `</nnsTable>`
 
