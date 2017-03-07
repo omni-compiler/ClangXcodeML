@@ -1812,8 +1812,8 @@ NNS定義要素には以下の要素がある。
 下記の各要素に適宜挿入される。
 
 * `nnsTable`要素に含まれるもの:
-    * `napespaceNNS`要素(※仮称)
-    * `classNNS`要素(※仮称)
+    * `napespaceNNS`要素
+    * `classNNS`要素
 * `typeTable`要素および`localTypeTable`に含まれるもの:
     * `name`要素
 * `globalSymbols`要素および(`symbols`要素に含まれるもの:
