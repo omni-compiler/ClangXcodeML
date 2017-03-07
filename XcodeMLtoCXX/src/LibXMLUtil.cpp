@@ -45,6 +45,13 @@ xmlNodePtr nth(xmlXPathObjectPtr obj, size_t n) {
   return obj->nodesetval->nodeTab[n];
 }
 
+std::string getProp(xmlNodePtr node, const std::string& attr) {
+  if (!xmlHasProp(node, BAD_CAST attr.c_str())) {
+    throw std::runtime_error(attr + " not found");
+  }
+  return XMLString(xmlGetProp(node, BAD_CAST attr.c_str()));
+}
+
 bool isTrueProp(xmlNodePtr node, const char* name, bool default_value) {
   if (!xmlHasProp(node, BAD_CAST name)) {
     return default_value;
