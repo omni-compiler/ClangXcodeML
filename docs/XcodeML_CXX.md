@@ -575,7 +575,7 @@ union(共用体)データ型は、`unionType`要素で定義する。
 
 以下の子要素をもつ。
 
-* `inheritedFrom`要素　－　継承元のクラス名のリスト
+* `inheritedFrom`要素　－　基本クラス名のリスト
 * `symbols`要素([-@sec:symb.local]節)　－　
   publicなメンバー関数名およびメンバー変数名のリスト。
   定義されるクラスが基本クラスを持つ場合、
@@ -595,7 +595,7 @@ friend関数の宣言。friend関数はそのクラスのメンバ関数では�
 
 
 ### inheritedFrom要素(C++) {#sec:type.class.inherit}
-継承元のクラスの並びを表現する。
+基本クラスの並びを表現する。
 
 | `<inheritedFrom>`
 |   [ `typeName`要素([-@sec:type.typename]節)
@@ -607,7 +607,7 @@ friend関数の宣言。friend関数はそのクラスのメンバ関数では�
 以下の子要素をもつ。
 
 * `typeName`要素　－　
-  継承するクラスのデータ型識別名を示す。`
+  基本クラスのデータ型識別名を示す。`
   access`属性により、
   `public`, `private`または`protected`の区別を指定できる。
 
