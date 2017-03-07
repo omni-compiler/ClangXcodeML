@@ -1,4 +1,5 @@
 #include <functional>
+#include <iostream>
 #include <sstream>
 #include <memory>
 #include <map>
@@ -17,12 +18,11 @@
 #include "TypeAnalyzer.h"
 #include "SourceInfo.h"
 #include "CodeBuilder.h"
+#include "ClangClassHandler.h"
 #include "SymbolBuilder.h"
 #include "LibXMLUtil.h"
 
 namespace cxxgen = CXXCodeGen;
-
-using CodeBuilder = XMLWalker<SourceInfo&, cxxgen::Stream&>;
 
 /*!
  * \brief Traverse XcodeML node and make SymbolEntry.
@@ -37,6 +37,7 @@ SymbolEntry parseSymbols(xmlNodePtr node, xmlXPathContextPtr ctxt) {
   for (auto idElem : idElems) {
     xmlNodePtr nameElem = findFirst(idElem, "name", ctxt);
     XMLString type(xmlGetProp(idElem, BAD_CAST "type"));
+    assert(length(type) != 0);
     XMLString name(xmlNodeGetContent(nameElem));
     if (!static_cast<std::string>(name).empty()) {
       // Ignore unnamed parameters such as <name type="int"/>
@@ -80,10 +81,17 @@ SymbolMap parseGlobalSymbols(
   xmlXPathObjectPtr xpathObj = xmlXPathEvalExpression(
       BAD_CAST "/XcodeProgram/globalSymbols",
       xpathCtx);
-  if (xpathObj == nullptr) {
+  if (xpathObj == nullptr
+      || !xmlXPathCastNodeSetToBoolean(xpathObj->nodesetval)) {
+    std::cerr
+      << "Warning: This document does not have globalSymbols element"
+      << std::endl;
     return SymbolMap();
   }
-  assert(xpathObj->nodesetval->nodeTab[0]);
+  assert(xpathObj
+      && xpathObj->nodesetval
+      && xpathObj->nodesetval->nodeTab
+      && xpathObj->nodesetval->nodeTab[0]);
   auto initialEntry(parseSymbols(xpathObj->nodesetval->nodeTab[0], xpathCtx));
   return {initialEntry};
 }
@@ -242,6 +250,10 @@ DEFINE_CB(outputParams) {
     alreadyPrinted = true;
   }
   ss << ")";
+}
+
+DEFINE_CB(clangStmtProc) {
+  ClangStmtHandler.walk(node, w, src, ss);
 }
 
 DEFINE_CB(emitClassDefinition) {
@@ -446,6 +458,8 @@ DEFINE_CB(varDeclProc) {
 }
 
 const CodeBuilder CXXBuilder({
+  //{ "clangStmt", clangStmtProc },
+
   { "typeTable", NullProc },
   { "functionDefinition", functionDefinitionProc },
   { "functionDecl", functionDeclProc },
@@ -472,6 +486,7 @@ const CodeBuilder CXXBuilder({
   { "mulExpr", showBinOp(" * ") },
   { "divExpr", showBinOp(" / ") },
   { "modExpr", showBinOp(" % ") },
+  { "logEQExpr", showBinOp(" == ")},
   { "unaryMinusExpr", showUnaryOp("-") },
   { "binNotExpr", showUnaryOp("~") },
   { "logNotExpr", showUnaryOp("!") },
@@ -504,20 +519,6 @@ void buildCode(
     parseTypeTable(rootNode, ctxt, ss),
     parseGlobalSymbols(rootNode, ctxt, ss)
   };
-
-
-  // emit forward declarations
-  ss << "// forward declarations" << std::endl;
-  const std::vector<std::string> &typeNames = src.typeTable.getKeys();
-  for (auto t : typeNames) {
-    XcodeMl::TypeRef ref = src.typeTable[t];
-    if (ref) {
-      ss << "// " << ref << ":" << ref->makeDeclaration("X", src.typeTable) << std::endl;
-    } else {
-      ss << "// null ref" << std::endl;
-    }
-  }
-  ss << "// end of forward declarations" << std::endl << std::endl;
 
   cxxgen::Stream out;
   xmlNodePtr globalSymbols = findFirst(rootNode, "/XcodeProgram/globalSymbols", src.ctxt);

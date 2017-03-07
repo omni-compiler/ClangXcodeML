@@ -1,6 +1,6 @@
 #include "XMLVisitorBase.h"
 
-#include "TypeTableVisitor.h"
+#include "TypeTableInfo.h"
 #include "DeclarationsVisitor.h"
 
 #include "clang/AST/ASTConsumer.h"
@@ -11,7 +11,6 @@
 #include "clang/Driver/Options.h"
 #include "llvm/Option/OptTable.h"
 #include "llvm/Support/Signals.h"
-#include "DumpTypeTable.h"
 
 #include <libxml/xmlsave.h>
 #include <time.h>
@@ -25,12 +24,6 @@ using namespace llvm;
 static cl::extrahelp CommonHelp(CommonOptionsParser::HelpMessage);
 static std::unique_ptr<opt::OptTable> Options(createDriverOptTable());
 
-static cl::opt<bool>
-OptDumpTypeMap(
-    "dump-typemap",
-    cl::desc("dump correspondence between type and data type identifier"),
-    cl::cat(CXX2XMLCategory));
-
 class XMLASTConsumer : public ASTConsumer {
     xmlNodePtr rootNode;
 
@@ -43,11 +36,9 @@ public:
         InheritanceInfo *II = &inheritanceinfo;
         TypeTableInfo typetableinfo(MC, II);
         TypeTableInfo *TTI = &typetableinfo;
-        TypeTableVisitor TTV(MC, rootNode, "typeTable", TTI);
         DeclarationsVisitor DV(MC, rootNode, "clangAST", TTI);
         Decl *D = CXT.getTranslationUnitDecl();
 
-        TTV.TraverseDecl(D);
         DV.TraverseDecl(D);
     }
 #if 0
@@ -113,9 +104,7 @@ int main(int argc, const char **argv) {
     Tool.appendArgumentsAdjuster(clang::tooling::getClangSyntaxOnlyAdjuster());
 
     std::unique_ptr<FrontendActionFactory> FrontendFactory =
-      OptDumpTypeMap ?
-          newFrontendActionFactory<TypeTableDumpAction>()
-        : newFrontendActionFactory<XMLASTDumpAction>();
+      newFrontendActionFactory<XMLASTDumpAction>();
     return Tool.run(FrontendFactory.get());
 }
 

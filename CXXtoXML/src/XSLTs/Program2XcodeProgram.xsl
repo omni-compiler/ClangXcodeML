@@ -26,6 +26,9 @@
             <xsl:value-of select=
               "clangDeclarationNameInfo[@class='Identifier']" />
           </name>
+
+          <xsl:apply-templates select="params" />
+
           <body>
             <xsl:apply-templates select="clangStmt" />
           </body>
@@ -47,9 +50,7 @@
     <varDecl>
       <xsl:apply-templates select="@*" />
       <name>
-        <xsl:attribute name="fullName">
-          <xsl:value-of select="fullName" />
-        </xsl:attribute>
+        <xsl:value-of select="fullName" />
       </name>
       <xsl:if test="@has_init = 1">
         <value>
@@ -75,9 +76,9 @@
   </xsl:template>
 
   <xsl:template match="clangStmt[@class='ReturnStmt']">
-    <returnStmt>
+    <returnStatement>
       <xsl:apply-templates />
-    </returnStmt>
+    </returnStatement>
   </xsl:template>
 
   <xsl:template match="clangStmt[@class='WhileStmt']">
@@ -99,6 +100,10 @@
     </compoundStatement>
   </xsl:template>
 
+  <xsl:template match="clangStmt[@class='DeclStmt']">
+    <xsl:apply-templates select="*[1]" />
+  </xsl:template>
+
   <xsl:template match="clangStmt[
     (@class='BinaryOperator' or @class='CompoundAssignOperator')
     and @binOpName]">
@@ -109,6 +114,24 @@
     </xsl:element>
   </xsl:template>
 
+  <xsl:template match="clangStmt[@class='CallExpr']">
+    <functionCall>
+      <xsl:apply-templates select="@*" />
+      <function>
+        <xsl:apply-templates select="*[1]" />
+      </function>
+      <arguments>
+        <xsl:apply-templates select="*[position() &gt; 1]" />
+      </arguments>
+    </functionCall>
+  </xsl:template>
+
+  <xsl:template match="clangDeclarationNameInfo[@class='Identifier']">
+    <Var>
+      <xsl:value-of select="." />
+    </Var>
+  </xsl:template>
+
   <xsl:template match="clangStmt[
     @class='UnaryOperator' and @unaryOpName]">
     <xsl:element name="{@unaryOpName}">
@@ -116,11 +139,46 @@
     </xsl:element>
   </xsl:template>
 
+  <xsl:template match="clangStmt[@class='ImplicitCastExpr']">
+    <implicitCastExpr>
+      <xsl:apply-templates select="@*" />
+      <xsl:apply-templates select="*[1]" />
+    </implicitCastExpr>
+  </xsl:template>
+
+  <xsl:template match="clangStmt[@class='CharacterLiteral']">
+    <intConstant>
+      <xsl:apply-templates select="@*" />
+      <xsl:value-of select="@hexadecimalNotation" />
+    </intConstant>
+  </xsl:template>
+
   <xsl:template match="clangStmt[@class='IntegerLiteral']">
     <intConstant>
       <xsl:apply-templates select="@*" />
       <xsl:value-of select="@decimalNotation" />
     </intConstant>
+  </xsl:template>
+
+  <xsl:template match="clangStmt[@class='StringLiteral']">
+    <stringConstant>
+      <xsl:apply-templates select="@*" />
+      <xsl:value-of select="@stringLiteral" />
+    </stringConstant>
+  </xsl:template>
+
+  <xsl:template match="clangStmt[@class='CXXThisExpr']">
+    <thisExpr />
+  </xsl:template>
+
+  <xsl:template match="clangStmt[@class='MemberExpr']">
+    <memberRef>
+      <xsl:apply-templates select="@*" />
+      <xsl:attribute name="member">
+        <xsl:value-of select="clangDeclarationNameInfo[@class='Identifier']" />
+      </xsl:attribute>
+      <xsl:apply-templates select="*[2]" />
+    </memberRef>
   </xsl:template>
 
   <xsl:template match="@valueCategory">
@@ -133,6 +191,12 @@
           <xsl:text>rvalue</xsl:text>
         </xsl:otherwise>
       </xsl:choose>
+    </xsl:attribute>
+  </xsl:template>
+
+  <xsl:template match="@xcodemlType">
+    <xsl:attribute name="type">
+      <xsl:value-of select="." />
     </xsl:attribute>
   </xsl:template>
 
