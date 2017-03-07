@@ -144,15 +144,12 @@ XcodeMLの設計方針は、XcodeMLで表現されたプログラムを入力に
     * `name`要素
     * `operator`要素
     * `Var`要素
-    * `varAddr`要素
     * `function`要素
     * `funcAddr`要素
     * `arrayRef`要素
     * `arrayAddr`要素
     * `memberRef`要素
-    * `memberAddr`要素
     * `memberArrayRef`要素
-    * `memberArrayAddr`要素
 
 例:
 
@@ -341,34 +338,10 @@ int型配列の初期値 `{ 1, 2 }` に対応する表現は次のとおりに�
 * `is_volatile`　－　そのデータ型がvolatile修飾子をもつかどうか
 * `is_restrict`　－　そのデータ型がrestrict修飾子をもつかどうか
 * `is_static`　－　そのデータ型がstatic属性をもつかどうか
-* `reference`(C++)　—　属性値がlvalueのとき左辺値参照、rvalueのとき右辺値参照を意味する。属性値が`default`または属性が省略されているとき文脈依存であることを意味するが、`lvalue`または`rvalue`の値をもつことが望ましい。引数の値渡し(通常の場合)に対しては、`defalut`とする。
 * `access`(C++)　－　アクセス指定子に対応。"`private`", "`protected`"または"`public`"
 * `is_virtual`(C++)　—　そのメンバ関数がvirtual属性をもつかどうか。
 
 "`is_`"　で始まる属性の値には、真を意味する`1`と`true`、および、偽を意味する`0`と`false`が許される。属性が省略されたとき、偽を意味する。
-
-例: 左辺値参照と右辺値参照
-
-以下の参照(左辺値参照)の宣言があるとき、
-
-    int& n_alias = n_org;
-
-変数`n_alias`のデータ型識別要素は以下のようになる。
-
-    <basicType type="B0" name="int" reference="lvalue"/>
-
-以下のコンストラクタ(ムーブコンストラクタ)の定義の引数に現れた右辺値参照について、
-
-    struct Array {
-      int *p, len;
-      Array( Array&& obj ) : p(obj.p), len(obj.len) {
-        obj.p = nullptr;  obj.len = 0;
-      }
-    }
-
-仮引数`obj`のデータ型識別要素は以下のようになる。
-
-    <basicType="B1" name="B2" reference="rvalue"/>
 
 ## `basicType`要素 {#sec:type.basic}
 `basicType` 要素は、他のデータ型識別要素にデータ型定義要素属性を加えた、新しいデータ型定義要素を定義する。
@@ -408,18 +381,22 @@ int型配列の初期値 `{ 1, 2 }` に対応する表現は次のとおりに�
 	  <pointerType type="P0" is_volatile="1" ref="B0"/>
 
 ## `pointerType`要素 {#sec:type.ptr}
-`pointerType`要素はポインタのデータ型を定義する。
+`pointerType`要素はポインタ型またはリファレンス型を定義する。
 
 | `<pointerType/>`
 
 属性(必須): `type`, `ref`
 
-属性(optional): データ型定義要素属性
+属性(optional): `reference`, データ型定義要素属性
 
 以下の属性を持つ。
 
 * `type`　－　この型に与えられたデータ型識別名
 * `ref`　－　このポインタが指すデータのデータ型識別名
+* `reference`　－　
+  属性が指定されたとき、この型がリファレンス型であることを表す。
+  "`lvalue`"のときlvalueリファレンス型であることを意味し、
+  "`rvalue`"のときrvalueリファレンス型であることを意味する。
 
 `pointerType`要素は、子要素を持たない。
 
@@ -428,6 +405,40 @@ int型配列の初期値 `{ 1, 2 }` に対応する表現は次のとおりに�
 "`int *`" に対応するデータ型定義は以下のようになる。
 
 	<pointerType type="P0123" ref="int"/>
+
+例:
+
+    const int& x = 0;
+
+は以下のXcodeMLに変換される。
+`basicType`要素によって、"`const int`"を意味するデータ型識別名`B0`が定義されている。
+
+    <basicType type="B0" is_const="1" name="int"/>
+    <pointerType type="P0124" ref="B0" reference="lvalue" />
+
+例:
+
+以下の(lvalue)リファレンスの宣言があるとき、
+
+    int& n_alias = n_org;
+
+変数`n_alias`のデータ型識別要素は以下のようになる。
+
+    <pointerType type="P0" ref="int" reference="lvalue"/>
+
+以下のコンストラクタ(ムーブコンストラクタ)の定義の引数に現れたrvalueリファレンスについて、
+
+    struct Array {
+      int *p, len;
+      Array( Array&& obj ) : p(obj.p), len(obj.len) {
+        obj.p = nullptr;  obj.len = 0;
+      }
+    }
+
+仮引数`obj`のデータ型識別要素は以下のようになる。
+ここで"`S0`"は"`Array`"に対応するデータ型識別名として定義されている。
+
+    <pointerType type="B2" ref="S0" reference="rvalue"/>
 
 ## `functionType`要素 {#sec:type.func}
 `funtionType`要素は、関数型を定義する。
@@ -910,6 +921,8 @@ enum型は、`enumType`要素で定義する。`type`要素で、メンバの識
 ## `varDecl`要素 {#sec:decl.var}
 変数の宣言を行う。
 
+リファレンス型でない変数の宣言に対応する`varDecl`要素は次の形式に従う。
+
 | `<varDecl>`
 |   `name`要素
 |   [ `value`要素([-@sec:program.value]節) ]
@@ -933,6 +946,53 @@ enum型は、`enumType`要素で定義する。`type`要素で、メンバの識
           <intConstant type="int">2</intConstant>
         </value>
       </varDecl>
+
+リファレンス型変数の宣言に対応する`varDecl`要素は次の形式に従う。
+
+| `<varDecl>`
+|   `name`要素
+|   `value`要素([-@sec:program.value]節)
+| `</varDecl>`
+
+属性なし
+
+変数宣言を行う識別子の名前を`name`要素で指定する。 以下の子要素を持つ。
+
+* `name`要素　－　
+  宣言する変数に対する`name`要素を持つ。
+* `value`要素　－　
+  初期化式を表現する。ここで、`value`要素は次の形式に従う。
+
+    |   `<value>`
+    |     `<addrOfExpr` `is_expedient=` `"1"` または `"true">`
+    |       式の要素
+    |     `</addrOfExpr>`
+    |   `</value>`
+
+    `value`要素の子要素である`addrOfExpr`要素の`is_expedient`属性値は"1"または"true"でなければならない。
+    その他にデータ型定義要素属性をもってもよい。
+
+例:
+
+    int x = 0;
+    int& rx = x;
+
+    <varDecl>
+      <name>x</name>
+      <value>
+        <intConstant type="int">0</intConstant>
+      </value>
+    </varDecl>
+    <varDecl>
+      <name>rx</name>
+      <value>
+        <addrOfExpr type="R1" is_expedient="true">
+          <Var type="int">x</Var>
+        </addrOfExpr>
+      </value>
+    </varDecl>
+
+ここで`R1`は"`int&`"に対応するデータ型識別名として定義されている。
 
 ## `functionDecl`要素 {#sec:decl.func}
 関数宣言を行う。
@@ -1307,41 +1367,39 @@ switch文のdefaultラベルを表す。`switch`要素の中の`body`要素の�
 
 備考:`longlongConstant`だけ特別扱いするのは不自然。素直に10進数表記で表現する形にしたい。
 
-## 変数参照の要素(`Var`要素、`varAddr`要素、`arrayAddr`要素) {#sec:expr.var}
-変数名への参照を表現する。それぞれ、`v`, `&v`, `a`に対応する(`v`は配列以外の変数、`a`は配列変数)。
+## `Var`要素 {#sec:expr.var}
+
+配列以外の変数への参照を表現する。
 
 | `<Var>`変数名`</Var>`
-| `<varAddr>`変数名`</varAddr>`
-| `<arrayAddr>`配列変数名`</arrayAddr>`
 
 属性(必須): `type`, `scope`
-
-* `Var`要素　－　配列以外の変数を参照する式。内容に変数名を指定する。
-* `varAddr`要素　－　配列以外の変数のアドレスを参照する式。内容に変数名を指定する。
-* `arrayAddr`要素　－　配列の先頭アドレスを参照する式。内容に配列変数名を指定する。
 
 `scope`属性をつかって、局所変数を区別する。
 
 * `scope`属性　－　"`local`", "`global`", "`param`"のいずれか
 
+## `addrOfExpr` 要素 {#sec:expr.addrof}
+
+式へのアドレス参照を表現する。
+
+| `<addrOfExpr>`
+|   式の要素
+| `</addrOfExpr>`
+
+属性(必須): `type`
+
+## `arrayAddr`要素 {#sec:expr.arrayaddr}
+
+配列型変数への参照を表現する。
+
+| `<arrayAddr>`配列変数名`</arrayAddr>`
+
 例:
 
-`n`がint型のとき、`n`のアドレスの参照 `&n` は、
+`a`がint型の配列のとき、`a`の参照は、
 
-    <varAddr type="P0" scope="local">n</varAddr>
-
-と表現される。ここで`P0`は、`typeTable`の中で
-
-    <pointerType type="P0" ref="int"/>
-
-
-などと宣言されている。
-
-例:
-
-`a`がint型の配列のとき、`a`の参照、すなわち`a[0]`のアドレスの参照は、
-
-    <arrayAddr type="A5" scope="local">a</varAddr>
+    <arrayAddr type="A5" scope="local">a</arrayAddr>
 
 と表現される。ここで`A5`は、`typeTable`の中で
 
@@ -1351,16 +1409,26 @@ switch文のdefaultラベルを表す。`switch`要素の中の`body`要素の�
 
 備考:
 
-`a`が配列のとき、2015年10月現在のF\_Frontでは `&a` の参照を`a`の参照と同様`arrayAddr`で表現している。これに関連してOmni XMPでは型の不一致によるエラーが出ている(バグレポート439)。
+`a`が配列のとき、2015年10月現在のF\_Frontでは `&a` の参照を`a`の参照と同様`arrayAddr`で表現している。
+これに関連してOmni XMPでは型の不一致によるエラーが出ている(バグレポート439)。
 
 ## `pointerRef`要素 {#sec:expr.pointer}
-式(ポインタ型)の指示先を表現する。
+式(ポインタ型またはリファレンス型)の指示先を表現する。
 
 | `<pointerRef>`
 |   式の参照
 | `</pointerRef>`
 
 属性(必須): `type`
+
+属性(optional): `is_expedient`
+
+pointerRef要素は次の属性を持つことができる。
+
+* `is_expedient`属性　－　
+  "`1`"または"`true`"のとき、式がリファレンスであることを表す。
+  "`0`"または"`false`"のとき、式がポインタであることを表す。
+  省略時の値は"`false`"である。
 
 例:
 
@@ -1412,40 +1480,51 @@ switch文のdefaultラベルを表す。`switch`要素の中の`body`要素の�
 
 のように表現される。ここで`P232`はint型へのポインタと宣言されている。後者は`arrayAddr`要素でないことに注意されたい。
 
-## メンバの参照の要素(C++拡張) {#sec:expr.member}
-構造型、クラス、または共用型のオブジェクトを`s`とするとき、`s`のメンバ`m`への参照`s.m`、`s`のメンバ`m`のアドレスの参照`&s.m`、`s`のメンバ配列`a`の要素への参照`s.a[i]`、および、`s`のメンバ配列`a`の要素のアドレスの参照`&s.a[i]`を、それぞれ以下のように表現する。
+## `memberRef`要素(C++拡張) {#sec:expr.memberref}
 
-| `<memberRef>` or `<memberAddr>` or `<memberArrayRef>` or `<memberArrayAddr>`
+構造型、クラス、または共用型のオブジェクトがもつ配列以外のメンバへの参照を表現する。
+
+| `<memberRef>`
 | 　　式の要素
-| `</memberRef>` or `</memberAddr>` or `</memberArrayRef>` or `</memberArrayAddr>`
+| `</memberRef>`
 
 属性(必須): `type`, `member`
 
-* `memberRef`　－　配列以外のメンバを参照する。`member`属性にメンバ名を指定し、子要素でオブジェクトのアドレスを表現する。例えば、オブジェクト`s`のint型メンバ`n`への参照 `s.n` について、以下のように表現する。
+* `member`属性　－　
+  参照するメンバをメンバ名で指定する。
+
+`memberRef`要素は、子要素としてオブジェクトを表現する式の要素をもつ。
+
+例:
+
+オブジェクト`s`のint型メンバ`n`への参照 `s.n` について、以下のように表現する。
 
         <memberRef type="int" member="n">
             <varAddr type="P0" scope="local">s</varAddr>
         </memberRef>
 
-* `memberAddr`　－　配列名以外のメンバのアドレスを参照する。`member`属性にメンバ名を指定し、子要素でオブジェクトのアドレスを表現する。例えば、オブジェクト`s`のint型メンバ`n`のアドレス `&s.n` について、以下のように表現する。
+## `memberArrayRef`要素(C++拡張) {#sec:expr.memberarrayref}
 
-        <memberAddr type="int" member="n">
-          <varAddr type="P6" scope="local">s</varAddr>
-        </memberAddr>
+構造型、クラス、または共用型のオブジェクトがもつ配列型のメンバへの参照を表現する。
 
-* `memberArrayRef`　－　オブジェクトの配列メンバを参照する。`member`属性にメンバ名を指定し、子要素でオブジェクトのアドレスを表現する。例えば、オブジェクト`s`のint型配列メンバ`a`への参照 `s.a` について、以下のように表現する。
+| `<memberArrayRef>`
+| 　　式の要素
+| `</memberArrayRef>`
+
+属性(必須): `type`, `member`
+
+* `member`属性　－　
+  参照するメンバをメンバ名で指定する。
+
+`memberArrayRef`要素は、子要素としてオブジェクトを表現する式の要素をもつ。
+
+例:
+
+オブジェクト`s`のint型配列メンバ`a`への参照 `s.a` について、以下のように表現する。
 
         <memberArrayRef type="A0" member="a">
           <varAddr type="P1" scope="local">s</varAddr>
         </memberArrayRef>
-
-* `memberArrayAddr`　－　オブジェクトの配列メンバのアドレスを参照する。`member`属性にメンバ名を指定し、子要素でオブジェクトのアドレスを表現する。例えば、オブジェクト`s`のint型配列メンバ`a`のアドレス `&s.a` について、以下のように表現する。
-
-        <memberArrayAddr type="P24" member="a">
-          <varAddr type="P7" scope="local">s</varAddr>
-        </memberArrayAddr>
-
-メンバの参照が入れ子になるとき、子要素の表現も入れ子になる。
 
 要検討:構造体まわりの現在のC\_Frontの変換仕様について
 
