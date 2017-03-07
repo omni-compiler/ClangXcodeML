@@ -571,7 +571,7 @@ union(共用体)データ型は、`unionType`要素で定義する。
 
 以下の子要素をもつ。
 
-* `inheritedFrom`要素　－　継承元の構造体またはクラス名のリスト
+* `inheritedFrom`要素　－　継承元のクラス名のリスト
 * `symbols`要素([-@sec:symb.local]節)　－　
   publicなメンバー関数名およびメンバー変数名のリスト。
   定義されるクラスが基本クラスを持つ場合、
@@ -591,7 +591,7 @@ friend関数の宣言。friend関数はそのクラスのメンバ関数では�
 
 
 ### inheritedFrom要素(C++) {#sec:type.class.inherit}
-継承元の構造体またはクラスの並びを表現する。
+継承元のクラスの並びを表現する。
 
 | `<inheritedFrom>`
 |   [ `typeName`要素([-@sec:type.typename]節)
@@ -602,7 +602,10 @@ friend関数の宣言。friend関数はそのクラスのメンバ関数では�
 
 以下の子要素をもつ。
 
-* `typeName`要素　－　継承する構造体またはクラスのデータ型識別名を示す。`access`属性により、`public`, `private`または`protected`の区別を指定できる。
+* `typeName`要素　－　
+  継承するクラスのデータ型識別名を示す。`
+  access`属性により、
+  `public`, `private`または`protected`の区別を指定できる。
 
 ## `enumType`要素 {#sec:type.enum}
 enum型は、`enumType`要素で定義する。`type`要素で、メンバの識別子を指定する。
