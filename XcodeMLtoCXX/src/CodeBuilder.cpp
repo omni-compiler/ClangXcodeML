@@ -69,7 +69,7 @@ std::string findSymbolType(const SymbolMap& table, const std::string& name) {
       return result->second;
     }
   }
-  throw std::runtime_error(name + " not found");
+  throw std::runtime_error(name + " not found in SymbolMap");
 }
 
 /*!
