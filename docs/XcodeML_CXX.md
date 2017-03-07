@@ -1792,15 +1792,15 @@ C++のラムダ式を表現する。
 NNSを定義するNNS定義要素の列からなる。
 NNS定義要素には以下の要素がある。
 
-* `globalName`要素
-* `namespaceName`要素
-* `unnamedNamespaceName`要素
-* `className`要素
-* `enumName`要素
-* `typedefTypeName`要素
-* `templateParamTypeName`要素
-* `simpleTemplateIdName`要素
-* `decltypeSpecName`要素
+* `globalNNS`要素
+* `namespaceNNS`要素
+* `unnamedNamespaceNNS`要素
+* `classNNS`要素
+* `enumNNS`要素
+* `typedefTypeNNS`要素
+* `templateParamTypeNNS`要素
+* `simpleTemplateIdNNS`要素
+* `decltypeSpecNNS`要素
 
 ## `nns`属性 {#sec:nns.attr}
 
@@ -1812,7 +1812,7 @@ NNS定義要素には以下の要素がある。
 下記の各要素に適宜挿入される。
 
 * `nnsTable`要素に含まれるもの:
-    * `napespaceName`要素(※仮称)
+    * `napespaceNNS`要素(※仮称)
     * `classname`要素(※仮称)
 * `typeTable`要素および`localTypeTable`に含まれるもの:
     * `name`要素
@@ -1851,7 +1851,7 @@ NNS定義要素には以下の要素がある。
 
     <nnsTable>
       <nestedNameSpecifier nns="Q0">
-        <namespaceName nns="global">NS</namespace>
+        <namespaceNNS nns="global">NS</namespace>
       </nestedNameSpecifier>
     </nnsTable>
 
@@ -1891,14 +1891,14 @@ NNS定義要素には以下の要素がある。
         <varAddr type="P4" scope="global">s1</varAddr>
     </memberAddr>
 
-## `namespaceName`要素 {#sec:nns.namespace}
+## `namespaceNNS`要素 {#sec:nns.namespace}
 
 無名でない名前空間を表現する。
 
-| `<namespaceName>`
+| `<namespaceNNS>`
 |   `name`要素
 |   `attributes`要素
-| `</namespaceName>`
+| `</namespaceNNS>`
 
 属性(必須): `nns`
 
@@ -1918,13 +1918,13 @@ NNS定義要素には以下の要素がある。
 * `attributes`要素 -
   アトリビュートの並び
 
-## `unnamedNamespaceName`要素 {#sec:nns.unnamednamespace}
+## `unnamedNamespaceNNS`要素 {#sec:nns.unnamednamespace}
 
 無名名前空間を表現する。
 
-| `<unnamedNamespaceName>`
+| `<unnamedNamespaceNNS>`
 |   `attributes`要素
-| `</unnamedNamespaceName>`
+| `</unnamedNamespaceNNS>`
 
 属性(必須): `nns`
 
@@ -1942,13 +1942,13 @@ NNS定義要素には以下の要素がある。
 * `attributes`要素 -
   アトリビュートの並び
 
-## `className`要素 {#sec:nns.class}
+## `classNNS`要素 {#sec:nns.class}
 
 クラスを表現する。
 
-| `<className>`
+| `<classNNS>`
 |   `name`要素
-| `</className>`
+| `</classNNS>`
 
 属性(必須): `nns`, `type`
 
@@ -1962,13 +1962,13 @@ NNS定義要素には以下の要素がある。
 * `name`要素 -
   クラス名
 
-## `enumName`要素 {#sec:nns.enum}
+## `enumNNS`要素 {#sec:nns.enum}
 
 enumを表現する。
 
-| `<enumName>`
+| `<enumNNS>`
 |   `name`要素
-| `</enumName>`
+| `</enumNNS>`
 
 属性(必須): `nns`, `type`
 
@@ -1982,13 +1982,13 @@ enumを表現する。
 * `name`要素 -
   enum名
 
-## `typedefTypeName`要素 {#sec:nns.typedef}
+## `typedefTypeNNS`要素 {#sec:nns.typedef}
 
 typedef名を表現する。
 
-| `<typedefTypeName>`
+| `<typedefTypeNNS>`
 |   `name`要素
-| `</typedefTypeName>`
+| `</typedefTypeNNS>`
 
 属性(必須): `nns`, `type`
 
@@ -2002,9 +2002,9 @@ typedef名を表現する。
 * `name`要素 -
   typedef名
 
-## `templateParamTypeName`要素 {#sec:nns.templateparam}
-## `simpleTemplateIdName`要素 {#sec:nns.simpletemplateid}
-## `decltypeSpecName`要素 {#sec:nns.decltype}
+## `templateParamTypeNNS`要素 {#sec:nns.templateparam}
+## `simpleTemplateIdNNS`要素 {#sec:nns.simpletemplateid}
+## `decltypeSpecNNS`要素 {#sec:nns.decltype}
 
 # テンプレート定義要素(C++) {#sec:temp}
 テンプレート定義要素には、以下のものがある。
