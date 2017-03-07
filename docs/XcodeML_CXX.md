@@ -1778,7 +1778,7 @@ C++のラムダ式を表現する。
 
 # `nnsTable`要素とNNS定義要素 {#sec:nns}
 `nnsTable`要素は、翻訳単位([-@sec:program]章)に対して一つだけ存在し、
-翻訳単位で使われているすべての名前修飾(nested namespace spcifier)についての情報を定義する。
+翻訳単位で使われているすべての名前修飾についての情報を定義する。
 
 | `<nnsTable>`
 |   [ NNS定義要素
