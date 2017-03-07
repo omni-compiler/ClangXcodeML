@@ -137,7 +137,10 @@ std::string TypeTableInfo::registerRecordType(QualType T){
   assert(name.empty());
 
   raw_string_ostream OS(name);
-  if (T->isStructureType()) {
+  if (T->getAsCXXRecordDecl()) {
+    OS << "Class" << seqForStructType++;
+    // XXX: temporary implementation
+  } else if (T->isStructureType()) {
     OS << "Struct" << seqForStructType++;
   } else if (T->isUnionType()) {
     OS << "Union" << seqForUnionType++;
