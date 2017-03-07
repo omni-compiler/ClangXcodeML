@@ -2021,6 +2021,32 @@ typedef名を表現する。
   仮引数名
 
 ## `simpleTemplateIdNNS`要素 {#sec:nns.simpletemplateid}
+
+実引数を与えられたクラステンプレートを表現する。
+
+| `<simpleTemplateIdNNS>`
+|   `<template>`
+|     `name`要素
+|   `</template>`
+|   `<arguments>`
+|     [ `name`要素
+|     ... ]
+|   `</arguments>`
+| `</simpleTemplateIdNNS>`
+
+属性(必須): `nns`
+
+* `nns` -
+  このNNSに与えられたNNS識別名
+
+以下の子要素を持つ。
+
+* `template`要素 -
+  テンプレート名
+
+* `arguments` -
+  テンプレート実引数の並び
+
 ## `decltypeSpecNNS`要素 {#sec:nns.decltype}
 
 # テンプレート定義要素(C++) {#sec:temp}
