@@ -1800,7 +1800,6 @@ NNS定義要素には以下の要素がある。
 * `typedefTypeNNS`要素
 * `templateParamTypeNNS`要素
 * `simpleTemplateIdNNS`要素
-* `decltypeSpecNNS`要素
 
 ## `nns`属性 {#sec:nns.attr}
 
@@ -2046,8 +2045,6 @@ typedef名を表現する。
 
 * `arguments` -
   テンプレート実引数の並び
-
-## `decltypeSpecNNS`要素 {#sec:nns.decltype}
 
 # テンプレート定義要素(C++) {#sec:temp}
 テンプレート定義要素には、以下のものがある。
