@@ -591,11 +591,6 @@ union(共用体)データ型は、`unionType`要素で定義する。
 メンバのビットフィールドは、`id`要素の `bit_field` 属性または `id`要素の子要素 である`bitField`要素に記述する([-@sec:symb.id]節)。
 構造体またはメンバの名前は、同じ`type`属性をもつ`id`要素で指定する。typedef文またはusing文で指定された別名もまた、同じ`type`属性をもつ`id`要素で指定する。
 
-要検討:
-
-friend関数の宣言。friend関数はそのクラスのメンバ関数ではない。
-
-
 
 ### inheritedFrom要素(C++) {#sec:type.class.inherit}
 基本クラスの並びを表現する。
