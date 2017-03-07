@@ -567,7 +567,11 @@ union(共用体)データ型は、`unionType`要素で定義する。
 
 属性(必須): `type`
 
-属性(optional): `lineno`, `file`, `inherited`, データ型定義要素属性
+属性(optional):
+  `lineno`,
+  `file`,
+  `inheritedFrom`,
+  データ型定義要素属性
 
 以下の子要素をもつ。
 
