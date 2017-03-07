@@ -175,7 +175,7 @@ int型配列の初期値 `{ 1, 2 }` に対応する表現は次のとおりに�
 * `functionType`要素([-@sec:type.func]節)
 * `arrayType`要素([-@sec:type.array]節)
 * `unionType`要素([-@sec:type.union]節)
-* `structType`要素と`class`要素([-@sec:type.struct]節)
+* `structType`要素と`classType`要素([-@sec:type.struct]節)
 * `enumType`要素([-@sec:type.enum]節)
 * `typeInstance`要素([-@sec:temp.funcinstance]節)
 * `classTemplate`要素([-@sec:temp.class]節)
@@ -487,13 +487,13 @@ union(共用体)データ型は、`unionType`要素で定義する。
 
 
 
-## `class`要素(C++) {#sec:type.class}
+## `classType`要素(C++) {#sec:type.class}
 クラスを表現する。
 
-| `<class>`
+| `<classType>`
 | 　 [ `inheritedFrom`要素([-@sec:type.class.inherit]) ]
 |   `symbols`要素([-@sec:symb.local]節)
-| `</class>`
+| `</classType>`
 
 属性(必須): `type`
 
@@ -623,9 +623,9 @@ enum型は、`enumType`要素で定義する。`type`要素で、メンバの識
     【要検討】storage class specifier以外のdecl-specifierである `friend`, `constexpr`もここで表現するか？
 
 * `type`属性　－　識別子のデータ型識別名
-* `bit_field`属性　－　`structType`、`unionType`と`class`要素においてメンバのビットフィールドを数値で指定する。
+* `bit_field`属性　－　`structType`、`unionType`と`classType`要素においてメンバのビットフィールドを数値で指定する。
 * `is_thread_local`属性　－　thread\_local指定されていることを表す。
-* `align_as`属性　－　`structType`、`unionType`と`class`要素において、メンバのalignmentを数値またはデータ型識別名で指定する。
+* `align_as`属性　－　`structType`、`unionType`と`classType`要素において、メンバのalignmentを数値またはデータ型識別名で指定する。
 * `is_gccThread`属性　－　GCCの`__thread`キーワードが指定されているかどうかの情報、`0`または`1`、`false`または`true`。
 * `is_gccExtension`属性
 
@@ -635,8 +635,8 @@ enum型は、`enumType`要素で定義する。`type`要素で、メンバの識
 
     要検討: 実装時に再検討。何もかも`value`要素にするのがよいか？
 
-* `bitField`要素　－　`unionType`と`class`要素においてメンバのビットフィールドの値を`bit_field`属性の数値として指定できないとき使用する。`bitField`要素は式を子要素に持つ。`bitField`要素を使用するとき、`bit_field` 属性の値は、"`*`" とする。
-* `alignAs`要素　—　`structType`、`unionType`と`class`要素においてメンバのalignmentを`align_as`属性の数値として指定できないとき、`alignAs`要素の子要素として式の要素で指定する。
+* `bitField`要素　－　`unionType`と`classType`要素においてメンバのビットフィールドの値を`bit_field`属性の数値として指定できないとき使用する。`bitField`要素は式を子要素に持つ。`bitField`要素を使用するとき、`bit_field` 属性の値は、"`*`" とする。
+* `alignAs`要素　—　`structType`、`unionType`と`classType`要素においてメンバのalignmentを`align_as`属性の数値として指定できないとき、`alignAs`要素の子要素として式の要素で指定する。
 
 例:
 
@@ -702,7 +702,7 @@ enum型は、`enumType`要素で定義する。`type`要素で、メンバの識
 * `text`要素　－　ディレクティブなど任意のテキストを表す
 
 ## `declarations`要素 {#sec:decl.local}
-`compoundStatement`([-@sec:stmt.comp]節)、`class`([-@sec:type.class]節)などをスコープとする変数、関数などの宣言と定義を行う。
+`compoundStatement`([-@sec:stmt.comp]節)、`classType`([-@sec:type.class]節)などをスコープとする変数、関数などの宣言と定義を行う。
 
 | `<declarations>`
 |   [ {`varDecl`要素([-@sec:decl.var]節)　or
@@ -2169,7 +2169,7 @@ typedef名を表現する。
 | `<classTemplate>`
 |   `symbols`要素([-@sec:symb.local]節)
 |   `typeParams`要素([-@sec:type.typeparams]節)
-|   `class`要素([-@sec:type.class]節)
+|   `classType`要素([-@sec:type.class]節)
 | `</classTemplate>`
 
 
@@ -2179,7 +2179,7 @@ typedef名を表現する。
 
 * `symbols`要素　—　型仮引数に関する`id`要素を子要素として持つ。
 * `typeParams`要素　—　子要素として`typeName`要素の並びを持つ。
-* `structType`要素または`class`要素　—　構造体またはクラスの定義
+* `structType`要素または`classType`要素　—　構造体またはクラスの定義
 
 例:
 
