@@ -296,6 +296,12 @@ void TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
       }
       rawname = registerPointerType(T);
       Node = createNode(T, "pointerType", nullptr);
+      xmlNewProp(
+          Node,
+          BAD_CAST "reference",
+          T->getTypeClass() == Type::LValueReference ?
+              BAD_CAST "lvalue"
+            : BAD_CAST "rvalue");
       if (RT) {
         xmlNewProp(
             Node,
