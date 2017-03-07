@@ -31,7 +31,7 @@ bool operator==(const XMLString lhs, const XMLString rhs) {
 }
 
 size_t length(XMLString str) {
-  return static_cast<size_t>(xmlStrlen(str.c_ptr()));
+  return static_cast<std::string>(str).length();
 }
 
 std::ostream& operator<<(std::ostream& os, const XMLString& str) {
