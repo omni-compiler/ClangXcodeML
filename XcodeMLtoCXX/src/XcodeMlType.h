@@ -98,6 +98,8 @@ public:
 protected:
   Function(const Function&);
 private:
+  bool isParamListEmpty() const;
+
   DataTypeIdent returnValue;
   Params params;
 };

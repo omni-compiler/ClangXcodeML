@@ -207,6 +207,15 @@ Function::Function(const Function& other):
   params(other.params)
 {}
 
+bool Function::isParamListEmpty() const {
+  if (params.empty()) {
+    return true;
+  }
+  return
+    params.size() == 1 &&
+    std::get<0>(params.at(0)) == "void";
+}
+
 Array::Array(DataTypeIdent ident, DataTypeIdent elem, Array::Size s):
   Type(TypeKind::Array, ident),
   element(elem),
