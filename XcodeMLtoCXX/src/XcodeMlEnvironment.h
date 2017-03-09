@@ -9,11 +9,13 @@ namespace XcodeMl {
    */
   class Environment {
   public:
+    using ReturnType = TypeRef;
+  public:
     const TypeRef& operator[](const std::string&) const;
     TypeRef& operator[](const std::string&);
     const TypeRef& at(const std::string&) const;
     TypeRef& at(const std::string&);
-    const TypeRef& getReturnType(const std::string&) const;
+    const ReturnType& getReturnType(const std::string&) const;
     void setReturnType(const std::string&, const TypeRef&);
     const std::vector<std::string>& getKeys(void) const;
   private:
@@ -22,7 +24,7 @@ namespace XcodeMl {
       const;
     const TypeRef& at_or_throw(const TypeMap&, const std::string&, const std::string&) const;
     std::map<std::string, TypeRef> map;
-    std::map<std::string, TypeRef> returnMap;
+    std::map<std::string, ReturnType> returnMap;
     std::vector<std::string> keys;
   };
 
