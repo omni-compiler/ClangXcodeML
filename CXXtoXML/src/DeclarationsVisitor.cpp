@@ -213,6 +213,24 @@ DeclarationsVisitor::PreVisitAttr(Attr *A) {
   return true;
 }
 
+static const char*
+getNameKind(NamedDecl* ND) {
+  auto FD = dyn_cast<FunctionDecl>(ND);
+  if (!FD) {
+    return "name";
+  }
+  if (FD->isOverloadedOperator()) {
+    return "operator";
+  }
+  if (isa<CXXConstructorDecl>(FD)) {
+    return "constructor";
+  }
+  if (isa<CXXDestructorDecl>(FD)) {
+    return "constructor";
+  }
+  return "name";
+}
+
 bool
 DeclarationsVisitor::PreVisitDecl(Decl *D) {
   if (!D) {
