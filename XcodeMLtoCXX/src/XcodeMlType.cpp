@@ -196,28 +196,12 @@ CodeFragment Function::makeDeclaration(
 }
 
 CodeFragment Function::makeDeclaration(CodeFragment var, const Environment& env) {
-  std::stringstream ss;
-  auto returnType(env[returnValue]);
-  if (!returnType) {
-    return makeTokenNode("INCOMPLETE_TYPE *") + var;
-  }
-  auto decl = var + makeTokenNode("(");
-  bool alreadyPrinted = false;
+  std::vector<CodeFragment> vec;
   for (auto param : params) {
-    auto paramDTI(std::get<0>(param));
-    auto paramType(env[paramDTI]);
     auto paramName(std::get<1>(param));
-    if (!paramType) {
-      return makeTokenNode( "INCOMPLETE_TYPE *" ) + var;
-    }
-    if (alreadyPrinted) {
-      decl = decl + makeTokenNode(",");
-    }
-    decl = decl + makeDecl(paramType, paramName, env);
-    alreadyPrinted = true;
+    vec.push_back(paramName);
   }
-  decl = decl + makeTokenNode(")");
-  return makeDecl(returnType, decl, env);
+  return makeDeclaration(var, vec, env);
 }
 
 Function::~Function() = default;
