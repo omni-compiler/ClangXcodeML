@@ -290,7 +290,7 @@ DEFINE_CB(functionDefinitionProc) {
   );
   const XMLString name(xmlNodeGetContent(nameElem));
   const XMLString kind(nameElem->name);
-  auto acc =
+  auto nameNode =
     makeTokenNode(
     (kind == "name" || kind == "operator") ?
       name :
@@ -300,23 +300,15 @@ DEFINE_CB(functionDefinitionProc) {
           "<DESTRUCTOR>" :
           throw);
 
-  /*
-   * Traverse parameter list of the functionDefinition element
-   * instead of simply using Function::makeDeclaration(...).
-   */
-  auto head = (handleSymTableStack(outputParams))(w, node, src);
-  if (kind == "constructor" || kind == "destructor") {
-    // Constructor and destructor have no return type.
-    acc = acc + head;
-  } else {
-    const auto fnTypeName = findSymbolType(src.symTable, name);
-    auto returnType = src.typeTable.getReturnType(fnTypeName);
-    acc = acc +
-        makeDecl(
-            returnType,
-            makeTokenNode( "FIXME" ),
-            src.typeTable);
-  }
+  auto fnTypeName = findSymbolType(src.symTable, name);
+  auto fnType = llvm::cast<XcodeMl::Function>(
+      src.typeTable.at(fnTypeName).get());
+  auto acc =
+    fnType->makeDeclaration(
+        nameNode,
+        getParams(node, src),
+        src.typeTable);
+
   acc = acc + makeTokenNode( "{" ) + makeNewLineNode();
   acc = acc + makeInnerNode(w.walkChildren(node, src));
   return acc + makeTokenNode("}");
