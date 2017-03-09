@@ -13,9 +13,11 @@
 
         <!-- C++ class declaration -->
         <xsl:when test="@class = 'CXXRecord'">
+          <!--
           <id>
             <name><xsl:value-of select="name" /></name>
           </id>
+          -->
           <xsl:call-template name="emit-id-lists-in-class" />
         </xsl:when>
 
