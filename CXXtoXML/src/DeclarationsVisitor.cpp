@@ -263,8 +263,12 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
 
   NamedDecl *ND = dyn_cast<NamedDecl>(D);
   if (ND) {
-    addChild("name", ND->getNameAsString().c_str());
+    auto nameNode = addChild("name", ND->getNameAsString().c_str());
     newProp("fullName", ND->getQualifiedNameAsString().c_str());
+    xmlNewProp(
+        nameNode,
+        BAD_CAST "name_kind",
+        BAD_CAST getNameKind(ND));
     if (ND->isLinkageValid()) {
       const auto FL = ND->getFormalLinkage(),
                  LI = ND->getLinkageInternal();
