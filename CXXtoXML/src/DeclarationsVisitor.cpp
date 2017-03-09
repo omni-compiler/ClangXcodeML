@@ -264,7 +264,10 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
   NamedDecl *ND = dyn_cast<NamedDecl>(D);
   if (ND) {
     auto nameNode = addChild("name", ND->getNameAsString().c_str());
-    newProp("fullName", ND->getQualifiedNameAsString().c_str());
+    xmlNewProp(
+        nameNode,
+        BAD_CAST "fullName",
+        BAD_CAST ND->getQualifiedNameAsString().c_str());
     xmlNewProp(
         nameNode,
         BAD_CAST "name_kind",
