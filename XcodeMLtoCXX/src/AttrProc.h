@@ -30,8 +30,9 @@ public:
   {}
 
   ReturnT walk(xmlNodePtr node, T... args) const {
+    std::string getProp(xmlNodePtr, const std::string&);
     assert(node && node->type == XML_ELEMENT_NODE);
-    XMLString prop(xmlGetProp(node, BAD_CAST attr.c_str()));
+    std::string prop(getProp(node, attr));
     auto iter = map.find(prop);
     if (iter != map.end()) {
       return (iter->second)(node, args...);

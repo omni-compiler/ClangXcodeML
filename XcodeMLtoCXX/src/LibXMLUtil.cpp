@@ -56,7 +56,7 @@ bool isTrueProp(xmlNodePtr node, const char* name, bool default_value) {
   if (!xmlHasProp(node, BAD_CAST name)) {
     return default_value;
   }
-  std::string value = static_cast<XMLString>(xmlGetProp(node, BAD_CAST name));
+  const auto value = getProp(node, name);
   if (value == "1" || value == "true") {
     return true;
   } else if (value == "0" || value == "false") {

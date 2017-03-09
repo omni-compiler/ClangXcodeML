@@ -32,7 +32,7 @@ using CXXCodeGen::makeTokenNode;
 #define DEFINE_SA(name) static void name(SA_ARGS)
 
 DEFINE_SA(tagnameProc) {
-  XMLString dataTypeIdent = xmlGetProp(node, BAD_CAST "type");
+  const auto dataTypeIdent = getProp(node, "type");
   auto typeref = map.at(dataTypeIdent); // structType must exists
   auto structType = llvm::cast<XcodeMl::Struct>(typeref.get());
   xmlNodePtr nameNode(findFirst(node, "name", ctxt));
