@@ -34,6 +34,9 @@
             /clangDecl[@class='ParmVar']">
           <id>
             <name>
+              <xsl:attribute name="type">
+                <xsl:value-of select="@xcodemlType" />
+              </xsl:attribute>
               <xsl:value-of select="name" />
             </name>
           </id>
