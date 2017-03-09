@@ -547,8 +547,11 @@ void buildCode(
   xmlNodePtr globalSymbols = findFirst(rootNode, "/XcodeProgram/globalSymbols", src.ctxt);
   buildSymbols(globalSymbols, src)
     ->flush(out);
+
+  xmlNodePtr globalDeclarations =
+    findFirst(rootNode, "/XcodeProgram/globalDeclarations", src.ctxt);
   separateByBlankLines(
-      CXXBuilder.walkAll(rootNode, src))
+      CXXBuilder.walkChildren(globalDeclarations, src))
     ->flush(out);
 
   ss << out.str();
