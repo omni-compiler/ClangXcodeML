@@ -10,7 +10,7 @@
 #include <cassert>
 #include <memory>
 #include <vector>
-#include "CXXCodeGen.h"
+#include "Stream.h"
 #include "StringTree.h"
 #include "XMLString.h"
 #include "Symbol.h"

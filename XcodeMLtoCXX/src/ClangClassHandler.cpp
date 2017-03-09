@@ -8,7 +8,7 @@
 #include <libxml/xpath.h>
 #include "llvm/Support/Casting.h"
 #include "LibXMLUtil.h"
-#include "CXXCodeGen.h"
+#include "Stream.h"
 #include "StringTree.h"
 #include "XMLString.h"
 #include "XMLWalker.h"

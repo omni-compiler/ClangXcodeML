@@ -5,7 +5,7 @@
 #include <tuple>
 #include <utility>
 
-#include "CXXCodeGen.h"
+#include "Stream.h"
 
 namespace cxxgen = CXXCodeGen;
 

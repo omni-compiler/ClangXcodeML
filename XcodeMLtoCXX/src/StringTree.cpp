@@ -4,6 +4,7 @@
 
 #include "llvm/Support/Casting.h"
 
+#include "Stream.h"
 #include "StringTree.h"
 
 namespace CXXCodeGen {
