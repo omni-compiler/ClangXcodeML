@@ -45,6 +45,18 @@
             <xsl:attribute name="type">
               <xsl:value-of select="@xcodemlType" />
             </xsl:attribute>
+
+            <xsl:attribute name="sclass">
+              <xsl:choose>
+                <xsl:when test="@class = 'Function'">
+                  <xsl:text>extern_def</xsl:text>
+                </xsl:when>
+                <xsl:otherwise>
+                  <xsl:text>__unknown__</xsl:text>
+                </xsl:otherwise>
+              </xsl:choose>
+            </xsl:attribute>
+
             <name>
               <xsl:value-of select="name" />
             </name>
@@ -100,7 +112,7 @@
         <xsl:when
             test="(@class = 'Friend')
                   and (clangDecl[@class='Function'])">
-          <id>
+          <id sclass="__friend__">
             <xsl:attribute name="type">
               <xsl:value-of
                 select="clangDecl[@class='Function']/@xcodemlType" />

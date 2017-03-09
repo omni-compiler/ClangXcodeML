@@ -13,6 +13,18 @@
             <xsl:attribute name="type">
               <xsl:value-of select="@xcodemlType" />
             </xsl:attribute>
+
+            <xsl:attribute name="sclass">
+              <xsl:choose>
+                <xsl:when test="@class = 'Var'">
+                  <xsl:text>auto</xsl:text>
+                </xsl:when>
+                <xsl:otherwise>
+                  <xsl:text>__unknown__</xsl:text>
+                </xsl:otherwise>
+              </xsl:choose>
+            </xsl:attribute>
+
             <name>
               <xsl:value-of select="name" />
             </name>
@@ -32,7 +44,7 @@
         <xsl:for-each
           select="TypeLoc[@class='FunctionProto']
             /clangDecl[@class='ParmVar']">
-          <id>
+          <id sclass="param">
             <name>
               <xsl:attribute name="type">
                 <xsl:value-of select="@xcodemlType" />
