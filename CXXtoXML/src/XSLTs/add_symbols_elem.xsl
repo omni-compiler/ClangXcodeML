@@ -25,9 +25,7 @@
               </xsl:choose>
             </xsl:attribute>
 
-            <name>
-              <xsl:value-of select="name" />
-            </name>
+            <xsl:copy-of select="name"/>
           </id>
         </xsl:for-each>
       </symbols>
@@ -46,6 +44,7 @@
             /clangDecl[@class='ParmVar']">
           <id sclass="param">
             <name>
+              <xsl:copy-of select="@*" />
               <xsl:attribute name="type">
                 <xsl:value-of select="@xcodemlType" />
               </xsl:attribute>

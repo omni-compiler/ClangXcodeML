@@ -27,9 +27,7 @@
             <xsl:attribute name="type">
               <xsl:value-of select="@xcodemlTypedefType" />
             </xsl:attribute>
-            <name>
-              <xsl:value-of select="name" />
-            </name>
+            <xsl:copy-of select="name" />
           </id>
         </xsl:when>
 
@@ -57,9 +55,7 @@
               </xsl:choose>
             </xsl:attribute>
 
-            <name>
-              <xsl:value-of select="name" />
-            </name>
+            <xsl:copy-of select="name" />
           </id>
         </xsl:when>
       </xsl:choose>

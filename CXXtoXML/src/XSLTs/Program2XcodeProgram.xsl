@@ -13,10 +13,7 @@
       <symbols>
         <xsl:for-each select="symbols/clangDecl[@class='EnumConstant']" >
           <id>
-            <name>
-              <xsl:apply-templates select="name/@*" />
-              <xsl:value-of select="name" />
-            </name>
+            <xsl:apply-templates select="name" />
           </id>
         </xsl:for-each>
       </symbols>
@@ -38,10 +35,7 @@
       <xsl:when test="clangStmt">
         <functionDefinition>
           <xsl:apply-templates select="@*" />
-          <name>
-            <xsl:value-of select=
-              "clangDeclarationNameInfo[@class='Identifier']" />
-          </name>
+          <xsl:apply-templates select="name" />
 
           <xsl:apply-templates select="params" />
 
@@ -53,10 +47,7 @@
       <xsl:otherwise>
         <functionDecl>
           <xsl:apply-templates select="@*" />
-          <name>
-            <xsl:value-of select=
-              "clangDeclarationNameInfo[@class='Identifier']" />
-          </name>
+          <xsl:apply-templates select="name" />
         </functionDecl>
       </xsl:otherwise>
     </xsl:choose>
@@ -65,9 +56,7 @@
   <xsl:template match="clangDecl[@class='Var']">
     <varDecl>
       <xsl:apply-templates select="@*" />
-      <name>
-        <xsl:value-of select="name" />
-      </name>
+      <xsl:apply-templates select="name" />
       <xsl:if test="@has_init = 1">
         <value>
           <xsl:apply-templates select="clangStmt" />
@@ -86,9 +75,7 @@
   <xsl:template match="clangDecl[@class='Field']">
     <varDecl>
       <xsl:apply-templates select="@*" />
-      <name>
-        <xsl:value-of select="name" />
-      </name>
+      <xsl:apply-templates select="name" />
     </varDecl>
   </xsl:template>
 
