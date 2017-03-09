@@ -92,6 +92,7 @@ public:
   Function(DataTypeIdent, TypeRef, const std::vector<DataTypeIdent>&);
   Function(DataTypeIdent, TypeRef, const Params&);
   CodeFragment makeDeclaration(CodeFragment, const Environment&) override;
+  CodeFragment makeDeclaration(CodeFragment, const std::vector<CodeFragment>&, const Environment&);
   ~Function() override;
   Type* clone() const override;
   static bool classof(const Type *);
