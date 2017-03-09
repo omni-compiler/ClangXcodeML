@@ -38,15 +38,6 @@ static std::ifstream mapfile;
 static bool map_is_already_set = false;
 static std::map<std::string, std::string> typenamemap;
 
-static std::string
-make_comment(Decl *decl, std::string message) {
-  std::string comment("PreVisitDecl::");
-  comment += decl->getDeclKindName();
-  comment += ": ";
-  comment += message;
-  return comment;
-}
-
 TypeTableInfo::TypeTableInfo(MangleContext *MC, InheritanceInfo *II) :
   mangleContext(MC),
   inheritanceinfo(II)
