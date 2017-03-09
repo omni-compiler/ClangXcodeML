@@ -252,26 +252,15 @@ const CodeBuilder::Procedure handleScope =
   handleSymTableStack(
   walkChildrenWithInsertingNewLines)));
 
-DEFINE_CB(outputParams) {
-  auto ret = makeTokenNode("(");
-
-  bool alreadyPrinted = false;
-  const auto params = findNodes(node, "params/name", src.ctxt);
+std::vector<XcodeMl::CodeFragment>
+getParams(xmlNodePtr fnNode, const SourceInfo& src) {
+  std::vector<XcodeMl::CodeFragment> vec;
+  const auto params = findNodes(fnNode, "params/name", src.ctxt);
   for (auto p : params) {
-    if (alreadyPrinted) {
-      ret = ret + makeTokenNode(", ");
-    }
     XMLString name = xmlNodeGetContent(p);
-    const auto typeName = getProp(p, "type");
-    const auto paramType = src.typeTable.at(typeName);
-    ret = ret +
-      makeDecl(
-          paramType,
-          makeTokenNode( name ),
-          src.typeTable);
-    alreadyPrinted = true;
+    vec.push_back(makeTokenNode(name));
   }
-  return ret + makeTokenNode(")");
+  return std::move(vec);
 }
 
 DEFINE_CB(clangStmtProc) {
