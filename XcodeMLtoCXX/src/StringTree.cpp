@@ -42,7 +42,7 @@ InnerNode::clone() const {
 }
 
 void
-InnerNode::flush(std::stringstream& ss) const {
+InnerNode::flush(Stream& ss) const {
   for (auto child : children) {
     child->flush(ss);
   }
@@ -71,8 +71,8 @@ TokenNode::clone() const {
 }
 
 void
-TokenNode::flush(std::stringstream& ss) const {
-  ss << token << " ";
+TokenNode::flush(Stream& ss) const {
+  ss << token;
 }
 
 InnerNode*

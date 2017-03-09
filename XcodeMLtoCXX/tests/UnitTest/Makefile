@@ -37,6 +37,7 @@ $(OBJS):
 	$(MAKE) -C $(XCODEMLTOCXXSRCDIR) $(notdir $@)
 
 XcodeMlType: \
+	$(XCODEMLTOCXXSRCDIR)/Stream.o \
 	$(XCODEMLTOCXXSRCDIR)/StringTree.o \
 	$(XCODEMLTOCXXSRCDIR)/XcodeMlEnvironment.o \
 	$(XCODEMLTOCXXSRCDIR)/XcodeMlType.o

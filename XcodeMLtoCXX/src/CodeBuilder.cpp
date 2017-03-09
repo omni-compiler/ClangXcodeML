@@ -562,10 +562,13 @@ void buildCode(
     parseGlobalSymbols(rootNode, ctxt, ss)
   };
 
+  cxxgen::Stream out;
   xmlNodePtr globalSymbols = findFirst(rootNode, "/XcodeProgram/globalSymbols", src.ctxt);
   buildSymbols(globalSymbols, src)
-    ->flush(ss);
+    ->flush(out);
   separateByBlankLines(
       CXXBuilder.walkAll(rootNode, src))
-    ->flush(ss);
+    ->flush(out);
+
+  ss << out.str();
 }
