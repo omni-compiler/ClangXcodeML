@@ -17,6 +17,7 @@ namespace XcodeMl {
     TypeRef& at(const std::string&);
     const ReturnType& getReturnType(const std::string&) const;
     void setReturnType(const std::string&, const TypeRef&);
+    bool exists(const std::string&) const;
     const std::vector<std::string>& getKeys(void) const;
   private:
     using TypeMap = std::map<std::string, TypeRef>;

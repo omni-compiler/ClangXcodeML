@@ -48,6 +48,10 @@ namespace XcodeMl {
     returnMap[dataTypeIdent] = type;
   }
 
+  bool Environment::exists(const std::string& dataTypeIdent) const {
+    return map.find(dataTypeIdent) != map.end();
+  }
+
   const std::vector<std::string>& Environment::getKeys(void) const {
     return keys;
   }
