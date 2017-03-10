@@ -91,6 +91,12 @@ std::string getNameFromIdNode(
   if (!idNode) {
     throw std::domain_error("expected id node, but got null");
   }
+  if ( !(XMLString(idNode->name) == "id") ) {
+    const auto name = static_cast<XMLString>(idNode->name);
+    throw std::domain_error(
+        static_cast<std::string>("expected id node, but got ")+
+        static_cast<std::string>(name));
+  }
   xmlNodePtr nameNode = findFirst(idNode, "name", ctxt);
   return static_cast<XMLString>(xmlNodeGetContent(nameNode));
 }
