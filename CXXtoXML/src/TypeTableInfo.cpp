@@ -408,6 +408,10 @@ void TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
     if (auto RD = T->getAsCXXRecordDecl()) {
       // XXX: temporary implementation
       Node = createNode(T, "classType", nullptr);
+      xmlNewProp(
+          Node,
+          BAD_CAST "cxx_class_kind",
+          BAD_CAST getTagKindAsString(RD->getTagKind()));
       pushType(T, Node);
     } else if (T->isStructureType()) {
       Node = createNode(T, "structType", nullptr);
