@@ -621,6 +621,12 @@ TypeRef makeArrayType(
   return std::make_shared<Array>(ident, elemName, size);
 }
 
+TypeRef makeEnumType(const DataTypeIdent& ident) {
+  return std::make_shared<EnumType>(
+      ident,
+      EnumType::EnumName());
+}
+
 TypeRef makeStructType(
     const DataTypeIdent& ident,
     const CodeFragment& tag,
