@@ -472,6 +472,7 @@ DEFINE_CB(condExprProc) {
 DEFINE_CB(varDeclProc) {
   xmlNodePtr nameElem = findFirst(node, "name|operator", src.ctxt);
   XMLString name(xmlNodeGetContent(nameElem));
+  assert(length(name) != 0);
   auto type = getIdentType(src, name);
   auto acc = makeDecl(
       type,
