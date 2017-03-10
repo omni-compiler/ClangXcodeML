@@ -35,7 +35,7 @@ DEFINE_SA(tagnameProc) {
   const auto dataTypeIdent = getProp(node, "type");
   auto typeref = map.at(dataTypeIdent); // structType must exists
   auto structType = llvm::cast<XcodeMl::Struct>(typeref.get());
-  xmlNodePtr nameNode(findFirst(node, "name", ctxt));
+  xmlNodePtr nameNode(findFirst(node, "name|operator", ctxt));
   XMLString tag(xmlNodeGetContent(nameNode));
   structType->setTagName(
       makeTokenNode(getNameFromIdNode(node, ctxt)));
