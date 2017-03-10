@@ -25,8 +25,10 @@ public:
     ReturnT(const XMLWalker&, xmlNodePtr, T...)>;
 
   XMLWalker(
+      const std::string& n,
       const std::function<ReturnT(const std::vector<ReturnT>&)> f,
       std::initializer_list<std::tuple<std::string, Procedure>> pairs):
+    name(n),
     fold(f),
     map()
   {
@@ -36,8 +38,10 @@ public:
   }
 
   XMLWalker(
+      const std::string& n,
       const std::function<ReturnT(const std::vector<ReturnT>&)> f,
       std::map<std::string, Procedure>&& initMap):
+    name(n),
     fold(f),
     map(initMap)
   {}
@@ -110,6 +114,7 @@ public:
   }
 
 private:
+  std::string name;
   std::function<ReturnT(const std::vector<ReturnT>&)> fold;
   std::map<std::string, Procedure> map;
 };
@@ -122,7 +127,9 @@ public:
     void(const XMLWalker&, xmlNodePtr, T...)>;
 
   XMLWalker(
+      const std::string& n,
       std::initializer_list<std::tuple<std::string, Procedure>> pairs):
+    name(n),
     map()
   {
     for (auto p : pairs) {
@@ -131,7 +138,9 @@ public:
   }
 
   XMLWalker(
+      const std::string& n,
       std::map<std::string, Procedure>&& initMap):
+    name(n),
     map(initMap)
   {}
 
@@ -180,6 +189,7 @@ public:
   }
 
 private:
+  std::string name;
   std::map<std::string, Procedure> map;
 };
 

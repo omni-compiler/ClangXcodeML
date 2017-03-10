@@ -479,6 +479,7 @@ DEFINE_CB(varDeclProc) {
 }
 
 const CodeBuilder CXXBuilder(
+"CodeBuilder",
 makeInnerNode,
 {
   //{ "clangStmt", clangStmtProc },

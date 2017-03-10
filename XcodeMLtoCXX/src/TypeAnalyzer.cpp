@@ -198,7 +198,9 @@ const XcodeMl::Environment FundamentalDataTypeIdentMap = []() {
   return map;
 }();
 
-const TypeAnalyzer XcodeMLTypeAnalyzer({
+const TypeAnalyzer XcodeMLTypeAnalyzer(
+"TypeAnalyzer",
+{
   { "basicType", basicTypeProc },
   { "pointerType", pointerTypeProc },
   { "functionType", functionTypeProc },
