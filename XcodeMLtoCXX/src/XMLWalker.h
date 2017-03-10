@@ -1,6 +1,9 @@
 #ifndef XMLWALKER_H
 #define XMLWALKER_H
 
+#include <libxml/debugXML.h>
+#include <iostream>
+
 /*!
  * \brief A class that combines procedures into a single one
  * that traverses XML node and visits each element.
@@ -173,7 +176,15 @@ public:
     XMLString elemName = node->name;
     auto iter = map.find(elemName);
     if (iter != map.end()) {
-      (iter->second)(*this, node, args...);
+      try {
+        (iter->second)(*this, node, args...);
+      } catch(const std::exception& e) {
+        std::cerr
+          << "In " << name << std::endl
+          << e.what() << std::endl;
+        xmlDebugDumpNode(stderr, node, 0);
+        abort();
+      }
     } else {
       walkAll(node->children, args...);
     }
