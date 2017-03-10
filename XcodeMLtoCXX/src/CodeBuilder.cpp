@@ -89,6 +89,7 @@ std::string findSymbolType(const SymbolMap& table, const std::string& name) {
  * \return Data type of \c ident.
  */
 XcodeMl::TypeRef getIdentType(const SourceInfo& src, const std::string& ident) {
+  assert(!ident.empty());
   std::string dataTypeIdent(findSymbolType(src.symTable, ident));
   return src.typeTable[dataTypeIdent];
 }
