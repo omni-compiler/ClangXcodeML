@@ -54,15 +54,20 @@
   </xsl:template>
 
   <xsl:template match="clangDecl[@class='Var']">
-    <varDecl>
-      <xsl:apply-templates select="@*" />
-      <xsl:apply-templates select="name" />
-      <xsl:if test="@has_init = 1">
-        <value>
-          <xsl:apply-templates select="clangStmt" />
-        </value>
-      </xsl:if>
-    </varDecl>
+    <xsl:choose>
+      <xsl:when test="(@is_implicit = 'true') or (@is_implicit = '1')"/>
+      <xsl:otherwise>
+        <varDecl>
+          <xsl:apply-templates select="@*" />
+          <xsl:apply-templates select="name" />
+          <xsl:if test="@has_init = 1">
+            <value>
+              <xsl:apply-templates select="clangStmt" />
+            </value>
+          </xsl:if>
+        </varDecl>
+      </xsl:otherwise>
+    </xsl:choose>
   </xsl:template>
 
   <xsl:template match="clangDecl[@class='CXXRecord']">
