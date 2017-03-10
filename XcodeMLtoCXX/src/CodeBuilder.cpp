@@ -69,7 +69,18 @@ std::string findSymbolType(const SymbolMap& table, const std::string& name) {
       return result->second;
     }
   }
-  throw std::runtime_error(name + " not found in SymbolMap");
+  std::stringstream log;
+  log << std::endl << "{";
+  for (auto entry : table) {
+    log << "\t{";
+    for (auto p : entry) {
+      log << "(" << p.first << "," << p.second << ")";
+    }
+    log << "}" << std::endl;
+  }
+  log << "}" << std::endl;
+  throw std::runtime_error(
+      name + " not found in SymbolMap: " + log.str());
 }
 
 /*!
