@@ -430,6 +430,11 @@ EnumType::clone() const {
   return copy;
 }
 
+bool
+EnumType::classof(const Type* T) {
+  return T->getKind() == TypeKind::Enum;
+}
+
 EnumType::EnumType(const EnumType& other):
   Type(other),
   name_(other.name_),
