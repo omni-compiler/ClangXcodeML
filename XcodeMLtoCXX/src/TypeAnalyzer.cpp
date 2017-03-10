@@ -150,6 +150,11 @@ DEFINE_TA(classTypeProc) {
       nullptr);
 }
 
+DEFINE_TA(enumTypeProc) {
+  XMLString dtident = xmlGetProp(node, BAD_CAST "type");
+  map[dtident] = XcodeMl::makeEnumType(dtident);
+}
+
 const std::vector<std::string> identicalFndDataTypeIdents = {
   "void",
   "char",
@@ -208,6 +213,7 @@ const TypeAnalyzer XcodeMLTypeAnalyzer(
   { "arrayType", arrayTypeProc },
   { "structType", structTypeProc },
   { "classType", classTypeProc },
+  { "enumType", enumTypeProc },
 });
 
 /*!
