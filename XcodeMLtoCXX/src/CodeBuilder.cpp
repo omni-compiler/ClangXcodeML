@@ -328,6 +328,7 @@ DEFINE_CB(functionDefinitionProc) {
 
 DEFINE_CB(functionDeclProc) {
   const auto name = getNameFromIdNode(node, src.ctxt);
+  assert(!name.empty());
   const auto fnType = getIdentType(src, name);
   return
     makeDecl(
