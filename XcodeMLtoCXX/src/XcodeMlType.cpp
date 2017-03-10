@@ -467,6 +467,33 @@ ClassType::ClassType(const ClassType& other):
   declNode(other.declNode)
 {}
 
+OtherType::OtherType(const DataTypeIdent& ident):
+  Type(TypeKind::Other, ident)
+{}
+
+CodeFragment
+OtherType::makeDeclaration(
+    CodeFragment var,
+    const Environment&)
+{
+  return makeTokenNode("/*") + var + makeTokenNode("*/");
+}
+
+Type*
+OtherType::clone()const {
+  OtherType* copy = new OtherType(*this);
+  return copy;
+}
+
+bool
+OtherType::classof(const Type* T) {
+  return T->getKind() == TypeKind::Other;
+}
+
+OtherType::OtherType(const OtherType& other):
+  Type(other)
+{}
+
 /*!
  * \brief Return the kind of \c type.
  */

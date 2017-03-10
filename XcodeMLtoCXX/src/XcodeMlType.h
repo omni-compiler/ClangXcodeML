@@ -26,6 +26,8 @@ enum class TypeKind {
   Struct,
   /*! C++-style class */
   Class,
+  /*! Other type */
+  Other,
 };
 
 TypeKind typeKind(TypeRef);
@@ -207,6 +209,17 @@ protected:
 private:
   CodeFragment name_;
   xmlNodePtr declNode; // nullable
+};
+
+class OtherType : public Type {
+public:
+  OtherType(const DataTypeIdent&);
+  ~OtherType() override = default;
+  CodeFragment makeDeclaration(CodeFragment, const Environment&) override;
+  Type* clone() const override;
+  static bool classof(const Type *);
+protected:
+  OtherType(const OtherType&);
 };
 
 TypeRef makeReservedType(DataTypeIdent, CodeFragment, bool = false, bool = false);
