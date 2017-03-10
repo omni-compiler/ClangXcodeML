@@ -590,6 +590,11 @@ TypeRef makeStructType(
   return std::make_shared<Struct>(ident, tag, fields);
 }
 
+TypeRef
+makeOtherType(const DataTypeIdent& ident) {
+  return std::make_shared<OtherType>(ident);
+}
+
 CodeFragment TypeRefToString(TypeRef type, const Environment& env) {
   return makeDecl(type, makeTokenNode( "" ), env);
 }

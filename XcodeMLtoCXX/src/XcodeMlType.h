@@ -232,6 +232,7 @@ TypeRef makeArrayType(DataTypeIdent, TypeRef, Array::Size);
 TypeRef makeArrayType(DataTypeIdent, DataTypeIdent, Array::Size);
 TypeRef makeArrayType(DataTypeIdent, DataTypeIdent, size_t);
 TypeRef makeStructType(const DataTypeIdent&, const CodeFragment&, const Struct::MemberList&);
+TypeRef makeOtherType(const DataTypeIdent&);
 
 }
 #endif /* !XCODEMLTYPE_H */
