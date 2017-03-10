@@ -412,6 +412,10 @@ void TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
           Node,
           BAD_CAST "cxx_class_kind",
           BAD_CAST getTagKindAsString(RD->getTagKind()));
+      xmlNewProp(
+          Node,
+          BAD_CAST "is_anonymous",
+          BAD_CAST (RD->isAnonymousStructOrUnion() ? "true" : "false"));
       pushType(T, Node);
     } else if (T->isStructureType()) {
       Node = createNode(T, "structType", nullptr);
