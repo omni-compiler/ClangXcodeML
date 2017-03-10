@@ -328,20 +328,13 @@ DEFINE_CB(functionDefinitionProc) {
 
 DEFINE_CB(functionDeclProc) {
   const auto name = getNameFromIdNode(node, src.ctxt);
-  try {
-    const auto fnType = getIdentType(src, name);
-    return
-      makeDecl(
-          fnType,
-          makeTokenNode(name),
-          src.typeTable) +
-      makeTokenNode(";");
-  } catch (const std::runtime_error& e) {
-    return
-      makeTokenNode("/* In <functionDecl>: ") +
-      makeTokenNode(e.what()) +
-      makeTokenNode("*/");
-  }
+  const auto fnType = getIdentType(src, name);
+  return
+    makeDecl(
+        fnType,
+        makeTokenNode(name),
+        src.typeTable) +
+    makeTokenNode(";");
 }
 
 DEFINE_CB(memberRefProc) {
