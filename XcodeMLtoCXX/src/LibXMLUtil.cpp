@@ -88,6 +88,9 @@ std::string getNameFromIdNode(
     xmlNodePtr idNode,
     xmlXPathContextPtr ctxt
 ) {
+  if (!idNode) {
+    throw std::domain_error("expected id node, but got null");
+  }
   xmlNodePtr nameNode = findFirst(idNode, "name", ctxt);
   return static_cast<XMLString>(xmlNodeGetContent(nameNode));
 }
