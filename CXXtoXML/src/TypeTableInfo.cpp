@@ -406,7 +406,6 @@ void TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
   case Type::Record:
     rawname = registerRecordType(T);
     if (auto RD = T->getAsCXXRecordDecl()) {
-      // XXX: temporary implementation
       Node = createNode(T, "classType", nullptr);
       xmlNewProp(
           Node,
