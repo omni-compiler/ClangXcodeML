@@ -521,8 +521,9 @@ void TypeTableInfo::setNormalizability(clang::QualType T, bool b) {
   normalizability[T] = b;
 }
 
-bool TypeTableInfo::isNormalizable(clang::QualType T) {
-  return normalizability[T];
+bool TypeTableInfo::isNormalizable(clang::QualType) {
+  // return normalizability[T];
+  return false;
 }
 
 void TypeTableInfo::pushTypeTableStack(xmlNodePtr typeTableNode) {
