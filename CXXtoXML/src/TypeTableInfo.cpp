@@ -191,6 +191,22 @@ void TypeTableInfo::pushType(const QualType& T, xmlNodePtr node) {
   TypeElements[T] = node;
 }
 
+static const char*
+getTagKindAsString(clang::TagTypeKind ttk) {
+  switch (ttk) {
+    case TTK_Struct:
+      return "struct";
+    case TTK_Union:
+      return "union";
+    case TTK_Class:
+      return "class";
+    case TTK_Enum:
+      return "enum";
+    case TTK_Interface:
+      return "__interface__";
+  }
+}
+
 void TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
   bool isQualified = false;
   xmlNodePtr Node = nullptr;
