@@ -545,9 +545,12 @@ void buildCode(
     xmlXPathContextPtr ctxt,
     std::stringstream& ss
 ) {
+
+  xmlNodePtr typeTableNode =
+    findFirst(rootNode, "/XcodeProgram/typeTable", ctxt);
   SourceInfo src = {
     ctxt,
-    parseTypeTable(rootNode, ctxt, ss),
+    parseTypeTable(typeTableNode, ctxt, ss),
     parseGlobalSymbols(rootNode, ctxt, ss)
   };
 
