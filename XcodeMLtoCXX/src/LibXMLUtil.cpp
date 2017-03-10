@@ -98,6 +98,9 @@ std::string getNameFromIdNode(
         static_cast<std::string>(name));
   }
   xmlNodePtr nameNode = findFirst(idNode, "name", ctxt);
+  if (!nameNode) {
+    throw std::runtime_error("name element not found");
+  }
   return static_cast<XMLString>(xmlNodeGetContent(nameNode));
 }
 
