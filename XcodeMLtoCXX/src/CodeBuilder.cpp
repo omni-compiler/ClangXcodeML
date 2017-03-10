@@ -44,7 +44,7 @@ SymbolEntry parseSymbols(xmlNodePtr node, xmlXPathContextPtr ctxt) {
   SymbolEntry entry;
   auto idElems = findNodes(node, "id", ctxt);
   for (auto idElem : idElems) {
-    xmlNodePtr nameElem = findFirst(idElem, "name", ctxt);
+    xmlNodePtr nameElem = findFirst(idElem, "name|operator", ctxt);
     const auto type = getProp(idElem, "type");
     assert(type.length() != 0);
     XMLString name(xmlNodeGetContent(nameElem));
