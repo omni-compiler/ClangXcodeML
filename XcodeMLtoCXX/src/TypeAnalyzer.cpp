@@ -9,6 +9,7 @@
 #include <libxml/parser.h>
 #include <libxml/xpath.h>
 #include <libxml/xpathInternals.h>
+#include "llvm/ADT/Optional.h"
 #include "llvm/Support/Casting.h"
 #include "LibXMLUtil.h"
 #include "XMLString.h"

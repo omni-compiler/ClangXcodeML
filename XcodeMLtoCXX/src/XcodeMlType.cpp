@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include <libxml/tree.h>
+#include "llvm/ADT/Optional.h"
 #include "StringTree.h"
 #include "Symbol.h"
 #include "XcodeMlType.h"
@@ -396,6 +397,44 @@ size_t Struct::Member::getSize() const {
   assert(isBitField());
   return size.size();
 }
+
+EnumType::EnumType(
+    const DataTypeIdent& ident,
+    const EnumType::EnumName& name):
+  Type(TypeKind::Enum, ident),
+  name_(name),
+  declBody(makeVoidNode())
+{}
+
+EnumType::EnumType(
+    const DataTypeIdent& ident,
+    const EnumType::EnumName& name,
+    const CodeFragment& d):
+  Type(TypeKind::Enum, ident),
+  name_(name),
+  declBody(d)
+{}
+
+CodeFragment
+EnumType::makeDeclaration(CodeFragment var, const Environment&) {
+  return
+    makeTokenNode("enum") +
+    (name_ ? (*name_) : makeVoidNode()) +
+    declBody +
+    var;
+}
+
+Type*
+EnumType::clone() const {
+  EnumType* copy = new EnumType(*this);
+  return copy;
+}
+
+EnumType::EnumType(const EnumType& other):
+  Type(other),
+  name_(other.name_),
+  declBody(other.declBody)
+{}
 
 std::string string_of_accessSpec(AccessSpec as) {
   switch (as) {

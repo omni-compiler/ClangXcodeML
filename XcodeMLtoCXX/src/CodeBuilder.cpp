@@ -7,6 +7,7 @@
 #include <vector>
 #include <libxml/tree.h>
 #include <libxml/xpath.h>
+#include "llvm/ADT/Optional.h"
 #include "llvm/Support/Casting.h"
 #include "XMLString.h"
 #include "XMLWalker.h"

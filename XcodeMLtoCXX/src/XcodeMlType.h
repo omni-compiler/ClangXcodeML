@@ -24,6 +24,8 @@ enum class TypeKind {
   Array,
   /*! C-Style struct (3.xx <structType> element) */
   Struct,
+  /*! C-style enum type */
+  Enum,
   /*! C++-style class */
   Class,
   /*! Other type */
@@ -184,6 +186,22 @@ protected:
 private:
   CodeFragment tag;
   MemberList fields;
+};
+
+class EnumType : public Type {
+public:
+  using EnumName = llvm::Optional<CodeFragment>;
+  EnumType(const DataTypeIdent&, const EnumName&);
+  EnumType(const DataTypeIdent&, const EnumName&, const CodeFragment&);
+  ~EnumType() override = default;
+  CodeFragment makeDeclaration(CodeFragment, const Environment&) override;
+  Type* clone() const override;
+  static bool classof(const Type *);
+protected:
+  EnumType(const EnumType&);
+private:
+  EnumName name_;
+  CodeFragment declBody;
 };
 
 enum class AccessSpec {

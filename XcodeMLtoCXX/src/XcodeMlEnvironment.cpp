@@ -5,6 +5,7 @@
 #include <memory>
 #include <cassert>
 #include <libxml/tree.h>
+#include "llvm/ADT/Optional.h"
 #include "StringTree.h"
 #include "Symbol.h"
 #include "XcodeMlType.h"
