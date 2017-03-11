@@ -13,6 +13,17 @@ using CodeFragment = CXXCodeGen::StringTreeRef;
 
 class Environment;
 
+class MemberDecl {
+public:
+  MemberDecl(const DataTypeIdent&, const CodeFragment&);
+  MemberDecl(const DataTypeIdent&, const CodeFragment&, size_t);
+  CodeFragment makeDeclaration(const Environment&);
+private:
+  DataTypeIdent dtident;
+  CodeFragment name;
+  llvm::Optional<size_t> bitfield;
+};
+
 enum class TypeKind {
  /*! basic data type (3.4 <basicType> element) */
   Reserved,

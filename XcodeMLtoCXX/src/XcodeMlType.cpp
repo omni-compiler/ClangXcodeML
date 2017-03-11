@@ -34,6 +34,33 @@ CodeFragment cv_qualify(
 
 namespace XcodeMl {
 
+MemberDecl::MemberDecl(
+    const DataTypeIdent& d,
+    const CodeFragment& c):
+  dtident(d),
+  name(c),
+  bitfield()
+{}
+
+MemberDecl::MemberDecl(
+    const DataTypeIdent& d,
+    const CodeFragment& c,
+    size_t s):
+  dtident(d),
+  name(c),
+  bitfield(s)
+{}
+
+CodeFragment
+MemberDecl::makeDeclaration(const Environment& env) {
+  auto type = env.at(dtident);
+  return
+    makeDecl(type, name, env) +
+    (bitfield ?
+        makeTokenNode(std::to_string(*bitfield))
+      : makeVoidNode());
+}
+
 Type::Type(TypeKind k, DataTypeIdent id, bool c, bool v):
   kind(k),
   ident(id),
