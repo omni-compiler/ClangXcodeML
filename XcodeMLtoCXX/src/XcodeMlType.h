@@ -197,6 +197,7 @@ public:
   CodeFragment makeDeclaration(CodeFragment, const Environment&) override;
   Type* clone() const override;
   static bool classof(const Type *);
+  void setName(const std::string&);
 protected:
   EnumType(const EnumType&);
 private:

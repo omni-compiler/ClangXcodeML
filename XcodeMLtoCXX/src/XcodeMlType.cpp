@@ -435,6 +435,12 @@ EnumType::classof(const Type* T) {
   return T->getKind() == TypeKind::Enum;
 }
 
+void
+EnumType::setName(const std::string& enum_name) {
+  assert(!name_);
+  name_ = makeTokenNode(enum_name);
+}
+
 EnumType::EnumType(const EnumType& other):
   Type(other),
   name_(other.name_),
