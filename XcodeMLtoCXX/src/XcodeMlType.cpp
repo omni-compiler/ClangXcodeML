@@ -447,6 +447,55 @@ EnumType::EnumType(const EnumType& other):
   declBody(other.declBody)
 {}
 
+UnionType::UnionType(
+    const DataTypeIdent& ident,
+    const UnionType::UnionName& name):
+  Type(TypeKind::Union, ident),
+  name_(name),
+  declBody(makeVoidNode())
+{}
+
+UnionType::UnionType(
+    const DataTypeIdent& ident,
+    const UnionType::UnionName& name,
+    const CodeFragment& d):
+  Type(TypeKind::Union, ident),
+  name_(name),
+  declBody(d)
+{}
+
+CodeFragment
+UnionType::makeDeclaration(CodeFragment var, const Environment&) {
+  return
+    makeTokenNode("union") +
+    (name_ ? (*name_) : makeVoidNode()) +
+    declBody +
+    var;
+}
+
+Type*
+UnionType::clone() const {
+  UnionType* copy = new UnionType(*this);
+  return copy;
+}
+
+bool
+UnionType::classof(const Type* T) {
+  return T->getKind() == TypeKind::Union;
+}
+
+void
+UnionType::setName(const std::string& enum_name) {
+  assert(!name_);
+  name_ = makeTokenNode(enum_name);
+}
+
+UnionType::UnionType(const UnionType& other):
+  Type(other),
+  name_(other.name_),
+  declBody(other.declBody)
+{}
+
 std::string string_of_accessSpec(AccessSpec as) {
   switch (as) {
     case AccessSpec::Public:

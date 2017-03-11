@@ -26,6 +26,8 @@ enum class TypeKind {
   Struct,
   /*! C-style enum type */
   Enum,
+  /*! C-style union type */
+  Union,
   /*! C++-style class */
   Class,
   /*! Other type */
@@ -202,6 +204,23 @@ protected:
   EnumType(const EnumType&);
 private:
   EnumName name_;
+  CodeFragment declBody;
+};
+
+class UnionType : public Type {
+public:
+  using UnionName = llvm::Optional<CodeFragment>;
+  UnionType(const DataTypeIdent&, const UnionName&);
+  UnionType(const DataTypeIdent&, const UnionName&, const CodeFragment&);
+  ~UnionType() override = default;
+  CodeFragment makeDeclaration(CodeFragment, const Environment&) override;
+  Type* clone() const override;
+  static bool classof(const Type *);
+  void setName(const std::string&);
+protected:
+  UnionType(const UnionType&);
+private:
+  UnionName name_;
   CodeFragment declBody;
 };
 
