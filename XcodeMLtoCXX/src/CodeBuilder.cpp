@@ -280,6 +280,20 @@ DEFINE_CB(clangStmtProc) {
   //ClangStmtHandler.walk(node, w, src, ss);
 }
 
+static SymbolEntry
+ClassSymbolsToSymbolEntry(const XcodeMl::ClassType* T) {
+  using namespace XcodeMl;
+  assert(T);
+  SymbolEntry entry;
+  auto members = T->getSymbols();
+  for (auto&& member : members) {
+    ClassType::MemberName name; DataTypeIdent dtident;
+    std::tie(name, dtident) = member;
+    entry[name] = dtident;
+  }
+  return std::move(entry);
+}
+
 DEFINE_CB(emitClassDefinition) {
   if (isTrueProp(node, "is_implicit", false)) {
     return makeVoidNode();
