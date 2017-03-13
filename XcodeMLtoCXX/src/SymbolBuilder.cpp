@@ -37,6 +37,9 @@ using SymbolBuilder = AttrProc<StringTreeRef, SourceInfo&>;
 #define DEFINE_SB(name) static StringTreeRef name(SB_ARGS)
 
 DEFINE_SB(typedefNameProc) {
+  if (isTrueProp(node, "is_implicit", false)) {
+    return makeVoidNode();
+  }
   const auto alias = getNameFromIdNode(node, src.ctxt);
   const auto type = src.typeTable.at(
       static_cast<XMLString>(xmlGetProp(node, BAD_CAST "type")));
