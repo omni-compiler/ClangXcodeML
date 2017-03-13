@@ -229,6 +229,7 @@ public:
   Type* clone() const override;
   ClassName name() const;
   void setName(const std::string&);
+  Symbols getSymbols() const;
   static bool classof(const Type *);
 protected:
   ClassType(const ClassType&);

@@ -547,6 +547,11 @@ void ClassType::setName(const std::string& name) {
   name_ = makeTokenNode(name);
 }
 
+ClassType::Symbols
+ClassType::getSymbols() const {
+  return classScopeSymbols;
+}
+
 bool ClassType::classof(const Type *T) {
   return T->getKind() == TypeKind::Class;
 }
