@@ -226,6 +226,7 @@ public:
   ~ClassType() override = default;
   Type* clone() const override;
   ClassName name() const;
+  void setName(const std::string&);
   static bool classof(const Type *);
 protected:
   ClassType(const ClassType&);
