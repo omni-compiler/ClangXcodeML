@@ -528,6 +528,7 @@ CodeFragment ClassType::makeDeclaration(
     CodeFragment var,
     const Environment&
 ) {
+  assert(name_);
   return *name_ + var;
 }
 
