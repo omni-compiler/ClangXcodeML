@@ -17,7 +17,7 @@ class MemberDecl {
 public:
   MemberDecl(const DataTypeIdent&, const CodeFragment&);
   MemberDecl(const DataTypeIdent&, const CodeFragment&, size_t);
-  CodeFragment makeDeclaration(const Environment&);
+  CodeFragment makeDeclaration(const Environment&) const;
 private:
   DataTypeIdent dtident;
   CodeFragment name;

@@ -52,7 +52,7 @@ MemberDecl::MemberDecl(
 {}
 
 CodeFragment
-MemberDecl::makeDeclaration(const Environment& env) {
+MemberDecl::makeDeclaration(const Environment& env) const {
   auto type = env.at(dtident);
   return
     makeDecl(type, name, env) +
