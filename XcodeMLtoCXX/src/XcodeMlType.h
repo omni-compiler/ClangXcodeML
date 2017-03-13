@@ -220,18 +220,16 @@ AccessSpec accessSpec_of_string(const std::string&);
 
 class ClassType : public Type {
 public:
-  ClassType(const DataTypeIdent&, const CodeFragment&, xmlNodePtr);
+  ClassType(const DataTypeIdent&, const CodeFragment&);
   CodeFragment makeDeclaration(CodeFragment, const Environment&) override;
   ~ClassType() override = default;
   Type* clone() const override;
-  xmlNodePtr getNode() const;
   CodeFragment name() const;
   static bool classof(const Type *);
 protected:
   ClassType(const ClassType&);
 private:
   CodeFragment name_;
-  xmlNodePtr declNode; // nullable
 };
 
 class OtherType : public Type {

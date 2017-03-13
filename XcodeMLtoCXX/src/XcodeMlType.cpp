@@ -519,11 +519,9 @@ AccessSpec accessSpec_of_string(const std::string& as) {
 
 ClassType::ClassType(
     const DataTypeIdent& ident,
-    const CodeFragment& className,
-    xmlNodePtr node):
+    const CodeFragment& className):
   Type(TypeKind::Class, ident),
-  name_(className),
-  declNode(node)
+  name_(className)
 {}
 
 CodeFragment ClassType::makeDeclaration(
@@ -538,10 +536,6 @@ Type* ClassType::clone() const {
   return copy;
 }
 
-xmlNodePtr ClassType::getNode() const {
-  return declNode;
-}
-
 CodeFragment ClassType::name() const {
   return name_;
 }
@@ -552,8 +546,7 @@ bool ClassType::classof(const Type *T) {
 
 ClassType::ClassType(const ClassType& other):
   Type(other),
-  name_(other.name_),
-  declNode(other.declNode)
+  name_(other.name_)
 {}
 
 OtherType::OtherType(const DataTypeIdent& ident):
