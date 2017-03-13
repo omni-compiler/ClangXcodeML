@@ -303,11 +303,16 @@ DEFINE_CB(emitClassDefinition) {
   auto classType = llvm::dyn_cast<XcodeMl::ClassType>(type.get());
   assert(classType);
   const auto className = classType->name();
+
+  src.symTable.push_back(ClassSymbolsToSymbolEntry(classType));
+  auto decls = w.walkChildren(node, src);
+  src.symTable.pop_back();
+
   return
     makeTokenNode("class") +
     (className.hasValue() ? *className : makeVoidNode()) +
     makeTokenNode("{") +
-    separateByBlankLines(w.walkChildren(node, src)) +
+    separateByBlankLines(decls) +
     makeTokenNode("}") +
     makeTokenNode(";") +
     makeNewLineNode();
