@@ -317,6 +317,10 @@ makeInheritanceNode(
         typeNode,
         BAD_CAST "access",
         BAD_CAST AccessSpec(base.getAccessSpecifier()).c_str());
+    xmlNewProp(
+        typeNode,
+        BAD_CAST "is_virtual",
+        BAD_CAST (base.isVirtual() ? "1" : "0"));
     xmlAddChild(inheritanceNode, typeNode);
   }
   return inheritanceNode;
