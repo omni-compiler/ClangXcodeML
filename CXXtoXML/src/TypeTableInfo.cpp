@@ -388,6 +388,7 @@ void TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
     break;
 
   case Type::Record:
+  {
     rawname = registerRecordType(T);
     if (T->isStructureType()) {
       Node = createNode(T, "structType", nullptr);
@@ -405,7 +406,7 @@ void TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
       pushType(T, Node);
     }
     break;
-
+  }
   case Type::Enum:
     rawname = registerEnumType(T);
     Node = createNode(T, "enumType", nullptr);
