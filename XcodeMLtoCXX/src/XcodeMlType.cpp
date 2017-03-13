@@ -693,9 +693,9 @@ TypeRef makeStructType(
 
 TypeRef makeClassType(
     const DataTypeIdent& ident,
-    xmlNodePtr)
+    const ClassType::Symbols& symbols)
 {
-  return std::make_shared<ClassType>(ident, nullptr);
+  return std::make_shared<ClassType>(ident, nullptr, symbols);
 }
 
 TypeRef
