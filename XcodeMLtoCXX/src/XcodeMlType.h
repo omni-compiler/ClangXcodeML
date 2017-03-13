@@ -183,7 +183,7 @@ public:
     CodeFragment name_;
     BitSize size;
   };
-  using MemberList = std::vector<Member>;
+  using MemberList = std::vector<MemberDecl>;
 
 public:
   Struct(const DataTypeIdent&, const CodeFragment&, const MemberList&);
