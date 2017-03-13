@@ -199,6 +199,133 @@ void TypeTableInfo::pushType(const QualType& T, xmlNodePtr node) {
   TypeElements[T] = node;
 }
 
+static xmlNodePtr
+makeSymbolsNodeForCXXRecordDecl(
+    TypeTableInfo& TTI,
+    const CXXRecordDecl* RD)
+{
+  assert(RD);
+  auto symbolsNode = xmlNewNode(nullptr, BAD_CAST "symbols");
+  if (! RD->hasDefinition()) {
+    return symbolsNode; // empty <symbols>
+  }
+  auto def = RD->getDefinition();
+
+  // data members
+  for (auto&& field : def->fields()) {
+    auto idNode = xmlNewNode(nullptr, BAD_CAST "id");
+    xmlNewProp(
+        idNode,
+        BAD_CAST "type",
+        BAD_CAST TTI.getTypeName(field->getType()).c_str());
+    const auto fieldName = field->getIdentifier();
+    if (fieldName) {
+      /* Emit only if the field has name.
+       * Some field does not have name.
+       *  Example: `struct A { int : 0; }; // unnamed bit field`
+       */
+      xmlNewChild(
+          idNode,
+          nullptr,
+          BAD_CAST "name",
+          BAD_CAST fieldName->getName().data());
+    }
+    xmlAddChild(symbolsNode, idNode);
+  }
+
+  // static or non-static member functions
+  for (auto&& method : def->methods()) {
+    auto idNode = xmlNewNode(nullptr, BAD_CAST "id");
+    xmlNewProp(
+        idNode,
+        BAD_CAST "type",
+        BAD_CAST TTI.getTypeName(method->getType()).c_str());
+    const auto name = method->getIdentifier();
+    assert(name);
+    xmlNewChild(
+        idNode,
+        nullptr,
+        BAD_CAST "name",
+        BAD_CAST name->getName().data());
+    xmlAddChild(symbolsNode, idNode);
+  }
+
+  return symbolsNode;
+}
+
+static xmlNodePtr
+makeSymbolsNodeForRecordType(
+    TypeTableInfo& TTI,
+    const RecordType* RT)
+{
+  assert(RT);
+  if (auto CRD = RT->getAsCXXRecordDecl()) {
+    return makeSymbolsNodeForCXXRecordDecl(TTI, CRD);
+  }
+  auto symbolsNode = xmlNewNode(nullptr, BAD_CAST "symbols");
+  auto RD = RT->getDecl();
+  if (!RD) {
+    return symbolsNode; // empty <symbols>
+  }
+  auto def = RD->getDefinition();
+  if (!def) {
+    return symbolsNode; // empty <symbols>
+  }
+  auto fields = def->fields();
+  for (auto field : fields) {
+    auto idNode = xmlNewNode(nullptr, BAD_CAST "id");
+    xmlNewProp(
+        idNode,
+        BAD_CAST "type",
+        BAD_CAST TTI.getTypeName(field->getType()).c_str());
+    const auto fieldName = field->getIdentifier();
+    if (fieldName) {
+      /* Emit only if the field has name.
+       * Some field does not have name.
+       *  Example: `struct A { int : 0; }; // unnamed bit field`
+       */
+      xmlNewChild(
+          idNode,
+          nullptr,
+          BAD_CAST "name",
+          BAD_CAST fieldName->getName().data());
+    }
+    xmlAddChild(symbolsNode, idNode);
+  }
+  return symbolsNode;
+}
+
+static xmlNodePtr
+makeInheritanceNode(
+    TypeTableInfo& TTI,
+    const CXXRecordDecl* RD)
+{
+  assert(RD);
+  auto inheritanceNode = xmlNewNode(nullptr, BAD_CAST "inheritedFrom");
+  if (! RD->hasDefinition()) {
+    return inheritanceNode; // empty node
+  }
+  const auto def = RD->getDefinition();
+
+  for (auto&& base : def->bases()) {
+    auto typeNode = xmlNewNode(nullptr, BAD_CAST "typeName");
+    xmlNewProp(
+        typeNode,
+        BAD_CAST "ref",
+        BAD_CAST TTI.getTypeName(base.getType()).c_str());
+    xmlNewProp(
+        typeNode,
+        BAD_CAST "access",
+        BAD_CAST AccessSpec(base.getAccessSpecifier()).c_str());
+    xmlNewProp(
+        typeNode,
+        BAD_CAST "is_virtual",
+        BAD_CAST (base.isVirtual() ? "1" : "0"));
+    xmlAddChild(inheritanceNode, typeNode);
+  }
+  return inheritanceNode;
+}
+
 void TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
   bool isQualified = false;
   xmlNodePtr Node = nullptr;
@@ -349,6 +476,19 @@ void TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
         xmlNewProp(Node, BAD_CAST "return_type",
                    BAD_CAST getTypeName(FT->getReturnType()).c_str());
       }
+      if (auto FTP = dyn_cast<FunctionProtoType>(FT)) {
+        auto paramsNode = xmlNewNode(nullptr, BAD_CAST "params");
+        for (auto& paramT : FTP->getParamTypes()) {
+          auto paramNode = xmlNewNode(nullptr, BAD_CAST "name");
+            // FIXME: Add content (parameter name) to <name> element
+          xmlNewProp(
+              paramNode,
+              BAD_CAST "type",
+              BAD_CAST getTypeName(paramT).c_str());
+          xmlAddChild(paramsNode, paramNode);
+        }
+        xmlAddChild(Node, paramsNode);
+      }
       pushType(T, Node);
     }
     break;
@@ -375,6 +515,7 @@ void TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
     break;
 
   case Type::Record:
+  {
     rawname = registerRecordType(T);
     if (T->isStructureType()) {
       Node = createNode(T, "structType", nullptr);
@@ -385,20 +526,54 @@ void TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
     } else if (T->isClassType()) {
       // XXX: temporary implementation
       Node = createNode(T, "classType", nullptr);
+      const auto RD = T->getAsCXXRecordDecl();
+      xmlAddChild(
+          Node,
+          makeInheritanceNode(*this, RD));
       pushType(T, Node);
     } else {
       // XXX: temporary implementation
       Node = createNode(T, "unknownRecordType", nullptr);
       pushType(T, Node);
     }
+    xmlAddChild(
+        Node,
+        makeSymbolsNodeForRecordType(*this, llvm::cast<RecordType>(T)));
+    // T must be of clang::RecordType so able to be casted
     break;
-
+  }
   case Type::Enum:
+  {
     rawname = registerEnumType(T);
     Node = createNode(T, "enumType", nullptr);
+    auto ED = llvm::cast<EnumType>(T)->getDecl();
+    if (!ED) {
+      break;
+    }
+    auto def = ED->getDefinition();
+    if (!def) {
+      /* Forward declaration of enum is available in C++11
+       *  Example : `enum E : unsigned int;`
+       */
+      break;
+    }
+    auto symbolsNode = xmlNewNode(nullptr, BAD_CAST "symbols");
+    auto names = def->enumerators();
+    for (auto name : names) {
+      const auto constantName = name->getIdentifier();
+      assert(constantName);
+      auto idNode = xmlNewNode(nullptr, BAD_CAST "id");
+      xmlNewChild(
+          idNode,
+          nullptr,
+          BAD_CAST "name",
+          BAD_CAST constantName->getName().data());
+      xmlAddChild(symbolsNode, idNode);
+    }
+    xmlAddChild(Node, symbolsNode);
     pushType(T, Node);
     break;
-
+  }
   case Type::Elaborated:
   case Type::Attributed:
   case Type::TemplateTypeParm:
