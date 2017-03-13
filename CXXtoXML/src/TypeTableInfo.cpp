@@ -405,6 +405,26 @@ void TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
       Node = createNode(T, "unknownRecordType", nullptr);
       pushType(T, Node);
     }
+    auto symbolsNode = xmlNewNode(nullptr, BAD_CAST "symbols");
+    auto RD = llvm::cast<RecordType>(T)->getDecl();
+      // T must be of clang::RecordType so able to be casted
+    if (!RD) {
+      break;
+    }
+    if (auto def = RD->getDefinition()) {
+      auto fields = def->fields();
+      for (auto field : fields) {
+        auto idNode = xmlNewNode(nullptr, BAD_CAST "id");
+        xmlNewProp(
+            idNode,
+            BAD_CAST "type",
+            BAD_CAST getTypeName(field->getType()).c_str());
+        auto nameNode = xmlNewNode(nullptr, BAD_CAST "name");
+        xmlAddChild(idNode, nameNode);
+        xmlAddChild(symbolsNode, idNode);
+      }
+    }
+    xmlAddChild(Node, symbolsNode);
     break;
   }
   case Type::Enum:
