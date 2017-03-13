@@ -682,6 +682,13 @@ TypeRef makeStructType(
   return std::make_shared<Struct>(ident, tag, fields);
 }
 
+TypeRef makeClassType(
+    const DataTypeIdent& ident,
+    xmlNodePtr)
+{
+  return std::make_shared<ClassType>(ident, nullptr);
+}
+
 TypeRef
 makeOtherType(const DataTypeIdent& ident) {
   return std::make_shared<OtherType>(ident);

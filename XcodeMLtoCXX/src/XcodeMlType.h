@@ -255,6 +255,7 @@ TypeRef makeArrayType(DataTypeIdent, TypeRef, Array::Size);
 TypeRef makeArrayType(DataTypeIdent, DataTypeIdent, Array::Size);
 TypeRef makeArrayType(DataTypeIdent, DataTypeIdent, size_t);
 TypeRef makeEnumType(const DataTypeIdent&);
+TypeRef makeClassType(const DataTypeIdent&, xmlNodePtr);
 TypeRef makeStructType(const DataTypeIdent&, const CodeFragment&, const Struct::MemberList&);
 TypeRef makeOtherType(const DataTypeIdent&);
 
