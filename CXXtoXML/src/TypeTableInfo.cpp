@@ -419,8 +419,18 @@ void TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
             idNode,
             BAD_CAST "type",
             BAD_CAST getTypeName(field->getType()).c_str());
-        auto nameNode = xmlNewNode(nullptr, BAD_CAST "name");
-        xmlAddChild(idNode, nameNode);
+        const auto fieldName = field->getIdentifier();
+        if (fieldName) {
+          /* Emit only if the field has name.
+           * Some field does not have name.
+           *  Example: `struct A { int : 0; }; // unnamed bit field`
+           */
+          xmlNewChild(
+              idNode,
+              nullptr,
+              BAD_CAST "name",
+              BAD_CAST fieldName->getName().data());
+        }
         xmlAddChild(symbolsNode, idNode);
       }
     }
