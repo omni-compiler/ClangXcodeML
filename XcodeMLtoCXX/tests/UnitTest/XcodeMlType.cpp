@@ -4,12 +4,13 @@
 #include <string>
 #include <vector>
 #include <libxml/tree.h>
+#include "llvm/ADT/Optional.h"
+#include "llvm/Support/Casting.h"
 #include "StringTree.h"
 #include "Symbol.h"
 #include "XcodeMlType.h"
 #include "XcodeMlEnvironment.h"
 #include "XcodeMlType.h"
-#include "llvm/Support/Casting.h"
 
 BOOST_AUTO_TEST_SUITE(xcodeml_type)
 
