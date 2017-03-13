@@ -259,6 +259,9 @@ makeSymbolsNodeForRecordType(
     const RecordType* RT)
 {
   assert(RT);
+  if (auto CRD = RT->getAsCXXRecordDecl()) {
+    return makeSymbolsNodeForCXXRecordDecl(TTI, CRD);
+  }
   auto symbolsNode = xmlNewNode(nullptr, BAD_CAST "symbols");
   auto RD = RT->getDecl();
   if (!RD) {
