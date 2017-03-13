@@ -139,7 +139,14 @@ DEFINE_TA(structTypeProc) {
 
 DEFINE_TA(classTypeProc) {
   XMLString elemName = xmlGetProp(node, BAD_CAST "type");
-  map[elemName] = XcodeMl::makeClassType(elemName, nullptr);
+  XcodeMl::ClassType::Symbols symbols;
+  const auto ids = findNodes(node, "symbols/id", ctxt);
+  for (auto& idElem : ids) {
+    const auto dtident = getProp(idElem, "type");
+    const auto name = getNameFromIdNode(idElem, ctxt);
+    symbols.emplace_back(name, dtident);
+  }
+  map[elemName] = XcodeMl::makeClassType(elemName, symbols);
 }
 
 DEFINE_TA(enumTypeProc) {
