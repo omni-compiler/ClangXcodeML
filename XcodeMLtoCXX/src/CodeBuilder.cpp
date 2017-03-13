@@ -71,11 +71,11 @@ std::string findSymbolType(const SymbolMap& table, const std::string& name) {
     }
   }
   std::stringstream log;
-  log << std::endl << "{";
+  log << std::endl << "{" << std::endl;
   for (auto entry : table) {
     log << "\t{";
     for (auto p : entry) {
-      log << "(" << p.first << "," << p.second << ")";
+      log << "(" << p.first << "," << p.second << "),";
     }
     log << "}" << std::endl;
   }
