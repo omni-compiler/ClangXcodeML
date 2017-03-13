@@ -281,6 +281,9 @@ DEFINE_CB(clangStmtProc) {
 }
 
 DEFINE_CB(emitClassDefinition) {
+  if (isTrueProp(node, "is_implicit", false)) {
+    return makeVoidNode();
+  }
   const auto typeName = getProp(node, "type");
   const auto type = src.typeTable.at(typeName);
   XcodeMl::ClassType* classType =
