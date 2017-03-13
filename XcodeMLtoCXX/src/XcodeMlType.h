@@ -220,16 +220,17 @@ AccessSpec accessSpec_of_string(const std::string&);
 
 class ClassType : public Type {
 public:
+  using ClassName = llvm::Optional<CodeFragment>;
   ClassType(const DataTypeIdent&, const CodeFragment&);
   CodeFragment makeDeclaration(CodeFragment, const Environment&) override;
   ~ClassType() override = default;
   Type* clone() const override;
-  CodeFragment name() const;
+  ClassName name() const;
   static bool classof(const Type *);
 protected:
   ClassType(const ClassType&);
 private:
-  CodeFragment name_;
+  ClassName name_;
 };
 
 class OtherType : public Type {

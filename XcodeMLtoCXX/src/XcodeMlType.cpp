@@ -528,7 +528,7 @@ CodeFragment ClassType::makeDeclaration(
     CodeFragment var,
     const Environment&
 ) {
-  return name_ + var;
+  return *name_ + var;
 }
 
 Type* ClassType::clone() const {
@@ -536,7 +536,7 @@ Type* ClassType::clone() const {
   return copy;
 }
 
-CodeFragment ClassType::name() const {
+ClassType::ClassName ClassType::name() const {
   return name_;
 }
 
