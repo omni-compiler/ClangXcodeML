@@ -342,6 +342,19 @@ CodeFragment Struct::makeDeclaration(CodeFragment var, const Environment&)
   return makeTokenNode("struct") + tag + var;
 }
 
+CodeFragment
+Struct::makeStructDefinition(const Environment& env) const {
+  auto body = makeVoidNode();
+  for (auto& field : fields) {
+    body = body + field.makeDeclaration(env);
+  }
+  return makeTokenNode("struct")
+    + makeTokenNode("{")
+    + body
+    + makeTokenNode("}")
+    + makeTokenNode(";");
+}
+
 Struct::~Struct() = default;
 
 Type* Struct::clone() const {

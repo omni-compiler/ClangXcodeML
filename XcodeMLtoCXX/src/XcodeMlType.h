@@ -161,6 +161,7 @@ public:
 public:
   Struct(const DataTypeIdent&, const CodeFragment&, const MemberList&);
   CodeFragment makeDeclaration(CodeFragment, const Environment&) override;
+  CodeFragment makeStructDefinition(const Environment&) const;
   ~Struct() override;
   Type* clone() const override;
   void setTagName(const CodeFragment&);
