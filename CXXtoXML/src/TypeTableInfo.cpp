@@ -313,6 +313,10 @@ makeInheritanceNode(
         typeNode,
         BAD_CAST "ref",
         BAD_CAST TTI.getTypeName(base.getType()).c_str());
+    xmlNewProp(
+        typeNode,
+        BAD_CAST "access",
+        BAD_CAST AccessSpec(base.getAccessSpecifier()).c_str());
     xmlAddChild(inheritanceNode, typeNode);
   }
   return inheritanceNode;
