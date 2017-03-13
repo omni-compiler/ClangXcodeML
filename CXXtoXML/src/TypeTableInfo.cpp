@@ -438,11 +438,12 @@ void TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
     break;
   }
   case Type::Enum:
+  {
     rawname = registerEnumType(T);
     Node = createNode(T, "enumType", nullptr);
     pushType(T, Node);
     break;
-
+  }
   case Type::Elaborated:
   case Type::Attributed:
   case Type::TemplateTypeParm:
