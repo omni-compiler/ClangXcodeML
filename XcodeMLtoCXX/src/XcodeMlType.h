@@ -156,33 +156,6 @@ private:
 
 class Struct : public Type {
 public:
-  class BitSize { /* represents a size of bit-field */
-  public:
-    BitSize();
-    BitSize(size_t);
-    bool isValid() const;
-    size_t size() const;
-  private:
-    bool valid;
-    size_t size_;
-  };
-
-  class Member {
-  public:
-    Member() = delete;
-    Member(const DataTypeIdent&, const CodeFragment&);
-    Member(const DataTypeIdent&, const CodeFragment&, size_t);
-    Member(const Member&) = default;
-    ~Member() = default;
-    DataTypeIdent type() const;
-    CodeFragment name() const;
-    bool isBitField() const;
-    size_t getSize() const;
-  private:
-    DataTypeIdent dataTypeIdent;
-    CodeFragment name_;
-    BitSize size;
-  };
   using MemberList = std::vector<MemberDecl>;
 
 public:

@@ -371,60 +371,6 @@ CodeFragment Struct::tagName() const {
   return tag;
 }
 
-Struct::BitSize::BitSize():
-  valid(false),
-  size_(0)
-{}
-
-Struct::BitSize::BitSize(size_t s):
-  valid(true),
-  size_(s)
-{}
-
-bool Struct::BitSize::isValid() const {
-  return valid;
-}
-
-size_t Struct::BitSize::size() const {
-  return size_;
-}
-
-Struct::Member::Member(
-    const DataTypeIdent& type,
-    const CodeFragment& name
-):
-  dataTypeIdent(type),
-  name_(name),
-  size()
-{}
-
-Struct::Member::Member(
-    const DataTypeIdent& type,
-    const CodeFragment& name,
-    size_t s
-):
-  dataTypeIdent(type),
-  name_(name),
-  size(s)
-{}
-
-DataTypeIdent Struct::Member::type() const {
-  return dataTypeIdent;
-}
-
-CodeFragment Struct::Member::name() const {
-  return name_;
-}
-
-bool Struct::Member::isBitField() const {
-  return size.isValid();
-}
-
-size_t Struct::Member::getSize() const {
-  assert(isBitField());
-  return size.size();
-}
-
 EnumType::EnumType(
     const DataTypeIdent& ident,
     const EnumType::EnumName& name):
