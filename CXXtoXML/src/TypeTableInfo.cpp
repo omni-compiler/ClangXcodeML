@@ -518,6 +518,10 @@ void TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
     } else if (T->isClassType()) {
       // XXX: temporary implementation
       Node = createNode(T, "classType", nullptr);
+      const auto RD = T->getAsCXXRecordDecl();
+      xmlAddChild(
+          Node,
+          makeInheritanceNode(*this, RD));
       pushType(T, Node);
     } else {
       // XXX: temporary implementation
