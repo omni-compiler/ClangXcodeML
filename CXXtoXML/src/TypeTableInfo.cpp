@@ -205,16 +205,16 @@ makeSymbolsNodeForRecordType(
     const RecordType* RT)
 {
   assert(RT);
+  auto symbolsNode = xmlNewNode(nullptr, BAD_CAST "symbols");
   auto RD = RT->getDecl();
   if (!RD) {
-    return nullptr;
+    return symbolsNode; // empty <symbols>
   }
   auto def = RD->getDefinition();
   if (!def) {
-    return nullptr;
+    return symbolsNode; // empty <symbols>
   }
   auto fields = def->fields();
-  auto symbolsNode = xmlNewNode(nullptr, BAD_CAST "symbols");
   for (auto field : fields) {
     auto idNode = xmlNewNode(nullptr, BAD_CAST "id");
     xmlNewProp(
