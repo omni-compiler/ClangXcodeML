@@ -13,11 +13,12 @@
 
         <!-- C++ class declaration -->
         <xsl:when test="@class = 'CXXRecord'">
-          <!--
-          <id>
-            <name><xsl:value-of select="name" /></name>
+          <id sclass="class_name">
+            <xsl:attribute name="type">
+              <xsl:value-of select="@xcodemlType" />
+            </xsl:attribute>
+            <xsl:copy-of select="name" />
           </id>
-          -->
           <xsl:call-template name="emit-id-lists-in-class" />
         </xsl:when>
 
