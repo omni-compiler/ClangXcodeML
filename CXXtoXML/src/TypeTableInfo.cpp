@@ -200,6 +200,60 @@ void TypeTableInfo::pushType(const QualType& T, xmlNodePtr node) {
 }
 
 static xmlNodePtr
+makeSymbolsNodeForCXXRecordDecl(
+    TypeTableInfo& TTI,
+    const CXXRecordDecl* RD)
+{
+  assert(RD);
+  auto symbolsNode = xmlNewNode(nullptr, BAD_CAST "symbols");
+  if (! RD->hasDefinition()) {
+    return symbolsNode; // empty <symbols>
+  }
+  auto def = RD->getDefinition();
+
+  // data members
+  for (auto&& field : def->fields()) {
+    auto idNode = xmlNewNode(nullptr, BAD_CAST "id");
+    xmlNewProp(
+        idNode,
+        BAD_CAST "type",
+        BAD_CAST TTI.getTypeName(field->getType()).c_str());
+    const auto fieldName = field->getIdentifier();
+    if (fieldName) {
+      /* Emit only if the field has name.
+       * Some field does not have name.
+       *  Example: `struct A { int : 0; }; // unnamed bit field`
+       */
+      xmlNewChild(
+          idNode,
+          nullptr,
+          BAD_CAST "name",
+          BAD_CAST fieldName->getName().data());
+    }
+    xmlAddChild(symbolsNode, idNode);
+  }
+
+  // static or non-static member functions
+  for (auto&& method : def->methods()) {
+    auto idNode = xmlNewNode(nullptr, BAD_CAST "id");
+    xmlNewProp(
+        idNode,
+        BAD_CAST "type",
+        BAD_CAST TTI.getTypeName(method->getType()).c_str());
+    const auto name = method->getIdentifier();
+    assert(name);
+    xmlNewChild(
+        idNode,
+        nullptr,
+        BAD_CAST "name",
+        BAD_CAST name->getName().data());
+    xmlAddChild(symbolsNode, idNode);
+  }
+
+  return symbolsNode;
+}
+
+static xmlNodePtr
 makeSymbolsNodeForRecordType(
     TypeTableInfo& TTI,
     const RecordType* RT)
