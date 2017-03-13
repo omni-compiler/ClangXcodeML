@@ -41,8 +41,7 @@ DEFINE_SB(typedefNameProc) {
     return makeVoidNode();
   }
   const auto alias = getNameFromIdNode(node, src.ctxt);
-  const auto type = src.typeTable.at(
-      static_cast<XMLString>(xmlGetProp(node, BAD_CAST "type")));
+  const auto type = src.typeTable.at(getProp(node, "type"));
   return
     makeTokenNode("typedef") +
     makeDecl(type, makeTokenNode(alias), src.typeTable) +
