@@ -25,6 +25,7 @@
         <!-- typedef declaration -->
         <xsl:when test="@class = 'Typedef'">
           <id sclass="typedef_name">
+            <xsl:copy-of select="@*" />
             <xsl:attribute name="type">
               <xsl:value-of select="@xcodemlTypedefType" />
             </xsl:attribute>
