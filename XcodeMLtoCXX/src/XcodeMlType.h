@@ -221,7 +221,9 @@ AccessSpec accessSpec_of_string(const std::string&);
 class ClassType : public Type {
 public:
   using ClassName = llvm::Optional<CodeFragment>;
-  ClassType(const DataTypeIdent&, const CodeFragment&);
+  using MemberName = std::string;
+  using Symbols = std::vector<std::tuple<MemberName, DataTypeIdent>>;
+  ClassType(const DataTypeIdent&, const CodeFragment&, const Symbols&);
   CodeFragment makeDeclaration(CodeFragment, const Environment&) override;
   ~ClassType() override = default;
   Type* clone() const override;
@@ -232,6 +234,7 @@ protected:
   ClassType(const ClassType&);
 private:
   ClassName name_;
+  Symbols classScopeSymbols;
 };
 
 class OtherType : public Type {

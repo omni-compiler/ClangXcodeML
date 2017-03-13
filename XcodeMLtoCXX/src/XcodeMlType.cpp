@@ -519,9 +519,11 @@ AccessSpec accessSpec_of_string(const std::string& as) {
 
 ClassType::ClassType(
     const DataTypeIdent& ident,
-    const CodeFragment& className):
+    const CodeFragment& className,
+    const ClassType::Symbols& symbols):
   Type(TypeKind::Class, ident),
-  name_(className)
+  name_(className),
+  classScopeSymbols(symbols)
 {}
 
 CodeFragment ClassType::makeDeclaration(
@@ -551,7 +553,8 @@ bool ClassType::classof(const Type *T) {
 
 ClassType::ClassType(const ClassType& other):
   Type(other),
-  name_(other.name_)
+  name_(other.name_),
+  classScopeSymbols(other.classScopeSymbols)
 {}
 
 OtherType::OtherType(const DataTypeIdent& ident):
