@@ -286,16 +286,17 @@ DEFINE_CB(emitClassDefinition) {
   }
   const auto typeName = getProp(node, "type");
   const auto type = src.typeTable.at(typeName);
-  XcodeMl::ClassType* classType =
-    llvm::cast<XcodeMl::ClassType>(type.get());
-  auto declNode = classType->getNode();
-  if (!declNode) {
-    return  makeTokenNode("class") +
-            classType->name() +
-            makeTokenNode(";") +
-            makeNewLineNode();
-  }
-  return w.walk(declNode, src) + makeTokenNode(";");
+  auto classType = llvm::dyn_cast<XcodeMl::ClassType>(type.get());
+  assert(classType);
+  const auto className = classType->name();
+  return
+    makeTokenNode("class") +
+    (className.hasValue() ? *className : makeVoidNode()) +
+    makeTokenNode("{") +
+    separateByBlankLines(w.walkChildren(node, src)) +
+    makeTokenNode("}") +
+    makeTokenNode(";") +
+    makeNewLineNode();
 }
 
 DEFINE_CB(functionDefinitionProc) {
