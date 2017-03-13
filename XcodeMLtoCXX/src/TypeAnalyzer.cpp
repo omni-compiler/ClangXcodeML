@@ -102,22 +102,23 @@ DEFINE_TA(arrayTypeProc) {
   map[name] = array;
 }
 
-static XcodeMl::Struct::Member makeMember(xmlNodePtr idNode) {
+static XcodeMl::MemberDecl
+makeMember(xmlNodePtr idNode) {
   XMLString type = xmlGetProp(idNode, BAD_CAST "type");
   XMLString name = xmlNodeGetContent(xmlFirstElementChild(idNode));
   if (!xmlHasProp(idNode, BAD_CAST "bit_field")) {
-    return XcodeMl::Struct::Member(
+    return XcodeMl::MemberDecl(
         type,
         makeTokenNode( name ));
   }
   XMLString bit_size = xmlGetProp(idNode, BAD_CAST "bit_field");
   if (!isNaturalNumber(bit_size)) {
-    return XcodeMl::Struct::Member(
+    return XcodeMl::MemberDecl(
         type,
         makeTokenNode(name));
       // FIXME: Don't ignore <bitField> element
   }
-  return XcodeMl::Struct::Member(
+  return XcodeMl::MemberDecl(
       type,
       makeTokenNode( name ),
       std::stoi(bit_size));
@@ -125,7 +126,7 @@ static XcodeMl::Struct::Member makeMember(xmlNodePtr idNode) {
 
 DEFINE_TA(structTypeProc) {
   XMLString elemName = xmlGetProp(node, BAD_CAST "type");
-  std::vector<XcodeMl::Struct::Member> fields;
+  XcodeMl::Struct::MemberList fields;
   const auto symbols = findNodes(node, "symbols/id", ctxt);
   for (auto& symbol : symbols) {
     fields.push_back(makeMember(symbol));
