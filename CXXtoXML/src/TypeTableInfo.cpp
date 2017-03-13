@@ -441,6 +441,31 @@ void TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
   {
     rawname = registerEnumType(T);
     Node = createNode(T, "enumType", nullptr);
+    auto ED = llvm::cast<EnumType>(T)->getDecl();
+    if (!ED) {
+      break;
+    }
+    auto def = ED->getDefinition();
+    if (!def) {
+      /* Forward declaration of enum is available in C++11
+       *  Example : `enum E : unsigned int;`
+       */
+      break;
+    }
+    auto symbolsNode = xmlNewNode(nullptr, BAD_CAST "symbols");
+    auto names = def->enumerators();
+    for (auto name : names) {
+      const auto constantName = name->getIdentifier();
+      assert(constantName);
+      auto idNode = xmlNewNode(nullptr, BAD_CAST "id");
+      xmlNewChild(
+          idNode,
+          nullptr,
+          BAD_CAST "name",
+          BAD_CAST constantName->getName().data());
+      xmlAddChild(symbolsNode, idNode);
+    }
+    xmlAddChild(Node, symbolsNode);
     pushType(T, Node);
     break;
   }
