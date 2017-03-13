@@ -438,24 +438,28 @@ UnionType::UnionType(
     const UnionType::UnionName& name):
   Type(TypeKind::Union, ident),
   name_(name),
-  declBody(makeVoidNode())
+  members()
 {}
 
 UnionType::UnionType(
     const DataTypeIdent& ident,
     const UnionType::UnionName& name,
-    const CodeFragment& d):
+    const std::vector<MemberDecl>& v):
   Type(TypeKind::Union, ident),
   name_(name),
-  declBody(d)
+  members(v)
 {}
 
 CodeFragment
-UnionType::makeDeclaration(CodeFragment var, const Environment&) {
+UnionType::makeDeclaration(CodeFragment var, const Environment& env) {
+  auto memberDecls = makeVoidNode();
+  for (auto& member : members) {
+    memberDecls = memberDecls + member.makeDeclaration(env);
+  }
   return
     makeTokenNode("union") +
     (name_ ? (*name_) : makeVoidNode()) +
-    declBody +
+    memberDecls +
     var;
 }
 
@@ -479,7 +483,7 @@ UnionType::setName(const std::string& enum_name) {
 UnionType::UnionType(const UnionType& other):
   Type(other),
   name_(other.name_),
-  declBody(other.declBody)
+  members(other.members)
 {}
 
 std::string string_of_accessSpec(AccessSpec as) {

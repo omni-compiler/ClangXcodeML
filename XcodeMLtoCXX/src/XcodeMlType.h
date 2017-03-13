@@ -196,7 +196,7 @@ class UnionType : public Type {
 public:
   using UnionName = llvm::Optional<CodeFragment>;
   UnionType(const DataTypeIdent&, const UnionName&);
-  UnionType(const DataTypeIdent&, const UnionName&, const CodeFragment&);
+  UnionType(const DataTypeIdent&, const UnionName&, const std::vector<MemberDecl>&);
   ~UnionType() override = default;
   CodeFragment makeDeclaration(CodeFragment, const Environment&) override;
   Type* clone() const override;
@@ -206,7 +206,7 @@ protected:
   UnionType(const UnionType&);
 private:
   UnionName name_;
-  CodeFragment declBody;
+  std::vector<MemberDecl> members;
 };
 
 enum class AccessSpec {
