@@ -349,6 +349,19 @@ void TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
         xmlNewProp(Node, BAD_CAST "return_type",
                    BAD_CAST getTypeName(FT->getReturnType()).c_str());
       }
+      if (auto FTP = dyn_cast<FunctionProtoType>(FT)) {
+        auto paramsNode = xmlNewNode(nullptr, BAD_CAST "params");
+        for (auto& paramT : FTP->getParamTypes()) {
+          auto paramNode = xmlNewNode(nullptr, BAD_CAST "name");
+            // FIXME: Add content (parameter name) to <name> element
+          xmlNewProp(
+              paramNode,
+              BAD_CAST "type",
+              BAD_CAST getTypeName(paramT).c_str());
+          xmlAddChild(paramsNode, paramNode);
+        }
+        xmlAddChild(Node, paramsNode);
+      }
       pushType(T, Node);
     }
     break;
