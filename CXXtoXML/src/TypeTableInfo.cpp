@@ -199,6 +199,45 @@ void TypeTableInfo::pushType(const QualType& T, xmlNodePtr node) {
   TypeElements[T] = node;
 }
 
+static xmlNodePtr
+makeSymbolsNodeForRecordType(
+    TypeTableInfo& TTI,
+    const RecordType* RT)
+{
+  assert(RT);
+  auto RD = RT->getDecl();
+  if (!RD) {
+    return nullptr;
+  }
+  auto def = RD->getDefinition();
+  if (!def) {
+    return nullptr;
+  }
+  auto fields = def->fields();
+  auto symbolsNode = xmlNewNode(nullptr, BAD_CAST "symbols");
+  for (auto field : fields) {
+    auto idNode = xmlNewNode(nullptr, BAD_CAST "id");
+    xmlNewProp(
+        idNode,
+        BAD_CAST "type",
+        BAD_CAST TTI.getTypeName(field->getType()).c_str());
+    const auto fieldName = field->getIdentifier();
+    if (fieldName) {
+      /* Emit only if the field has name.
+       * Some field does not have name.
+       *  Example: `struct A { int : 0; }; // unnamed bit field`
+       */
+      xmlNewChild(
+          idNode,
+          nullptr,
+          BAD_CAST "name",
+          BAD_CAST fieldName->getName().data());
+    }
+    xmlAddChild(symbolsNode, idNode);
+  }
+  return symbolsNode;
+}
+
 void TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
   bool isQualified = false;
   xmlNodePtr Node = nullptr;
@@ -405,36 +444,10 @@ void TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
       Node = createNode(T, "unknownRecordType", nullptr);
       pushType(T, Node);
     }
-    auto symbolsNode = xmlNewNode(nullptr, BAD_CAST "symbols");
-    auto RD = llvm::cast<RecordType>(T)->getDecl();
-      // T must be of clang::RecordType so able to be casted
-    if (!RD) {
-      break;
-    }
-    if (auto def = RD->getDefinition()) {
-      auto fields = def->fields();
-      for (auto field : fields) {
-        auto idNode = xmlNewNode(nullptr, BAD_CAST "id");
-        xmlNewProp(
-            idNode,
-            BAD_CAST "type",
-            BAD_CAST getTypeName(field->getType()).c_str());
-        const auto fieldName = field->getIdentifier();
-        if (fieldName) {
-          /* Emit only if the field has name.
-           * Some field does not have name.
-           *  Example: `struct A { int : 0; }; // unnamed bit field`
-           */
-          xmlNewChild(
-              idNode,
-              nullptr,
-              BAD_CAST "name",
-              BAD_CAST fieldName->getName().data());
-        }
-        xmlAddChild(symbolsNode, idNode);
-      }
-    }
-    xmlAddChild(Node, symbolsNode);
+    xmlAddChild(
+        Node,
+        makeSymbolsNodeForRecordType(*this, llvm::cast<RecordType>(T)));
+    // T must be of clang::RecordType so able to be casted
     break;
   }
   case Type::Enum:
