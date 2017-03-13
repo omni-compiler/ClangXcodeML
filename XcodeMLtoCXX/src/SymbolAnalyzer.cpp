@@ -46,10 +46,21 @@ DEFINE_SA(tagnameProc) {
 
 }
 
+DEFINE_SA(classNameProc) {
+  const auto dataTypeIdent = getProp(node, "type");
+  auto typeref = map.at(dataTypeIdent);
+  const auto name = getNameFromIdNode(node, ctxt);
+  auto CT = llvm::dyn_cast<XcodeMl::ClassType>(typeref.get());
+  assert(CT);
+  CT->setName(name);
+}
+
+
 const SymbolAnalyzer CXXSymbolAnalyzer (
     "sclass",
     {
       { "tagname", tagnameProc },
+      { "class_name", classNameProc },
     });
 
 void analyzeSymbols(
