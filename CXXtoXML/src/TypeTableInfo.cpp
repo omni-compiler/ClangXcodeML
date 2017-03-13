@@ -232,11 +232,15 @@ makeSymbolsNodeForCXXRecordDecl(
        * Some field does not have name.
        *  Example: `struct A { int : 0; }; // unnamed bit field`
        */
-      xmlNewChild(
+      auto nameNode = xmlNewChild(
           idNode,
           nullptr,
           BAD_CAST "name",
           BAD_CAST fieldName->getName().data());
+      xmlNewProp(
+          nameNode,
+          BAD_CAST "name_kind",
+          BAD_CAST "name");
     }
     xmlAddChild(symbolsNode, idNode);
   }
@@ -250,11 +254,15 @@ makeSymbolsNodeForCXXRecordDecl(
         BAD_CAST TTI.getTypeName(method->getType()).c_str());
     const auto name = method->getIdentifier();
     assert(name);
-    xmlNewChild(
+    auto nameNode = xmlNewChild(
         idNode,
         nullptr,
         BAD_CAST "name",
         BAD_CAST name->getName().data());
+    xmlNewProp(
+        nameNode,
+        BAD_CAST "name_kind",
+        BAD_CAST "name");
     xmlAddChild(symbolsNode, idNode);
   }
 
@@ -292,11 +300,15 @@ makeSymbolsNodeForRecordType(
        * Some field does not have name.
        *  Example: `struct A { int : 0; }; // unnamed bit field`
        */
-      xmlNewChild(
+      auto nameNode = xmlNewChild(
           idNode,
           nullptr,
           BAD_CAST "name",
           BAD_CAST fieldName->getName().data());
+      xmlNewProp(
+          nameNode,
+          BAD_CAST "name_kind",
+          BAD_CAST "name");
     }
     xmlAddChild(symbolsNode, idNode);
   }
@@ -514,6 +526,10 @@ void TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
               paramNode,
               BAD_CAST "type",
               BAD_CAST getTypeName(paramT).c_str());
+          xmlNewProp(
+              paramNode,
+              BAD_CAST "name_kind",
+              BAD_CAST "name");
           xmlAddChild(paramsNode, paramNode);
         }
         xmlAddChild(Node, paramsNode);
@@ -598,11 +614,15 @@ void TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
       const auto constantName = name->getIdentifier();
       assert(constantName);
       auto idNode = xmlNewNode(nullptr, BAD_CAST "id");
-      xmlNewChild(
+      auto nameNode = xmlNewChild(
           idNode,
           nullptr,
           BAD_CAST "name",
           BAD_CAST constantName->getName().data());
+      xmlNewProp(
+          nameNode,
+          BAD_CAST "name_kind",
+          BAD_CAST "name");
       xmlAddChild(symbolsNode, idNode);
     }
     xmlAddChild(Node, symbolsNode);
