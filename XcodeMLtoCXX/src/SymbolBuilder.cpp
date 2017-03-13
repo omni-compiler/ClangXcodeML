@@ -53,21 +53,7 @@ static StringTreeRef emitStructDefinition(
     const XcodeMl::TypeRef type
 ) {
   XcodeMl::Struct* structType = llvm::cast<XcodeMl::Struct>(type.get());
-  auto acc =
-    makeTokenNode("struct") +
-    structType->tagName() +
-    makeTokenNode("{");
-  for (auto member : structType->members()) {
-    const auto memberType = src.typeTable.at(member.type());
-    acc = acc + makeDecl(memberType, member.name(), src.typeTable);
-    if (member.isBitField()) {
-      acc = acc +
-            makeTokenNode(":") +
-            makeTokenNode(std::to_string(member.getSize()));
-    }
-    acc = acc + makeTokenNode(";");
-  }
-  return acc + makeTokenNode("};");
+  return structType->makeStructDefinition(src.typeTable);
 }
 
 DEFINE_SB(tagnameProc) {
