@@ -28,6 +28,7 @@ void XPathObjectReleaser::operator() (xmlXPathObjectPtr ptr) {
  * \return The first element that matches \c xpathExpr.
  */
 xmlNodePtr findFirst(xmlNodePtr node, const char* xpathExpr, xmlXPathContextPtr xpathCtxt) {
+  assert(node);
   xmlXPathObjectPtr xpathObj = getNodeSet(node, xpathExpr, xpathCtxt);
   if (!xpathObj) {
     return nullptr;
