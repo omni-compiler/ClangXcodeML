@@ -295,6 +295,29 @@ makeSymbolsNodeForRecordType(
   return symbolsNode;
 }
 
+static xmlNodePtr
+makeInheritanceNode(
+    TypeTableInfo& TTI,
+    const CXXRecordDecl* RD)
+{
+  assert(RD);
+  auto inheritanceNode = xmlNewNode(nullptr, BAD_CAST "inheritedFrom");
+  if (! RD->hasDefinition()) {
+    return inheritanceNode; // empty node
+  }
+  const auto def = RD->getDefinition();
+
+  for (auto&& base : def->bases()) {
+    auto typeNode = xmlNewNode(nullptr, BAD_CAST "typeName");
+    xmlNewProp(
+        typeNode,
+        BAD_CAST "ref",
+        BAD_CAST TTI.getTypeName(base.getType()).c_str());
+    xmlAddChild(inheritanceNode, typeNode);
+  }
+  return inheritanceNode;
+}
+
 void TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
   bool isQualified = false;
   xmlNodePtr Node = nullptr;
