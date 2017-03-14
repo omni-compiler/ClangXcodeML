@@ -57,29 +57,19 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
   setLocation(S->getLocStart());
 
  if (auto FS = dyn_cast<ForStmt>(S)) {
-   if (auto init = FS->getInit()) {
-     TraverseStmt(init);
+   const std::vector<std::tuple<const char*, Stmt*>> children = {
+     std::make_tuple( "init", FS->getInit() ),
+     std::make_tuple( "cond", FS->getCond() ),
+     std::make_tuple( "iter", FS->getInc() ),
+     std::make_tuple( "body", FS->getBody() ),
+   };
+   for (auto& child : children) {
+     const char* kind; Stmt* stmt;
+     std::tie(kind, stmt) = child;
+     TraverseStmt(stmt);
      xmlNewProp(
          xmlGetLastChild(curNode),
-         BAD_CAST "for_stmt_kind", BAD_CAST "init");
-   }
-   if (auto cond = FS->getCond()) {
-     TraverseStmt(cond);
-     xmlNewProp(
-         xmlGetLastChild(curNode),
-         BAD_CAST "for_stmt_kind", BAD_CAST "cond");
-   }
-   if (auto iter = FS->getInc()) {
-     TraverseStmt(iter);
-     xmlNewProp(
-         xmlGetLastChild(curNode),
-         BAD_CAST "for_stmt_kind", BAD_CAST "iter");
-   }
-   if (auto body = FS->getBody()) {
-     TraverseStmt(body);
-     xmlNewProp(
-         xmlGetLastChild(curNode),
-         BAD_CAST "for_stmt_kind", BAD_CAST "body");
+         BAD_CAST "for_stmt_kind", BAD_CAST kind);
    }
    return false; // already traversed
  }
