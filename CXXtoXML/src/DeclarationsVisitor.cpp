@@ -56,6 +56,24 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
   newProp("class", S->getStmtClassName());
   setLocation(S->getLocStart());
 
+ if (auto FS = dyn_cast<ForStmt>(S)) {
+   const std::vector<std::tuple<const char*, Stmt*>> children = {
+     std::make_tuple( "init", FS->getInit() ),
+     std::make_tuple( "cond", FS->getCond() ),
+     std::make_tuple( "iter", FS->getInc() ),
+     std::make_tuple( "body", FS->getBody() ),
+   };
+   for (auto& child : children) {
+     const char* kind; Stmt* stmt;
+     std::tie(kind, stmt) = child;
+     TraverseStmt(stmt);
+     xmlNewProp(
+         xmlGetLastChild(curNode),
+         BAD_CAST "for_stmt_kind", BAD_CAST kind);
+   }
+   return false; // already traversed
+ }
+
   const BinaryOperator *BO = dyn_cast<const BinaryOperator>(S);
   if (BO) {
     auto namePtr = BOtoElemName(BO->getOpcode());
@@ -213,6 +231,24 @@ DeclarationsVisitor::PreVisitAttr(Attr *A) {
   return true;
 }
 
+static const char*
+getNameKind(NamedDecl* ND) {
+  auto FD = dyn_cast<FunctionDecl>(ND);
+  if (!FD) {
+    return "name";
+  }
+  if (FD->isOverloadedOperator()) {
+    return "operator";
+  }
+  if (isa<CXXConstructorDecl>(FD)) {
+    return "constructor";
+  }
+  if (isa<CXXDestructorDecl>(FD)) {
+    return "constructor";
+  }
+  return "name";
+}
+
 bool
 DeclarationsVisitor::PreVisitDecl(Decl *D) {
   if (!D) {
@@ -245,7 +281,15 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
 
   NamedDecl *ND = dyn_cast<NamedDecl>(D);
   if (ND) {
-    addChild("fullName", ND->getQualifiedNameAsString().c_str());
+    auto nameNode = addChild("name", ND->getNameAsString().c_str());
+    xmlNewProp(
+        nameNode,
+        BAD_CAST "fullName",
+        BAD_CAST ND->getQualifiedNameAsString().c_str());
+    xmlNewProp(
+        nameNode,
+        BAD_CAST "name_kind",
+        BAD_CAST getNameKind(ND));
     if (ND->isLinkageValid()) {
       const auto FL = ND->getFormalLinkage(),
                  LI = ND->getLinkageInternal();
@@ -267,6 +311,12 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
   if (auto TD = dyn_cast<TypeDecl>(D)) {
     const auto T = QualType( TD->getTypeForDecl(), 0 );
     newProp("xcodemlType", typetableinfo->getTypeName(T).c_str());
+  }
+
+  if (auto TND = dyn_cast<TypedefNameDecl>(D)) {
+    const auto T = TND->getUnderlyingType();
+    newProp( "xcodemlTypedefType",
+        typetableinfo->getTypeName(T).c_str());
   }
 
   if (auto VD = dyn_cast<VarDecl>(D)) {

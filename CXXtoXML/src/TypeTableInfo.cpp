@@ -38,15 +38,6 @@ static std::ifstream mapfile;
 static bool map_is_already_set = false;
 static std::map<std::string, std::string> typenamemap;
 
-static std::string
-make_comment(Decl *decl, std::string message) {
-  std::string comment("PreVisitDecl::");
-  comment += decl->getDeclKindName();
-  comment += ": ";
-  comment += message;
-  return comment;
-}
-
 TypeTableInfo::TypeTableInfo(MangleContext *MC, InheritanceInfo *II) :
   mangleContext(MC),
   inheritanceinfo(II)
@@ -137,12 +128,13 @@ std::string TypeTableInfo::registerRecordType(QualType T){
   assert(name.empty());
 
   raw_string_ostream OS(name);
-  if (T->isStructureType()) {
+  if (T->getAsCXXRecordDecl()) {
+    OS << "Class" << seqForStructType++;
+    // XXX: temporary implementation
+  } else if (T->isStructureType()) {
     OS << "Struct" << seqForStructType++;
   } else if (T->isUnionType()) {
     OS << "Union" << seqForUnionType++;
-  } else if (T->isClassType()) {
-    OS << "Class" << seqForClassType++;
   } else {
     abort();
   }
@@ -199,6 +191,46 @@ void TypeTableInfo::pushType(const QualType& T, xmlNodePtr node) {
   TypeElements[T] = node;
 }
 
+static const char*
+getTagKindAsString(clang::TagTypeKind ttk) {
+  switch (ttk) {
+    case TTK_Struct:
+      return "struct";
+    case TTK_Union:
+      return "union";
+    case TTK_Class:
+      return "class";
+    case TTK_Enum:
+      return "enum";
+    case TTK_Interface:
+      return "__interface__";
+  }
+}
+
+static xmlNodePtr
+makeIdNodeForCXXMethodDecl(
+    TypeTableInfo& TTI,
+    const CXXMethodDecl* method)
+{
+  auto idNode = xmlNewNode(nullptr, BAD_CAST "id");
+  xmlNewProp(
+      idNode,
+      BAD_CAST "type",
+      BAD_CAST TTI.getTypeName(method->getType()).c_str());
+  const auto name = method->getIdentifier();
+  assert(name);
+  auto nameNode = xmlNewChild(
+      idNode,
+      nullptr,
+      BAD_CAST "name",
+      BAD_CAST name->getName().data());
+  xmlNewProp(
+      nameNode,
+      BAD_CAST "name_kind",
+      BAD_CAST "name");
+  return idNode;
+}
+
 static xmlNodePtr
 makeSymbolsNodeForCXXRecordDecl(
     TypeTableInfo& TTI,
@@ -224,29 +256,22 @@ makeSymbolsNodeForCXXRecordDecl(
        * Some field does not have name.
        *  Example: `struct A { int : 0; }; // unnamed bit field`
        */
-      xmlNewChild(
+      auto nameNode = xmlNewChild(
           idNode,
           nullptr,
           BAD_CAST "name",
           BAD_CAST fieldName->getName().data());
+      xmlNewProp(
+          nameNode,
+          BAD_CAST "name_kind",
+          BAD_CAST "name");
     }
     xmlAddChild(symbolsNode, idNode);
   }
 
   // static or non-static member functions
   for (auto&& method : def->methods()) {
-    auto idNode = xmlNewNode(nullptr, BAD_CAST "id");
-    xmlNewProp(
-        idNode,
-        BAD_CAST "type",
-        BAD_CAST TTI.getTypeName(method->getType()).c_str());
-    const auto name = method->getIdentifier();
-    assert(name);
-    xmlNewChild(
-        idNode,
-        nullptr,
-        BAD_CAST "name",
-        BAD_CAST name->getName().data());
+    auto idNode = makeIdNodeForCXXMethodDecl(TTI, method);
     xmlAddChild(symbolsNode, idNode);
   }
 
@@ -284,11 +309,15 @@ makeSymbolsNodeForRecordType(
        * Some field does not have name.
        *  Example: `struct A { int : 0; }; // unnamed bit field`
        */
-      xmlNewChild(
+      auto nameNode = xmlNewChild(
           idNode,
           nullptr,
           BAD_CAST "name",
           BAD_CAST fieldName->getName().data());
+      xmlNewProp(
+          nameNode,
+          BAD_CAST "name_kind",
+          BAD_CAST "name");
     }
     xmlAddChild(symbolsNode, idNode);
   }
@@ -396,22 +425,43 @@ void TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
 
   case Type::Pointer:
   case Type::BlockPointer:
-  case Type::LValueReference:
-  case Type::RValueReference:
   case Type::MemberPointer:
     {
       const PointerType *PT = dyn_cast<const PointerType>(T.getTypePtr());
       if (PT) {
         registerType(PT->getPointeeType(), nullptr, nullptr);
       }
-      if (const auto RT = dyn_cast<ReferenceType>(T)) {
-        registerType(RT->getPointeeType(), nullptr, nullptr);
-      }
       rawname = registerPointerType(T);
       Node = createNode(T, "pointerType", nullptr);
       if (PT) {
         xmlNewProp(Node, BAD_CAST "ref",
                    BAD_CAST getTypeName(PT->getPointeeType()).c_str());
+      }
+      pushType(T, Node);
+    }
+    break;
+
+  case Type::LValueReference:
+  case Type::RValueReference:
+    {
+      const auto RT = dyn_cast<ReferenceType>(T.getTypePtr());
+      const auto Pointee = RT->getPointeeType();
+      if (RT) {
+        registerType(Pointee, nullptr, nullptr);
+      }
+      rawname = registerPointerType(T);
+      Node = createNode(T, "pointerType", nullptr);
+      xmlNewProp(
+          Node,
+          BAD_CAST "reference",
+          T->getTypeClass() == Type::LValueReference ?
+              BAD_CAST "lvalue"
+            : BAD_CAST "rvalue");
+      if (RT) {
+        xmlNewProp(
+            Node,
+            BAD_CAST "ref",
+            BAD_CAST getTypeName(Pointee).c_str());
       }
       pushType(T, Node);
     }
@@ -485,6 +535,10 @@ void TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
               paramNode,
               BAD_CAST "type",
               BAD_CAST getTypeName(paramT).c_str());
+          xmlNewProp(
+              paramNode,
+              BAD_CAST "name_kind",
+              BAD_CAST "name");
           xmlAddChild(paramsNode, paramNode);
         }
         xmlAddChild(Node, paramsNode);
@@ -517,19 +571,25 @@ void TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
   case Type::Record:
   {
     rawname = registerRecordType(T);
-    if (T->isStructureType()) {
+    if (auto RD = T->getAsCXXRecordDecl()) {
+      Node = createNode(T, "classType", nullptr);
+      xmlNewProp(
+          Node,
+          BAD_CAST "cxx_class_kind",
+          BAD_CAST getTagKindAsString(RD->getTagKind()));
+      xmlNewProp(
+          Node,
+          BAD_CAST "is_anonymous",
+          BAD_CAST (RD->isAnonymousStructOrUnion() ? "true" : "false"));
+      xmlAddChild(
+          Node,
+          makeInheritanceNode(*this, RD));
+      pushType(T, Node);
+    } else if (T->isStructureType()) {
       Node = createNode(T, "structType", nullptr);
       pushType(T, Node);
     } else if (T->isUnionType()) {
       Node = createNode(T, "unionType", nullptr);
-      pushType(T, Node);
-    } else if (T->isClassType()) {
-      // XXX: temporary implementation
-      Node = createNode(T, "classType", nullptr);
-      const auto RD = T->getAsCXXRecordDecl();
-      xmlAddChild(
-          Node,
-          makeInheritanceNode(*this, RD));
       pushType(T, Node);
     } else {
       // XXX: temporary implementation
@@ -563,11 +623,15 @@ void TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
       const auto constantName = name->getIdentifier();
       assert(constantName);
       auto idNode = xmlNewNode(nullptr, BAD_CAST "id");
-      xmlNewChild(
+      auto nameNode = xmlNewChild(
           idNode,
           nullptr,
           BAD_CAST "name",
           BAD_CAST constantName->getName().data());
+      xmlNewProp(
+          nameNode,
+          BAD_CAST "name_kind",
+          BAD_CAST "name");
       xmlAddChild(symbolsNode, idNode);
     }
     xmlAddChild(Node, symbolsNode);
@@ -683,8 +747,9 @@ void TypeTableInfo::setNormalizability(clang::QualType T, bool b) {
   normalizability[T] = b;
 }
 
-bool TypeTableInfo::isNormalizable(clang::QualType T) {
-  return normalizability[T];
+bool TypeTableInfo::isNormalizable(clang::QualType) {
+  // return normalizability[T];
+  return false;
 }
 
 void TypeTableInfo::pushTypeTableStack(xmlNodePtr typeTableNode) {

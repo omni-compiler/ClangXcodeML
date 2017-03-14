@@ -2,7 +2,7 @@
 #include <sstream>
 #include <string>
 
-#include "CXXCodeGen.h"
+#include "Stream.h"
 
 namespace CXXCodeGen {
 

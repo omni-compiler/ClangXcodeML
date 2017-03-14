@@ -6,39 +6,57 @@
 all: test
 
 ROOTDIR = ../../..
-CTOXCODEMLDIR = $(ROOTDIR)/CtoXcodeML/src
+CXXTOXMLDIR = $(ROOTDIR)/CXXtoXML/src
 XCODEMLTOCXXDIR = $(ROOTDIR)/XcodeMLtoCXX
+CXXTOXMLXSLTDIR = $(CXXTOXMLDIR)/XSLTs
 CC = /usr/local/bin/clang
 CFLAGS = -pedantic -fsyntax-only
 CXX = /usr/local/bin/clang++
 CXXFLAGS = -pedantic -fsyntax-only
-CTOXCODEML = $(CTOXCODEMLDIR)/CtoXcodeML
-CTOXCODEMLFLAGS = --
+CXXTOXML = $(CXXTOXMLDIR)/CXXtoXML
+CXXTOXMLFLAGS = --
 XCODEMLTOCXX = $(XCODEMLTOCXXDIR)/XcodeMLtoCXX
 CTESTCASES = $(wildcard *.src.c)
 CTESTOBJECTS = $(CTESTCASES:.src.c=.dst.c)
 CXXTESTCASES = $(wildcard *.src.cpp)
 CXXTESTOBJECTS = $(CXXTESTCASES:.src.cpp=.dst.cpp)
-
-$(CTOXCODEML):
-	$(MAKE) -C $(CTOXCODEMLDIR)
+$(CXXTOXML):
+	$(MAKE) -C $(CXXTOXMLDIR)
 
 $(XCODEMLTOCXX):
 	$(MAKE) -C $(XCODEMLTOCXXDIR)
 
-%.CasXcodeML: %.src.c $(CTOXCODEML)
-	$(CTOXCODEML) $< $(CTOXCODEMLFLAGS) > $@
+%.CasXcodeML: %.src.c $(CXXTOXML)
+	$(CXXTOXML) $< $(CXXTOXMLFLAGS) \
+	  | xsltproc $(CXXTOXMLXSLTDIR)/drop_prop_column.xsl - \
+		| xsltproc $(CXXTOXMLXSLTDIR)/drop_prop_file.xsl - \
+		| xsltproc $(CXXTOXMLXSLTDIR)/drop_prop_lineno.xsl - \
+		| xsltproc $(CXXTOXMLXSLTDIR)/reorder_decl.xsl - \
+		| xsltproc $(CXXTOXMLXSLTDIR)/add_symbols_elem.xsl - \
+		| xsltproc $(CXXTOXMLXSLTDIR)/add_globalsymbols_elem.xsl - \
+		| xsltproc $(CXXTOXMLXSLTDIR)/Program2XcodeProgram.xsl - \
+		| xmllint --format - \
+		> $@
 
 %.dst.c: %.CasXcodeML $(XCODEMLTOCXX)
 	$(XCODEMLTOCXX) $< > $@
 
-%.CXXasXcodeML: %.src.cpp $(CTOXCODEML)
-	$(CTOXCODEML) $< $(CTOXCODEMLFLAGS) > $@
+%.CXXasXcodeML: %.src.cpp $(CXXTOXML)
+	$(CXXTOXML) $< $(CXXTOXMLFLAGS) \
+	  | xsltproc $(CXXTOXMLXSLTDIR)/drop_prop_column.xsl - \
+		| xsltproc $(CXXTOXMLXSLTDIR)/drop_prop_file.xsl - \
+		| xsltproc $(CXXTOXMLXSLTDIR)/drop_prop_lineno.xsl - \
+		| xsltproc $(CXXTOXMLXSLTDIR)/reorder_decl.xsl - \
+		| xsltproc $(CXXTOXMLXSLTDIR)/add_symbols_elem.xsl - \
+		| xsltproc $(CXXTOXMLXSLTDIR)/add_globalsymbols_elem.xsl - \
+		| xsltproc $(CXXTOXMLXSLTDIR)/Program2XcodeProgram.xsl - \
+		| xmllint --format - \
+		> $@
 
 %.dst.cpp: %.CXXasXcodeML $(XCODEMLTOCXX)
 	$(XCODEMLTOCXX) $< > $@
 
-check: $(CTOXCODEML) $(XCODEMLTOCXX) $(CXXTESTOBJECTS) $(CTESTOBJECTS)
+check: $(CXXTOXML) $(XCODEMLTOCXX) $(CXXTESTOBJECTS) $(CTESTOBJECTS)
 	set -e; \
 	for testobj in $(CXXTESTOBJECTS); do  \
 		$(CXX) $(CXXFLAGS) $$testobj; \

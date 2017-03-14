@@ -1,6 +1,6 @@
 #ifndef SYMBOLBUILDER_H
 #define SYMBOLBUILDER_H
 
-void buildSymbols(xmlNodePtr, SourceInfo&, std::stringstream&);
+CXXCodeGen::StringTreeRef buildSymbols(xmlNodePtr, SourceInfo&);
 
 #endif /* !SYMBOLBUILDER_H */

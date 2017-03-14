@@ -9,17 +9,22 @@
 #include <libxml/parser.h>
 #include <libxml/xpath.h>
 #include <libxml/xpathInternals.h>
+#include "llvm/ADT/Optional.h"
 #include "llvm/Support/Casting.h"
 #include "LibXMLUtil.h"
 #include "XMLString.h"
 #include "XMLWalker.h"
+#include "StringTree.h"
 #include "Symbol.h"
 #include "XcodeMlType.h"
 #include "XcodeMlEnvironment.h"
 #include "SymbolAnalyzer.h"
 #include "TypeAnalyzer.h"
 
-using TypeAnalyzer = XMLWalker<xmlXPathContextPtr, XcodeMl::Environment&>;
+using TypeAnalyzer = XMLWalker<void, xmlXPathContextPtr, XcodeMl::Environment&>;
+
+using CXXCodeGen::makeTokenNode;
+using CXXCodeGen::makeVoidNode;
 
 /*!
  * \brief Arguments to be passed to TypeAnalyzer::Procedure.
@@ -38,7 +43,7 @@ DEFINE_TA(basicTypeProc) {
   XMLString signifier(xmlGetProp(node, BAD_CAST "type"));
   map[signifier] = XcodeMl::makeReservedType(
       signifier,
-      signified,
+      makeTokenNode(signified),
       isTrueProp(node, "is_const", false),
       isTrueProp(node, "is_volatile", false)
   );
@@ -66,7 +71,9 @@ DEFINE_TA(functionTypeProc) {
     xmlNodePtr param = nth(paramsNode, i);
     XMLString paramType(xmlGetProp(param, BAD_CAST "type"));
     XMLString paramName(xmlNodeGetContent(param));
-    params.emplace_back(paramType, paramName);
+    params.emplace_back(
+        paramType,
+        makeTokenNode( paramName ));
   }
   XMLString name(xmlGetProp(node, BAD_CAST "type"));
   map.setReturnType(name, returnType);
@@ -95,61 +102,60 @@ DEFINE_TA(arrayTypeProc) {
   map[name] = array;
 }
 
-static XcodeMl::Struct::Member makeMember(xmlNodePtr idNode) {
+static XcodeMl::MemberDecl
+makeMember(xmlNodePtr idNode) {
   XMLString type = xmlGetProp(idNode, BAD_CAST "type");
   XMLString name = xmlNodeGetContent(xmlFirstElementChild(idNode));
   if (!xmlHasProp(idNode, BAD_CAST "bit_field")) {
-    return XcodeMl::Struct::Member(type, name);
+    return XcodeMl::MemberDecl(
+        type,
+        makeTokenNode( name ));
   }
   XMLString bit_size = xmlGetProp(idNode, BAD_CAST "bit_field");
   if (!isNaturalNumber(bit_size)) {
-    return XcodeMl::Struct::Member(type, name);
+    return XcodeMl::MemberDecl(
+        type,
+        makeTokenNode(name));
       // FIXME: Don't ignore <bitField> element
   }
-  return XcodeMl::Struct::Member(type, name, std::stoi(bit_size));
+  return XcodeMl::MemberDecl(
+      type,
+      makeTokenNode( name ),
+      std::stoi(bit_size));
 }
 
 DEFINE_TA(structTypeProc) {
   XMLString elemName = xmlGetProp(node, BAD_CAST "type");
-  std::vector<XcodeMl::Struct::Member> fields;
+  XcodeMl::Struct::MemberList fields;
   const auto symbols = findNodes(node, "symbols/id", ctxt);
   for (auto& symbol : symbols) {
     fields.push_back(makeMember(symbol));
   }
-  map[elemName] = XcodeMl::makeStructType(elemName, "", fields);
-}
-
-static XcodeMl::ClassType::Member makeClassMember(
-    xmlNodePtr idNode,
-    xmlXPathContextPtr ctxt
-) {
-  using XcodeMl::AccessSpec;
-  XMLString type = xmlGetProp(idNode, BAD_CAST "type");
-  std::string name = getNameFromIdNode(idNode, ctxt);
-  XMLString access = xmlGetProp(idNode, BAD_CAST "access");
-  AccessSpec as;
-  if (access == "public") {
-    as = AccessSpec::Public;
-  } else if (access == "private") {
-    as = AccessSpec::Private;
-  } else if (access == "protected") {
-    as = AccessSpec::Protected;
-  } else {
-    assert(false);
-  }
-  return {name, type, as};
+  map[elemName] = XcodeMl::makeStructType(
+      elemName,
+      makeVoidNode(),
+      fields);
 }
 
 DEFINE_TA(classTypeProc) {
   XMLString elemName = xmlGetProp(node, BAD_CAST "type");
-  std::string className = getNameFromIdNode(node, ctxt);
-  std::vector<XcodeMl::ClassType::Member> members;
+  XcodeMl::ClassType::Symbols symbols;
   const auto ids = findNodes(node, "symbols/id", ctxt);
-  for (auto& id : ids) {
-    members.push_back(makeClassMember(id, ctxt));
+  for (auto& idElem : ids) {
+    const auto dtident = getProp(idElem, "type");
+    const auto name = getNameFromIdNodeOrNull(idElem, ctxt);
+    if (name.hasValue()) {
+      symbols.emplace_back(*name, dtident);
+    } else {
+      symbols.emplace_back("", dtident);
+    }
   }
-  map[elemName] = std::make_shared<XcodeMl::ClassType>(
-      elemName, className, members);
+  map[elemName] = XcodeMl::makeClassType(elemName, symbols);
+}
+
+DEFINE_TA(enumTypeProc) {
+  XMLString dtident = xmlGetProp(node, BAD_CAST "type");
+  map[dtident] = XcodeMl::makeEnumType(dtident);
 }
 
 const std::vector<std::string> identicalFndDataTypeIdents = {
@@ -165,6 +171,7 @@ const std::vector<std::string> identicalFndDataTypeIdents = {
   "char16_t",
   "char32_t",
   "bool",
+  "__int128",
 };
 
 const std::vector<std::tuple<std::string, std::string>>
@@ -177,6 +184,7 @@ nonidenticalFndDataTypeIdents = {
   std::make_tuple("unsigned_long", "unsigned long"),
   std::make_tuple("unsigned_long_long", "unsigned long long"),
   std::make_tuple("long_double", "long double"),
+  std::make_tuple("unsigned___int128", "unsigned __int128"),
 };
 
 /*!
@@ -185,23 +193,30 @@ nonidenticalFndDataTypeIdents = {
 const XcodeMl::Environment FundamentalDataTypeIdentMap = []() {
   XcodeMl::Environment map;
   for (std::string key : identicalFndDataTypeIdents) {
-    map[key] = XcodeMl::makeReservedType(key, key);
+    map[key] = XcodeMl::makeReservedType(
+        key,
+        makeTokenNode( key ));
   }
   for (auto p : nonidenticalFndDataTypeIdents) {
     std::string ident, type_name;
     std::tie(ident, type_name) = p;
-    map[ident] = XcodeMl::makeReservedType(ident, type_name);
+    map[ident] = XcodeMl::makeReservedType(
+        ident,
+        makeTokenNode( type_name ));
   }
   return map;
 }();
 
-const TypeAnalyzer XcodeMLTypeAnalyzer({
+const TypeAnalyzer XcodeMLTypeAnalyzer(
+"TypeAnalyzer",
+{
   { "basicType", basicTypeProc },
   { "pointerType", pointerTypeProc },
   { "functionType", functionTypeProc },
   { "arrayType", arrayTypeProc },
   { "structType", structTypeProc },
   { "classType", classTypeProc },
+  { "enumType", enumTypeProc },
 });
 
 /*!

@@ -23,7 +23,8 @@ OBJNAMES = XcodeMlType.o \
 	LibXMLUtil.o \
 	ClangClassHandler.o \
 	CodeBuilder.o \
-	CXXCodeGen.o \
+	Stream.o \
+	StringTree.o \
 	TypeAnalyzer.o \
 	XMLString.o \
 	XcodeMlEnvironment.o \
@@ -36,11 +37,13 @@ $(OBJS):
 	$(MAKE) -C $(XCODEMLTOCXXSRCDIR) $(notdir $@)
 
 XcodeMlType: \
+	$(XCODEMLTOCXXSRCDIR)/Stream.o \
+	$(XCODEMLTOCXXSRCDIR)/StringTree.o \
 	$(XCODEMLTOCXXSRCDIR)/XcodeMlEnvironment.o \
 	$(XCODEMLTOCXXSRCDIR)/XcodeMlType.o
 
 CXXCodeGenStream: \
-	$(XCODEMLTOCXXSRCDIR)/CXXCodeGen.o
+	$(XCODEMLTOCXXSRCDIR)/Stream.o
 
 clean:
 	rm -f $(TARGETS) $(addsuffix .o, $(TARGETS))

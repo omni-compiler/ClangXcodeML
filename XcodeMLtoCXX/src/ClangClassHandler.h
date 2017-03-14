@@ -2,6 +2,7 @@
 #define CLANGCLASSHANDLER_H
 
 using ClangClassHandler = AttrProc<
+  void,
   const CodeBuilder&,
   SourceInfo&,
   CXXCodeGen::Stream&>;

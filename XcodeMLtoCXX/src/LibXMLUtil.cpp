@@ -9,6 +9,7 @@
 #include <libxml/parser.h>
 #include <libxml/xpath.h>
 #include <libxml/xpathInternals.h>
+#include "llvm/ADT/Optional.h"
 #include "LibXMLUtil.h"
 #include "XMLString.h"
 
@@ -28,6 +29,7 @@ void XPathObjectReleaser::operator() (xmlXPathObjectPtr ptr) {
  * \return The first element that matches \c xpathExpr.
  */
 xmlNodePtr findFirst(xmlNodePtr node, const char* xpathExpr, xmlXPathContextPtr xpathCtxt) {
+  assert(node);
   xmlXPathObjectPtr xpathObj = getNodeSet(node, xpathExpr, xpathCtxt);
   if (!xpathObj) {
     return nullptr;
@@ -45,11 +47,18 @@ xmlNodePtr nth(xmlXPathObjectPtr obj, size_t n) {
   return obj->nodesetval->nodeTab[n];
 }
 
+std::string getProp(xmlNodePtr node, const std::string& attr) {
+  if (!xmlHasProp(node, BAD_CAST attr.c_str())) {
+    throw std::runtime_error(attr + " not found");
+  }
+  return XMLString(xmlGetProp(node, BAD_CAST attr.c_str()));
+}
+
 bool isTrueProp(xmlNodePtr node, const char* name, bool default_value) {
   if (!xmlHasProp(node, BAD_CAST name)) {
     return default_value;
   }
-  std::string value = static_cast<XMLString>(xmlGetProp(node, BAD_CAST name));
+  const auto value = getProp(node, name);
   if (value == "1" || value == "true") {
     return true;
   } else if (value == "0" || value == "false") {
@@ -81,8 +90,30 @@ std::string getNameFromIdNode(
     xmlNodePtr idNode,
     xmlXPathContextPtr ctxt
 ) {
-  xmlNodePtr nameNode = findFirst(idNode, "name", ctxt);
+  if (!idNode) {
+    throw std::domain_error("expected id node, but got null");
+  }
+  xmlNodePtr nameNode = findFirst(idNode, "name|operator", ctxt);
+  if (!nameNode) {
+    throw std::runtime_error("name element not found");
+  }
   return static_cast<XMLString>(xmlNodeGetContent(nameNode));
+}
+
+llvm::Optional<std::string> getNameFromIdNodeOrNull(
+    xmlNodePtr idNode,
+    xmlXPathContextPtr ctxt)
+{
+  using MaybeString = llvm::Optional<std::string>;
+  if (!idNode) {
+    throw std::domain_error("expected id node, but got null");
+  }
+  xmlNodePtr nameNode = findFirst(idNode, "name|operator", ctxt);
+  if (!nameNode) {
+    return MaybeString();
+  }
+  const auto str = static_cast<XMLString>(xmlNodeGetContent(nameNode));
+  return MaybeString(str);
 }
 
 bool isNaturalNumber(const std::string& prop) {

@@ -7,6 +7,19 @@
     </XcodeProgram>
   </xsl:template>
 
+  <xsl:template match="enumType">
+    <enumType>
+      <xsl:apply-templates select="@*" />
+      <symbols>
+        <xsl:for-each select="symbols/clangDecl[@class='EnumConstant']" >
+          <id>
+            <xsl:apply-templates select="name" />
+          </id>
+        </xsl:for-each>
+      </symbols>
+    </enumType>
+  </xsl:template>
+
   <xsl:template match="clangDecl[@class='TranslationUnit']">
     <globalDeclarations>
       <xsl:apply-templates />
@@ -17,15 +30,12 @@
     <xsl:apply-templates />
   </xsl:template>
 
-  <xsl:template match="clangDecl[@class='Function']">
+  <xsl:template match="clangDecl[@class='Function' or @class='CXXMethod']">
     <xsl:choose>
       <xsl:when test="clangStmt">
         <functionDefinition>
           <xsl:apply-templates select="@*" />
-          <name>
-            <xsl:value-of select=
-              "clangDeclarationNameInfo[@class='Identifier']" />
-          </name>
+          <xsl:apply-templates select="name" />
 
           <xsl:apply-templates select="params" />
 
@@ -37,26 +47,42 @@
       <xsl:otherwise>
         <functionDecl>
           <xsl:apply-templates select="@*" />
-          <name>
-            <xsl:value-of select=
-              "clangDeclarationNameInfo[@class='Identifier']" />
-          </name>
+          <xsl:apply-templates select="name" />
         </functionDecl>
       </xsl:otherwise>
     </xsl:choose>
   </xsl:template>
 
   <xsl:template match="clangDecl[@class='Var']">
+    <xsl:choose>
+      <xsl:when test="(@is_implicit = 'true') or (@is_implicit = '1')"/>
+      <xsl:otherwise>
+        <varDecl>
+          <xsl:apply-templates select="@*" />
+          <xsl:apply-templates select="name" />
+          <xsl:if test="@has_init = 1">
+            <value>
+              <xsl:apply-templates select="clangStmt" />
+            </value>
+          </xsl:if>
+        </varDecl>
+      </xsl:otherwise>
+    </xsl:choose>
+  </xsl:template>
+
+  <xsl:template match="clangDecl[@class='Record']" />
+
+  <xsl:template match="clangDecl[@class='CXXRecord']">
+    <classDecl>
+      <xsl:apply-templates select="@*" />
+      <xsl:apply-templates select="clangDecl" />
+    </classDecl>
+  </xsl:template>
+
+  <xsl:template match="clangDecl[@class='Field']">
     <varDecl>
       <xsl:apply-templates select="@*" />
-      <name>
-        <xsl:value-of select="fullName" />
-      </name>
-      <xsl:if test="@has_init = 1">
-        <value>
-          <xsl:apply-templates select="clangStmt" />
-        </value>
-      </xsl:if>
+      <xsl:apply-templates select="name" />
     </varDecl>
   </xsl:template>
 
@@ -91,6 +117,35 @@
         <xsl:apply-templates select="*[2]" />
       </body>
     </whileStatement>
+  </xsl:template>
+
+  <xsl:template match="clangStmt[@class='DoStmt']">
+    <doStatement>
+      <xsl:apply-templates select="@*" />
+      <body>
+        <xsl:apply-templates select="*[1]" />
+      </body>
+      <condition>
+        <xsl:apply-templates select="*[2]" />
+      </condition>
+    </doStatement>
+  </xsl:template>
+
+  <xsl:template match="clangStmt[@class='ForStmt']">
+    <forStatement>
+      <init>
+        <xsl:apply-templates select="*[@for_stmt_kind='init']" />
+      </init>
+      <condition>
+        <xsl:apply-templates select="*[@for_stmt_kind='cond']" />
+      </condition>
+      <iter>
+        <xsl:apply-templates select="*[@for_stmt_kind='iter']" />
+      </iter>
+      <body>
+        <xsl:apply-templates select="*[@for_stmt_kind='body']" />
+      </body>
+    </forStatement>
   </xsl:template>
 
   <xsl:template match="clangStmt[@class='CompoundStmt']">
@@ -179,6 +234,36 @@
       </xsl:attribute>
       <xsl:apply-templates select="*[2]" />
     </memberRef>
+  </xsl:template>
+
+  <xsl:template match="name">
+    <xsl:choose>
+      <xsl:when test="@name_kind = 'name'">
+        <xsl:copy-of select="."/>
+      </xsl:when>
+
+      <xsl:when test="@name_kind = 'operator'">
+        <operator>
+          <xsl:copy-of select="@*"/>
+          <xsl:value-of select="." />
+        </operator>
+      </xsl:when>
+
+      <xsl:when test="@name_kind = 'constructor'">
+        <constructor>
+          <xsl:copy-of select="@*"/>
+        </constructor>
+      </xsl:when>
+
+      <xsl:when test="@name_kind = 'destructor'">
+        <destructor>
+          <xsl:copy-of select="@*"/>
+        </destructor>
+      </xsl:when>
+
+      <xsl:otherwise>
+      </xsl:otherwise>
+    </xsl:choose>
   </xsl:template>
 
   <xsl:template match="@valueCategory">
