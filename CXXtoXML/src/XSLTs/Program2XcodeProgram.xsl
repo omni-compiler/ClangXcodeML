@@ -70,6 +70,8 @@
     </xsl:choose>
   </xsl:template>
 
+  <xsl:template match="clangDecl[@class='Record']" />
+
   <xsl:template match="clangDecl[@class='CXXRecord']">
     <classDecl>
       <xsl:apply-templates select="@*" />
