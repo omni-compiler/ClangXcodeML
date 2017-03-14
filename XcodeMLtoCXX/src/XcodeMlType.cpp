@@ -12,11 +12,13 @@
 
 #include <iostream>
 
-std::string cv_qualify(
+using XcodeMl::CodeFragment;
+
+CodeFragment cv_qualify(
     const XcodeMl::TypeRef& type,
-    const std::string& var
+    const CodeFragment& var
 ) {
-  std::string str(var);
+  CodeFragment str(var);
   if (type->isConst()) {
     str = type->addConstQualifier(str);
   }
@@ -28,7 +30,7 @@ std::string cv_qualify(
 
 namespace XcodeMl {
 
-Type::Type(TypeKind k, std::string id, bool c, bool v):
+Type::Type(TypeKind k, DataTypeIdent id, bool c, bool v):
   kind(k),
   ident(id),
   constness(c),
@@ -37,12 +39,12 @@ Type::Type(TypeKind k, std::string id, bool c, bool v):
 
 Type::~Type() {}
 
-std::string Type::addConstQualifier(std::string var) const {
-  return static_cast<std::string>("const ") + var;
+CodeFragment Type::addConstQualifier(CodeFragment var) const {
+  return static_cast<CodeFragment>("const ") + var;
 }
 
-std::string Type::addVolatileQualifier(std::string var) const {
-  return static_cast<std::string>("volatile ") + var;
+CodeFragment Type::addVolatileQualifier(CodeFragment var) const {
+  return static_cast<CodeFragment>("volatile ") + var;
 }
 
 bool Type::isConst() const {
@@ -76,12 +78,12 @@ Type::Type(const Type& other):
   volatility(other.volatility)
 {}
 
-Reserved::Reserved(DataTypeIdent ident, std::string dataType):
+Reserved::Reserved(DataTypeIdent ident, CodeFragment dataType):
   Type(TypeKind::Reserved, ident),
   name(dataType)
 {}
 
-std::string Reserved::makeDeclaration(std::string var, const Environment&) {
+CodeFragment Reserved::makeDeclaration(CodeFragment var, const Environment&) {
   return name + " " + var;
 }
 
@@ -111,7 +113,7 @@ Pointer::Pointer(DataTypeIdent ident, DataTypeIdent signified):
   ref(signified)
 {}
 
-std::string Pointer::makeDeclaration(std::string var, const Environment& env) {
+CodeFragment Pointer::makeDeclaration(CodeFragment var, const Environment& env) {
   auto refType = env[ref];
   if (!refType) {
     return "INCOMPLETE_TYPE *" + var;
@@ -151,13 +153,13 @@ Function::Function(DataTypeIdent ident, TypeRef r, const std::vector<DataTypeIde
   }
 }
 
-Function::Function(DataTypeIdent ident, TypeRef r, const std::vector<std::tuple<DataTypeIdent, std::string>>& p):
+Function::Function(DataTypeIdent ident, TypeRef r, const std::vector<std::tuple<DataTypeIdent, CodeFragment>>& p):
   Type(TypeKind::Function, ident),
   returnValue(r->dataTypeIdent()),
   params(p)
 {}
 
-std::string Function::makeDeclaration(std::string var, const Environment& env) {
+CodeFragment Function::makeDeclaration(CodeFragment var, const Environment& env) {
   std::stringstream ss;
   auto returnType(env[returnValue]);
   if (!returnType) {
@@ -210,19 +212,19 @@ Array::Array(DataTypeIdent ident, DataTypeIdent elem, size_t s):
   size(Size::makeIntegerSize(s))
 {}
 
-std::string Array::makeDeclaration(std::string var, const Environment& env) {
+CodeFragment Array::makeDeclaration(CodeFragment var, const Environment& env) {
   auto elementType(env[element]);
   if (!elementType) {
     return "INCOMPLETE_TYPE *" + var;
   }
-  const std::string size_expression =
+  const CodeFragment size_expression =
     size.kind == Size::Kind::Integer ? std::to_string(size.size):"*";
-  const std::string declarator =
-    static_cast<std::string>("[") +
-    static_cast<std::string>(isConst() ? "const ":"") +
-    static_cast<std::string>(isVolatile() ? "volatile ":"") +
+  const CodeFragment declarator =
+    static_cast<CodeFragment>("[") +
+    static_cast<CodeFragment>(isConst() ? "const ":"") +
+    static_cast<CodeFragment>(isVolatile() ? "volatile ":"") +
     size_expression +
-    static_cast<std::string>("]");
+    static_cast<CodeFragment>("]");
   return makeDecl(elementType, var + declarator, env);
 }
 
@@ -243,12 +245,12 @@ Array::Array(const Array& other):
   size(other.size)
 {}
 
-std::string Array::addConstQualifier(std::string var) const {
+CodeFragment Array::addConstQualifier(CodeFragment var) const {
   // add cv-qualifiers in Array::makeDeclaration, not here
   return var;
 }
 
-std::string Array::addVolatileQualifier(std::string var) const {
+CodeFragment Array::addVolatileQualifier(CodeFragment var) const {
   // add cv-qualifiers in Array::makeDeclaration, not here
   return var;
 }
@@ -268,14 +270,14 @@ Array::Size Array::Size::makeVariableSize() {
 
 Struct::Struct(
     const DataTypeIdent& ident,
-    const std::string& t,
+    const CodeFragment& t,
     const Struct::MemberList& f):
   Type(TypeKind::Struct, ident),
   tag(t),
   fields(f)
 {}
 
-std::string Struct::makeDeclaration(std::string var, const Environment&)
+CodeFragment Struct::makeDeclaration(CodeFragment var, const Environment&)
 {
   std::stringstream ss;
   ss << "struct " << tag << " " << var;
@@ -299,7 +301,7 @@ Struct::Struct(const Struct& other):
   fields(other.fields)
 {}
 
-void Struct::setTagName(const std::string& tagname) {
+void Struct::setTagName(const CodeFragment& tagname) {
   assert(tag == "");
   tag = tagname;
 }
@@ -308,7 +310,7 @@ Struct::MemberList Struct::members() const {
   return fields;
 }
 
-std::string Struct::tagName() const {
+CodeFragment Struct::tagName() const {
   return tag;
 }
 
@@ -331,8 +333,8 @@ size_t Struct::BitSize::size() const {
 }
 
 Struct::Member::Member(
-    const std::string& type,
-    const std::string& name
+    const DataTypeIdent& type,
+    const CodeFragment& name
 ):
   dataTypeIdent(type),
   name_(name),
@@ -340,8 +342,8 @@ Struct::Member::Member(
 {}
 
 Struct::Member::Member(
-    const std::string& type,
-    const std::string& name,
+    const DataTypeIdent& type,
+    const CodeFragment& name,
     size_t s
 ):
   dataTypeIdent(type),
@@ -349,11 +351,11 @@ Struct::Member::Member(
   size(s)
 {}
 
-std::string Struct::Member::type() const {
+DataTypeIdent Struct::Member::type() const {
   return dataTypeIdent;
 }
 
-std::string Struct::Member::name() const {
+CodeFragment Struct::Member::name() const {
   return name_;
 }
 
@@ -399,15 +401,15 @@ AccessSpec accessSpec_of_string(const std::string& as) {
 
 ClassType::ClassType(
     const DataTypeIdent& ident,
-    const std::string& className,
+    const CodeFragment& className,
     const MemberList& members_):
   Type(TypeKind::Class, ident),
   name_(className),
   fields(members_)
 {}
 
-std::string ClassType::makeDeclaration(
-    std::string var,
+CodeFragment ClassType::makeDeclaration(
+    CodeFragment var,
     const Environment&
 ) {
   return name_ + " " + var;
@@ -422,7 +424,7 @@ ClassType::MemberList ClassType::members() const {
   return fields;
 }
 
-std::string ClassType::name() const {
+CodeFragment ClassType::name() const {
   return name_;
 }
 
@@ -443,7 +445,7 @@ TypeKind typeKind(TypeRef type) {
   return type->getKind();
 }
 
-std::string makeDecl(TypeRef type, std::string var, const Environment& env) {
+CodeFragment makeDecl(TypeRef type, CodeFragment var, const Environment& env) {
   if (type) {
     return type->makeDeclaration(cv_qualify(type, var), env);
   } else {
@@ -451,7 +453,7 @@ std::string makeDecl(TypeRef type, std::string var, const Environment& env) {
   }
 }
 
-TypeRef makeReservedType(DataTypeIdent ident, std::string name, bool c, bool v) {
+TypeRef makeReservedType(DataTypeIdent ident, CodeFragment name, bool c, bool v) {
   auto type = std::make_shared<Reserved>(
       ident,
       name
@@ -526,13 +528,13 @@ TypeRef makeArrayType(
 
 TypeRef makeStructType(
     const DataTypeIdent& ident,
-    const std::string& tag,
+    const CodeFragment& tag,
     const Struct::MemberList& fields
 ) {
   return std::make_shared<Struct>(ident, tag, fields);
 }
 
-std::string TypeRefToString(TypeRef type, const Environment& env) {
+CodeFragment TypeRefToString(TypeRef type, const Environment& env) {
   return makeDecl(type, "", env);
 }
 
