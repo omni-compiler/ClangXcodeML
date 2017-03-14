@@ -208,6 +208,30 @@ getTagKindAsString(clang::TagTypeKind ttk) {
 }
 
 static xmlNodePtr
+makeIdNodeForCXXMethodDecl(
+    TypeTableInfo& TTI,
+    const CXXMethodDecl* method)
+{
+  auto idNode = xmlNewNode(nullptr, BAD_CAST "id");
+  xmlNewProp(
+      idNode,
+      BAD_CAST "type",
+      BAD_CAST TTI.getTypeName(method->getType()).c_str());
+  const auto name = method->getIdentifier();
+  assert(name);
+  auto nameNode = xmlNewChild(
+      idNode,
+      nullptr,
+      BAD_CAST "name",
+      BAD_CAST name->getName().data());
+  xmlNewProp(
+      nameNode,
+      BAD_CAST "name_kind",
+      BAD_CAST "name");
+  return idNode;
+}
+
+static xmlNodePtr
 makeSymbolsNodeForCXXRecordDecl(
     TypeTableInfo& TTI,
     const CXXRecordDecl* RD)
@@ -247,22 +271,7 @@ makeSymbolsNodeForCXXRecordDecl(
 
   // static or non-static member functions
   for (auto&& method : def->methods()) {
-    auto idNode = xmlNewNode(nullptr, BAD_CAST "id");
-    xmlNewProp(
-        idNode,
-        BAD_CAST "type",
-        BAD_CAST TTI.getTypeName(method->getType()).c_str());
-    const auto name = method->getIdentifier();
-    assert(name);
-    auto nameNode = xmlNewChild(
-        idNode,
-        nullptr,
-        BAD_CAST "name",
-        BAD_CAST name->getName().data());
-    xmlNewProp(
-        nameNode,
-        BAD_CAST "name_kind",
-        BAD_CAST "name");
+    auto idNode = makeIdNodeForCXXMethodDecl(TTI, method);
     xmlAddChild(symbolsNode, idNode);
   }
 
