@@ -42,15 +42,13 @@
         <xsl:for-each
           select="TypeLoc[@class='FunctionProto']
             /clangDecl[@class='ParmVar']">
-          <id sclass="param">
-            <name>
-              <xsl:copy-of select="name/@*" />
-              <xsl:attribute name="type">
-                <xsl:value-of select="@xcodemlType" />
-              </xsl:attribute>
-              <xsl:value-of select="name" />
-            </name>
-          </id>
+          <name>
+            <xsl:copy-of select="name/@*" />
+            <xsl:attribute name="type">
+              <xsl:value-of select="@xcodemlType" />
+            </xsl:attribute>
+            <xsl:value-of select="name" />
+          </name>
         </xsl:for-each>
       </params>
 
