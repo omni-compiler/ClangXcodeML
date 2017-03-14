@@ -7,6 +7,22 @@
     </XcodeProgram>
   </xsl:template>
 
+  <xsl:template match="enumType">
+    <enumType>
+      <xsl:apply-templates select="@*" />
+      <symbols>
+        <xsl:for-each select="symbols/clangDecl[@class='EnumConstant']" >
+          <id>
+            <name>
+              <xsl:apply-templates select="fullName/@*" />
+              <xsl:value-of select="fullName" />
+            </name>
+          </id>
+        </xsl:for-each>
+      </symbols>
+    </enumType>
+  </xsl:template>
+
   <xsl:template match="clangDecl[@class='TranslationUnit']">
     <globalDeclarations>
       <xsl:apply-templates />
@@ -60,6 +76,24 @@
     </varDecl>
   </xsl:template>
 
+  <xsl:template match="clangDecl[@class='Record']" />
+
+  <xsl:template match="clangDecl[@class='CXXRecord']">
+    <classDecl>
+      <xsl:apply-templates select="@*" />
+      <xsl:apply-templates select="clangDecl" />
+    </classDecl>
+  </xsl:template>
+
+  <xsl:template match="clangDecl[@class='Field']">
+    <varDecl>
+      <xsl:apply-templates select="@*" />
+      <name>
+        <xsl:value-of select="fullName" />
+      </name>
+    </varDecl>
+  </xsl:template>
+
   <xsl:template match="clangStmt[@class='IfStmt']">
     <ifStatement>
       <xsl:apply-templates select="@*" />
@@ -91,6 +125,35 @@
         <xsl:apply-templates select="*[2]" />
       </body>
     </whileStatement>
+  </xsl:template>
+
+  <xsl:template match="clangStmt[@class='DoStmt']">
+    <doStatement>
+      <xsl:apply-templates select="@*" />
+      <body>
+        <xsl:apply-templates select="*[1]" />
+      </body>
+      <condition>
+        <xsl:apply-templates select="*[2]" />
+      </condition>
+    </doStatement>
+  </xsl:template>
+
+  <xsl:template match="clangStmt[@class='ForStmt']">
+    <forStatement>
+      <init>
+        <xsl:apply-templates select="*[@for_stmt_kind='init']" />
+      </init>
+      <condition>
+        <xsl:apply-templates select="*[@for_stmt_kind='cond']" />
+      </condition>
+      <iter>
+        <xsl:apply-templates select="*[@for_stmt_kind='iter']" />
+      </iter>
+      <body>
+        <xsl:apply-templates select="*[@for_stmt_kind='body']" />
+      </body>
+    </forStatement>
   </xsl:template>
 
   <xsl:template match="clangStmt[@class='CompoundStmt']">
