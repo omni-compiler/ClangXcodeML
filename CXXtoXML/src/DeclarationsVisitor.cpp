@@ -56,6 +56,34 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
   newProp("class", S->getStmtClassName());
   setLocation(S->getLocStart());
 
+ if (auto FS = dyn_cast<ForStmt>(S)) {
+   if (auto init = FS->getInit()) {
+     TraverseStmt(init);
+     xmlNewProp(
+         xmlGetLastChild(curNode),
+         BAD_CAST "for_stmt_kind", BAD_CAST "init");
+   }
+   if (auto cond = FS->getCond()) {
+     TraverseStmt(cond);
+     xmlNewProp(
+         xmlGetLastChild(curNode),
+         BAD_CAST "for_stmt_kind", BAD_CAST "cond");
+   }
+   if (auto iter = FS->getInc()) {
+     TraverseStmt(iter);
+     xmlNewProp(
+         xmlGetLastChild(curNode),
+         BAD_CAST "for_stmt_kind", BAD_CAST "iter");
+   }
+   if (auto body = FS->getBody()) {
+     TraverseStmt(body);
+     xmlNewProp(
+         xmlGetLastChild(curNode),
+         BAD_CAST "for_stmt_kind", BAD_CAST "body");
+   }
+   return false; // already traversed
+ }
+
   const BinaryOperator *BO = dyn_cast<const BinaryOperator>(S);
   if (BO) {
     auto namePtr = BOtoElemName(BO->getOpcode());
