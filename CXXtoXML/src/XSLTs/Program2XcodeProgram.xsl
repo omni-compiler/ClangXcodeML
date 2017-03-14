@@ -131,6 +131,23 @@
     </doStatement>
   </xsl:template>
 
+  <xsl:template match="clangStmt[@class='ForStmt']">
+    <forStatement>
+      <init>
+        <xsl:apply-templates select="*[@for_stmt_kind='init']" />
+      </init>
+      <condition>
+        <xsl:apply-templates select="*[@for_stmt_kind='cond']" />
+      </condition>
+      <iter>
+        <xsl:apply-templates select="*[@for_stmt_kind='iter']" />
+      </iter>
+      <body>
+        <xsl:apply-templates select="*[@for_stmt_kind='body']" />
+      </body>
+    </forStatement>
+  </xsl:template>
+
   <xsl:template match="clangStmt[@class='CompoundStmt']">
     <compoundStatement>
       <xsl:apply-templates select="@*" />
