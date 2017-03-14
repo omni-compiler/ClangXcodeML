@@ -143,8 +143,12 @@ DEFINE_TA(classTypeProc) {
   const auto ids = findNodes(node, "symbols/id", ctxt);
   for (auto& idElem : ids) {
     const auto dtident = getProp(idElem, "type");
-    const auto name = getNameFromIdNode(idElem, ctxt);
-    symbols.emplace_back(name, dtident);
+    const auto name = getNameFromIdNodeOrNull(idElem, ctxt);
+    if (name.hasValue()) {
+      symbols.emplace_back(*name, dtident);
+    } else {
+      symbols.emplace_back("", dtident);
+    }
   }
   map[elemName] = XcodeMl::makeClassType(elemName, symbols);
 }
