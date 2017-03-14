@@ -119,6 +119,18 @@
     </whileStatement>
   </xsl:template>
 
+  <xsl:template match="clangStmt[@class='DoStmt']">
+    <doStatement>
+      <xsl:apply-templates select="@*" />
+      <body>
+        <xsl:apply-templates select="*[1]" />
+      </body>
+      <condition>
+        <xsl:apply-templates select="*[2]" />
+      </condition>
+    </doStatement>
+  </xsl:template>
+
   <xsl:template match="clangStmt[@class='CompoundStmt']">
     <compoundStatement>
       <xsl:apply-templates select="@*" />
