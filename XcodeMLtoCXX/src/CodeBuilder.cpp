@@ -138,8 +138,17 @@ DEFINE_CB(EmptyProc) {
   return makeInnerNode( w.walkChildren(node, src) );
 }
 
+static cxxgen::StringTreeRef
+foldWithSemicolon(const std::vector<StringTreeRef>& stmts) {
+  auto node = makeVoidNode();
+  for (auto& stmt : stmts) {
+    node = node + stmt + makeTokenNode(";") + makeNewLineNode();
+  }
+  return node;
+}
+
 DEFINE_CB(walkChildrenWithInsertingNewLines) {
-  return insertNewLines( w.walkChildren(node, src) );
+  return foldWithSemicolon( w.walkChildren(node, src) );
 }
 
 CodeBuilder::Procedure outputStringLn(std::string str) {
