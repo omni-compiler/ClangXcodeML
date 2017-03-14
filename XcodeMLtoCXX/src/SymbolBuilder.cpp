@@ -6,12 +6,14 @@
 #include <vector>
 #include <libxml/tree.h>
 #include <libxml/xpath.h>
+#include "llvm/ADT/Optional.h"
 #include "llvm/Support/Casting.h"
 #include "LibXMLUtil.h"
 #include "XMLString.h"
 #include "XMLWalker.h"
 #include "AttrProc.h"
-#include "CXXCodeGen.h"
+#include "Stream.h"
+#include "StringTree.h"
 #include "Symbol.h"
 #include "XcodeMlType.h"
 #include "XcodeMlEnvironment.h"
@@ -21,62 +23,58 @@
 
 namespace cxxgen = CXXCodeGen;
 
-using SymbolBuilder = AttrProc<SourceInfo&, cxxgen::Stream&>;
+using CXXCodeGen::StringTreeRef;
+using CXXCodeGen::makeInnerNode;
+using CXXCodeGen::makeTokenNode;
+using CXXCodeGen::makeVoidNode;
+using CXXCodeGen::separateByBlankLines;
+
+using SymbolBuilder = AttrProc<StringTreeRef, SourceInfo&>;
 
 #define SB_ARGS xmlNodePtr node __attribute__((unused)), \
-                SourceInfo& src __attribute__((unused)), \
-                cxxgen::Stream& ss __attribute__((unused))
+                SourceInfo& src __attribute__((unused))
 
-#define DEFINE_SB(name) static void name(SB_ARGS)
+#define DEFINE_SB(name) static StringTreeRef name(SB_ARGS)
 
 DEFINE_SB(typedefNameProc) {
+  if (isTrueProp(node, "is_implicit", false)) {
+    return makeVoidNode();
+  }
   const auto alias = getNameFromIdNode(node, src.ctxt);
-  const auto type = src.typeTable.at(
-      static_cast<XMLString>(xmlGetProp(node, BAD_CAST "type")));
-  ss << "typedef "
-     << makeDecl(type, alias, src.typeTable)
-     << ";" << cxxgen::newline;
+  const auto type = src.typeTable.at(getProp(node, "type"));
+  return
+    makeTokenNode("typedef") +
+    makeDecl(type, makeTokenNode(alias), src.typeTable) +
+    makeTokenNode(";");
 }
 
-static void emitStructDefinition(
+static StringTreeRef emitStructDefinition(
     const SourceInfo& src,
-    const XcodeMl::TypeRef type,
-    cxxgen::Stream& ss
+    const XcodeMl::TypeRef type
 ) {
   XcodeMl::Struct* structType = llvm::cast<XcodeMl::Struct>(type.get());
-  ss << "struct " << structType->tagName() << "{" << cxxgen::newline;
-  ss.indent(1);
-  for (auto member : structType->members()) {
-    const auto memberType = src.typeTable.at(member.type());
-    ss << makeDecl(memberType, member.name(), src.typeTable);
-    if (member.isBitField()) {
-      ss << " : " << std::to_string(member.getSize());
-    }
-    ss << ";" << cxxgen::newline;
-  }
-  ss.unindent(1);
-  ss << "};" << cxxgen::newline;
+  return structType->makeStructDefinition(src.typeTable);
 }
 
 DEFINE_SB(tagnameProc) {
   const auto tagname = getNameFromIdNode(node, src.ctxt);
   const auto type = src.typeTable.at(static_cast<XMLString>( xmlGetProp(node, BAD_CAST "type") ));
-  emitStructDefinition(src, type, ss);
+  return emitStructDefinition(src, type);
 }
 
 const SymbolBuilder CXXSymbolBuilder(
     "sclass",
+    makeInnerNode,
+    makeVoidNode,
     {
       { "typedef_name", typedefNameProc },
       { "tagname", tagnameProc },
     });
 
-void buildSymbols(
+StringTreeRef buildSymbols(
     xmlNodePtr node,
-    SourceInfo& src,
-    std::stringstream& ss
+    SourceInfo& src
 ) {
-  cxxgen::Stream out;
-  CXXSymbolBuilder.walkAll(node, src, out);
-  ss << out.str();
+  return separateByBlankLines(
+      CXXSymbolBuilder.walkAll(node, src));
 }

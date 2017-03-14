@@ -1,5 +1,5 @@
 .SUFFIXES: .xml .xcodeml
-.PHONY: test clean
+.PHONY: check clean
 .DELETE_ON_ERROR:
 
 all: test
@@ -29,7 +29,9 @@ $(XCODEMLTOCXX):
 	xsltproc $(CXXTOXMLXSLTDIR)/drop_prop_column.xsl $< \
 		| xsltproc $(CXXTOXMLXSLTDIR)/drop_prop_file.xsl - \
 		| xsltproc $(CXXTOXMLXSLTDIR)/drop_prop_lineno.xsl - \
+		| xsltproc $(CXXTOXMLXSLTDIR)/reorder_decl.xsl - \
 		| xsltproc $(CXXTOXMLXSLTDIR)/add_symbols_elem.xsl - \
+		| xsltproc $(CXXTOXMLXSLTDIR)/add_globalsymbols_elem.xsl - \
 		| xsltproc $(CXXTOXMLXSLTDIR)/Program2XcodeProgram.xsl - \
 		| xmllint --format - \
 		> $@

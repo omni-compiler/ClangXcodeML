@@ -9,7 +9,20 @@ using TypeRef = std::shared_ptr<Type>;
 /* data type identifier (3.1 data type identifier) */
 using DataTypeIdent = std::string;
 
+using CodeFragment = CXXCodeGen::StringTreeRef;
+
 class Environment;
+
+class MemberDecl {
+public:
+  MemberDecl(const DataTypeIdent&, const CodeFragment&);
+  MemberDecl(const DataTypeIdent&, const CodeFragment&, size_t);
+  CodeFragment makeDeclaration(const Environment&) const;
+private:
+  DataTypeIdent dtident;
+  CodeFragment name;
+  llvm::Optional<size_t> bitfield;
+};
 
 enum class TypeKind {
  /*! basic data type (3.4 <basicType> element) */
@@ -22,14 +35,20 @@ enum class TypeKind {
   Array,
   /*! C-Style struct (3.xx <structType> element) */
   Struct,
+  /*! C-style enum type */
+  Enum,
+  /*! C-style union type */
+  Union,
   /*! C++-style class */
   Class,
+  /*! Other type */
+  Other,
 };
 
 TypeKind typeKind(TypeRef);
-std::string makeDecl(TypeRef, std::string, const Environment&);
+CodeFragment makeDecl(TypeRef, CodeFragment, const Environment&);
 
-std::string TypeRefToString(TypeRef, const Environment& env);
+CodeFragment TypeRefToString(TypeRef, const Environment& env);
 
 /*!
  * \brief A class that represents data types in XcodeML.
@@ -39,9 +58,9 @@ public:
   Type(TypeKind, DataTypeIdent, bool = false, bool = false);
   virtual ~Type() = 0;
   virtual Type* clone() const = 0;
-  virtual std::string makeDeclaration(std::string, const Environment&) = 0;
-  virtual std::string addConstQualifier(std::string) const;
-  virtual std::string addVolatileQualifier(std::string) const;
+  virtual CodeFragment makeDeclaration(CodeFragment, const Environment&) = 0;
+  virtual CodeFragment addConstQualifier(CodeFragment) const;
+  virtual CodeFragment addVolatileQualifier(CodeFragment) const;
   bool isConst() const;
   bool isVolatile() const;
   void setConst(bool);
@@ -59,22 +78,22 @@ private:
 
 class Reserved : public Type {
 public:
-  Reserved(DataTypeIdent, std::string);
-  std::string makeDeclaration(std::string, const Environment&) override;
+  Reserved(DataTypeIdent, CodeFragment);
+  CodeFragment makeDeclaration(CodeFragment, const Environment&) override;
   ~Reserved() override;
   Type* clone() const override;
   static bool classof(const Type *);
 protected:
   Reserved(const Reserved&);
 private:
-  std::string name;
+  CodeFragment name;
 };
 
 class Pointer : public Type {
 public:
   Pointer(DataTypeIdent, TypeRef);
   Pointer(DataTypeIdent, DataTypeIdent);
-  std::string makeDeclaration(std::string, const Environment&) override;
+  CodeFragment makeDeclaration(CodeFragment, const Environment&) override;
   ~Pointer() override;
   Type* clone() const override;
   static bool classof(const Type *);
@@ -86,16 +105,19 @@ private:
 
 class Function : public Type {
 public:
-  using Params = std::vector<std::tuple<DataTypeIdent, std::string>>;
+  using Params = std::vector<std::tuple<DataTypeIdent, CodeFragment>>;
   Function(DataTypeIdent, TypeRef, const std::vector<DataTypeIdent>&);
   Function(DataTypeIdent, TypeRef, const Params&);
-  std::string makeDeclaration(std::string, const Environment&) override;
+  CodeFragment makeDeclaration(CodeFragment, const Environment&) override;
+  CodeFragment makeDeclaration(CodeFragment, const std::vector<CodeFragment>&, const Environment&);
   ~Function() override;
   Type* clone() const override;
   static bool classof(const Type *);
 protected:
   Function(const Function&);
 private:
+  bool isParamListEmpty() const;
+
   DataTypeIdent returnValue;
   Params params;
 };
@@ -119,11 +141,11 @@ public:
 public:
   Array(DataTypeIdent, DataTypeIdent, Size);
   Array(DataTypeIdent, DataTypeIdent, size_t);
-  std::string makeDeclaration(std::string, const Environment&) override;
+  CodeFragment makeDeclaration(CodeFragment, const Environment&) override;
   ~Array() override;
   Type* clone() const override;
-  std::string addConstQualifier(std::string) const override;
-  std::string addVolatileQualifier(std::string) const override;
+  CodeFragment addConstQualifier(CodeFragment) const override;
+  CodeFragment addVolatileQualifier(CodeFragment) const override;
   static bool classof(const Type *);
 protected:
   Array(const Array&);
@@ -134,49 +156,57 @@ private:
 
 class Struct : public Type {
 public:
-  class BitSize { /* represents a size of bit-field */
-  public:
-    BitSize();
-    BitSize(size_t);
-    bool isValid() const;
-    size_t size() const;
-  private:
-    bool valid;
-    size_t size_;
-  };
-
-  class Member {
-  public:
-    Member() = delete;
-    Member(const std::string&, const std::string&);
-    Member(const std::string&, const std::string&, size_t);
-    Member(const Member&) = default;
-    ~Member() = default;
-    std::string type() const;
-    std::string name() const;
-    bool isBitField() const;
-    size_t getSize() const;
-  private:
-    std::string dataTypeIdent;
-    std::string name_;
-    BitSize size;
-  };
-  using MemberList = std::vector<Member>;
+  using MemberList = std::vector<MemberDecl>;
 
 public:
-  Struct(const DataTypeIdent&, const std::string&, const MemberList&);
-  std::string makeDeclaration(std::string, const Environment&) override;
+  Struct(const DataTypeIdent&, const CodeFragment&, const MemberList&);
+  CodeFragment makeDeclaration(CodeFragment, const Environment&) override;
+  CodeFragment makeStructDefinition(const Environment&) const;
   ~Struct() override;
   Type* clone() const override;
-  void setTagName(const std::string&);
+  void setTagName(const CodeFragment&);
   MemberList members() const;
-  std::string tagName() const;
+  CodeFragment tagName() const;
   static bool classof(const Type *);
 protected:
   Struct(const Struct&);
 private:
-  std::string tag;
+  CodeFragment tag;
   MemberList fields;
+};
+
+class EnumType : public Type {
+public:
+  using EnumName = llvm::Optional<CodeFragment>;
+  EnumType(const DataTypeIdent&, const EnumName&);
+  EnumType(const DataTypeIdent&, const EnumName&, const CodeFragment&);
+  ~EnumType() override = default;
+  CodeFragment makeDeclaration(CodeFragment, const Environment&) override;
+  Type* clone() const override;
+  static bool classof(const Type *);
+  void setName(const std::string&);
+protected:
+  EnumType(const EnumType&);
+private:
+  EnumName name_;
+  CodeFragment declBody;
+};
+
+class UnionType : public Type {
+public:
+  using UnionName = llvm::Optional<CodeFragment>;
+  UnionType(const DataTypeIdent&, const UnionName&);
+  UnionType(const DataTypeIdent&, const UnionName&, const std::vector<MemberDecl>&);
+  ~UnionType() override = default;
+  CodeFragment makeDeclaration(CodeFragment, const Environment&) override;
+  Type* clone() const override;
+  static bool classof(const Type *);
+  void setName(const std::string&);
+protected:
+  UnionType(const UnionType&);
+private:
+  UnionName name_;
+  std::vector<MemberDecl> members;
 };
 
 enum class AccessSpec {
@@ -190,29 +220,36 @@ AccessSpec accessSpec_of_string(const std::string&);
 
 class ClassType : public Type {
 public:
-  struct Member {
-    std::string name;
-    std::string type;
-    AccessSpec access;
-  };
-  using MemberList = std::vector<Member>;
-
-public:
-  ClassType(const DataTypeIdent&, const std::string&, const MemberList&);
-  std::string makeDeclaration(std::string, const Environment&) override;
+  using ClassName = llvm::Optional<CodeFragment>;
+  using MemberName = std::string;
+  using Symbols = std::vector<std::tuple<MemberName, DataTypeIdent>>;
+  ClassType(const DataTypeIdent&, const CodeFragment&, const Symbols&);
+  CodeFragment makeDeclaration(CodeFragment, const Environment&) override;
   ~ClassType() override = default;
   Type* clone() const override;
-  MemberList members() const;
-  std::string name() const;
+  ClassName name() const;
+  void setName(const std::string&);
+  Symbols getSymbols() const;
   static bool classof(const Type *);
 protected:
   ClassType(const ClassType&);
 private:
-  std::string name_;
-  MemberList fields;
+  ClassName name_;
+  Symbols classScopeSymbols;
 };
 
-TypeRef makeReservedType(DataTypeIdent, std::string, bool = false, bool = false);
+class OtherType : public Type {
+public:
+  OtherType(const DataTypeIdent&);
+  ~OtherType() override = default;
+  CodeFragment makeDeclaration(CodeFragment, const Environment&) override;
+  Type* clone() const override;
+  static bool classof(const Type *);
+protected:
+  OtherType(const OtherType&);
+};
+
+TypeRef makeReservedType(DataTypeIdent, CodeFragment, bool = false, bool = false);
 TypeRef makePointerType(DataTypeIdent, TypeRef);
 TypeRef makePointerType(DataTypeIdent, DataTypeIdent);
 TypeRef makeFunctionType(DataTypeIdent, TypeRef, const Function::Params&);
@@ -221,7 +258,10 @@ TypeRef makeArrayType(DataTypeIdent, TypeRef, size_t);
 TypeRef makeArrayType(DataTypeIdent, TypeRef, Array::Size);
 TypeRef makeArrayType(DataTypeIdent, DataTypeIdent, Array::Size);
 TypeRef makeArrayType(DataTypeIdent, DataTypeIdent, size_t);
-TypeRef makeStructType(const DataTypeIdent&, const std::string&, const Struct::MemberList&);
+TypeRef makeEnumType(const DataTypeIdent&);
+TypeRef makeClassType(const DataTypeIdent&, const ClassType::Symbols&);
+TypeRef makeStructType(const DataTypeIdent&, const CodeFragment&, const Struct::MemberList&);
+TypeRef makeOtherType(const DataTypeIdent&);
 
 }
 #endif /* !XCODEMLTYPE_H */

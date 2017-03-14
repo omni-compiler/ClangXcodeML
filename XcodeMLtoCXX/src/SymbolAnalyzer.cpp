@@ -6,18 +6,25 @@
 #include <vector>
 #include <libxml/tree.h>
 #include <libxml/xpath.h>
+#include "llvm/ADT/Optional.h"
 #include "llvm/Support/Casting.h"
 #include "LibXMLUtil.h"
 #include "XMLString.h"
 #include "XMLWalker.h"
 #include "AttrProc.h"
+#include "StringTree.h"
 #include "Symbol.h"
 #include "XcodeMlType.h"
 #include "XcodeMlEnvironment.h"
 #include "SourceInfo.h"
 #include "SymbolAnalyzer.h"
 
-using SymbolAnalyzer = AttrProc<xmlXPathContextPtr, XcodeMl::Environment&>;
+using SymbolAnalyzer = AttrProc<
+  void,
+  xmlXPathContextPtr,
+  XcodeMl::Environment&>;
+
+using CXXCodeGen::makeTokenNode;
 
 #define SA_ARGS xmlNodePtr node __attribute__((unused)), \
                 xmlXPathContextPtr ctxt __attribute__((unused)), \
@@ -26,18 +33,34 @@ using SymbolAnalyzer = AttrProc<xmlXPathContextPtr, XcodeMl::Environment&>;
 #define DEFINE_SA(name) static void name(SA_ARGS)
 
 DEFINE_SA(tagnameProc) {
-  XMLString dataTypeIdent = xmlGetProp(node, BAD_CAST "type");
-  auto typeref = map.at(dataTypeIdent); // structType must exists
-  auto structType = llvm::cast<XcodeMl::Struct>(typeref.get());
-  xmlNodePtr nameNode(findFirst(node, "name", ctxt));
-  XMLString tag(xmlNodeGetContent(nameNode));
-  structType->setTagName(getNameFromIdNode(node, ctxt));
+  const auto dataTypeIdent = getProp(node, "type");
+  auto typeref = map.at(dataTypeIdent);
+
+  const auto tagName = getNameFromIdNode(node, ctxt);
+
+  if (auto ST = llvm::dyn_cast<XcodeMl::Struct>(typeref.get())) {
+    ST->setTagName(makeTokenNode(tagName));
+  } else if (auto ET = llvm::dyn_cast<XcodeMl::EnumType>(typeref.get())) {
+    ET->setName(tagName);
+  }
+
 }
+
+DEFINE_SA(classNameProc) {
+  const auto dataTypeIdent = getProp(node, "type");
+  auto typeref = map.at(dataTypeIdent);
+  const auto name = getNameFromIdNode(node, ctxt);
+  auto CT = llvm::dyn_cast<XcodeMl::ClassType>(typeref.get());
+  assert(CT);
+  CT->setName(name);
+}
+
 
 const SymbolAnalyzer CXXSymbolAnalyzer (
     "sclass",
     {
       { "tagname", tagnameProc },
+      { "class_name", classNameProc },
     });
 
 void analyzeSymbols(
