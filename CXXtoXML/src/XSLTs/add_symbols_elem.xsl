@@ -34,7 +34,7 @@
     </clangStmt>
   </xsl:template>
 
-  <xsl:template match="clangDecl[@class='Function']">
+  <xsl:template match="clangDecl[@class='Function' or @class='CXXMethod']">
     <clangDecl>
       <xsl:apply-templates select="@*" />
 
