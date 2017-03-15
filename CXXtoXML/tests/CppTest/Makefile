@@ -39,7 +39,7 @@ $(XCODEMLTOCXX):
 %.generated.cpp: %.xcodeml $(XCODEMLTOCXX)
 	$(XCODEMLTOCXX) $< > $@
 
-check: $(CXXTOXML) $(CXXTESTOBJECTS) $(CXXDECOMPTESTOBJECTS)
+check: $(CXXTOXML) $(CXXDECOMPTESTOBJECTS)
 	set -e; \
 	for testobj in $(CXXDECOMPTESTOBJECTS); do  \
 		$(CXX) $(CXXFLAGS) $$testobj; \
