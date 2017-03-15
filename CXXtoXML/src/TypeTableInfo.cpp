@@ -248,17 +248,8 @@ makeIdNodeForCXXMethodDecl(
       idNode,
       BAD_CAST "type",
       BAD_CAST TTI.getTypeName(method->getType()).c_str());
-  const auto name = method->getIdentifier();
-  assert(name);
-  auto nameNode = xmlNewChild(
-      idNode,
-      nullptr,
-      BAD_CAST "name",
-      BAD_CAST name->getName().data());
-  xmlNewProp(
-      nameNode,
-      BAD_CAST "name_kind",
-      BAD_CAST "name");
+  auto nameNode = makeNameNodeForCXXMethodDecl(TTI, method);
+  xmlAddChild(idNode, nameNode);
   return idNode;
 }
 
