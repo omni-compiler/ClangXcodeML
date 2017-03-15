@@ -212,24 +212,22 @@ makeNameNodeForCXXMethodDecl(
     TypeTableInfo&,
     const CXXMethodDecl* MD)
 {
+  auto nameNode = xmlNewNode(nullptr, BAD_CAST "name");
   if (isa<CXXConstructorDecl>(MD)) {
-    auto ctorNode = xmlNewNode(nullptr, BAD_CAST "constructor");
     xmlNewProp(
-        ctorNode,
+        nameNode,
         BAD_CAST "name_kind",
         BAD_CAST "constructor");
-    return ctorNode;
+    return nameNode;
   } else if (isa<CXXDestructorDecl>(MD)) {
-    auto dtorNode = xmlNewNode(nullptr, BAD_CAST "destructor");
     xmlNewProp(
-        dtorNode,
+        nameNode,
         BAD_CAST "name_kind",
         BAD_CAST "destructor");
-    return dtorNode;
+    return nameNode;
   }
   const auto ident = MD->getIdentifier();
   assert(ident);
-  auto nameNode = xmlNewNode(nullptr, BAD_CAST "name");
   xmlNodeAddContent(nameNode, BAD_CAST ident->getName().data());
   xmlNewProp(
       nameNode,
