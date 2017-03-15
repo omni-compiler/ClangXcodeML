@@ -449,6 +449,26 @@ DEFINE_CB(forStatementProc) {
   return acc + handleScope(w, body, src);
 }
 
+DEFINE_CB(ifStatementProc) {
+  auto cond = findFirst(node, "condition", src.ctxt),
+       thenpart = findFirst(node, "then", src.ctxt),
+       elsepart = findFirst(node, "else", src.ctxt);
+  auto acc = makeTokenNode("if") + makeTokenNode("(");
+  if (cond) {
+    acc = acc + w.walk(cond, src);
+  }
+  acc = acc + makeTokenNode(") {");
+  if (thenpart) {
+    acc = acc + handleScope(w, thenpart, src);
+  }
+  if (elsepart) {
+    acc = acc + makeTokenNode("} else {");
+    acc = acc + handleScope(w, elsepart, src);
+  }
+  acc = acc + makeTokenNode("}");
+  return acc;
+}
+
 DEFINE_CB(returnStatementProc) {
   xmlNodePtr child = xmlFirstElementChild(node);
   if (child) {
@@ -543,6 +563,7 @@ makeInnerNode,
   { "whileStatement", whileStatementProc },
   { "doStatement", doStatementProc },
   { "forStatement", forStatementProc },
+  { "ifStatement", ifStatementProc },
   { "thisExpr", thisExprProc },
   { "assignExpr", showBinOp(" = ") },
   { "plusExpr", showBinOp(" + ") },
@@ -550,10 +571,35 @@ makeInnerNode,
   { "mulExpr", showBinOp(" * ") },
   { "divExpr", showBinOp(" / ") },
   { "modExpr", showBinOp(" % ") },
+  { "LshiftExpr", showBinOp(" << ")},
+  { "RshiftExpr", showBinOp(" >> ")},
+  { "logLTExpr", showBinOp(" < ")},
+  { "logGTExpr", showBinOp(" > ")},
+  { "logLEExpr", showBinOp(" <= ")},
+  { "logGEExpr", showBinOp(" >= ")},
   { "logEQExpr", showBinOp(" == ")},
+  { "logNEQExpr", showBinOp(" != ")},
+  { "bitAndExpr", showBinOp(" & ")},
+  { "bitXorExpr", showBinOp(" ^ ")},
+  { "bitOrExpr", showBinOp(" | ")},
+  { "logAndExpr", showBinOp(" && ")},
+  { "logOrExpr", showBinOp(" || ")},
+  { "asgMulExpr", showBinOp(" *= ")},
+  { "asgDivExpr", showBinOp(" /= ")},
+  { "asgPlusExpr", showBinOp(" += ")},
+  { "asgMinusExpr", showBinOp(" -= ")},
+  { "asgLshiftExpr", showBinOp(" <<= ")},
+  { "asgRshiftExpr", showBinOp(" >>= ")},
+  { "asgBitAndExpr", showBinOp(" &= ")},
+  { "asgBitOrExpr", showBinOp(" |= ")},
+  { "asgBitXorExpr", showBinOp(" ^= ")},
+  { "unaryPlusExpr", showUnaryOp("+") },
   { "unaryMinusExpr", showUnaryOp("-") },
+  { "preIncrExpr", showUnaryOp("++") },
+  { "preDecrExpr", showUnaryOp("--") },
   { "AddrOfExpr", showUnaryOp("&") },
-  { "binNotExpr", showUnaryOp("~") },
+  { "pointerRef", showUnaryOp("*") },
+  { "bitNotExpr", showUnaryOp("~") },
   { "logNotExpr", showUnaryOp("!") },
   { "sizeOfExpr", showUnaryOp("sizeof") },
   { "functionCall", functionCallProc },
