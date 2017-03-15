@@ -208,6 +208,37 @@ getTagKindAsString(clang::TagTypeKind ttk) {
 }
 
 static xmlNodePtr
+makeNameNodeForCXXMethodDecl(
+    TypeTableInfo&,
+    const CXXMethodDecl* MD)
+{
+  if (isa<CXXConstructorDecl>(MD)) {
+    auto ctorNode = xmlNewNode(nullptr, BAD_CAST "constructor");
+    xmlNewProp(
+        ctorNode,
+        BAD_CAST "name_kind",
+        BAD_CAST "constructor");
+    return ctorNode;
+  } else if (isa<CXXDestructorDecl>(MD)) {
+    auto dtorNode = xmlNewNode(nullptr, BAD_CAST "destructor");
+    xmlNewProp(
+        dtorNode,
+        BAD_CAST "name_kind",
+        BAD_CAST "destructor");
+    return dtorNode;
+  }
+  const auto ident = MD->getIdentifier();
+  assert(ident);
+  auto nameNode = xmlNewNode(nullptr, BAD_CAST "name");
+  xmlNodeAddContent(nameNode, BAD_CAST ident->getName().data());
+  xmlNewProp(
+      nameNode,
+      BAD_CAST "name_kind",
+      BAD_CAST "name");
+  return nameNode;
+}
+
+static xmlNodePtr
 makeIdNodeForCXXMethodDecl(
     TypeTableInfo& TTI,
     const CXXMethodDecl* method)
