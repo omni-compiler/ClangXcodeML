@@ -208,6 +208,35 @@ getTagKindAsString(clang::TagTypeKind ttk) {
 }
 
 static xmlNodePtr
+makeNameNodeForCXXMethodDecl(
+    TypeTableInfo&,
+    const CXXMethodDecl* MD)
+{
+  auto nameNode = xmlNewNode(nullptr, BAD_CAST "name");
+  if (isa<CXXConstructorDecl>(MD)) {
+    xmlNewProp(
+        nameNode,
+        BAD_CAST "name_kind",
+        BAD_CAST "constructor");
+    return nameNode;
+  } else if (isa<CXXDestructorDecl>(MD)) {
+    xmlNewProp(
+        nameNode,
+        BAD_CAST "name_kind",
+        BAD_CAST "destructor");
+    return nameNode;
+  }
+  const auto ident = MD->getIdentifier();
+  assert(ident);
+  xmlNodeAddContent(nameNode, BAD_CAST ident->getName().data());
+  xmlNewProp(
+      nameNode,
+      BAD_CAST "name_kind",
+      BAD_CAST "name");
+  return nameNode;
+}
+
+static xmlNodePtr
 makeIdNodeForCXXMethodDecl(
     TypeTableInfo& TTI,
     const CXXMethodDecl* method)
@@ -217,17 +246,8 @@ makeIdNodeForCXXMethodDecl(
       idNode,
       BAD_CAST "type",
       BAD_CAST TTI.getTypeName(method->getType()).c_str());
-  const auto name = method->getIdentifier();
-  assert(name);
-  auto nameNode = xmlNewChild(
-      idNode,
-      nullptr,
-      BAD_CAST "name",
-      BAD_CAST name->getName().data());
-  xmlNewProp(
-      nameNode,
-      BAD_CAST "name_kind",
-      BAD_CAST "name");
+  auto nameNode = makeNameNodeForCXXMethodDecl(TTI, method);
+  xmlAddChild(idNode, nameNode);
   return idNode;
 }
 
@@ -370,8 +390,8 @@ void TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
     return;
   }
 
-  if (mapFromQualTypeToXmlNodePtr.find(T) !=
-      mapFromQualTypeToXmlNodePtr.end()) {
+  if (mapFromQualTypeToName.find(T) !=
+      mapFromQualTypeToName.end()) {
     if (retNode != nullptr) {
       *retNode = mapFromQualTypeToXmlNodePtr[T];
     }
