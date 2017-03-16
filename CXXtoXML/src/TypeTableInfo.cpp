@@ -408,13 +408,14 @@ void TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
     isQualified = true;
   }
 
-  if (T->isBuiltinType() || T->getTypeClass() == Type::Builtin) {
-    if (isQualified) {
-      rawname = registerBasicType(T);
-      // XXX: temporary imcompletearray
-      Node = createNode(T, "basicType", nullptr);
-      pushType(T, Node);
-    } else {
+  if (isQualified) {
+    rawname = registerBasicType(T);
+    // XXX: temporary imcompletearray
+    Node = createNode(T, "basicType", nullptr);
+    pushType(T, Node);
+  } else switch (T->getTypeClass()) {
+  case Type::Builtin:
+    {
       const Type *Tptr = T.getTypePtrOrNull();
       ASTContext &CXT = mangleContext->getASTContext();
       PrintingPolicy PP(CXT.getLangOpts());
@@ -427,10 +428,8 @@ void TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
         }
       }
       mapFromQualTypeToName[T] = rawname;
+      break;
     }
-  } else switch (T->getTypeClass()) {
-  case Type::Builtin:
-    break;
 
   case Type::Complex:
     rawname = registerOtherType(T);
