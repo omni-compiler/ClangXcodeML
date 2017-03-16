@@ -42,6 +42,12 @@
 
           <xsl:apply-templates select="params" />
 
+          <xsl:if test="@class='CXXConstructor'">
+            <constructorInitializerList>
+              <xsl:apply-templates select="clangConstructorInitializer" />
+            </constructorInitializerList>
+          </xsl:if>
+
           <body>
             <xsl:apply-templates select="clangStmt" />
           </body>
@@ -54,6 +60,13 @@
         </functionDecl>
       </xsl:otherwise>
     </xsl:choose>
+  </xsl:template>
+
+  <xsl:template match="clangConstructorInitializer">
+    <constructorInitializer>
+      <xsl:copy-of select="@*" /> <!-- including @member -->
+      <xsl:apply-templates select="*" />
+    </constructorInitializer>
   </xsl:template>
 
   <xsl:template match="clangDecl[@class='Var']">
