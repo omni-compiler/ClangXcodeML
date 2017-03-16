@@ -36,6 +36,17 @@ NnsTableInfo::pushNnsTableStack(xmlNodePtr nnsTableNode) {
         std::vector<const clang::NestedNameSpecifier*>()));
 }
 
+void
+NnsTableInfo::popNnsTableStack() {
+  assert(!nnsTableStack.empty());
+  const auto nnsTableNode = std::get<0>(nnsTableStack.top());
+  const auto nnssInCurScope = std::get<1>(nnsTableStack.top());
+  for (auto& nns : nnssInCurScope) {
+    xmlAddChild(nnsTableNode, getNnsNode(nns));
+  }
+  nnsTableStack.pop();
+}
+
 static xmlNodePtr
 makeNnsIdentNodeForType(
     NnsTableInfo& NTI,
