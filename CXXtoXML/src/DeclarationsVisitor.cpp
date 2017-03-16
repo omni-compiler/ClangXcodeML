@@ -2,6 +2,7 @@
 #include "TypeTableInfo.h"
 #include "DeclarationsVisitor.h"
 #include "InheritanceInfo.h"
+#include "NnsTableInfo.h"
 #include "clang/Basic/Builtins.h"
 #include "clang/Lex/Lexer.h"
 #include <map>
@@ -420,6 +421,9 @@ DeclarationsVisitor::PreVisitNestedNameSpecifierLoc(
   if (auto NNS = N.getNestedNameSpecifier()) {
     newChild("clangNestedNameSpecifier");
     newProp("kind", SpecifierKindToString(NNS->getKind()).c_str());
+    newProp(
+        "nns",
+        nnstableinfo->getNnsName(NNS).c_str());
     newProp("is_dependent", NNS->isDependent() ? "1":"0");
     newProp(
         "is_instantiation_dependent",
