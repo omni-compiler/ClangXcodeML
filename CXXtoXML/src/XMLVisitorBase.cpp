@@ -27,9 +27,12 @@ OptEmitSourceRange("range", cl::desc("emit 'range'"),
 
 XMLVisitorBaseImpl::XMLVisitorBaseImpl(MangleContext *MC,
                                        xmlNodePtr CurNode,
-                                       TypeTableInfo *TTI)
+                                       TypeTableInfo *TTI,
+                                       NnsTableInfo *NTI)
     : XMLRAVpool(this), mangleContext(MC), curNode(CurNode),
-      typetableinfo(TTI) {};
+      typetableinfo(TTI),
+      nnstableinfo(NTI)
+{}
 
 xmlNodePtr XMLVisitorBaseImpl::addChild(const char *Name, const char *Content) {
     return xmlNewTextChild(curNode, nullptr, BAD_CAST Name, BAD_CAST Content);
