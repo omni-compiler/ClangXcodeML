@@ -278,6 +278,8 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
   if (isa<TranslationUnitDecl>(D)) {
     auto typetable = addChild("xcodemlTypeTable");
     typetableinfo->pushTypeTableStack(typetable);
+    auto nnsTable = addChild("xcodemlNnsTable");
+    nnstableinfo->pushNnsTableStack(nnsTable);
   }
 
   NamedDecl *ND = dyn_cast<NamedDecl>(D);
@@ -359,6 +361,7 @@ bool
 DeclarationsVisitor::PostVisitDecl(Decl* D) {
   if (isa<TranslationUnitDecl>(D)) {
     typetableinfo->popTypeTableStack();
+    nnstableinfo->popNnsTableStack();
   }
   return true;
 }
