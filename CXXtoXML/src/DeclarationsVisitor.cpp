@@ -244,7 +244,7 @@ getNameKind(NamedDecl* ND) {
     return "constructor";
   }
   if (isa<CXXDestructorDecl>(FD)) {
-    return "constructor";
+    return "destructor";
   }
   return "name";
 }
@@ -432,6 +432,24 @@ DeclarationsVisitor::PreVisitNestedNameSpecifierLoc(
   }
   return true;
 }
+
+bool
+DeclarationsVisitor::PreVisitConstructorInitializer(
+    CXXCtorInitializer* CI)
+{
+  if (!CI) {
+    return true;
+  }
+  newChild("clangConstructorInitializer");
+
+  // FIXME: temporary implementation
+
+  if (auto member = CI->getMember()) {
+    newProp("member", member->getNameAsString().c_str());
+  }
+  return true;
+}
+
 ///
 /// Local Variables:
 /// indent-tabs-mode: nil

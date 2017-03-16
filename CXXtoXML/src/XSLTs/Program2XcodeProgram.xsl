@@ -30,7 +30,10 @@
     <xsl:apply-templates />
   </xsl:template>
 
-  <xsl:template match="clangDecl[@class='Function' or @class='CXXMethod']">
+  <xsl:template match="clangDecl[@class='Function'
+      or @class='CXXMethod'
+      or @class='CXXConstructor'
+      or @class='CXXDestructor']">
     <xsl:choose>
       <xsl:when test="clangStmt">
         <functionDefinition>
@@ -38,6 +41,12 @@
           <xsl:apply-templates select="name" />
 
           <xsl:apply-templates select="params" />
+
+          <xsl:if test="@class='CXXConstructor'">
+            <constructorInitializerList>
+              <xsl:apply-templates select="clangConstructorInitializer" />
+            </constructorInitializerList>
+          </xsl:if>
 
           <body>
             <xsl:apply-templates select="clangStmt" />
@@ -51,6 +60,13 @@
         </functionDecl>
       </xsl:otherwise>
     </xsl:choose>
+  </xsl:template>
+
+  <xsl:template match="clangConstructorInitializer">
+    <constructorInitializer>
+      <xsl:copy-of select="@*" /> <!-- including @member -->
+      <xsl:apply-templates select="*" />
+    </constructorInitializer>
   </xsl:template>
 
   <xsl:template match="clangDecl[@class='Var']">

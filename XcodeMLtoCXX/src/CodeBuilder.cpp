@@ -538,6 +538,31 @@ DEFINE_CB(varDeclProc) {
   return acc + makeTokenNode(";");
 }
 
+DEFINE_CB(ctorInitListProc) {
+  auto inits = findNodes(node, "constructorInitializer", src.ctxt);
+  if (inits.empty()) {
+    return makeVoidNode();
+  }
+  auto decl = makeVoidNode();
+  bool alreadyPrinted = false;
+  for (auto init : inits) {
+    decl = decl
+      + makeTokenNode(alreadyPrinted ? "," : ":")
+      + w.walk(init, src);
+  }
+  return decl;
+}
+
+DEFINE_CB(ctorInitProc) {
+  const auto member = getProp(node, "member");
+  auto expr = findFirst(node, "*[1]", src.ctxt);
+  assert(expr);
+  return makeTokenNode(member) +
+    makeTokenNode("(") +
+    w.walk(expr, src) +
+    makeTokenNode(")");
+}
+
 const CodeBuilder CXXBuilder(
 "CodeBuilder",
 makeInnerNode,

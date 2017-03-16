@@ -15,6 +15,7 @@ public:
     bool PostVisitDecl(clang::Decl *);
     bool PreVisitDeclarationNameInfo(clang::DeclarationNameInfo);
     bool PreVisitNestedNameSpecifierLoc(clang::NestedNameSpecifierLoc);
+    bool PreVisitConstructorInitializer(clang::CXXCtorInitializer *);
 };
 
 #endif /* !DECLARATIONSVISITOR_H */
