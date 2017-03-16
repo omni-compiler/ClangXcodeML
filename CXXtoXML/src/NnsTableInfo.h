@@ -12,6 +12,9 @@ public:
   explicit NnsTableInfo(clang::MangleContext*);
   std::string getNnsName(clang::NestedNameSpecifier*);
 private:
+  void registerNestedNameSpec(clang::NestedNameSpecifier*);
+
+private:
   int seqForOther;
   clang::MangleContext* MC;
   std::map<clang::NestedNameSpecifier*, std::string> mapForOtherNns;
