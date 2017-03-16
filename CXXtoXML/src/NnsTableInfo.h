@@ -1,6 +1,8 @@
 #ifndef NNSTABLEINFO_H
 #define NNSTABLEINFO_H
 
+class TypeTableInfo;
+
 class NnsTableInfo {
 public:
   NnsTableInfo() = delete;
@@ -9,7 +11,7 @@ public:
   NnsTableInfo& operator =(const NnsTableInfo&&) = delete;
   NnsTableInfo& operator =(NnsTableInfo&&) = delete;
 
-  explicit NnsTableInfo(clang::MangleContext*);
+  explicit NnsTableInfo(TypeTableInfo*);
   std::string getNnsName(const clang::NestedNameSpecifier*);
   void popNnsTableStack();
   void pushNnsTableStack(xmlNodePtr);
@@ -20,7 +22,7 @@ private:
 
 private:
   int seqForOther;
-  clang::MangleContext* MC;
+  TypeTableInfo* typetableinfo;
   std::map<const clang::NestedNameSpecifier*, std::string> mapForOtherNns;
   std::map<const clang::NestedNameSpecifier*, xmlNodePtr>
     mapFromNestedNameSpecToXmlNodePtr;

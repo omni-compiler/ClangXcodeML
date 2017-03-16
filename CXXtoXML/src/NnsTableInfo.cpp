@@ -3,15 +3,19 @@
 #include <string>
 #include <libxml/tree.h>
 #include "clang/AST/Mangle.h"
+#include "TypeTableInfo.h"
 
 #include "NnsTableInfo.h"
 
-NnsTableInfo::NnsTableInfo(clang::MangleContext* M):
+NnsTableInfo::NnsTableInfo(
+    TypeTableInfo* TTI):
   seqForOther(0),
-  MC(M),
+  typetableinfo(TTI),
   mapForOtherNns(),
   mapFromNestedNameSpecToXmlNodePtr()
-{}
+{
+  assert(typetableinfo);
+}
 
 std::string
 NnsTableInfo::getNnsName(

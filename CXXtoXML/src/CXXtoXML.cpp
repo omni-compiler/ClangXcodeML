@@ -35,10 +35,10 @@ public:
         MangleContext *MC = CXT.createMangleContext();
         InheritanceInfo inheritanceinfo;
         InheritanceInfo *II = &inheritanceinfo;
-        NnsTableInfo nnstableinfo(MC);
-        NnsTableInfo *NTI = &nnstableinfo;
         TypeTableInfo typetableinfo(MC, II);
         TypeTableInfo *TTI = &typetableinfo;
+        NnsTableInfo nnstableinfo(TTI);
+        NnsTableInfo *NTI = &nnstableinfo;
         DeclarationsVisitor DV(MC, rootNode, "clangAST", TTI, NTI);
         Decl *D = CXT.getTranslationUnitDecl();
 
