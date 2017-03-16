@@ -162,27 +162,7 @@ std::string TypeTableInfo::registerOtherType(QualType T){
 
 xmlNodePtr TypeTableInfo::createNode(QualType T, const char *fieldname, xmlNodePtr) {
   xmlNodePtr N = xmlNewNode(nullptr, BAD_CAST fieldname);
-  bool isQualified = false;
   xmlNewProp(N, BAD_CAST "type", BAD_CAST getTypeName(T).c_str());
-
-  if (T.isConstQualified()) {
-    xmlNewProp(N, BAD_CAST "is_const", BAD_CAST "1");
-    isQualified = true;
-  }
-  if (T.isVolatileQualified()) {
-    xmlNewProp(N, BAD_CAST "is_volatile", BAD_CAST "1");
-    isQualified = true;
-  }
-  if (T.isRestrictQualified()) {
-    xmlNewProp(N, BAD_CAST "is_restrict", BAD_CAST "1");
-    isQualified = true;
-  }
-  if (isQualified) {
-    registerType(T.getUnqualifiedType(), nullptr, nullptr);
-    xmlNewProp(N, BAD_CAST "name",
-               BAD_CAST getTypeName(T.getUnqualifiedType()).c_str());
-  }
-
   return N;
 }
 
@@ -412,6 +392,22 @@ void TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
     rawname = registerBasicType(T);
     // XXX: temporary imcompletearray
     Node = createNode(T, "basicType", nullptr);
+
+    xmlNewProp(
+        Node,
+        BAD_CAST "name",
+        BAD_CAST getTypeName(T.getUnqualifiedType()).c_str());
+
+    if (T.isConstQualified()) {
+      xmlNewProp(Node, BAD_CAST "is_const", BAD_CAST "1");
+    }
+    if (T.isVolatileQualified()) {
+      xmlNewProp(Node, BAD_CAST "is_volatile", BAD_CAST "1");
+    }
+    if (T.isRestrictQualified()) {
+      xmlNewProp(Node, BAD_CAST "is_restrict", BAD_CAST "1");
+    }
+
     pushType(T, Node);
   } else switch (T->getTypeClass()) {
   case Type::Builtin:
