@@ -25,6 +25,7 @@ OBJS =  CXXtoXML.o \
 	TypeTableInfo.o \
 	DeclarationsVisitor.o \
 	InheritanceInfo.o \
+	NnsTableInfo.o \
 	OperationKinds.o
 
 CXXtoXML: $(RAVOBJS) $(OBJS)
