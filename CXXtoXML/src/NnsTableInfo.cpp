@@ -29,6 +29,12 @@ NnsTableInfo::registerNestedNameSpec(
 {
   assert(NestedNameSpec);
 
+  using SK = clang::NestedNameSpecifier::SpecifierKind;
+  if (NestedNameSpec->getKind() == SK::Global) {
+    // no need to for registration
+    return;
+  }
+
   const auto prefix = static_cast<std::string>("NNS");
   const auto name =
     prefix +
