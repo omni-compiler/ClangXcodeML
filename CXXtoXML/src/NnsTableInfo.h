@@ -18,6 +18,8 @@ private:
   int seqForOther;
   clang::MangleContext* MC;
   std::map<const clang::NestedNameSpecifier*, std::string> mapForOtherNns;
+  std::map<const clang::NestedNameSpecifier*, xmlNodePtr>
+    mapFromNestedNameSpecToXmlNodePtr;
 };
 
 #endif

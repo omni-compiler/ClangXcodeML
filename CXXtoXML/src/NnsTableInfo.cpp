@@ -1,5 +1,6 @@
 #include <map>
 #include <string>
+#include <libxml/tree.h>
 #include "clang/AST/Mangle.h"
 
 #include "NnsTableInfo.h"
@@ -7,7 +8,8 @@
 NnsTableInfo::NnsTableInfo(clang::MangleContext* M):
   seqForOther(0),
   MC(M),
-  mapForOtherNns()
+  mapForOtherNns(),
+  mapFromNestedNameSpecToXmlNodePtr()
 {}
 
 std::string
