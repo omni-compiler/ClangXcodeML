@@ -28,6 +28,14 @@ NnsTableInfo::getNnsName(
   return mapForOtherNns[NestedNameSpec];
 }
 
+void
+NnsTableInfo::pushNnsTableStack(xmlNodePtr nnsTableNode) {
+  nnsTableStack.push(
+      std::make_tuple(
+        nnsTableNode,
+        std::vector<const clang::NestedNameSpecifier*>()));
+}
+
 static xmlNodePtr
 makeNnsIdentNodeForType(
     NnsTableInfo& NTI,

@@ -11,6 +11,7 @@ public:
 
   explicit NnsTableInfo(clang::MangleContext*);
   std::string getNnsName(const clang::NestedNameSpecifier*);
+  void pushNnsTableStack(xmlNodePtr);
 private:
   void registerNestedNameSpec(const clang::NestedNameSpecifier*);
 
