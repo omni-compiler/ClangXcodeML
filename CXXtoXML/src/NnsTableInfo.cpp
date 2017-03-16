@@ -117,6 +117,7 @@ NnsTableInfo::registerNestedNameSpec(
   mapForOtherNns[NestedNameSpec] = name;
   mapFromNestedNameSpecToXmlNodePtr[NestedNameSpec] =
     makeNnsIdentNodeForNestedNameSpec(*this, NestedNameSpec);
+  pushNns(NestedNameSpec);
 }
 
 xmlNodePtr
