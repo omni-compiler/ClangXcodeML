@@ -27,6 +27,26 @@ NnsTableInfo::getNnsName(
   return mapForOtherNns[NestedNameSpec];
 }
 
+static xmlNodePtr
+makeNnsIdentNodeForType(
+    NnsTableInfo& NTI,
+    const clang::NestedNameSpecifier* Spec)
+{
+  assert(Spec);
+  using SK = clang::NestedNameSpecifier::SpecifierKind;
+  assert(Spec->getKind() == SK::TypeSpec);
+
+  auto node = xmlNewNode(nullptr, BAD_CAST "classNNS");
+  if (const auto prefix = Spec->getPrefix()) {
+    xmlNewProp(
+        node,
+        BAD_CAST "nns",
+        BAD_CAST (NTI.getNnsName(prefix).c_str()));
+  }
+
+  return node;
+}
+
 void
 NnsTableInfo::registerNestedNameSpec(
     const clang::NestedNameSpecifier *NestedNameSpec)
