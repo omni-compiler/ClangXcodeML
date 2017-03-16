@@ -25,7 +25,7 @@ private:
 };
 
 enum class TypeKind {
- /*! basic data type (3.4 <basicType> element) */
+ /*! Built-in type */
   Reserved,
  /*! basic data type (3.4 <basicType> element) */
   Qualified,
