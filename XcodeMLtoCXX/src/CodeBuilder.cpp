@@ -547,7 +547,7 @@ DEFINE_CB(ctorInitListProc) {
   bool alreadyPrinted = false;
   for (auto init : inits) {
     decl = decl
-      + makeTokenNode(alreadyPrinted ? ":" : ",")
+      + makeTokenNode(alreadyPrinted ? "," : ":")
       + w.walk(init, src);
   }
   return decl;
