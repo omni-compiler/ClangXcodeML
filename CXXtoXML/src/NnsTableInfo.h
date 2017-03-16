@@ -14,6 +14,7 @@ public:
   void popNnsTableStack();
   void pushNnsTableStack(xmlNodePtr);
 private:
+  xmlNodePtr getNnsNode(const clang::NestedNameSpecifier*) const;
   void registerNestedNameSpec(const clang::NestedNameSpecifier*);
 
 private:

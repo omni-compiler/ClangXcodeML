@@ -113,3 +113,10 @@ NnsTableInfo::registerNestedNameSpec(
   mapFromNestedNameSpecToXmlNodePtr[NestedNameSpec] =
     makeNnsIdentNodeForNestedNameSpec(*this, NestedNameSpec);
 }
+
+xmlNodePtr
+NnsTableInfo::getNnsNode(const clang::NestedNameSpecifier* Spec) const {
+  auto iter = mapFromNestedNameSpecToXmlNodePtr.find(Spec);
+  assert(iter != mapFromNestedNameSpecToXmlNodePtr.end());
+  return iter->second;
+}
