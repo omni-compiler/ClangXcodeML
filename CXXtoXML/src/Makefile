@@ -41,6 +41,7 @@ CXXtoXML.o: \
 	XMLRAV.h \
 	XMLVisitorBase.h \
 	TypeTableInfo.h \
+	NnsTableInfo.h \
 	DeclarationsVisitor.h
 XMLVisitorBase.o: \
 	XMLVisitorBase.cpp \
@@ -60,6 +61,7 @@ DeclarationsVisitor.o: \
 	XMLVisitorBase.h \
 	InheritanceInfo.cpp \
 	InheritanceInfo.h \
+	NnsTableInfo.h \
 	OperationKinds.cpp \
 	OperationKinds.h
 InheritanceInfo.o: \
