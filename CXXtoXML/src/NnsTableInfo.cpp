@@ -1,4 +1,5 @@
 #include <map>
+#include <stack>
 #include <string>
 #include <libxml/tree.h>
 #include "clang/AST/Mangle.h"

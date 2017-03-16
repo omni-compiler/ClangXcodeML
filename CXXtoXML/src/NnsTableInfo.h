@@ -20,6 +20,11 @@ private:
   std::map<const clang::NestedNameSpecifier*, std::string> mapForOtherNns;
   std::map<const clang::NestedNameSpecifier*, xmlNodePtr>
     mapFromNestedNameSpecToXmlNodePtr;
+  std::stack<
+    std::tuple<
+      xmlNodePtr,
+      std::vector<const clang::NestedNameSpecifier*>>>
+    nnsTableStack;
 };
 
 #endif
