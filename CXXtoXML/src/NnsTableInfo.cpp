@@ -90,4 +90,6 @@ NnsTableInfo::registerNestedNameSpec(
     prefix +
     std::to_string(seqForOther++);
   mapForOtherNns[NestedNameSpec] = name;
+  mapFromNestedNameSpecToXmlNodePtr[NestedNameSpec] =
+    makeNnsIdentNodeForNestedNameSpec(*this, NestedNameSpec);
 }
