@@ -47,6 +47,32 @@ makeNnsIdentNodeForType(
   return node;
 }
 
+static xmlNodePtr
+makeNnsIdentNodeForNestedNameSpec(
+    NnsTableInfo& NTI,
+    const clang::NestedNameSpecifier* Spec)
+{
+  assert(Spec);
+  using SK = clang::NestedNameSpecifier::SpecifierKind;
+  switch(Spec->getKind()) {
+    case SK::TypeSpec:
+      return makeNnsIdentNodeForType(NTI, Spec);
+
+    case SK::Global:
+      // do not make Nns Identifier node for global namespace
+      assert(false);
+
+    case SK::Identifier:
+    case SK::Namespace:
+    case SK::NamespaceAlias:
+    case SK::TypeSpecWithTemplate:
+    case SK::Super:
+      // FIXME: unimplemented
+      assert(false);
+  }
+  return nullptr;
+}
+
 void
 NnsTableInfo::registerNestedNameSpec(
     const clang::NestedNameSpecifier *NestedNameSpec)
