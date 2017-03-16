@@ -29,6 +29,11 @@ NnsTableInfo::getNnsName(
 }
 
 void
+NnsTableInfo::pushNns(const clang::NestedNameSpecifier* Spec) {
+  std::get<1>(nnsTableStack.top()).push_back(Spec);
+}
+
+void
 NnsTableInfo::pushNnsTableStack(xmlNodePtr nnsTableNode) {
   nnsTableStack.push(
       std::make_tuple(
