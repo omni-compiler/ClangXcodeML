@@ -244,7 +244,7 @@ getNameKind(NamedDecl* ND) {
     return "constructor";
   }
   if (isa<CXXDestructorDecl>(FD)) {
-    return "constructor";
+    return "destructor";
   }
   return "name";
 }
