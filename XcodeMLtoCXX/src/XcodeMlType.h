@@ -25,8 +25,10 @@ private:
 };
 
 enum class TypeKind {
- /*! basic data type (3.4 <basicType> element) */
+ /*! Built-in type */
   Reserved,
+ /*! basic data type (3.4 <basicType> element) */
+  Qualified,
   /*! pointer (3.5 <pointerType> element) */
   Pointer,
   /*! function (3.6 <functionType> element) */
@@ -87,6 +89,21 @@ protected:
   Reserved(const Reserved&);
 private:
   CodeFragment name;
+};
+
+class QualifiedType : public Type {
+public:
+  QualifiedType(DataTypeIdent, DataTypeIdent, bool, bool);
+  CodeFragment makeDeclaration(CodeFragment, const Environment&) override;
+  ~QualifiedType() override;
+  Type* clone() const override;
+  static bool classof(const Type*);
+protected:
+  QualifiedType(const QualifiedType&);
+private:
+  DataTypeIdent underlying;
+  bool isConst;
+  bool isVolatile;
 };
 
 class Pointer : public Type {
@@ -250,6 +267,7 @@ protected:
 };
 
 TypeRef makeReservedType(DataTypeIdent, CodeFragment, bool = false, bool = false);
+TypeRef makeQualifiedType(const DataTypeIdent&, const DataTypeIdent&, bool, bool);
 TypeRef makePointerType(DataTypeIdent, TypeRef);
 TypeRef makePointerType(DataTypeIdent, DataTypeIdent);
 TypeRef makeFunctionType(DataTypeIdent, TypeRef, const Function::Params&);

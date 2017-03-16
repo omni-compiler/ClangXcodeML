@@ -41,9 +41,9 @@ using CXXCodeGen::makeVoidNode;
 DEFINE_TA(basicTypeProc) {
   XMLString signified = xmlGetProp(node, BAD_CAST "name");
   XMLString signifier(xmlGetProp(node, BAD_CAST "type"));
-  map[signifier] = XcodeMl::makeReservedType(
+  map[signifier] = XcodeMl::makeQualifiedType(
       signifier,
-      makeTokenNode(signified),
+      signified,
       isTrueProp(node, "is_const", false),
       isTrueProp(node, "is_volatile", false)
   );
