@@ -10,14 +10,14 @@ public:
   NnsTableInfo& operator =(NnsTableInfo&&) = delete;
 
   explicit NnsTableInfo(clang::MangleContext*);
-  std::string getNnsName(clang::NestedNameSpecifier*);
+  std::string getNnsName(const clang::NestedNameSpecifier*);
 private:
-  void registerNestedNameSpec(clang::NestedNameSpecifier*);
+  void registerNestedNameSpec(const clang::NestedNameSpecifier*);
 
 private:
   int seqForOther;
   clang::MangleContext* MC;
-  std::map<clang::NestedNameSpecifier*, std::string> mapForOtherNns;
+  std::map<const clang::NestedNameSpecifier*, std::string> mapForOtherNns;
 };
 
 #endif

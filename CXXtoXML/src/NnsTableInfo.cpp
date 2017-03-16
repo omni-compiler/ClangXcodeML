@@ -11,7 +11,9 @@ NnsTableInfo::NnsTableInfo(clang::MangleContext* M):
 {}
 
 std::string
-NnsTableInfo::getNnsName(clang::NestedNameSpecifier* NestedNameSpec) {
+NnsTableInfo::getNnsName(
+    const clang::NestedNameSpecifier* NestedNameSpec)
+{
   using SK = clang::NestedNameSpecifier::SpecifierKind;
   if (NestedNameSpec->getKind() == SK::Global) {
     return "global";
@@ -25,7 +27,7 @@ NnsTableInfo::getNnsName(clang::NestedNameSpecifier* NestedNameSpec) {
 
 void
 NnsTableInfo::registerNestedNameSpec(
-    clang::NestedNameSpecifier *NestedNameSpec)
+    const clang::NestedNameSpecifier *NestedNameSpec)
 {
   assert(NestedNameSpec);
 
