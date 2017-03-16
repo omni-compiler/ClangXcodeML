@@ -27,6 +27,8 @@ void
 NnsTableInfo::registerNestedNameSpec(
     clang::NestedNameSpecifier *NestedNameSpec)
 {
+  assert(NestedNameSpec);
+
   const auto prefix = static_cast<std::string>("NNS");
   const auto name =
     prefix +
