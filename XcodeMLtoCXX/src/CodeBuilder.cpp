@@ -543,13 +543,12 @@ DEFINE_CB(ctorInitListProc) {
   if (inits.empty()) {
     return makeVoidNode();
   }
-  auto decl = makeTokenNode(":");
+  auto decl = makeVoidNode();
   bool alreadyPrinted = false;
   for (auto init : inits) {
-    if (alreadyPrinted) {
-      decl = decl + makeTokenNode(",");
-    }
-    decl = decl + w.walk(init, src);
+    decl = decl
+      + makeTokenNode(alreadyPrinted ? ":" : ",")
+      + w.walk(init, src);
   }
   return decl;
 }
