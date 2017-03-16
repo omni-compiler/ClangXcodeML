@@ -538,6 +538,16 @@ DEFINE_CB(varDeclProc) {
   return acc + makeTokenNode(";");
 }
 
+DEFINE_CB(ctorInitProc) {
+  const auto member = getProp(node, "member");
+  auto expr = findFirst(node, "*[1]", src.ctxt);
+  assert(expr);
+  return makeTokenNode(member) +
+    makeTokenNode("(") +
+    w.walk(expr, src) +
+    makeTokenNode(")");
+}
+
 const CodeBuilder CXXBuilder(
 "CodeBuilder",
 makeInnerNode,
