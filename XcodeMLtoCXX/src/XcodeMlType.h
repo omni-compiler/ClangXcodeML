@@ -91,6 +91,21 @@ private:
   CodeFragment name;
 };
 
+class QualifiedType : public Type {
+public:
+  QualifiedType(DataTypeIdent, DataTypeIdent, bool, bool);
+  CodeFragment makeDeclaration(CodeFragment, const Environment&) override;
+  ~QualifiedType() override;
+  Type* clone() const override;
+  static bool classof(const Type*);
+protected:
+  QualifiedType(const QualifiedType&);
+private:
+  DataTypeIdent underlying;
+  bool isConst;
+  bool isVolatile;
+};
+
 class Pointer : public Type {
 public:
   Pointer(DataTypeIdent, TypeRef);

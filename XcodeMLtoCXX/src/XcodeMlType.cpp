@@ -134,6 +134,53 @@ bool Reserved::classof(const Type* T) {
   return T->getKind() == TypeKind::Reserved;
 }
 
+QualifiedType::QualifiedType(
+    DataTypeIdent ident,
+    DataTypeIdent baseType,
+    bool constness,
+    bool volatility):
+  Type(TypeKind::Qualified, ident),
+  underlying(baseType),
+  isConst(constness),
+  isVolatile(volatility)
+{}
+
+CodeFragment
+QualifiedType::makeDeclaration(
+    CodeFragment var,
+    const Environment& env)
+{
+  const auto T = env[underlying];
+  TypeRef QT(T->clone());
+  if (isConst) {
+    QT->setConst(true);
+  }
+  if (isVolatile) {
+    QT->setVolatile(true);
+  }
+  return makeDecl(QT, var, env);
+}
+
+QualifiedType::~QualifiedType() = default;
+
+Type*
+QualifiedType::clone() const {
+  QualifiedType* copy = new QualifiedType(*this);
+  return copy;
+}
+
+bool
+QualifiedType::classof(const Type* T) {
+  return T->getKind() == TypeKind::Qualified;
+}
+
+QualifiedType::QualifiedType(const QualifiedType& other):
+  Type(other),
+  underlying(other.underlying),
+  isConst(other.isConst),
+  isVolatile(other.isVolatile)
+{}
+
 Pointer::Pointer(DataTypeIdent ident, TypeRef signified):
   Type(TypeKind::Pointer, ident),
   ref(signified->dataTypeIdent())
