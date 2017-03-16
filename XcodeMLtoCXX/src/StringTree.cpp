@@ -107,6 +107,13 @@ makeTokenNode(const std::string& s) {
   return std::make_shared<TokenNode>(s);
 }
 
+std::string
+to_string(const StringTreeRef& str) {
+  Stream ss;
+  str->flush(ss);
+  return ss.str();
+}
+
 StringTreeRef
 makeVoidNode() {
   return std::make_shared<TokenNode>("");
