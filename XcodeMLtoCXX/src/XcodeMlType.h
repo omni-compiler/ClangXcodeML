@@ -27,6 +27,8 @@ private:
 enum class TypeKind {
  /*! basic data type (3.4 <basicType> element) */
   Reserved,
+ /*! basic data type (3.4 <basicType> element) */
+  Qualified,
   /*! pointer (3.5 <pointerType> element) */
   Pointer,
   /*! function (3.6 <functionType> element) */
