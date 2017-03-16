@@ -267,6 +267,7 @@ protected:
 };
 
 TypeRef makeReservedType(DataTypeIdent, CodeFragment, bool = false, bool = false);
+TypeRef makeQualifiedType(const DataTypeIdent&, const DataTypeIdent&, bool, bool);
 TypeRef makePointerType(DataTypeIdent, TypeRef);
 TypeRef makePointerType(DataTypeIdent, DataTypeIdent);
 TypeRef makeFunctionType(DataTypeIdent, TypeRef, const Function::Params&);

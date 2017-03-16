@@ -661,6 +661,16 @@ TypeRef makeReservedType(DataTypeIdent ident, CodeFragment name, bool c, bool v)
   return type;
 }
 
+TypeRef
+makeQualifiedType(
+    const DataTypeIdent& ident,
+    const DataTypeIdent& underlyingType,
+    bool c,
+    bool v)
+{
+  return std::make_shared<QualifiedType>(ident, underlyingType, c, v);
+}
+
 TypeRef makePointerType(DataTypeIdent ident, TypeRef ref) {
   return std::make_shared<Pointer>(
       ident,
