@@ -59,13 +59,20 @@ NnsTableInfo::popNnsTableStack() {
 static xmlNodePtr
 makeNnsIdentNodeForType(
     NnsTableInfo& NTI,
+    TypeTableInfo& TTI,
     const clang::NestedNameSpecifier* Spec)
 {
   assert(Spec);
-  using SK = clang::NestedNameSpecifier::SpecifierKind;
-  assert(Spec->getKind() == SK::TypeSpec);
+  const auto T = Spec->getAsType();
+  assert(T);
 
   auto node = xmlNewNode(nullptr, BAD_CAST "classNNS");
+  auto dtident = TTI.getTypeName(
+      clang::QualType(T, 0));
+  xmlNewProp(
+      node,
+      BAD_CAST "type",
+      BAD_CAST (dtident.c_str()));
   if (const auto prefix = Spec->getPrefix()) {
     xmlNewProp(
         node,
@@ -79,13 +86,14 @@ makeNnsIdentNodeForType(
 static xmlNodePtr
 makeNnsIdentNodeForNestedNameSpec(
     NnsTableInfo& NTI,
+    TypeTableInfo& TTI,
     const clang::NestedNameSpecifier* Spec)
 {
   assert(Spec);
   using SK = clang::NestedNameSpecifier::SpecifierKind;
   switch(Spec->getKind()) {
     case SK::TypeSpec:
-      return makeNnsIdentNodeForType(NTI, Spec);
+      return makeNnsIdentNodeForType(NTI, TTI, Spec);
 
     case SK::Global:
       // do not make Nns Identifier node for global namespace
@@ -120,7 +128,10 @@ NnsTableInfo::registerNestedNameSpec(
     std::to_string(seqForOther++);
   mapForOtherNns[NestedNameSpec] = name;
   mapFromNestedNameSpecToXmlNodePtr[NestedNameSpec] =
-    makeNnsIdentNodeForNestedNameSpec(*this, NestedNameSpec);
+    makeNnsIdentNodeForNestedNameSpec(
+        *this,
+        *typetableinfo,
+        NestedNameSpec);
   pushNns(NestedNameSpec);
 }
 
