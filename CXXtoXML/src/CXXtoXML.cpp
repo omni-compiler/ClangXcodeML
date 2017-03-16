@@ -1,6 +1,7 @@
 #include "XMLVisitorBase.h"
 
 #include "TypeTableInfo.h"
+#include "NnsTableInfo.h"
 #include "DeclarationsVisitor.h"
 
 #include "clang/AST/ASTConsumer.h"
@@ -34,9 +35,11 @@ public:
         MangleContext *MC = CXT.createMangleContext();
         InheritanceInfo inheritanceinfo;
         InheritanceInfo *II = &inheritanceinfo;
+        NnsTableInfo nnstableinfo(MC);
+        NnsTableInfo *NTI = &nnstableinfo;
         TypeTableInfo typetableinfo(MC, II);
         TypeTableInfo *TTI = &typetableinfo;
-        DeclarationsVisitor DV(MC, rootNode, "clangAST", TTI);
+        DeclarationsVisitor DV(MC, rootNode, "clangAST", TTI, NTI);
         Decl *D = CXT.getTranslationUnitDecl();
 
         DV.TraverseDecl(D);
