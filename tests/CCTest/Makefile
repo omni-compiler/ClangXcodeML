@@ -2,7 +2,7 @@
 .PHONY: check clean
 .DELETE_ON_ERROR:
 
-all: test
+all: check
 
 ROOTDIR = ../..
 CXXTOXMLDIR = $(ROOTDIR)/CXXtoXML
