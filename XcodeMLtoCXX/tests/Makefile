@@ -1,6 +1,6 @@
 .PHONY: clean check
 
-TESTDIRS = UnitTest Compilability
+TESTDIRS = UnitTest
 
 all:
 	set -e; \
