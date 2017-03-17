@@ -354,19 +354,13 @@ DEFINE_CB(functionDefinitionProc) {
   );
   const XMLString name(xmlNodeGetContent(nameElem));
   const XMLString kind(nameElem->name);
-  auto nameNode =
-    makeTokenNode(
-    (kind == "name" || kind == "operator") ?
-      name :
-      (kind == "constructor") ?
-        "<CONSTRUCTOR>" :
-        (kind == "destructor") ?
-          "<DESTRUCTOR>" :
-          throw);
+  const auto nameNode = getDeclNameFromTypedNode(node, src);
+    // FIXME: Do not cheat (lookup symbols table)
 
-  auto fnTypeName = findSymbolType(src.symTable, name);
+  const auto dtident = getProp(node, "type");
+  const auto T = src.typeTable[dtident];
   auto fnType = llvm::cast<XcodeMl::Function>(
-      src.typeTable.at(fnTypeName).get());
+      T.get());
   auto acc =
     fnType->makeDeclaration(
         nameNode,
