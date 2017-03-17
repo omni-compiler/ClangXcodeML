@@ -462,6 +462,8 @@ DeclarationsVisitor::PreVisitConstructorInitializer(
 
   if (auto member = CI->getMember()) {
     newProp("member", member->getNameAsString().c_str());
+  } else {
+    newBoolProp("clang_unknown_ctor_init", true);
   }
   return true;
 }
