@@ -1,6 +1,6 @@
 .PHONY: clean check
 
-TESTDIRS = CppTest
+TESTDIRS =
 
 check:
 	set -e; \

@@ -5,7 +5,7 @@
 
 all: test
 
-ROOTDIR = ../../..
+ROOTDIR = ../..
 CXXTOXMLDIR = $(ROOTDIR)/CXXtoXML/src
 XCODEMLTOCXXDIR = $(ROOTDIR)/XcodeMLtoCXX
 CXXTOXMLXSLTDIR = $(CXXTOXMLDIR)/XSLTs
@@ -26,7 +26,7 @@ $(CXXTOXML):
 $(XCODEMLTOCXX):
 	$(MAKE) -C $(XCODEMLTOCXXDIR)
 
-%.CasXcodeML: %.src.c $(CXXTOXML)
+%.c.xcodeml: %.src.c $(CXXTOXML)
 	$(CXXTOXML) $< $(CXXTOXMLFLAGS) \
 	  | xsltproc $(CXXTOXMLXSLTDIR)/drop_prop_column.xsl - \
 		| xsltproc $(CXXTOXMLXSLTDIR)/drop_prop_file.xsl - \
@@ -38,10 +38,10 @@ $(XCODEMLTOCXX):
 		| xmllint --format - \
 		> $@
 
-%.dst.c: %.CasXcodeML $(XCODEMLTOCXX)
+%.dst.c: %.c.xcodeml $(XCODEMLTOCXX)
 	$(XCODEMLTOCXX) $< > $@
 
-%.CXXasXcodeML: %.src.cpp $(CXXTOXML)
+%.cpp.xcodeml: %.src.cpp $(CXXTOXML)
 	$(CXXTOXML) $< $(CXXTOXMLFLAGS) \
 	  | xsltproc $(CXXTOXMLXSLTDIR)/drop_prop_column.xsl - \
 		| xsltproc $(CXXTOXMLXSLTDIR)/drop_prop_file.xsl - \
@@ -53,7 +53,7 @@ $(XCODEMLTOCXX):
 		| xmllint --format - \
 		> $@
 
-%.dst.cpp: %.CXXasXcodeML $(XCODEMLTOCXX)
+%.dst.cpp: %.cpp.xcodeml $(XCODEMLTOCXX)
 	$(XCODEMLTOCXX) $< > $@
 
 check: $(CXXTOXML) $(XCODEMLTOCXX) $(CXXTESTOBJECTS) $(CTESTOBJECTS)
@@ -67,4 +67,4 @@ check: $(CXXTOXML) $(XCODEMLTOCXX) $(CXXTESTOBJECTS) $(CTESTOBJECTS)
 	done
 
 clean:
-	rm -f *.dst.c *.dst.cpp *.CasXcodeML *.CXXasXcodeML
+	rm -f *.dst.c *.dst.cpp *.xcodeml

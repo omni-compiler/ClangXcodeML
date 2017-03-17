@@ -1,8 +1,8 @@
 .PHONY: clean check
 
-TESTDIRS = UnitTest
+TESTDIRS = Compilability CCTest
 
-all:
+check:
 	set -e; \
 	for dir in $(TESTDIRS); do \
 		$(MAKE) -C $$dir check; \
