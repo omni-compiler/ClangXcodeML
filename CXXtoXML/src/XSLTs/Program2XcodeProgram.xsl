@@ -63,11 +63,13 @@
   </xsl:template>
 
   <xsl:template match="clangConstructorInitializer">
-    <constructorInitializer>
-      <xsl:copy-of select="@*" /> <!-- including @member -->
-      <xsl:apply-templates select="@xcodemlType" />
-      <xsl:apply-templates select="*" />
-    </constructorInitializer>
+    <xsl:if test="@is_written = '1' or @is_written = 'true'">
+      <constructorInitializer>
+        <xsl:copy-of select="@*" /> <!-- including @member -->
+        <xsl:apply-templates select="@xcodemlType" />
+        <xsl:apply-templates select="*" />
+      </constructorInitializer>
+    </xsl:if>
   </xsl:template>
 
   <xsl:template match="clangDecl[@class='Var']">
