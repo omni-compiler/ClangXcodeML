@@ -578,6 +578,28 @@ DEFINE_CB(ctorInitListProc) {
   return decl;
 }
 
+static XcodeMl::CodeFragment
+getCtorInitName(
+    xmlNodePtr node,
+    const XcodeMl::Environment& env)
+{
+  const auto dataMember = getPropOrNull(node, "member");
+  if (dataMember.hasValue()) {
+    return makeTokenNode(*dataMember);
+  }
+  const auto base = getPropOrNull(node, "type");
+  if (base.hasValue()) {
+    const auto T = env[*base];
+    const auto classT = llvm::cast<XcodeMl::ClassType>(T.get());
+    const auto name = classT->name();
+    assert(name.hasValue());
+    return *name;
+  }
+
+  xmlDebugDumpNode(stderr, node, 0);
+  assert(false);
+}
+
 DEFINE_CB(ctorInitProc) {
   const auto member = getProp(node, "member");
   auto expr = findFirst(node, "*[1]", src.ctxt);
