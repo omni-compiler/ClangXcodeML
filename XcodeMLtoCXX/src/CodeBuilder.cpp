@@ -34,6 +34,29 @@ using cxxgen::makeVoidNode;
 
 using cxxgen::separateByBlankLines;
 
+static XcodeMl::CodeFragment
+getDeclNameFromTypedNode(
+    xmlNodePtr node,
+    const SourceInfo& src)
+{
+  if (findFirst(node, "constructor", src.ctxt)) {
+    const auto classDtident = getProp(node, "parent_class");
+    const auto T = src.typeTable[classDtident];
+    const auto classT = llvm::cast<XcodeMl::ClassType>(T.get());
+    const auto name = classT->name();
+    assert(name.hasValue());
+    return *name;
+  } else if (findFirst(node, "destructor", src.ctxt)) {
+    const auto classDtident = getProp(node, "parent_class");
+    const auto T = src.typeTable[classDtident];
+    const auto classT = llvm::cast<XcodeMl::ClassType>(T.get());
+    const auto name = classT->name();
+    assert(name.hasValue());
+    return makeTokenNode("~") + (*name);
+  }
+  return makeTokenNode(getNameFromIdNode(node, src.ctxt));
+}
+
 /*!
  * \brief Traverse XcodeML node and make SymbolEntry.
  * \pre \c node is <globalSymbols> or <symbols> element.
@@ -285,10 +308,6 @@ getParams(xmlNodePtr fnNode, const SourceInfo& src) {
   return std::move(vec);
 }
 
-DEFINE_CB(clangStmtProc) {
-  //ClangStmtHandler.walk(node, w, src, ss);
-}
-
 static SymbolEntry
 ClassSymbolsToSymbolEntry(const XcodeMl::ClassType* T) {
   using namespace XcodeMl;
@@ -335,19 +354,13 @@ DEFINE_CB(functionDefinitionProc) {
   );
   const XMLString name(xmlNodeGetContent(nameElem));
   const XMLString kind(nameElem->name);
-  auto nameNode =
-    makeTokenNode(
-    (kind == "name" || kind == "operator") ?
-      name :
-      (kind == "constructor") ?
-        "<CONSTRUCTOR>" :
-        (kind == "destructor") ?
-          "<DESTRUCTOR>" :
-          throw);
+  const auto nameNode = getDeclNameFromTypedNode(node, src);
+    // FIXME: Do not cheat (lookup symbols table)
 
-  auto fnTypeName = findSymbolType(src.symTable, name);
+  const auto dtident = getProp(node, "type");
+  const auto T = src.typeTable[dtident];
   auto fnType = llvm::cast<XcodeMl::Function>(
-      src.typeTable.at(fnTypeName).get());
+      T.get());
   auto acc =
     fnType->makeDeclaration(
         nameNode,
@@ -360,13 +373,14 @@ DEFINE_CB(functionDefinitionProc) {
 }
 
 DEFINE_CB(functionDeclProc) {
-  const auto name = getNameFromIdNode(node, src.ctxt);
-  assert(!name.empty());
-  const auto fnType = getIdentType(src, name);
+  const auto name = getDeclNameFromTypedNode(node, src);
+    // FIXME: Do not cheat (lookup symbols table)
+  const auto fnDtident = getProp(node, "type");
+  const auto fnType = src.typeTable[fnDtident];
   return
     makeDecl(
         fnType,
-        makeTokenNode(name),
+        name,
         src.typeTable) +
     makeTokenNode(";");
 }

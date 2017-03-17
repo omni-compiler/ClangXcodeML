@@ -353,6 +353,15 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
     newBoolProp("is_const", MD->isConst());
     newBoolProp("is_static", MD->isStatic());
     newBoolProp("is_virtual", MD->isVirtual());
+    if (auto RD = MD->getParent()) {
+      assert(mangleContext);
+      const auto T = mangleContext->getASTContext().getRecordType(RD);
+      newProp(
+          "parent_class",
+          typetableinfo->getTypeName(T).c_str());
+    } else {
+      newBoolProp("clang_parent_class_not_found", true);
+    }
   }
   return true;
 }
