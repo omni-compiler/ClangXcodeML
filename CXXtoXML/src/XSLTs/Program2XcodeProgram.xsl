@@ -65,6 +65,7 @@
   <xsl:template match="clangConstructorInitializer">
     <constructorInitializer>
       <xsl:copy-of select="@*" /> <!-- including @member -->
+      <xsl:apply-templates select="@xcodemlType" />
       <xsl:apply-templates select="*" />
     </constructorInitializer>
   </xsl:template>
