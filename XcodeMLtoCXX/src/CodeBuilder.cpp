@@ -367,6 +367,14 @@ DEFINE_CB(functionDefinitionProc) {
         getParams(node, src),
         src.typeTable);
 
+  if (auto ctorInitList = findFirst(
+        node,
+        "constructorInitializerList",
+        src.ctxt))
+  {
+    acc = acc + w.walk(ctorInitList, src);
+  }
+
   acc = acc + makeTokenNode( "{" ) + makeNewLineNode();
   acc = acc + makeInnerNode(w.walkChildren(node, src));
   return acc + makeTokenNode("}");
@@ -582,6 +590,8 @@ const CodeBuilder CXXBuilder(
 makeInnerNode,
 {
   //{ "clangStmt", clangStmtProc },
+  { "constructorInitializer", ctorInitProc },
+  { "constructorInitializerList", ctorInitListProc },
 
   { "typeTable", NullProc },
   { "functionDefinition", functionDefinitionProc },
