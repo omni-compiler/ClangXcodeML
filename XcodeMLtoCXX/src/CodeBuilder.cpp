@@ -526,14 +526,25 @@ DEFINE_CB(argumentsProc) {
 
 DEFINE_CB(condExprProc) {
   xmlNodePtr prd = findFirst(node, "*[1]", src.ctxt),
-             the = findFirst(node, "*[2]", src.ctxt),
-             els = findFirst(node, "*[3]", src.ctxt);
-  return
-    w.walk(prd, src) +
-    makeTokenNode("?") +
-    w.walk(the, src) +
-    makeTokenNode(":") +
-    w.walk(els, src);
+          second = findFirst(node, "*[2]", src.ctxt),
+           third = findFirst(node, "*[3]", src.ctxt);
+  if (third) {
+    return
+      makeTokenNode( "(" ) +
+      w.walk(prd, src) +
+      makeTokenNode( "?" ) +
+      w.walk(second, src) +
+      makeTokenNode( ":" ) +
+      w.walk(third, src) +
+      makeTokenNode(")");
+  } else {
+    return
+      makeTokenNode( "(" ) +
+      w.walk(prd, src) +
+      makeTokenNode( "?:" ) +
+      w.walk(second, src) +
+      makeTokenNode(")");
+  }
 }
 
 DEFINE_CB(varDeclProc) {
