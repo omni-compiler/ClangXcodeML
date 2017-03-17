@@ -4,7 +4,7 @@
 
 all: test
 
-ROOTDIR = ../../..
+ROOTDIR = ../..
 CXXTOXMLDIR = $(ROOTDIR)/CXXtoXML
 CXXTOXML = $(CXXTOXMLDIR)/src/CXXtoXML
 CXXTOXMLFLAGS = --
