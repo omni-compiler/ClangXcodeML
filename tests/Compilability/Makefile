@@ -12,6 +12,7 @@ CC = /usr/local/bin/clang
 CFLAGS = -pedantic -fsyntax-only
 CXX = /usr/local/bin/clang++
 CXXFLAGS = -pedantic -fsyntax-only
+CTOXML = $(ROOTDIR)/bin/CXXtoXcodeML
 CXXTOXML = $(ROOTDIR)/bin/CXXtoXcodeML
 CXXTOXMLFLAGS = --
 XCODEMLTOCXX = $(XCODEMLTOCXXDIR)/XcodeMLtoCXX
@@ -26,7 +27,7 @@ $(XCODEMLTOCXX):
 	$(MAKE) -C $(XCODEMLTOCXXDIR)
 
 %.c.xcodeml: %.src.c $(CXXTOXML)
-	$(CXXTOXML) $< $(CXXTOXMLFLAGS) \
+	$(CTOXML) $< $(CXXTOXMLFLAGS) \
 		> $@
 
 %.dst.c: %.c.xcodeml $(XCODEMLTOCXX)
