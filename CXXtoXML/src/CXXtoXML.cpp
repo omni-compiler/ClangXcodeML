@@ -1,6 +1,7 @@
 #include "XMLVisitorBase.h"
 
 #include "TypeTableInfo.h"
+#include "NnsTableInfo.h"
 #include "DeclarationsVisitor.h"
 
 #include "clang/AST/ASTConsumer.h"
@@ -36,7 +37,9 @@ public:
         InheritanceInfo *II = &inheritanceinfo;
         TypeTableInfo typetableinfo(MC, II);
         TypeTableInfo *TTI = &typetableinfo;
-        DeclarationsVisitor DV(MC, rootNode, "clangAST", TTI);
+        NnsTableInfo nnstableinfo(TTI);
+        NnsTableInfo *NTI = &nnstableinfo;
+        DeclarationsVisitor DV(MC, rootNode, "clangAST", TTI, NTI);
         Decl *D = CXT.getTranslationUnitDecl();
 
         DV.TraverseDecl(D);

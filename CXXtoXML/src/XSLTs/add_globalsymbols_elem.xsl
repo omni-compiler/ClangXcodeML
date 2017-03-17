@@ -150,6 +150,14 @@
             xcodemlTypeTable/*"/>
       </typeTable>
 
+      <nnsTable>
+        <xsl:apply-templates
+            select="
+            clangAST/
+            clangDecl[@class='TranslationUnit']/
+            xcodemlNnsTable/*"/>
+      </nnsTable>
+
       <globalSymbols>
         <xsl:for-each
           select="clangAST/clangDecl[@class='TranslationUnit']">
@@ -163,6 +171,8 @@
   </xsl:template>
 
   <xsl:template match="xcodemlTypeTable" />
+
+  <xsl:template match="xcodemlNnsTable" />
 
   <xsl:template match="node()|@*">
     <xsl:copy>

@@ -10,6 +10,7 @@
 #include <string>
 
 class TypeTableInfo;
+class NnsTableInfo;
 
 // some members & methods of XMLVisitorBase do not need the info
 // of deriving type <Derived>:
@@ -20,6 +21,7 @@ protected:
     clang::MangleContext *mangleContext;
     xmlNodePtr curNode;        // a candidate of the new chlid.
     TypeTableInfo *typetableinfo;
+    NnsTableInfo *nnstableinfo;
 public:
     XMLVisitorBaseImpl() = delete;
     XMLVisitorBaseImpl(const XMLVisitorBaseImpl&) = delete;
@@ -29,7 +31,8 @@ public:
 
     explicit XMLVisitorBaseImpl(clang::MangleContext *MC,
                                 xmlNodePtr CurNode,
-                                TypeTableInfo *TTI);
+                                TypeTableInfo *TTI,
+                                NnsTableInfo *NTI);
 
     xmlNodePtr addChild(const char *Name, const char *Content = nullptr);
     xmlNodePtr addChild(const char *Name, xmlNodePtr N);
@@ -60,17 +63,20 @@ public:
 
     explicit XMLVisitorBase(clang::MangleContext *MC, xmlNodePtr Parent,
                             const char *ChildName,
-                            TypeTableInfo *TTI = nullptr)
+                            TypeTableInfo *TTI = nullptr,
+                            NnsTableInfo *NTI = nullptr)
         : XMLVisitorBaseImpl(MC, (ChildName
                                   ? xmlNewTextChild(Parent, nullptr,
                                                     BAD_CAST ChildName,
                                                     nullptr)
                                   : Parent),
-                             TTI),
+                             TTI,
+                             NTI),
           optContext() {};
     explicit XMLVisitorBase(XMLVisitorBase *p)
         : XMLVisitorBaseImpl(p->mangleContext, p->curNode,
-                             p->typetableinfo),
+                             p->typetableinfo,
+                             p->nnstableinfo),
           optContext(p->optContext) {};
 
     Derived &getDerived() { return *static_cast<Derived *>(this); }
