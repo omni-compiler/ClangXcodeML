@@ -266,6 +266,20 @@ CodeBuilder::Procedure showUnaryOp(std::string Operator) {
   return showChildElem(Operator + "(", ")");
 }
 
+DEFINE_CB(postIncrExprProc) {
+  return
+    makeTokenNode("(") +
+    makeInnerNode(w.walkChildren(node, src)) +
+    makeTokenNode("++)");
+}
+
+DEFINE_CB(postDecrExprProc) {
+  return
+    makeTokenNode("(") +
+    makeInnerNode(w.walkChildren(node, src)) +
+    makeTokenNode("--)");
+}
+
 /*!
  * \brief Make a procedure that handles SourceInfo::symTable.
  * \return A procudure. It traverses <symbols> node and pushes new
@@ -636,6 +650,8 @@ makeInnerNode,
   { "unaryMinusExpr", showUnaryOp("-") },
   { "preIncrExpr", showUnaryOp("++") },
   { "preDecrExpr", showUnaryOp("--") },
+  { "postIncrExpr", postIncrExprProc },
+  { "postDecrExpr", postDecrExprProc },
   { "AddrOfExpr", showUnaryOp("&") },
   { "pointerRef", showUnaryOp("*") },
   { "bitNotExpr", showUnaryOp("~") },
