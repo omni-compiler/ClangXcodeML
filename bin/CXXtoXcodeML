@@ -1,0 +1,18 @@
+#!/bin/bash
+
+INPUTFILE=$(readlink -f $1)
+
+cd $(dirname $0)
+ROOTDIR=..
+XSLTsDIR=${ROOTDIR}/CXXtoXML/src/XSLTs
+CXXTOXML=${ROOTDIR}/CXXtoXML/src/CXXtoXML
+
+${CXXTOXML} ${INPUTFILE} -- |
+	    xsltproc ${XSLTsDIR}/drop_prop_column.xsl - |
+      xsltproc ${XSLTsDIR}/drop_prop_file.xsl -  |
+      xsltproc ${XSLTsDIR}/drop_prop_lineno.xsl -  |
+      xsltproc ${XSLTsDIR}/reorder_decl.xsl -  |
+      xsltproc ${XSLTsDIR}/add_symbols_elem.xsl -  |
+      xsltproc ${XSLTsDIR}/add_globalsymbols_elem.xsl -  |
+      xsltproc ${XSLTsDIR}/Program2XcodeProgram.xsl -  |
+      xmllint --format - 
