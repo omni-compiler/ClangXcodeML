@@ -8,12 +8,11 @@ all: test
 ROOTDIR = ../..
 CXXTOXMLDIR = $(ROOTDIR)/CXXtoXML/src
 XCODEMLTOCXXDIR = $(ROOTDIR)/XcodeMLtoCXX
-CXXTOXMLXSLTDIR = $(CXXTOXMLDIR)/XSLTs
 CC = /usr/local/bin/clang
 CFLAGS = -pedantic -fsyntax-only
 CXX = /usr/local/bin/clang++
 CXXFLAGS = -pedantic -fsyntax-only
-CXXTOXML = $(CXXTOXMLDIR)/CXXtoXML
+CXXTOXML = $(ROOTDIR)/bin/CXXtoXcodeML
 CXXTOXMLFLAGS = --
 XCODEMLTOCXX = $(XCODEMLTOCXXDIR)/XcodeMLtoCXX
 CTESTCASES = $(wildcard *.src.c)
@@ -28,14 +27,6 @@ $(XCODEMLTOCXX):
 
 %.c.xcodeml: %.src.c $(CXXTOXML)
 	$(CXXTOXML) $< $(CXXTOXMLFLAGS) \
-	  | xsltproc $(CXXTOXMLXSLTDIR)/drop_prop_column.xsl - \
-		| xsltproc $(CXXTOXMLXSLTDIR)/drop_prop_file.xsl - \
-		| xsltproc $(CXXTOXMLXSLTDIR)/drop_prop_lineno.xsl - \
-		| xsltproc $(CXXTOXMLXSLTDIR)/reorder_decl.xsl - \
-		| xsltproc $(CXXTOXMLXSLTDIR)/add_symbols_elem.xsl - \
-		| xsltproc $(CXXTOXMLXSLTDIR)/add_globalsymbols_elem.xsl - \
-		| xsltproc $(CXXTOXMLXSLTDIR)/Program2XcodeProgram.xsl - \
-		| xmllint --format - \
 		> $@
 
 %.dst.c: %.c.xcodeml $(XCODEMLTOCXX)
@@ -43,14 +34,6 @@ $(XCODEMLTOCXX):
 
 %.cpp.xcodeml: %.src.cpp $(CXXTOXML)
 	$(CXXTOXML) $< $(CXXTOXMLFLAGS) \
-	  | xsltproc $(CXXTOXMLXSLTDIR)/drop_prop_column.xsl - \
-		| xsltproc $(CXXTOXMLXSLTDIR)/drop_prop_file.xsl - \
-		| xsltproc $(CXXTOXMLXSLTDIR)/drop_prop_lineno.xsl - \
-		| xsltproc $(CXXTOXMLXSLTDIR)/reorder_decl.xsl - \
-		| xsltproc $(CXXTOXMLXSLTDIR)/add_symbols_elem.xsl - \
-		| xsltproc $(CXXTOXMLXSLTDIR)/add_globalsymbols_elem.xsl - \
-		| xsltproc $(CXXTOXMLXSLTDIR)/Program2XcodeProgram.xsl - \
-		| xmllint --format - \
 		> $@
 
 %.dst.cpp: %.cpp.xcodeml $(XCODEMLTOCXX)
