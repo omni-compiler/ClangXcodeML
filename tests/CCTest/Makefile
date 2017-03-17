@@ -1,5 +1,5 @@
 .SUFFIXES: .xml .xcodeml
-.PHONY: check clean
+.PHONY: check clean install-cc
 .DELETE_ON_ERROR:
 
 all: check
@@ -38,6 +38,11 @@ $(XCODEMLTOCXX):
 
 %.dst.cpp: %.xcodeml $(XCODEMLTOCXX)
 	$(XCODEMLTOCXX) $< > $@
+
+install-cc:
+	for file in *.cc; do \
+		mv $$file $${file%.cc}.src.cpp; \
+	done
 
 check: $(CXXTOXML) $(CXXDECOMPTESTOBJECTS)
 	set -e; \
