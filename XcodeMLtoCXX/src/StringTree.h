@@ -59,6 +59,8 @@ private:
   std::string token;
 };
 
+std::string to_string(const StringTreeRef&);
+
 StringTreeRef makeVoidNode();
 StringTreeRef makeNewLineNode();
 StringTreeRef makeInnerNode(const std::vector<StringTreeRef>&);
