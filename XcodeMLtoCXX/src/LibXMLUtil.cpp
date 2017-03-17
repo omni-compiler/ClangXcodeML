@@ -54,6 +54,17 @@ std::string getProp(xmlNodePtr node, const std::string& attr) {
   return XMLString(xmlGetProp(node, BAD_CAST attr.c_str()));
 }
 
+llvm::Optional<std::string>
+getPropOrNull(xmlNodePtr node, const std::string& attr) {
+  using MaybeString = llvm::Optional<std::string>;
+  if (!xmlHasProp(node, BAD_CAST attr.c_str())) {
+    return MaybeString();
+  }
+  const auto value =
+    static_cast<XMLString>(xmlGetProp(node, BAD_CAST attr.c_str()));
+  return MaybeString(value);
+}
+
 bool isTrueProp(xmlNodePtr node, const char* name, bool default_value) {
   if (!xmlHasProp(node, BAD_CAST name)) {
     return default_value;
