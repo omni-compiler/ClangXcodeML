@@ -375,8 +375,10 @@ DEFINE_CB(functionDefinitionProc) {
     acc = acc + w.walk(ctorInitList, src);
   }
 
+  auto body = findFirst(node, "body", src.ctxt);
+  assert(body);
   acc = acc + makeTokenNode( "{" ) + makeNewLineNode();
-  acc = acc + makeInnerNode(w.walkChildren(node, src));
+  acc = acc + w.walk(body, src);
   return acc + makeTokenNode("}");
 }
 
