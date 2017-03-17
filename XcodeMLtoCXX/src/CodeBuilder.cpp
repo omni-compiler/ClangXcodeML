@@ -373,13 +373,14 @@ DEFINE_CB(functionDefinitionProc) {
 }
 
 DEFINE_CB(functionDeclProc) {
-  const auto name = getNameFromIdNode(node, src.ctxt);
-  assert(!name.empty());
-  const auto fnType = getIdentType(src, name);
+  const auto name = getDeclNameFromTypedNode(node, src);
+    // FIXME: Do not cheat (lookup symbols table)
+  const auto fnDtident = getProp(node, "type");
+  const auto fnType = src.typeTable[fnDtident];
   return
     makeDecl(
         fnType,
-        makeTokenNode(name),
+        name,
         src.typeTable) +
     makeTokenNode(";");
 }
