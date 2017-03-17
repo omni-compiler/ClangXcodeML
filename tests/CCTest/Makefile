@@ -11,9 +11,9 @@ CXXTOXMLFLAGS = --
 CXXTOXMLXSLTDIR = $(CXXTOXMLDIR)/src/XSLTs
 XCODEMLTOCXXDIR = $(ROOTDIR)/XcodeMLtoCXX
 XCODEMLTOCXX = $(XCODEMLTOCXXDIR)/XcodeMLtoCXX
-CXXTESTCASES = $(wildcard *.cc)
+CXXTESTCASES = $(wildcard *.src.cpp)
 CXXTESTOBJECTS = $(CXXTESTCASES:.cc=.xml)
-CXXDECOMPTESTOBJECTS = $(CXXTESTCASES:.cc=.generated.cpp)
+CXXDECOMPTESTOBJECTS = $(CXXTESTCASES:.src.cpp=.dst.cpp)
 CXXFLAGS = -pedantic -fsyntax-only
 
 $(CXXTOXML):
@@ -22,7 +22,7 @@ $(CXXTOXML):
 $(XCODEMLTOCXX):
 	$(MAKE) -C $(XCODEMLTOCXXDIR)
 
-%.xml: %.cc $(CXXTOXML)
+%.xml: %.src.cpp $(CXXTOXML)
 	$(CXXTOXML) $< $(CXXTOXMLFLAGS) > $@
 
 %.xcodeml: %.xml
@@ -36,7 +36,7 @@ $(XCODEMLTOCXX):
 		| xmllint --format - \
 		> $@
 
-%.generated.cpp: %.xcodeml $(XCODEMLTOCXX)
+%.dst.cpp: %.xcodeml $(XCODEMLTOCXX)
 	$(XCODEMLTOCXX) $< > $@
 
 check: $(CXXTOXML) $(CXXDECOMPTESTOBJECTS)
@@ -46,4 +46,4 @@ check: $(CXXTOXML) $(CXXDECOMPTESTOBJECTS)
 	done
 
 clean:
-	rm -f *.xml *.generated.cpp *.xcodeml
+	rm -f *.xml *.dst.cpp *.xcodeml
