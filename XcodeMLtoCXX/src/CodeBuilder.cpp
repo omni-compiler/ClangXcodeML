@@ -285,10 +285,6 @@ getParams(xmlNodePtr fnNode, const SourceInfo& src) {
   return std::move(vec);
 }
 
-DEFINE_CB(clangStmtProc) {
-  //ClangStmtHandler.walk(node, w, src, ss);
-}
-
 static SymbolEntry
 ClassSymbolsToSymbolEntry(const XcodeMl::ClassType* T) {
   using namespace XcodeMl;
