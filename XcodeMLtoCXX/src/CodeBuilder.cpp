@@ -601,10 +601,10 @@ getCtorInitName(
 }
 
 DEFINE_CB(ctorInitProc) {
-  const auto member = getProp(node, "member");
+  const auto member = getCtorInitName(node, src.typeTable);
   auto expr = findFirst(node, "*[1]", src.ctxt);
   assert(expr);
-  return makeTokenNode(member) +
+  return member +
     makeTokenNode("(") +
     w.walk(expr, src) +
     makeTokenNode(")");
