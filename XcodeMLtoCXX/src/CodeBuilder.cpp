@@ -34,6 +34,29 @@ using cxxgen::makeVoidNode;
 
 using cxxgen::separateByBlankLines;
 
+static XcodeMl::CodeFragment
+getDeclNameFromTypedNode(
+    xmlNodePtr node,
+    const SourceInfo& src)
+{
+  if (findFirst(node, "constructor", src.ctxt)) {
+    const auto classDtident = getProp(node, "parent_class");
+    const auto T = src.typeTable[classDtident];
+    const auto classT = llvm::cast<XcodeMl::ClassType>(T.get());
+    const auto name = classT->name();
+    assert(name.hasValue());
+    return *name;
+  } else if (findFirst(node, "destructor", src.ctxt)) {
+    const auto classDtident = getProp(node, "parent_class");
+    const auto T = src.typeTable[classDtident];
+    const auto classT = llvm::cast<XcodeMl::ClassType>(T.get());
+    const auto name = classT->name();
+    assert(name.hasValue());
+    return makeTokenNode("~") + (*name);
+  }
+  return makeTokenNode(getNameFromIdNode(node, src.ctxt));
+}
+
 /*!
  * \brief Traverse XcodeML node and make SymbolEntry.
  * \pre \c node is <globalSymbols> or <symbols> element.
