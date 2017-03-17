@@ -457,6 +457,7 @@ DeclarationsVisitor::PreVisitConstructorInitializer(
     return true;
   }
   newChild("clangConstructorInitializer");
+  newBoolProp("is_written", CI->isWritten());
 
   // FIXME: temporary implementation
 
