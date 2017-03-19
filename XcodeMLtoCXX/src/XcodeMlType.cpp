@@ -223,6 +223,13 @@ Pointer::Pointer(const Pointer& other):
   ref(other.ref)
 {}
 
+ParamList::ParamList(
+    const std::vector<CodeFragment>& v,
+    bool e):
+  vars(v),
+  hasEllipsis(e)
+{}
+
 Function::Function(DataTypeIdent ident, TypeRef r, const std::vector<DataTypeIdent>& p):
   Type(TypeKind::Function, ident),
   returnValue(r->dataTypeIdent()),

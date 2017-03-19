@@ -120,6 +120,14 @@ private:
   DataTypeIdent ref;
 };
 
+class ParamList {
+public:
+  ParamList(const std::vector<CodeFragment>&, bool);
+private:
+  std::vector<CodeFragment> vars;
+  bool hasEllipsis;
+};
+
 class Function : public Type {
 public:
   using Params = std::vector<std::tuple<DataTypeIdent, CodeFragment>>;
