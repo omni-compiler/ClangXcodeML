@@ -40,10 +40,24 @@ DEFINE_CCH(callExprProc) {
   return (w["functionCall"])(w, node, src);
 }
 
+DEFINE_CCH(CXXTemporaryObjectExprProc) {
+  const auto resultT = src.typeTable.at(
+      getProp(node, "type"));
+  const auto name =
+    llvm::cast<XcodeMl::ClassType>(resultT.get())->name();
+  assert(name.hasValue());
+  const auto args = w.walkChildren(node, src);
+  return *name +
+    makeTokenNode("(") +
+    join(",", args) +
+    makeTokenNode(")");
+}
+
 const ClangClassHandler ClangStmtHandler(
     "class",
     cxxgen::makeInnerNode,
     callCodeBuilder,
     {
       { "CallExpr", callExprProc },
+      { "CXXTemporaryObjectExpr", CXXTemporaryObjectExprProc },
     });
