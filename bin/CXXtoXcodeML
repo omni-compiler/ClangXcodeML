@@ -5,7 +5,7 @@ XSLTsDIR=${ROOTDIR}/CXXtoXML/src/XSLTs
 CXXTOXML=${ROOTDIR}/CXXtoXML/src/CXXtoXML
 
 ${CXXTOXML} $@ |
-	    xsltproc ${XSLTsDIR}/drop_prop_column.xsl - |
+      xsltproc ${XSLTsDIR}/drop_prop_column.xsl - |
       xsltproc ${XSLTsDIR}/drop_prop_file.xsl -  |
       xsltproc ${XSLTsDIR}/drop_prop_lineno.xsl -  |
       xsltproc ${XSLTsDIR}/reorder_decl.xsl -  |
