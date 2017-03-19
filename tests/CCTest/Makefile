@@ -15,17 +15,11 @@ CXXTESTOBJECTS = $(CXXTESTCASES:.cc=.xml)
 CXXDECOMPTESTOBJECTS = $(CXXTESTCASES:.src.cpp=.dst.cpp)
 CXXFLAGS = -pedantic -fsyntax-only
 
-$(CXXTOXML):
-	$(MAKE) -C $(CXXTOXMLDIR)/src
-
-$(XCODEMLTOCXX):
-	$(MAKE) -C $(XCODEMLTOCXXDIR)
-
 %.xcodeml: %.src.cpp
 	$(CXXTOXML) $< $(CXXTOXMLFLAGS) \
 		> $@
 
-%.dst.cpp: %.xcodeml $(XCODEMLTOCXX)
+%.dst.cpp: %.xcodeml
 	$(XCODEMLTOCXX) $< > $@
 
 install-cc:
@@ -33,7 +27,7 @@ install-cc:
 		mv $$file $${file%.cc}.src.cpp; \
 	done
 
-check: $(CXXTOXML) $(CXXDECOMPTESTOBJECTS)
+check: $(CXXDECOMPTESTOBJECTS)
 	set -e; \
 	for testobj in $(CXXDECOMPTESTOBJECTS); do  \
 		$(CXX) $(CXXFLAGS) $$testobj; \
