@@ -5,7 +5,6 @@
 all: check
 
 ROOTDIR = ../..
-CXXTOXMLDIR = $(ROOTDIR)/CXXtoXML/src
 XCODEMLTOCXXDIR = $(ROOTDIR)/XcodeMLtoCXX
 CC = /usr/local/bin/clang
 CFLAGS = -pedantic -fsyntax-only
@@ -20,27 +19,22 @@ CTESTCASES = $(wildcard *.src.c)
 CTESTOBJECTS = $(CTESTCASES:.src.c=.dst.c)
 CXXTESTCASES = $(wildcard *.src.cpp)
 CXXTESTOBJECTS = $(CXXTESTCASES:.src.cpp=.dst.cpp)
-$(CXXTOXCODEML):
-	$(MAKE) -C $(CXXTOXMLDIR)
 
-$(XCODEMLTOCXX):
-	$(MAKE) -C $(XCODEMLTOCXXDIR)
-
-%.c.xcodeml: %.src.c $(CTOXCODEML)
+%.c.xcodeml: %.src.c
 	$(CTOXCODEML) $< $(CTOXCODEMLFLAGS) \
 		> $@
 
-%.dst.c: %.c.xcodeml $(XCODEMLTOCXX)
+%.dst.c: %.c.xcodeml
 	$(XCODEMLTOCXX) $< > $@
 
-%.cpp.xcodeml: %.src.cpp $(CXXTOXCODEML)
+%.cpp.xcodeml: %.src.cpp
 	$(CXXTOXCODEML) $< $(CXXTOXCODEMLFLAGS) \
 		> $@
 
-%.dst.cpp: %.cpp.xcodeml $(XCODEMLTOCXX)
+%.dst.cpp: %.cpp.xcodeml
 	$(XCODEMLTOCXX) $< > $@
 
-check: $(CXXTOXCODEML) $(XCODEMLTOCXX) $(CXXTESTOBJECTS) $(CTESTOBJECTS)
+check: $(CXXTESTOBJECTS) $(CTESTOBJECTS)
 	set -e; \
 	for testobj in $(CXXTESTOBJECTS); do  \
 		$(CXX) $(CXXFLAGS) $$testobj; \
