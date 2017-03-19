@@ -247,19 +247,13 @@ Function::makeDeclarationWithoutReturnType(
     const Environment& env)
 {
   assert(isParamListEmpty() || args.size() == params.size());
-  if (!env.exists(returnValue)) {
-    return makeTokenNode("INCOMPLETE_TYPE *") + var;
-  }
   auto decl = var + makeTokenNode("(");
   bool alreadyPrinted = false;
   for (int i = 0, len = args.size(); i < len; ++i) {
-    if (!env.exists(std::get<0>(params[i]))) {
-      return makeTokenNode( "INCOMPLETE_TYPE *" ) + var;
-    }
     if (alreadyPrinted) {
       decl = decl + makeTokenNode(",");
     }
-    auto paramType = env[std::get<0>(params[i])];
+    auto paramType = env.at(std::get<0>(params[i]));
     decl = decl + makeDecl(paramType, args[i], env);
     alreadyPrinted = true;
   }
