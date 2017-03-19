@@ -362,7 +362,19 @@ DEFINE_CB(emitClassDefinition) {
   const auto className = classType->name();
 
   src.symTable.push_back(ClassSymbolsToSymbolEntry(classType));
-  auto decls = w.walkChildren(node, src);
+  std::vector<XcodeMl::CodeFragment> decls;
+
+  for (xmlNodePtr memberNode = xmlFirstElementChild(node);
+       memberNode;
+       memberNode = xmlNextElementSibling(memberNode)) {
+    const auto access = getProp(memberNode, "access");
+    const auto decl =
+      makeTokenNode(access) +
+      makeTokenNode(":") +
+      w.walk(memberNode, src);
+    decls.push_back(decl);
+  }
+
   src.symTable.pop_back();
 
   return
