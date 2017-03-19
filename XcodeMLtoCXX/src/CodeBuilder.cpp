@@ -387,7 +387,8 @@ DEFINE_CB(emitClassDefinition) {
     makeNewLineNode();
 }
 
-DEFINE_CB(functionDefinitionProc) {
+static XcodeMl::CodeFragment
+makeFunctionDeclHead(xmlNodePtr node, const SourceInfo& src) {
   xmlNodePtr nameElem = findFirst(
       node,
       "name|operator|constructor|destructor",
@@ -402,13 +403,22 @@ DEFINE_CB(functionDefinitionProc) {
       src.ctxt,
       src.symTable);
   const auto T = src.typeTable[dtident];
-  auto fnType = llvm::cast<XcodeMl::Function>(
-      T.get());
+  const auto fnType = llvm::cast<XcodeMl::Function>(T.get());
+  return
+    (kind == "constructor" || kind == "destructor") ?
+      fnType->makeDeclarationWithoutReturnType(
+          nameNode,
+          getParams(node, src),
+          src.typeTable)
+    : fnType->makeDeclaration(
+          nameNode,
+          getParams(node, src),
+          src.typeTable);
+}
+
+DEFINE_CB(functionDefinitionProc) {
   auto acc =
-    fnType->makeDeclaration(
-        nameNode,
-        getParams(node, src),
-        src.typeTable);
+    makeFunctionDeclHead(node, src);
 
   acc = acc + makeTokenNode( "{" ) + makeNewLineNode();
   acc = acc + makeInnerNode(w.walkChildren(node, src));
