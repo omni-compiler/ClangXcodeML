@@ -1,62 +1,40 @@
-.SUFFIXES: .CXXasXcodeML
-.PHONY: test clean
-.PRECIOUS: %.CXXasXcodeML %.CasXcodeML
+.PHONY: check clean
+.PRECIOUS: %.cpp.xcodeml %.c.xcodeml
 .DELETE_ON_ERROR:
 
-all: test
+all: check
 
 ROOTDIR = ../..
-CXXTOXMLDIR = $(ROOTDIR)/CXXtoXML/src
 XCODEMLTOCXXDIR = $(ROOTDIR)/XcodeMLtoCXX
-CXXTOXMLXSLTDIR = $(CXXTOXMLDIR)/XSLTs
 CC = /usr/local/bin/clang
 CFLAGS = -pedantic -fsyntax-only
 CXX = /usr/local/bin/clang++
 CXXFLAGS = -pedantic -fsyntax-only
-CXXTOXML = $(CXXTOXMLDIR)/CXXtoXML
-CXXTOXMLFLAGS = --
+CTOXCODEML = $(ROOTDIR)/bin/CXXtoXcodeML
+CXXTOXCODEML = $(ROOTDIR)/bin/CXXtoXcodeML
+CTOXCODEMLFLAGS = --
+CXXTOXCODEMLFLAGS = --
 XCODEMLTOCXX = $(XCODEMLTOCXXDIR)/XcodeMLtoCXX
 CTESTCASES = $(wildcard *.src.c)
 CTESTOBJECTS = $(CTESTCASES:.src.c=.dst.c)
 CXXTESTCASES = $(wildcard *.src.cpp)
 CXXTESTOBJECTS = $(CXXTESTCASES:.src.cpp=.dst.cpp)
-$(CXXTOXML):
-	$(MAKE) -C $(CXXTOXMLDIR)
 
-$(XCODEMLTOCXX):
-	$(MAKE) -C $(XCODEMLTOCXXDIR)
-
-%.c.xcodeml: %.src.c $(CXXTOXML)
-	$(CXXTOXML) $< $(CXXTOXMLFLAGS) \
-	  | xsltproc $(CXXTOXMLXSLTDIR)/drop_prop_column.xsl - \
-		| xsltproc $(CXXTOXMLXSLTDIR)/drop_prop_file.xsl - \
-		| xsltproc $(CXXTOXMLXSLTDIR)/drop_prop_lineno.xsl - \
-		| xsltproc $(CXXTOXMLXSLTDIR)/reorder_decl.xsl - \
-		| xsltproc $(CXXTOXMLXSLTDIR)/add_symbols_elem.xsl - \
-		| xsltproc $(CXXTOXMLXSLTDIR)/add_globalsymbols_elem.xsl - \
-		| xsltproc $(CXXTOXMLXSLTDIR)/Program2XcodeProgram.xsl - \
-		| xmllint --format - \
+%.c.xcodeml: %.src.c
+	$(CTOXCODEML) $< $(CTOXCODEMLFLAGS) \
 		> $@
 
-%.dst.c: %.c.xcodeml $(XCODEMLTOCXX)
+%.dst.c: %.c.xcodeml
 	$(XCODEMLTOCXX) $< > $@
 
-%.cpp.xcodeml: %.src.cpp $(CXXTOXML)
-	$(CXXTOXML) $< $(CXXTOXMLFLAGS) \
-	  | xsltproc $(CXXTOXMLXSLTDIR)/drop_prop_column.xsl - \
-		| xsltproc $(CXXTOXMLXSLTDIR)/drop_prop_file.xsl - \
-		| xsltproc $(CXXTOXMLXSLTDIR)/drop_prop_lineno.xsl - \
-		| xsltproc $(CXXTOXMLXSLTDIR)/reorder_decl.xsl - \
-		| xsltproc $(CXXTOXMLXSLTDIR)/add_symbols_elem.xsl - \
-		| xsltproc $(CXXTOXMLXSLTDIR)/add_globalsymbols_elem.xsl - \
-		| xsltproc $(CXXTOXMLXSLTDIR)/Program2XcodeProgram.xsl - \
-		| xmllint --format - \
+%.cpp.xcodeml: %.src.cpp
+	$(CXXTOXCODEML) $< $(CXXTOXCODEMLFLAGS) \
 		> $@
 
-%.dst.cpp: %.cpp.xcodeml $(XCODEMLTOCXX)
+%.dst.cpp: %.cpp.xcodeml
 	$(XCODEMLTOCXX) $< > $@
 
-check: $(CXXTOXML) $(XCODEMLTOCXX) $(CXXTESTOBJECTS) $(CTESTOBJECTS)
+check: $(CXXTESTOBJECTS) $(CTESTOBJECTS)
 	set -e; \
 	for testobj in $(CXXTESTOBJECTS); do  \
 		$(CXX) $(CXXFLAGS) $$testobj; \
