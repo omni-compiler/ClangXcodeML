@@ -33,6 +33,8 @@ enum class TypeKind {
   Pointer,
   /*! lvalue reference */
   LValueReference,
+  /*! rvalue reference */
+  RValueReference,
   /*! function (3.6 <functionType> element) */
   Function,
   /*! C-style array (3.7 <ArrayType> element) */
