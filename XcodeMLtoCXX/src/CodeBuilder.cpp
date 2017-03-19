@@ -107,6 +107,21 @@ std::string findSymbolType(const SymbolMap& table, const std::string& name) {
       name + " not found in SymbolMap: " + log.str());
 }
 
+static std::string
+getDtidentFromTypedNode(
+    xmlNodePtr node,
+    xmlXPathContextPtr ctxt,
+    const SymbolMap& table)
+{
+  const auto dtident = getPropOrNull(node, "type");
+  if (dtident.hasValue()) {
+    return *dtident;
+  } else {
+    const auto name = getNameFromIdNode(node, ctxt);
+    return findSymbolType(table, name);
+  }
+}
+
 /*!
  * \brief Search for \c ident visible in current scope.
  * \pre src.symTable contains \c ident.
@@ -266,6 +281,20 @@ CodeBuilder::Procedure showUnaryOp(std::string Operator) {
   return showChildElem(Operator + "(", ")");
 }
 
+DEFINE_CB(postIncrExprProc) {
+  return
+    makeTokenNode("(") +
+    makeInnerNode(w.walkChildren(node, src)) +
+    makeTokenNode("++)");
+}
+
+DEFINE_CB(postDecrExprProc) {
+  return
+    makeTokenNode("(") +
+    makeInnerNode(w.walkChildren(node, src)) +
+    makeTokenNode("--)");
+}
+
 /*!
  * \brief Make a procedure that handles SourceInfo::symTable.
  * \return A procudure. It traverses <symbols> node and pushes new
@@ -333,7 +362,19 @@ DEFINE_CB(emitClassDefinition) {
   const auto className = classType->name();
 
   src.symTable.push_back(ClassSymbolsToSymbolEntry(classType));
-  auto decls = w.walkChildren(node, src);
+  std::vector<XcodeMl::CodeFragment> decls;
+
+  for (xmlNodePtr memberNode = xmlFirstElementChild(node);
+       memberNode;
+       memberNode = xmlNextElementSibling(memberNode)) {
+    const auto access = getProp(memberNode, "access");
+    const auto decl =
+      makeTokenNode(access) +
+      makeTokenNode(":") +
+      w.walk(memberNode, src);
+    decls.push_back(decl);
+  }
+
   src.symTable.pop_back();
 
   return
@@ -346,7 +387,8 @@ DEFINE_CB(emitClassDefinition) {
     makeNewLineNode();
 }
 
-DEFINE_CB(functionDefinitionProc) {
+static XcodeMl::CodeFragment
+makeFunctionDeclHead(xmlNodePtr node, const SourceInfo& src) {
   xmlNodePtr nameElem = findFirst(
       node,
       "name|operator|constructor|destructor",
@@ -355,17 +397,28 @@ DEFINE_CB(functionDefinitionProc) {
   const XMLString name(xmlNodeGetContent(nameElem));
   const XMLString kind(nameElem->name);
   const auto nameNode = getDeclNameFromTypedNode(node, src);
-    // FIXME: Do not cheat (lookup symbols table)
 
-  const auto dtident = getProp(node, "type");
+  const auto dtident = getDtidentFromTypedNode(
+      node,
+      src.ctxt,
+      src.symTable);
   const auto T = src.typeTable[dtident];
-  auto fnType = llvm::cast<XcodeMl::Function>(
-      T.get());
+  const auto fnType = llvm::cast<XcodeMl::Function>(T.get());
+  return
+    (kind == "constructor" || kind == "destructor") ?
+      fnType->makeDeclarationWithoutReturnType(
+          nameNode,
+          getParams(node, src),
+          src.typeTable)
+    : fnType->makeDeclaration(
+          nameNode,
+          getParams(node, src),
+          src.typeTable);
+}
+
+DEFINE_CB(functionDefinitionProc) {
   auto acc =
-    fnType->makeDeclaration(
-        nameNode,
-        getParams(node, src),
-        src.typeTable);
+    makeFunctionDeclHead(node, src);
 
   if (auto ctorInitList = findFirst(
         node,
@@ -384,8 +437,10 @@ DEFINE_CB(functionDefinitionProc) {
 
 DEFINE_CB(functionDeclProc) {
   const auto name = getDeclNameFromTypedNode(node, src);
-    // FIXME: Do not cheat (lookup symbols table)
-  const auto fnDtident = getProp(node, "type");
+  const auto fnDtident = getDtidentFromTypedNode(
+      node,
+      src.ctxt,
+      src.symTable);
   const auto fnType = src.typeTable[fnDtident];
   return
     makeDecl(
@@ -536,14 +591,25 @@ DEFINE_CB(argumentsProc) {
 
 DEFINE_CB(condExprProc) {
   xmlNodePtr prd = findFirst(node, "*[1]", src.ctxt),
-             the = findFirst(node, "*[2]", src.ctxt),
-             els = findFirst(node, "*[3]", src.ctxt);
-  return
-    w.walk(prd, src) +
-    makeTokenNode("?") +
-    w.walk(the, src) +
-    makeTokenNode(":") +
-    w.walk(els, src);
+          second = findFirst(node, "*[2]", src.ctxt),
+           third = findFirst(node, "*[3]", src.ctxt);
+  if (third) {
+    return
+      makeTokenNode( "(" ) +
+      w.walk(prd, src) +
+      makeTokenNode( "?" ) +
+      w.walk(second, src) +
+      makeTokenNode( ":" ) +
+      w.walk(third, src) +
+      makeTokenNode(")");
+  } else {
+    return
+      makeTokenNode( "(" ) +
+      w.walk(prd, src) +
+      makeTokenNode( "?:" ) +
+      w.walk(second, src) +
+      makeTokenNode(")");
+  }
 }
 
 DEFINE_CB(varDeclProc) {
@@ -628,7 +694,7 @@ makeInnerNode,
   { "stringConstant", showNodeContent("\"", "\"") },
   { "Var", EmptySNCProc },
   { "varAddr", showNodeContent("&", "") },
-  { "pointerRef", showNodeContent("*", "") },
+  { "pointerRef", showUnaryOp("*") },
   { "memberRef", memberRefProc },
   { "memberAddr", memberAddrProc },
   { "memberPointerRef", memberPointerRefProc },
@@ -671,6 +737,8 @@ makeInnerNode,
   { "unaryMinusExpr", showUnaryOp("-") },
   { "preIncrExpr", showUnaryOp("++") },
   { "preDecrExpr", showUnaryOp("--") },
+  { "postIncrExpr", postIncrExprProc },
+  { "postDecrExpr", postDecrExprProc },
   { "AddrOfExpr", showUnaryOp("&") },
   { "pointerRef", showUnaryOp("*") },
   { "bitNotExpr", showUnaryOp("~") },

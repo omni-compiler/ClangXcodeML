@@ -188,6 +188,23 @@
     </xsl:element>
   </xsl:template>
 
+  <xsl:template match="clangStmt[@class='ConditionalOperator']">
+    <xsl:element name="condExpr">
+      <xsl:apply-templates select="@*" />
+      <xsl:apply-templates select="*[1]" />
+      <xsl:apply-templates select="*[2]" />
+      <xsl:apply-templates select="*[3]" />
+    </xsl:element>
+  </xsl:template>
+
+  <xsl:template match="clangStmt[@class='BinaryConditionalOperator']">
+    <xsl:element name="condExpr">
+      <xsl:apply-templates select="@*" />
+      <xsl:apply-templates select="*[1]" />
+      <xsl:apply-templates select="*[2]" />
+    </xsl:element>
+  </xsl:template>
+
   <xsl:template match="clangStmt[@class='CallExpr']">
     <functionCall>
       <xsl:apply-templates select="@*" />
