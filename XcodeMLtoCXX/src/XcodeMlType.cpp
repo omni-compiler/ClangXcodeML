@@ -273,34 +273,49 @@ Function::Function(DataTypeIdent ident, TypeRef r, const std::vector<std::tuple<
   params(p)
 {}
 
-CodeFragment Function::makeDeclaration(
+CodeFragment
+Function::makeDeclarationWithoutReturnType(
     CodeFragment var,
     const std::vector<CodeFragment>& args,
     const Environment& env)
 {
   assert(isParamListEmpty() || args.size() == params.size());
-  if (!env.exists(returnValue)) {
-    return makeTokenNode("INCOMPLETE_TYPE *") + var;
-  }
-  auto returnType = env[returnValue];
   auto decl = var + makeTokenNode("(");
   bool alreadyPrinted = false;
   for (int i = 0, len = args.size(); i < len; ++i) {
-    if (!env.exists(std::get<0>(params[i]))) {
-      return makeTokenNode( "INCOMPLETE_TYPE *" ) + var;
-    }
     if (alreadyPrinted) {
       decl = decl + makeTokenNode(",");
     }
-    auto paramType = env[std::get<0>(params[i])];
+    auto paramType = env.at(std::get<0>(params[i]));
     decl = decl + makeDecl(paramType, args[i], env);
     alreadyPrinted = true;
   }
   decl = decl + makeTokenNode(")");
-  return
-    returnType ?
-        makeDecl(returnType, decl, env)
-      : decl;
+  return decl;
+}
+
+CodeFragment
+Function::makeDeclarationWithoutReturnType(
+    CodeFragment var,
+    const Environment& env)
+{
+  std::vector<CodeFragment> vec;
+  for (auto param : params) {
+    auto paramName(std::get<1>(param));
+    vec.push_back(paramName);
+  }
+  return makeDeclarationWithoutReturnType(var, vec, env);
+}
+
+CodeFragment
+Function::makeDeclaration(
+    CodeFragment var,
+    const std::vector<CodeFragment>& args,
+    const Environment& env)
+{
+  auto returnType = env.at(returnValue);
+  auto decl = makeDeclarationWithoutReturnType(var, args, env);
+  return makeDecl(returnType, decl, env);
 }
 
 CodeFragment Function::makeDeclaration(CodeFragment var, const Environment& env) {
