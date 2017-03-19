@@ -29,6 +29,13 @@ namespace cxxgen = CXXCodeGen;
 
 #define DEFINE_CCH(name) static XcodeMl::CodeFragment name(CCH_ARGS)
 
+using cxxgen::makeInnerNode;
+using cxxgen::makeTokenNode;
+
+DEFINE_CCH(callCodeBuilder) {
+  return makeInnerNode(w.walkChildren(node, src));
+}
+
 DEFINE_CCH(callExprProc) {
   return (w["functionCall"])(w, node, src);
 }
@@ -36,7 +43,7 @@ DEFINE_CCH(callExprProc) {
 const ClangClassHandler ClangStmtHandler(
     "class",
     cxxgen::makeInnerNode,
-    cxxgen::makeVoidNode,
+    callCodeBuilder,
     {
       { "CallExpr", callExprProc },
     });
