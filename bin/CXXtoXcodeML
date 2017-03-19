@@ -2,8 +2,7 @@
 
 INPUTFILE=$(readlink -f $1)
 
-cd $(dirname $0)
-ROOTDIR=..
+ROOTDIR=$(cd ${0%/*}/..; pwd)
 XSLTsDIR=${ROOTDIR}/CXXtoXML/src/XSLTs
 CXXTOXML=${ROOTDIR}/CXXtoXML/src/CXXtoXML
 
