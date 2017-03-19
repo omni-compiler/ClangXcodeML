@@ -107,6 +107,21 @@ std::string findSymbolType(const SymbolMap& table, const std::string& name) {
       name + " not found in SymbolMap: " + log.str());
 }
 
+static std::string
+getDtidentFromTypedNode(
+    xmlNodePtr node,
+    xmlXPathContextPtr ctxt,
+    const SymbolMap& table)
+{
+  const auto dtident = getPropOrNull(node, "type");
+  if (dtident.hasValue()) {
+    return *dtident;
+  } else {
+    const auto name = getNameFromIdNode(node, ctxt);
+    return findSymbolType(table, name);
+  }
+}
+
 /*!
  * \brief Search for \c ident visible in current scope.
  * \pre src.symTable contains \c ident.
