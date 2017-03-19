@@ -1,6 +1,5 @@
-.SUFFIXES: .CXXasXcodeML
 .PHONY: check clean
-.PRECIOUS: %.CXXasXcodeML %.CasXcodeML
+.PRECIOUS: %.cpp.xcodeml %.c.xcodeml
 .DELETE_ON_ERROR:
 
 all: check
