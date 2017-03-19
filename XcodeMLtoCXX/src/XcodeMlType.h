@@ -31,6 +31,8 @@ enum class TypeKind {
   Qualified,
   /*! pointer (3.5 <pointerType> element) */
   Pointer,
+  /*! lvalue reference */
+  LValueReference,
   /*! function (3.6 <functionType> element) */
   Function,
   /*! C-style array (3.7 <ArrayType> element) */
@@ -130,6 +132,17 @@ public:
 protected:
   ReferenceType(const ReferenceType&) = default;
   DataTypeIdent ref;
+};
+
+class LValueReferenceType : public ReferenceType {
+public:
+  LValueReferenceType(const DataTypeIdent&, const DataTypeIdent&);
+  CodeFragment makeDeclaration(CodeFragment, const Environment&)
+    override;
+  ~LValueReferenceType() override = default;
+  Type* clone() const override;
+protected:
+  LValueReferenceType(const LValueReferenceType&) = default;
 };
 
 class Function : public Type {

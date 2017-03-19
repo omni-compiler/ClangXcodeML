@@ -233,6 +233,29 @@ ReferenceType::ReferenceType(
 
 ReferenceType::~ReferenceType() = default;
 
+LValueReferenceType::LValueReferenceType(
+    const DataTypeIdent& ident,
+    const DataTypeIdent& ref):
+  ReferenceType(ident, TypeKind::LValueReference, ref)
+{}
+
+CodeFragment
+LValueReferenceType::makeDeclaration(
+    CodeFragment var,
+    const Environment& env)
+{
+  return makeDecl(
+      env.at(ref),
+      makeTokenNode("&") + var,
+      env);
+}
+
+Type*
+LValueReferenceType::clone() const {
+  LValueReferenceType* copy = new LValueReferenceType(*this);
+  return copy;
+}
+
 Function::Function(DataTypeIdent ident, TypeRef r, const std::vector<DataTypeIdent>& p):
   Type(TypeKind::Function, ident),
   returnValue(r->dataTypeIdent()),
