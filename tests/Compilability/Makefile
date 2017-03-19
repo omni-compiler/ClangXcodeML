@@ -14,7 +14,7 @@ CXXFLAGS = -pedantic -fsyntax-only
 CTOXML = $(ROOTDIR)/bin/CXXtoXcodeML
 CXXTOXCODEML = $(ROOTDIR)/bin/CXXtoXcodeML
 CTOXMLFLAGS = --
-CXXTOXMLFLAGS = --
+CXXTOXCODEMLFLAGS = --
 XCODEMLTOCXX = $(XCODEMLTOCXXDIR)/XcodeMLtoCXX
 CTESTCASES = $(wildcard *.src.c)
 CTESTOBJECTS = $(CTESTCASES:.src.c=.dst.c)
@@ -34,7 +34,7 @@ $(XCODEMLTOCXX):
 	$(XCODEMLTOCXX) $< > $@
 
 %.cpp.xcodeml: %.src.cpp $(CXXTOXCODEML)
-	$(CXXTOXCODEML) $< $(CXXTOXMLFLAGS) \
+	$(CXXTOXCODEML) $< $(CXXTOXCODEMLFLAGS) \
 		> $@
 
 %.dst.cpp: %.cpp.xcodeml $(XCODEMLTOCXX)
