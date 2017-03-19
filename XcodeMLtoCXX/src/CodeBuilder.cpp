@@ -384,9 +384,11 @@ DEFINE_CB(functionDefinitionProc) {
   const XMLString name(xmlNodeGetContent(nameElem));
   const XMLString kind(nameElem->name);
   const auto nameNode = getDeclNameFromTypedNode(node, src);
-    // FIXME: Do not cheat (lookup symbols table)
 
-  const auto dtident = getProp(node, "type");
+  const auto dtident = getDtidentFromTypedNode(
+      node,
+      src.ctxt,
+      src.symTable);
   const auto T = src.typeTable[dtident];
   auto fnType = llvm::cast<XcodeMl::Function>(
       T.get());
@@ -403,8 +405,10 @@ DEFINE_CB(functionDefinitionProc) {
 
 DEFINE_CB(functionDeclProc) {
   const auto name = getDeclNameFromTypedNode(node, src);
-    // FIXME: Do not cheat (lookup symbols table)
-  const auto fnDtident = getProp(node, "type");
+  const auto fnDtident = getDtidentFromTypedNode(
+      node,
+      src.ctxt,
+      src.symTable);
   const auto fnType = src.typeTable[fnDtident];
   return
     makeDecl(
