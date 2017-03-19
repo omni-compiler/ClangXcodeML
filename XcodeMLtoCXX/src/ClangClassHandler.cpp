@@ -31,6 +31,7 @@ namespace cxxgen = CXXCodeGen;
 
 using cxxgen::makeInnerNode;
 using cxxgen::makeTokenNode;
+using XcodeMl::CodeFragment;
 
 DEFINE_CCH(callCodeBuilder) {
   return makeInnerNode(w.walkChildren(node, src));
@@ -46,7 +47,13 @@ DEFINE_CCH(CXXTemporaryObjectExprProc) {
   const auto name =
     llvm::cast<XcodeMl::ClassType>(resultT.get())->name();
   assert(name.hasValue());
-  const auto args = w.walkChildren(node, src);
+  auto children = findNodes(node, "*[position() > 1]", src.ctxt);
+    // ignore first child, which represents the result (class) type of
+    // the clang::CXXTemporaryObjectExpr
+  std::vector<CodeFragment> args;
+  for (auto child : children) {
+    args.push_back(w.walk(child, src));
+  }
   return *name +
     makeTokenNode("(") +
     join(",", args) +
