@@ -1,9 +1,9 @@
 .SUFFIXES: .CXXasXcodeML
-.PHONY: test clean
+.PHONY: check clean
 .PRECIOUS: %.CXXasXcodeML %.CasXcodeML
 .DELETE_ON_ERROR:
 
-all: test
+all: check
 
 ROOTDIR = ../..
 CXXTOXMLDIR = $(ROOTDIR)/CXXtoXML/src
