@@ -676,14 +676,14 @@ DEFINE_CB(ctorInitProc) {
     makeTokenNode(")");
 }
 
+DEFINE_CB(clangStmtProc) {
+  return ClangStmtHandler.walk(node, w, src);
+}
+
 const CodeBuilder CXXBuilder(
 "CodeBuilder",
 makeInnerNode,
 {
-  //{ "clangStmt", clangStmtProc },
-  { "constructorInitializer", ctorInitProc },
-  { "constructorInitializerList", ctorInitListProc },
-
   { "typeTable", NullProc },
   { "functionDefinition", functionDefinitionProc },
   { "functionDecl", functionDeclProc },
@@ -751,6 +751,13 @@ makeInnerNode,
   { "returnStatement", returnStatementProc },
   { "varDecl", varDeclProc },
   { "classDecl", emitClassDefinition },
+
+  /* out of specification */
+  { "constructorInitializer", ctorInitProc },
+  { "constructorInitializerList", ctorInitListProc },
+
+  /* for elements defined by clang */
+  { "clangStmt", clangStmtProc },
 
   /* for CtoXcodeML */
   { "Decl_Record", NullProc },

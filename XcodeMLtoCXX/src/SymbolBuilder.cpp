@@ -36,6 +36,10 @@ using SymbolBuilder = AttrProc<StringTreeRef, SourceInfo&>;
 
 #define DEFINE_SB(name) static StringTreeRef name(SB_ARGS)
 
+DEFINE_SB(NullProc) {
+  return makeVoidNode();
+}
+
 DEFINE_SB(typedefNameProc) {
   if (isTrueProp(node, "is_implicit", false)) {
     return makeVoidNode();
@@ -65,7 +69,7 @@ DEFINE_SB(tagnameProc) {
 const SymbolBuilder CXXSymbolBuilder(
     "sclass",
     makeInnerNode,
-    makeVoidNode,
+    NullProc,
     {
       { "typedef_name", typedefNameProc },
       { "tagname", tagnameProc },

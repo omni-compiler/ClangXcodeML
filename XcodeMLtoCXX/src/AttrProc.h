@@ -10,22 +10,22 @@ public:
   AttrProc(
       const std::string& a,
       std::function<ReturnT(const std::vector<ReturnT>&)> f,
-      std::function<ReturnT()> e,
+      Procedure d,
       std::initializer_list<std::tuple<std::string, Procedure>> m):
     attr(a),
     fold(f),
-    empty(e),
+    defaultProc(d),
     map(m)
   {}
 
   AttrProc(
       const std::string& a,
       std::function<ReturnT(const std::vector<ReturnT>&)> f,
-      std::function<ReturnT()> e,
+      Procedure d,
       std::map<std::string, Procedure>&& m):
     attr(a),
     fold(f),
-    empty(e),
+    defaultProc(d),
     map(m)
   {}
 
@@ -37,7 +37,7 @@ public:
     if (iter != map.end()) {
       return (iter->second)(node, args...);
     }
-    return empty();
+    return defaultProc(node, args...);
   }
 
   std::vector<ReturnT> walkAll(xmlNodePtr node, T... args) const {
@@ -57,7 +57,7 @@ public:
 private:
   std::string attr;
   std::function<ReturnT(const std::vector<ReturnT>&)> fold;
-  std::function<ReturnT()> empty;
+  Procedure defaultProc;
   std::map<std::string, Procedure> map;
 };
 
