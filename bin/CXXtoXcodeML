@@ -1,12 +1,10 @@
 #!/bin/bash
 
-INPUTFILE=$(readlink -f $1)
-
 ROOTDIR=$(cd ${0%/*}/..; pwd)
 XSLTsDIR=${ROOTDIR}/CXXtoXML/src/XSLTs
 CXXTOXML=${ROOTDIR}/CXXtoXML/src/CXXtoXML
 
-${CXXTOXML} ${INPUTFILE} -- |
+${CXXTOXML} $@ |
 	    xsltproc ${XSLTsDIR}/drop_prop_column.xsl - |
       xsltproc ${XSLTsDIR}/drop_prop_file.xsl -  |
       xsltproc ${XSLTsDIR}/drop_prop_lineno.xsl -  |
