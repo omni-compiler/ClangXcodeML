@@ -240,7 +240,8 @@ Function::Function(DataTypeIdent ident, TypeRef r, const std::vector<std::tuple<
   params(p)
 {}
 
-CodeFragment Function::makeDeclaration(
+CodeFragment
+Function::makeDeclarationWithoutReturnType(
     CodeFragment var,
     const std::vector<CodeFragment>& args,
     const Environment& env)
@@ -249,7 +250,6 @@ CodeFragment Function::makeDeclaration(
   if (!env.exists(returnValue)) {
     return makeTokenNode("INCOMPLETE_TYPE *") + var;
   }
-  auto returnType = env[returnValue];
   auto decl = var + makeTokenNode("(");
   bool alreadyPrinted = false;
   for (int i = 0, len = args.size(); i < len; ++i) {
@@ -264,10 +264,18 @@ CodeFragment Function::makeDeclaration(
     alreadyPrinted = true;
   }
   decl = decl + makeTokenNode(")");
-  return
-    returnType ?
-        makeDecl(returnType, decl, env)
-      : decl;
+  return decl;
+}
+
+CodeFragment
+Function::makeDeclaration(
+    CodeFragment var,
+    const std::vector<CodeFragment>& args,
+    const Environment& env)
+{
+  auto returnType = env.at(returnValue);
+  auto decl = makeDeclarationWithoutReturnType(var, args, env);
+  return makeDecl(returnType, decl, env);
 }
 
 CodeFragment Function::makeDeclaration(CodeFragment var, const Environment& env) {

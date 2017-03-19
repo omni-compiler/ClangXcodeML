@@ -125,6 +125,8 @@ public:
   using Params = std::vector<std::tuple<DataTypeIdent, CodeFragment>>;
   Function(DataTypeIdent, TypeRef, const std::vector<DataTypeIdent>&);
   Function(DataTypeIdent, TypeRef, const Params&);
+  CodeFragment makeDeclarationWithoutReturnType(
+      CodeFragment, const std::vector<CodeFragment>&, const Environment&);
   CodeFragment makeDeclaration(CodeFragment, const Environment&) override;
   CodeFragment makeDeclaration(CodeFragment, const std::vector<CodeFragment>&, const Environment&);
   ~Function() override;
