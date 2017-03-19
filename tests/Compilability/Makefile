@@ -26,7 +26,7 @@ $(CXXTOXML):
 $(XCODEMLTOCXX):
 	$(MAKE) -C $(XCODEMLTOCXXDIR)
 
-%.c.xcodeml: %.src.c $(CXXTOXML)
+%.c.xcodeml: %.src.c $(CTOXML)
 	$(CTOXML) $< $(CTOXMLFLAGS) \
 		> $@
 
