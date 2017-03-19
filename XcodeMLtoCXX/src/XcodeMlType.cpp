@@ -230,6 +230,11 @@ ParamList::ParamList(
   hasEllipsis(e)
 {}
 
+bool
+ParamList::isVariadic() const {
+  return hasEllipsis;
+}
+
 Function::Function(DataTypeIdent ident, TypeRef r, const std::vector<DataTypeIdent>& p):
   Type(TypeKind::Function, ident),
   returnValue(r->dataTypeIdent()),

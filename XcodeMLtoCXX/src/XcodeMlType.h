@@ -123,6 +123,7 @@ private:
 class ParamList {
 public:
   ParamList(const std::vector<CodeFragment>&, bool);
+  bool isVariadic() const;
 private:
   std::vector<CodeFragment> vars;
   bool hasEllipsis;
