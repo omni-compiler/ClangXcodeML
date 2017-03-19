@@ -2,10 +2,9 @@
 #define CLANGCLASSHANDLER_H
 
 using ClangClassHandler = AttrProc<
-  void,
+  XcodeMl::CodeFragment,
   const CodeBuilder&,
-  SourceInfo&,
-  CXXCodeGen::Stream&>;
+  SourceInfo&>;
 
 extern const ClangClassHandler ClangStmtHandler;
 

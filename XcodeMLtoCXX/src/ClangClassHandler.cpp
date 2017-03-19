@@ -25,17 +25,18 @@ namespace cxxgen = CXXCodeGen;
 
 #define CCH_ARGS xmlNodePtr node __attribute__((unused)), \
                  const CodeBuilder& w __attribute__((unused)), \
-                 SourceInfo& src __attribute__((unused)), \
-                 cxxgen::Stream& ss __attribute__((unused))
+                 SourceInfo& src __attribute__((unused))
 
-#define DEFINE_CCH(name) static void name(CCH_ARGS)
+#define DEFINE_CCH(name) static XcodeMl::CodeFragment name(CCH_ARGS)
 
 DEFINE_CCH(callExprProc) {
-  (w["functionCall"])(w, node, src);
+  return (w["functionCall"])(w, node, src);
 }
 
 const ClangClassHandler ClangStmtHandler(
     "class",
+    cxxgen::makeInnerNode,
+    cxxgen::makeVoidNode,
     {
       { "CallExpr", callExprProc },
     });
