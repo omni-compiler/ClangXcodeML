@@ -137,6 +137,20 @@ separateByBlankLines(const std::vector<StringTreeRef>& strs) {
   return acc;
 }
 
+StringTreeRef
+join(const std::string& delim, const std::vector<StringTreeRef>& strs) {
+  auto acc = makeVoidNode();
+  bool alreadyPrinted = false;
+  for (auto& str : strs) {
+    if (alreadyPrinted) {
+      acc = acc + makeTokenNode(delim);
+    }
+    acc = acc + str;
+    alreadyPrinted = true;
+  }
+  return acc;
+}
+
 } // namespace CXXCodeGen
 
 CXXCodeGen::StringTreeRef operator+(
