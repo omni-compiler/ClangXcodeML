@@ -262,6 +262,19 @@ Function::makeDeclarationWithoutReturnType(
 }
 
 CodeFragment
+Function::makeDeclarationWithoutReturnType(
+    CodeFragment var,
+    const Environment& env)
+{
+  std::vector<CodeFragment> vec;
+  for (auto param : params) {
+    auto paramName(std::get<1>(param));
+    vec.push_back(paramName);
+  }
+  return makeDeclarationWithoutReturnType(var, vec, env);
+}
+
+CodeFragment
 Function::makeDeclaration(
     CodeFragment var,
     const std::vector<CodeFragment>& args,

@@ -127,6 +127,7 @@ public:
   Function(DataTypeIdent, TypeRef, const Params&);
   CodeFragment makeDeclarationWithoutReturnType(
       CodeFragment, const std::vector<CodeFragment>&, const Environment&);
+  CodeFragment makeDeclarationWithoutReturnType(CodeFragment, const Environment&);
   CodeFragment makeDeclaration(CodeFragment, const Environment&) override;
   CodeFragment makeDeclaration(CodeFragment, const std::vector<CodeFragment>&, const Environment&);
   ~Function() override;
