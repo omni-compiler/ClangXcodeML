@@ -107,6 +107,21 @@ std::string findSymbolType(const SymbolMap& table, const std::string& name) {
       name + " not found in SymbolMap: " + log.str());
 }
 
+static std::string
+getDtidentFromTypedNode(
+    xmlNodePtr node,
+    xmlXPathContextPtr ctxt,
+    const SymbolMap& table)
+{
+  const auto dtident = getPropOrNull(node, "type");
+  if (dtident.hasValue()) {
+    return *dtident;
+  } else {
+    const auto name = getNameFromIdNode(node, ctxt);
+    return findSymbolType(table, name);
+  }
+}
+
 /*!
  * \brief Search for \c ident visible in current scope.
  * \pre src.symTable contains \c ident.
@@ -369,9 +384,11 @@ DEFINE_CB(functionDefinitionProc) {
   const XMLString name(xmlNodeGetContent(nameElem));
   const XMLString kind(nameElem->name);
   const auto nameNode = getDeclNameFromTypedNode(node, src);
-    // FIXME: Do not cheat (lookup symbols table)
 
-  const auto dtident = getProp(node, "type");
+  const auto dtident = getDtidentFromTypedNode(
+      node,
+      src.ctxt,
+      src.symTable);
   const auto T = src.typeTable[dtident];
   auto fnType = llvm::cast<XcodeMl::Function>(
       T.get());
@@ -388,8 +405,10 @@ DEFINE_CB(functionDefinitionProc) {
 
 DEFINE_CB(functionDeclProc) {
   const auto name = getDeclNameFromTypedNode(node, src);
-    // FIXME: Do not cheat (lookup symbols table)
-  const auto fnDtident = getProp(node, "type");
+  const auto fnDtident = getDtidentFromTypedNode(
+      node,
+      src.ctxt,
+      src.symTable);
   const auto fnType = src.typeTable[fnDtident];
   return
     makeDecl(
