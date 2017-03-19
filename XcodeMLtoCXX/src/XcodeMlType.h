@@ -120,6 +120,18 @@ private:
   DataTypeIdent ref;
 };
 
+class ReferenceType : public Type {
+public:
+  ReferenceType(const DataTypeIdent&, TypeKind, const DataTypeIdent&);
+  CodeFragment makeDeclaration(CodeFragment, const Environment&)
+    override = 0;
+  ~ReferenceType() override = 0;
+  Type* clone() const override = 0;
+protected:
+  ReferenceType(const ReferenceType&) = default;
+  DataTypeIdent ref;
+};
+
 class Function : public Type {
 public:
   using Params = std::vector<std::tuple<DataTypeIdent, CodeFragment>>;

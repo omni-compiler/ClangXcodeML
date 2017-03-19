@@ -223,6 +223,16 @@ Pointer::Pointer(const Pointer& other):
   ref(other.ref)
 {}
 
+ReferenceType::ReferenceType(
+    const DataTypeIdent& ident,
+    TypeKind kind,
+    const DataTypeIdent& r):
+  Type(kind, ident),
+  ref(r)
+{}
+
+ReferenceType::~ReferenceType() = default;
+
 Function::Function(DataTypeIdent ident, TypeRef r, const std::vector<DataTypeIdent>& p):
   Type(TypeKind::Function, ident),
   returnValue(r->dataTypeIdent()),
