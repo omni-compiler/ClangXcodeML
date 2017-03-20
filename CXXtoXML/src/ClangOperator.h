@@ -1,3 +1,6 @@
+#ifndef CLANGOPERATOR_H
+#define CLANGOPERATOR_H
+
 const char*
 BOtoElemName(clang::BinaryOperatorKind);
 
@@ -6,3 +9,5 @@ UOtoElemName(clang::UnaryOperatorKind);
 
 const char*
 OverloadedOperatorKindToString(clang::OverloadedOperatorKind, unsigned);
+
+#endif /* !CLANGOPERATOR_H */
