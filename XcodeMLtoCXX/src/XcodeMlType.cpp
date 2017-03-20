@@ -297,17 +297,8 @@ Function::makeDeclarationWithoutReturnType(
     const std::vector<CodeFragment>& args,
     const Environment& env)
 {
-  assert(isParamListEmpty() || args.size() == params.size());
   auto decl = var + makeTokenNode("(");
-  bool alreadyPrinted = false;
-  for (int i = 0, len = args.size(); i < len; ++i) {
-    if (alreadyPrinted) {
-      decl = decl + makeTokenNode(",");
-    }
-    auto paramType = env.at(std::get<0>(params[i]));
-    decl = decl + makeDecl(paramType, args[i], env);
-    alreadyPrinted = true;
-  }
+  decl = decl + params.makeDeclaration(args, env);
   decl = decl + makeTokenNode(")");
   return decl;
 }
@@ -317,12 +308,7 @@ Function::makeDeclarationWithoutReturnType(
     CodeFragment var,
     const Environment& env)
 {
-  std::vector<CodeFragment> vec;
-  for (auto param : params) {
-    auto paramName(std::get<1>(param));
-    vec.push_back(paramName);
-  }
-  return makeDeclarationWithoutReturnType(var, vec, env);
+  return makeDeclarationWithoutReturnType(var, defaultArgs, env);
 }
 
 CodeFragment
@@ -337,12 +323,7 @@ Function::makeDeclaration(
 }
 
 CodeFragment Function::makeDeclaration(CodeFragment var, const Environment& env) {
-  std::vector<CodeFragment> vec;
-  for (auto param : params) {
-    auto paramName(std::get<1>(param));
-    vec.push_back(paramName);
-  }
-  return makeDeclaration(var, vec, env);
+  return makeDeclaration(var, defaultArgs, env);
 }
 
 Function::~Function() = default;
