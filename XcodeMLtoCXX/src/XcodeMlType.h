@@ -154,7 +154,8 @@ private:
   bool isParamListEmpty() const;
 
   DataTypeIdent returnValue;
-  Params params;
+  ParamList params;
+  std::vector<CodeFragment> defaultArgs;
 };
 
 class Array : public Type {
