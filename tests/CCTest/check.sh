@@ -5,6 +5,7 @@ make_here() {
   target=$1
   make \
     CXXTOXMLFLAGS=' -- -I. -I/usr/local/lib/clang/3.6.2/include -w' \
+    -s \
     $target
 }
 
