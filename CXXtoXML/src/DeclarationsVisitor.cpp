@@ -457,11 +457,17 @@ DeclarationsVisitor::PreVisitConstructorInitializer(
     return true;
   }
   newChild("clangConstructorInitializer");
+  newBoolProp("is_written", CI->isWritten());
 
   // FIXME: temporary implementation
 
   if (auto member = CI->getMember()) {
     newProp("member", member->getNameAsString().c_str());
+  } else if (auto base = CI->getBaseClass()) {
+    const auto T = QualType(base, 0);
+    newProp("xcodemlType", typetableinfo->getTypeName(T).c_str());
+  } else {
+    newBoolProp("clang_unknown_ctor_init", true);
   }
   return true;
 }

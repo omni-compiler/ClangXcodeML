@@ -420,8 +420,18 @@ DEFINE_CB(functionDefinitionProc) {
   auto acc =
     makeFunctionDeclHead(node, src);
 
+  if (auto ctorInitList = findFirst(
+        node,
+        "constructorInitializerList",
+        src.ctxt))
+  {
+    acc = acc + w.walk(ctorInitList, src);
+  }
+
+  auto body = findFirst(node, "body", src.ctxt);
+  assert(body);
   acc = acc + makeTokenNode( "{" ) + makeNewLineNode();
-  acc = acc + makeInnerNode(w.walkChildren(node, src));
+  acc = acc + w.walk(body, src);
   return acc + makeTokenNode("}");
 }
 
@@ -629,26 +639,51 @@ DEFINE_CB(ctorInitListProc) {
     decl = decl
       + makeTokenNode(alreadyPrinted ? "," : ":")
       + w.walk(init, src);
+    alreadyPrinted = true;
   }
   return decl;
 }
 
+static XcodeMl::CodeFragment
+getCtorInitName(
+    xmlNodePtr node,
+    const XcodeMl::Environment& env)
+{
+  const auto dataMember = getPropOrNull(node, "member");
+  if (dataMember.hasValue()) {
+    return makeTokenNode(*dataMember);
+  }
+  const auto base = getPropOrNull(node, "type");
+  if (base.hasValue()) {
+    const auto T = env[*base];
+    const auto classT = llvm::cast<XcodeMl::ClassType>(T.get());
+    const auto name = classT->name();
+    assert(name.hasValue());
+    return *name;
+  }
+
+  xmlDebugDumpNode(stderr, node, 0);
+  assert(false);
+}
+
 DEFINE_CB(ctorInitProc) {
-  const auto member = getProp(node, "member");
+  const auto member = getCtorInitName(node, src.typeTable);
   auto expr = findFirst(node, "*[1]", src.ctxt);
   assert(expr);
-  return makeTokenNode(member) +
+  return member +
     makeTokenNode("(") +
     w.walk(expr, src) +
     makeTokenNode(")");
+}
+
+DEFINE_CB(clangStmtProc) {
+  return ClangStmtHandler.walk(node, w, src);
 }
 
 const CodeBuilder CXXBuilder(
 "CodeBuilder",
 makeInnerNode,
 {
-  //{ "clangStmt", clangStmtProc },
-
   { "typeTable", NullProc },
   { "functionDefinition", functionDefinitionProc },
   { "functionDecl", functionDeclProc },
@@ -716,6 +751,13 @@ makeInnerNode,
   { "returnStatement", returnStatementProc },
   { "varDecl", varDeclProc },
   { "classDecl", emitClassDefinition },
+
+  /* out of specification */
+  { "constructorInitializer", ctorInitProc },
+  { "constructorInitializerList", ctorInitListProc },
+
+  /* for elements defined by clang */
+  { "clangStmt", clangStmtProc },
 
   /* for CtoXcodeML */
   { "Decl_Record", NullProc },

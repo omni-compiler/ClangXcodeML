@@ -25,17 +25,46 @@ namespace cxxgen = CXXCodeGen;
 
 #define CCH_ARGS xmlNodePtr node __attribute__((unused)), \
                  const CodeBuilder& w __attribute__((unused)), \
-                 SourceInfo& src __attribute__((unused)), \
-                 cxxgen::Stream& ss __attribute__((unused))
+                 SourceInfo& src __attribute__((unused))
 
-#define DEFINE_CCH(name) static void name(CCH_ARGS)
+#define DEFINE_CCH(name) static XcodeMl::CodeFragment name(CCH_ARGS)
+
+using cxxgen::makeInnerNode;
+using cxxgen::makeTokenNode;
+using XcodeMl::CodeFragment;
+
+DEFINE_CCH(callCodeBuilder) {
+  return makeInnerNode(w.walkChildren(node, src));
+}
 
 DEFINE_CCH(callExprProc) {
-  (w["functionCall"])(w, node, src);
+  return (w["functionCall"])(w, node, src);
+}
+
+DEFINE_CCH(CXXTemporaryObjectExprProc) {
+  const auto resultT = src.typeTable.at(
+      getProp(node, "type"));
+  const auto name =
+    llvm::cast<XcodeMl::ClassType>(resultT.get())->name();
+  assert(name.hasValue());
+  auto children = findNodes(node, "*[position() > 1]", src.ctxt);
+    // ignore first child, which represents the result (class) type of
+    // the clang::CXXTemporaryObjectExpr
+  std::vector<CodeFragment> args;
+  for (auto child : children) {
+    args.push_back(w.walk(child, src));
+  }
+  return *name +
+    makeTokenNode("(") +
+    join(",", args) +
+    makeTokenNode(")");
 }
 
 const ClangClassHandler ClangStmtHandler(
     "class",
+    cxxgen::makeInnerNode,
+    callCodeBuilder,
     {
       { "CallExpr", callExprProc },
+      { "CXXTemporaryObjectExpr", CXXTemporaryObjectExprProc },
     });
