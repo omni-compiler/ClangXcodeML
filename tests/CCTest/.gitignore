@@ -1,3 +1,5 @@
 *.xcodeml
 *.cc
 *.cpp
+err.log
+result.csv
