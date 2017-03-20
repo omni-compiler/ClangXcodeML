@@ -20,7 +20,8 @@ OBJS = XcodeMlType.o \
 	StringTree.o \
 	SymbolBuilder.o \
 	SymbolAnalyzer.o \
-	ClangClassHandler.o
+	ClangClassHandler.o \
+	XcodeMlNns.o
 
 $(XCODEMLTOCXX): $(OBJS)
 	$(CXX) $(CXXFLAGS) $(OBJS) $(USEDLIBS) -o $(XCODEMLTOCXX)
@@ -48,6 +49,11 @@ TypeAnalyzer.o: \
 	XcodeMlEnvironment.h \
 	TypeAnalyzer.h \
 	XMLWalker.h
+XcodeMlNns.o: \
+	StringTree.h \
+	XcodeMlEnvironment.h \
+	XcodeMlNns.h \
+	XcodeMlType.h
 XcodeMlType.o: \
   Symbol.h \
 	TypeAnalyzer.h \
