@@ -14,6 +14,7 @@ OBJS = XcodeMlType.o \
 	XcodeMLtoCXX.o \
 	LibXMLUtil.o \
 	CodeBuilder.o \
+	NnsAnalyzer.o \
 	TypeAnalyzer.o \
 	XMLString.o \
 	XcodeMlEnvironment.o \
@@ -34,6 +35,7 @@ CodeBuilder.o: \
 	LibXMLUtil.h \
 	XcodeMlType.h \
 	XcodeMlEnvironment.h \
+	NnsAnalyzer.o \
 	TypeAnalyzer.h \
 	Symbol.h \
 	CodeBuilder.h \
