@@ -75,6 +75,8 @@ private:
   DataTypeIdent dtident;
 };
 
+NnsRef makeGlobalNns();
+
 }
 
 #endif /* !XCODEMLNNS_H */

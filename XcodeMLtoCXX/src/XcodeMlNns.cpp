@@ -115,4 +115,9 @@ ClassNns::classof(const Nns* N) {
   return N->getKind() == NnsKind::Class;
 }
 
+NnsRef
+makeGlobalNns() {
+  return std::make_shared<GlobalNns>();
+}
+
 } // namespace XcodeMl
