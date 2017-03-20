@@ -45,6 +45,31 @@ Nns::getParent() const {
   return parent;
 }
 
+GlobalNns::GlobalNns():
+  Nns(NnsKind::Global, nullptr, "global")
+{}
+
+Nns*
+GlobalNns::clone() const {
+  GlobalNns *copy = new GlobalNns(*this);
+  return copy;
+}
+
+bool
+GlobalNns::classof(const Nns *N) {
+  return N->getKind() == NnsKind::Global;
+}
+
+CodeFragment
+GlobalNns::makeNestedNameSpec(const Environment&) const {
+  return makeTokenNode("::");
+}
+
+NnsRef
+GlobalNns::getParent() const {
+  return nullptr;
+}
+
 ClassNns::ClassNns(
     const NnsIdent& ni,
     const NnsRef& parent,

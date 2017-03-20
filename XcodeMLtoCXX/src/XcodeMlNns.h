@@ -15,6 +15,8 @@ class Environment;
 using NnsIdent = std::string;
 
 enum class NnsKind {
+  /*! global namespace */
+  Global,
   /*! classNNS */
   Class,
 };
@@ -34,6 +36,18 @@ private:
   NnsRef parent;
   NnsKind kind;
   NnsIdent ident;
+};
+
+class GlobalNns : public Nns {
+public:
+  GlobalNns();
+  ~GlobalNns() override = default;
+  Nns* clone() const override;
+  static bool classof(const Nns *);
+protected:
+  GlobalNns(const GlobalNns&) = default;
+  CodeFragment makeNestedNameSpec(const Environment&) const override;
+  NnsRef getParent() const override;
 };
 
 class ClassNns : public Nns {
