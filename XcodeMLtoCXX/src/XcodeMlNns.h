@@ -25,6 +25,7 @@ public:
   virtual ~Nns() = 0;
   virtual Nns* clone() const = 0;
   NnsKind getKind() const;
+  CodeFragment makeDeclaration(const Environment&) const;
 protected:
   Nns(const Nns&) = default;
   virtual CodeFragment makeNestedNameSpec(const Environment&) const = 0;

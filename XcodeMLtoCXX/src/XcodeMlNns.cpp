@@ -27,6 +27,19 @@ Nns::getKind() const {
   return kind;
 }
 
+CodeFragment
+Nns::makeDeclaration(
+    const Environment& env) const
+{
+  if (auto p = getParent()) {
+    const auto prefix = p->makeDeclaration(
+        env);
+    return prefix + makeNestedNameSpec(env);
+  } else {
+    return makeNestedNameSpec(env);
+  }
+}
+
 NnsRef
 Nns::getParent() const {
   return parent;
