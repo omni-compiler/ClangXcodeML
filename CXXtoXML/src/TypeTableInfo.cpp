@@ -1,5 +1,6 @@
 #include "XMLVisitorBase.h"
 #include "DeclarationsVisitor.h"
+#include "OperationKinds.h"
 #include "TypeTableInfo.h"
 
 #include <iostream>
@@ -204,6 +205,15 @@ makeNameNodeForCXXMethodDecl(
         nameNode,
         BAD_CAST "name_kind",
         BAD_CAST "destructor");
+    return nameNode;
+  } else if (auto OOK = MD->getOverloadedOperator()) {
+    xmlNewProp(
+        nameNode,
+        BAD_CAST "name_kind",
+        BAD_CAST "operator");
+    xmlNodeAddContent(
+        nameNode,
+        BAD_CAST OverloadedOperatorKindToString(OOK, MD->param_size()));
     return nameNode;
   }
   const auto ident = MD->getIdentifier();
