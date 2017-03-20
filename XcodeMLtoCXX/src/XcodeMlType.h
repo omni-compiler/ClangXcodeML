@@ -289,7 +289,7 @@ TypeRef makeReservedType(DataTypeIdent, CodeFragment, bool = false, bool = false
 TypeRef makeQualifiedType(const DataTypeIdent&, const DataTypeIdent&, bool, bool);
 TypeRef makePointerType(DataTypeIdent, TypeRef);
 TypeRef makePointerType(DataTypeIdent, DataTypeIdent);
-TypeRef makeFunctionType(DataTypeIdent, TypeRef, const Function::Params&);
+TypeRef makeFunctionType(DataTypeIdent, TypeRef, const Function::Params&, bool = false);
 TypeRef makeArrayType(DataTypeIdent, TypeRef, size_t);
 TypeRef makeArrayType(DataTypeIdent, TypeRef, size_t);
 TypeRef makeArrayType(DataTypeIdent, TypeRef, Array::Size);

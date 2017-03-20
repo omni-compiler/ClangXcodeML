@@ -727,13 +727,14 @@ TypeRef makePointerType(DataTypeIdent ident, DataTypeIdent ref) {
 TypeRef makeFunctionType(
     DataTypeIdent ident,
     TypeRef returnType,
-    const Function::Params& params
-) {
+    const Function::Params& params,
+    bool isVariadic)
+{
   return std::make_shared<Function>(
       ident,
       returnType,
-      params
-  );
+      params,
+      isVariadic);
 }
 
 TypeRef makeArrayType(
