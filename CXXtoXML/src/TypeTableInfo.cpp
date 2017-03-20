@@ -556,6 +556,10 @@ void TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
               BAD_CAST "name");
           xmlAddChild(paramsNode, paramNode);
         }
+        if (FTP->isVariadic()) {
+          auto ellipNode = xmlNewNode(nullptr, BAD_CAST "ellipsis");
+          xmlAddChild(paramsNode, ellipNode);
+        }
         xmlAddChild(Node, paramsNode);
       }
       pushType(T, Node);

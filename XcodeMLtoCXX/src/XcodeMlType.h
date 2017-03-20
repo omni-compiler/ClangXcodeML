@@ -120,11 +120,26 @@ private:
   DataTypeIdent ref;
 };
 
+class ParamList {
+public:
+  ParamList() = default;
+  ParamList& operator=(const ParamList&) = default;
+  ParamList(const std::vector<DataTypeIdent>&, bool);
+  bool isVariadic() const;
+  bool isEmpty() const;
+  CodeFragment makeDeclaration(
+      const std::vector<CodeFragment>&,
+      const Environment&) const;
+private:
+  std::vector<DataTypeIdent> dtidents;
+  bool hasEllipsis;
+};
+
 class Function : public Type {
 public:
   using Params = std::vector<std::tuple<DataTypeIdent, CodeFragment>>;
-  Function(DataTypeIdent, TypeRef, const std::vector<DataTypeIdent>&);
-  Function(DataTypeIdent, TypeRef, const Params&);
+  Function(DataTypeIdent, TypeRef, const std::vector<DataTypeIdent>&, bool = false);
+  Function(DataTypeIdent, TypeRef, const Params&, bool = false);
   CodeFragment makeDeclarationWithoutReturnType(
       CodeFragment, const std::vector<CodeFragment>&, const Environment&);
   CodeFragment makeDeclarationWithoutReturnType(CodeFragment, const Environment&);
@@ -139,7 +154,8 @@ private:
   bool isParamListEmpty() const;
 
   DataTypeIdent returnValue;
-  Params params;
+  ParamList params;
+  std::vector<CodeFragment> defaultArgs;
 };
 
 class Array : public Type {
@@ -273,7 +289,7 @@ TypeRef makeReservedType(DataTypeIdent, CodeFragment, bool = false, bool = false
 TypeRef makeQualifiedType(const DataTypeIdent&, const DataTypeIdent&, bool, bool);
 TypeRef makePointerType(DataTypeIdent, TypeRef);
 TypeRef makePointerType(DataTypeIdent, DataTypeIdent);
-TypeRef makeFunctionType(DataTypeIdent, TypeRef, const Function::Params&);
+TypeRef makeFunctionType(DataTypeIdent, TypeRef, const Function::Params&, bool = false);
 TypeRef makeArrayType(DataTypeIdent, TypeRef, size_t);
 TypeRef makeArrayType(DataTypeIdent, TypeRef, size_t);
 TypeRef makeArrayType(DataTypeIdent, TypeRef, Array::Size);
