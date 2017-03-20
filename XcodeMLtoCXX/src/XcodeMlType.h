@@ -138,8 +138,8 @@ private:
 class Function : public Type {
 public:
   using Params = std::vector<std::tuple<DataTypeIdent, CodeFragment>>;
-  Function(DataTypeIdent, TypeRef, const std::vector<DataTypeIdent>&);
-  Function(DataTypeIdent, TypeRef, const Params&);
+  Function(DataTypeIdent, TypeRef, const std::vector<DataTypeIdent>&, bool = false);
+  Function(DataTypeIdent, TypeRef, const Params&, bool = false);
   CodeFragment makeDeclarationWithoutReturnType(
       CodeFragment, const std::vector<CodeFragment>&, const Environment&);
   CodeFragment makeDeclarationWithoutReturnType(CodeFragment, const Environment&);
