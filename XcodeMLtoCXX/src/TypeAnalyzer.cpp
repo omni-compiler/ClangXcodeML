@@ -63,7 +63,7 @@ DEFINE_TA(functionTypeProc) {
   auto returnType = map[returnName];
   xmlXPathObjectPtr paramsNode = xmlXPathNodeEval(
       node,
-      BAD_CAST "params/*",
+      BAD_CAST "params/name",
       ctxt
   );
   XcodeMl::Function::Params params;
@@ -77,7 +77,11 @@ DEFINE_TA(functionTypeProc) {
   }
   XMLString name(xmlGetProp(node, BAD_CAST "type"));
   map.setReturnType(name, returnType);
-  map[name] = XcodeMl::makeFunctionType(name, returnType, params);
+  map[name] = XcodeMl::makeFunctionType(
+    name,
+    returnType,
+    params,
+    findFirst(node, "params/ellipsis", ctxt));
 }
 
 DEFINE_TA(arrayTypeProc) {

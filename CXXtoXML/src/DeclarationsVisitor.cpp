@@ -8,7 +8,7 @@
 #include <map>
 #include <sstream>
 #include "ClangUtil.h"
-#include "OperationKinds.h"
+#include "ClangOperator.h"
 
 using namespace clang;
 using namespace llvm;

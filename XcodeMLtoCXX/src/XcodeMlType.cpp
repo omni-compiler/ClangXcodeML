@@ -256,22 +256,73 @@ LValueReferenceType::clone() const {
   return copy;
 }
 
-Function::Function(DataTypeIdent ident, TypeRef r, const std::vector<DataTypeIdent>& p):
-  Type(TypeKind::Function, ident),
-  returnValue(r->dataTypeIdent()),
-  params(p.size())
-{
-  // FIXME: initialization cost
-  for (size_t i = 0; i < p.size(); ++i) {
-    params[i] = std::make_tuple(p[i], makeVoidNode());
-  }
+ParamList::ParamList(
+    const std::vector<DataTypeIdent>& d,
+    bool e):
+  dtidents(d),
+  hasEllipsis(e)
+{}
+
+bool
+ParamList::isVariadic() const {
+  return hasEllipsis;
 }
 
-Function::Function(DataTypeIdent ident, TypeRef r, const std::vector<std::tuple<DataTypeIdent, CodeFragment>>& p):
+bool
+ParamList::isEmpty() const {
+  if (dtidents.empty()) {
+    return true;
+  }
+  return
+    dtidents.size() == 1 &&
+    dtidents[0] == "void";
+}
+
+CodeFragment
+ParamList::makeDeclaration(
+    const std::vector<CodeFragment>& vars,
+    const Environment& env) const
+{
+  assert(dtidents.size() == vars.size());
+  std::vector<CodeFragment> decls;
+  for (int i = 0, len = dtidents.size(); i < len; ++i) {
+    decls.push_back(makeDecl(env[dtidents[i]], vars[i], env));
+  }
+  return CXXCodeGen::join(",", decls) +
+    (isVariadic() ?
+        makeTokenNode(",") + makeTokenNode("...")
+      : makeVoidNode());
+}
+
+Function::Function(
+    DataTypeIdent ident,
+    TypeRef r,
+    const std::vector<DataTypeIdent>& p,
+    bool v):
   Type(TypeKind::Function, ident),
   returnValue(r->dataTypeIdent()),
-  params(p)
-{}
+  params(p, v),
+  defaultArgs(p.size(), makeVoidNode())
+{
+}
+
+Function::Function(
+    DataTypeIdent ident,
+    TypeRef r,
+    const Params& p,
+    bool v):
+  Type(TypeKind::Function, ident),
+  returnValue(r->dataTypeIdent()),
+  params(),
+  defaultArgs()
+{
+  std::vector<DataTypeIdent> dtidents;
+  for (auto param : p) {
+    dtidents.push_back(std::get<0>(param));
+    defaultArgs.push_back(std::get<1>(param));
+  }
+  params = ParamList(dtidents, v);
+}
 
 CodeFragment
 Function::makeDeclarationWithoutReturnType(
@@ -279,17 +330,8 @@ Function::makeDeclarationWithoutReturnType(
     const std::vector<CodeFragment>& args,
     const Environment& env)
 {
-  assert(isParamListEmpty() || args.size() == params.size());
   auto decl = var + makeTokenNode("(");
-  bool alreadyPrinted = false;
-  for (int i = 0, len = args.size(); i < len; ++i) {
-    if (alreadyPrinted) {
-      decl = decl + makeTokenNode(",");
-    }
-    auto paramType = env.at(std::get<0>(params[i]));
-    decl = decl + makeDecl(paramType, args[i], env);
-    alreadyPrinted = true;
-  }
+  decl = decl + params.makeDeclaration(args, env);
   decl = decl + makeTokenNode(")");
   return decl;
 }
@@ -299,12 +341,7 @@ Function::makeDeclarationWithoutReturnType(
     CodeFragment var,
     const Environment& env)
 {
-  std::vector<CodeFragment> vec;
-  for (auto param : params) {
-    auto paramName(std::get<1>(param));
-    vec.push_back(paramName);
-  }
-  return makeDeclarationWithoutReturnType(var, vec, env);
+  return makeDeclarationWithoutReturnType(var, defaultArgs, env);
 }
 
 CodeFragment
@@ -319,12 +356,7 @@ Function::makeDeclaration(
 }
 
 CodeFragment Function::makeDeclaration(CodeFragment var, const Environment& env) {
-  std::vector<CodeFragment> vec;
-  for (auto param : params) {
-    auto paramName(std::get<1>(param));
-    vec.push_back(paramName);
-  }
-  return makeDeclaration(var, vec, env);
+  return makeDeclaration(var, defaultArgs, env);
 }
 
 Function::~Function() = default;
@@ -345,12 +377,7 @@ Function::Function(const Function& other):
 {}
 
 bool Function::isParamListEmpty() const {
-  if (params.empty()) {
-    return true;
-  }
-  return
-    params.size() == 1 &&
-    std::get<0>(params.at(0)) == "void";
+  return params.isEmpty();
 }
 
 Array::Array(DataTypeIdent ident, DataTypeIdent elem, Array::Size s):
@@ -733,13 +760,14 @@ TypeRef makePointerType(DataTypeIdent ident, DataTypeIdent ref) {
 TypeRef makeFunctionType(
     DataTypeIdent ident,
     TypeRef returnType,
-    const Function::Params& params
-) {
+    const Function::Params& params,
+    bool isVariadic)
+{
   return std::make_shared<Function>(
       ident,
       returnType,
-      params
-  );
+      params,
+      isVariadic);
 }
 
 TypeRef makeArrayType(
