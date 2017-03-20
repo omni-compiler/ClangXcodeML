@@ -35,7 +35,7 @@ protected:
   virtual CodeFragment makeNestedNameSpec(const Environment&) const = 0;
   virtual NnsRef getParent() const;
 private:
-  NnsRef parent;
+  llvm::Optional<NnsIdent> parent;
   NnsKind kind;
   NnsIdent ident;
 };
