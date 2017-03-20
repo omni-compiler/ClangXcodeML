@@ -35,6 +35,7 @@
       or @class='CXXConstructor'
       or @class='CXXDestructor']">
     <xsl:choose>
+      <xsl:when test="(@is_implicit='true') or (@is_implicit='1')" />
       <xsl:when test="clangStmt">
         <functionDefinition>
           <xsl:apply-templates select="@*" />
