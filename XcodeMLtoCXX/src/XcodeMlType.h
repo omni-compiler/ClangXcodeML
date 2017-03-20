@@ -124,6 +124,7 @@ class ParamList {
 public:
   ParamList(const std::vector<DataTypeIdent>&, bool);
   bool isVariadic() const;
+  bool isEmpty() const;
   CodeFragment makeDeclaration(
       const std::vector<CodeFragment>&,
       const Environment&) const;

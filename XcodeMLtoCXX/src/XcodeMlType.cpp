@@ -235,6 +235,16 @@ ParamList::isVariadic() const {
   return hasEllipsis;
 }
 
+bool
+ParamList::isEmpty() const {
+  if (dtidents.empty()) {
+    return true;
+  }
+  return
+    dtidents.size() == 1 &&
+    dtidents[0] == "void";
+}
+
 CodeFragment
 ParamList::makeDeclaration(
     const std::vector<CodeFragment>& vars,
