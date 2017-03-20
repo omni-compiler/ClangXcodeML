@@ -14,6 +14,8 @@ class Environment;
 
 using NnsIdent = std::string;
 
+using NnsMap = std::map<NnsIdent, NnsRef>;
+
 enum class NnsKind {
   /*! global namespace */
   Global,
