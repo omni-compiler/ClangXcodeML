@@ -42,7 +42,7 @@ ClassNns::clone() const {
 }
 
 CodeFragment
-ClassNns::makeDeclaration(
+ClassNns::makeNestedNameSpec(
     const Environment& env) const
 {
   const auto T = env.at(dtident);

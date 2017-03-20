@@ -25,9 +25,9 @@ public:
   virtual ~Nns() = 0;
   virtual Nns* clone() const = 0;
   NnsKind getKind() const;
-  virtual CodeFragment makeDeclaration(const Environment&) const = 0;
 protected:
   Nns(const Nns&) = default;
+  virtual CodeFragment makeNestedNameSpec(const Environment&) const = 0;
 private:
   NnsRef parent;
   NnsKind kind;
@@ -39,10 +39,11 @@ public:
   ClassNns(const NnsIdent&, const NnsRef&, const DataTypeIdent&);
   ~ClassNns() override = default;
   Nns* clone() const override;
-  virtual CodeFragment makeDeclaration(const Environment&) const override;
   static bool classof(const Nns *);
 protected:
   ClassNns(const ClassNns&) = default;
+  virtual CodeFragment makeNestedNameSpec(const Environment&)
+    const override;
 private:
   DataTypeIdent dtident;
 };
