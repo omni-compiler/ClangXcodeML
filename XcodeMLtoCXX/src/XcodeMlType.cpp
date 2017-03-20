@@ -235,6 +235,22 @@ ParamList::isVariadic() const {
   return hasEllipsis;
 }
 
+CodeFragment
+ParamList::makeDeclaration(
+    const std::vector<CodeFragment>& vars,
+    const Environment& env) const
+{
+  assert(dtidents.size() == vars.size());
+  std::vector<CodeFragment> decls;
+  for (int i = 0, len = dtidents.size(); i < len; ++i) {
+    decls.push_back(makeDecl(env[dtidents[i]], vars[i], env));
+  }
+  return CXXCodeGen::join(",", decls) +
+    (isVariadic() ?
+        makeTokenNode(",") + makeTokenNode("...")
+      : makeVoidNode());
+}
+
 Function::Function(DataTypeIdent ident, TypeRef r, const std::vector<DataTypeIdent>& p):
   Type(TypeKind::Function, ident),
   returnValue(r->dataTypeIdent()),
