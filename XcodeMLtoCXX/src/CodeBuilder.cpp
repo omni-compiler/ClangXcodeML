@@ -18,6 +18,7 @@
 #include "XcodeMlNns.h"
 #include "XcodeMlType.h"
 #include "XcodeMlEnvironment.h"
+#include "NnsAnalyzer.h"
 #include "TypeAnalyzer.h"
 #include "SourceInfo.h"
 #include "CodeBuilder.h"
@@ -778,10 +779,13 @@ void buildCode(
 
   xmlNodePtr typeTableNode =
     findFirst(rootNode, "/XcodeProgram/typeTable", ctxt);
+  xmlNodePtr nnsTableNode =
+    findFirst(rootNode, "/XcodeProgram/nnsTable", ctxt);
   SourceInfo src = {
     ctxt,
     parseTypeTable(typeTableNode, ctxt, ss),
-    parseGlobalSymbols(rootNode, ctxt, ss)
+    parseGlobalSymbols(rootNode, ctxt, ss),
+    analyzeNnsTable(nnsTableNode, ctxt),
   };
 
   cxxgen::Stream out;
