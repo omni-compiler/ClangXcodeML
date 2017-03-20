@@ -26,7 +26,7 @@ OBJS =  CXXtoXML.o \
 	DeclarationsVisitor.o \
 	InheritanceInfo.o \
 	NnsTableInfo.o \
-	OperationKinds.o
+	ClangOperator.o
 
 CXXtoXML: $(RAVOBJS) $(OBJS)
 	$(CXX) $(CXXFLAGS) $(RAVOBJS) $(OBJS) $(USEDLIBS) -o CXXtoXML
@@ -62,15 +62,15 @@ DeclarationsVisitor.o: \
 	InheritanceInfo.cpp \
 	InheritanceInfo.h \
 	NnsTableInfo.h \
-	OperationKinds.cpp \
-	OperationKinds.h
+	ClangOperator.cpp \
+	ClangOperator.h
 InheritanceInfo.o: \
 	InheritanceInfo.cpp \
 	InheritanceInfo.h \
 	Hash.h
-OperationKinds.o: \
-	OperationKinds.cpp \
-	OperationKinds.h
+ClangOperator.o: \
+	ClangOperator.cpp \
+	ClangOperator.h
 
 distclean: clean
 	rm -f $(RAVOBJS)
