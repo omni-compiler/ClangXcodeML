@@ -76,6 +76,7 @@ private:
 };
 
 NnsRef makeGlobalNns();
+NnsRef makeClassNns(const NnsIdent&, const NnsRef&, const DataTypeIdent&);
 
 }
 

@@ -120,4 +120,13 @@ makeGlobalNns() {
   return std::make_shared<GlobalNns>();
 }
 
+NnsRef
+makeClassNns(
+    const NnsIdent& ident,
+    const NnsRef& parent,
+    const DataTypeIdent& classType)
+{
+  return std::make_shared<ClassNns>(ident, parent, classType);
+}
+
 } // namespace XcodeMl
