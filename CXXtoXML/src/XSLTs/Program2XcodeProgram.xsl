@@ -276,11 +276,16 @@
   <xsl:template match="name">
     <xsl:choose>
       <xsl:when test="@name_kind = 'name'">
-        <xsl:copy-of select="."/>
+        <name>
+          <xsl:copy-of select="../clangNestedNameSpecifier/@*"/>
+          <xsl:copy-of select="@*"/>
+          <xsl:value-of select="." />
+        </name>
       </xsl:when>
 
       <xsl:when test="@name_kind = 'operator'">
         <operator>
+          <xsl:copy-of select="../clangNestedNameSpecifier/@*"/>
           <xsl:copy-of select="@*"/>
           <xsl:value-of select="." />
         </operator>
@@ -288,12 +293,14 @@
 
       <xsl:when test="@name_kind = 'constructor'">
         <constructor>
+          <xsl:copy-of select="../clangNestedNameSpecifier/@*"/>
           <xsl:copy-of select="@*"/>
         </constructor>
       </xsl:when>
 
       <xsl:when test="@name_kind = 'destructor'">
         <destructor>
+          <xsl:copy-of select="../clangNestedNameSpecifier/@*"/>
           <xsl:copy-of select="@*"/>
         </destructor>
       </xsl:when>
