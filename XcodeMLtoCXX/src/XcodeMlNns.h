@@ -34,7 +34,7 @@ public:
 protected:
   Nns(const Nns&) = default;
   virtual CodeFragment makeNestedNameSpec(const Environment&) const = 0;
-  virtual NnsRef getParent() const;
+  virtual llvm::Optional<NnsIdent> getParent() const;
 private:
   llvm::Optional<NnsIdent> parent;
   NnsKind kind;
@@ -50,7 +50,7 @@ public:
 protected:
   GlobalNns(const GlobalNns&) = default;
   CodeFragment makeNestedNameSpec(const Environment&) const override;
-  NnsRef getParent() const override;
+  llvm::Optional<NnsIdent> getParent() const override;
 };
 
 class ClassNns : public Nns {

@@ -46,7 +46,7 @@ Nns::makeDeclaration(
   }
 }
 
-NnsRef
+llvm::Optional<NnsIdent>
 Nns::getParent() const {
   return parent;
 }
@@ -67,13 +67,16 @@ GlobalNns::classof(const Nns *N) {
 }
 
 CodeFragment
-GlobalNns::makeNestedNameSpec(const Environment&) const {
+GlobalNns::makeNestedNameSpec(
+    const Environment&,
+    const NnsMap&) const
+{
   return makeTokenNode("::");
 }
 
-NnsRef
+llvm::Optional<NnsIdent>
 GlobalNns::getParent() const {
-  return nullptr;
+  return llvm::Optional<NnsIdent>();
 }
 
 ClassNns::ClassNns(
