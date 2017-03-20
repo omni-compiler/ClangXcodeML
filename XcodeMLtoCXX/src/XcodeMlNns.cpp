@@ -27,6 +27,11 @@ Nns::getKind() const {
   return kind;
 }
 
+NnsRef
+Nns::getParent() const {
+  return parent;
+}
+
 ClassNns::ClassNns(
     const NnsIdent& ni,
     const NnsRef& parent,

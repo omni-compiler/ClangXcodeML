@@ -28,6 +28,7 @@ public:
 protected:
   Nns(const Nns&) = default;
   virtual CodeFragment makeNestedNameSpec(const Environment&) const = 0;
+  virtual NnsRef getParent() const;
 private:
   NnsRef parent;
   NnsKind kind;
