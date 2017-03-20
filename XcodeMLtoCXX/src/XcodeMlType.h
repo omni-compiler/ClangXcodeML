@@ -122,10 +122,10 @@ private:
 
 class ParamList {
 public:
-  ParamList(const std::vector<CodeFragment>&, bool);
+  ParamList(const std::vector<DataTypeIdent>&, bool);
   bool isVariadic() const;
 private:
-  std::vector<CodeFragment> vars;
+  std::vector<DataTypeIdent> dtidents;
   bool hasEllipsis;
 };
 

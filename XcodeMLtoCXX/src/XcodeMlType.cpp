@@ -224,9 +224,9 @@ Pointer::Pointer(const Pointer& other):
 {}
 
 ParamList::ParamList(
-    const std::vector<CodeFragment>& v,
+    const std::vector<DataTypeIdent>& d,
     bool e):
-  vars(v),
+  dtidents(d),
   hasEllipsis(e)
 {}
 
