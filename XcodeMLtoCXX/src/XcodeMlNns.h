@@ -21,7 +21,7 @@ enum class NnsKind {
 
 class Nns {
 public:
-  Nns(NnsKind, const NnsIdent&);
+  Nns(NnsKind, const NnsRef&, const NnsIdent&);
   virtual ~Nns() = 0;
   virtual Nns* clone() const = 0;
   NnsKind getKind() const;
@@ -29,13 +29,14 @@ public:
 protected:
   Nns(const Nns&) = default;
 private:
+  NnsRef parent;
   NnsKind kind;
   NnsIdent ident;
 };
 
 class ClassNns : public Nns {
 public:
-  ClassNns(const NnsIdent&, const DataTypeIdent&);
+  ClassNns(const NnsIdent&, const NnsRef&, const DataTypeIdent&);
   ~ClassNns() override = default;
   Nns* clone() const override;
   virtual CodeFragment makeDeclaration(const Environment&) const override;
