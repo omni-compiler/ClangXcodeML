@@ -35,14 +35,18 @@ Nns::getKind() const {
 
 CodeFragment
 Nns::makeDeclaration(
-    const Environment& env) const
+    const Environment& env,
+    const NnsMap& nnss) const
 {
-  if (auto p = getParent()) {
+  const auto par = getParent();
+  if (par.hasValue()) {
+    const auto p = nnss.at(*par);
     const auto prefix = p->makeDeclaration(
-        env);
-    return prefix + makeNestedNameSpec(env);
+        env,
+        nnss);
+    return prefix + makeNestedNameSpec(env, nnss);
   } else {
-    return makeNestedNameSpec(env);
+    return makeNestedNameSpec(env, nnss);
   }
 }
 
@@ -95,7 +99,8 @@ ClassNns::clone() const {
 
 CodeFragment
 ClassNns::makeNestedNameSpec(
-    const Environment& env) const
+    const Environment& env,
+    const NnsMap&) const
 {
   const auto T = env.at(dtident);
   const auto classT = llvm::cast<XcodeMl::ClassType>(T.get());

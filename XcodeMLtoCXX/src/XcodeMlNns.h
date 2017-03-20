@@ -30,10 +30,14 @@ public:
   virtual ~Nns() = 0;
   virtual Nns* clone() const = 0;
   NnsKind getKind() const;
-  CodeFragment makeDeclaration(const Environment&) const;
+  CodeFragment makeDeclaration(
+      const Environment&,
+      const NnsMap&) const;
 protected:
   Nns(const Nns&) = default;
-  virtual CodeFragment makeNestedNameSpec(const Environment&) const = 0;
+  virtual CodeFragment makeNestedNameSpec(
+      const Environment&,
+      const NnsMap&) const = 0;
   virtual llvm::Optional<NnsIdent> getParent() const;
 private:
   llvm::Optional<NnsIdent> parent;
@@ -49,7 +53,9 @@ public:
   static bool classof(const Nns *);
 protected:
   GlobalNns(const GlobalNns&) = default;
-  CodeFragment makeNestedNameSpec(const Environment&) const override;
+  CodeFragment makeNestedNameSpec(
+      const Environment&,
+      const NnsMap&) const override;
   llvm::Optional<NnsIdent> getParent() const override;
 };
 
@@ -61,7 +67,9 @@ public:
   static bool classof(const Nns *);
 protected:
   ClassNns(const ClassNns&) = default;
-  virtual CodeFragment makeNestedNameSpec(const Environment&)
+  virtual CodeFragment makeNestedNameSpec(
+      const Environment&,
+      const NnsMap&)
     const override;
 private:
   DataTypeIdent dtident;
