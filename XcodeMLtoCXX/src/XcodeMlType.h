@@ -122,6 +122,8 @@ private:
 
 class ParamList {
 public:
+  ParamList() = default;
+  ParamList& operator=(const ParamList&) = default;
   ParamList(const std::vector<DataTypeIdent>&, bool);
   bool isVariadic() const;
   bool isEmpty() const;
