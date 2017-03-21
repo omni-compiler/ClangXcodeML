@@ -75,3 +75,11 @@ DEFINE_CCH(FriendDeclProc) {
     makeTokenNode("friend") +
     callCodeBuilder(node, w, src);
 }
+
+const ClangClassHandler ClangDeclHandler(
+    "class",
+    cxxgen::makeInnerNode,
+    callCodeBuilder,
+    {
+      { "Friend", FriendDeclProc },
+    });
