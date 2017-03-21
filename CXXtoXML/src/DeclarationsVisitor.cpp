@@ -273,6 +273,8 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
   }
   if (D->getAccess() != AS_none) {
     newProp("access", AccessSpec(D->getAccess()).c_str());
+  } else {
+    newBoolProp("clang_access_none", true);
   }
 
   if (isa<TranslationUnitDecl>(D)) {
