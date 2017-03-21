@@ -108,6 +108,10 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
     newProp("clangCastKind", CE->getCastKindName());
   }
 
+  if (auto ME = dyn_cast<clang::MemberExpr>(S)) {
+    newBoolProp("is_arrow", ME->isArrow());
+  }
+
   if (auto CL = dyn_cast<CharacterLiteral>(S)) {
     newProp("hexadecimalNotation",
         unsignedToHexString(CL->getValue()).c_str());
