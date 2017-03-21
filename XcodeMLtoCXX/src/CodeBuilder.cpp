@@ -461,6 +461,21 @@ DEFINE_CB(emitClassDefinition) {
     makeNewLineNode();
 }
 
+DEFINE_CB(classDeclProc) {
+  if (isTrueProp(node, "is_this_declaration_a_definition", false)) {
+    return emitClassDefinition(w, node, src);
+  }
+  const auto T = src.typeTable.at(getProp(node, "type"));
+  auto classT = llvm::dyn_cast<XcodeMl::ClassType>(T.get());
+  assert(classT);
+  const auto name = classT->name();
+  assert(name.hasValue());
+  return
+    makeTokenNode("class") +
+    (*name) +
+    makeTokenNode(";");
+}
+
 static XcodeMl::CodeFragment
 makeFunctionDeclHead(
     xmlNodePtr node,
@@ -856,7 +871,7 @@ makeInnerNode,
   { "exprStatement", exprStatementProc },
   { "returnStatement", returnStatementProc },
   { "varDecl", varDeclProc },
-  { "classDecl", emitClassDefinition },
+  { "classDecl", classDeclProc },
 
   /* out of specification */
   { "constructorInitializer", ctorInitProc },
