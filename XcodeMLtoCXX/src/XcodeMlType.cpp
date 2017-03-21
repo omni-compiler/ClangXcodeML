@@ -654,6 +654,17 @@ ClassType::ClassType(
   classScopeSymbols(symbols)
 {}
 
+ClassType::ClassType(
+    const DataTypeIdent& ident,
+    const CodeFragment& className,
+    const std::vector<BaseClass>& b,
+    const ClassType::Symbols& symbols):
+  Type(TypeKind::Class, ident),
+  name_(className),
+  bases_(b),
+  classScopeSymbols(symbols)
+{}
+
 CodeFragment ClassType::makeDeclaration(
     CodeFragment var,
     const Environment&
