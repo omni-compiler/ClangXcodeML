@@ -295,6 +295,7 @@ public:
   ClassName name() const;
   void setName(const std::string&);
   Symbols getSymbols() const;
+  std::vector<BaseClass> getBases() const;
   static bool classof(const Type *);
 protected:
   ClassType(const ClassType&);
