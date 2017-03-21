@@ -42,6 +42,20 @@ DEFINE_CCH(callExprProc) {
   return (w["functionCall"])(w, node, src);
 }
 
+DEFINE_CCH(CXXMemberCallExprProc) {
+  auto funcNode = findFirst(node, "*[1]", src.ctxt);
+  const auto func = w.walk(funcNode, src);
+  const auto argNodes = findNodes(node, "*[position() > 1]", src.ctxt);
+  std::vector<CodeFragment> args;
+  for (auto a : argNodes) {
+    args.push_back(w.walk(a, src));
+  }
+  return func +
+    makeTokenNode("(") +
+    cxxgen::join(", ", args) +
+    makeTokenNode(")");
+}
+
 DEFINE_CCH(CXXTemporaryObjectExprProc) {
   const auto resultT = src.typeTable.at(
       getProp(node, "type"));
@@ -67,6 +81,7 @@ const ClangClassHandler ClangStmtHandler(
     callCodeBuilder,
     {
       { "CallExpr", callExprProc },
+      { "CXXMemberCallExpr", CXXMemberCallExprProc },
       { "CXXTemporaryObjectExpr", CXXTemporaryObjectExprProc },
     });
 
