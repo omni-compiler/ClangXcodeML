@@ -1,7 +1,7 @@
 #!/bin/bash
 
 
-make_here() {
+make_with_preferences() {
   target=$1
   make \
     CXXTOXMLFLAGS=' -- -I. -I/usr/local/lib/clang/3.6.2/include -w' \
@@ -13,12 +13,12 @@ print_csv() {
   while read -r line
   do
     echo -n ${line}.cc,
-    make_here ${line}.xcodeml
+    make_with_preferences ${line}.xcodeml
     if [ $? -gt 0 ]; then
       echo "Error"
     else
       echo -n "OK,"
-      make_here ${line}.dst.cpp
+      make_with_preferences ${line}.dst.cpp
       if [ $? -gt 0 ]; then
         echo "Error"
       else
