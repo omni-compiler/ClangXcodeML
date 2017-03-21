@@ -650,6 +650,20 @@ DEFINE_CB(varDeclProc) {
   if (!valueElem) {
     return acc + makeTokenNode(";");
   }
+
+  if (auto ctorExpr = findFirst(
+        valueElem,
+        "clangStmt[@class='CXXConstructExpr']",
+        src.ctxt))
+  {
+    return
+      acc +
+      makeTokenNode("(") +
+      cxxgen::join(",", w.walkChildren(ctorExpr, src)) +
+      makeTokenNode(")") +
+      makeTokenNode(";");
+  }
+
   return acc + makeTokenNode("=") + w.walk(valueElem, src);
 }
 
