@@ -76,14 +76,21 @@ getQualifiedNameFromTypedNode(
 }
 
 static XcodeMl::CodeFragment
-makeLangLinkSpec(xmlNodePtr node) {
+wrapWithLangLink(
+    const XcodeMl::CodeFragment& content,
+    xmlNodePtr node)
+{
   const auto lang = getPropOrNull(node, "language_linkage");
   if (! lang.hasValue() || *lang == "C++") {
-    return makeVoidNode();
+    return content;
   } else {
     return
       makeTokenNode("extern") +
-      makeTokenNode("\"" + *lang + "\"");
+      makeTokenNode("\"" + *lang + "\"") +
+      makeTokenNode("{") +
+      makeNewLineNode() +
+      content +
+      makeTokenNode("}");
   }
 }
 
@@ -446,7 +453,6 @@ makeFunctionDeclHead(
   const auto T = src.typeTable[dtident];
   const auto fnType = llvm::cast<XcodeMl::Function>(T.get());
   return
-    makeLangLinkSpec(node) +
     (kind == "constructor" || kind == "destructor" ?
       fnType->makeDeclarationWithoutReturnType(
           nameNode,
@@ -475,7 +481,8 @@ DEFINE_CB(functionDefinitionProc) {
   assert(body);
   acc = acc + makeTokenNode( "{" ) + makeNewLineNode();
   acc = acc + w.walk(body, src);
-  return acc + makeTokenNode("}");
+  acc = acc + makeTokenNode("}");
+  return wrapWithLangLink(acc, node);
 }
 
 DEFINE_CB(functionDeclProc) {
@@ -485,9 +492,10 @@ DEFINE_CB(functionDeclProc) {
       src.symTable);
   const auto fnType =
     llvm::cast<XcodeMl::Function>(src.typeTable[fnDtident].get());
-  return
+  auto decl =
     makeFunctionDeclHead(node, fnType->argNames(), src) +
     makeTokenNode(";");
+  return wrapWithLangLink(decl, node);
 }
 
 DEFINE_CB(memberRefProc) {
@@ -666,14 +674,13 @@ DEFINE_CB(varDeclProc) {
   XMLString name(xmlNodeGetContent(nameElem));
   assert(length(name) != 0);
   auto type = getIdentType(src, name);
-  auto acc = makeLangLinkSpec(node);
-  acc = acc + makeDecl(
+  auto acc = makeDecl(
       type,
       makeTokenNode(name),
       src.typeTable);
   xmlNodePtr valueElem = findFirst(node, "value", src.ctxt);
   if (!valueElem) {
-    return acc + makeTokenNode(";");
+    return wrapWithLangLink(acc + makeTokenNode(";"), node);
   }
 
   if (auto ctorExpr = findFirst(
@@ -681,15 +688,17 @@ DEFINE_CB(varDeclProc) {
         "clangStmt[@class='CXXConstructExpr']",
         src.ctxt))
   {
-    return
+    acc =
       acc +
       makeTokenNode("(") +
       cxxgen::join(",", w.walkChildren(ctorExpr, src)) +
       makeTokenNode(")") +
       makeTokenNode(";");
+    return wrapWithLangLink(acc, node);
   }
 
-  return acc + makeTokenNode("=") + w.walk(valueElem, src);
+  acc = acc + makeTokenNode("=") + w.walk(valueElem, src);
+  return wrapWithLangLink(acc, node);
 }
 
 DEFINE_CB(ctorInitListProc) {
