@@ -254,6 +254,17 @@ getNameKind(NamedDecl* ND) {
   return "name";
 }
 
+static const char*
+getLanguageIdAsString(clang::LinkageSpecDecl::LanguageIDs id) {
+  using clang::LinkageSpecDecl;
+  switch(id) {
+    case LinkageSpecDecl::lang_c:
+      return "C";
+    case LinkageSpecDecl::lang_cxx:
+      return "C++";
+  }
+}
+
 bool
 DeclarationsVisitor::PreVisitDecl(Decl *D) {
   if (!D) {
