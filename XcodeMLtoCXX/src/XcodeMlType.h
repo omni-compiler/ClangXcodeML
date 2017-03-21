@@ -287,18 +287,26 @@ public:
   using ClassName = llvm::Optional<CodeFragment>;
   using MemberName = std::string;
   using Symbols = std::vector<std::tuple<MemberName, DataTypeIdent>>;
+  using BaseClass = std::tuple<std::string, DataTypeIdent>;
   ClassType(const DataTypeIdent&, const CodeFragment&, const Symbols&);
+  ClassType(
+      const DataTypeIdent&,
+      const CodeFragment&,
+      const std::vector<BaseClass>&,
+      const Symbols&);
   CodeFragment makeDeclaration(CodeFragment, const Environment&) override;
   ~ClassType() override = default;
   Type* clone() const override;
   ClassName name() const;
   void setName(const std::string&);
   Symbols getSymbols() const;
+  std::vector<BaseClass> getBases() const;
   static bool classof(const Type *);
 protected:
   ClassType(const ClassType&);
 private:
   ClassName name_;
+  std::vector<BaseClass> bases_;
   Symbols classScopeSymbols;
 };
 
@@ -326,6 +334,7 @@ TypeRef makeArrayType(DataTypeIdent, DataTypeIdent, Array::Size);
 TypeRef makeArrayType(DataTypeIdent, DataTypeIdent, size_t);
 TypeRef makeEnumType(const DataTypeIdent&);
 TypeRef makeClassType(const DataTypeIdent&, const ClassType::Symbols&);
+TypeRef makeClassType(const DataTypeIdent&, const std::vector<ClassType::BaseClass>&, const ClassType::Symbols&);
 TypeRef makeStructType(const DataTypeIdent&, const CodeFragment&, const Struct::MemberList&);
 TypeRef makeOtherType(const DataTypeIdent&);
 

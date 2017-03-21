@@ -650,6 +650,18 @@ ClassType::ClassType(
     const ClassType::Symbols& symbols):
   Type(TypeKind::Class, ident),
   name_(className),
+  bases_(),
+  classScopeSymbols(symbols)
+{}
+
+ClassType::ClassType(
+    const DataTypeIdent& ident,
+    const CodeFragment& className,
+    const std::vector<BaseClass>& b,
+    const ClassType::Symbols& symbols):
+  Type(TypeKind::Class, ident),
+  name_(className),
+  bases_(b),
   classScopeSymbols(symbols)
 {}
 
@@ -677,6 +689,11 @@ void ClassType::setName(const std::string& name) {
 ClassType::Symbols
 ClassType::getSymbols() const {
   return classScopeSymbols;
+}
+
+std::vector<ClassType::BaseClass>
+ClassType::getBases() const {
+  return bases_;
 }
 
 bool ClassType::classof(const Type *T) {
@@ -842,6 +859,14 @@ TypeRef makeClassType(
     const ClassType::Symbols& symbols)
 {
   return std::make_shared<ClassType>(ident, nullptr, symbols);
+}
+
+TypeRef makeClassType(
+    const DataTypeIdent& ident,
+    const std::vector<ClassType::BaseClass>& bases,
+    const ClassType::Symbols& symbols)
+{
+  return std::make_shared<ClassType>(ident, nullptr, bases, symbols);
 }
 
 TypeRef
