@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -xv
 
 
 make_with_preferences() {
