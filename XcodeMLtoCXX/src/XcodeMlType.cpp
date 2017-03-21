@@ -326,6 +326,11 @@ CodeFragment Function::makeDeclaration(CodeFragment var, const Environment& env)
   return makeDeclaration(var, defaultArgs, env);
 }
 
+std::vector<CodeFragment>
+Function::argNames() const {
+  return defaultArgs;
+}
+
 Function::~Function() = default;
 
 Type* Function::clone() const {

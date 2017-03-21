@@ -145,6 +145,7 @@ public:
   CodeFragment makeDeclarationWithoutReturnType(CodeFragment, const Environment&);
   CodeFragment makeDeclaration(CodeFragment, const Environment&) override;
   CodeFragment makeDeclaration(CodeFragment, const std::vector<CodeFragment>&, const Environment&);
+  std::vector<CodeFragment> argNames() const;
   ~Function() override;
   Type* clone() const override;
   static bool classof(const Type *);
