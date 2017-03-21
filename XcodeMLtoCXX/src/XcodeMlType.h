@@ -287,6 +287,7 @@ public:
   using ClassName = llvm::Optional<CodeFragment>;
   using MemberName = std::string;
   using Symbols = std::vector<std::tuple<MemberName, DataTypeIdent>>;
+  using BaseClass = std::tuple<std::string, DataTypeIdent>;
   ClassType(const DataTypeIdent&, const CodeFragment&, const Symbols&);
   CodeFragment makeDeclaration(CodeFragment, const Environment&) override;
   ~ClassType() override = default;
@@ -299,6 +300,7 @@ protected:
   ClassType(const ClassType&);
 private:
   ClassName name_;
+  std::vector<BaseClass> bases_;
   Symbols classScopeSymbols;
 };
 

@@ -650,6 +650,7 @@ ClassType::ClassType(
     const ClassType::Symbols& symbols):
   Type(TypeKind::Class, ident),
   name_(className),
+  bases_(),
   classScopeSymbols(symbols)
 {}
 
