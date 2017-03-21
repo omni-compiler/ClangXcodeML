@@ -31,7 +31,6 @@ DEFINE_NA(classNnsProc) {
   const auto type = getProp(node, "type");
   map[name] = XcodeMl::makeClassNns(
       name,
-      nullptr,
       type);
 }
 
