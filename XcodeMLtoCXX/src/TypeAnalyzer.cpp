@@ -171,6 +171,7 @@ getBases(
 
 DEFINE_TA(classTypeProc) {
   XMLString elemName = xmlGetProp(node, BAD_CAST "type");
+  const auto bases = getBases(node, ctxt);
   XcodeMl::ClassType::Symbols symbols;
   const auto ids = findNodes(node, "symbols/id", ctxt);
   for (auto& idElem : ids) {
@@ -182,7 +183,10 @@ DEFINE_TA(classTypeProc) {
       symbols.emplace_back("", dtident);
     }
   }
-  map[elemName] = XcodeMl::makeClassType(elemName, symbols);
+  map[elemName] = XcodeMl::makeClassType(
+      elemName,
+      bases,
+      symbols);
 }
 
 DEFINE_TA(enumTypeProc) {
