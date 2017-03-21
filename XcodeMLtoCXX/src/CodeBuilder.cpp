@@ -385,7 +385,13 @@ DEFINE_CB(emitClassDefinition) {
   for (xmlNodePtr memberNode = xmlFirstElementChild(node);
        memberNode;
        memberNode = xmlNextElementSibling(memberNode)) {
-    const auto access = getProp(memberNode, "access");
+    const auto accessProp = getPropOrNull(memberNode, "access");
+    if (!accessProp.hasValue()) {
+      return
+        makeTokenNode("/* ignored a member with no access specifier */") +
+        makeNewLineNode();
+    }
+    const auto access = *accessProp;
     const auto decl =
       makeTokenNode(access) +
       makeTokenNode(":") +
