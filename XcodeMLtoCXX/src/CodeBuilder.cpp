@@ -478,7 +478,7 @@ DEFINE_CB(functionDeclProc) {
 DEFINE_CB(memberRefProc) {
   return
     makeInnerNode(w.walkChildren(node, src)) +
-    makeTokenNode(".") +
+    makeTokenNode("->") +
     makeTokenNode(getProp(node, "member"));
 }
 
