@@ -254,6 +254,17 @@ getNameKind(NamedDecl* ND) {
   return "name";
 }
 
+static const char*
+getLanguageIdAsString(clang::LinkageSpecDecl::LanguageIDs id) {
+  using clang::LinkageSpecDecl;
+  switch(id) {
+    case LinkageSpecDecl::lang_c:
+      return "C";
+    case LinkageSpecDecl::lang_cxx:
+      return "C++";
+  }
+}
+
 bool
 DeclarationsVisitor::PreVisitDecl(Decl *D) {
   if (!D) {
@@ -286,6 +297,12 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
     typetableinfo->pushTypeTableStack(typetable);
     auto nnsTable = addChild("xcodemlNnsTable");
     nnstableinfo->pushNnsTableStack(nnsTable);
+  }
+
+  if (const auto LSD = dyn_cast<LinkageSpecDecl>(D)) {
+    newProp(
+        "language_id",
+        getLanguageIdAsString(LSD->getLanguage()));
   }
 
   NamedDecl *ND = dyn_cast<NamedDecl>(D);

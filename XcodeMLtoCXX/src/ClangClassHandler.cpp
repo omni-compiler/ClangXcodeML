@@ -85,6 +85,18 @@ const ClangClassHandler ClangStmtHandler(
       { "CXXTemporaryObjectExpr", CXXTemporaryObjectExprProc },
     });
 
+DEFINE_CCH(linkageSpecDeclProc) {
+  const auto lang = getProp(node, "language_id");
+  return
+    makeTokenNode("extern") +
+    makeTokenNode("\"") +
+    makeTokenNode(lang) +
+    makeTokenNode("\"") +
+    makeTokenNode("{") +
+    cxxgen::insertNewLines(w.walkChildren(node, src)) +
+    makeTokenNode("}");
+}
+
 DEFINE_CCH(FriendDeclProc) {
   return
     makeTokenNode("friend") +
@@ -97,4 +109,5 @@ const ClangClassHandler ClangDeclHandler(
     callCodeBuilder,
     {
       { "Friend", FriendDeclProc },
+      { "LinkageSpec", linkageSpecDeclProc },
     });
