@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <functional>
 #include <iostream>
 #include <sstream>
@@ -369,6 +370,34 @@ ClassSymbolsToSymbolEntry(const XcodeMl::ClassType* T) {
     entry[name] = dtident;
   }
   return std::move(entry);
+}
+
+static XcodeMl::CodeFragment
+makeBases(
+    XcodeMl::ClassType *T,
+    SourceInfo& src)
+{
+  using namespace XcodeMl;
+  assert(T);
+  const auto bases = T->getBases();
+  std::vector<CodeFragment> decls;
+  std::transform(
+      bases.begin(),
+      bases.end(),
+      std::back_inserter(decls),
+      [&src] (ClassType::BaseClass base) {
+        const auto T = src.typeTable.at(std::get<1>(base));
+        const auto classT = llvm::cast<ClassType>(T.get());
+        assert(classT);
+        assert(classT->name().hasValue());
+        return
+          makeTokenNode(std::get<0>(base)) +
+          *(classT->name());
+      });
+  return
+    decls.empty() ?
+      makeVoidNode()
+    : makeTokenNode(":") + cxxgen::join(",", decls);
 }
 
 DEFINE_CB(emitClassDefinition) {
