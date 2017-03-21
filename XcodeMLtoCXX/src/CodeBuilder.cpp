@@ -440,17 +440,14 @@ DEFINE_CB(functionDefinitionProc) {
 }
 
 DEFINE_CB(functionDeclProc) {
-  const auto name = getDeclNameFromTypedNode(node, src);
   const auto fnDtident = getDtidentFromTypedNode(
       node,
       src.ctxt,
       src.symTable);
-  const auto fnType = src.typeTable[fnDtident];
+  const auto fnType =
+    llvm::cast<XcodeMl::Function>(src.typeTable[fnDtident].get());
   return
-    makeDecl(
-        fnType,
-        name,
-        src.typeTable) +
+    makeFunctionDeclHead(node, fnType->argNames(), src) +
     makeTokenNode(";");
 }
 
