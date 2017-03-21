@@ -59,6 +59,22 @@ getDeclNameFromTypedNode(
   return makeTokenNode(getNameFromIdNode(node, src.ctxt));
 }
 
+static XcodeMl::CodeFragment
+getQualifiedNameFromTypedNode(
+    xmlNodePtr node,
+    const SourceInfo& src)
+{
+  const auto name = getDeclNameFromTypedNode(node, src);
+  auto nameNode = findFirst(node, "name", src.ctxt);
+  const auto ident = getPropOrNull(nameNode, "nns");
+  if (ident.hasValue()) {
+    const auto nns = src.nnsTable.at(*ident);
+    return nns->makeDeclaration(src.typeTable, src.nnsTable) + name;
+  } else {
+    return name;
+  }
+}
+
 /*!
  * \brief Traverse XcodeML node and make SymbolEntry.
  * \pre \c node is <globalSymbols> or <symbols> element.
