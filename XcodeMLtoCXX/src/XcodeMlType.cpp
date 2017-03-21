@@ -861,6 +861,14 @@ TypeRef makeClassType(
   return std::make_shared<ClassType>(ident, nullptr, symbols);
 }
 
+TypeRef makeClassType(
+    const DataTypeIdent& ident,
+    const std::vector<ClassType::BaseClass>& bases,
+    const ClassType::Symbols& symbols)
+{
+  return std::make_shared<ClassType>(ident, nullptr, bases, symbols);
+}
+
 TypeRef
 makeOtherType(const DataTypeIdent& ident) {
   return std::make_shared<OtherType>(ident);
