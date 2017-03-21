@@ -441,7 +441,10 @@ union(共用体)データ型は、`unionType`要素で定義する。
 
 属性(必須): `type`
 
-属性(optional): `lineno`, `file`, `inherited`, データ型定義要素属性
+属性(optional):
+  `lineno`,
+  `file`,
+  データ型定義要素属性
 
 以下の子要素をもつ。
 
@@ -497,12 +500,19 @@ union(共用体)データ型は、`unionType`要素で定義する。
 
 属性(必須): `type`
 
-属性(optional): `lineno`, `file`, `inherited`, データ型定義要素属性
+属性(optional):
+  `lineno`,
+  `file`,
+  `inheritedFrom`,
+  データ型定義要素属性
 
 以下の子要素をもつ。
 
-* `inheritedFrom`要素　－　継承元の構造体またはクラス名のリスト
-* `symbols`要素　－　メンバ変数名とメンバ関数名のリスト
+* `inheritedFrom`要素　－　基本クラス名のリスト
+* `symbols`要素([-@sec:symb.local]節)　－　
+  メンバー関数名およびメンバー変数名のリスト。
+  定義されるクラスが基本クラスを持つ場合、
+  そのpublicメンバー関数および変数も含む。
 
 以下の属性をもつ。
 
@@ -511,14 +521,9 @@ union(共用体)データ型は、`unionType`要素で定義する。
 メンバのビットフィールドは、`id`要素の `bit_field` 属性または `id`要素の子要素 である`bitField`要素に記述する([-@sec:symb.id]節)。
 構造体またはメンバの名前は、同じ`type`属性をもつ`id`要素で指定する。typedef文またはusing文で指定された別名もまた、同じ`type`属性をもつ`id`要素で指定する。
 
-要検討:
-
-friend関数の宣言。friend関数はそのクラスのメンバ関数ではない。
-
-
 
 ### inheritedFrom要素(C++) {#sec:type.class.inherit}
-継承元の構造体またはクラスの並びを表現する。
+基本クラスの並びを表現する。
 
 | `<inheritedFrom>`
 |   [ `typeName`要素([-@sec:type.typename]節)
@@ -529,7 +534,10 @@ friend関数の宣言。friend関数はそのクラスのメンバ関数では�
 
 以下の子要素をもつ。
 
-* `typeName`要素　－　継承する構造体またはクラスのデータ型識別名を示す。`access`属性により、`public`, `private`または`protected`の区別を指定できる。
+* `typeName`要素　－　
+  基本クラスのデータ型識別名を示す。`
+  access`属性により、
+  `public`, `private`または`protected`の区別を指定できる。
 
 ## `enumType`要素 {#sec:type.enum}
 enum型は、`enumType`要素で定義する。`type`要素で、メンバの識別子を指定する。
