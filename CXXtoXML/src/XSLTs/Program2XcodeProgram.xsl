@@ -280,7 +280,7 @@
           <xsl:attribute name="member">
             <xsl:value-of select="clangDeclarationNameInfo[@class='Identifier']" />
           </xsl:attribute>
-          <AddrOfExpr is_expedient="1">
+          <AddrOfExpr>
             <xsl:apply-templates select="*[2]" />
           </AddrOfExpr>
         </memberRef>
