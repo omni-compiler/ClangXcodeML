@@ -31,6 +31,10 @@ enum class TypeKind {
   Qualified,
   /*! pointer (3.5 <pointerType> element) */
   Pointer,
+  /*! lvalue reference */
+  LValueReference,
+  /*! rvalue reference */
+  RValueReference,
   /*! function (3.6 <functionType> element) */
   Function,
   /*! C-style array (3.7 <ArrayType> element) */
@@ -118,6 +122,29 @@ protected:
   Pointer(const Pointer&);
 private:
   DataTypeIdent ref;
+};
+
+class ReferenceType : public Type {
+public:
+  ReferenceType(const DataTypeIdent&, TypeKind, const DataTypeIdent&);
+  CodeFragment makeDeclaration(CodeFragment, const Environment&)
+    override = 0;
+  ~ReferenceType() override = 0;
+  Type* clone() const override = 0;
+protected:
+  ReferenceType(const ReferenceType&) = default;
+  DataTypeIdent ref;
+};
+
+class LValueReferenceType : public ReferenceType {
+public:
+  LValueReferenceType(const DataTypeIdent&, const DataTypeIdent&);
+  CodeFragment makeDeclaration(CodeFragment, const Environment&)
+    override;
+  ~LValueReferenceType() override = default;
+  Type* clone() const override;
+protected:
+  LValueReferenceType(const LValueReferenceType&) = default;
 };
 
 class ParamList {
@@ -289,6 +316,7 @@ TypeRef makeReservedType(DataTypeIdent, CodeFragment, bool = false, bool = false
 TypeRef makeQualifiedType(const DataTypeIdent&, const DataTypeIdent&, bool, bool);
 TypeRef makePointerType(DataTypeIdent, TypeRef);
 TypeRef makePointerType(DataTypeIdent, DataTypeIdent);
+TypeRef makeLValueReferenceType(const DataTypeIdent&, const DataTypeIdent&);
 TypeRef makeFunctionType(DataTypeIdent, TypeRef, const Function::Params&, bool = false);
 TypeRef makeArrayType(DataTypeIdent, TypeRef, size_t);
 TypeRef makeArrayType(DataTypeIdent, TypeRef, size_t);
