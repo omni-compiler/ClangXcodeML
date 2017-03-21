@@ -264,26 +264,13 @@
   </xsl:template>
 
   <xsl:template match="clangStmt[@class='MemberExpr']">
-    <xsl:choose>
-      <xsl:when test="(@is_arrow = '1') or (@is_arrow = 'true')">
-        <arrowExpr>
-          <xsl:apply-templates select="@*" />
-          <xsl:attribute name="member">
-            <xsl:value-of select="clangDeclarationNameInfo[@class='Identifier']" />
-          </xsl:attribute>
-          <xsl:apply-templates select="*[2]" />
-        </arrowExpr>
-      </xsl:when>
-      <xsl:otherwise>
-        <memberRef>
-          <xsl:apply-templates select="@*" />
-          <xsl:attribute name="member">
-            <xsl:value-of select="clangDeclarationNameInfo[@class='Identifier']" />
-          </xsl:attribute>
-          <xsl:apply-templates select="*[2]" />
-        </memberRef>
-      </xsl:otherwise>
-    </xsl:choose>
+    <memberRef>
+      <xsl:apply-templates select="@*" />
+      <xsl:attribute name="member">
+        <xsl:value-of select="clangDeclarationNameInfo[@class='Identifier']" />
+      </xsl:attribute>
+      <xsl:apply-templates select="*[2]" />
+    </memberRef>
   </xsl:template>
 
   <xsl:template match="name">
