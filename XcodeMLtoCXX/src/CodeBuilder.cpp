@@ -406,7 +406,10 @@ DEFINE_CB(emitClassDefinition) {
 }
 
 static XcodeMl::CodeFragment
-makeFunctionDeclHead(xmlNodePtr node, const SourceInfo& src) {
+makeFunctionDeclHead(
+    xmlNodePtr node,
+    const std::vector<XcodeMl::CodeFragment> args,
+    const SourceInfo& src) {
   xmlNodePtr nameElem = findFirst(
       node,
       "name|operator|constructor|destructor",
@@ -426,17 +429,18 @@ makeFunctionDeclHead(xmlNodePtr node, const SourceInfo& src) {
     (kind == "constructor" || kind == "destructor") ?
       fnType->makeDeclarationWithoutReturnType(
           nameNode,
-          getParams(node, src),
+          args,
           src.typeTable)
     : fnType->makeDeclaration(
           nameNode,
-          getParams(node, src),
+          args,
           src.typeTable);
 }
 
 DEFINE_CB(functionDefinitionProc) {
+  const auto args = getParams(node, src);
   auto acc =
-    makeFunctionDeclHead(node, src);
+    makeFunctionDeclHead(node, args, src);
 
   if (auto ctorInitList = findFirst(
         node,
@@ -454,17 +458,14 @@ DEFINE_CB(functionDefinitionProc) {
 }
 
 DEFINE_CB(functionDeclProc) {
-  const auto name = getQualifiedNameFromTypedNode(node, src);
   const auto fnDtident = getDtidentFromTypedNode(
       node,
       src.ctxt,
       src.symTable);
-  const auto fnType = src.typeTable[fnDtident];
+  const auto fnType =
+    llvm::cast<XcodeMl::Function>(src.typeTable[fnDtident].get());
   return
-    makeDecl(
-        fnType,
-        name,
-        src.typeTable) +
+    makeFunctionDeclHead(node, fnType->argNames(), src) +
     makeTokenNode(";");
 }
 
