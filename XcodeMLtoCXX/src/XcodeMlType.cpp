@@ -757,6 +757,14 @@ TypeRef makePointerType(DataTypeIdent ident, DataTypeIdent ref) {
   return std::make_shared<Pointer>(ident, ref);
 }
 
+TypeRef
+makeLValueReferenceType(
+    const DataTypeIdent& ident,
+    const DataTypeIdent& ref)
+{
+  return std::make_shared<LValueReferenceType>(ident, ref);
+}
+
 TypeRef makeFunctionType(
     DataTypeIdent ident,
     TypeRef returnType,
