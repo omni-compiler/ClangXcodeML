@@ -75,6 +75,18 @@ getQualifiedNameFromTypedNode(
   }
 }
 
+static XcodeMl::CodeFragment
+makeLangLinkSpec(xmlNodePtr node) {
+  const auto lang = getPropOrNull(node, "language_linkage");
+  if (! lang.hasValue() || *lang == "C++") {
+    return makeVoidNode();
+  } else {
+    return
+      makeTokenNode("extern") +
+      makeTokenNode("\"" + *lang + "\"");
+  }
+}
+
 /*!
  * \brief Traverse XcodeML node and make SymbolEntry.
  * \pre \c node is <globalSymbols> or <symbols> element.
@@ -434,7 +446,8 @@ makeFunctionDeclHead(
   const auto T = src.typeTable[dtident];
   const auto fnType = llvm::cast<XcodeMl::Function>(T.get());
   return
-    (kind == "constructor" || kind == "destructor") ?
+    makeLangLinkSpec(node) +
+    (kind == "constructor" || kind == "destructor" ?
       fnType->makeDeclarationWithoutReturnType(
           nameNode,
           args,
@@ -442,7 +455,7 @@ makeFunctionDeclHead(
     : fnType->makeDeclaration(
           nameNode,
           args,
-          src.typeTable);
+          src.typeTable));
 }
 
 DEFINE_CB(functionDefinitionProc) {
@@ -653,7 +666,8 @@ DEFINE_CB(varDeclProc) {
   XMLString name(xmlNodeGetContent(nameElem));
   assert(length(name) != 0);
   auto type = getIdentType(src, name);
-  auto acc = makeDecl(
+  auto acc = makeLangLinkSpec(node);
+  acc = acc + makeDecl(
       type,
       makeTokenNode(name),
       src.typeTable);
