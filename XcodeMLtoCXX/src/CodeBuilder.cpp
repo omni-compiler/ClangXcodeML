@@ -435,6 +435,7 @@ DEFINE_CB(emitClassDefinition) {
   return
     makeTokenNode("class") +
     (className.hasValue() ? *className : makeVoidNode()) +
+    makeBases(classType, src) +
     makeTokenNode("{") +
     separateByBlankLines(decls) +
     makeTokenNode("}") +
