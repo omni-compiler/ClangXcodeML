@@ -414,7 +414,7 @@ makeFunctionDeclHead(xmlNodePtr node, const SourceInfo& src) {
   );
   const XMLString name(xmlNodeGetContent(nameElem));
   const XMLString kind(nameElem->name);
-  const auto nameNode = getDeclNameFromTypedNode(node, src);
+  const auto nameNode = getQualifiedNameFromTypedNode(node, src);
 
   const auto dtident = getDtidentFromTypedNode(
       node,
@@ -454,7 +454,7 @@ DEFINE_CB(functionDefinitionProc) {
 }
 
 DEFINE_CB(functionDeclProc) {
-  const auto name = getDeclNameFromTypedNode(node, src);
+  const auto name = getQualifiedNameFromTypedNode(node, src);
   const auto fnDtident = getDtidentFromTypedNode(
       node,
       src.ctxt,
