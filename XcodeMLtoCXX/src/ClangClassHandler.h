@@ -7,5 +7,6 @@ using ClangClassHandler = AttrProc<
   SourceInfo&>;
 
 extern const ClangClassHandler ClangStmtHandler;
+extern const ClangClassHandler ClangDeclHandler;
 
 #endif /* !CLANGCLASSHANDLER_H */

@@ -69,3 +69,17 @@ const ClangClassHandler ClangStmtHandler(
       { "CallExpr", callExprProc },
       { "CXXTemporaryObjectExpr", CXXTemporaryObjectExprProc },
     });
+
+DEFINE_CCH(FriendDeclProc) {
+  return
+    makeTokenNode("friend") +
+    callCodeBuilder(node, w, src);
+}
+
+const ClangClassHandler ClangDeclHandler(
+    "class",
+    cxxgen::makeInnerNode,
+    callCodeBuilder,
+    {
+      { "Friend", FriendDeclProc },
+    });
