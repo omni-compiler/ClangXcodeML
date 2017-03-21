@@ -14,13 +14,15 @@ OBJS = XcodeMlType.o \
 	XcodeMLtoCXX.o \
 	LibXMLUtil.o \
 	CodeBuilder.o \
+	NnsAnalyzer.o \
 	TypeAnalyzer.o \
 	XMLString.o \
 	XcodeMlEnvironment.o \
 	StringTree.o \
 	SymbolBuilder.o \
 	SymbolAnalyzer.o \
-	ClangClassHandler.o
+	ClangClassHandler.o \
+	XcodeMlNns.o
 
 $(XCODEMLTOCXX): $(OBJS)
 	$(CXX) $(CXXFLAGS) $(OBJS) $(USEDLIBS) -o $(XCODEMLTOCXX)
@@ -33,6 +35,7 @@ CodeBuilder.o: \
 	LibXMLUtil.h \
 	XcodeMlType.h \
 	XcodeMlEnvironment.h \
+	NnsAnalyzer.o \
 	TypeAnalyzer.h \
 	Symbol.h \
 	CodeBuilder.h \
@@ -48,6 +51,11 @@ TypeAnalyzer.o: \
 	XcodeMlEnvironment.h \
 	TypeAnalyzer.h \
 	XMLWalker.h
+XcodeMlNns.o: \
+	StringTree.h \
+	XcodeMlEnvironment.h \
+	XcodeMlNns.h \
+	XcodeMlType.h
 XcodeMlType.o: \
   Symbol.h \
 	TypeAnalyzer.h \

@@ -15,6 +15,7 @@
 #include "XMLWalker.h"
 #include "AttrProc.h"
 #include "Symbol.h"
+#include "XcodeMlNns.h"
 #include "XcodeMlType.h"
 #include "XcodeMlEnvironment.h"
 #include "SourceInfo.h"

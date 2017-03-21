@@ -11,6 +11,7 @@ public:
   XcodeMl::Environment typeTable;
   /*! SymbolEntry stack in current scope. */
   SymbolMap symTable;
+  XcodeMl::NnsMap nnsTable;
 };
 
 #endif /* !SOURCEINFO_H */

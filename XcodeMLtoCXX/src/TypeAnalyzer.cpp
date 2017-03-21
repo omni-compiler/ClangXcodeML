@@ -52,6 +52,14 @@ DEFINE_TA(basicTypeProc) {
 DEFINE_TA(pointerTypeProc) {
   XMLString refName = xmlGetProp(node, BAD_CAST "ref");
   XMLString name(xmlGetProp(node, BAD_CAST "type"));
+
+  const auto refProp = getPropOrNull(node, "reference");
+  if (refProp.hasValue() && (*refProp == "lvalue")) {
+    auto reference = XcodeMl::makeLValueReferenceType(name, refName);
+    map[name] = reference;
+    return;
+  }
+
   auto pointer = XcodeMl::makePointerType(name, refName);
   pointer->setConst(isTrueProp(node, "is_const", false));
   pointer->setVolatile(isTrueProp(node, "is_volatile", false));

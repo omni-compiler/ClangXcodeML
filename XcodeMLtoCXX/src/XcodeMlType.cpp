@@ -223,6 +223,39 @@ Pointer::Pointer(const Pointer& other):
   ref(other.ref)
 {}
 
+ReferenceType::ReferenceType(
+    const DataTypeIdent& ident,
+    TypeKind kind,
+    const DataTypeIdent& r):
+  Type(kind, ident),
+  ref(r)
+{}
+
+ReferenceType::~ReferenceType() = default;
+
+LValueReferenceType::LValueReferenceType(
+    const DataTypeIdent& ident,
+    const DataTypeIdent& ref):
+  ReferenceType(ident, TypeKind::LValueReference, ref)
+{}
+
+CodeFragment
+LValueReferenceType::makeDeclaration(
+    CodeFragment var,
+    const Environment& env)
+{
+  return makeDecl(
+      env.at(ref),
+      makeTokenNode("&") + var,
+      env);
+}
+
+Type*
+LValueReferenceType::clone() const {
+  LValueReferenceType* copy = new LValueReferenceType(*this);
+  return copy;
+}
+
 ParamList::ParamList(
     const std::vector<DataTypeIdent>& d,
     bool e):
@@ -727,6 +760,14 @@ TypeRef makePointerType(DataTypeIdent ident, TypeRef ref) {
 
 TypeRef makePointerType(DataTypeIdent ident, DataTypeIdent ref) {
   return std::make_shared<Pointer>(ident, ref);
+}
+
+TypeRef
+makeLValueReferenceType(
+    const DataTypeIdent& ident,
+    const DataTypeIdent& ref)
+{
+  return std::make_shared<LValueReferenceType>(ident, ref);
 }
 
 TypeRef makeFunctionType(
