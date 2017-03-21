@@ -74,4 +74,5 @@ print_csv() {
 }
 
 make -s clean
+rm -f err.log result.csv
 print_csv < testobjects.txt > result.csv 2> err.log
