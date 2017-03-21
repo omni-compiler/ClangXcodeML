@@ -296,7 +296,9 @@ CodeBuilder::Procedure showChildElem(
  * \param Operator Spelling of unary operator.
  */
 CodeBuilder::Procedure showUnaryOp(std::string Operator) {
-  return showChildElem(Operator + "(", ")");
+  return showChildElem(
+      std::string("(") + Operator + "(",
+      "))");
 }
 
 DEFINE_CB(postIncrExprProc) {
@@ -727,7 +729,7 @@ makeInnerNode,
   { "funcAddr", EmptySNCProc },
   { "stringConstant", showNodeContent("\"", "\"") },
   { "Var", EmptySNCProc },
-  { "varAddr", showNodeContent("&", "") },
+  { "varAddr", showNodeContent("(&", ")") },
   { "pointerRef", showUnaryOp("*") },
   { "memberRef", memberRefProc },
   { "memberAddr", memberAddrProc },
