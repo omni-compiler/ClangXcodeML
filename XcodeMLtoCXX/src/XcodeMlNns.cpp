@@ -15,7 +15,7 @@ using CXXCodeGen::makeTokenNode;
 namespace XcodeMl {
 
 Nns::Nns(NnsKind k, const NnsRef& nr, const NnsIdent& ni):
-  parent(nr->getParent()),
+  parent(nr ? nr->getParent() : llvm::Optional<NnsIdent>()),
   kind(k),
   ident(ni)
 {}
