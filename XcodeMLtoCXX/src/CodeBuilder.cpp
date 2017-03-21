@@ -388,7 +388,10 @@ DEFINE_CB(emitClassDefinition) {
 }
 
 static XcodeMl::CodeFragment
-makeFunctionDeclHead(xmlNodePtr node, const SourceInfo& src) {
+makeFunctionDeclHead(
+    xmlNodePtr node,
+    const std::vector<XcodeMl::CodeFragment> args,
+    const SourceInfo& src) {
   xmlNodePtr nameElem = findFirst(
       node,
       "name|operator|constructor|destructor",
@@ -408,17 +411,18 @@ makeFunctionDeclHead(xmlNodePtr node, const SourceInfo& src) {
     (kind == "constructor" || kind == "destructor") ?
       fnType->makeDeclarationWithoutReturnType(
           nameNode,
-          getParams(node, src),
+          args,
           src.typeTable)
     : fnType->makeDeclaration(
           nameNode,
-          getParams(node, src),
+          args,
           src.typeTable);
 }
 
 DEFINE_CB(functionDefinitionProc) {
+  const auto args = getParams(node, src);
   auto acc =
-    makeFunctionDeclHead(node, src);
+    makeFunctionDeclHead(node, args, src);
 
   if (auto ctorInitList = findFirst(
         node,
