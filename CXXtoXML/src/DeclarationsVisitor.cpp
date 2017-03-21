@@ -299,6 +299,12 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
     nnstableinfo->pushNnsTableStack(nnsTable);
   }
 
+  if (const auto LSD = dyn_cast<LinkageSpecDecl>(D)) {
+    newProp(
+        "language_id",
+        getLanguageIdAsString(LSD->getLanguage()));
+  }
+
   NamedDecl *ND = dyn_cast<NamedDecl>(D);
   if (ND) {
     auto nameNode = addChild("name", ND->getNameAsString().c_str());
