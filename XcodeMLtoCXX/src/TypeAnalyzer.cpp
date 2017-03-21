@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <functional>
 #include <vector>
 #include <string>
@@ -147,6 +148,25 @@ DEFINE_TA(structTypeProc) {
       elemName,
       makeVoidNode(),
       fields);
+}
+
+static std::vector<std::tuple<std::string, XcodeMl::DataTypeIdent>>
+getBases(
+    xmlNodePtr node,
+    xmlXPathContextPtr ctxt)
+{
+  auto nodes = findNodes(node, "inheritedFrom/typeName", ctxt);
+  std::vector<std::tuple<std::string, XcodeMl::DataTypeIdent>> result;
+  std::transform(
+      nodes.begin(),
+      nodes.end(),
+      std::back_inserter(result),
+      [](xmlNodePtr node) {
+        return std::make_tuple(
+          getProp(node, "access"),
+          getProp(node, "ref"));
+      });
+  return result;
 }
 
 DEFINE_TA(classTypeProc) {
