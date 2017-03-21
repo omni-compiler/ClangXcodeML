@@ -680,6 +680,11 @@ ClassType::getSymbols() const {
   return classScopeSymbols;
 }
 
+std::vector<ClassType::BaseClass>
+ClassType::getBases() const {
+  return bases_;
+}
+
 bool ClassType::classof(const Type *T) {
   return T->getKind() == TypeKind::Class;
 }
