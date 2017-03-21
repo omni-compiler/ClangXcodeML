@@ -197,6 +197,7 @@ nonidenticalFndDataTypeIdents = {
   std::make_tuple("unsigned_long_long", "unsigned long long"),
   std::make_tuple("long_double", "long double"),
   std::make_tuple("unsigned___int128", "unsigned __int128"),
+  std::make_tuple("signed_char", "signed char"),
 };
 
 /*!
