@@ -658,10 +658,24 @@ DEFINE_CB(varDeclProc) {
       makeTokenNode(name),
       src.typeTable);
   xmlNodePtr valueElem = findFirst(node, "value", src.ctxt);
-  if (valueElem) {
-    acc = acc + makeTokenNode("=") + w.walk(valueElem, src);
+  if (!valueElem) {
+    return acc + makeTokenNode(";");
   }
-  return acc + makeTokenNode(";");
+
+  if (auto ctorExpr = findFirst(
+        valueElem,
+        "clangStmt[@class='CXXConstructExpr']",
+        src.ctxt))
+  {
+    return
+      acc +
+      makeTokenNode("(") +
+      cxxgen::join(",", w.walkChildren(ctorExpr, src)) +
+      makeTokenNode(")") +
+      makeTokenNode(";");
+  }
+
+  return acc + makeTokenNode("=") + w.walk(valueElem, src);
 }
 
 DEFINE_CB(ctorInitListProc) {
