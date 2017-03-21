@@ -88,7 +88,6 @@ wrapWithLangLink(
       makeTokenNode("extern") +
       makeTokenNode("\"" + *lang + "\"") +
       makeTokenNode("{") +
-      makeNewLineNode() +
       content +
       makeTokenNode("}");
   }
