@@ -637,6 +637,15 @@ DEFINE_CB(condExprProc) {
   }
 }
 
+DEFINE_CB(addrOfExprProc) {
+  if (isTrueProp(node, "is_expedient", false)) {
+    auto expr = findFirst(node, "*[1]", src.ctxt);
+    return w.walk(expr, src);
+  }
+  const auto wrap = showUnaryOp("&");
+  return wrap(w, node, src);
+}
+
 DEFINE_CB(varDeclProc) {
   xmlNodePtr nameElem = findFirst(node, "name|operator", src.ctxt);
   XMLString name(xmlNodeGetContent(nameElem));
@@ -764,7 +773,7 @@ makeInnerNode,
   { "preDecrExpr", showUnaryOp("--") },
   { "postIncrExpr", postIncrExprProc },
   { "postDecrExpr", postDecrExprProc },
-  { "AddrOfExpr", showUnaryOp("&") },
+  { "AddrOfExpr", addrOfExprProc },
   { "pointerRef", showUnaryOp("*") },
   { "bitNotExpr", showUnaryOp("~") },
   { "logNotExpr", showUnaryOp("!") },
