@@ -13,6 +13,9 @@ CXXTESTCASES = $(wildcard *.src.cpp)
 CXXDECOMPTESTOBJECTS = $(CXXTESTCASES:.src.cpp=.dst.cpp)
 CXXFLAGS = -pedantic -fsyntax-only
 
+%.xml: %.src.cpp
+	../../CXXtoXML/src/CXXtoXML $< $(CXXTOXMLFLAGS) > $@
+
 %.xcodeml: %.src.cpp
 	$(CXXTOXML) $< $(CXXTOXMLFLAGS) \
 		> $@
