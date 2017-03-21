@@ -176,7 +176,7 @@
   </xsl:template>
 
   <xsl:template match="clangStmt[@class='DeclStmt']">
-    <xsl:apply-templates select="*[1]" />
+    <xsl:apply-templates />
   </xsl:template>
 
   <xsl:template match="clangStmt[
