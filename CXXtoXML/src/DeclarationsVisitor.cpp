@@ -345,6 +345,12 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
         typetableinfo->getTypeName(T).c_str());
   }
 
+  if (const auto RD = dyn_cast<RecordDecl>(D)) {
+    newBoolProp(
+        "is_this_declaration_a_definition",
+        RD->isThisDeclarationADefinition());
+  }
+
   if (auto VD = dyn_cast<VarDecl>(D)) {
     const auto ll = VD->getLanguageLinkage();
     if (ll != NoLanguageLinkage) {
