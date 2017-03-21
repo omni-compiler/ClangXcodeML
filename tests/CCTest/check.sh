@@ -5,8 +5,7 @@ make_with_preferences() {
   target=$1
   make \
     CXXTOXMLFLAGS=' -- -I. -I/usr/local/lib/clang/3.6.2/include -w' \
-    -s \
-    $target
+    $target >&2
 }
 
 examine() {
