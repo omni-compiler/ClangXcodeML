@@ -457,6 +457,13 @@ DEFINE_CB(memberRefProc) {
     makeTokenNode(getProp(node, "member"));
 }
 
+DEFINE_CB(arrowExprProc) {
+  return
+    makeInnerNode(w.walkChildren(node, src)) +
+    makeTokenNode("->") +
+    makeTokenNode(getProp(node, "member"));
+}
+
 DEFINE_CB(memberAddrProc) {
   return
     makeTokenNode("&") +
@@ -753,6 +760,7 @@ makeInnerNode,
   { "classDecl", emitClassDefinition },
 
   /* out of specification */
+  { "arrowExpr", arrowExprProc },
   { "constructorInitializer", ctorInitProc },
   { "constructorInitializerList", ctorInitListProc },
 
