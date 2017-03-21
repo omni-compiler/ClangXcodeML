@@ -705,6 +705,10 @@ DEFINE_CB(clangStmtProc) {
   return ClangStmtHandler.walk(node, w, src);
 }
 
+DEFINE_CB(clangDeclProc) {
+  return ClangDeclHandler.walk(node, w, src);
+}
+
 const CodeBuilder CXXBuilder(
 "CodeBuilder",
 makeInnerNode,
@@ -783,6 +787,7 @@ makeInnerNode,
 
   /* for elements defined by clang */
   { "clangStmt", clangStmtProc },
+  { "clangDecl", clangDeclProc },
 
   /* for CtoXcodeML */
   { "Decl_Record", NullProc },
