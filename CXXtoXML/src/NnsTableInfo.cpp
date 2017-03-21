@@ -73,12 +73,10 @@ makeNnsIdentNodeForType(
       node,
       BAD_CAST "type",
       BAD_CAST (dtident.c_str()));
-  if (const auto prefix = Spec->getPrefix()) {
-    xmlNewProp(
-        node,
-        BAD_CAST "nns",
-        BAD_CAST (NTI.getNnsName(prefix).c_str()));
-  }
+  xmlNewProp(
+      node,
+      BAD_CAST "nns",
+      BAD_CAST (NTI.getNnsName(Spec).c_str()));
 
   return node;
 }

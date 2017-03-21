@@ -15,8 +15,10 @@
 #include "Stream.h"
 #include "StringTree.h"
 #include "Symbol.h"
+#include "XcodeMlNns.h"
 #include "XcodeMlType.h"
 #include "XcodeMlEnvironment.h"
+#include "NnsAnalyzer.h"
 #include "TypeAnalyzer.h"
 #include "SourceInfo.h"
 #include "CodeBuilder.h"
@@ -55,6 +57,22 @@ getDeclNameFromTypedNode(
     return makeTokenNode("~") + (*name);
   }
   return makeTokenNode(getNameFromIdNode(node, src.ctxt));
+}
+
+static XcodeMl::CodeFragment
+getQualifiedNameFromTypedNode(
+    xmlNodePtr node,
+    const SourceInfo& src)
+{
+  const auto name = getDeclNameFromTypedNode(node, src);
+  auto nameNode = findFirst(node, "name", src.ctxt);
+  const auto ident = getPropOrNull(nameNode, "nns");
+  if (ident.hasValue()) {
+    const auto nns = src.nnsTable.at(*ident);
+    return nns->makeDeclaration(src.typeTable, src.nnsTable) + name;
+  } else {
+    return name;
+  }
 }
 
 /*!
@@ -396,7 +414,7 @@ makeFunctionDeclHead(xmlNodePtr node, const SourceInfo& src) {
   );
   const XMLString name(xmlNodeGetContent(nameElem));
   const XMLString kind(nameElem->name);
-  const auto nameNode = getDeclNameFromTypedNode(node, src);
+  const auto nameNode = getQualifiedNameFromTypedNode(node, src);
 
   const auto dtident = getDtidentFromTypedNode(
       node,
@@ -436,7 +454,7 @@ DEFINE_CB(functionDefinitionProc) {
 }
 
 DEFINE_CB(functionDeclProc) {
-  const auto name = getDeclNameFromTypedNode(node, src);
+  const auto name = getQualifiedNameFromTypedNode(node, src);
   const auto fnDtident = getDtidentFromTypedNode(
       node,
       src.ctxt,
@@ -777,10 +795,13 @@ void buildCode(
 
   xmlNodePtr typeTableNode =
     findFirst(rootNode, "/XcodeProgram/typeTable", ctxt);
+  xmlNodePtr nnsTableNode =
+    findFirst(rootNode, "/XcodeProgram/nnsTable", ctxt);
   SourceInfo src = {
     ctxt,
     parseTypeTable(typeTableNode, ctxt, ss),
-    parseGlobalSymbols(rootNode, ctxt, ss)
+    parseGlobalSymbols(rootNode, ctxt, ss),
+    analyzeNnsTable(nnsTableNode, ctxt),
   };
 
   cxxgen::Stream out;
