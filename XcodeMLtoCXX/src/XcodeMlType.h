@@ -334,6 +334,7 @@ TypeRef makeArrayType(DataTypeIdent, DataTypeIdent, Array::Size);
 TypeRef makeArrayType(DataTypeIdent, DataTypeIdent, size_t);
 TypeRef makeEnumType(const DataTypeIdent&);
 TypeRef makeClassType(const DataTypeIdent&, const ClassType::Symbols&);
+TypeRef makeClassType(const DataTypeIdent&, const std::vector<ClassType::BaseClass>&, const ClassType::Symbols&);
 TypeRef makeStructType(const DataTypeIdent&, const CodeFragment&, const Struct::MemberList&);
 TypeRef makeOtherType(const DataTypeIdent&);
 
