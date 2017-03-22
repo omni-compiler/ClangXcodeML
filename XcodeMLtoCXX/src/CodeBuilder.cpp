@@ -94,6 +94,23 @@ wrapWithLangLink(
   }
 }
 
+static XcodeMl::CodeFragment
+makeNestedNameSpec(
+    const XcodeMl::NnsRef& nns,
+    const SourceInfo& src)
+{
+  return nns->makeDeclaration(src.typeTable, src.nnsTable);
+}
+
+static XcodeMl::CodeFragment
+makeNestedNameSpec(
+    const std::string& ident,
+    const SourceInfo& src)
+{
+  const auto nns = src.nnsTable.at(ident);
+  return makeNestedNameSpec(nns, src);
+}
+
 /*!
  * \brief Traverse XcodeML node and make SymbolEntry.
  * \pre \c node is <globalSymbols> or <symbols> element.
