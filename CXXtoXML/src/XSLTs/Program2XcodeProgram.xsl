@@ -266,28 +266,32 @@
   </xsl:template>
 
   <xsl:template match="clangStmt[@class='MemberExpr']">
-    <xsl:choose>
-      <xsl:when test="@is_arrow = '1' or @is_arrow = 'true'">
-        <memberRef>
-          <xsl:apply-templates select="@*" />
-          <xsl:attribute name="member">
-            <xsl:value-of select="clangDeclarationNameInfo[@class='Identifier']" />
-          </xsl:attribute>
-          <xsl:apply-templates select="*[2]" />
-        </memberRef>
-      </xsl:when>
-      <xsl:otherwise>
-        <memberRef>
-          <xsl:apply-templates select="@*" />
-          <xsl:attribute name="member">
-            <xsl:value-of select="clangDeclarationNameInfo[@class='Identifier']" />
-          </xsl:attribute>
+    <memberRef>
+      <xsl:apply-templates select="@*" />
+      <xsl:attribute name="member">
+        <xsl:value-of select="clangDeclarationNameInfo[@class='Identifier']" />
+      </xsl:attribute>
+      <xsl:if test="clangNestedNameSpecifier">
+        <!--
+             The second operand of member access is optionally qualified.
+             Example: `x.T::mem`, `x->T::mem`
+        -->
+        <xsl:attribute name="nns">
+          <xsl:value-of select="clangNestedNameSpecifier/@nns" />
+        </xsl:attribute>
+      </xsl:if>
+
+      <xsl:choose>
+        <xsl:when test="@is_arrow = '1' or @is_arrow = 'true'">
+          <xsl:apply-templates select="clangStmt" />
+        </xsl:when>
+        <xsl:otherwise>
           <AddrOfExpr>
-            <xsl:apply-templates select="*[2]" />
+            <xsl:apply-templates select="clangStmt" />
           </AddrOfExpr>
-        </memberRef>
-      </xsl:otherwise>
-    </xsl:choose>
+        </xsl:otherwise>
+      </xsl:choose>
+    </memberRef>
   </xsl:template>
 
   <xsl:template match="name">

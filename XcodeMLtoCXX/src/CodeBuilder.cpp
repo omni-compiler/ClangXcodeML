@@ -94,6 +94,23 @@ wrapWithLangLink(
   }
 }
 
+static XcodeMl::CodeFragment
+makeNestedNameSpec(
+    const XcodeMl::NnsRef& nns,
+    const SourceInfo& src)
+{
+  return nns->makeDeclaration(src.typeTable, src.nnsTable);
+}
+
+static XcodeMl::CodeFragment
+makeNestedNameSpec(
+    const std::string& ident,
+    const SourceInfo& src)
+{
+  const auto nns = src.nnsTable.at(ident);
+  return makeNestedNameSpec(nns, src);
+}
+
 /*!
  * \brief Traverse XcodeML node and make SymbolEntry.
  * \pre \c node is <globalSymbols> or <symbols> element.
@@ -543,10 +560,17 @@ DEFINE_CB(functionDeclProc) {
 }
 
 DEFINE_CB(memberRefProc) {
+  const auto baseName = getProp(node, "member");
+  const auto nnsident = getPropOrNull(node, "nns");
+  const auto name =
+    (nnsident.hasValue() ?
+        makeNestedNameSpec(*nnsident, src)
+      : makeVoidNode()) +
+    makeTokenNode(baseName);
   return
     makeInnerNode(w.walkChildren(node, src)) +
     makeTokenNode("->") +
-    makeTokenNode(getProp(node, "member"));
+    name;
 }
 
 DEFINE_CB(memberAddrProc) {
