@@ -358,6 +358,16 @@ DEFINE_CB(postDecrExprProc) {
     makeTokenNode("--)");
 }
 
+DEFINE_CB(castExprProc) {
+  const auto dtident = getProp(node, "type");
+  const auto Tstr = makeDecl(
+      src.typeTable.at(dtident),
+      makeVoidNode(),
+      src.typeTable);
+  const auto child = makeInnerNode(w.walkChildren(node, src));
+  return wrapWithParen(wrapWithParen(Tstr) + wrapWithParen(child));
+}
+
 /*!
  * \brief Make a procedure that handles SourceInfo::symTable.
  * \return A procudure. It traverses <symbols> node and pushes new
@@ -900,6 +910,7 @@ makeInnerNode,
   { "preDecrExpr", showUnaryOp("--") },
   { "postIncrExpr", postIncrExprProc },
   { "postDecrExpr", postDecrExprProc },
+  { "castExpr", castExprProc },
   { "AddrOfExpr", addrOfExprProc },
   { "pointerRef", showUnaryOp("*") },
   { "bitNotExpr", showUnaryOp("~") },
