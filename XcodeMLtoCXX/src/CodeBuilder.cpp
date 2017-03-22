@@ -791,7 +791,10 @@ DEFINE_CB(varDeclProc) {
     return wrapWithLangLink(acc, node);
   }
 
-  acc = acc + makeTokenNode("=") + w.walk(valueElem, src);
+  acc = acc
+    + makeTokenNode("=")
+    + w.walk(valueElem, src)
+    + makeTokenNode(";");
   return wrapWithLangLink(acc, node);
 }
 
