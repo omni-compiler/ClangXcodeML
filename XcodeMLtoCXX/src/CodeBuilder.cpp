@@ -699,6 +699,10 @@ DEFINE_CB(caseLabelProc) {
     + makeTokenNode(":");
 }
 
+DEFINE_CB(defaultLabelProc) {
+  return makeTokenNode("default") + makeTokenNode(":");
+}
+
 DEFINE_CB(returnStatementProc) {
   xmlNodePtr child = xmlFirstElementChild(node);
   if (child) {
@@ -895,6 +899,7 @@ makeInnerNode,
   { "ifStatement", ifStatementProc },
   { "switchStatement" , switchStatementProc },
   { "caseLabel", caseLabelProc },
+  { "defaultLabel", defaultLabelProc },
   { "thisExpr", thisExprProc },
   { "assignExpr", showBinOp(" = ") },
   { "plusExpr", showBinOp(" + ") },
