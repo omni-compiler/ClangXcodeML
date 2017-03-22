@@ -329,6 +329,12 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
     }
   }
 
+  if (auto UD = dyn_cast<UsingDecl>(D)) {
+    newBoolProp(
+        "is_access_declaration",
+        UD->isAccessDeclaration());
+  }
+
   if (auto VD = dyn_cast<ValueDecl>(D)) {
     const auto T = VD->getType();
     newProp("xcodemlType", typetableinfo->getTypeName(T).c_str());
