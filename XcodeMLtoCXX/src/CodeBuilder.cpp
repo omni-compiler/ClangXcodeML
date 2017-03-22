@@ -545,10 +545,17 @@ DEFINE_CB(functionDeclProc) {
 }
 
 DEFINE_CB(memberRefProc) {
+  const auto baseName = getProp(node, "member");
+  const auto nnsident = getPropOrNull(node, "nns");
+  const auto name =
+    (nnsident.hasValue() ?
+        makeNestedNameSpec(*nnsident, src)
+      : makeVoidNode()) +
+    makeTokenNode(baseName);
   return
     makeInnerNode(w.walkChildren(node, src)) +
     makeTokenNode("->") +
-    makeTokenNode(getProp(node, "member"));
+    name;
 }
 
 DEFINE_CB(memberAddrProc) {
