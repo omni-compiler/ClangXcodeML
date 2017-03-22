@@ -732,11 +732,20 @@ DEFINE_CB(varDeclProc) {
         "clangStmt[@class='CXXConstructExpr']",
         src.ctxt))
   {
+    const auto args = w.walkChildren(ctorExpr, src);
+    /*
+     * X a();  // illegal ([dcl.init]/6)
+     * X a;    // OK
+     */
+    const auto init =
+      args.empty() ?
+        makeVoidNode()
+      : makeTokenNode("(") +
+        cxxgen::join(",", args) +
+        makeTokenNode(")");
     acc =
       acc +
-      makeTokenNode("(") +
-      cxxgen::join(",", w.walkChildren(ctorExpr, src)) +
-      makeTokenNode(")") +
+      init +
       makeTokenNode(";");
     return wrapWithLangLink(acc, node);
   }
