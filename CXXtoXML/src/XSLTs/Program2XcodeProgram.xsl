@@ -272,11 +272,11 @@
 
     <xsl:choose>
       <xsl:when test="@is_arrow = '1' or @is_arrow = 'true'">
-          <xsl:apply-templates select="*[2]" />
+          <xsl:apply-templates select="clangStmt" />
       </xsl:when>
       <xsl:otherwise>
           <AddrOfExpr>
-            <xsl:apply-templates select="*[2]" />
+            <xsl:apply-templates select="clangStmt" />
           </AddrOfExpr>
       </xsl:otherwise>
     </xsl:choose>
