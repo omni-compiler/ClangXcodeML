@@ -692,6 +692,13 @@ DEFINE_CB(switchStatementProc) {
     + makeTokenNode("}");
 }
 
+DEFINE_CB(caseLabelProc) {
+  auto value = findFirst(node, "value", src.ctxt);
+  return makeTokenNode("case")
+    + makeInnerNode(w.walkChildren(value, src))
+    + makeTokenNode(":");
+}
+
 DEFINE_CB(returnStatementProc) {
   xmlNodePtr child = xmlFirstElementChild(node);
   if (child) {
@@ -887,6 +894,7 @@ makeInnerNode,
   { "forStatement", forStatementProc },
   { "ifStatement", ifStatementProc },
   { "switchStatement" , switchStatementProc },
+  { "caseLabel", caseLabelProc },
   { "thisExpr", thisExprProc },
   { "assignExpr", showBinOp(" = ") },
   { "plusExpr", showBinOp(" + ") },
