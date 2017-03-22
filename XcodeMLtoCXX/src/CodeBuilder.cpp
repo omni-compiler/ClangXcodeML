@@ -35,6 +35,7 @@ using cxxgen::makeInnerNode;
 using cxxgen::makeNewLineNode;
 using cxxgen::makeVoidNode;
 
+using cxxgen::insertNewLines;
 using cxxgen::separateByBlankLines;
 
 static XcodeMl::CodeFragment
@@ -681,6 +682,27 @@ DEFINE_CB(ifStatementProc) {
   return acc;
 }
 
+DEFINE_CB(switchStatementProc) {
+  auto cond = findFirst(node, "value", src.ctxt);
+  auto body = findFirst(node, "body", src.ctxt);
+  return makeTokenNode("switch")
+    + wrapWithParen(w.walk(cond, src))
+    + makeTokenNode("{")
+    + insertNewLines(w.walkChildren(body, src))
+    + makeTokenNode("}");
+}
+
+DEFINE_CB(caseLabelProc) {
+  auto value = findFirst(node, "value", src.ctxt);
+  return makeTokenNode("case")
+    + makeInnerNode(w.walkChildren(value, src))
+    + makeTokenNode(":");
+}
+
+DEFINE_CB(defaultLabelProc) {
+  return makeTokenNode("default") + makeTokenNode(":");
+}
+
 DEFINE_CB(returnStatementProc) {
   xmlNodePtr child = xmlFirstElementChild(node);
   if (child) {
@@ -875,6 +897,9 @@ makeInnerNode,
   { "doStatement", doStatementProc },
   { "forStatement", forStatementProc },
   { "ifStatement", ifStatementProc },
+  { "switchStatement" , switchStatementProc },
+  { "caseLabel", caseLabelProc },
+  { "defaultLabel", defaultLabelProc },
   { "thisExpr", thisExprProc },
   { "assignExpr", showBinOp(" = ") },
   { "plusExpr", showBinOp(" + ") },

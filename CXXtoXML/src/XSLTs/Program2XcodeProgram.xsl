@@ -123,6 +123,31 @@
     </ifStatement>
   </xsl:template>
 
+  <xsl:template match="clangStmt[@class='SwitchStmt']">
+    <switchStatement>
+      <value>
+        <xsl:apply-templates select="*[1]" />
+      </value>
+      <body>
+        <xsl:apply-templates select="*[position() &gt; 1]" />
+      </body>
+    </switchStatement>
+  </xsl:template>
+
+  <xsl:template match="clangStmt[@class='CaseStmt']">
+    <caseLabel>
+      <value>
+        <xsl:apply-templates select="*[1]" />
+      </value>
+    </caseLabel>
+    <xsl:apply-templates select="*[position() &gt; 1]" />
+  </xsl:template>
+
+  <xsl:template match="clangStmt[@class='DefaultStmt']">
+    <defaultLabel/>
+    <xsl:apply-templates />
+  </xsl:template>
+
   <xsl:template match="clangStmt[@class='ReturnStmt']">
     <returnStatement>
       <xsl:apply-templates />
