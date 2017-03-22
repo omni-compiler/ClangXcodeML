@@ -270,16 +270,16 @@
         <xsl:value-of select="clangDeclarationNameInfo[@class='Identifier']" />
       </xsl:attribute>
 
-    <xsl:choose>
-      <xsl:when test="@is_arrow = '1' or @is_arrow = 'true'">
+      <xsl:choose>
+        <xsl:when test="@is_arrow = '1' or @is_arrow = 'true'">
           <xsl:apply-templates select="clangStmt" />
-      </xsl:when>
-      <xsl:otherwise>
+        </xsl:when>
+        <xsl:otherwise>
           <AddrOfExpr>
             <xsl:apply-templates select="clangStmt" />
           </AddrOfExpr>
-      </xsl:otherwise>
-    </xsl:choose>
+        </xsl:otherwise>
+      </xsl:choose>
     </memberRef>
   </xsl:template>
 
