@@ -123,6 +123,17 @@
     </ifStatement>
   </xsl:template>
 
+  <xsl:template match="clangStmt[@class='SwitchStmt']">
+    <switchStatement>
+      <value>
+        <xsl:apply-templates select="*[1]" />
+      </value>
+      <body>
+        <xsl:apply-templates select="*[position() &gt; 1]" />
+      </body>
+    </switchStatement>
+  </xsl:template>
+
   <xsl:template match="clangStmt[@class='ReturnStmt']">
     <returnStatement>
       <xsl:apply-templates />
