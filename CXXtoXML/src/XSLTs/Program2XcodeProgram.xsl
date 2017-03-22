@@ -240,6 +240,13 @@
     </implicitCastExpr>
   </xsl:template>
 
+  <xsl:template match="clangStmt[@class='CStyleCastExpr']">
+    <castExpr>
+      <xsl:apply-templates select="@*" />
+      <xsl:apply-templates select="*[2]" />
+    </castExpr>
+  </xsl:template>
+
   <xsl:template match="clangStmt[@class='CharacterLiteral']">
     <intConstant>
       <xsl:apply-templates select="@*" />
