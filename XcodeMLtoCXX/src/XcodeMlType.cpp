@@ -670,7 +670,7 @@ CodeFragment ClassType::makeDeclaration(
     const Environment&
 ) {
   assert(name_);
-  return *name_ + var;
+  return makeTokenNode("class") + *name_ + var;
 }
 
 Type* ClassType::clone() const {
