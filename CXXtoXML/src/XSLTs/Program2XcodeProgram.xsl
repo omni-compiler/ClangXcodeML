@@ -143,6 +143,11 @@
     <xsl:apply-templates select="*[position() &gt; 1]" />
   </xsl:template>
 
+  <xsl:template match="clangStmt[@class='DefaultStmt']">
+    <defaultLabel/>
+    <xsl:apply-templates />
+  </xsl:template>
+
   <xsl:template match="clangStmt[@class='ReturnStmt']">
     <returnStatement>
       <xsl:apply-templates />
