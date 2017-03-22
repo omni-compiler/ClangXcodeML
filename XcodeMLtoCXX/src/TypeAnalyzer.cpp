@@ -150,13 +150,13 @@ DEFINE_TA(structTypeProc) {
       fields);
 }
 
-static std::vector<std::tuple<std::string, XcodeMl::DataTypeIdent>>
+static std::vector<XcodeMl::ClassType::BaseClass>
 getBases(
     xmlNodePtr node,
     xmlXPathContextPtr ctxt)
 {
   auto nodes = findNodes(node, "inheritedFrom/typeName", ctxt);
-  std::vector<std::tuple<std::string, XcodeMl::DataTypeIdent>> result;
+  std::vector<XcodeMl::ClassType::BaseClass> result;
   std::transform(
       nodes.begin(),
       nodes.end(),
@@ -164,7 +164,8 @@ getBases(
       [](xmlNodePtr node) {
         return std::make_tuple(
           getProp(node, "access"),
-          getProp(node, "ref"));
+          getProp(node, "ref"),
+          isTrueProp(node, "is_virtual", 0));
       });
   return result;
 }

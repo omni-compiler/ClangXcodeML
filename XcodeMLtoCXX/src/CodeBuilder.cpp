@@ -445,6 +445,7 @@ makeBases(
         assert(classT->name().hasValue());
         return
           makeTokenNode(std::get<0>(base)) +
+          makeTokenNode(std::get<2>(base) ? "virtual":"") +
           *(classT->name());
       });
   return

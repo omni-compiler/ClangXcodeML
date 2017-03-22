@@ -287,7 +287,7 @@ public:
   using ClassName = llvm::Optional<CodeFragment>;
   using MemberName = std::string;
   using Symbols = std::vector<std::tuple<MemberName, DataTypeIdent>>;
-  using BaseClass = std::tuple<std::string, DataTypeIdent>;
+  using BaseClass = std::tuple<std::string, DataTypeIdent, bool>;
   ClassType(const DataTypeIdent&, const CodeFragment&, const Symbols&);
   ClassType(
       const DataTypeIdent&,
