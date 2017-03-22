@@ -231,6 +231,13 @@ DEFINE_CB(EmptyProc) {
 }
 
 static cxxgen::StringTreeRef
+wrapWithParen(const cxxgen::StringTreeRef& str) {
+  return makeTokenNode("(")
+    + str
+    + makeTokenNode(")");
+}
+
+static cxxgen::StringTreeRef
 foldWithSemicolon(const std::vector<StringTreeRef>& stmts) {
   auto node = makeVoidNode();
   for (auto& stmt : stmts) {
@@ -349,6 +356,16 @@ DEFINE_CB(postDecrExprProc) {
     makeTokenNode("(") +
     makeInnerNode(w.walkChildren(node, src)) +
     makeTokenNode("--)");
+}
+
+DEFINE_CB(castExprProc) {
+  const auto dtident = getProp(node, "type");
+  const auto Tstr = makeDecl(
+      src.typeTable.at(dtident),
+      makeVoidNode(),
+      src.typeTable);
+  const auto child = makeInnerNode(w.walkChildren(node, src));
+  return wrapWithParen(wrapWithParen(Tstr) + wrapWithParen(child));
 }
 
 /*!
@@ -893,6 +910,7 @@ makeInnerNode,
   { "preDecrExpr", showUnaryOp("--") },
   { "postIncrExpr", postIncrExprProc },
   { "postDecrExpr", postDecrExprProc },
+  { "castExpr", castExprProc },
   { "AddrOfExpr", addrOfExprProc },
   { "pointerRef", showUnaryOp("*") },
   { "bitNotExpr", showUnaryOp("~") },
