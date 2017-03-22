@@ -795,6 +795,16 @@ DEFINE_CB(varDeclProc) {
   return wrapWithLangLink(acc, node);
 }
 
+DEFINE_CB(usingDeclProc) {
+  const auto name = getQualifiedNameFromTypedNode(node, src);
+    // FIXME: using declaration of base constructor
+  const auto head =
+    isTrueProp(node, "is_access_declaration", false) ?
+      makeVoidNode()
+    : makeTokenNode("using");
+  return head + name + makeTokenNode(";");
+}
+
 DEFINE_CB(ctorInitListProc) {
   auto inits = findNodes(node, "constructorInitializer", src.ctxt);
   if (inits.empty()) {
@@ -922,6 +932,7 @@ makeInnerNode,
   { "exprStatement", exprStatementProc },
   { "returnStatement", returnStatementProc },
   { "varDecl", varDeclProc },
+  { "usingDecl", usingDeclProc },
   { "classDecl", classDeclProc },
 
   /* out of specification */
