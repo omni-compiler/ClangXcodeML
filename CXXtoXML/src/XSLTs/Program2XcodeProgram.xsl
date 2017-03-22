@@ -134,6 +134,15 @@
     </switchStatement>
   </xsl:template>
 
+  <xsl:template match="clangStmt[@class='CaseStmt']">
+    <caseLabel>
+      <value>
+        <xsl:apply-templates select="*[1]" />
+      </value>
+    </caseLabel>
+    <xsl:apply-templates select="*[position() &gt; 1]" />
+  </xsl:template>
+
   <xsl:template match="clangStmt[@class='ReturnStmt']">
     <returnStatement>
       <xsl:apply-templates />
