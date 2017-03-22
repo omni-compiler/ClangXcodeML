@@ -269,6 +269,15 @@
       <xsl:attribute name="member">
         <xsl:value-of select="clangDeclarationNameInfo[@class='Identifier']" />
       </xsl:attribute>
+      <xsl:if test="clangNestedNameSpecifier">
+        <!--
+             The second operand of member access is optionally qualified.
+             Example: `x.T::mem`, `x->T::mem`
+        -->
+        <xsl:attribute name="nns">
+          <xsl:value-of select="clangNestedNameSpecifier/@nns" />
+        </xsl:attribute>
+      </xsl:if>
 
       <xsl:choose>
         <xsl:when test="@is_arrow = '1' or @is_arrow = 'true'">
