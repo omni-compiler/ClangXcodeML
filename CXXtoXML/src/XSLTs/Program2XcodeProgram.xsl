@@ -305,6 +305,10 @@
   </xsl:template>
 
   <xsl:template match="clangStmt[@class='MemberExpr']">
+    <xsl:variable
+      name="is_anon"
+      select="(@is_access_to_anon_record = '1')
+              or (@is_access_to_anon_record = 'true')" />
     <memberRef>
       <xsl:apply-templates select="@*" />
       <xsl:attribute name="member">
