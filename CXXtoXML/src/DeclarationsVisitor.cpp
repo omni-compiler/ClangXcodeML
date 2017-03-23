@@ -418,6 +418,7 @@ DeclarationsVisitor::PreVisitDeclarationNameInfo(DeclarationNameInfo NI) {
   newChild("clangDeclarationNameInfo",
           II ? II->getNameStart() : nullptr);
   newProp("class", NameForDeclarationName(DN));
+  newBoolProp("is_empty", DN.isEmpty());
   return true;
 }
 
