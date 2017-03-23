@@ -309,6 +309,15 @@
       name="is_anon"
       select="(@is_access_to_anon_record = '1')
               or (@is_access_to_anon_record = 'true')" />
+    <xsl:variable
+      name="elemName"
+      select="concat(substring('xcodemlAccessToAnonRecordExpr',
+                               1 div $is_anon),
+                     substring('memberRef',
+                               1 div not($is_anon)))"/>
+    <!-- "if ($is_anon)
+         then ('xcodemlAccessToAnonRecordExpr')
+         else ('memberRef')" -->
     <memberRef>
       <xsl:apply-templates select="@*" />
       <xsl:attribute name="member">
