@@ -554,6 +554,8 @@ void TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
             BAD_CAST (FT->isConst() ? "1" : "0"));
         xmlNewProp(Node, BAD_CAST "is_volatile",
             BAD_CAST (FT->isVolatile() ? "1" : "0"));
+        xmlNewProp(Node, BAD_CAST "is_restrict",
+            BAD_CAST (FT->isRestrict() ? "1" : "0"));
       }
       if (auto FTP = dyn_cast<FunctionProtoType>(FT)) {
         auto paramsNode = xmlNewNode(nullptr, BAD_CAST "params");
