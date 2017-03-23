@@ -333,6 +333,12 @@ Function::makeDeclarationWithoutReturnType(
   auto decl = var + makeTokenNode("(");
   decl = decl + params.makeDeclaration(args, env);
   decl = decl + makeTokenNode(")");
+  if (isConst()) {
+    decl = decl + makeTokenNode("const");
+  }
+  if (isVolatile()) {
+    decl = decl + makeTokenNode("volatile");
+  }
   return decl;
 }
 
