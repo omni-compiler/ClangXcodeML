@@ -334,6 +334,7 @@
       </xsl:if>
 
       <xsl:choose>
+        <xsl:when test="$is_anon" />
         <xsl:when test="@is_arrow = '1' or @is_arrow = 'true'">
           <xsl:apply-templates select="clangStmt" />
         </xsl:when>
