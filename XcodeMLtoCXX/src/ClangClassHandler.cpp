@@ -86,6 +86,14 @@ const ClangClassHandler ClangStmtHandler(
     });
 
 DEFINE_CCH(FriendDeclProc) {
+  if (auto TL = findFirst(node, "TypeLoc", src.ctxt)) {
+    /* friend class declaration */
+    const auto dtident = getProp(TL, "type");
+    const auto T = src.typeTable.at(dtident);
+    return makeTokenNode("friend")
+      + makeDecl(T, cxxgen::makeVoidNode(), src.typeTable)
+      + makeTokenNode(";");
+  }
   return
     makeTokenNode("friend") +
     callCodeBuilder(node, w, src);
