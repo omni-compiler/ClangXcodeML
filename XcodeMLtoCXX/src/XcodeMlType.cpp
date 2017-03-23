@@ -364,6 +364,12 @@ Function::argNames() const {
   return defaultArgs;
 }
 
+CodeFragment
+Function::addConstQualifier(CodeFragment var) const {
+  // add cv-qualifiers in Function::makeDeclaration, not here
+  return var;
+}
+
 Function::~Function() = default;
 
 Type* Function::clone() const {

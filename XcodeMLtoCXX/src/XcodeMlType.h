@@ -172,6 +172,7 @@ public:
   CodeFragment makeDeclarationWithoutReturnType(CodeFragment, const Environment&);
   CodeFragment makeDeclaration(CodeFragment, const Environment&) override;
   CodeFragment makeDeclaration(CodeFragment, const std::vector<CodeFragment>&, const Environment&);
+  virtual CodeFragment addConstQualifier(CodeFragment) const override;
   std::vector<CodeFragment> argNames() const;
   ~Function() override;
   Type* clone() const override;
