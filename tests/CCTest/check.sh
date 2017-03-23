@@ -24,6 +24,8 @@ examine() {
     exit 1
   fi
 
+  clang-format -style=LLVM -i ${target}.dst.cpp
+
   if $(clang++ -o "${target}.out" "${target}.dst.cpp") ; then
     echo  # success
   else
