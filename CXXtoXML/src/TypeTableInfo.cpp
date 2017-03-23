@@ -550,6 +550,8 @@ void TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
       if (FT) {
         xmlNewProp(Node, BAD_CAST "return_type",
                    BAD_CAST getTypeName(FT->getReturnType()).c_str());
+        xmlNewProp(Node, BAD_CAST "is_const",
+            BAD_CAST (FT->isConst() ? "1" : "0"));
       }
       if (auto FTP = dyn_cast<FunctionProtoType>(FT)) {
         auto paramsNode = xmlNewNode(nullptr, BAD_CAST "params");
