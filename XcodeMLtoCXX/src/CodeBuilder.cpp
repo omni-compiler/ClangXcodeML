@@ -879,6 +879,15 @@ DEFINE_CB(ctorInitProc) {
     makeTokenNode(")");
 }
 
+DEFINE_CB(accessToAnonRecordExprProc) {
+  const auto baseName = getProp(node, "member");
+  const auto nnsident = getPropOrNull(node, "nns");
+  return (nnsident.hasValue() ?
+            makeNestedNameSpec(*nnsident, src)
+          : makeVoidNode())
+    + makeTokenNode(baseName);
+}
+
 DEFINE_CB(clangStmtProc) {
   return ClangStmtHandler.walk(node, w, src);
 }
@@ -967,6 +976,7 @@ makeInnerNode,
   /* out of specification */
   { "constructorInitializer", ctorInitProc },
   { "constructorInitializerList", ctorInitListProc },
+  { "xcodemlAccessToAnonRecordExpr", accessToAnonRecordExprProc},
 
   /* for elements defined by clang */
   { "clangStmt", clangStmtProc },
