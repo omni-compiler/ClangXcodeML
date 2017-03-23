@@ -370,6 +370,12 @@ Function::addConstQualifier(CodeFragment var) const {
   return var;
 }
 
+CodeFragment
+Function::addVolatileQualifier(CodeFragment var) const {
+  // add cv-qualifiers in Function::makeDeclaration, not here
+  return var;
+}
+
 Function::~Function() = default;
 
 Type* Function::clone() const {
