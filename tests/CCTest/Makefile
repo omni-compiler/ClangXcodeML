@@ -45,7 +45,8 @@ build:
 prepare-cpptest: $(CPPTEST_TARBALL) $(TESTOBJECTS_TXT)
 	tar xvf $(CPPTEST_TARBALL)
 	@cat $(TESTOBJECTS_TXT) | while read line; do \
-	   sed 's/^main/int main/' $(CPPTEST_EXTRACT_DIR)/$${line}.cc > $${line}.src.cpp; \
+	   sed 's/^main/int main/' $(CPPTEST_EXTRACT_DIR)/$${line}.cc \
+	      > $${line}.src.cpp; \
 	done
 
 check-cpptest:
@@ -53,10 +54,12 @@ check-cpptest:
 	  sh $(EXAMINE_SH) $${line}; \
 	done 2> err.log | tee result.csv
 
-clean-cpptest: clean
-	@if [ -d $(CPPTEST_EXTRACT_DIR) ]; then \
+clean-cpptest:
+	if [ -d $(CPPTEST_EXTRACT_DIR) ]; then \
 	   (cd $(CPPTEST_EXTRACT_DIR); for file in *; do \
-	       rm -f $$file ../$${file%.cc}.src.cpp ../$${file%.cc}.out; \
+	       rm -f $$file ../$${file%.cc}.src.cpp \
+	         ../$${file%.cc}.xml ../$${file%.cc}.xcodeml \
+	         ../$${file%.cc}.dst.cpp ../$${file%.cc}.out; \
 	    done); rmdir $(CPPTEST_EXTRACT_DIR); \
 	 fi
 	rm -f err.log result.csv
