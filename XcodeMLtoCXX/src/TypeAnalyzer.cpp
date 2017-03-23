@@ -86,11 +86,14 @@ DEFINE_TA(functionTypeProc) {
   }
   XMLString name(xmlGetProp(node, BAD_CAST "type"));
   map.setReturnType(name, returnType);
-  map[name] = XcodeMl::makeFunctionType(
+  auto func = XcodeMl::makeFunctionType(
     name,
     returnType,
     params,
     findFirst(node, "params/ellipsis", ctxt));
+  func->setConst(isTrueProp(node, "is_const", false));
+  func->setVolatile(isTrueProp(node, "is_volatile", false));
+  map[name] = func;
 }
 
 DEFINE_TA(arrayTypeProc) {
