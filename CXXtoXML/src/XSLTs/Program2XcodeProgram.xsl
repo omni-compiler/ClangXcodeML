@@ -318,7 +318,7 @@
     <!-- "if ($is_anon)
          then ('xcodemlAccessToAnonRecordExpr')
          else ('memberRef')" -->
-    <memberRef>
+    <xsl:element name="{$elemName}">
       <xsl:apply-templates select="@*" />
       <xsl:attribute name="member">
         <xsl:value-of select="clangDeclarationNameInfo[@class='Identifier']" />
@@ -343,7 +343,7 @@
           </AddrOfExpr>
         </xsl:otherwise>
       </xsl:choose>
-    </memberRef>
+    </xsl:element>
   </xsl:template>
 
   <xsl:template match="name">
