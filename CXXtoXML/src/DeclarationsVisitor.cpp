@@ -217,6 +217,17 @@ DeclarationsVisitor::PreVisitType(QualType T) {
 }
 
 bool
+DeclarationsVisitor::PreVisitTypeLoc(TypeLoc TL) {
+  newChild("TypeLoc");
+  newProp("class", NameForTypeLoc(TL));
+  const auto T = TL.getType();
+  newProp(
+      "type",
+      typetableinfo->getTypeName(T).c_str());
+  return true;
+}
+
+bool
 DeclarationsVisitor::PreVisitAttr(Attr *A) {
   if (!A) {
     newComment("Attr:NULL");
