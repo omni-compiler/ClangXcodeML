@@ -778,13 +778,18 @@ DEFINE_CB(addrOfExprProc) {
 }
 
 DEFINE_CB(varDeclProc) {
-  xmlNodePtr nameElem = findFirst(node, "name|operator", src.ctxt);
-  XMLString name(xmlNodeGetContent(nameElem));
-  assert(length(name) != 0);
-  auto type = getIdentType(src, name);
-  auto acc = makeDecl(
-      type,
-      makeTokenNode(name),
+  const auto name = getQualifiedNameFromTypedNode(node, src);
+  const auto dtident = getDtidentFromTypedNode(
+      node,
+      src.ctxt,
+      src.symTable);
+  auto acc =
+    isTrueProp(node, "has_static_specifier", false) ?
+      makeTokenNode("static")
+    : makeVoidNode();
+  acc = acc + makeDecl(
+      src.typeTable.at(dtident),
+      name,
       src.typeTable);
   xmlNodePtr valueElem = findFirst(node, "value", src.ctxt);
   if (!valueElem) {
