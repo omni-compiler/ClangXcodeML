@@ -112,6 +112,17 @@ makeNestedNameSpec(
   return makeNestedNameSpec(nns, src);
 }
 
+static bool
+isInClassDecl(xmlNodePtr node, const SourceInfo& src) {
+  // FIXME: temporary implementation
+  auto parent = findFirst(node, "..", src.ctxt);
+  if (!parent) {
+    return false;
+  }
+  const auto name = static_cast<XMLString>(parent->name);
+  return name == "classDecl";
+}
+
 /*!
  * \brief Traverse XcodeML node and make SymbolEntry.
  * \pre \c node is <globalSymbols> or <symbols> element.
@@ -532,7 +543,13 @@ makeFunctionDeclHead(
       src.symTable);
   const auto T = src.typeTable[dtident];
   const auto fnType = llvm::cast<XcodeMl::Function>(T.get());
-  return
+  auto acc = makeVoidNode();
+  if (isInClassDecl(node, src)
+      && isTrueProp(node, "is_virtual", false))
+  {
+    acc = acc + makeTokenNode("virtual");
+  }
+  acc = acc +
     (kind == "constructor" || kind == "destructor" ?
       fnType->makeDeclarationWithoutReturnType(
           nameNode,
@@ -542,6 +559,7 @@ makeFunctionDeclHead(
           nameNode,
           args,
           src.typeTable));
+  return acc;
 }
 
 DEFINE_CB(functionDefinitionProc) {
