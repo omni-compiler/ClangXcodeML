@@ -543,7 +543,13 @@ makeFunctionDeclHead(
       src.symTable);
   const auto T = src.typeTable[dtident];
   const auto fnType = llvm::cast<XcodeMl::Function>(T.get());
-  return
+  auto acc = makeVoidNode();
+  if (isInClassDecl(node, src)
+      && isTrueProp(node, "is_virtual", false))
+  {
+    acc = acc + makeTokenNode("virtual");
+  }
+  acc = acc +
     (kind == "constructor" || kind == "destructor" ?
       fnType->makeDeclarationWithoutReturnType(
           nameNode,
@@ -553,6 +559,7 @@ makeFunctionDeclHead(
           nameNode,
           args,
           src.typeTable));
+  return acc;
 }
 
 DEFINE_CB(functionDefinitionProc) {
