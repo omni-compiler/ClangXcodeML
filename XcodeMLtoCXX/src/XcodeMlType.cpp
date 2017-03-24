@@ -333,6 +333,12 @@ Function::makeDeclarationWithoutReturnType(
   auto decl = var + makeTokenNode("(");
   decl = decl + params.makeDeclaration(args, env);
   decl = decl + makeTokenNode(")");
+  if (isConst()) {
+    decl = decl + makeTokenNode("const");
+  }
+  if (isVolatile()) {
+    decl = decl + makeTokenNode("volatile");
+  }
   return decl;
 }
 
@@ -362,6 +368,18 @@ CodeFragment Function::makeDeclaration(CodeFragment var, const Environment& env)
 std::vector<CodeFragment>
 Function::argNames() const {
   return defaultArgs;
+}
+
+CodeFragment
+Function::addConstQualifier(CodeFragment var) const {
+  // add cv-qualifiers in Function::makeDeclaration, not here
+  return var;
+}
+
+CodeFragment
+Function::addVolatileQualifier(CodeFragment var) const {
+  // add cv-qualifiers in Function::makeDeclaration, not here
+  return var;
 }
 
 Function::~Function() = default;
