@@ -800,10 +800,17 @@ DEFINE_CB(varDeclProc) {
   XMLString name(xmlNodeGetContent(nameElem));
   assert(length(name) != 0);
   auto type = getIdentType(src, name);
-  auto acc = makeDecl(
-      type,
-      makeTokenNode(name),
-      src.typeTable);
+  auto acc = makeVoidNode();
+  if (isInClassDecl(node, src)
+      && isTrueProp(node, "is_static_data_member", false))
+  {
+    acc = acc + makeTokenNode("static");
+  }
+  acc = acc
+    + makeDecl(
+        type,
+        makeTokenNode(name),
+        src.typeTable);
   xmlNodePtr valueElem = findFirst(node, "value", src.ctxt);
   if (!valueElem) {
     return wrapWithLangLink(acc + makeTokenNode(";"), node);
