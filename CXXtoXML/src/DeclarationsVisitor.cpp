@@ -375,6 +375,7 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
           stringifyLanguageLinkage(ll));
     }
     newBoolProp("has_init", VD->hasInit());
+    newBoolProp("is_static_data_member", VD->isStaticDataMember());
   }
 
   if (auto ND = dyn_cast<NamespaceDecl>(D)) {
