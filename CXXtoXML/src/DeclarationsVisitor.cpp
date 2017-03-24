@@ -376,6 +376,7 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
     }
     newBoolProp("has_init", VD->hasInit());
     newBoolProp("is_static_data_member", VD->isStaticDataMember());
+    newBoolProp("is_out_of_line", VD->isOutOfLine());
   }
 
   if (auto ND = dyn_cast<NamespaceDecl>(D)) {
