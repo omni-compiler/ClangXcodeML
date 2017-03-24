@@ -591,8 +591,11 @@ DEFINE_CB(functionDeclProc) {
   const auto fnType =
     llvm::cast<XcodeMl::Function>(src.typeTable[fnDtident].get());
   auto decl =
-    makeFunctionDeclHead(node, fnType->argNames(), src) +
-    makeTokenNode(";");
+    makeFunctionDeclHead(node, fnType->argNames(), src);
+  if (isTrueProp(node, "is_pure", false)) {
+    decl = decl + makeTokenNode("=") + makeTokenNode("0");
+  }
+  decl = decl + makeTokenNode(";");
   return wrapWithLangLink(decl, node);
 }
 
