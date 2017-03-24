@@ -333,6 +333,12 @@
     </memberRef>
   </xsl:template>
 
+  <xsl:template match="sizeOfExpr">
+    <sizeOfExpr>
+      <xsl:apply-templates select="*[1]" />
+    </sizeOfExpr>
+  </xsl:template>
+
   <xsl:template match="name">
     <xsl:choose>
       <xsl:when test="@name_kind = 'name'">
