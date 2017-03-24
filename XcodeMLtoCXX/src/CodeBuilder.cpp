@@ -112,6 +112,17 @@ makeNestedNameSpec(
   return makeNestedNameSpec(nns, src);
 }
 
+static bool
+isInClassDecl(xmlNodePtr node, const SourceInfo& src) {
+  // FIXME: temporary implementation
+  auto parent = findFirst(node, "..", src.ctxt);
+  if (!parent) {
+    return false;
+  }
+  const auto name = static_cast<XMLString>(parent->name);
+  return name == "classDecl";
+}
+
 /*!
  * \brief Traverse XcodeML node and make SymbolEntry.
  * \pre \c node is <globalSymbols> or <symbols> element.
