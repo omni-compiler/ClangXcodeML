@@ -79,6 +79,11 @@
       <xsl:otherwise>
         <varDecl>
           <xsl:apply-templates select="@*" />
+          <xsl:attribute name="has_static_specifier">
+            <xsl:value-of
+              select="(@is_static_data_member = '1' or @is_static_data_member = 'true')
+              and (@is_out_of_line = '0' or @is_out_of_line = 'false')"/>
+          </xsl:attribute>
           <xsl:apply-templates select="name" />
           <xsl:if test="@has_init = 1">
             <value>
