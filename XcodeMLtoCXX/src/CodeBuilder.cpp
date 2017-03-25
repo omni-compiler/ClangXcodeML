@@ -849,27 +849,15 @@ DEFINE_CB(varDeclProc) {
     return wrapWithLangLink(acc + makeTokenNode(";"), node);
   }
 
-  if (auto ctorExpr = findFirst(
+  auto ctorExpr = findFirst(
         valueElem,
         "clangStmt[@class='CXXConstructExpr']",
-        src.ctxt))
-  {
-    const auto args = w.walkChildren(ctorExpr, src);
-    /*
-     * X a();  // illegal ([dcl.init]/6)
-     * X a;    // OK
-     */
-    const auto init =
-      args.empty() ?
-        makeVoidNode()
-      : makeTokenNode("(") +
-        cxxgen::join(",", args) +
-        makeTokenNode(")");
-    acc =
-      acc +
-      init +
-      makeTokenNode(";");
-    return wrapWithLangLink(acc, node);
+        src.ctxt);
+  if (ctorExpr) {
+    const auto decl = acc
+        + declareClassTypeInit(w, ctorExpr, src)
+        + makeTokenNode(";");
+    return wrapWithLangLink(decl, node);
   }
 
   acc = acc
