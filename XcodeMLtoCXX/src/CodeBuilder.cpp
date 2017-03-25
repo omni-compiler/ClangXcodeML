@@ -798,6 +798,34 @@ DEFINE_CB(addrOfExprProc) {
   return wrap(w, node, src);
 }
 
+static XcodeMl::CodeFragment
+declareClassTypeInit(
+    const CodeBuilder& w,
+    xmlNodePtr ctorExpr,
+    SourceInfo& src)
+{
+  auto copySrc = findFirst(
+      ctorExpr,
+      "clangStmt[@class='MaterializeTemporaryExpr']",
+      src.ctxt);
+  if (copySrc) {
+    /* Use `=` to reduce ambiguity.
+     * A a(A());    // function
+     * A a = A();   // class
+     */
+    return makeTokenNode("=") + w.walk(copySrc, src);
+  }
+  const auto args = w.walkChildren(ctorExpr, src);
+  /*
+   * X a();  // function ([dcl.init]/6)
+   * X a;    // class
+   */
+  return
+    args.empty() ?
+      makeVoidNode()
+    : wrapWithParen(cxxgen::join(",", args));
+}
+
 DEFINE_CB(varDeclProc) {
   const auto name = getQualifiedNameFromTypedNode(node, src);
   const auto dtident = getDtidentFromTypedNode(
