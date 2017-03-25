@@ -56,6 +56,12 @@ DEFINE_CCH(CXXMemberCallExprProc) {
     makeTokenNode(")");
 }
 
+DEFINE_CCH(CXXCtorExprProc) {
+  return makeTokenNode("(")
+    + cxxgen::join(", ", w.walkChildren(node, src))
+    + makeTokenNode(")");
+}
+
 DEFINE_CCH(CXXTemporaryObjectExprProc) {
   const auto resultT = src.typeTable.at(
       getProp(node, "type"));
@@ -81,6 +87,7 @@ const ClangClassHandler ClangStmtHandler(
     callCodeBuilder,
     {
       { "CallExpr", callExprProc },
+      { "CXXConstructExpr", CXXCtorExprProc },
       { "CXXMemberCallExpr", CXXMemberCallExprProc },
       { "CXXTemporaryObjectExpr", CXXTemporaryObjectExprProc },
     });
