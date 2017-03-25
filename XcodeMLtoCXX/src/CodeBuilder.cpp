@@ -599,6 +599,15 @@ DEFINE_CB(functionDeclProc) {
   return wrapWithLangLink(decl, node);
 }
 
+DEFINE_CB(varProc) {
+  const auto name = makeTokenNode(getContent(node));
+  const auto nnsident = getPropOrNull(node, "nns");
+  if (!nnsident.hasValue()) {
+    return name;
+  }
+  return makeNestedNameSpec(*nnsident, src) + name;
+}
+
 DEFINE_CB(memberRefProc) {
   const auto baseName = getProp(node, "member");
   const auto nnsident = getPropOrNull(node, "nns");
@@ -929,7 +938,7 @@ makeInnerNode,
   { "booleanConstant", EmptySNCProc },
   { "funcAddr", EmptySNCProc },
   { "stringConstant", showNodeContent("\"", "\"") },
-  { "Var", EmptySNCProc },
+  { "Var", varProc },
   { "varAddr", showNodeContent("(&", ")") },
   { "pointerRef", showUnaryOp("*") },
   { "memberRef", memberRefProc },
