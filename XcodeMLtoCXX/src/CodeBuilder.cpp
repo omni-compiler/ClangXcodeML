@@ -919,6 +919,10 @@ DEFINE_CB(ctorInitProc) {
   const auto member = getCtorInitName(node, src.typeTable);
   auto expr = findFirst(node, "*[1]", src.ctxt);
   assert(expr);
+  const auto astClass = getPropOrNull(expr, "class");
+  if (astClass.hasValue() && (*astClass == "CXXConstructExpr")) {
+    return member + w.walk(expr, src);
+  }
   return member +
     makeTokenNode("(") +
     w.walk(expr, src) +
