@@ -150,3 +150,7 @@ constructorInitizlier要素は次の形式に従う。
 |   `type=` データ型識別名 `>`
 |   式の要素
 | `</constructorInitializer>`
+
+## その他
+
+### signed\_char データ型識別名
