@@ -125,7 +125,7 @@ C++における関数形式の明示的型変換を表現する。
 ### constructorInitializerList要素
 
 | `<constructorInitializerList>`
-|   [ constructorInitializerList要素
+|   [ constructorInitializer要素
 |   ... ]
 | `</constructorInitializerList>`
 
