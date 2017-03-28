@@ -67,6 +67,17 @@ getPropOrNull(xmlNodePtr node, const std::string& attr) {
   return MaybeString(value);
 }
 
+std::string
+getContent(xmlNodePtr node) {
+  const auto ptr = xmlNodeGetContent(node);
+  if (!ptr) {
+    return "";
+  }
+  const auto content = static_cast<XMLString>(ptr);
+  xmlFree(ptr);
+  return content;
+}
+
 bool isTrueProp(xmlNodePtr node, const char* name, bool default_value) {
   if (!xmlHasProp(node, BAD_CAST name)) {
     return default_value;
