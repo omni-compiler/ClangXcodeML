@@ -108,6 +108,14 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
     newProp("clangCastKind", CE->getCastKindName());
   }
 
+  if (auto OCE = dyn_cast<clang::CXXOperatorCallExpr>(S)) {
+    newProp(
+        "xcodeml_operator_kind",
+        OverloadedOperatorKindToString(
+          OCE->getOperator(),
+          OCE->getNumArgs()));
+  }
+
   if (auto ME = dyn_cast<clang::MemberExpr>(S)) {
     newBoolProp("is_arrow", ME->isArrow());
   }
