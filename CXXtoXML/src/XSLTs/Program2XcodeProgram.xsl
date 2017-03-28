@@ -68,7 +68,7 @@
       <constructorInitializer>
         <xsl:copy-of select="@*" /> <!-- including @member -->
         <xsl:apply-templates select="@xcodemlType" />
-        <xsl:apply-templates select="*" />
+        <xsl:apply-templates select="clangStmt[1]" />
       </constructorInitializer>
     </xsl:if>
   </xsl:template>
