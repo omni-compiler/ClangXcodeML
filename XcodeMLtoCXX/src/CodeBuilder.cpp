@@ -798,6 +798,34 @@ DEFINE_CB(addrOfExprProc) {
   return wrap(w, node, src);
 }
 
+static XcodeMl::CodeFragment
+declareClassTypeInit(
+    const CodeBuilder& w,
+    xmlNodePtr ctorExpr,
+    SourceInfo& src)
+{
+  auto copySrc = findFirst(
+      ctorExpr,
+      "clangStmt[@class='MaterializeTemporaryExpr']",
+      src.ctxt);
+  if (copySrc) {
+    /* Use `=` to reduce ambiguity.
+     * A a(A());    // function
+     * A a = A();   // class
+     */
+    return makeTokenNode("=") + w.walk(copySrc, src);
+  }
+  const auto args = w.walkChildren(ctorExpr, src);
+  /*
+   * X a();  // function ([dcl.init]/6)
+   * X a;    // class
+   */
+  return
+    args.empty() ?
+      makeVoidNode()
+    : wrapWithParen(cxxgen::join(",", args));
+}
+
 DEFINE_CB(varDeclProc) {
   const auto name = getQualifiedNameFromTypedNode(node, src);
   const auto dtident = getDtidentFromTypedNode(
@@ -821,27 +849,15 @@ DEFINE_CB(varDeclProc) {
     return wrapWithLangLink(acc + makeTokenNode(";"), node);
   }
 
-  if (auto ctorExpr = findFirst(
+  auto ctorExpr = findFirst(
         valueElem,
         "clangStmt[@class='CXXConstructExpr']",
-        src.ctxt))
-  {
-    const auto args = w.walkChildren(ctorExpr, src);
-    /*
-     * X a();  // illegal ([dcl.init]/6)
-     * X a;    // OK
-     */
-    const auto init =
-      args.empty() ?
-        makeVoidNode()
-      : makeTokenNode("(") +
-        cxxgen::join(",", args) +
-        makeTokenNode(")");
-    acc =
-      acc +
-      init +
-      makeTokenNode(";");
-    return wrapWithLangLink(acc, node);
+        src.ctxt);
+  if (ctorExpr) {
+    const auto decl = acc
+        + declareClassTypeInit(w, ctorExpr, src)
+        + makeTokenNode(";");
+    return wrapWithLangLink(decl, node);
   }
 
   acc = acc
@@ -903,6 +919,10 @@ DEFINE_CB(ctorInitProc) {
   const auto member = getCtorInitName(node, src.typeTable);
   auto expr = findFirst(node, "*[1]", src.ctxt);
   assert(expr);
+  const auto astClass = getPropOrNull(expr, "class");
+  if (astClass.hasValue() && (*astClass == "CXXConstructExpr")) {
+    return member + w.walk(expr, src);
+  }
   return member +
     makeTokenNode("(") +
     w.walk(expr, src) +
