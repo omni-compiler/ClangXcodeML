@@ -102,7 +102,7 @@ friendクラスの宣言に対応するclangDecl要素は次の形式に従う�
 
 ### `clangStmt[@class="CXXTemporaryObjectExpr"]`
 
-| `<clangStmt class="CXXTemporaryObjectExpr`
+| `<clangStmt class="CXXTemporaryObjectExpr"`
 |   `type=` データ型識別名 `>`
 |   `<typeLoc/>`
 |   [ 式の要素
