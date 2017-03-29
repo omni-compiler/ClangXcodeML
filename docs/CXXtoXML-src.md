@@ -21,8 +21,7 @@ RAVBidirBridge をつかってclass XcodeMlVisitorBase との間で
 
 ## DeclarationsVisitor.h, DeclarationsVisitor.cpp
 
-clang の AST から XcodeML の \<globalDeclarations\> 部
-および \<declarations\> 部を生成する部分。
+clang の AST からそれに近い形式のXML要素を生成する部分。
 この部分がCXXtoXMLの中でもっとも大きな部分を占める。
 
 ## Hash.h
