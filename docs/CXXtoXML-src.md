@@ -31,7 +31,7 @@ clang の AST から XcodeML の \<globalDeclarations\> 部
 
 ## InheritanceInfo.{h,cpp}
 
-C++のクラス・構造体の継承関係の情報を扱う部分。
+C++のクラスの継承関係の情報を扱う部分。
 
 ## NnsTableInfo.{h,cpp}
 
