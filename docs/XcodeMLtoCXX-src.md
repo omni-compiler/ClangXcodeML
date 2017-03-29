@@ -1,4 +1,4 @@
-# /XcodeMLtoCXX/src/下のファイル
+# 逆変換ツールの各ソースコードについて
 
 
 ## LibXMLUtil.h, LibXMLUtil.cpp
