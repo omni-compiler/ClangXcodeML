@@ -50,5 +50,3 @@ OverloadedOperatorKindToString関数を持つ。
 main 関数部分。
 与えられたコマンドラインから AST を構成し、
 上記各 Visitor にAST を渡す部分。
-
-## Makefile
