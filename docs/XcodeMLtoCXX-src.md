@@ -1,88 +1,110 @@
-# /XcodeMLtoCXX/src/下のファイル
+# 逆変換ツールの各ソースコードについて
 
 
-## AttrProc.h
+## LibXMLUtil.h, LibXMLUtil.cpp
 
-AttrProcクラステンプレートを定義する。
-AttrProcは、XML要素を読みながら何らかの処理を行うが、その際要素の属性に応じて処理を切りかえる。
+libxml を用いて XcodeML を容易に解析するためのユーティリティライブラリ。
 
-## ClangClassHandler.{h,cpp}
+## XMLString.h, XMLString.cpp
 
-入力されたXML文書に含まれるclangStmt、clangDecl要素を処理してC/C++プログラムを出力する。
+libxml の文字列(xmlChar\*)を C++で容易に扱うための
+ラッパーを定義している部分。
 
-## CodeBuilder.{h,cpp}
+## Stream.h, Stream.cpp
 
-入力されたXML文書に含まれる要素のうち、clangStmt、clangDecl以外の要素を処理してC/C++プログラムを出力する。
-
-## LibXMLUtil.{h,cpp}
-
-libxmlに関わるユーティリティライブラリ。
-
-## Makefile
-
-(Makefile)
-
-## NnsAnalyzer.{h,cpp}
-
-入力されたXML文書に含まれるnnsTable要素を読み、NNS識別名からNNSへのマップを構築する。
-
-## Stream.{h,cpp}
-
-CXXCodeGen::Streamを定義する。
+CXXCodeGen::Streamクラスを定義している部分。
 CXXCodeGen::Streamは、C/C++プログラムを出力するのに便利なストリームのクラスである。
 
-## StringTree.{h,cpp}
+## StringTree.h, StringTree.cpp
 
-CXXCodeGen::StringTreeを定義する。
+CXXCodeGen::StringTreeクラスを定義している部分。
 CXXCodeGen::StringTreeは、連接が高速にできる文字列のクラスである。
 
 ## SourceInfo.h
 
-SourceInfoを定義する。
-SourceInfoは、入力されたXML文書を読んでC/C++プログラムを出力する際に必要となる情報を保持する。
+SourceInfo クラスを定義しているヘッダーファイル。
+入力された XcodeML の構造すべてにアクセスできる XPath コンテキスト情報と、
+そこから解析された XcodeML::Environment 情報(後述)・SymbolMap 情報(後述) を
+束ねたデータ構造である。
 
 ## Symbol.h
 
-SymbolMapを定義する。
-SymbolMapは、プログラムのある場所から可視である全ての識別子とその型(データ型識別名)に関する情報を保持する。
+SymbolMap 型を定義しているヘッダーファイル。
+SymbolMap は、XcodeML の表す抽象構文木のある位置から見える名前と、
+その名前が表す変数の型との対応関係に関する情報を保存している。
+XcodeML における name 要素はデータ型に関する情報を必ずしも持たないため、
+SymbolMap は C/C++ プログラムを出力する際に変数の型情報を得るのに使われて
+いる。
 
-## SymbolAnalyzer.{h,cpp}
+## XcodeMlNns.h, XcodeMlNns.cpp
 
-入力されたXML文書に含まれるglobalSymbols要素を読み、識別子からデータ型へのマップを構築する。
+XcoedMl::Nnsクラスを定義している部分。
+XcodeMl::Nnsは、(XcodeML/C++の定義する)NNSを表現する。
 
-## SymbolBuilder.{h,cpp}
+## XcodeMlType.h, XcodeMlType.cpp
 
-入力されたXML文書に含まれるglobalSymbols要素を読み、(特にtypedef宣言や構造体定義などの)C/C++プログラムを出力する。
+XcodeMl::Type クラスを定義している部分。
+XcodeMl::Type は、後述する XcodeMl::Environment と合わせて
+XcodeML で定義されるデータ型を表現する。
 
-## TypeAnalyzer.{h,cpp}
+## XcodeMlEnvironment.h, XcodeMlEnvironment.cpp
 
-入力されたXML文書に含まれるtypeTable要素を読み、データ型識別名から型(XcodeMl::Type)へのマップを構築する。
-
-## XMLString.{h,cpp}
-
-XMLStringを定義する。
-XMLStringは、libxmlの文字列(xmlChar)をC++で扱うためのラッパークラスである。
+XcodeMl::Environment クラスを定義している部分。
+XcodeMl::Environment は、データ型識別名と実際のデータ型との
+対応関係に関する情報を保存している。
 
 ## XMLWalker.h
 
-XMLWalkerクラステンプレートを定義する。
-XMLWalkerは、XML要素を再帰的に読みながら何らかの処理を行うが、その際要素名に応じて処理を切りかえる。
+XMLWalker クラステンプレートを定義しているヘッダーファイル。
+XML の各要素を処理する際、
+要素の種類に合わせて別々の処理を行うことが必要になる場合がある。
+XMLWalker はこれを実現する。
+後述する NnsAnalyzer、TypeAnalyzer、CodeBuilder、ClangClassHandler で
+XcodeML の各部分を処理するために使われている。
+
+## AttrProc.h
+
+AttrProc クラステンプレートを定義しているヘッダーファイル。
+AttrProc を使うことで、与えられた XML の各要素に対し、
+その属性(XML attribute)に応じた柔軟な処理を行うことができる。
+後述する SymbolAnalyzer、SymbolBuilder で、
+XcodeML の\<globalSymbols\>部の要素を処理する
+ために使われている。
+
+## TypeAnalyzer.h, TypeAnalyzer.cpp
+
+XcodeML の\<typeTable\>部を解析して
+データ型識別名と実際のデータ型との対応関係を管理する部分。
+
+## NnsAnalyzer.h, NnsAnalyzer.cpp
+
+XcodeML の\<nnsTable\>部を解析して
+NNS識別名と実際のNNSとの対応関係を管理する部分。
+
+## SymbolAnalyzer.h, SymbolAnalyzer.cpp
+
+XcodeML の\<globalSymbols\>, \<symbols\>部を解析して
+プログラム中の名前とそのデータ型との対応関係を管理する部分。
+
+## SymbolBuilder.h, SymbolBuilder.cpp
+
+XcodeML の\<globalSymbols\>, \<symbols\>部を解析して
+C/C++プログラムにおける宣言(グローバル変数宣言、クラス・構造体定義など)部を
+出力する部分。
+
+## ClangClassHandler.h, ClangClassHandler.cpp
+
+入力されたXML文書に含まれる\<clangStmt\>, \<clangDecl\>要素を解析して
+C/C++プログラムを出力する部分。
+
+## CodeBuilder.h, CodeBuilder.cpp
+
+XcodeML の\<globalDeclarations\>部を解析して
+C/C++プログラムを出力する部分。
 
 ## XcodeMLtoCXX.cpp
 
-main関数を定義する。
-
-## XcodeMlEnvironment.{h,cpp}
-
-XcodeMl::Environmentを定義する。
-XcodeMl::Environmentは、データ型識別名から型(XcodeMl::Type)へのマップを表現する。
-
-## XcodeMlNns.{h,cpp}
-
-XcoedMl::Nnsを定義する。
-XcodeMl::Nnsは、(XcodeML/C++の定義する)NNSを表現する。
-
-## XcodeMlType.{h,cpp}
-
-XcodeMl::Typeを定義する。
-XcodeMl::Typeは、C++の型を表現する。
+main 関数部分。
+コマンドライン引数として与えられたファイル名が表す
+XcodeML 文書を読み、
+上記各 Walker を用いて C/C++プログラムを出力する。
