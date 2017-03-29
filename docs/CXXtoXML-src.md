@@ -27,13 +27,20 @@ clang の AST から XcodeML の \<globalDeclarations\> 部
 
 ## Hash.h
 
+clang AST の QualType を C++ 標準ライブラリの std::hash で用いるための
+テンプレートを定義する。
+
 ## TypeTableInfo.{h,cpp}
+
+clang AST の QualType で示された値 (型の種別情報) とXcodeML のデータ型識別名との対応関係を管理する部分。
 
 ## InheritanceInfo.{h,cpp}
 
 C++のクラスの継承関係の情報を扱う部分。
 
 ## NnsTableInfo.{h,cpp}
+
+Clang AST の NestedNameSpecifier で示された値 (nested-name-specifierの種別情報) と XcodeML のNNS識別名との対応関係を管理する部分。
 
 ## ClangOperator.{h,cpp}
 
@@ -42,6 +49,8 @@ Clang で定義された演算子の種類をXcodeMLでの演算子名に変換�
 
 ## ClangUtil.{h,cpp}
 
+Clang で定義された各種のオブジェクトを CXXtoXML で用いるための
+ユーティリティ関数を定義する。
 
 ## CXXtoXML.{h,cpp}
 
