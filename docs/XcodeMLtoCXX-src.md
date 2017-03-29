@@ -79,10 +79,6 @@ AttrProcは、XML要素を読みながら何らかの処理を行うが、その
 
 入力されたXML文書に含まれる要素のうち、clangStmt、clangDecl以外の要素を処理してC/C++プログラムを出力する。
 
-## Makefile
-
-(Makefile)
-
 ## XcodeMLtoCXX.cpp
 
 main関数を定義する。
