@@ -59,7 +59,7 @@ XMLWalker クラステンプレートを定義しているヘッダーファイ�
 XML の各要素を処理する際、
 要素の種類に合わせて別々の処理を行うことが必要になる場合がある。
 XMLWalker はこれを実現する。
-後述する SymbolAnalyzer、TypeAnalyzer、CodeBuilder で
+後述する NnsAnalyzer、TypeAnalyzer、CodeBuilder、ClangClassHandler で
 XcodeML の各部分を処理するために使われている。
 
 ## AttrProc.h
@@ -67,7 +67,8 @@ XcodeML の各部分を処理するために使われている。
 AttrProc クラステンプレートを定義しているヘッダーファイル。
 AttrProc を使うことで、与えられた XML の各要素に対し、
 その属性(XML attribute)に応じた柔軟な処理を行うことができる。
-後述する SymbolBuilder で、XcodeML の\<globalSymbols\>部の要素を処理する
+後述する SymbolAnalyzer、SymbolBuilder で、
+XcodeML の\<globalSymbols\>部の要素を処理する
 ために使われている。
 
 ## TypeAnalyzer.h, TypeAnalyzer.cpp
