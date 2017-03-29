@@ -1,4 +1,4 @@
-# /CXXtoXML/src/下のファイル
+# 正変換ツールの各ソースコードについて
 
 ## XMLVisitorBase.h, XMLVisitorBase.cpp
 
