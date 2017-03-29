@@ -1,7 +1,5 @@
 # /CXXtoXML/src/下のファイル
 
-## XSLTs/
-
 ## XMLVisitorBase.{h,cpp}
 
 下記の各種の \*Visitor.cpp, \*Visitor.h の実装の基底クラスである
