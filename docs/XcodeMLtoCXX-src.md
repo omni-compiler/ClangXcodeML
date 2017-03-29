@@ -12,12 +12,12 @@ libxml の文字列(xmlChar\*)を C++で容易に扱うための
 
 ## Stream.h, Stream.cpp
 
-CXXCodeGen::Streamを定義する。
+CXXCodeGen::Streamクラスを定義している部分。
 CXXCodeGen::Streamは、C/C++プログラムを出力するのに便利なストリームのクラスである。
 
 ## StringTree.h, StringTree.cpp
 
-CXXCodeGen::StringTreeを定義する。
+CXXCodeGen::StringTreeクラスを定義している部分。
 CXXCodeGen::StringTreeは、連接が高速にできる文字列のクラスである。
 
 ## SourceInfo.h
@@ -38,7 +38,7 @@ SymbolMap は C/C++ プログラムを出力する際に変数の型情報を得
 
 ## XcodeMlNns.h, XcodeMlNns.cpp
 
-XcoedMl::Nnsを定義する。
+XcoedMl::Nnsクラスを定義している部分。
 XcodeMl::Nnsは、(XcodeML/C++の定義する)NNSを表現する。
 
 ## XcodeMlType.h, XcodeMlType.cpp
@@ -77,7 +77,8 @@ XcodeML の\<typeTable\>部を解析して
 
 ## NnsAnalyzer.h, NnsAnalyzer.cpp
 
-入力されたXML文書に含まれるnnsTable要素を読み、NNS識別名からNNSへのマップを構築する。
+XcodeML の\<nnsTable\>部を解析して
+NNS識別名と実際のNNSとの対応関係を管理する部分。
 
 ## SymbolAnalyzer.h, SymbolAnalyzer.cpp
 
@@ -92,7 +93,8 @@ C/C++プログラムにおける宣言(グローバル変数宣言、クラス�
 
 ## ClangClassHandler.h, ClangClassHandler.cpp
 
-入力されたXML文書に含まれるclangStmt、clangDecl要素を処理してC/C++プログラムを出力する。
+入力されたXML文書に含まれる\<clangStmt\>, \<clangDecl\>要素を解析して
+C/C++プログラムを出力する部分。
 
 ## CodeBuilder.h, CodeBuilder.cpp
 
