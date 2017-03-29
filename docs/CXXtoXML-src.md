@@ -1,6 +1,6 @@
 # /CXXtoXML/src/下のファイル
 
-## XMLVisitorBase.{h,cpp}
+## XMLVisitorBase.h, XMLVisitorBase.cpp
 
 DeclarationsVisitor.cpp, DeclarationsVisitor.h の実装の基底クラスである
 class XcodeMlVisitorBase を準備している部分。
@@ -12,14 +12,14 @@ RecursiveASTvisitorクラスは大量のメソッドを持つため、
 pimpl イディオム相当の class RAVBidirBridge をつかって、
 下記のXcodeMlRAV のほうに RecursiveASTvisitor の実装の部分を隠蔽している。
 
-## XMLRAV.{h,cpp}
+## XMLRAV.h, XMLRAV.cpp
 
 clang の libtooling ライブラリ内の
 RecursiveASTvisitor.h を利用したクラスを実装している部分。
 RAVBidirBridge をつかってclass XcodeMlVisitorBase との間で
 双方向に橋渡しをしている。
 
-## DeclarationsVisitor.{h,cpp}
+## DeclarationsVisitor.h, DeclarationsVisitor.cpp
 
 clang の AST から XcodeML の \<globalDeclarations\> 部
 および \<declarations\> 部を生成する部分。
@@ -30,29 +30,29 @@ clang の AST から XcodeML の \<globalDeclarations\> 部
 clang AST の QualType を C++ 標準ライブラリの std::hash で用いるための
 テンプレートを定義する。
 
-## TypeTableInfo.{h,cpp}
+## TypeTableInfo.h, TypeTableInfo.cpp
 
 clang AST の QualType で示された値 (型の種別情報) とXcodeML のデータ型識別名との対応関係を管理する部分。
 
-## InheritanceInfo.{h,cpp}
+## InheritanceInfo.h, InheritanceInfo.cpp
 
 C++のクラスの継承関係の情報を扱う部分。
 
-## NnsTableInfo.{h,cpp}
+## NnsTableInfo.h, NnsTableInfo.cpp
 
 Clang AST の NestedNameSpecifier で示された値 (nested-name-specifierの種別情報) と XcodeML のNNS識別名との対応関係を管理する部分。
 
-## ClangOperator.{h,cpp}
+## ClangOperator.h, ClangOperator.cpp
 
 Clang で定義された演算子の種類をXcodeMLでの演算子名に変換するための
 ユーティリティ関数を定義する。
 
-## ClangUtil.{h,cpp}
+## ClangUtil.h, ClangUtil.cpp
 
 Clang で定義された各種のオブジェクトを CXXtoXML で用いるための
 ユーティリティ関数を定義する。
 
-## CXXtoXML.{h,cpp}
+## CXXtoXML.h, CXXtoXML.cpp
 
 main 関数部分。
 与えられたコマンドラインから AST を構成し、
