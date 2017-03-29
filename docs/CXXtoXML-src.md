@@ -33,6 +33,7 @@ clang AST の QualType を C++ 標準ライブラリの std::hash で用いる�
 ## TypeTableInfo.h, TypeTableInfo.cpp
 
 clang AST の QualType で示された値 (型の種別情報) とXcodeML のデータ型識別名との対応関係を管理する部分。
+また、必要に応じて前述したxcodemlTypeTable要素を生成する。
 
 ## InheritanceInfo.h, InheritanceInfo.cpp
 
@@ -41,6 +42,7 @@ C++のクラスの継承関係の情報を扱う部分。
 ## NnsTableInfo.h, NnsTableInfo.cpp
 
 Clang AST の NestedNameSpecifier で示された値 (nested-name-specifierの種別情報) と XcodeML のNNS識別名との対応関係を管理する部分。
+また、必要に応じて前述したxcodemlNnsTable要素を生成する。
 
 ## ClangOperator.h, ClangOperator.cpp
 
