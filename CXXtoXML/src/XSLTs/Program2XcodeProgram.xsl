@@ -377,6 +377,13 @@
         </destructor>
       </xsl:when>
 
+      <xsl:when test="@name_kind = 'conversion'">
+        <conversion>
+          <xsl:copy-of select="../clangNestedNameSpecifier/@*"/>
+          <xsl:copy-of select="@*"/>
+        </conversion>
+      </xsl:when>
+
       <xsl:otherwise>
       </xsl:otherwise>
     </xsl:choose>
