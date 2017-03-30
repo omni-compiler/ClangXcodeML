@@ -190,7 +190,7 @@ getTagKindAsString(clang::TagTypeKind ttk) {
 
 static xmlNodePtr
 makeNameNodeForCXXMethodDecl(
-    TypeTableInfo&,
+    TypeTableInfo& TTI,
     const CXXMethodDecl* MD)
 {
   auto nameNode = xmlNewNode(nullptr, BAD_CAST "name");
@@ -205,6 +205,17 @@ makeNameNodeForCXXMethodDecl(
         nameNode,
         BAD_CAST "name_kind",
         BAD_CAST "destructor");
+    return nameNode;
+  } else if (auto CD = dyn_cast<CXXConversionDecl>(MD)) {
+    xmlNewProp(
+        nameNode,
+        BAD_CAST "name_kind",
+        BAD_CAST "conversion");
+    const auto dtident = TTI.getTypeName(CD->getConversionType());
+    xmlNewProp(
+        nameNode,
+        BAD_CAST "conversion_type",
+        BAD_CAST dtident.c_str());
     return nameNode;
   } else if (auto OOK = MD->getOverloadedOperator()) {
     xmlNewProp(
