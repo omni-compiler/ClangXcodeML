@@ -32,6 +32,7 @@
 
   <xsl:template match="clangDecl[@class='Function'
       or @class='CXXMethod'
+      or @class='CXXConversion'
       or @class='CXXConstructor'
       or @class='CXXDestructor']">
     <xsl:choose>
