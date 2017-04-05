@@ -256,6 +256,9 @@ getNameKind(NamedDecl* ND) {
   if (FD->isOverloadedOperator()) {
     return "operator";
   }
+  if (isa<CXXConversionDecl>(FD)) {
+    return "conversion";
+  }
   if (isa<CXXConstructorDecl>(FD)) {
     return "constructor";
   }
