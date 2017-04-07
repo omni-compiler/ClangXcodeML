@@ -562,15 +562,11 @@ void TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
       const auto constantName = name->getIdentifier();
       assert(constantName);
       auto idNode = xmlNewNode(nullptr, BAD_CAST "id");
-      auto nameNode = xmlNewChild(
+      xmlNewChild(
           idNode,
           nullptr,
           BAD_CAST "name",
           BAD_CAST constantName->getName().data());
-      xmlNewProp(
-          nameNode,
-          BAD_CAST "name_kind",
-          BAD_CAST "name");
       xmlAddChild(symbolsNode, idNode);
     }
     xmlAddChild(Node, symbolsNode);
