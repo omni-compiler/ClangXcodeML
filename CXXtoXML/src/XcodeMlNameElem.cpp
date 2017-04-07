@@ -46,6 +46,14 @@ makeNameNode(
     xmlNodeSetContent(node, BAD_CAST (ND->getNameAsString().c_str()));
   }
 
+  xmlNewProp(
+      node,
+      BAD_CAST "name_kind",
+      BAD_CAST getNameKind(ND));
+  xmlNewProp(
+      node,
+      BAD_CAST "fullName",
+      BAD_CAST ND->getQualifiedNameAsString().c_str());
   if (ND->isLinkageValid()) {
     const auto FL = ND->getFormalLinkage(),
                LI = ND->getLinkageInternal();
@@ -76,35 +84,16 @@ makeNameNodeForCXXMethodDecl(
     const CXXMethodDecl* MD)
 {
   auto nameNode = xmlNewNode(nullptr, BAD_CAST "name");
-  if (isa<CXXConstructorDecl>(MD)) {
-    xmlNewProp(
-        nameNode,
-        BAD_CAST "name_kind",
-        BAD_CAST "constructor");
-    return nameNode;
-  } else if (isa<CXXDestructorDecl>(MD)) {
-    xmlNewProp(
-        nameNode,
-        BAD_CAST "name_kind",
-        BAD_CAST "destructor");
-    return nameNode;
-  } else if (auto OOK = MD->getOverloadedOperator()) {
-    xmlNewProp(
-        nameNode,
-        BAD_CAST "name_kind",
-        BAD_CAST "operator");
+  if (auto OOK = MD->getOverloadedOperator()) {
     xmlNodeAddContent(
         nameNode,
         BAD_CAST OverloadedOperatorKindToString(OOK, MD->param_size()));
-    return nameNode;
   }
   const auto ident = MD->getIdentifier();
-  assert(ident);
+  if (!ident) {
+    return nameNode;
+  }
   xmlNodeAddContent(nameNode, BAD_CAST ident->getName().data());
-  xmlNewProp(
-      nameNode,
-      BAD_CAST "name_kind",
-      BAD_CAST "name");
   return nameNode;
 }
 
@@ -150,4 +139,30 @@ makeIdNodeForFieldDecl(
         BAD_CAST "name");
   }
   return idNode;
+}
+
+xmlNodePtr
+makeFunctionTypeParamsNode(
+    TypeTableInfo& TTI,
+    const clang::FunctionProtoType* FTP)
+{
+  auto paramsNode = xmlNewNode(nullptr, BAD_CAST "params");
+  for (auto& paramT : FTP->getParamTypes()) {
+    auto paramNode = xmlNewNode(nullptr, BAD_CAST "name");
+      // FIXME: Add content (parameter name) to <name> element
+    xmlNewProp(
+        paramNode,
+        BAD_CAST "type",
+        BAD_CAST TTI.getTypeName(paramT).c_str());
+    xmlNewProp(
+        paramNode,
+        BAD_CAST "name_kind",
+        BAD_CAST "name");
+    xmlAddChild(paramsNode, paramNode);
+  }
+  if (FTP->isVariadic()) {
+    auto ellipNode = xmlNewNode(nullptr, BAD_CAST "ellipsis");
+    xmlAddChild(paramsNode, ellipNode);
+  }
+  return paramsNode;
 }
