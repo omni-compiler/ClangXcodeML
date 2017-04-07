@@ -2,6 +2,7 @@
 #include "DeclarationsVisitor.h"
 #include "ClangOperator.h"
 #include "TypeTableInfo.h"
+#include "XcodeMlNameElem.h"
 
 #include <iostream>
 #include <sstream>
@@ -186,59 +187,6 @@ getTagKindAsString(clang::TagTypeKind ttk) {
     case TTK_Interface:
       return "__interface__";
   }
-}
-
-static xmlNodePtr
-makeNameNodeForCXXMethodDecl(
-    TypeTableInfo&,
-    const CXXMethodDecl* MD)
-{
-  auto nameNode = xmlNewNode(nullptr, BAD_CAST "name");
-  if (isa<CXXConstructorDecl>(MD)) {
-    xmlNewProp(
-        nameNode,
-        BAD_CAST "name_kind",
-        BAD_CAST "constructor");
-    return nameNode;
-  } else if (isa<CXXDestructorDecl>(MD)) {
-    xmlNewProp(
-        nameNode,
-        BAD_CAST "name_kind",
-        BAD_CAST "destructor");
-    return nameNode;
-  } else if (auto OOK = MD->getOverloadedOperator()) {
-    xmlNewProp(
-        nameNode,
-        BAD_CAST "name_kind",
-        BAD_CAST "operator");
-    xmlNodeAddContent(
-        nameNode,
-        BAD_CAST OverloadedOperatorKindToString(OOK, MD->param_size()));
-    return nameNode;
-  }
-  const auto ident = MD->getIdentifier();
-  assert(ident);
-  xmlNodeAddContent(nameNode, BAD_CAST ident->getName().data());
-  xmlNewProp(
-      nameNode,
-      BAD_CAST "name_kind",
-      BAD_CAST "name");
-  return nameNode;
-}
-
-static xmlNodePtr
-makeIdNodeForCXXMethodDecl(
-    TypeTableInfo& TTI,
-    const CXXMethodDecl* method)
-{
-  auto idNode = xmlNewNode(nullptr, BAD_CAST "id");
-  xmlNewProp(
-      idNode,
-      BAD_CAST "type",
-      BAD_CAST TTI.getTypeName(method->getType()).c_str());
-  auto nameNode = makeNameNodeForCXXMethodDecl(TTI, method);
-  xmlAddChild(idNode, nameNode);
-  return idNode;
 }
 
 static xmlNodePtr
