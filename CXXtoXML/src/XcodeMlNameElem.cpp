@@ -127,4 +127,5 @@ makeIdNodeForFieldDecl(
         BAD_CAST "name_kind",
         BAD_CAST "name");
   }
+  return idNode;
 }
