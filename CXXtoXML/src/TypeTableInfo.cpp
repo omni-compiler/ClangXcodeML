@@ -203,27 +203,7 @@ makeSymbolsNodeForCXXRecordDecl(
 
   // data members
   for (auto&& field : def->fields()) {
-    auto idNode = xmlNewNode(nullptr, BAD_CAST "id");
-    xmlNewProp(
-        idNode,
-        BAD_CAST "type",
-        BAD_CAST TTI.getTypeName(field->getType()).c_str());
-    const auto fieldName = field->getIdentifier();
-    if (fieldName) {
-      /* Emit only if the field has name.
-       * Some field does not have name.
-       *  Example: `struct A { int : 0; }; // unnamed bit field`
-       */
-      auto nameNode = xmlNewChild(
-          idNode,
-          nullptr,
-          BAD_CAST "name",
-          BAD_CAST fieldName->getName().data());
-      xmlNewProp(
-          nameNode,
-          BAD_CAST "name_kind",
-          BAD_CAST "name");
-    }
+    auto idNode = makeIdNodeForFieldDecl(TTI, field);
     xmlAddChild(symbolsNode, idNode);
   }
 
