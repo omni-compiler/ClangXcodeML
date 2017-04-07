@@ -1,13 +1,24 @@
+#include <libxml/tree.h>
+#include "clang/Basic/Builtins.h"
+#include "clang/Lex/Lexer.h"
+#include "llvm/Support/Casting.h"
+#include "XMLVisitorBase.h"
+#include "ClangOperator.h"
+#include "ClangUtil.h"
+#include "TypeTableInfo.h"
 #include "XcodeMlNameElem.h"
+
+using namespace clang;
+using namespace llvm;
 
 xmlNodePtr
 makeNameNode(
-    TypeTableInfo&,
+    TypeTableInfo& TTI,
     const NamedDecl* ND)
 {
   xmlNodePtr node = nullptr;
   if (auto MD = dyn_cast<CXXMethodDecl>(ND)) {
-    node = makeNameNodeForCXXMethodDecl(MD);
+    node = makeNameNodeForCXXMethodDecl(TTI, MD);
   } else {
     node = xmlNewNode(nullptr, BAD_CAST "name");
     xmlNodeSetContent(node, BAD_CAST (ND->getNameAsString().c_str()));
@@ -19,12 +30,12 @@ makeNameNode(
     xmlNewProp(
         node,
         BAD_CAST "linkage",
-        stringifyLinkage(FL));
+        BAD_CAST stringifyLinkage(FL));
     if (FL != LI) {
       xmlNewProp(
           node,
           BAD_CAST "clang_linkage_internal",
-          stringifyLinkage(LI));
+          BAD_CAST stringifyLinkage(LI));
     }
   } else {
     // should not be executed
