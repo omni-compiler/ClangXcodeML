@@ -1,8 +1,8 @@
 #ifndef XCODEMLNAMEELEM_H
 #define XCODEMLNAMEELEM_H
 
-xmlNodePtr makeNameNode(TypeTableInfo&, const NamedDecl*);
-xmlNodePtr makeNameNodeForCXXMethodDecl(TypeTableInfo&, const CXXMethodDecl*);
-xmlNodePtr makeIdNodeForCXXMethodDecl(TypeTableInfo&, const CXXMethodDecl*);
+xmlNodePtr makeNameNode(TypeTableInfo&, const clang::NamedDecl*);
+xmlNodePtr makeNameNodeForCXXMethodDecl(TypeTableInfo&, const clang::CXXMethodDecl*);
+xmlNodePtr makeIdNodeForCXXMethodDecl(TypeTableInfo&, const clang::CXXMethodDecl*);
 
 #endif /*! XCODEMLNAMEELEM_H */
