@@ -248,24 +248,6 @@ DeclarationsVisitor::PreVisitAttr(Attr *A) {
 }
 
 static const char*
-getNameKind(NamedDecl* ND) {
-  auto FD = dyn_cast<FunctionDecl>(ND);
-  if (!FD) {
-    return "name";
-  }
-  if (FD->isOverloadedOperator()) {
-    return "operator";
-  }
-  if (isa<CXXConstructorDecl>(FD)) {
-    return "constructor";
-  }
-  if (isa<CXXDestructorDecl>(FD)) {
-    return "destructor";
-  }
-  return "name";
-}
-
-static const char*
 getLanguageIdAsString(clang::LinkageSpecDecl::LanguageIDs id) {
   using clang::LinkageSpecDecl;
   switch(id) {

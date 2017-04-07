@@ -11,6 +11,28 @@
 using namespace clang;
 using namespace llvm;
 
+namespace {
+
+const char*
+getNameKind(const NamedDecl* ND) {
+  auto FD = dyn_cast<FunctionDecl>(ND);
+  if (!FD) {
+    return "name";
+  }
+  if (FD->isOverloadedOperator()) {
+    return "operator";
+  }
+  if (isa<CXXConstructorDecl>(FD)) {
+    return "constructor";
+  }
+  if (isa<CXXDestructorDecl>(FD)) {
+    return "destructor";
+  }
+  return "name";
+}
+
+} // namespace
+
 xmlNodePtr
 makeNameNode(
     TypeTableInfo& TTI,
