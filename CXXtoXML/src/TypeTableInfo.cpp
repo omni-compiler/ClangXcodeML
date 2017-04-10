@@ -479,7 +479,21 @@ void TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
             BAD_CAST (FT->isRestrict() ? "1" : "0"));
       }
       if (auto FTP = dyn_cast<FunctionProtoType>(FT)) {
-        auto paramsNode = makeFunctionTypeParamsNode(*this, FTP);
+        auto paramsNode = xmlNewNode(nullptr, BAD_CAST "params");
+        for (auto& paramT : FTP->getParamTypes()) {
+          auto paramNode = xmlNewNode(
+              nullptr,
+              BAD_CAST "paramTypeName");
+          xmlNewProp(
+              paramNode,
+              BAD_CAST "type",
+              BAD_CAST getTypeName(paramT).c_str());
+          xmlAddChild(paramsNode, paramNode);
+        }
+        if (FTP->isVariadic()) {
+          auto ellipNode = xmlNewNode(nullptr, BAD_CAST "ellipsis");
+          xmlAddChild(paramsNode, ellipNode);
+        }
         xmlAddChild(Node, paramsNode);
       }
       pushType(T, Node);
