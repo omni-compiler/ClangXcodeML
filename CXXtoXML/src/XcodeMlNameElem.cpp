@@ -31,6 +31,19 @@ getNameKind(const NamedDecl* ND) {
   return "name";
 }
 
+xmlNodePtr
+makeIdNode(
+    TypeTableInfo& TTI,
+    const ValueDecl* VD)
+{
+  auto idNode = xmlNewNode(nullptr, BAD_CAST "id");
+  xmlNewProp(
+      idNode,
+      BAD_CAST "type",
+      BAD_CAST TTI.getTypeName(VD->getType()).c_str());
+  return idNode;
+}
+
 } // namespace
 
 xmlNodePtr
