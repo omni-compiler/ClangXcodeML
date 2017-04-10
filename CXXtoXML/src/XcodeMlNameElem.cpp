@@ -140,29 +140,3 @@ makeIdNodeForFieldDecl(
   }
   return idNode;
 }
-
-xmlNodePtr
-makeFunctionTypeParamsNode(
-    TypeTableInfo& TTI,
-    const clang::FunctionProtoType* FTP)
-{
-  auto paramsNode = xmlNewNode(nullptr, BAD_CAST "params");
-  for (auto& paramT : FTP->getParamTypes()) {
-    auto paramNode = xmlNewNode(nullptr, BAD_CAST "name");
-      // FIXME: Add content (parameter name) to <name> element
-    xmlNewProp(
-        paramNode,
-        BAD_CAST "type",
-        BAD_CAST TTI.getTypeName(paramT).c_str());
-    xmlNewProp(
-        paramNode,
-        BAD_CAST "name_kind",
-        BAD_CAST "name");
-    xmlAddChild(paramsNode, paramNode);
-  }
-  if (FTP->isVariadic()) {
-    auto ellipNode = xmlNewNode(nullptr, BAD_CAST "ellipsis");
-    xmlAddChild(paramsNode, ellipNode);
-  }
-  return paramsNode;
-}
