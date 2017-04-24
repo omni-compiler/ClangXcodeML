@@ -38,10 +38,6 @@ xmlNodePtr XMLVisitorBaseImpl::addChild(const char *Name, const char *Content) {
     return xmlNewTextChild(curNode, nullptr, BAD_CAST Name, BAD_CAST Content);
 }
 
-xmlNodePtr XMLVisitorBaseImpl::addChild(const char *Name, xmlNodePtr N) {
-    return xmlNewTextChild(N, nullptr, BAD_CAST Name, nullptr);
-}
-
 void XMLVisitorBaseImpl::newChild(const char *Name, const char *Content) {
     curNode = xmlNewTextChild(curNode, nullptr,
                               BAD_CAST Name, BAD_CAST Content);
