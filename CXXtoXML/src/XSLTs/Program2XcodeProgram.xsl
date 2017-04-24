@@ -223,6 +223,12 @@
     </xsl:element>
   </xsl:template>
 
+  <xsl:template match="clangStmt[@class='ArraySubscriptExpr']">
+    <arrayRef>
+      <xsl:apply-templates />
+    </arrayRef>
+  </xsl:template>
+
   <xsl:template match="clangStmt[@class='ConditionalOperator']">
     <xsl:element name="condExpr">
       <xsl:apply-templates select="@*" />

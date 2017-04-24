@@ -646,6 +646,15 @@ DEFINE_CB(thisExprProc) {
   return makeTokenNode("this");
 }
 
+DEFINE_CB(arrayRefExprProc) {
+  auto arr = findFirst(node, "*[1]", src.ctxt),
+       index = findFirst(node, "*[2]", src.ctxt);
+  return w.walk(arr, src)
+    + makeTokenNode("[")
+    + w.walk(index, src)
+    + makeTokenNode("]");
+}
+
 const auto compoundStatementProc = handleScope;
 
 DEFINE_CB(whileStatementProc) {
@@ -974,6 +983,7 @@ makeInnerNode,
   { "caseLabel", caseLabelProc },
   { "defaultLabel", defaultLabelProc },
   { "thisExpr", thisExprProc },
+  { "arrayRef" , arrayRefExprProc },
   { "assignExpr", showBinOp(" = ") },
   { "plusExpr", showBinOp(" + ") },
   { "minusExpr", showBinOp(" - ") },
