@@ -3,6 +3,7 @@
 #include "DeclarationsVisitor.h"
 #include "InheritanceInfo.h"
 #include "NnsTableInfo.h"
+#include "XcodeMlNameElem.h"
 #include "clang/Basic/Builtins.h"
 #include "clang/Lex/Lexer.h"
 #include <map>
@@ -253,24 +254,6 @@ DeclarationsVisitor::PreVisitAttr(Attr *A) {
 }
 
 static const char*
-getNameKind(NamedDecl* ND) {
-  auto FD = dyn_cast<FunctionDecl>(ND);
-  if (!FD) {
-    return "name";
-  }
-  if (FD->isOverloadedOperator()) {
-    return "operator";
-  }
-  if (isa<CXXConstructorDecl>(FD)) {
-    return "constructor";
-  }
-  if (isa<CXXDestructorDecl>(FD)) {
-    return "destructor";
-  }
-  return "name";
-}
-
-static const char*
 getLanguageIdAsString(clang::LinkageSpecDecl::LanguageIDs id) {
   using clang::LinkageSpecDecl;
   switch(id) {
@@ -323,26 +306,8 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
 
   NamedDecl *ND = dyn_cast<NamedDecl>(D);
   if (ND) {
-    auto nameNode = addChild("name", ND->getNameAsString().c_str());
-    xmlNewProp(
-        nameNode,
-        BAD_CAST "fullName",
-        BAD_CAST ND->getQualifiedNameAsString().c_str());
-    xmlNewProp(
-        nameNode,
-        BAD_CAST "name_kind",
-        BAD_CAST getNameKind(ND));
-    if (ND->isLinkageValid()) {
-      const auto FL = ND->getFormalLinkage(),
-                 LI = ND->getLinkageInternal();
-      newProp("linkage", stringifyLinkage(FL));
-      if (FL != LI) {
-        newProp("clang_linkage_internal", stringifyLinkage(LI));
-      }
-    } else {
-      // should not be executed
-      newBoolProp("clang_has_invalid_linkage", true);
-    }
+    auto nameNode = makeNameNode(*typetableinfo, ND);
+    xmlAddChild(curNode, nameNode);
   }
 
   if (auto UD = dyn_cast<UsingDecl>(D)) {

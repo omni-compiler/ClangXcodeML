@@ -20,6 +20,12 @@
     </enumType>
   </xsl:template>
 
+  <xsl:template match="paramTypeName">
+    <name>
+      <xsl:copy-of select="@type" />
+    </name>
+  </xsl:template>
+
   <xsl:template match="clangDecl[@class='TranslationUnit']">
     <globalDeclarations>
       <xsl:apply-templates />
