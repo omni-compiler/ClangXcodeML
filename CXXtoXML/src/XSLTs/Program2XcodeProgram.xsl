@@ -317,7 +317,20 @@
   </xsl:template>
 
   <xsl:template match="clangStmt[@class='MemberExpr']">
-    <memberRef>
+    <xsl:variable
+      name="is_anon"
+      select="(@is_access_to_anon_record = '1')
+              or (@is_access_to_anon_record = 'true')" />
+    <xsl:variable
+      name="elemName"
+      select="concat(substring('xcodemlAccessToAnonRecordExpr',
+                               1 div $is_anon),
+                     substring('memberRef',
+                               1 div not($is_anon)))"/>
+    <!-- "if ($is_anon)
+         then ('xcodemlAccessToAnonRecordExpr')
+         else ('memberRef')" -->
+    <xsl:element name="{$elemName}">
       <xsl:apply-templates select="@*" />
       <xsl:attribute name="member">
         <xsl:value-of select="clangDeclarationNameInfo[@class='Identifier']" />
@@ -333,6 +346,7 @@
       </xsl:if>
 
       <xsl:choose>
+        <xsl:when test="$is_anon" />
         <xsl:when test="@is_arrow = '1' or @is_arrow = 'true'">
           <xsl:apply-templates select="clangStmt" />
         </xsl:when>
@@ -342,7 +356,7 @@
           </AddrOfExpr>
         </xsl:otherwise>
       </xsl:choose>
-    </memberRef>
+    </xsl:element>
   </xsl:template>
 
   <xsl:template match="sizeOfExpr">
