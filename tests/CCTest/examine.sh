@@ -9,6 +9,12 @@ target="$1"
 
 echo -n "${target}.cc,"
 
+
+if grep -sq ${target} ignore.txt ; then
+  echo
+  exit 0
+fi
+
 make "${target}.xcodeml" >&2 || abort 'CXXtoXcodeML fail'
 make "${target}.dst.cpp" >&2 || abort 'XcodeMLtoCXX fail'
 

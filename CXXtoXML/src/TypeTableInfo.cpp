@@ -2,6 +2,7 @@
 #include "DeclarationsVisitor.h"
 #include "ClangOperator.h"
 #include "TypeTableInfo.h"
+#include "XcodeMlNameElem.h"
 
 #include <iostream>
 #include <sstream>
@@ -189,59 +190,6 @@ getTagKindAsString(clang::TagTypeKind ttk) {
 }
 
 static xmlNodePtr
-makeNameNodeForCXXMethodDecl(
-    TypeTableInfo&,
-    const CXXMethodDecl* MD)
-{
-  auto nameNode = xmlNewNode(nullptr, BAD_CAST "name");
-  if (isa<CXXConstructorDecl>(MD)) {
-    xmlNewProp(
-        nameNode,
-        BAD_CAST "name_kind",
-        BAD_CAST "constructor");
-    return nameNode;
-  } else if (isa<CXXDestructorDecl>(MD)) {
-    xmlNewProp(
-        nameNode,
-        BAD_CAST "name_kind",
-        BAD_CAST "destructor");
-    return nameNode;
-  } else if (auto OOK = MD->getOverloadedOperator()) {
-    xmlNewProp(
-        nameNode,
-        BAD_CAST "name_kind",
-        BAD_CAST "operator");
-    xmlNodeAddContent(
-        nameNode,
-        BAD_CAST OverloadedOperatorKindToString(OOK, MD->param_size()));
-    return nameNode;
-  }
-  const auto ident = MD->getIdentifier();
-  assert(ident);
-  xmlNodeAddContent(nameNode, BAD_CAST ident->getName().data());
-  xmlNewProp(
-      nameNode,
-      BAD_CAST "name_kind",
-      BAD_CAST "name");
-  return nameNode;
-}
-
-static xmlNodePtr
-makeIdNodeForCXXMethodDecl(
-    TypeTableInfo& TTI,
-    const CXXMethodDecl* method)
-{
-  auto idNode = xmlNewNode(nullptr, BAD_CAST "id");
-  xmlNewProp(
-      idNode,
-      BAD_CAST "type",
-      BAD_CAST TTI.getTypeName(method->getType()).c_str());
-  auto nameNode = makeNameNodeForCXXMethodDecl(TTI, method);
-  xmlAddChild(idNode, nameNode);
-  return idNode;
-}
-
-static xmlNodePtr
 makeSymbolsNodeForCXXRecordDecl(
     TypeTableInfo& TTI,
     const CXXRecordDecl* RD)
@@ -255,27 +203,7 @@ makeSymbolsNodeForCXXRecordDecl(
 
   // data members
   for (auto&& field : def->fields()) {
-    auto idNode = xmlNewNode(nullptr, BAD_CAST "id");
-    xmlNewProp(
-        idNode,
-        BAD_CAST "type",
-        BAD_CAST TTI.getTypeName(field->getType()).c_str());
-    const auto fieldName = field->getIdentifier();
-    if (fieldName) {
-      /* Emit only if the field has name.
-       * Some field does not have name.
-       *  Example: `struct A { int : 0; }; // unnamed bit field`
-       */
-      auto nameNode = xmlNewChild(
-          idNode,
-          nullptr,
-          BAD_CAST "name",
-          BAD_CAST fieldName->getName().data());
-      xmlNewProp(
-          nameNode,
-          BAD_CAST "name_kind",
-          BAD_CAST "name");
-    }
+    auto idNode = makeIdNodeForFieldDecl(TTI, field);
     xmlAddChild(symbolsNode, idNode);
   }
 
@@ -319,15 +247,8 @@ makeSymbolsNodeForRecordType(
        * Some field does not have name.
        *  Example: `struct A { int : 0; }; // unnamed bit field`
        */
-      auto nameNode = xmlNewChild(
-          idNode,
-          nullptr,
-          BAD_CAST "name",
-          BAD_CAST fieldName->getName().data());
-      xmlNewProp(
-          nameNode,
-          BAD_CAST "name_kind",
-          BAD_CAST "name");
+      auto nameNode = makeNameNode(TTI, field);
+      xmlAddChild(idNode, nameNode);
     }
     xmlAddChild(symbolsNode, idNode);
   }
@@ -560,16 +481,13 @@ void TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
       if (auto FTP = dyn_cast<FunctionProtoType>(FT)) {
         auto paramsNode = xmlNewNode(nullptr, BAD_CAST "params");
         for (auto& paramT : FTP->getParamTypes()) {
-          auto paramNode = xmlNewNode(nullptr, BAD_CAST "name");
-            // FIXME: Add content (parameter name) to <name> element
+          auto paramNode = xmlNewNode(
+              nullptr,
+              BAD_CAST "paramTypeName");
           xmlNewProp(
               paramNode,
               BAD_CAST "type",
               BAD_CAST getTypeName(paramT).c_str());
-          xmlNewProp(
-              paramNode,
-              BAD_CAST "name_kind",
-              BAD_CAST "name");
           xmlAddChild(paramsNode, paramNode);
         }
         if (FTP->isVariadic()) {
@@ -658,15 +576,11 @@ void TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
       const auto constantName = name->getIdentifier();
       assert(constantName);
       auto idNode = xmlNewNode(nullptr, BAD_CAST "id");
-      auto nameNode = xmlNewChild(
+      xmlNewChild(
           idNode,
           nullptr,
           BAD_CAST "name",
           BAD_CAST constantName->getName().data());
-      xmlNewProp(
-          nameNode,
-          BAD_CAST "name_kind",
-          BAD_CAST "name");
       xmlAddChild(symbolsNode, idNode);
     }
     xmlAddChild(Node, symbolsNode);
