@@ -26,6 +26,7 @@ OBJS =  CXXtoXML.o \
 	DeclarationsVisitor.o \
 	InheritanceInfo.o \
 	NnsTableInfo.o \
+	XcodeMlNameElem.o \
 	ClangOperator.o
 
 CXXtoXML: $(RAVOBJS) $(OBJS)
