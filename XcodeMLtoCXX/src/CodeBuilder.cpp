@@ -535,7 +535,7 @@ makeFunctionDeclHead(
     const SourceInfo& src) {
   xmlNodePtr nameElem = findFirst(
       node,
-      "name|operator|constructor|destructor",
+      "name|operator|conversion|constructor|destructor",
       src.ctxt
   );
   const XMLString name(xmlNodeGetContent(nameElem));
@@ -555,7 +555,7 @@ makeFunctionDeclHead(
     acc = acc + makeTokenNode("virtual");
   }
   acc = acc +
-    (kind == "constructor" || kind == "destructor" ?
+    (kind == "constructor" || kind == "destructor" || kind == "conversion" ?
       fnType->makeDeclarationWithoutReturnType(
           nameNode,
           args,
