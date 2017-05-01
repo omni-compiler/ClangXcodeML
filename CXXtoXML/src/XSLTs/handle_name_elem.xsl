@@ -39,6 +39,10 @@
         <conversion>
           <xsl:copy-of select="../clangNestedNameSpecifier/@*"/>
           <xsl:copy-of select="@*"/>
+          <xsl:attribute name="type">
+            <xsl:value-of
+              select="../clangNestedNameSpecifier/@clang_name_type"/>
+          </xsl:attribute>
         </conversion>
       </xsl:when>
 
