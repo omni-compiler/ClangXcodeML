@@ -402,6 +402,14 @@ DeclarationsVisitor::PreVisitDeclarationNameInfo(DeclarationNameInfo NI) {
           II ? II->getNameStart() : nullptr);
   newProp("class", NameForDeclarationName(DN));
   newBoolProp("is_empty", DN.isEmpty());
+
+  // FIXME: not MECE
+  const auto T = DN.getCXXNameType();
+  if (!T.isNull()) {
+    newProp(
+        "clang_name_type",
+        typetableinfo->getTypeName(T).c_str());
+  }
   return true;
 }
 
