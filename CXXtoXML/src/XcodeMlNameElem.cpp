@@ -123,7 +123,7 @@ makeIdNodeForCXXMethodDecl(
       idNode,
       BAD_CAST "type",
       BAD_CAST TTI.getTypeName(method->getType()).c_str());
-  auto nameNode = makeNameNodeForCXXMethodDecl(TTI, method);
+  auto nameNode = makeNameNode(TTI, method);
   xmlAddChild(idNode, nameNode);
   return idNode;
 }
