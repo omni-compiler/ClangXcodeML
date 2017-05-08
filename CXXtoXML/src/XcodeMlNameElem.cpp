@@ -148,15 +148,24 @@ makeNameNode(
 
 xmlNodePtr
 makeNameNodeForCXXMethodDecl(
-    TypeTableInfo&,
+    TypeTableInfo& TTI,
     const CXXMethodDecl* MD)
 {
-  auto nameNode = xmlNewNode(nullptr, BAD_CAST "name");
   if (auto OOK = MD->getOverloadedOperator()) {
+    auto opNode = xmlNewNode(nullptr, BAD_CAST "operator");
     xmlNodeAddContent(
-        nameNode,
+        opNode,
         BAD_CAST OverloadedOperatorKindToString(OOK, MD->param_size()));
+    return opNode;
+  } else if (const auto ctor = dyn_cast<CXXConstructorDecl>(MD)) {
+    return makeCtorNode(TTI, ctor);
+  } else if (isa<CXXDestructorDecl>(MD)) {
+    return xmlNewNode(nullptr, BAD_CAST "destructor");
+  } else if (const auto conv = dyn_cast<CXXConversionDecl>(MD)) {
+    return makeConvNode(TTI, conv);
   }
+
+  auto nameNode = xmlNewNode(nullptr, BAD_CAST "name");
   const auto ident = MD->getIdentifier();
   if (!ident) {
     return nameNode;
