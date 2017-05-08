@@ -93,7 +93,7 @@ makeConvNode(
   const auto convT = conv->getConversionType();
   xmlNewProp(
       node,
-      BAD_CAST "conversion_type",
+      BAD_CAST "destination_type",
       BAD_CAST TTI.getTypeName(convT).c_str());
 
   return node;

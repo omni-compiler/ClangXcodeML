@@ -57,8 +57,8 @@ getDeclNameFromTypedNode(
     const auto name = classT->name();
     assert(name.hasValue());
     return makeTokenNode("~") + (*name);
-  } else if (findFirst(node, "conversion", src.ctxt)) {
-    const auto dtident = getProp(node, "conversion");
+  } else if (const auto conv = findFirst(node, "conversion", src.ctxt)) {
+    const auto dtident = getProp(conv, "destination_type");
     const auto returnT = src.typeTable.at(dtident);
     return makeTokenNode("operator")
       + returnT->makeDeclaration(makeVoidNode(), src.typeTable);
