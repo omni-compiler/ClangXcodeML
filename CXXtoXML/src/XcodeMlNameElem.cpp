@@ -60,7 +60,7 @@ makeCtorNode(
     TypeTableInfo& TTI,
     const CXXConstructorDecl* ctor)
 {
-  auto node = xmlNewNode(nullptr, BAD_CAST "constructor");
+  auto node = xmlNewNode(nullptr, BAD_CAST "name");
   xmlNewBoolProp(
       node,
       "is_implicit",
@@ -88,7 +88,7 @@ makeConvNode(
     TypeTableInfo& TTI,
     const CXXConversionDecl* conv)
 {
-  auto node = xmlNewNode(nullptr, BAD_CAST "conversion");
+  auto node = xmlNewNode(nullptr, BAD_CAST "name");
 
   const auto convT = conv->getConversionType();
   xmlNewProp(
@@ -152,7 +152,7 @@ makeNameNodeForCXXMethodDecl(
     const CXXMethodDecl* MD)
 {
   if (auto OOK = MD->getOverloadedOperator()) {
-    auto opNode = xmlNewNode(nullptr, BAD_CAST "operator");
+    auto opNode = xmlNewNode(nullptr, BAD_CAST "name");
     xmlNodeAddContent(
         opNode,
         BAD_CAST OverloadedOperatorKindToString(OOK, MD->param_size()));
@@ -160,7 +160,7 @@ makeNameNodeForCXXMethodDecl(
   } else if (const auto ctor = dyn_cast<CXXConstructorDecl>(MD)) {
     return makeCtorNode(TTI, ctor);
   } else if (isa<CXXDestructorDecl>(MD)) {
-    return xmlNewNode(nullptr, BAD_CAST "destructor");
+    return xmlNewNode(nullptr, BAD_CAST "name");
   } else if (const auto conv = dyn_cast<CXXConversionDecl>(MD)) {
     return makeConvNode(TTI, conv);
   }
