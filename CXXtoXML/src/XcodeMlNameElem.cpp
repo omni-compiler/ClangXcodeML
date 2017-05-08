@@ -47,6 +47,14 @@ makeIdNode(
   return idNode;
 }
 
+void
+xmlNewBoolProp(xmlNodePtr node, const std::string &name, bool value) {
+  xmlNewProp(
+      node,
+      BAD_CAST(name.c_str()),
+      BAD_CAST(value ? "true" : "false"));
+}
+
 } // namespace
 
 xmlNodePtr
