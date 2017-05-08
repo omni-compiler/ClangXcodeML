@@ -3,6 +3,12 @@
   xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
   <xsl:output method="xml" encoding="UTF-8"/>
 
+  <xsl:template match="paramTypeName">
+    <name>
+      <xsl:copy-of select="@type" />
+    </name>
+  </xsl:template>
+
   <xsl:template match="name">
     <xsl:choose>
       <xsl:when test="@name_kind = 'name'">
