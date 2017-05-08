@@ -57,6 +57,11 @@ getDeclNameFromTypedNode(
     const auto name = classT->name();
     assert(name.hasValue());
     return makeTokenNode("~") + (*name);
+  } else if (const auto conv = findFirst(node, "conversion", src.ctxt)) {
+    const auto dtident = getProp(conv, "destination_type");
+    const auto returnT = src.typeTable.at(dtident);
+    return makeTokenNode("operator")
+      + returnT->makeDeclaration(makeVoidNode(), src.typeTable);
   }
   return makeTokenNode(getNameFromIdNode(node, src.ctxt));
 }
@@ -530,7 +535,7 @@ makeFunctionDeclHead(
     const SourceInfo& src) {
   xmlNodePtr nameElem = findFirst(
       node,
-      "name|operator|constructor|destructor",
+      "name|operator|conversion|constructor|destructor",
       src.ctxt
   );
   const XMLString name(xmlNodeGetContent(nameElem));
@@ -550,7 +555,7 @@ makeFunctionDeclHead(
     acc = acc + makeTokenNode("virtual");
   }
   acc = acc +
-    (kind == "constructor" || kind == "destructor" ?
+    (kind == "constructor" || kind == "destructor" || kind == "conversion" ?
       fnType->makeDeclarationWithoutReturnType(
           nameNode,
           args,
