@@ -366,6 +366,14 @@
     </sizeOfExpr>
   </xsl:template>
 
+  <xsl:template match="name">
+    <name>
+      <xsl:copy-of select="../clangNestedNameSpecifier/@*" />
+      <xsl:apply-templates select="@*" />
+      <xsl:value-of select="." />
+    </name>
+  </xsl:template>
+
   <xsl:template match="@valueCategory">
     <xsl:attribute name="reference">
       <xsl:choose>
