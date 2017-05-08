@@ -8,7 +8,6 @@ ${CXXTOXML} $@ |
       xsltproc ${XSLTsDIR}/drop_prop_column.xsl - |
       xsltproc ${XSLTsDIR}/drop_prop_file.xsl -  |
       xsltproc ${XSLTsDIR}/reorder_decl.xsl -  |
-      xsltproc ${XSLTsDIR}/handle_name_elem.xsl -  |
       xsltproc ${XSLTsDIR}/add_symbols_elem.xsl -  |
       xsltproc ${XSLTsDIR}/add_globalsymbols_elem.xsl -  |
       xsltproc ${XSLTsDIR}/Program2XcodeProgram.xsl -  |
