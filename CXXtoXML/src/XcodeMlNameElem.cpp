@@ -55,6 +55,50 @@ xmlNewBoolProp(xmlNodePtr node, const std::string &name, bool value) {
       BAD_CAST(value ? "true" : "false"));
 }
 
+xmlNodePtr
+makeCtorNode(
+    TypeTableInfo& TTI,
+    const CXXConstructorDecl* ctor)
+{
+  auto node = xmlNewNode(nullptr, BAD_CAST "constructor");
+  xmlNewBoolProp(
+      node,
+      "is_implicit",
+      ctor->isExplicit());
+  xmlNewBoolProp(
+      node,
+      "is_copy_constructor",
+      ctor->isCopyConstructor());
+  xmlNewBoolProp(
+      node,
+      "is_move_constructor",
+      ctor->isMoveConstructor());
+
+  const auto T = ctor->getDeclName().getCXXNameType();
+  xmlNewProp(
+      node,
+      BAD_CAST "ctor_type",
+      BAD_CAST TTI.getTypeName(T).c_str());
+
+  return node;
+}
+
+xmlNodePtr
+makeConvNode(
+    TypeTableInfo& TTI,
+    const CXXConversionDecl* conv)
+{
+  auto node = xmlNewNode(nullptr, BAD_CAST "conversion");
+
+  const auto convT = conv->getConversionType();
+  xmlNewProp(
+      node,
+      BAD_CAST "conversion_type",
+      BAD_CAST TTI.getTypeName(convT).c_str());
+
+  return node;
+}
+
 } // namespace
 
 xmlNodePtr
