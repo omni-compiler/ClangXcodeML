@@ -332,11 +332,17 @@
       select="(@is_access_to_anon_record = '1')
               or (@is_access_to_anon_record = 'true')" />
     <xsl:variable
+      name="is_arrow"
+      select="(@is_arrow = '1')
+              or (@is_arrow = 'true')" />
+    <xsl:variable
       name="elemName"
       select="concat(substring('xcodemlAccessToAnonRecordExpr',
                                1 div $is_anon),
+                     substring('memberExpr',
+                               1 div (not($is_anon) and not($is_arrow))),
                      substring('memberRef',
-                               1 div not($is_anon)))"/>
+                               1 div (not($is_anon) and $is_arrow)))"/>
     <!-- "if ($is_anon)
          then ('xcodemlAccessToAnonRecordExpr')
          else ('memberRef')" -->
@@ -357,13 +363,11 @@
 
       <xsl:choose>
         <xsl:when test="$is_anon" />
-        <xsl:when test="@is_arrow = '1' or @is_arrow = 'true'">
+        <xsl:when test="$is_arrow">
           <xsl:apply-templates select="clangStmt" />
         </xsl:when>
         <xsl:otherwise>
-          <AddrOfExpr>
-            <xsl:apply-templates select="clangStmt" />
-          </AddrOfExpr>
+          <xsl:apply-templates select="clangStmt" />
         </xsl:otherwise>
       </xsl:choose>
     </xsl:element>
