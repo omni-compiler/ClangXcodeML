@@ -773,6 +773,12 @@ DEFINE_CB(functionCallProc) {
   return w.walk(function, src) + w.walk(arguments, src);
 }
 
+DEFINE_CB(memberFunctionCallProc) {
+  const auto function = findFirst(node, "*[1]", src.ctxt);
+  const auto arguments = findFirst(node, "arguments", src.ctxt);
+  return w.walk(function, src) + w.walk(arguments, src);
+}
+
 DEFINE_CB(argumentsProc) {
   auto acc = makeTokenNode("(");
   bool alreadyPrinted = false;
@@ -1039,6 +1045,7 @@ makeInnerNode,
   { "logNotExpr", showUnaryOp("!") },
   { "sizeOfExpr", showUnaryOp("sizeof") },
   { "functionCall", functionCallProc },
+  { "memberFunctionCall", memberFunctionCallProc },
   { "arguments", argumentsProc },
   { "condExpr", condExprProc },
   { "exprStatement", exprStatementProc },
