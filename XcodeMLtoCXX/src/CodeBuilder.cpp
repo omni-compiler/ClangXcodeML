@@ -613,6 +613,20 @@ DEFINE_CB(varProc) {
   return makeNestedNameSpec(*nnsident, src) + name;
 }
 
+DEFINE_CB(memberExprProc) {
+  const auto baseName = getProp(node, "member");
+  const auto nnsident = getPropOrNull(node, "nns");
+  const auto name =
+    (nnsident.hasValue() ?
+        makeNestedNameSpec(*nnsident, src)
+      : makeVoidNode())
+    + makeTokenNode(baseName);
+  return
+    makeInnerNode(w.walkChildren(node, src))
+    + makeTokenNode(".")
+    + name;
+}
+
 DEFINE_CB(memberRefProc) {
   const auto baseName = getProp(node, "member");
   const auto nnsident = getPropOrNull(node, "nns");
@@ -990,6 +1004,7 @@ makeInnerNode,
   { "Var", varProc },
   { "varAddr", showNodeContent("(&", ")") },
   { "pointerRef", showUnaryOp("*") },
+  { "memberExpr", memberExprProc },
   { "memberRef", memberRefProc },
   { "memberAddr", memberAddrProc },
   { "memberPointerRef", memberPointerRefProc },
