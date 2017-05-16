@@ -23,25 +23,49 @@ private:
   UnqualIdKind kind;
 };
 
+/**
+ * corresponds to the name elements in XcodeML, such as.
+ */
 class Name {
 private:
   UnqualId id;
   Nns nns;
 };
 
+class UIDIdent : public UnqualId {
+public:
+  UIDIdent(const std::string&);
+  ~UIDIdent() override = default;
+  UnqualId* clone() const override;
+  static bool classof(const UnqualId*);
+protected:
+  Ident(const Ident&) = default;
+private:
+  std::string ident;
+};
+
 class OpFuncId : public UnqualId {
 public:
   OpFuncId(const std::string&);
-  ~OpFuncId() override = 0;
+  ~OpFuncId() override = default;
   UnqualId* clone() const override;
   static bool classof(const UnqualId*);
+protected:
+  OpFuncId(const OpFuncId&) = default;
 private:
   std::string opName;
 };
 
 class ConvFuncId : public UnqualId {
 public:
-  ConvFuncId(const std::string&);
+  ConvFuncId(const DataTypeIdent&);
+  ~ConvFuncId() override = default;
+  UnqualId* clone() const override;
+  static bool classof(const UnqualId*);
+protected:
+  ConvFuncId(const ConvFuncId&) = default;
+private:
+  DataTypeIdent dtident;
 };
 
 } // namespace XcodeMl
