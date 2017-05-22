@@ -4,6 +4,7 @@
 #include <vector>
 #include "llvm/ADT/Optional.h"
 #include "llvm/Support/Casting.h"
+#include "XcodeMlOperator.h"
 #include "StringTree.h"
 #include "XcodeMlType.h"
 #include "XcodeMlEnvironment.h"
@@ -63,8 +64,8 @@ OpFuncId::clone() const {
 
 CodeFragment
 OpFuncId::toString(const Environment&) const {
-  // FIXME
-  // return makeTokenNode("operator") + makeTokenNode(opName);
+  return makeTokenNode("operator")
+    + makeTokenNode(OperatorNameToSpelling(opName));
 }
 
 bool
