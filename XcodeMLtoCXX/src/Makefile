@@ -23,7 +23,8 @@ OBJS = XcodeMlType.o \
 	SymbolAnalyzer.o \
 	ClangClassHandler.o \
 	XcodeMlName.o \
-	XcodeMlNns.o
+	XcodeMlNns.o \
+	XcodeMlOperator.o
 
 $(XCODEMLTOCXX): $(OBJS)
 	$(CXX) $(CXXFLAGS) $(OBJS) $(USEDLIBS) -o $(XCODEMLTOCXX)
