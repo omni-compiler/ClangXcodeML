@@ -1,19 +1,43 @@
+#include <map>
+#include <memory>
 #include <string>
+#include <vector>
+#include "llvm/ADT/Optional.h"
+#include "llvm/Support/Casting.h"
+#include "StringTree.h"
 #include "XcodeMlType.h"
 #include "XcodeMlNns.h"
 #include "XcodeMlName.h"
 
 namespace XcodeMl {
 
+UnqualId::UnqualId(UnqualIdKind k):
+  kind(k)
+{}
+
 UnqualId::~UnqualId() {
 }
 
-Ident::Ident(const std::string& id):
+UnqualIdKind
+UnqualId::getKind() const {
+  return kind;
+}
+
+UIDIdent::UIDIdent(const std::string& id):
   UnqualId(UnqualIdKind::Ident),
   ident(id)
 {}
 
-Ident::
+UnqualId*
+UIDIdent::clone() const {
+  auto copy = new UIDIdent(*this);
+  return copy;
+}
+
+bool
+UIDIdent::classof(const UnqualId* id) {
+  return id->getKind() == UnqualIdKind::Ident;
+}
 
 OpFuncId::OpFuncId(const std::string& op):
   UnqualId(UnqualIdKind::OpFuncId),
@@ -36,6 +60,7 @@ ConvFuncId::ConvFuncId(const DataTypeIdent& type):
   dtident(type)
 {}
 
+UnqualId*
 ConvFuncId::clone() const {
   auto copy = new ConvFuncId(*this);
   return copy;

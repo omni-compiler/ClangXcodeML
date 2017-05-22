@@ -28,8 +28,8 @@ private:
  */
 class Name {
 private:
-  UnqualId id;
-  Nns nns;
+  std::shared_ptr<UnqualId> id;
+  std::shared_ptr<Nns> nns;
 };
 
 class UIDIdent : public UnqualId {
@@ -39,7 +39,7 @@ public:
   UnqualId* clone() const override;
   static bool classof(const UnqualId*);
 protected:
-  Ident(const Ident&) = default;
+  UIDIdent(const UIDIdent&) = default;
 private:
   std::string ident;
 };
