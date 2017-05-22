@@ -6,8 +6,14 @@
 #include "llvm/Support/Casting.h"
 #include "StringTree.h"
 #include "XcodeMlType.h"
+#include "XcodeMlEnvironment.h"
 #include "XcodeMlNns.h"
+
 #include "XcodeMlName.h"
+
+using XcodeMl::CodeFragment;
+using CXXCodeGen::makeTokenNode;
+using CXXCodeGen::makeVoidNode;
 
 namespace XcodeMl {
 
@@ -34,6 +40,11 @@ UIDIdent::clone() const {
   return copy;
 }
 
+CodeFragment
+UIDIdent::toString(const Environment&) const {
+  return makeTokenNode(ident);
+}
+
 bool
 UIDIdent::classof(const UnqualId* id) {
   return id->getKind() == UnqualIdKind::Ident;
@@ -50,6 +61,12 @@ OpFuncId::clone() const {
   return copy;
 }
 
+CodeFragment
+OpFuncId::toString(const Environment&) const {
+  // FIXME
+  // return makeTokenNode("operator") + makeTokenNode(opName);
+}
+
 bool
 OpFuncId::classof(const UnqualId* id) {
   return id->getKind() == UnqualIdKind::OpFuncId;
@@ -64,6 +81,13 @@ UnqualId*
 ConvFuncId::clone() const {
   auto copy = new ConvFuncId(*this);
   return copy;
+}
+
+CodeFragment
+ConvFuncId::toString(const Environment& env) const {
+  const auto T = env.at(dtident);
+  return makeTokenNode("operator")
+    + T->makeDeclaration(makeVoidNode(), env);
 }
 
 bool
