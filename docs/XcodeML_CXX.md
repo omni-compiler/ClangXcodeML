@@ -300,22 +300,18 @@ int型配列の初期値 `{ 1, 2 }` に対応する表現は次のとおりに�
 	  <pointerType type="P0" is_volatile="1" ref="B0"/>
 
 ## `pointerType`要素 {#sec:type.ptr}
-`pointerType`要素はポインタ型またはリファレンス型を定義する。
+`pointerType`要素はポインタのデータ型を定義する。
 
 | `<pointerType/>`
 
 属性(必須): `type`, `ref`
 
-属性(optional): `reference`, データ型定義要素属性
+属性(optional): データ型定義要素属性
 
 以下の属性を持つ。
 
 * `type`　－　この型に与えられたデータ型識別名
 * `ref`　－　このポインタが指すデータのデータ型識別名
-* `reference`　－　
-  属性が指定されたとき、この型がリファレンス型であることを表す。
-  "`lvalue`"のときlvalueリファレンス型であることを意味し、
-  "`rvalue`"のときrvalueリファレンス型であることを意味する。
 
 `pointerType`要素は、子要素を持たない。
 
@@ -325,6 +321,34 @@ int型配列の初期値 `{ 1, 2 }` に対応する表現は次のとおりに�
 
 	<pointerType type="P0123" ref="int"/>
 
+## `referenceType`要素 {#sec:type.ref}
+`referenceType`要素はリファレンス型を定義する。
+
+| \<referenceType/\>
+
+属性(必須): `type`, `ref`
+
+属性(optional): `kind`
+
+以下の属性を持つ。
+
+* `type`　－　この型に与えられたデータ型識別名
+* `ref`　－　このリファレンスが参照するデータ型のデータ型識別名
+* `kind`　－　
+  リファレンスの種類。
+  "`lvalue`"のときlvalueリファレンス、"`rvalue`"のときrvalueリファレンスを意味する。
+  省略時の値は"`lvalue`"である。
+
+`referenceType`要素は、子要素を持たない。
+
+例:
+
+    void f(const int& )
+
+は次のXcodeMLに変換される。
+
+	<referenceType type="R0" ref="int"/>
+
 例:
 
     const int& x = 0;
@@ -333,7 +357,7 @@ int型配列の初期値 `{ 1, 2 }` に対応する表現は次のとおりに�
 `basicType`要素によって、"`const int`"を意味するデータ型識別名`B0`が定義されている。
 
     <basicType type="B0" is_const="1" name="int"/>
-    <pointerType type="P0124" ref="B0" reference="lvalue" />
+    <referenceType type="P0124" ref="B0" />
 
 例:
 
@@ -343,7 +367,7 @@ int型配列の初期値 `{ 1, 2 }` に対応する表現は次のとおりに�
 
 変数`n_alias`のデータ型識別要素は以下のようになる。
 
-    <pointerType type="P0" ref="int" reference="lvalue"/>
+    <referenceType type="P0" ref="int" />
 
 以下のコンストラクタ(ムーブコンストラクタ)の定義の引数に現れたrvalueリファレンスについて、
 
@@ -357,7 +381,7 @@ int型配列の初期値 `{ 1, 2 }` に対応する表現は次のとおりに�
 仮引数`obj`のデータ型識別要素は以下のようになる。
 ここで"`S0`"は"`Array`"に対応するデータ型識別名として定義されている。
 
-    <pointerType type="B2" ref="S0" reference="rvalue"/>
+    <referenceType type="B2" ref="S0" kind="rvalue"/>
 
 ## `functionType`要素 {#sec:type.func}
 `funtionType`要素は、関数型を定義する。
@@ -903,16 +927,7 @@ enum型は、`enumType`要素で定義する。`type`要素で、メンバの識
 * `name`要素　－　
   宣言する変数に対する`name`要素を持つ。
 * `value`要素　－　
-  初期化式を表現する。ここで、`value`要素は次の形式に従う。
-
-    |   `<value>`
-    |     `<addrOfExpr` `is_expedient=` `"1"` または `"true">`
-    |       式の要素
-    |     `</addrOfExpr>`
-    |   `</value>`
-
-    `value`要素の子要素である`addrOfExpr`要素の`is_expedient`属性値は"1"または"true"でなければならない。
-    その他にデータ型定義要素属性をもってもよい。
+  初期化式を表現する式の要素([-@sec:expr])を子要素に持つ。
 
 例:
 
@@ -928,9 +943,7 @@ enum型は、`enumType`要素で定義する。`type`要素で、メンバの識
     <varDecl>
       <name>rx</name>
       <value>
-        <addrOfExpr type="R1" is_expedient="true">
-          <Var type="int">x</Var>
-        </addrOfExpr>
+        <Var type="R1">x</Var>
       </value>
     </varDecl>
 
@@ -1355,22 +1368,13 @@ switch文のdefaultラベルを表す。`switch`要素の中の`body`要素の�
 これに関連してOmni XMPでは型の不一致によるエラーが出ている(バグレポート439)。
 
 ## `pointerRef`要素 {#sec:expr.pointer}
-式(ポインタ型またはリファレンス型)の指示先を表現する。
+式(ポインタ型)の指示先を表現する。
 
 | `<pointerRef>`
 |   式の参照
 | `</pointerRef>`
 
 属性(必須): `type`
-
-属性(optional): `is_expedient`
-
-pointerRef要素は次の属性を持つことができる。
-
-* `is_expedient`属性　－　
-  "`1`"または"`true`"のとき、式がリファレンスであることを表す。
-  "`0`"または"`false`"のとき、式がポインタであることを表す。
-  省略時の値は"`false`"である。
 
 例:
 
