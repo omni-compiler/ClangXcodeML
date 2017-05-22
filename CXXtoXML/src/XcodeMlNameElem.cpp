@@ -15,23 +15,23 @@ namespace {
 
 const char*
 getNameKind(const NamedDecl* ND) {
-  auto FD = dyn_cast<FunctionDecl>(ND);
-  if (!FD) {
-    return "name";
+  const auto DN = ND->getDeclName();
+
+  using NK = clang::DeclarationName::NameKind;
+  switch (DN.getNameKind()) {
+    case NK::Identifier:
+      return "name";
+    case NK::CXXOperatorName:
+      return "operator";
+    case NK::CXXConversionFunctionName:
+      return "conversion";
+    case NK::CXXConstructorName:
+      return "constructor";
+    case NK::CXXDestructorName:
+      return "destructor";
+    default:
+      assert(false && "not supported");
   }
-  if (FD->isOverloadedOperator()) {
-    return "operator";
-  }
-  if (isa<CXXConversionDecl>(FD)) {
-    return "conversion";
-  }
-  if (isa<CXXConstructorDecl>(FD)) {
-    return "constructor";
-  }
-  if (isa<CXXDestructorDecl>(FD)) {
-    return "destructor";
-  }
-  return "name";
 }
 
 xmlNodePtr
