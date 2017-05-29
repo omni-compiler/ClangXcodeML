@@ -175,6 +175,14 @@ makeNameNode(
 }
 
 xmlNodePtr
+makeNameNode(
+    TypeTableInfo& TTI,
+    const DeclRefExpr* DRE)
+{
+  return makeNameNode(TTI, DRE->getFoundDecl());
+}
+
+xmlNodePtr
 makeIdNodeForCXXMethodDecl(
     TypeTableInfo& TTI,
     const CXXMethodDecl* method)
