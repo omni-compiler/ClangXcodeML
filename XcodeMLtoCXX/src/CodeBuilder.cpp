@@ -554,6 +554,11 @@ makeFunctionDeclHead(
   {
     acc = acc + makeTokenNode("virtual");
   }
+  if (isInClassDecl(node, src)
+      && isTrueProp(node, "is_static", false))
+  {
+    acc = acc + makeTokenNode("static");
+  }
   acc = acc +
     (kind == "constructor" || kind == "destructor" || kind == "conversion" ?
       fnType->makeDeclarationWithoutReturnType(
