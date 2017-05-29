@@ -306,6 +306,13 @@
     </intConstant>
   </xsl:template>
 
+  <xsl:template match="clangStmt[@class='FloatingLiteral']">
+    <floatConstant>
+      <xsl:apply-templates select="@*" />
+      <xsl:value-of select="@token" />
+    </floatConstant>
+  </xsl:template>
+
   <xsl:template match="clangStmt[@class='StringLiteral']">
     <stringConstant>
       <xsl:apply-templates select="@*" />
