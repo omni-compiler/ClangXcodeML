@@ -259,6 +259,19 @@
     </functionCall>
   </xsl:template>
 
+  <xsl:template match="clangStmt[@class='CXXNewExpr']">
+    <newExpr>
+      <xsl:apply-templates select="@*" />
+      <xsl:if test="clangStmt[@class='CXXConstructExpr']">
+        <!-- FIXME: support scalar types -->
+        <arguments>
+          <xsl:apply-templates
+            select="clangStmt[@class='CXXConstructExpr']/*" />
+        </arguments>
+      </xsl:if>
+    </newExpr>
+  </xsl:template>
+
   <xsl:template match="clangStmt[@class='DeclRefExpr']">
     <Var>
       <xsl:if test="clangNestedNameSpecifier">
