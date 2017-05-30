@@ -218,6 +218,12 @@ bool Pointer::classof(const Type* T) {
   return T->getKind() == TypeKind::Pointer;
 }
 
+TypeRef
+Pointer::getPointee(const Environment& env) const {
+  const auto T = env.at(ref);
+  return static_cast<TypeRef>(T->clone());
+}
+
 Pointer::Pointer(const Pointer& other):
   Type(other),
   ref(other.ref)

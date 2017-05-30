@@ -118,6 +118,7 @@ public:
   ~Pointer() override;
   Type* clone() const override;
   static bool classof(const Type *);
+  TypeRef getPointee(const Environment&) const;
 protected:
   Pointer(const Pointer&);
 private:
