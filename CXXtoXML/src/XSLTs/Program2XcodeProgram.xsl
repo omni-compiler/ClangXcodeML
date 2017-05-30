@@ -20,12 +20,6 @@
     </enumType>
   </xsl:template>
 
-  <xsl:template match="paramTypeName">
-    <name>
-      <xsl:copy-of select="@type" />
-    </name>
-  </xsl:template>
-
   <xsl:template match="clangDecl[@class='TranslationUnit']">
     <globalDeclarations>
       <xsl:apply-templates />
@@ -38,6 +32,7 @@
 
   <xsl:template match="clangDecl[@class='Function'
       or @class='CXXMethod'
+      or @class='CXXConversion'
       or @class='CXXConstructor'
       or @class='CXXDestructor']">
     <xsl:choose>
@@ -311,6 +306,13 @@
     </intConstant>
   </xsl:template>
 
+  <xsl:template match="clangStmt[@class='FloatingLiteral']">
+    <floatConstant>
+      <xsl:apply-templates select="@*" />
+      <xsl:value-of select="@token" />
+    </floatConstant>
+  </xsl:template>
+
   <xsl:template match="clangStmt[@class='StringLiteral']">
     <stringConstant>
       <xsl:apply-templates select="@*" />
@@ -372,40 +374,11 @@
   </xsl:template>
 
   <xsl:template match="name">
-    <xsl:choose>
-      <xsl:when test="@name_kind = 'name'">
-        <name>
-          <xsl:copy-of select="../clangNestedNameSpecifier/@*"/>
-          <xsl:copy-of select="@*"/>
-          <xsl:value-of select="." />
-        </name>
-      </xsl:when>
-
-      <xsl:when test="@name_kind = 'operator'">
-        <operator>
-          <xsl:copy-of select="../clangNestedNameSpecifier/@*"/>
-          <xsl:copy-of select="@*"/>
-          <xsl:value-of select="." />
-        </operator>
-      </xsl:when>
-
-      <xsl:when test="@name_kind = 'constructor'">
-        <constructor>
-          <xsl:copy-of select="../clangNestedNameSpecifier/@*"/>
-          <xsl:copy-of select="@*"/>
-        </constructor>
-      </xsl:when>
-
-      <xsl:when test="@name_kind = 'destructor'">
-        <destructor>
-          <xsl:copy-of select="../clangNestedNameSpecifier/@*"/>
-          <xsl:copy-of select="@*"/>
-        </destructor>
-      </xsl:when>
-
-      <xsl:otherwise>
-      </xsl:otherwise>
-    </xsl:choose>
+    <name>
+      <xsl:copy-of select="../clangNestedNameSpecifier/@*" />
+      <xsl:apply-templates select="@*" />
+      <xsl:value-of select="." />
+    </name>
   </xsl:template>
 
   <xsl:template match="@valueCategory">

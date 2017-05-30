@@ -734,7 +734,7 @@ enum型は、`enumType`要素で定義する。`type`要素で、メンバの識
 関数定義、メンバ関数の定義、コンストラクターの定義、デストラクターの定義、および、演算子オーバーロードの定義を行う。以下のいずれか一つの子要素を持つ。
 
 | `<functionDefinition>`
-|   `name`要素 or `operator`要素([-@sec:decl.op]) or `constructor`要素([-@sec:decl.ctor]) or `descructor`要素([-@sec:decl.dtor])
+|   `name`要素 or `operator`要素([-@sec:decl.op]) or `constructor`要素([-@sec:decl.ctor]) or `descructor`要素([-@sec:decl.dtor]) or `conversion`要素([-@sec:decl.conv])
 |   `symbols`要素([-@sec:symb.local]節)
 |   `params`要素([-@sec:decl.params])
 |   `body`要素
@@ -749,6 +749,7 @@ enum型は、`enumType`要素で定義する。`type`要素で、メンバの識
 * `operator`要素　—　演算子オーバーロードのときの、演算子の名前
 * `constructor`要素　—　構造体またはクラスのコンストラクタのとき
 * `destructor`要素　—　構造体またはクラスのデストラクタのとき
+* `conversion`要素　—　型変換関数のとき
 
 加えて、以下の子要素をもつ。
 
@@ -824,6 +825,20 @@ enum型は、`enumType`要素で定義する。`type`要素で、メンバの識
 `functionDefinition`要素の子要素。そのメンバ関数がデストラクタであるとき、`name`要素の代わりに指定する。
 
 | `<destructor/>`
+
+### `conversion`要素(C++) {#sec:decl.conv}
+`functionDefinition`要素の子要素。
+そのメンバ関数が型変換関数であるとき、`name`要素の代わりに指定する。
+
+| `<conversion/>`
+
+属性(必須): `destination_type`
+
+`conversion`要素は以下の属性を持つ。
+
+* `destination_type`　－　
+  戻り値の型(conversion-type-idが表す型)のデータ型識別名
+
 
 ### `params`要素 {#sec:decl.params}
 関数の引数の並びを指定する。

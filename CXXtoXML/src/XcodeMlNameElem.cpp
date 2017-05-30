@@ -22,6 +22,9 @@ getNameKind(const NamedDecl* ND) {
   if (FD->isOverloadedOperator()) {
     return "operator";
   }
+  if (isa<CXXConversionDecl>(FD)) {
+    return "conversion";
+  }
   if (isa<CXXConstructorDecl>(FD)) {
     return "constructor";
   }
@@ -42,6 +45,58 @@ makeIdNode(
       BAD_CAST "type",
       BAD_CAST TTI.getTypeName(VD->getType()).c_str());
   return idNode;
+}
+
+void
+xmlNewBoolProp(xmlNodePtr node, const std::string &name, bool value) {
+  xmlNewProp(
+      node,
+      BAD_CAST(name.c_str()),
+      BAD_CAST(value ? "true" : "false"));
+}
+
+xmlNodePtr
+makeCtorNode(
+    TypeTableInfo& TTI,
+    const CXXConstructorDecl* ctor)
+{
+  auto node = xmlNewNode(nullptr, BAD_CAST "name");
+  xmlNewBoolProp(
+      node,
+      "is_implicit",
+      ctor->isExplicit());
+  xmlNewBoolProp(
+      node,
+      "is_copy_constructor",
+      ctor->isCopyConstructor());
+  xmlNewBoolProp(
+      node,
+      "is_move_constructor",
+      ctor->isMoveConstructor());
+
+  const auto T = ctor->getDeclName().getCXXNameType();
+  xmlNewProp(
+      node,
+      BAD_CAST "ctor_type",
+      BAD_CAST TTI.getTypeName(T).c_str());
+
+  return node;
+}
+
+xmlNodePtr
+makeConvNode(
+    TypeTableInfo& TTI,
+    const CXXConversionDecl* conv)
+{
+  auto node = xmlNewNode(nullptr, BAD_CAST "name");
+
+  const auto convT = conv->getConversionType();
+  xmlNewProp(
+      node,
+      BAD_CAST "destination_type",
+      BAD_CAST TTI.getTypeName(convT).c_str());
+
+  return node;
 }
 
 } // namespace
@@ -93,15 +148,24 @@ makeNameNode(
 
 xmlNodePtr
 makeNameNodeForCXXMethodDecl(
-    TypeTableInfo&,
+    TypeTableInfo& TTI,
     const CXXMethodDecl* MD)
 {
-  auto nameNode = xmlNewNode(nullptr, BAD_CAST "name");
   if (auto OOK = MD->getOverloadedOperator()) {
+    auto opNode = xmlNewNode(nullptr, BAD_CAST "name");
     xmlNodeAddContent(
-        nameNode,
+        opNode,
         BAD_CAST OverloadedOperatorKindToString(OOK, MD->param_size()));
+    return opNode;
+  } else if (const auto ctor = dyn_cast<CXXConstructorDecl>(MD)) {
+    return makeCtorNode(TTI, ctor);
+  } else if (isa<CXXDestructorDecl>(MD)) {
+    return xmlNewNode(nullptr, BAD_CAST "name");
+  } else if (const auto conv = dyn_cast<CXXConversionDecl>(MD)) {
+    return makeConvNode(TTI, conv);
   }
+
+  auto nameNode = xmlNewNode(nullptr, BAD_CAST "name");
   const auto ident = MD->getIdentifier();
   if (!ident) {
     return nameNode;
@@ -120,7 +184,7 @@ makeIdNodeForCXXMethodDecl(
       idNode,
       BAD_CAST "type",
       BAD_CAST TTI.getTypeName(method->getType()).c_str());
-  auto nameNode = makeNameNodeForCXXMethodDecl(TTI, method);
+  auto nameNode = makeNameNode(TTI, method);
   xmlAddChild(idNode, nameNode);
   return idNode;
 }

@@ -147,6 +147,18 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
     newProp("decimalNotation", decimalNotation.c_str());
   }
 
+  if (auto FL = dyn_cast<FloatingLiteral>(S)) {
+    const unsigned INIT_BUFFER_SIZE = 32;
+    SmallVector<char, INIT_BUFFER_SIZE> buffer;
+    auto& CXT = mangleContext->getASTContext();
+    auto spelling = clang::Lexer::getSpelling(
+        FL->getLocation(),
+        buffer,
+        CXT.getSourceManager(),
+        CXT.getLangOpts());
+    newProp("token", spelling.str().c_str());
+  }
+
   if (auto SL = dyn_cast<StringLiteral>(S)) {
     StringRef Data = SL->getString();
     std::string literalAsString;
@@ -410,6 +422,14 @@ DeclarationsVisitor::PreVisitDeclarationNameInfo(DeclarationNameInfo NI) {
           II ? II->getNameStart() : nullptr);
   newProp("class", NameForDeclarationName(DN));
   newBoolProp("is_empty", DN.isEmpty());
+
+  // FIXME: not MECE
+  const auto T = DN.getCXXNameType();
+  if (!T.isNull()) {
+    newProp(
+        "clang_name_type",
+        typetableinfo->getTypeName(T).c_str());
+  }
   return true;
 }
 
