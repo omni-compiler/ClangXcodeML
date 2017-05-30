@@ -778,6 +778,17 @@ DEFINE_CB(functionCallProc) {
   return w.walk(function, src) + w.walk(arguments, src);
 }
 
+DEFINE_CB(newExprProc) {
+  const auto type = src.typeTable.at(getProp(node, "type"));
+  // FIXME: Support scalar type
+  const auto pointeeT =
+    llvm::cast<XcodeMl::Pointer>(type.get())->getPointee(src.typeTable);
+  const auto arguments = findFirst(node, "arguments", src.ctxt);
+  return makeTokenNode("new")
+    + pointeeT->makeDeclaration(makeVoidNode(), src.typeTable)
+    + w.walk(arguments, src);
+}
+
 DEFINE_CB(argumentsProc) {
   auto acc = makeTokenNode("(");
   bool alreadyPrinted = false;
@@ -1044,6 +1055,7 @@ makeInnerNode,
   { "bitNotExpr", showUnaryOp("~") },
   { "logNotExpr", showUnaryOp("!") },
   { "sizeOfExpr", showUnaryOp("sizeof") },
+  { "newExpr", newExprProc },
   { "functionCall", functionCallProc },
   { "arguments", argumentsProc },
   { "condExpr", condExprProc },
