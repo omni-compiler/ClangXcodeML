@@ -238,6 +238,11 @@ ReferenceType::ReferenceType(
 
 ReferenceType::~ReferenceType() = default;
 
+TypeRef
+ReferenceType::getPointee(const Environment& env) const {
+  return env.at(ref);
+}
+
 LValueReferenceType::LValueReferenceType(
     const DataTypeIdent& ident,
     const DataTypeIdent& ref):

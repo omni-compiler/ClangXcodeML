@@ -132,6 +132,7 @@ public:
     override = 0;
   ~ReferenceType() override = 0;
   Type* clone() const override = 0;
+  TypeRef getPointee(const Environment&) const;
 protected:
   ReferenceType(const ReferenceType&) = default;
   DataTypeIdent ref;
