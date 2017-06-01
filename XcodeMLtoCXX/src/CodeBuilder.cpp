@@ -788,7 +788,8 @@ DEFINE_CB(newExprProc) {
   const auto arguments = findFirst(node, "arguments", src.ctxt);
 
   return makeTokenNode("new")
-    + (hasParen(pointeeT)? wrapWithParen(NewTypeId) : NewTypeId)
+    + (hasParen(pointeeT, src.typeTable) ?
+        wrapWithParen(NewTypeId) : NewTypeId)
     + w.walk(arguments, src);
 }
 

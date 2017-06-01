@@ -927,8 +927,25 @@ getPointee(const TypeRef& type, const Environment& env) {
 } // namespace
 
 bool
-hasParen(const TypeRef& type) {
+hasParen(const TypeRef& type, const Environment& env) {
   return llvm::isa<Function>(type.get());
+  switch (type->getKind()) {
+    case TypeKind::Function:
+      return true;
+
+    case TypeKind::Array:
+    {
+      const auto elemT = llvm::cast<Array>(type.get())->getElemType(env);
+      return hasParen(elemT, env);
+    }
+    case TypeKind::LValueReference:
+      return hasParen(getPointee<LValueReferenceType>(type, env), env);
+    case TypeKind::Pointer:
+      return hasParen(getPointee<Pointer>(type, env), env);
+
+    default:
+      return false;
+  }
 }
 
 }
