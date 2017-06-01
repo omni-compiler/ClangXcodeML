@@ -145,6 +145,7 @@ public:
     override;
   ~LValueReferenceType() override = default;
   Type* clone() const override;
+  static bool classof(const Type *);
 protected:
   LValueReferenceType(const LValueReferenceType&) = default;
 };

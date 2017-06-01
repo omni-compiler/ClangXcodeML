@@ -266,6 +266,11 @@ LValueReferenceType::clone() const {
   return copy;
 }
 
+bool
+LValueReferenceType::classof(const Type* T) {
+  return T->getKind() == TypeKind::LValueReference;
+}
+
 ParamList::ParamList(
     const std::vector<DataTypeIdent>& d,
     bool e):
