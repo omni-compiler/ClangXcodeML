@@ -151,6 +151,13 @@ join(const std::string& delim, const std::vector<StringTreeRef>& strs) {
   return acc;
 }
 
+StringTreeRef
+wrapWithParen(const StringTreeRef& str) {
+  return makeTokenNode("(")
+    + str
+    + makeTokenNode(")");
+}
+
 } // namespace CXXCodeGen
 
 CXXCodeGen::StringTreeRef operator+(

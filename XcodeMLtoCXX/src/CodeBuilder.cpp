@@ -248,13 +248,6 @@ DEFINE_CB(EmptyProc) {
 }
 
 static cxxgen::StringTreeRef
-wrapWithParen(const cxxgen::StringTreeRef& str) {
-  return makeTokenNode("(")
-    + str
-    + makeTokenNode(")");
-}
-
-static cxxgen::StringTreeRef
 foldWithSemicolon(const std::vector<StringTreeRef>& stmts) {
   auto node = makeVoidNode();
   for (auto& stmt : stmts) {
