@@ -902,4 +902,9 @@ CodeFragment TypeRefToString(TypeRef type, const Environment& env) {
   return makeDecl(type, makeTokenNode( "" ), env);
 }
 
+bool
+hasParen(const TypeRef& type) {
+  return llvm::isa<Function>(type.get());
+}
+
 }

@@ -341,5 +341,7 @@ TypeRef makeClassType(const DataTypeIdent&, const std::vector<ClassType::BaseCla
 TypeRef makeStructType(const DataTypeIdent&, const CodeFragment&, const Struct::MemberList&);
 TypeRef makeOtherType(const DataTypeIdent&);
 
+bool hasParen(const TypeRef&);
+
 }
 #endif /* !XCODEMLTYPE_H */
