@@ -916,6 +916,16 @@ CodeFragment TypeRefToString(TypeRef type, const Environment& env) {
   return makeDecl(type, makeTokenNode( "" ), env);
 }
 
+namespace {
+
+template<typename T>
+TypeRef
+getPointee(const TypeRef& type, const Environment& env) {
+  return llvm::cast<T>(type.get())->getPointee(env);
+}
+
+} // namespace
+
 bool
 hasParen(const TypeRef& type) {
   return llvm::isa<Function>(type.get());
