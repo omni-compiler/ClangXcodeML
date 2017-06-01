@@ -475,6 +475,11 @@ CodeFragment Array::addVolatileQualifier(CodeFragment var) const {
   return var;
 }
 
+TypeRef
+Array::getElemType(const Environment& env) const {
+  return env.at(element);
+}
+
 Array::Size::Size(Kind k, size_t s):
   kind(k),
   size(s)

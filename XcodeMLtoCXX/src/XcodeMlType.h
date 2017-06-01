@@ -216,6 +216,7 @@ public:
   CodeFragment addConstQualifier(CodeFragment) const override;
   CodeFragment addVolatileQualifier(CodeFragment) const override;
   static bool classof(const Type *);
+  TypeRef getElemType(const Environment&) const;
 protected:
   Array(const Array&);
 private:
