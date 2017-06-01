@@ -776,9 +776,19 @@ DEFINE_CB(newExprProc) {
   // FIXME: Support scalar type
   const auto pointeeT =
     llvm::cast<XcodeMl::Pointer>(type.get())->getPointee(src.typeTable);
+  const auto NewTypeId =
+    pointeeT->makeDeclaration(makeVoidNode(), src.typeTable);
+    /* Ref: [new.expr]/4
+     * new int(*[10])();   // error
+     * new (int(*[10])()); // OK
+     * new int;            // OK
+     * new (int);          // OK
+     * new ((int));        // error
+     */
   const auto arguments = findFirst(node, "arguments", src.ctxt);
+
   return makeTokenNode("new")
-    + pointeeT->makeDeclaration(makeVoidNode(), src.typeTable)
+    + (hasParen(pointeeT)? wrapWithParen(NewTypeId) : NewTypeId)
     + w.walk(arguments, src);
 }
 
