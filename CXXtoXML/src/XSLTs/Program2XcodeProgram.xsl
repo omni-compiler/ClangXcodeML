@@ -259,7 +259,22 @@
     </functionCall>
   </xsl:template>
 
-  <xsl:template match="clangStmt[@class='CXXNewExpr']">
+  <xsl:template match="clangStmt[@class='CXXNewExpr'
+    and (@is_new_array='true' or @is_new_array='1')]">
+    <newArrayExpr>
+      <xsl:apply-templates select="@*" />
+      <xsl:if test="clangStmt[@class='CXXConstructExpr']">
+        <!-- FIXME: support scalar types -->
+        <arguments>
+          <xsl:apply-templates
+            select="clangStmt[@class='CXXConstructExpr']/*" />
+        </arguments>
+      </xsl:if>
+    </newArrayExpr>
+  </xsl:template>
+
+  <xsl:template match="clangStmt[@class='CXXNewExpr'
+    and not(@is_new_array='true' or @is_new_array='1')]">
     <newExpr>
       <xsl:apply-templates select="@*" />
       <xsl:if test="clangStmt[@class='CXXConstructExpr']">
