@@ -11,7 +11,7 @@ public:
   NnsTableInfo& operator =(const NnsTableInfo&&) = delete;
   NnsTableInfo& operator =(NnsTableInfo&&) = delete;
 
-  explicit NnsTableInfo(TypeTableInfo*);
+  explicit NnsTableInfo(clang::MangleContext*, TypeTableInfo*);
   std::string getNnsName(const clang::NestedNameSpecifier*);
   void popNnsTableStack();
   void pushNnsTableStack(xmlNodePtr);
@@ -22,6 +22,7 @@ private:
 
 private:
   int seqForOther;
+  clang::MangleContext* mangleContext;
   TypeTableInfo* typetableinfo;
   std::map<const clang::NestedNameSpecifier*, std::string> mapForOtherNns;
   std::map<const clang::NestedNameSpecifier*, xmlNodePtr>
