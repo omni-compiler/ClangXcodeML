@@ -1,3 +1,4 @@
+#include <iostream>
 #include <map>
 #include <stack>
 #include <string>
@@ -59,7 +60,9 @@ NnsTableInfo::popNnsTableStack() {
   nnsTableStack.pop();
 }
 
-static xmlNodePtr
+namespace {
+
+xmlNodePtr
 makeNnsIdentNodeForType(
     NnsTableInfo& NTI,
     TypeTableInfo& TTI,
@@ -84,8 +87,22 @@ makeNnsIdentNodeForType(
   return node;
 }
 
-static xmlNodePtr
+ // clang::NestedNameSpecifier::dump is not a const member fucntion.
+void dump(
+    const clang::NestedNameSpecifier& Spec,
+    const clang::MangleContext& MC)
+{
+ const clang::PrintingPolicy policy(MC.getASTContext().getLangOpts());
+ std::string ostr;
+ llvm::raw_string_ostream os(ostr);
+ Spec.print(os, policy);
+ os.flush();
+ std::cerr << ostr << std::endl;
+}
+
+xmlNodePtr
 makeNnsIdentNodeForNestedNameSpec(
+    const clang::MangleContext& MC,
     NnsTableInfo& NTI,
     TypeTableInfo& TTI,
     const clang::NestedNameSpecifier* Spec)
@@ -105,11 +122,14 @@ makeNnsIdentNodeForNestedNameSpec(
     case SK::NamespaceAlias:
     case SK::TypeSpecWithTemplate:
     case SK::Super:
+      dump(*Spec, MC);
       // FIXME: unimplemented
       assert(false);
   }
   return nullptr;
 }
+
+} // namespace
 
 void
 NnsTableInfo::registerNestedNameSpec(
@@ -130,6 +150,7 @@ NnsTableInfo::registerNestedNameSpec(
   mapForOtherNns[NestedNameSpec] = name;
   mapFromNestedNameSpecToXmlNodePtr[NestedNameSpec] =
     makeNnsIdentNodeForNestedNameSpec(
+        *mangleContext,
         *this,
         *typetableinfo,
         NestedNameSpec);
