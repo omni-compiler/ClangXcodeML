@@ -109,6 +109,10 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
     newProp("clangCastKind", CE->getCastKindName());
   }
 
+  if (auto NL = dyn_cast<CXXNewExpr>(S)) {
+    newBoolProp("is_new_array", NL->isArray());
+  }
+
   if (auto ME = dyn_cast<clang::MemberExpr>(S)) {
     newBoolProp("is_arrow", ME->isArrow());
 
