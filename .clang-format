@@ -1,9 +1,9 @@
 ---
 AccessModifierOffset: -2
 AlignAfterOpenBracket: true
-AllowShortBlocksOnASingleLine: true
+AllowShortBlocksOnASingleLine: false
 AllowShortCaseLabelsOnASingleLine: true
-AllowShortFunctionsOnASingleLine: true
+AllowShortFunctionsOnASingleLine: false
 AlwaysBreakAfterDefinitionReturnType: true
 AlwaysBreakTemplateDeclarations: true
 BinPackArguments: false
