@@ -8,7 +8,7 @@ AlwaysBreakAfterDefinitionReturnType: true
 AlwaysBreakTemplateDeclarations: true
 BinPackArguments: false
 BinPackParameters: false
-BreakBeforeBinaryOperators: NoAssignment
+BreakBeforeBinaryOperators: NonAssignment
 BreakBeforeBraces: Attach
 BreakConstructorInitializersBeforeComma: false
 ColumnLimit: 72
