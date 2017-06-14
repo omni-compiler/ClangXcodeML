@@ -1,0 +1,23 @@
+---
+AccessModifierOffset: -2
+AlignAfterOpenBracket: true
+AllowShortBlocksOnASingleLine: true
+AllowShortCaseLabelsOnASingleLine: true
+AllowShortFunctionsOnASingleLine: true
+AlwaysBreakAfterDefinitionReturnType: true
+AlwaysBreakTemplateDeclarations: true
+BinPackArguments: false
+BinPackParameters: false
+BreakBeforeBinaryOperators: NoAssignment
+BreakBeforeBraces: Attach
+BreakConstructorInitializersBeforeComma: false
+ColumnLimit: 72
+ConstructorInitializerAllOnOneLineOrOnePerLine: true
+IndentCaseLabels: true
+IndentWidth: 2
+IndentWrappedFunctionNames: false
+KeepEmptyLinesAtTheStartOfBlocks: false
+NamespaceIndentation: None
+PointerAlignment: Right
+Standard: Cpp11
+UseTab: Never
