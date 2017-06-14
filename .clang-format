@@ -18,6 +18,6 @@ IndentWidth: 2
 IndentWrappedFunctionNames: false
 KeepEmptyLinesAtTheStartOfBlocks: false
 NamespaceIndentation: None
-PointerAlignment: Right
+PointerAlignment: Left
 Standard: Cpp11
 UseTab: Never
