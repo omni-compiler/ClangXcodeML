@@ -1,9 +1,11 @@
 ---
 AccessModifierOffset: -2
-AlignAfterOpenBracket: true
+AlignAfterOpenBracket: false
+AlignOperands: false
+AlignTrailingComments: false
 AllowShortBlocksOnASingleLine: false
 AllowShortCaseLabelsOnASingleLine: true
-AllowShortFunctionsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: None
 AlwaysBreakAfterDefinitionReturnType: true
 AlwaysBreakTemplateDeclarations: true
 BinPackArguments: false
@@ -11,12 +13,14 @@ BinPackParameters: false
 BreakBeforeBinaryOperators: NonAssignment
 BreakBeforeBraces: Attach
 BreakConstructorInitializersBeforeComma: false
-ColumnLimit: 72
+ColumnLimit: 79
 ConstructorInitializerAllOnOneLineOrOnePerLine: true
-IndentCaseLabels: true
+ContinuationIndentWidth: 4
+IndentCaseLabels: false
 IndentWidth: 2
 IndentWrappedFunctionNames: false
 KeepEmptyLinesAtTheStartOfBlocks: false
+Language: Cpp
 NamespaceIndentation: None
 PointerAlignment: Left
 Standard: Cpp11
