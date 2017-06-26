@@ -278,10 +278,18 @@
     <newExpr>
       <xsl:apply-templates select="@*" />
       <xsl:if test="clangStmt[@class='CXXConstructExpr']">
-        <!-- FIXME: support scalar types -->
         <arguments>
-          <xsl:apply-templates
-            select="clangStmt[@class='CXXConstructExpr']/*" />
+          <xsl:choose>
+            <xsl:when test="clangStmt[@class='CXXConstructExpr']">
+              <!-- class types -->
+              <xsl:apply-templates
+                select="clangStmt[@class='CXXConstructExpr']/*" />
+            </xsl:when>
+            <xsl:otherwise>
+              <!-- scalar types -->
+              <xsl:apply-templates />
+            </xsl:otherwise>
+          </xsl:choose>
         </arguments>
       </xsl:if>
     </newExpr>
