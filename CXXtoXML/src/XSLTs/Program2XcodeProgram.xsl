@@ -277,17 +277,18 @@
     and not(@is_new_array='true' or @is_new_array='1')]">
     <newExpr>
       <xsl:apply-templates select="@*" />
-      <xsl:if test="clangStmt[@class='CXXConstructExpr']">
+      <xsl:if test="clangStmt">
         <arguments>
           <xsl:choose>
             <xsl:when test="clangStmt[@class='CXXConstructExpr']">
               <!-- class types -->
+              <!-- parse inside CXXConstructExpr -->
               <xsl:apply-templates
                 select="clangStmt[@class='CXXConstructExpr']/*" />
             </xsl:when>
             <xsl:otherwise>
               <!-- scalar types -->
-              <xsl:apply-templates />
+              <xsl:apply-templates select="clangStmt" />
             </xsl:otherwise>
           </xsl:choose>
         </arguments>
