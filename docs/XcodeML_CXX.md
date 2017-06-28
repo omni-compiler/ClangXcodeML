@@ -1811,7 +1811,7 @@ gcc拡張の複文式に対応する。
 new演算子またはnew[]演算子から成る式を表現する。
 
 | `<newExpr>`
-|   `arguments`要素([-@sec:expr.arguments]項)
+|   [ `arguments`要素([-@sec:expr.arguments]項) ]
 | `</newExpr>`
 
 属性(必須): `type`
@@ -1820,6 +1820,7 @@ new演算子またはnew[]演算子から成る式を表現する。
 |   `<size>`
 |     式の要素([-@sec:expr]章)
 |   `</size>`
+|   [ `arguments`要素([-@sec:expr.arguments]項) ]
 | `</newArrrayExpr>`
 
 属性(必須): `type`
