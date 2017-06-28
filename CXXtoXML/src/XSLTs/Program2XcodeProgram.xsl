@@ -263,6 +263,9 @@
     and (@is_new_array='true' or @is_new_array='1')]">
     <newArrayExpr>
       <xsl:apply-templates select="@*" />
+      <size>
+        <xsl:apply-templates select="clangStmt[1]" />
+      </size>
       <xsl:if test="clangStmt[@class='CXXConstructExpr']">
         <!-- FIXME: support scalar types -->
         <arguments>
