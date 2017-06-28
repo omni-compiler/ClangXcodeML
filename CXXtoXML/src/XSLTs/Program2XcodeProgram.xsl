@@ -266,11 +266,10 @@
       <size>
         <xsl:apply-templates select="clangStmt[1]" />
       </size>
-      <xsl:if test="clangStmt[@class='CXXConstructExpr']">
-        <!-- FIXME: support scalar types -->
+      <xsl:if test="clangStmt[2]">
         <arguments>
           <xsl:apply-templates
-            select="clangStmt[@class='CXXConstructExpr']/*" />
+            select="clangStmt[@class='InitListExpr']/*" />
         </arguments>
       </xsl:if>
     </newArrayExpr>
