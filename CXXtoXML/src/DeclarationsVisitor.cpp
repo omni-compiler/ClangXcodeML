@@ -126,6 +126,11 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
     }
   }
 
+  if (auto DRE = dyn_cast<DeclRefExpr>(S)) {
+    const auto kind = DRE->getDecl()->getDeclKindName();
+    newProp("declkind", kind);
+  }
+
   if (auto CL = dyn_cast<CharacterLiteral>(S)) {
     newProp("hexadecimalNotation",
         unsignedToHexString(CL->getValue()).c_str());
