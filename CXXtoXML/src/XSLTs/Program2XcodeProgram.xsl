@@ -259,6 +259,45 @@
     </functionCall>
   </xsl:template>
 
+  <xsl:template match="clangStmt[@class='CXXNewExpr'
+    and (@is_new_array='true' or @is_new_array='1')]">
+    <newArrayExpr>
+      <xsl:apply-templates select="@*" />
+      <size>
+        <xsl:apply-templates select="clangStmt[1]" />
+      </size>
+      <xsl:if test="clangStmt[2]">
+        <arguments>
+          <xsl:apply-templates
+            select="clangStmt[@class='InitListExpr']/*" />
+        </arguments>
+      </xsl:if>
+    </newArrayExpr>
+  </xsl:template>
+
+  <xsl:template match="clangStmt[@class='CXXNewExpr'
+    and not(@is_new_array='true' or @is_new_array='1')]">
+    <newExpr>
+      <xsl:apply-templates select="@*" />
+      <xsl:if test="clangStmt">
+        <arguments>
+          <xsl:choose>
+            <xsl:when test="clangStmt[@class='CXXConstructExpr']">
+              <!-- class types -->
+              <!-- parse inside CXXConstructExpr -->
+              <xsl:apply-templates
+                select="clangStmt[@class='CXXConstructExpr']/*" />
+            </xsl:when>
+            <xsl:otherwise>
+              <!-- scalar types -->
+              <xsl:apply-templates select="clangStmt" />
+            </xsl:otherwise>
+          </xsl:choose>
+        </arguments>
+      </xsl:if>
+    </newExpr>
+  </xsl:template>
+
   <xsl:template match="clangStmt[@class='DeclRefExpr']">
     <Var>
       <xsl:if test="clangNestedNameSpecifier">

@@ -218,6 +218,11 @@ bool Pointer::classof(const Type* T) {
   return T->getKind() == TypeKind::Pointer;
 }
 
+TypeRef
+Pointer::getPointee(const Environment& env) const {
+  return env.at(ref);
+}
+
 Pointer::Pointer(const Pointer& other):
   Type(other),
   ref(other.ref)
@@ -232,6 +237,11 @@ ReferenceType::ReferenceType(
 {}
 
 ReferenceType::~ReferenceType() = default;
+
+TypeRef
+ReferenceType::getPointee(const Environment& env) const {
+  return env.at(ref);
+}
 
 LValueReferenceType::LValueReferenceType(
     const DataTypeIdent& ident,
@@ -254,6 +264,11 @@ Type*
 LValueReferenceType::clone() const {
   LValueReferenceType* copy = new LValueReferenceType(*this);
   return copy;
+}
+
+bool
+LValueReferenceType::classof(const Type* T) {
+  return T->getKind() == TypeKind::LValueReference;
 }
 
 ParamList::ParamList(
@@ -458,6 +473,11 @@ CodeFragment Array::addConstQualifier(CodeFragment var) const {
 CodeFragment Array::addVolatileQualifier(CodeFragment var) const {
   // add cv-qualifiers in Array::makeDeclaration, not here
   return var;
+}
+
+TypeRef
+Array::getElemType(const Environment& env) const {
+  return env.at(element);
 }
 
 Array::Size::Size(Kind k, size_t s):
@@ -894,6 +914,38 @@ makeOtherType(const DataTypeIdent& ident) {
 
 CodeFragment TypeRefToString(TypeRef type, const Environment& env) {
   return makeDecl(type, makeTokenNode( "" ), env);
+}
+
+namespace {
+
+template<typename T>
+TypeRef
+getPointee(const TypeRef& type, const Environment& env) {
+  return llvm::cast<T>(type.get())->getPointee(env);
+}
+
+} // namespace
+
+bool
+hasParen(const TypeRef& type, const Environment& env) {
+  return llvm::isa<Function>(type.get());
+  switch (type->getKind()) {
+    case TypeKind::Function:
+      return true;
+
+    case TypeKind::Array:
+    {
+      const auto elemT = llvm::cast<Array>(type.get())->getElemType(env);
+      return hasParen(elemT, env);
+    }
+    case TypeKind::LValueReference:
+      return hasParen(getPointee<LValueReferenceType>(type, env), env);
+    case TypeKind::Pointer:
+      return hasParen(getPointee<Pointer>(type, env), env);
+
+    default:
+      return false;
+  }
 }
 
 }
