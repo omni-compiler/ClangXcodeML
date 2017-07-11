@@ -119,6 +119,16 @@ makeVoidNode() {
   return std::make_shared<TokenNode>("");
 }
 
+namespace {
+// helpers
+
+StringTreeRef
+wrapWithStr(const std::string& opening, const StringTreeRef& str, const std::string& closing) {
+  return makeTokenNode(opening) + str + makeTokenNode(closing);
+}
+
+} // namespace
+
 StringTreeRef
 insertNewLines(const std::vector<StringTreeRef>& strs) {
   auto acc = makeVoidNode();
@@ -153,16 +163,12 @@ join(const std::string& delim, const std::vector<StringTreeRef>& strs) {
 
 StringTreeRef
 wrapWithParen(const StringTreeRef& str) {
-  return makeTokenNode("(")
-    + str
-    + makeTokenNode(")");
+  return wrapWithStr("(", str, ")");
 }
 
 StringTreeRef
 wrapWithSquareBracket(const StringTreeRef& str) {
-  return makeTokenNode("[")
-    + str
-    + makeTokenNode("]");
+  return wrapWithStr("[", str, "]");
 }
 
 } // namespace CXXCodeGen
