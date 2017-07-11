@@ -158,6 +158,13 @@ wrapWithParen(const StringTreeRef& str) {
     + makeTokenNode(")");
 }
 
+StringTreeRef
+wrapWithSquareBracket(const StringTreeRef& str) {
+  return makeTokenNode("[")
+    + str
+    + makeTokenNode("]");
+}
+
 } // namespace CXXCodeGen
 
 CXXCodeGen::StringTreeRef operator+(

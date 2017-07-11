@@ -70,6 +70,7 @@ StringTreeRef insertNewLines(const std::vector<StringTreeRef>&);
 StringTreeRef separateByBlankLines(const std::vector<StringTreeRef>&);
 StringTreeRef join(const std::string&, const std::vector<StringTreeRef>&);
 StringTreeRef wrapWithParen(const StringTreeRef&);
+StringTreeRef wrapWithSquareBracket(const StringTreeRef&);
 
 }
 
