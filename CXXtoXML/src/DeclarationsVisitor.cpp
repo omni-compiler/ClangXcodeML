@@ -421,10 +421,10 @@ DeclarationsVisitor::PostVisitDecl(Decl* D) {
 bool
 DeclarationsVisitor::PreVisitDeclarationNameInfo(DeclarationNameInfo NI) {
   DeclarationName DN = NI.getName();
-  IdentifierInfo *II = DN.getAsIdentifierInfo();
 
+  const auto name = NI.getAsString();
   newChild("clangDeclarationNameInfo",
-          II ? II->getNameStart() : nullptr);
+      name.c_str());
   newProp("class", NameForDeclarationName(DN));
   newBoolProp("is_empty", DN.isEmpty());
 
