@@ -793,6 +793,20 @@ DEFINE_CB(newExprProc) {
     + w.walk(arguments, src);
 }
 
+DEFINE_CB(newArrayExprProc) {
+  const auto type = src.typeTable.at(getProp(node, "type"));
+  const auto pointeeT =
+    llvm::cast<XcodeMl::Pointer>(type.get())->getPointee(src.typeTable);
+  const auto size_expr = w.walk(findFirst(node, "size", src.ctxt), src);
+  const auto decl = pointeeT->makeDeclaration(
+      wrapWithSquareBracket(size_expr),
+      src.typeTable);
+  return makeTokenNode("new") + wrapWithParen(decl);
+    /* new int(*[10])();   // error
+     * new (int(*[10])()); // OK
+     */
+}
+
 DEFINE_CB(argumentsProc) {
   auto acc = makeTokenNode("(");
   bool alreadyPrinted = false;
@@ -1060,6 +1074,7 @@ makeInnerNode,
   { "logNotExpr", showUnaryOp("!") },
   { "sizeOfExpr", showUnaryOp("sizeof") },
   { "newExpr", newExprProc },
+  { "newArrayExpr", newArrayExprProc },
   { "functionCall", functionCallProc },
   { "arguments", argumentsProc },
   { "condExpr", condExprProc },
