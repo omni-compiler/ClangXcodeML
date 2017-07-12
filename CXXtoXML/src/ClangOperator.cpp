@@ -3,6 +3,8 @@
 #include "clang/AST/OperationKinds.h"
 #include "clang/Basic/OperatorKinds.h"
 
+#include "ClangOperator.h"
+
 const char*
 BOtoElemName(clang::BinaryOperatorKind BO) {
   using namespace clang;
