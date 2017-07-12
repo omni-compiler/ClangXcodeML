@@ -143,7 +143,13 @@ makeNameNode(
     const NamedDecl* ND)
 {
   xmlNodePtr node = nullptr;
-  if (auto MD = dyn_cast<CXXMethodDecl>(ND)) {
+  using NK = clang::DeclarationName::NameKind;
+  if (ND->getDeclName().getNameKind() == NK::CXXOperatorName) {
+    // An overloaded operator can be a member function
+    // or a non-member function (= CXXMethod).
+    const auto FD = cast<FunctionDecl>(ND);
+    node = makeNameNodeForCXXOperator(TTI, FD);
+  } else if (auto MD = dyn_cast<CXXMethodDecl>(ND)) {
     node = makeNameNodeForCXXMethodDecl(TTI, MD);
   } else {
     node = xmlNewNode(nullptr, BAD_CAST "name");
