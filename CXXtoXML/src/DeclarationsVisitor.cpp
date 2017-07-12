@@ -123,8 +123,11 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
     if (const auto DRE = dyn_cast<clang::DeclRefExpr>(ME->getBase())) {
       const auto DN = DRE->getNameInfo().getName();
       newBoolProp("is_access_to_anon_record", DN.isEmpty());
-      auto nameNode = makeNameNode(*typetableinfo, DRE);
-      xmlAddChild(curNode, nameNode);
+
+      auto baseName = makeNameNode(*typetableinfo, DRE);
+      auto base = xmlNewNode(nullptr, BAD_CAST "base");
+      xmlAddChild(base, baseName);
+      xmlAddChild(curNode, base);
     }
   }
 
