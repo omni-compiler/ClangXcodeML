@@ -10,4 +10,10 @@ UOtoElemName(clang::UnaryOperatorKind);
 const char*
 OverloadedOperatorKindToString(clang::OverloadedOperatorKind, unsigned);
 
+namespace clang {
+  class FunctionDecl;
+}
+const char*
+getOperatorString(const clang::FunctionDecl*);
+
 #endif /* !CLANGOPERATOR_H */

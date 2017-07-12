@@ -1,7 +1,10 @@
 #include <map>
 #include <string>
+#include "clang/AST/Decl.h"
+#include "clang/AST/DeclCXX.h"
 #include "clang/AST/OperationKinds.h"
 #include "clang/Basic/OperatorKinds.h"
+#include "llvm/Support/Casting.h"
 
 #include "ClangOperator.h"
 
@@ -152,4 +155,13 @@ OverloadedOperatorKindToString(
     default:
       return unique_meaning.at(op);
   }
+}
+
+const char*
+getOperatorString(const clang::FunctionDecl* op) {
+  const auto OOK = op->getOverloadedOperator();
+  assert(OOK != clang::OO_None);
+  const auto arity =
+    op->param_size() + (clang::isa<clang::CXXMethodDecl>(op) ? 1 : 0);
+  return OverloadedOperatorKindToString(OOK, arity);
 }
