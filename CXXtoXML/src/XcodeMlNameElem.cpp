@@ -100,17 +100,25 @@ makeConvNode(
 }
 
 xmlNodePtr
+makeNameNodeForCXXOperator(TypeTableInfo&, const FunctionDecl* FD) {
+  assert(FD->getOverloadedOperator() != OO_None);
+  const auto opName = getOperatorString(FD);
+  auto opNode = xmlNewNode(nullptr, BAD_CAST "name");
+  xmlNodeAddContent(opNode, BAD_CAST opName);
+  return opNode;
+}
+
+xmlNodePtr
 makeNameNodeForCXXMethodDecl(
     TypeTableInfo& TTI,
     const CXXMethodDecl* MD)
 {
-  if (auto OOK = MD->getOverloadedOperator()) {
-    auto opNode = xmlNewNode(nullptr, BAD_CAST "name");
-    xmlNodeAddContent(
-        opNode,
-        BAD_CAST OverloadedOperatorKindToString(OOK, MD->param_size()));
-    return opNode;
-  } else if (const auto ctor = dyn_cast<CXXConstructorDecl>(MD)) {
+  // Assume `MD` is not an overloaded operator.
+  // (makeNameNodeForCXXOperator handles them)
+  using NK = clang::DeclarationName::NameKind;
+  assert(MD->getDeclName().getNameKind() != NK::CXXOperatorName);
+
+  if (const auto ctor = dyn_cast<CXXConstructorDecl>(MD)) {
     return makeCtorNode(TTI, ctor);
   } else if (isa<CXXDestructorDecl>(MD)) {
     return xmlNewNode(nullptr, BAD_CAST "name");
