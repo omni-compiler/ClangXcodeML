@@ -28,7 +28,9 @@ DeclarationsVisitor::getVisitorName() const {
   return OptTraceDeclarations ? "Declarations" : nullptr;
 }
 
-static std::string
+namespace {
+
+std::string
 getSpelling(clang::Expr *E, const clang::ASTContext& CXT) {
   const unsigned INIT_BUFFER_SIZE = 32;
   SmallVector<char, INIT_BUFFER_SIZE> buffer;
@@ -40,12 +42,14 @@ getSpelling(clang::Expr *E, const clang::ASTContext& CXT) {
   return spelling.str();
 }
 
-static std::string
+std::string
 unsignedToHexString(unsigned u) {
   std::stringstream ss;
   ss << std::hex << "0x" << u;
   return ss.str();
 }
+
+} // namespace
 
 bool
 DeclarationsVisitor::PreVisitStmt(Stmt *S) {
@@ -109,13 +113,24 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
     newProp("clangCastKind", CE->getCastKindName());
   }
 
+  if (auto NL = dyn_cast<CXXNewExpr>(S)) {
+    newBoolProp("is_new_array", NL->isArray());
+  }
+
   if (auto ME = dyn_cast<clang::MemberExpr>(S)) {
     newBoolProp("is_arrow", ME->isArrow());
 
     if (const auto DRE = dyn_cast<clang::DeclRefExpr>(ME->getBase())) {
       const auto DN = DRE->getNameInfo().getName();
       newBoolProp("is_access_to_anon_record", DN.isEmpty());
+      auto nameNode = makeNameNode(*typetableinfo, DRE);
+      xmlAddChild(curNode, nameNode);
     }
+  }
+
+  if (auto DRE = dyn_cast<clang::DeclRefExpr>(S)) {
+    auto nameNode = makeNameNode(*typetableinfo, DRE);
+    xmlAddChild(curNode, nameNode);
   }
 
   if (auto CL = dyn_cast<CharacterLiteral>(S)) {
@@ -137,6 +152,18 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
     newProp("token", spelling.str().c_str());
     std::string decimalNotation = IL->getValue().toString(10, true);
     newProp("decimalNotation", decimalNotation.c_str());
+  }
+
+  if (auto FL = dyn_cast<FloatingLiteral>(S)) {
+    const unsigned INIT_BUFFER_SIZE = 32;
+    SmallVector<char, INIT_BUFFER_SIZE> buffer;
+    auto& CXT = mangleContext->getASTContext();
+    auto spelling = clang::Lexer::getSpelling(
+        FL->getLocation(),
+        buffer,
+        CXT.getSourceManager(),
+        CXT.getLangOpts());
+    newProp("token", spelling.str().c_str());
   }
 
   if (auto SL = dyn_cast<StringLiteral>(S)) {
@@ -253,7 +280,9 @@ DeclarationsVisitor::PreVisitAttr(Attr *A) {
   return true;
 }
 
-static const char*
+namespace {
+
+const char*
 getLanguageIdAsString(clang::LinkageSpecDecl::LanguageIDs id) {
   using clang::LinkageSpecDecl;
   switch(id) {
@@ -263,6 +292,8 @@ getLanguageIdAsString(clang::LinkageSpecDecl::LanguageIDs id) {
       return "C++";
   }
 }
+
+} // namespace
 
 bool
 DeclarationsVisitor::PreVisitDecl(Decl *D) {
@@ -413,7 +444,9 @@ DeclarationsVisitor::PreVisitDeclarationNameInfo(DeclarationNameInfo NI) {
   return true;
 }
 
-static std::string
+namespace {
+
+std::string
 SpecifierKindToString(
     clang::NestedNameSpecifier::SpecifierKind kind)
 {
@@ -435,7 +468,7 @@ SpecifierKindToString(
   }
 }
 
-static clang::IdentifierInfo*
+clang::IdentifierInfo*
 getAsIdentifierInfo(clang::NestedNameSpecifier *NNS) {
   switch (NNS->getKind()) {
     case NestedNameSpecifier::Identifier:
@@ -452,6 +485,8 @@ getAsIdentifierInfo(clang::NestedNameSpecifier *NNS) {
       return nullptr;
   }
 }
+
+} // namespace
 
 bool
 DeclarationsVisitor::PreVisitNestedNameSpecifierLoc(

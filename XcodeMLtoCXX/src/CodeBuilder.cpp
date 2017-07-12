@@ -248,13 +248,6 @@ DEFINE_CB(EmptyProc) {
 }
 
 static cxxgen::StringTreeRef
-wrapWithParen(const cxxgen::StringTreeRef& str) {
-  return makeTokenNode("(")
-    + str
-    + makeTokenNode(")");
-}
-
-static cxxgen::StringTreeRef
 foldWithSemicolon(const std::vector<StringTreeRef>& stmts) {
   auto node = makeVoidNode();
   for (auto& stmt : stmts) {
@@ -554,6 +547,11 @@ makeFunctionDeclHead(
   {
     acc = acc + makeTokenNode("virtual");
   }
+  if (isInClassDecl(node, src)
+      && isTrueProp(node, "is_static", false))
+  {
+    acc = acc + makeTokenNode("static");
+  }
   acc = acc +
     (kind == "constructor" || kind == "destructor" || kind == "conversion" ?
       fnType->makeDeclarationWithoutReturnType(
@@ -793,6 +791,42 @@ DEFINE_CB(memberFunctionCallProc) {
   return w.walk(function, src) + w.walk(arguments, src);
 }
 
+DEFINE_CB(newExprProc) {
+  const auto type = src.typeTable.at(getProp(node, "type"));
+  // FIXME: Support scalar type
+  const auto pointeeT =
+    llvm::cast<XcodeMl::Pointer>(type.get())->getPointee(src.typeTable);
+  const auto NewTypeId =
+    pointeeT->makeDeclaration(makeVoidNode(), src.typeTable);
+    /* Ref: [new.expr]/4
+     * new int(*[10])();   // error
+     * new (int(*[10])()); // OK
+     * new int;            // OK
+     * new (int);          // OK
+     * new ((int));        // error
+     */
+  const auto arguments = findFirst(node, "arguments", src.ctxt);
+
+  return makeTokenNode("new")
+    + (hasParen(pointeeT, src.typeTable) ?
+        wrapWithParen(NewTypeId) : NewTypeId)
+    + w.walk(arguments, src);
+}
+
+DEFINE_CB(newArrayExprProc) {
+  const auto type = src.typeTable.at(getProp(node, "type"));
+  const auto pointeeT =
+    llvm::cast<XcodeMl::Pointer>(type.get())->getPointee(src.typeTable);
+  const auto size_expr = w.walk(findFirst(node, "size", src.ctxt), src);
+  const auto decl = pointeeT->makeDeclaration(
+      wrapWithSquareBracket(size_expr),
+      src.typeTable);
+  return makeTokenNode("new") + wrapWithParen(decl);
+    /* new int(*[10])();   // error
+     * new (int(*[10])()); // OK
+     */
+}
+
 DEFINE_CB(argumentsProc) {
   auto acc = makeTokenNode("(");
   bool alreadyPrinted = false;
@@ -997,6 +1031,7 @@ makeInnerNode,
   { "functionDefinition", functionDefinitionProc },
   { "functionDecl", functionDeclProc },
   { "intConstant", EmptySNCProc },
+  { "floatConstant", EmptySNCProc },
   { "moeConstant", EmptySNCProc },
   { "booleanConstant", EmptySNCProc },
   { "funcAddr", EmptySNCProc },
@@ -1059,6 +1094,8 @@ makeInnerNode,
   { "bitNotExpr", showUnaryOp("~") },
   { "logNotExpr", showUnaryOp("!") },
   { "sizeOfExpr", showUnaryOp("sizeof") },
+  { "newExpr", newExprProc },
+  { "newArrayExpr", newArrayExprProc },
   { "functionCall", functionCallProc },
   { "memberFunctionCall", memberFunctionCallProc },
   { "arguments", argumentsProc },

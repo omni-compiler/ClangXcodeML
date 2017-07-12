@@ -118,6 +118,7 @@ public:
   ~Pointer() override;
   Type* clone() const override;
   static bool classof(const Type *);
+  TypeRef getPointee(const Environment&) const;
 protected:
   Pointer(const Pointer&);
 private:
@@ -131,6 +132,7 @@ public:
     override = 0;
   ~ReferenceType() override = 0;
   Type* clone() const override = 0;
+  TypeRef getPointee(const Environment&) const;
 protected:
   ReferenceType(const ReferenceType&) = default;
   DataTypeIdent ref;
@@ -143,6 +145,7 @@ public:
     override;
   ~LValueReferenceType() override = default;
   Type* clone() const override;
+  static bool classof(const Type *);
 protected:
   LValueReferenceType(const LValueReferenceType&) = default;
 };
@@ -213,6 +216,7 @@ public:
   CodeFragment addConstQualifier(CodeFragment) const override;
   CodeFragment addVolatileQualifier(CodeFragment) const override;
   static bool classof(const Type *);
+  TypeRef getElemType(const Environment&) const;
 protected:
   Array(const Array&);
 private:
@@ -339,6 +343,8 @@ TypeRef makeClassType(const DataTypeIdent&, const ClassType::Symbols&);
 TypeRef makeClassType(const DataTypeIdent&, const std::vector<ClassType::BaseClass>&, const ClassType::Symbols&);
 TypeRef makeStructType(const DataTypeIdent&, const CodeFragment&, const Struct::MemberList&);
 TypeRef makeOtherType(const DataTypeIdent&);
+
+bool hasParen(const TypeRef&, const Environment&);
 
 }
 #endif /* !XCODEMLTYPE_H */

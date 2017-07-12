@@ -15,23 +15,23 @@ namespace {
 
 const char*
 getNameKind(const NamedDecl* ND) {
-  auto FD = dyn_cast<FunctionDecl>(ND);
-  if (!FD) {
-    return "name";
+  const auto DN = ND->getDeclName();
+
+  using NK = clang::DeclarationName::NameKind;
+  switch (DN.getNameKind()) {
+    case NK::Identifier:
+      return "name";
+    case NK::CXXOperatorName:
+      return "operator";
+    case NK::CXXConversionFunctionName:
+      return "conversion";
+    case NK::CXXConstructorName:
+      return "constructor";
+    case NK::CXXDestructorName:
+      return "destructor";
+    default:
+      assert(false && "not supported");
   }
-  if (FD->isOverloadedOperator()) {
-    return "operator";
-  }
-  if (isa<CXXConversionDecl>(FD)) {
-    return "conversion";
-  }
-  if (isa<CXXConstructorDecl>(FD)) {
-    return "constructor";
-  }
-  if (isa<CXXDestructorDecl>(FD)) {
-    return "destructor";
-  }
-  return "name";
 }
 
 xmlNodePtr
@@ -99,6 +99,34 @@ makeConvNode(
   return node;
 }
 
+xmlNodePtr
+makeNameNodeForCXXMethodDecl(
+    TypeTableInfo& TTI,
+    const CXXMethodDecl* MD)
+{
+  if (auto OOK = MD->getOverloadedOperator()) {
+    auto opNode = xmlNewNode(nullptr, BAD_CAST "name");
+    xmlNodeAddContent(
+        opNode,
+        BAD_CAST OverloadedOperatorKindToString(OOK, MD->param_size()));
+    return opNode;
+  } else if (const auto ctor = dyn_cast<CXXConstructorDecl>(MD)) {
+    return makeCtorNode(TTI, ctor);
+  } else if (isa<CXXDestructorDecl>(MD)) {
+    return xmlNewNode(nullptr, BAD_CAST "name");
+  } else if (const auto conv = dyn_cast<CXXConversionDecl>(MD)) {
+    return makeConvNode(TTI, conv);
+  }
+
+  auto nameNode = xmlNewNode(nullptr, BAD_CAST "name");
+  const auto ident = MD->getIdentifier();
+  if (!ident) {
+    return nameNode;
+  }
+  xmlNodeAddContent(nameNode, BAD_CAST ident->getName().data());
+  return nameNode;
+}
+
 } // namespace
 
 xmlNodePtr
@@ -147,31 +175,11 @@ makeNameNode(
 }
 
 xmlNodePtr
-makeNameNodeForCXXMethodDecl(
+makeNameNode(
     TypeTableInfo& TTI,
-    const CXXMethodDecl* MD)
+    const DeclRefExpr* DRE)
 {
-  if (auto OOK = MD->getOverloadedOperator()) {
-    auto opNode = xmlNewNode(nullptr, BAD_CAST "name");
-    xmlNodeAddContent(
-        opNode,
-        BAD_CAST OverloadedOperatorKindToString(OOK, MD->param_size()));
-    return opNode;
-  } else if (const auto ctor = dyn_cast<CXXConstructorDecl>(MD)) {
-    return makeCtorNode(TTI, ctor);
-  } else if (isa<CXXDestructorDecl>(MD)) {
-    return xmlNewNode(nullptr, BAD_CAST "name");
-  } else if (const auto conv = dyn_cast<CXXConversionDecl>(MD)) {
-    return makeConvNode(TTI, conv);
-  }
-
-  auto nameNode = xmlNewNode(nullptr, BAD_CAST "name");
-  const auto ident = MD->getIdentifier();
-  if (!ident) {
-    return nameNode;
-  }
-  xmlNodeAddContent(nameNode, BAD_CAST ident->getName().data());
-  return nameNode;
+  return makeNameNode(TTI, DRE->getFoundDecl());
 }
 
 xmlNodePtr
