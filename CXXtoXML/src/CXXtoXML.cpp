@@ -37,7 +37,7 @@ public:
         InheritanceInfo *II = &inheritanceinfo;
         TypeTableInfo typetableinfo(MC, II);
         TypeTableInfo *TTI = &typetableinfo;
-        NnsTableInfo nnstableinfo(TTI);
+        NnsTableInfo nnstableinfo(MC, TTI);
         NnsTableInfo *NTI = &nnstableinfo;
         DeclarationsVisitor DV(MC, rootNode, "clangAST", TTI, NTI);
         Decl *D = CXT.getTranslationUnitDecl();

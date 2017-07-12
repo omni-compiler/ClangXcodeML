@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
-  <xsl:output method="xml" encoding="UTF-8"/>
+  <xsl:output
+    encoding="UTF-8"
+    indent="yes"
+    method="xml" />
   <xsl:template match="Program">
     <XcodeProgram>
       <xsl:apply-templates />
@@ -257,6 +260,45 @@
         <xsl:apply-templates select="*[position() &gt; 1]" />
       </arguments>
     </functionCall>
+  </xsl:template>
+
+  <xsl:template match="clangStmt[@class='CXXNewExpr'
+    and (@is_new_array='true' or @is_new_array='1')]">
+    <newArrayExpr>
+      <xsl:apply-templates select="@*" />
+      <size>
+        <xsl:apply-templates select="clangStmt[1]" />
+      </size>
+      <xsl:if test="clangStmt[2]">
+        <arguments>
+          <xsl:apply-templates
+            select="clangStmt[@class='InitListExpr']/*" />
+        </arguments>
+      </xsl:if>
+    </newArrayExpr>
+  </xsl:template>
+
+  <xsl:template match="clangStmt[@class='CXXNewExpr'
+    and not(@is_new_array='true' or @is_new_array='1')]">
+    <newExpr>
+      <xsl:apply-templates select="@*" />
+      <xsl:if test="clangStmt">
+        <arguments>
+          <xsl:choose>
+            <xsl:when test="clangStmt[@class='CXXConstructExpr']">
+              <!-- class types -->
+              <!-- parse inside CXXConstructExpr -->
+              <xsl:apply-templates
+                select="clangStmt[@class='CXXConstructExpr']/*" />
+            </xsl:when>
+            <xsl:otherwise>
+              <!-- scalar types -->
+              <xsl:apply-templates select="clangStmt" />
+            </xsl:otherwise>
+          </xsl:choose>
+        </arguments>
+      </xsl:if>
+    </newExpr>
   </xsl:template>
 
   <xsl:template match="clangStmt[@class='DeclRefExpr']">
