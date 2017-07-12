@@ -611,6 +611,20 @@ DEFINE_CB(varProc) {
   return makeNestedNameSpec(*nnsident, src) + name;
 }
 
+DEFINE_CB(memberExprProc) {
+  const auto baseName = getProp(node, "member");
+  const auto nnsident = getPropOrNull(node, "nns");
+  const auto name =
+    (nnsident.hasValue() ?
+        makeNestedNameSpec(*nnsident, src)
+      : makeVoidNode())
+    + makeTokenNode(baseName);
+  return
+    makeInnerNode(w.walkChildren(node, src))
+    + makeTokenNode(".")
+    + name;
+}
+
 DEFINE_CB(memberRefProc) {
   const auto baseName = getProp(node, "member");
   const auto nnsident = getPropOrNull(node, "nns");
@@ -768,6 +782,12 @@ DEFINE_CB(exprStatementProc) {
 DEFINE_CB(functionCallProc) {
   xmlNodePtr function = findFirst(node, "function/*", src.ctxt);
   xmlNodePtr arguments = findFirst(node, "arguments", src.ctxt);
+  return w.walk(function, src) + w.walk(arguments, src);
+}
+
+DEFINE_CB(memberFunctionCallProc) {
+  const auto function = findFirst(node, "*[1]", src.ctxt);
+  const auto arguments = findFirst(node, "arguments", src.ctxt);
   return w.walk(function, src) + w.walk(arguments, src);
 }
 
@@ -1019,6 +1039,7 @@ makeInnerNode,
   { "Var", varProc },
   { "varAddr", showNodeContent("(&", ")") },
   { "pointerRef", showUnaryOp("*") },
+  { "memberExpr", memberExprProc },
   { "memberRef", memberRefProc },
   { "memberAddr", memberAddrProc },
   { "memberPointerRef", memberPointerRefProc },
@@ -1076,6 +1097,7 @@ makeInnerNode,
   { "newExpr", newExprProc },
   { "newArrayExpr", newArrayExprProc },
   { "functionCall", functionCallProc },
+  { "memberFunctionCall", memberFunctionCallProc },
   { "arguments", argumentsProc },
   { "condExpr", condExprProc },
   { "exprStatement", exprStatementProc },
