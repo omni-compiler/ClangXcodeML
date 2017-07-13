@@ -78,6 +78,11 @@ getContent(xmlNodePtr node) {
   return content;
 }
 
+std::string
+getName(xmlNodePtr node) {
+  return static_cast<XMLString>(node->name);
+}
+
 bool isTrueProp(xmlNodePtr node, const char* name, bool default_value) {
   if (!xmlHasProp(node, BAD_CAST name)) {
     return default_value;
