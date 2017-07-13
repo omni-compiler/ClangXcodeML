@@ -76,6 +76,22 @@ getDeclNameFromNameNode(
   return makeTokenNode("~") + (*className);
 }
 
+XcodeMl::CodeFragment
+getQualifiedNameFromNameNode(
+    xmlNodePtr nameNode,
+    const llvm::Optional<XcodeMl::DataTypeIdent>& dtident,
+    const SourceInfo& src)
+{
+  const auto name = getDeclNameFromNameNode(nameNode, dtident, src);
+  const auto ident = getPropOrNull(nameNode, "nns");
+  if (ident.hasValue()) {
+    const auto nns = src.nnsTable.at(*ident);
+    return nns->makeDeclaration(src.typeTable, src.nnsTable) + name;
+  } else {
+    return name;
+  }
+}
+
 } // namespace
 
 static XcodeMl::CodeFragment
