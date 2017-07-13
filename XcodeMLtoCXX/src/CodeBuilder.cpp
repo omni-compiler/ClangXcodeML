@@ -840,9 +840,17 @@ DEFINE_CB(exprStatementProc) {
 }
 
 DEFINE_CB(functionCallProc) {
+  xmlNodePtr arguments = findFirst(node, "arguments", src.ctxt);
+
+  if (const auto opNode = findFirst(node, "operator", src.ctxt)) {
+    const auto opName = getContent(opNode);
+    const auto op = makeTokenNode(
+        XcodeMl::OperatorNameToSpelling(opName));
+    return makeTokenNode("operator") + op + w.walk(arguments, src);
+  }
+
   xmlNodePtr function = findFirst(node, "function|memberFunction", src.ctxt);
   const auto callee = findFirst(function, "*", src.ctxt);
-  xmlNodePtr arguments = findFirst(node, "arguments", src.ctxt);
   return w.walk(callee, src) + w.walk(arguments, src);
 }
 
