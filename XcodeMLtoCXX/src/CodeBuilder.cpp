@@ -834,9 +834,10 @@ DEFINE_CB(exprStatementProc) {
 }
 
 DEFINE_CB(functionCallProc) {
-  xmlNodePtr function = findFirst(node, "function/*", src.ctxt);
+  xmlNodePtr function = findFirst(node, "function|memberFunction", src.ctxt);
+  const auto callee = findFirst(function, "*", src.ctxt);
   xmlNodePtr arguments = findFirst(node, "arguments", src.ctxt);
-  return w.walk(function, src) + w.walk(arguments, src);
+  return w.walk(callee, src) + w.walk(arguments, src);
 }
 
 DEFINE_CB(memberFunctionCallProc) {
