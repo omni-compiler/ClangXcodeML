@@ -113,6 +113,12 @@ getDeclNameFromTypedNode(
     const auto name = classT->name();
     assert(name.hasValue());
     return makeTokenNode("~") + (*name);
+  } else if (const auto opNode = findFirst(node, "operator", src.ctxt)) {
+    using namespace XcodeMl;
+    const auto opName = getContent(opNode);
+    const auto op = makeTokenNode(
+        OperatorNameToSpelling(opName));
+    return makeTokenNode("operator") + op;
   } else if (const auto conv = findFirst(node, "conversion", src.ctxt)) {
     const auto dtident = getProp(conv, "destination_type");
     const auto returnT = src.typeTable.at(dtident);
