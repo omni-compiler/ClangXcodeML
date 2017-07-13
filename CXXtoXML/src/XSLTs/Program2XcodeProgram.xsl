@@ -399,20 +399,16 @@
          else ('memberRef')" -->
     <xsl:element name="{$elemName}">
       <xsl:apply-templates select="@*" />
-      <member>
-        <xsl:apply-templates select="name" />
-      </member>
-      <object>
-        <xsl:choose>
-          <xsl:when test="$is_anon" />
-          <xsl:when test="$is_arrow">
-            <xsl:apply-templates select="clangStmt" />
-          </xsl:when>
-          <xsl:otherwise>
-            <xsl:apply-templates select="clangStmt" />
-          </xsl:otherwise>
-        </xsl:choose>
-      </object>
+      <xsl:apply-templates select="name" />
+      <xsl:choose>
+        <xsl:when test="$is_anon" />
+        <xsl:when test="$is_arrow">
+          <xsl:apply-templates select="clangStmt" />
+        </xsl:when>
+        <xsl:otherwise>
+          <xsl:apply-templates select="clangStmt" />
+        </xsl:otherwise>
+      </xsl:choose>
     </xsl:element>
   </xsl:template>
 
