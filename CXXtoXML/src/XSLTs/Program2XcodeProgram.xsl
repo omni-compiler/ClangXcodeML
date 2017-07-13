@@ -399,7 +399,7 @@
          else ('memberRef')" -->
     <xsl:element name="{$elemName}">
       <xsl:apply-templates select="@*" />
-      <xsl:apply-templates select="name" />
+      <!-- lhs of member access (object) -->
       <xsl:choose>
         <xsl:when test="$is_anon" />
         <xsl:when test="$is_arrow">
@@ -409,6 +409,9 @@
           <xsl:apply-templates select="clangStmt" />
         </xsl:otherwise>
       </xsl:choose>
+
+      <!-- rhs of member access (name) -->
+      <xsl:apply-templates select="name" />
     </xsl:element>
   </xsl:template>
 
