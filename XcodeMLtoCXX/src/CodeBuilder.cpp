@@ -17,6 +17,7 @@
 #include "StringTree.h"
 #include "Symbol.h"
 #include "XcodeMlNns.h"
+#include "XcodeMlOperator.h"
 #include "XcodeMlType.h"
 #include "XcodeMlEnvironment.h"
 #include "NnsAnalyzer.h"
@@ -37,6 +38,45 @@ using cxxgen::makeVoidNode;
 
 using cxxgen::insertNewLines;
 using cxxgen::separateByBlankLines;
+
+namespace {
+
+XcodeMl::CodeFragment
+getDeclNameFromNameNode(
+    xmlNodePtr nameNode,
+    const llvm::Optional<XcodeMl::DataTypeIdent>& dtident,
+    const SourceInfo& src)
+{
+  const auto kind = getName(nameNode);
+  if (kind == "name") {
+    return makeTokenNode(getContent(nameNode));
+  } else if (kind == "operator") {
+    using namespace XcodeMl;
+    const auto opName = getContent(nameNode);
+    const auto op = makeTokenNode(
+        OperatorNameToSpelling(opName));
+    return makeTokenNode("operator") + op;
+  } else if (getName(nameNode) == "conversion") {
+    const auto dtident = getProp(nameNode, "destination_type");
+    const auto returnT = src.typeTable.at(dtident);
+    return makeTokenNode("operator")
+      + returnT->makeDeclaration(makeVoidNode(), src.typeTable);
+  }
+  assert(dtident.hasValue());
+  const auto T = src.typeTable[*dtident];
+  const auto classT = llvm::cast<XcodeMl::ClassType>(T.get());
+  const auto className = classT->name();
+  assert(className.hasValue());
+
+  if (kind == "constructor") {
+    return *className;
+  }
+
+  assert(kind == "destructor");
+  return makeTokenNode("~") + (*className);
+}
+
+} // namespace
 
 static XcodeMl::CodeFragment
 getDeclNameFromTypedNode(
