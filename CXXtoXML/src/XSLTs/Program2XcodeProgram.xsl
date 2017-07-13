@@ -399,28 +399,20 @@
          else ('memberRef')" -->
     <xsl:element name="{$elemName}">
       <xsl:apply-templates select="@*" />
-      <xsl:attribute name="member">
-        <xsl:value-of select="clangDeclarationNameInfo[@class='Identifier']" />
-      </xsl:attribute>
-      <xsl:if test="clangNestedNameSpecifier">
-        <!--
-             The second operand of member access is optionally qualified.
-             Example: `x.T::mem`, `x->T::mem`
-        -->
-        <xsl:attribute name="nns">
-          <xsl:value-of select="clangNestedNameSpecifier/@nns" />
-        </xsl:attribute>
-      </xsl:if>
-
-      <xsl:choose>
-        <xsl:when test="$is_anon" />
-        <xsl:when test="$is_arrow">
-          <xsl:apply-templates select="clangStmt" />
-        </xsl:when>
-        <xsl:otherwise>
-          <xsl:apply-templates select="clangStmt" />
-        </xsl:otherwise>
-      </xsl:choose>
+      <member>
+        <xsl:apply-templates select="name" />
+      </member>
+      <object>
+        <xsl:choose>
+          <xsl:when test="$is_anon" />
+          <xsl:when test="$is_arrow">
+            <xsl:apply-templates select="clangStmt" />
+          </xsl:when>
+          <xsl:otherwise>
+            <xsl:apply-templates select="clangStmt" />
+          </xsl:otherwise>
+        </xsl:choose>
+      </object>
     </xsl:element>
   </xsl:template>
 

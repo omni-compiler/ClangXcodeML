@@ -122,9 +122,7 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
 
     const auto MD = ME->getMemberDecl();
     auto memberName = makeNameNode(*typetableinfo, MD);
-    auto member = xmlNewNode(nullptr, BAD_CAST "member");
-    xmlAddChild(member, memberName);
-    xmlAddChild(curNode, member);
+    xmlAddChild(curNode, memberName);
 
     if (const auto DRE = dyn_cast<clang::DeclRefExpr>(ME->getBase())) {
       const auto DN = DRE->getNameInfo().getName();
