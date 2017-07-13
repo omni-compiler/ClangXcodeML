@@ -113,6 +113,14 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
     newProp("clangCastKind", CE->getCastKindName());
   }
 
+  if (auto OCE = dyn_cast<clang::CXXOperatorCallExpr>(S)) {
+    newProp(
+        "xcodeml_operator_kind",
+        OverloadedOperatorKindToString(
+          OCE->getOperator(),
+          OCE->getNumArgs()));
+  }
+
   if (auto NL = dyn_cast<CXXNewExpr>(S)) {
     newBoolProp("is_new_array", NL->isArray());
   }
@@ -130,7 +138,9 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
     }
   }
 
-  if (auto DRE = dyn_cast<clang::DeclRefExpr>(S)) {
+  if (auto DRE = dyn_cast<DeclRefExpr>(S)) {
+    const auto kind = DRE->getDecl()->getDeclKindName();
+    newProp("declkind", kind);
     auto nameNode = makeNameNode(*typetableinfo, DRE);
     xmlAddChild(curNode, nameNode);
   }
@@ -429,10 +439,10 @@ DeclarationsVisitor::PostVisitDecl(Decl* D) {
 bool
 DeclarationsVisitor::PreVisitDeclarationNameInfo(DeclarationNameInfo NI) {
   DeclarationName DN = NI.getName();
-  IdentifierInfo *II = DN.getAsIdentifierInfo();
 
+  const auto name = NI.getAsString();
   newChild("clangDeclarationNameInfo",
-          II ? II->getNameStart() : nullptr);
+      name.c_str());
   newProp("class", NameForDeclarationName(DN));
   newBoolProp("is_empty", DN.isEmpty());
 
