@@ -363,12 +363,14 @@
   </xsl:template>
 
   <xsl:template match="clangStmt[@class='CXXMemberCallExpr']">
-    <memberFunctionCall>
-      <xsl:apply-templates select="*[1]" />
+    <functionCall>
+      <memberFunction>
+        <xsl:apply-templates select="clangStmt[1]" />
+      </memberFunction>
       <arguments>
-        <xsl:apply-templates select="*[position() &gt; 1]" />
+        <xsl:apply-templates select="clangStmt[position() &gt; 1]" />
       </arguments>
-    </memberFunctionCall>
+    </functionCall>
   </xsl:template>
 
   <xsl:template match="clangStmt[@class='CXXThisExpr']">
