@@ -262,6 +262,38 @@
     </functionCall>
   </xsl:template>
 
+  <xsl:template match="clangStmt[@class='CXXOperatorCallExpr']">
+    <functionCall>
+      <xsl:apply-templates select="@*" />
+      <xsl:choose>
+
+        <xsl:when test="clangStmt[1]/clangStmt[1]/@declkind = 'CXXMethod'">
+          <memberFunction>
+            <memberExpr>
+              <xsl:apply-templates select="clangStmt[2]" />
+              <operator>
+                <xsl:value-of select="@xcodeml_operator_kind" />
+              </operator>
+            </memberExpr>
+          </memberFunction>
+          <arguments>
+            <xsl:apply-templates select="*[position() &gt; 2]" />
+          </arguments>
+        </xsl:when>
+
+        <xsl:otherwise>
+          <operator>
+            <xsl:value-of select="@xcodeml_operator_kind" />
+          </operator>
+          <arguments>
+            <xsl:apply-templates select="*[position() &gt; 1]" />
+          </arguments>
+        </xsl:otherwise>
+
+      </xsl:choose>
+    </functionCall>
+  </xsl:template>
+
   <xsl:template match="clangStmt[@class='CXXNewExpr'
     and (@is_new_array='true' or @is_new_array='1')]">
     <newArrayExpr>
