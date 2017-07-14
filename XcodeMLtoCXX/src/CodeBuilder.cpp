@@ -92,9 +92,7 @@ getQualifiedNameFromNameNode(
   }
 }
 
-} // namespace
-
-static XcodeMl::CodeFragment
+XcodeMl::CodeFragment
 getDeclNameFromTypedNode(
     xmlNodePtr node,
     const SourceInfo& src)
@@ -128,7 +126,7 @@ getDeclNameFromTypedNode(
   return makeTokenNode(getNameFromIdNode(node, src.ctxt));
 }
 
-static XcodeMl::CodeFragment
+XcodeMl::CodeFragment
 getQualifiedNameFromTypedNode(
     xmlNodePtr node,
     const SourceInfo& src)
@@ -144,7 +142,7 @@ getQualifiedNameFromTypedNode(
   }
 }
 
-static XcodeMl::CodeFragment
+XcodeMl::CodeFragment
 wrapWithLangLink(
     const XcodeMl::CodeFragment& content,
     xmlNodePtr node)
@@ -162,7 +160,7 @@ wrapWithLangLink(
   }
 }
 
-static XcodeMl::CodeFragment
+XcodeMl::CodeFragment
 makeNestedNameSpec(
     const XcodeMl::NnsRef& nns,
     const SourceInfo& src)
@@ -170,7 +168,7 @@ makeNestedNameSpec(
   return nns->makeDeclaration(src.typeTable, src.nnsTable);
 }
 
-static XcodeMl::CodeFragment
+XcodeMl::CodeFragment
 makeNestedNameSpec(
     const std::string& ident,
     const SourceInfo& src)
@@ -179,7 +177,7 @@ makeNestedNameSpec(
   return makeNestedNameSpec(nns, src);
 }
 
-static bool
+bool
 isInClassDecl(xmlNodePtr node, const SourceInfo& src) {
   // FIXME: temporary implementation
   auto parent = findFirst(node, "..", src.ctxt);
@@ -240,7 +238,7 @@ std::string findSymbolType(const SymbolMap& table, const std::string& name) {
       name + " not found in SymbolMap: " + log.str());
 }
 
-static std::string
+std::string
 getDtidentFromTypedNode(
     xmlNodePtr node,
     xmlXPathContextPtr ctxt,
@@ -299,7 +297,7 @@ SymbolMap parseGlobalSymbols(
 /*!
  * \brief Define new CodeBuilder::Procedure named \c name.
  */
-#define DEFINE_CB(name) static StringTreeRef name(CB_ARGS)
+#define DEFINE_CB(name) StringTreeRef name(CB_ARGS)
 
 DEFINE_CB(NullProc) {
   return CXXCodeGen::makeVoidNode();
@@ -309,7 +307,7 @@ DEFINE_CB(EmptyProc) {
   return makeInnerNode( w.walkChildren(node, src) );
 }
 
-static cxxgen::StringTreeRef
+cxxgen::StringTreeRef
 foldWithSemicolon(const std::vector<StringTreeRef>& stmts) {
   auto node = makeVoidNode();
   for (auto& stmt : stmts) {
@@ -482,7 +480,7 @@ getParams(xmlNodePtr fnNode, const SourceInfo& src) {
   return std::move(vec);
 }
 
-static SymbolEntry
+SymbolEntry
 ClassSymbolsToSymbolEntry(const XcodeMl::ClassType* T) {
   using namespace XcodeMl;
   assert(T);
@@ -496,7 +494,7 @@ ClassSymbolsToSymbolEntry(const XcodeMl::ClassType* T) {
   return std::move(entry);
 }
 
-static XcodeMl::CodeFragment
+XcodeMl::CodeFragment
 makeBases(
     XcodeMl::ClassType *T,
     SourceInfo& src)
@@ -583,7 +581,7 @@ DEFINE_CB(classDeclProc) {
     makeTokenNode(";");
 }
 
-static XcodeMl::CodeFragment
+XcodeMl::CodeFragment
 makeFunctionDeclHead(
     xmlNodePtr node,
     const std::vector<XcodeMl::CodeFragment> args,
@@ -944,7 +942,7 @@ DEFINE_CB(addrOfExprProc) {
   return wrap(w, node, src);
 }
 
-static XcodeMl::CodeFragment
+XcodeMl::CodeFragment
 declareClassTypeInit(
     const CodeBuilder& w,
     xmlNodePtr ctorExpr,
@@ -1039,7 +1037,7 @@ DEFINE_CB(ctorInitListProc) {
   return decl;
 }
 
-static XcodeMl::CodeFragment
+XcodeMl::CodeFragment
 getCtorInitName(
     xmlNodePtr node,
     const XcodeMl::Environment& env)
@@ -1188,6 +1186,8 @@ makeInnerNode,
   { "Decl_Record", NullProc },
     // Ignore Decl_Record (structs are already emitted)
 });
+
+} // namespace
 
 /*!
  * \brief Traverse an XcodeML document and generate C++ source code.
