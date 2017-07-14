@@ -320,6 +320,14 @@
     </xsl:element>
   </xsl:template>
 
+  <xsl:template match="clangStmt[@class='InitListExpr']">
+    <value>
+      <value>
+        <xsl:apply-templates />
+      </value>
+    </value>
+  </xsl:template>
+
   <xsl:template match="clangStmt[@class='ImplicitCastExpr']">
     <implicitCastExpr>
       <xsl:apply-templates select="@*" />
