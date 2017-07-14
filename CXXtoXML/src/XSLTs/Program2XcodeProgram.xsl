@@ -354,9 +354,7 @@
 
   <xsl:template match="clangStmt[@class='InitListExpr']">
     <value>
-      <value>
-        <xsl:apply-templates />
-      </value>
+      <xsl:apply-templates />
     </value>
   </xsl:template>
 
