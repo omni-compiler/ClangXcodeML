@@ -17,6 +17,7 @@
 #include "StringTree.h"
 #include "Symbol.h"
 #include "XcodeMlNns.h"
+#include "XcodeMlOperator.h"
 #include "XcodeMlType.h"
 #include "XcodeMlEnvironment.h"
 #include "NnsAnalyzer.h"
@@ -38,6 +39,61 @@ using cxxgen::makeVoidNode;
 using cxxgen::insertNewLines;
 using cxxgen::separateByBlankLines;
 
+namespace {
+
+XcodeMl::CodeFragment
+getDeclNameFromNameNode(
+    xmlNodePtr nameNode,
+    const llvm::Optional<XcodeMl::DataTypeIdent>& dtident,
+    const SourceInfo& src)
+{
+  const auto kind = getName(nameNode);
+  if (kind == "name") {
+    return makeTokenNode(getContent(nameNode));
+  } else if (kind == "operator") {
+    using namespace XcodeMl;
+    const auto opName = getContent(nameNode);
+    const auto op = makeTokenNode(
+        OperatorNameToSpelling(opName));
+    return makeTokenNode("operator") + op;
+  } else if (getName(nameNode) == "conversion") {
+    const auto dtident = getProp(nameNode, "destination_type");
+    const auto returnT = src.typeTable.at(dtident);
+    return makeTokenNode("operator")
+      + returnT->makeDeclaration(makeVoidNode(), src.typeTable);
+  }
+  assert(dtident.hasValue());
+  const auto T = src.typeTable[*dtident];
+  const auto classT = llvm::cast<XcodeMl::ClassType>(T.get());
+  const auto className = classT->name();
+  assert(className.hasValue());
+
+  if (kind == "constructor") {
+    return *className;
+  }
+
+  assert(kind == "destructor");
+  return makeTokenNode("~") + (*className);
+}
+
+XcodeMl::CodeFragment
+getQualifiedNameFromNameNode(
+    xmlNodePtr nameNode,
+    const llvm::Optional<XcodeMl::DataTypeIdent>& dtident,
+    const SourceInfo& src)
+{
+  const auto name = getDeclNameFromNameNode(nameNode, dtident, src);
+  const auto ident = getPropOrNull(nameNode, "nns");
+  if (ident.hasValue()) {
+    const auto nns = src.nnsTable.at(*ident);
+    return nns->makeDeclaration(src.typeTable, src.nnsTable) + name;
+  } else {
+    return name;
+  }
+}
+
+} // namespace
+
 static XcodeMl::CodeFragment
 getDeclNameFromTypedNode(
     xmlNodePtr node,
@@ -57,6 +113,12 @@ getDeclNameFromTypedNode(
     const auto name = classT->name();
     assert(name.hasValue());
     return makeTokenNode("~") + (*name);
+  } else if (const auto opNode = findFirst(node, "operator", src.ctxt)) {
+    using namespace XcodeMl;
+    const auto opName = getContent(opNode);
+    const auto op = makeTokenNode(
+        OperatorNameToSpelling(opName));
+    return makeTokenNode("operator") + op;
   } else if (const auto conv = findFirst(node, "conversion", src.ctxt)) {
     const auto dtident = getProp(conv, "destination_type");
     const auto returnT = src.typeTable.at(dtident);
@@ -611,6 +673,18 @@ DEFINE_CB(varProc) {
   return makeNestedNameSpec(*nnsident, src) + name;
 }
 
+DEFINE_CB(memberExprProc) {
+  const auto expr = findFirst(node, "*", src.ctxt);
+  const auto name = getQualifiedNameFromNameNode(
+      findFirst(node, "*[2]", src.ctxt),
+      getPropOrNull(node, "type"),
+      src);
+  return
+    w.walk(expr, src)
+    + makeTokenNode(".")
+    + name;
+}
+
 DEFINE_CB(memberRefProc) {
   const auto baseName = getProp(node, "member");
   const auto nnsident = getPropOrNull(node, "nns");
@@ -766,8 +840,23 @@ DEFINE_CB(exprStatementProc) {
 }
 
 DEFINE_CB(functionCallProc) {
-  xmlNodePtr function = findFirst(node, "function/*", src.ctxt);
   xmlNodePtr arguments = findFirst(node, "arguments", src.ctxt);
+
+  if (const auto opNode = findFirst(node, "operator", src.ctxt)) {
+    const auto opName = getContent(opNode);
+    const auto op = makeTokenNode(
+        XcodeMl::OperatorNameToSpelling(opName));
+    return makeTokenNode("operator") + op + w.walk(arguments, src);
+  }
+
+  xmlNodePtr function = findFirst(node, "function|memberFunction", src.ctxt);
+  const auto callee = findFirst(function, "*", src.ctxt);
+  return w.walk(callee, src) + w.walk(arguments, src);
+}
+
+DEFINE_CB(memberFunctionCallProc) {
+  const auto function = findFirst(node, "*[1]", src.ctxt);
+  const auto arguments = findFirst(node, "arguments", src.ctxt);
   return w.walk(function, src) + w.walk(arguments, src);
 }
 
@@ -1019,6 +1108,7 @@ makeInnerNode,
   { "Var", varProc },
   { "varAddr", showNodeContent("(&", ")") },
   { "pointerRef", showUnaryOp("*") },
+  { "memberExpr", memberExprProc },
   { "memberRef", memberRefProc },
   { "memberAddr", memberAddrProc },
   { "memberPointerRef", memberPointerRefProc },
@@ -1076,6 +1166,7 @@ makeInnerNode,
   { "newExpr", newExprProc },
   { "newArrayExpr", newArrayExprProc },
   { "functionCall", functionCallProc },
+  { "memberFunctionCall", memberFunctionCallProc },
   { "arguments", argumentsProc },
   { "condExpr", condExprProc },
   { "exprStatement", exprStatementProc },

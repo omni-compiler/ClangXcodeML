@@ -100,17 +100,25 @@ makeConvNode(
 }
 
 xmlNodePtr
+makeNameNodeForCXXOperator(TypeTableInfo&, const FunctionDecl* FD) {
+  assert(FD->getOverloadedOperator() != OO_None);
+  const auto opName = getOperatorString(FD);
+  auto opNode = xmlNewNode(nullptr, BAD_CAST "name");
+  xmlNodeAddContent(opNode, BAD_CAST opName);
+  return opNode;
+}
+
+xmlNodePtr
 makeNameNodeForCXXMethodDecl(
     TypeTableInfo& TTI,
     const CXXMethodDecl* MD)
 {
-  if (auto OOK = MD->getOverloadedOperator()) {
-    auto opNode = xmlNewNode(nullptr, BAD_CAST "name");
-    xmlNodeAddContent(
-        opNode,
-        BAD_CAST OverloadedOperatorKindToString(OOK, MD->param_size()));
-    return opNode;
-  } else if (const auto ctor = dyn_cast<CXXConstructorDecl>(MD)) {
+  // Assume `MD` is not an overloaded operator.
+  // (makeNameNodeForCXXOperator handles them)
+  using NK = clang::DeclarationName::NameKind;
+  assert(MD->getDeclName().getNameKind() != NK::CXXOperatorName);
+
+  if (const auto ctor = dyn_cast<CXXConstructorDecl>(MD)) {
     return makeCtorNode(TTI, ctor);
   } else if (isa<CXXDestructorDecl>(MD)) {
     return xmlNewNode(nullptr, BAD_CAST "name");
@@ -135,7 +143,13 @@ makeNameNode(
     const NamedDecl* ND)
 {
   xmlNodePtr node = nullptr;
-  if (auto MD = dyn_cast<CXXMethodDecl>(ND)) {
+  using NK = clang::DeclarationName::NameKind;
+  if (ND->getDeclName().getNameKind() == NK::CXXOperatorName) {
+    // An overloaded operator can be a member function
+    // or a non-member function (= CXXMethod).
+    const auto FD = cast<FunctionDecl>(ND);
+    node = makeNameNodeForCXXOperator(TTI, FD);
+  } else if (auto MD = dyn_cast<CXXMethodDecl>(ND)) {
     node = makeNameNodeForCXXMethodDecl(TTI, MD);
   } else {
     node = xmlNewNode(nullptr, BAD_CAST "name");

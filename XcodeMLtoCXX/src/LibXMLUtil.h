@@ -14,6 +14,7 @@ xmlNodePtr nth(xmlXPathObjectPtr obj, size_t n);
 std::string getProp(xmlNodePtr node, const std::string& attr);
 llvm::Optional<std::string> getPropOrNull(xmlNodePtr, const std::string&);
 std::string getContent(xmlNodePtr);
+std::string getName(xmlNodePtr);
 
 /* Utility for XcodeML */
 bool isTrueProp(xmlNodePtr node, const char* name, bool default_value);

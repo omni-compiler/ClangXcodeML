@@ -262,6 +262,38 @@
     </functionCall>
   </xsl:template>
 
+  <xsl:template match="clangStmt[@class='CXXOperatorCallExpr']">
+    <functionCall>
+      <xsl:apply-templates select="@*" />
+      <xsl:choose>
+
+        <xsl:when test="clangStmt[1]/clangStmt[1]/@declkind = 'CXXMethod'">
+          <memberFunction>
+            <memberExpr>
+              <xsl:apply-templates select="clangStmt[2]" />
+              <operator>
+                <xsl:value-of select="@xcodeml_operator_kind" />
+              </operator>
+            </memberExpr>
+          </memberFunction>
+          <arguments>
+            <xsl:apply-templates select="*[position() &gt; 2]" />
+          </arguments>
+        </xsl:when>
+
+        <xsl:otherwise>
+          <operator>
+            <xsl:value-of select="@xcodeml_operator_kind" />
+          </operator>
+          <arguments>
+            <xsl:apply-templates select="*[position() &gt; 1]" />
+          </arguments>
+        </xsl:otherwise>
+
+      </xsl:choose>
+    </functionCall>
+  </xsl:template>
+
   <xsl:template match="clangStmt[@class='CXXNewExpr'
     and (@is_new_array='true' or @is_new_array='1')]">
     <newArrayExpr>
@@ -370,6 +402,17 @@
     </stringConstant>
   </xsl:template>
 
+  <xsl:template match="clangStmt[@class='CXXMemberCallExpr']">
+    <functionCall>
+      <memberFunction>
+        <xsl:apply-templates select="clangStmt[1]" />
+      </memberFunction>
+      <arguments>
+        <xsl:apply-templates select="clangStmt[position() &gt; 1]" />
+      </arguments>
+    </functionCall>
+  </xsl:template>
+
   <xsl:template match="clangStmt[@class='CXXThisExpr']">
     <thisExpr />
   </xsl:template>
@@ -380,40 +423,35 @@
       select="(@is_access_to_anon_record = '1')
               or (@is_access_to_anon_record = 'true')" />
     <xsl:variable
+      name="is_arrow"
+      select="(@is_arrow = '1')
+              or (@is_arrow = 'true')" />
+    <xsl:variable
       name="elemName"
       select="concat(substring('xcodemlAccessToAnonRecordExpr',
                                1 div $is_anon),
+                     substring('memberExpr',
+                               1 div (not($is_anon) and not($is_arrow))),
                      substring('memberRef',
-                               1 div not($is_anon)))"/>
+                               1 div (not($is_anon) and $is_arrow)))"/>
     <!-- "if ($is_anon)
          then ('xcodemlAccessToAnonRecordExpr')
          else ('memberRef')" -->
     <xsl:element name="{$elemName}">
       <xsl:apply-templates select="@*" />
-      <xsl:attribute name="member">
-        <xsl:value-of select="clangDeclarationNameInfo[@class='Identifier']" />
-      </xsl:attribute>
-      <xsl:if test="clangNestedNameSpecifier">
-        <!--
-             The second operand of member access is optionally qualified.
-             Example: `x.T::mem`, `x->T::mem`
-        -->
-        <xsl:attribute name="nns">
-          <xsl:value-of select="clangNestedNameSpecifier/@nns" />
-        </xsl:attribute>
-      </xsl:if>
-
+      <!-- lhs of member access (object) -->
       <xsl:choose>
         <xsl:when test="$is_anon" />
-        <xsl:when test="@is_arrow = '1' or @is_arrow = 'true'">
+        <xsl:when test="$is_arrow">
           <xsl:apply-templates select="clangStmt" />
         </xsl:when>
         <xsl:otherwise>
-          <AddrOfExpr>
-            <xsl:apply-templates select="clangStmt" />
-          </AddrOfExpr>
+          <xsl:apply-templates select="clangStmt" />
         </xsl:otherwise>
       </xsl:choose>
+
+      <!-- rhs of member access (name) -->
+      <xsl:apply-templates select="name" />
     </xsl:element>
   </xsl:template>
 
