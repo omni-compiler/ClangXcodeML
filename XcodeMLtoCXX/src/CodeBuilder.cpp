@@ -253,17 +253,6 @@ getDtidentFromTypedNode(
   }
 }
 
-/*!
- * \brief Search for \c ident visible in current scope.
- * \pre src.symTable contains \c ident.
- * \return Data type of \c ident.
- */
-XcodeMl::TypeRef getIdentType(const SourceInfo& src, const std::string& ident) {
-  assert(!ident.empty());
-  std::string dataTypeIdent(findSymbolType(src.symTable, ident));
-  return src.typeTable[dataTypeIdent];
-}
-
 SymbolMap parseGlobalSymbols(
     xmlNodePtr,
     xmlXPathContextPtr xpathCtx,
@@ -318,18 +307,6 @@ foldWithSemicolon(const std::vector<StringTreeRef>& stmts) {
 
 DEFINE_CB(walkChildrenWithInsertingNewLines) {
   return foldWithSemicolon( w.walkChildren(node, src) );
-}
-
-CodeBuilder::Procedure outputStringLn(std::string str) {
-  return [str](CB_ARGS) {
-    return makeTokenNode(str) + makeNewLineNode();
-  };
-}
-
-CodeBuilder::Procedure outputString(std::string str) {
-  return [str](CB_ARGS) {
-    return makeTokenNode(str);
-  };
 }
 
 CodeBuilder::Procedure handleBrackets(
