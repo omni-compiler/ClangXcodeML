@@ -2,6 +2,8 @@
 #include "clang/Driver/Options.h"
 #include "clang/Lex/Lexer.h"
 
+#include <sstream>
+#include <string>
 #include <type_traits>
 #include <unistd.h>
 
@@ -45,9 +47,8 @@ void XMLVisitorBaseImpl::newChild(const char *Name, const char *Content) {
 
 void XMLVisitorBaseImpl::newProp(const char *Name, int Val, xmlNodePtr N) {
     if (!N) N = curNode;
-    xmlChar Buf[BUFSIZ];
-    xmlStrPrintf(Buf, BUFSIZ, BAD_CAST "%d", Val);
-    xmlNewProp(N, BAD_CAST Name, Buf);
+    const auto buf = std::to_string(Val);
+    xmlNewProp(N, BAD_CAST Name, BAD_CAST(buf.c_str()));
 }
 
 void XMLVisitorBaseImpl::newProp(const char *Name, const char *Val,
@@ -62,12 +63,11 @@ void XMLVisitorBaseImpl::newBoolProp(const char *Name, bool Val, xmlNodePtr N) {
 
 void XMLVisitorBaseImpl::newComment(const xmlChar *str, xmlNodePtr N) {
     if (!N) N = curNode;
-    xmlChar Buf[BUFSIZ];
-    const char *VN = getVisitorName();
-    if (VN) {
-        xmlStrPrintf(Buf, BUFSIZ,
-                     BAD_CAST "%s::%s", BAD_CAST VN, str);
-        xmlNodePtr Comment = xmlNewComment(Buf);
+    const auto VN = static_cast<std::string>(getVisitorName());
+    if (!VN.empty()) {
+        std::stringstream ss; ss << str;
+        const auto buf = VN + "::" + ss.str();
+        xmlNodePtr Comment = xmlNewComment(BAD_CAST(buf.c_str()));
         xmlAddChild(N, Comment);
         //errs() << (const char *)Buf << "\n";
     }
