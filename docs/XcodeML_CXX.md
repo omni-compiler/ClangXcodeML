@@ -1706,17 +1706,17 @@ pointerRef要素は次の属性を持つことができる。
 `functionCall`要素は関数呼び出しを表す。
 
 | `<functionCall>`
-|   `<function>`または`<memberRef>`または`<operator>`
+|   `<function>`または`<memberFunction>`または`<operator>`
 |     式の要素
-|   `</function>`または`</memberRef>`または`</operator>`
+|   `</function>`または`</memberFunction>`または`</operator>`
 |   `arguments`要素([-@sec:expr.arguments]項)
 | `</functionCall>`
 
 属性(必須): `type`
 
 `function`要素には呼び出す関数のアドレスを指定する。
-`memberRef`　　　メンバ関数呼び出しの時のメンバアクセスの式を指定する。
-`operator`　　　グローバル関数の形の演算子オーバーロードの呼び出しの場合の演算子名を指定する。
+`memberFunction`　メンバー関数呼び出しを表す。memberExpr要素を子要素にもつ。
+`operator`　　　非メンバー関数の形の演算子関数の呼び出しの場合の演算子名を指定する。
 `arguments`要素には引数の並びを指定する。
 
 ### `arguments`要素 {#sec:expr.arguments}
