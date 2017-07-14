@@ -81,15 +81,6 @@ DEFINE_CCH(CXXTemporaryObjectExprProc) {
     makeTokenNode(")");
 }
 
-DEFINE_CCH(initListExprProc) {
-  const auto children = findNodes(node, "*", src.ctxt);
-  std::vector<CodeFragment> elems;
-  for (auto&& child : children) {
-    elems.push_back(w.walk(child, src));
-  }
-  return wrapWithBrace(join(",", elems));
-}
-
 const ClangClassHandler ClangStmtHandler(
     "class",
     cxxgen::makeInnerNode,
@@ -99,7 +90,6 @@ const ClangClassHandler ClangStmtHandler(
       { "CXXConstructExpr", CXXCtorExprProc },
       { "CXXMemberCallExpr", CXXMemberCallExprProc },
       { "CXXTemporaryObjectExpr", CXXTemporaryObjectExprProc },
-      { "InitListExpr", initListExprProc },
     });
 
 DEFINE_CCH(FriendDeclProc) {
