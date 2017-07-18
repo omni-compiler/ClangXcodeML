@@ -41,7 +41,7 @@
     <xsd:complexType>
       <xsd:sequence>
         <xsd:element minOccurs="0" maxOccurs="unbounded"
-          ref="ChildOfValueElem" />
+          ref="expression-element" />
       </xsd:sequence>
     </xsd:complexType>
   </xsd:element>
