@@ -42,15 +42,85 @@
     </xsd:complexType>
   </xsd:element>
 
-  <!-- FIXME -->
-  <xsd:simpleType name="ChildOfValueElem">
-    <xsd:union memberTypes="ElemAtSectionSeven" />
-  </xsd:simpleType>
-
-  <!-- FIXME -->
-  <xsd:simpleType name="ElemAtSectionSeven">
-    <xsd:union memberTypes="FIXME" />
-  </xsd:simpleType>
+  <xsd:complexType name="expression-element">
+    <xsd:choice>
+      <xsd:element ref="intConstant" />
+      <xsd:element ref="longlongConstant" />
+      <xsd:element ref="floatConstant" />
+      <xsd:element ref="stringConstant" />
+      <xsd:element ref="moeConstant" />
+      <xsd:element ref="booleanConstant" />
+      <xsd:element ref="funcAddr" />
+      <xsd:element ref="Var" />
+      <xsd:element ref="addrOfExpr" />
+      <xsd:element ref="pointerRef" />
+      <xsd:element ref="arrayRef" />
+      <xsd:element ref="memberRef" />
+      <xsd:element ref="memberArrayRef" />
+      <xsd:element ref="memberPointer" />
+      <xsd:element ref="compoundValue" />
+      <xsd:element ref="compoundValueExpr" />
+      <xsd:element ref="thisExpr" />
+      <xsd:element ref="assignExpr" />
+      <!-- binary operation -->
+      <xsd:element ref="plusExpr" />
+      <xsd:element ref="minusExpr" />
+      <xsd:element ref="mulExpr" />
+      <xsd:element ref="divExpr" />
+      <xsd:element ref="modExpr" />
+      <xsd:element ref="LshiftExpr" />
+      <xsd:element ref="RshiftExpr" />
+      <xsd:element ref="bitAndExpr" />
+      <xsd:element ref="bitOrExpr" />
+      <xsd:element ref="bitXorExpr" />
+      <xsd:element ref="asgPlusExpr" />
+      <xsd:element ref="asgMinusExpr" />
+      <xsd:element ref="asgMulExpr" />
+      <xsd:element ref="asgDivExpr" />
+      <xsd:element ref="asgModExpr" />
+      <xsd:element ref="asgLshiftExpr" />
+      <xsd:element ref="asgRshiftExpr" />
+      <xsd:element ref="asgBitAndExpr" />
+      <xsd:element ref="asgBitOrExpr" />
+      <xsd:element ref="asgBitXorExpr" />
+      <xsd:element ref="logEQExpr" />
+      <xsd:element ref="logNEQExpr" />
+      <xsd:element ref="logGEExpr" />
+      <xsd:element ref="logGTExpr" />
+      <xsd:element ref="logLEExpr" />
+      <xsd:element ref="logLTExpr" />
+      <xsd:element ref="logAndExpr" />
+      <xsd:element ref="logOrExpr" />
+      <!-- unary operation -->
+      <xsd:element ref="unaryMinusExpr" />
+      <xsd:element ref="bitNotExpr" />
+      <xsd:element ref="logNotExpr" />
+      <xsd:element ref="sizeOfExpr" />
+      <xsd:element ref="alignOfExpr" />
+      <xsd:element ref="typeidExpr" />
+      <xsd:element ref="gccAlignOfExpr" />
+      <xsd:element ref="gccLabelAddr" />
+      <xsd:element ref="functionCall" />
+      <xsd:element ref="commaExpr" />
+      <xsd:element ref="PostIncrExpr" />
+      <xsd:element ref="PostDecrExpr" />
+      <xsd:element ref="PreIncrExpr" />
+      <xsd:element ref="PreDecrExpr" />
+      <xsd:element ref="castExpr" />
+      <xsd:element ref="staticCast" />
+      <xsd:element ref="dynamicCast" />
+      <xsd:element ref="constCast" />
+      <xsd:element ref="reinterpretCast" />
+      <xsd:element ref="implicitCastExpr" />
+      <xsd:element ref="gccCompoundExpr" />
+      <xsd:element ref="newExpr" />
+      <xsd:element ref="newArrayExpr" />
+      <xsd:element ref="deleteExpr" />
+      <xsd:element ref="deleteArrayExpr" />
+      <xsd:element ref="throwExpr" />
+      <xsd:element ref="lambdaExpr" />
+    </xsd:choice>
+  </xsd:complexType>
 
   <!-- 3 typeTable element and data type definition element -->
   <xsd:complexType name="typeTable">
