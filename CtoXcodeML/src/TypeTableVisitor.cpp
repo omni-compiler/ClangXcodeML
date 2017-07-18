@@ -379,16 +379,16 @@ void TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr tra
 
   case Type::Record:
     rawname = registerRecordType(T);
-    if (T->isStructureType()) {
+    if (T->getAsCXXRecordDecl()){
+      // XXX: temporary implementation
+      Node = createNode(T, "classType", traversingNode);
+      classTypeNodes.push_back(Node);
+    } else if (T->isStructureType()) {
       Node = createNode(T, "structType", traversingNode);
       structTypeNodes.push_back(Node);
     } else if (T->isUnionType()) {
       Node = createNode(T, "unionType", traversingNode);
       unionTypeNodes.push_back(Node);
-    } else if (T->isClassType()) {
-      // XXX: temporary implementation
-      Node = createNode(T, "classType", traversingNode);
-      classTypeNodes.push_back(Node);
     } else {
       // XXX: temporary implementation
       Node = createNode(T, "unknownRecordType", traversingNode);
@@ -713,14 +713,13 @@ TypeTableVisitor::PreVisitDecl(Decl *D) {
           }
           xmlAddChild(tmpNode, basesNode);
         }
-        std::string class_name(RD->getName());
-        if (isNested(*RD)) {
+        if (RD && isNested(*RD)) {
           /* neither enblaced classes nor enblacing classes are normalizable */
           RecordDecl* enclosure(D->getDeclContext()->getOuterLexicalRecordContext());
           QualType enclosureType(enclosure->getTypeForDecl(), 0);
           typetableinfo->setNormalizability(enclosureType, false);
           typetableinfo->setNormalizability(T, false);
-        } else if (RD->isLocalClass() || class_name.empty()) {
+        } else if (RD && (RD->isLocalClass() || RD->getName().empty())) {
           typetableinfo->setNormalizability(T, false);
         } else {
           typetableinfo->setNormalizability(T, true);
@@ -791,6 +790,10 @@ TypeTableVisitor::PreVisitDecl(Decl *D) {
       if (xmlChildElementCount(tmpNode) == 0) {
         curNode = tmpNode;
         newChild("params");
+        if (FD->hasPrototype() && FD->parameters().empty()) {
+          newChild("name");
+          newProp("type", "void");
+        }
       } else {
         newComment("PreVisitDecl::Function: already the same type is registered");
         // ignore the children, but traverse them all

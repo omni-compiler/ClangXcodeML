@@ -3,12 +3,22 @@
 #include <sstream>
 #include "XMLString.h"
 
-XMLString::XMLString(const xmlChar * p) : ptr(p) {}
+XMLString::XMLString(const xmlChar * p) {
+  std::stringstream ss;
+  ss << p;
+  str = ss.str();
+}
 
-XMLString::XMLString(const char *str) : ptr(BAD_CAST str) {}
+XMLString::XMLString(const char *s):
+  str(s)
+{}
 
 const xmlChar* XMLString::c_ptr() const {
-  return ptr;
+  return BAD_CAST str.c_str();
+}
+
+XMLString::operator std::string() const {
+  return str;
 }
 
 XMLString operator+(const XMLString lhs, const XMLString rhs) {
@@ -17,11 +27,11 @@ XMLString operator+(const XMLString lhs, const XMLString rhs) {
 }
 
 bool operator==(const XMLString lhs, const XMLString rhs) {
-  return xmlStrEqual(lhs.c_ptr(), rhs.c_ptr());
+  return static_cast<std::string>(lhs) == static_cast<std::string>(rhs);
 }
 
 size_t length(XMLString str) {
-  return static_cast<size_t>(xmlStrlen(str.c_ptr()));
+  return static_cast<std::string>(str).length();
 }
 
 std::ostream& operator<<(std::ostream& os, const XMLString& str) {

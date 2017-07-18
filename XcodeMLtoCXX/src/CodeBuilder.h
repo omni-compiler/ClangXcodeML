@@ -1,19 +1,10 @@
 #ifndef CODEBUILDER_H
 #define CODEBUILDER_H
 
-/*!
- * \brief A pack of necessary information for generating
- * C++ source code.
- */
-class SourceInfo {
-public:
-  xmlXPathContextPtr ctxt;
-  TypeMap typeTable;
-  /*! SymbolEntry stack in current scope. */
-  SymbolMap symTable;
-  unsigned int indentation;
-};
+using CodeBuilder = XMLWalker<
+  CXXCodeGen::StringTreeRef,
+  SourceInfo&>;
 
-void buildCode(xmlDocPtr, std::stringstream&);
+void buildCode(xmlNodePtr, xmlXPathContextPtr, std::stringstream&);
 
 #endif /* !CODEBUILDER_H */

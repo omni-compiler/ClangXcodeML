@@ -7,16 +7,27 @@ CXXFLAGS = -O2 -g -Wall -Wextra -fno-rtti -std=c++11 -pedantic \
 USEDLIBS += -lpthread -ldl -ltinfo -lz
 USEDLIBS += `pkg-config --libs libxml-2.0`
 USEDLIBS += $(OTHERLIBS)
+XCODEMLTOCXX = ../XcodeMLtoCXX
 
 OBJS = XcodeMlType.o \
+	Stream.o \
 	XcodeMLtoCXX.o \
 	LibXMLUtil.o \
 	CodeBuilder.o \
+	NnsAnalyzer.o \
 	TypeAnalyzer.o \
-	XMLString.o
+	XMLString.o \
+	XcodeMlEnvironment.o \
+	StringTree.o \
+	SymbolBuilder.o \
+	SymbolAnalyzer.o \
+	ClangClassHandler.o \
+	XcodeMlName.o \
+	XcodeMlNns.o \
+	XcodeMlOperator.o
 
-XcodeMLtoCXX: $(OBJS)
-	$(CXX) $(CXXFLAGS) $(OBJS) $(USEDLIBS) -o XcodeMLtoCXX
+$(XCODEMLTOCXX): $(OBJS)
+	$(CXX) $(CXXFLAGS) $(OBJS) $(USEDLIBS) -o $(XCODEMLTOCXX)
 
 XcodeMLtoCXX.o: \
 	CodeBuilder.h \
@@ -25,19 +36,35 @@ CodeBuilder.o: \
 	XMLString.h \
 	LibXMLUtil.h \
 	XcodeMlType.h \
+	XcodeMlEnvironment.h \
+	NnsAnalyzer.o \
 	TypeAnalyzer.h \
-	SymbolAnalyzer.h \
+	Symbol.h \
 	CodeBuilder.h \
-	XMLWalker.h
+	XMLWalker.h \
+	AttrProc.h \
+	SourceInfo.h
 TypeAnalyzer.o: \
 	XMLString.h \
 	LibXMLUtil.h \
+	Symbol.h \
 	SymbolAnalyzer.h \
 	XcodeMlType.h \
+	XcodeMlEnvironment.h \
 	TypeAnalyzer.h \
 	XMLWalker.h
+XcodeMlNns.o: \
+	StringTree.h \
+	XcodeMlEnvironment.h \
+	XcodeMlNns.h \
+	XcodeMlType.h
+XcodeMlType.o: \
+  Symbol.h \
+	TypeAnalyzer.h \
+	XcodeMlEnvironment.h
 
 clean:
+	rm -f $(XCODEMLTOCXX)
 	rm -f $(OBJS) *~
 
-all: XcodeMLtoCXX
+all: $(XCODEMLTOCXX)

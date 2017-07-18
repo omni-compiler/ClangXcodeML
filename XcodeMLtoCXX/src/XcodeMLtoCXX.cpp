@@ -10,11 +10,17 @@
 #include <cassert>
 #include <memory>
 #include <vector>
+#include "llvm/ADT/Optional.h"
+#include "Stream.h"
+#include "StringTree.h"
 #include "XMLString.h"
-#include "SymbolAnalyzer.h"
+#include "Symbol.h"
+#include "XcodeMlNns.h"
 #include "XcodeMlType.h"
+#include "XcodeMlEnvironment.h"
 #include "XMLWalker.h"
 #include "TypeAnalyzer.h"
+#include "SourceInfo.h"
 #include "CodeBuilder.h"
 
 int main(int argc, char** argv) {
@@ -24,9 +30,13 @@ int main(int argc, char** argv) {
   }
   std::string filename(argv[1]);
   xmlDocPtr doc = xmlParseFile(filename.c_str());
+  xmlNodePtr root = xmlDocGetRootElement(doc);
+  xmlXPathContextPtr ctxt = xmlXPathNewContext(doc);
   std::stringstream ss;
-  buildCode(doc, ss);
+  buildCode(root, ctxt, ss);
   std::cout << ss.str() << std::endl;
+  xmlXPathFreeContext(ctxt);
+  xmlFreeDoc(doc);
   return 0;
 }
 

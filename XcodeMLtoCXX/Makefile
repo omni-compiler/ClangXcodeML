@@ -1,14 +1,13 @@
-.PHONY: clean test
+.PHONY: clean check
 
 all:
 	$(MAKE) -C src
-	mv src/XcodeMLtoCXX .
 
-test:
-	$(MAKE) -C test
+check:
+	$(MAKE) -C tests
 
 clean :
-	rm XcodeMLtoCXX
+	rm -f XcodeMLtoCXX
 	for dir in $(cleandirs); do $(MAKE) clean -C $$dir; done
 
-cleandirs = src test
+cleandirs = src tests

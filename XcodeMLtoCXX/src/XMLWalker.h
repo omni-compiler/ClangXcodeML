@@ -1,6 +1,9 @@
 #ifndef XMLWALKER_H
 #define XMLWALKER_H
 
+#include <libxml/debugXML.h>
+#include <iostream>
+
 /*!
  * \brief A class that combines procedures into a single one
  * that traverses XML node and visits each element.
@@ -13,86 +16,89 @@
  * whose name is registered with the map. Finally it executes
  * a corresponding procedure.
  */
-template<typename... T>
+template<
+  typename ReturnT,
+  typename... T>
 class XMLWalker {
 public:
   /*!
    * \brief Procedure to be registered with XMLWalker.
    */
-  using Procedure = std::function<void(const XMLWalker&, xmlNodePtr, T...)>;
-  XMLWalker() = default;
-  XMLWalker(std::initializer_list<std::tuple<std::string, Procedure>>);
-  XMLWalker(std::map<std::string, Procedure>&&);
-  void walkAll(xmlNodePtr, T...) const;
-  void walkChildren(xmlNodePtr, T...) const;
-  void walk(xmlNodePtr, T...) const;
-  bool registerProc(std::string, Procedure);
-private:
-  std::map<std::string, Procedure> map;
-};
+  using Procedure = std::function<
+    ReturnT(const XMLWalker&, xmlNodePtr, T...)>;
 
-template<typename... T>
-XMLWalker<T...>::XMLWalker(std::map<std::string,Procedure>&& initMap):
-  map(initMap)
-{}
-
-template<typename... T>
-XMLWalker<T...>::XMLWalker(std::initializer_list<std::tuple<std::string, typename XMLWalker<T...>::Procedure>> pairs):
-  map()
-{
-  for (auto p : pairs) {
-    registerProc(std::get<0>(p), std::get<1>(p));
-  }
-}
-
-/*!
- * \brief Traverse a given XML element and subsequent elements.
- * \param node XML element to traverse first
- * \param args... Arguments to be passed to registered procedures.
- */
-template<typename... T>
-void XMLWalker<T...>::walkAll(xmlNodePtr node, T... args) const {
-  if (!node) {
-    return;
-  }
-  for (xmlNodePtr cur =
-        node->type == XML_ELEMENT_NODE ?
-          node : xmlNextElementSibling(node) ;
-       cur;
-       cur = xmlNextElementSibling(cur))
+  XMLWalker(
+      const std::string& n,
+      const std::function<ReturnT(const std::vector<ReturnT>&)> f,
+      std::initializer_list<std::tuple<std::string, Procedure>> pairs):
+    name(n),
+    fold(f),
+    map()
   {
-    walk(cur, args...);
+    for (auto p : pairs) {
+      registerProc(std::get<0>(p), std::get<1>(p));
+    }
   }
-}
 
-template<typename... T>
-void XMLWalker<T...>::walkChildren(xmlNodePtr node, T... args) const {
-  if (node) {
-    walkAll(node->children, args...);
-  }
-}
+  XMLWalker(
+      const std::string& n,
+      const std::function<ReturnT(const std::vector<ReturnT>&)> f,
+      std::map<std::string, Procedure>&& initMap):
+    name(n),
+    fold(f),
+    map(initMap)
+  {}
 
-/*!
- * \brief Traverse an XML element.
- * \param node XML element to traverse
- * \param args... Arguments to be passed to registered procedures.
- * \pre \c node is not null.
- * \pre \c node is an XML element node.
- */
-template<typename... T>
-void XMLWalker<T...>::walk(xmlNodePtr node, T... args) const {
-  assert(node && node->type == XML_ELEMENT_NODE);
-  bool traverseChildren = true;
-  XMLString elemName = node->name;
-  auto iter = map.find(elemName);
-  if (iter != map.end()) {
-    (iter->second)(*this, node, args...);
-    traverseChildren = false;
+  const Procedure& operator[](const std::string& key) const {
+    return map.at(key);
   }
-  if (traverseChildren) {
-    walkAll(node->children, args...);
+
+  /*!
+   * \brief Traverse a given XML element and subsequent elements.
+   * \param node XML element to traverse first
+   * \param args... Arguments to be passed to registered procedures.
+   */
+  std::vector<ReturnT> walkAll(xmlNodePtr node, T... args) const {
+    std::vector<ReturnT> values;
+    if (!node) {
+      return values;
+    }
+    for (xmlNodePtr cur =
+          node->type == XML_ELEMENT_NODE ?
+            node : xmlNextElementSibling(node) ;
+         cur;
+         cur = xmlNextElementSibling(cur))
+    {
+      values.push_back(walk(cur, args...));
+    }
+    return values;
   }
-}
+
+  std::vector<ReturnT> walkChildren(xmlNodePtr node, T... args) const {
+    if (node) {
+      return walkAll(node->children, args...);
+    } else {
+      return {};
+    }
+  }
+
+  /*!
+   * \brief Traverse an XML element.
+   * \param node XML element to traverse
+   * \param args... Arguments to be passed to registered procedures.
+   * \pre \c node is not null.
+   * \pre \c node is an XML element node.
+   */
+  ReturnT walk(xmlNodePtr node, T... args) const {
+    assert(node && node->type == XML_ELEMENT_NODE);
+    XMLString elemName = node->name;
+    auto iter = map.find(elemName);
+    if (iter != map.end()) {
+      return (iter->second)(*this, node, args...);
+    } else {
+      return fold(walkAll(node->children, args...));
+    }
+  }
 
 /*!
  * \brief Register a procedure. If \c key already exists,
@@ -101,29 +107,101 @@ void XMLWalker<T...>::walk(xmlNodePtr node, T... args) const {
  * \param value Procedure to run.
  * \return false if \c key already exists.
  */
-template<typename... T>
-bool XMLWalker<T...>::registerProc(std::string key, Procedure value) {
-  auto iter = map.find(key);
-  if (iter != map.end()) {
-    return false;
+  bool registerProc(std::string key, Procedure value) {
+    auto iter = map.find(key);
+    if (iter != map.end()) {
+      return false;
+    }
+    map[key] = value;
+    return true;
   }
-  map[key] = value;
-  return true;
-}
 
-/*!
- * \brief Merge two procedures into one that executes them in order.
- * \param lhs Procedure that runs first.
- * \param rhs Procedure that runs second.
- */
-template<typename... T>
-typename std::function<void(T...)> merge(
-    typename std::function<void(T...)> lhs,
-    typename std::function<void(T...)> rhs) {
-  return [lhs, rhs](T... args) {
-    lhs(args ...);
-    rhs(args ...);
-  };
-}
+private:
+  std::string name;
+  std::function<ReturnT(const std::vector<ReturnT>&)> fold;
+  std::map<std::string, Procedure> map;
+};
+
+template<
+  typename... T>
+class XMLWalker<void, T...> {
+public:
+  using Procedure = std::function<
+    void(const XMLWalker&, xmlNodePtr, T...)>;
+
+  XMLWalker(
+      const std::string& n,
+      std::initializer_list<std::tuple<std::string, Procedure>> pairs):
+    name(n),
+    map()
+  {
+    for (auto p : pairs) {
+      registerProc(std::get<0>(p), std::get<1>(p));
+    }
+  }
+
+  XMLWalker(
+      const std::string& n,
+      std::map<std::string, Procedure>&& initMap):
+    name(n),
+    map(initMap)
+  {}
+
+  const Procedure& operator[](const std::string& key) const {
+    return map.at(key);
+  }
+
+  void walkAll(xmlNodePtr node, T... args) const {
+    if (!node) {
+      return;
+    }
+    for (xmlNodePtr cur =
+          node->type == XML_ELEMENT_NODE ?
+            node : xmlNextElementSibling(node) ;
+         cur;
+         cur = xmlNextElementSibling(cur))
+    {
+      walk(cur, args...);
+    }
+  }
+
+  void walkChildren(xmlNodePtr node, T... args) const {
+    if (node) {
+      walkAll(node->children, args...);
+    }
+  }
+
+  void walk(xmlNodePtr node, T... args) const {
+    assert(node && node->type == XML_ELEMENT_NODE);
+    XMLString elemName = node->name;
+    auto iter = map.find(elemName);
+    if (iter != map.end()) {
+      try {
+        (iter->second)(*this, node, args...);
+      } catch(const std::exception& e) {
+        std::cerr
+          << "In " << name << std::endl
+          << e.what() << std::endl;
+        xmlDebugDumpNode(stderr, node, 0);
+        abort();
+      }
+    } else {
+      walkAll(node->children, args...);
+    }
+  }
+
+  bool registerProc(std::string key, Procedure value) {
+    auto iter = map.find(key);
+    if (iter != map.end()) {
+      return false;
+    }
+    map[key] = value;
+    return true;
+  }
+
+private:
+  std::string name;
+  std::map<std::string, Procedure> map;
+};
 
 #endif /* !XMLWALKER_H */
