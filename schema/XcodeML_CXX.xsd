@@ -127,12 +127,14 @@
   </xsd:complexType>
 
   <!-- 3 typeTable element and data type definition element -->
-  <xsd:complexType name="typeTable">
-    <xsd:sequence>
-      <xsd:element minOccurs="0" maxOccurs="unbounded"
-        ref="DataTypeDefElems" />
-    </xsd:sequence>
-  </xsd:complexType>
+  <xsd:element name="typeTable">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element minOccurs="0" maxOccurs="unbounded"
+          ref="DataTypeDefElems" />
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
 
   <!-- FIXME: structType/unionType are deprecated -->
   <xsd:complexType name="DataTypeDefElems">
