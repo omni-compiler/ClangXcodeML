@@ -23,7 +23,6 @@
   </xsd:element>
 
   <!-- 2.1 name element -->
-  <!-- FIXME: baseはxsd:stringより小さくしたい -->
   <xsd:element name="name">
     <xsd:complexType>
       <xsd:simpleContent>
