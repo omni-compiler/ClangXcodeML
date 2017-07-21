@@ -3,7 +3,7 @@ CXX = /usr/local/bin/clang++
 #LLVM_CONFIG = /usr/bin/llvm-config-3.6
 #CXX = /usr/bin/clang++-3.6
 CXXFLAGS = -O2 -g -Wall -Wextra -fno-rtti -std=c++11 -pedantic \
-	`pkg-config --cflags libxml-2.0` \
+	$(INCLUDE) \
 	-D__STDC_LIMIT_MACROS -D__STDC_CONSTANT_MACROS
 
 USEDLIBS = -L$(shell $(LLVM_CONFIG) --libdir)
@@ -13,9 +13,12 @@ USEDLIBS += -lclangTooling -lclangFrontend -lclangSerialization -lclangDriver \
             -lclangFormat -lclangARCMigrate -lclangDynamicASTMatchers \
             -lclangIndex -lclangCodeGen -lclangFrontendTool \
             -lclangStaticAnalyzerCheckers -lclangRewrite -lclangRewriteFrontend
+INCLUDE = -I. \
+	  -I $(shell $(LLVM_CONFIG) --includedir) \
+	  $(shell pkg-config --cflags libxml-2.0)
 USEDLIBS += $(shell $(LLVM_CONFIG) --libs mcparser bitreader support mc option)
 USEDLIBS += -lpthread -ldl -ltinfo -lz
-USEDLIBS += `pkg-config --libs libxml-2.0` -lclang
+USEDLIBS += $(shell pkg-config --libs libxml-2.0) -lclang
 USEDLIBS += $(OTHERLIBS)
 
 RAVOBJS = XMLRAV.o
