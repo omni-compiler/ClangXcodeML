@@ -3,6 +3,14 @@
   xmlns:xsd="http://www.w3.org/2001/XMLSchema"
   xmlns="http://example/xcodeml/">
 
+  <xsd:simpleType name="source-language">
+    <xsd:restriction base="xsd:string">
+      <xsd:enumeration value="C" />
+      <xsd:enumeration value="C++" />
+    </xsd:restriction>
+  </xsd:simpleType>
+
+
   <xsd:simpleType name="data-type-identifier">
     <xsd:restriction base="xsd:string" />
   </xsd:simpleType>
