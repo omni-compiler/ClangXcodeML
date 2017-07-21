@@ -1358,7 +1358,7 @@ switch文のdefaultラベルを表す。`switch`要素の中の`body`要素の�
 式(ポインタ型またはリファレンス型)の指示先を表現する。
 
 | `<pointerRef>`
-|   式の参照
+|   式の要素
 | `</pointerRef>`
 
 属性(必須): `type`
