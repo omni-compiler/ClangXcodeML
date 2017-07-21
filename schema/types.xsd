@@ -7,6 +7,31 @@
     <xsd:restriction base="xsd:string" />
   </xsd:simpleType>
 
+  <xsd:group name="statement-element">
+    <xsd:choice>
+      <xsd:element ref="exprStatement" />
+      <xsd:element ref="compoundStatement" />
+      <xsd:element ref="ifStatement" />
+      <xsd:element ref="whileStatement" />
+      <xsd:element ref="doStatement" />
+      <xsd:element ref="forStatement" />
+      <xsd:element ref="rangeForStatement" />
+      <xsd:element ref="breakStatement" />
+      <xsd:element ref="continueStatement" />
+      <xsd:element ref="returnStatement" />
+      <xsd:element ref="gotoStatement" />
+      <xsd:element ref="tryStatement" />
+      <xsd:element ref="catchStatement" />
+      <xsd:element ref="statementLabel" />
+      <xsd:element ref="switchStatement" />
+      <xsd:element ref="caseLabel" />
+      <xsd:element ref="gccRangedCaseLabel" />
+      <xsd:element ref="defaultLabel" />
+      <xsd:element ref="pragma" />
+      <xsd:element ref="text" />
+    </xsd:choice>
+  </xsd:group>
+
   <xsd:group name="expression-element">
     <xsd:choice>
       <xsd:element ref="intConstant" />
