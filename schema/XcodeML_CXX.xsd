@@ -28,10 +28,10 @@
   <!-- 2.2 value element -->
   <xsd:element name="value">
     <xsd:complexType>
-      <xsd:sequence>
-        <xsd:group minOccurs="0" maxOccurs="unbounded"
-          ref="expression-element" />
-      </xsd:sequence>
+      <xsd:choice minOccurs="0" maxOccurs="unbounded">
+        <xsd:group ref="expression-element" />
+        <xsd:element ref="value" />
+      </xsd:choice>
     </xsd:complexType>
   </xsd:element>
 
