@@ -130,15 +130,15 @@
   <xsd:element name="typeTable">
     <xsd:complexType>
       <xsd:sequence>
-        <xsd:element minOccurs="0" maxOccurs="unbounded"
-          ref="DataTypeDefElems" />
+        <xsd:group minOccurs="0" maxOccurs="unbounded"
+          ref="data-type-defining-elements" />
       </xsd:sequence>
     </xsd:complexType>
   </xsd:element>
 
   <!-- FIXME: structType/unionType are deprecated -->
-  <xsd:complexType name="DataTypeDefElems">
-    <xsd:choice minOccurs="1" maxOccurs="1">
+  <xsd:group name="data-type-defining-elements">
+    <xsd:choice>
       <xsd:element ref="basicType" />
       <xsd:element ref="pointerType" />
       <xsd:element ref="functionType" />
@@ -151,7 +151,7 @@
       <xsd:element ref="classTemplate" />
       <xsd:element ref="aliasTemplate" />
     </xsd:choice>
-  </xsd:complexType>
+  </xsd:group>
 
   <!-- 3.1 data type identifying name -->
   <xsd:simpleType name="BuiltinDataTypeIdentName">
@@ -200,15 +200,15 @@
 
   <!-- 3.3 data type definition element attributes -->
   <!-- FIXME: default of AccessSpec -->
-  <xsd:attributeGroup name="dataTypeDefElemAttrs">
-    <xsd:attribute name="is_const" type="ExtBool" default="false" />
-    <xsd:attribute name="is_volatile" type="ExtBool" default="false" />
-    <xsd:attribute name="is_restrict" type="ExtBool" default="false" />
-    <xsd:attribute name="is_static" type="ExtBool" default="false" />
+  <xsd:attributeGroup name="data-type-defining-element-attributes">
+    <xsd:attribute name="is_const" type="extended-boolean" default="false" />
+    <xsd:attribute name="is_volatile" type="extended-boolean" default="false" />
+    <xsd:attribute name="is_restrict" type="extended-boolean" default="false" />
+    <xsd:attribute name="is_static" type="extended-boolean" default="false" />
     <xsd:attribute name="reference" type="ReferenceAttr" default="default" />
     <xsd:attribute name="access" type="AccessSpec" default="private" />
-    <xsd:attribute name="is_virtual" type="ExtBool" default="false" />
-    <xsd:attribute name="is_userDefined" type="ExtBool" default="false" />
+    <xsd:attribute name="is_virtual" type="extended-boolean" default="false" />
+    <xsd:attribute name="is_userDefined" type="extended-boolean" default="false" />
   </xsd:attributeGroup>
 
   <xsd:attributeGroup name="SourceLocInfo">
@@ -216,9 +216,8 @@
     <xsd:attribute name="file" type="xsd:string" />
   </xsd:attributeGroup>
 
-  <!-- FIXME: base = xsd:string ? -->
   <!-- FIXME: default of AccessSpec -->
-  <xsd:simpleType name="ExtBool">
+  <xsd:simpleType name="extended-boolean">
     <xsd:restriction base="xsd:string">
       <xsd:enumeration value="1" />
       <xsd:enumeration value="0" />
@@ -243,28 +242,34 @@
     </xsd:restriction>
   </xsd:simpleType>
 
+  <xsd:attribute name="type" type="xsd:string" />
+
   <!-- 3.4 basicType element -->
   <!-- FIXME: alignas is nani???? -->
   <xsd:element name="basicType">
     <xsd:complexType>
-      <xsd:attribute name="alignas" type="alignasType" />
-      <xsd:attributeGroup ref="dataTypeDefElemAttrs" />
-      <xsd:attributeGroup ref="typeRefAttrs" />
+      <xsd:attribute ref="type" use="required" />
+      <xsd:attribute name="alignas" type="xsd:string" />
+      <xsd:attributeGroup ref="data-type-defining-element-attributes" />
     </xsd:complexType>
   </xsd:element>
-
-  <xsd:attributeGroup name="typeRefAttrs">
-    <xsd:attribute name="type" type="dataTypeIdentName" use="required" />
-    <xsd:attribute name="ref" type="dataTypeIdentName" use="required" />
-  </xsd:attributeGroup>
 
   <!-- 3.5 pointerType element -->
   <xsd:element name="pointerType">
     <xsd:complexType>
-      <xsd:attributeGroup ref="dataTypeIdentName" />
-      <xsd:attributeGroup ref="typeRefAttrs" />
+      <xsd:attribute ref="type" use="required" />
+      <xsd:attribute name="ref" type="xsd:string" use="required" />
+      <xsd:attribute name="reference"
+        type="reference-attribute-value" use="optional" />
     </xsd:complexType>
   </xsd:element>
+
+  <xsd:simpleType name="reference-attribute-value">
+    <xsd:restriction base="xsd:string">
+      <xsd:enumeration value="lvalue" />
+      <xsd:enumeration value="rvalue" />
+    </xsd:restriction>
+  </xsd:simpleType>
 
   <xsd:element name="functionType">
     <xsd:complexType>
@@ -275,7 +280,7 @@
         use="required" />
       <xsd:attribute name="return_type" type="dataTypeIdentName"
         use="required" />
-      <xsd:attribute name="is_inline" type="extBool" />
+      <xsd:attribute name="is_inline" type="extended-boolean" />
     </xsd:complexType>
   </xsd:element>
 
@@ -293,14 +298,14 @@
         use="required" />
       <xsd:attribute name="array_size" type="xsd:nonNegativeInteger"
         default="42" />
-      <xsd:attributeGroup ref="dataTypeDefElemAttrs" />
+      <xsd:attributeGroup ref="data-type-defining-element-attributes" />
     </xsd:complexType>
   </xsd:element>
 
   <xsd:element name="arraySize">
     <xsd:complexType>
       <xsd:sequence>
-        <xsd:element name="FIXME" type="FIXME" />
+        <xsd:group ref="expression-element" minOccurs="1" maxOccurs="1" />
       </xsd:sequence>
     </xsd:complexType>
   </xsd:element>
@@ -312,13 +317,13 @@
         <xsd:element minOccurs="1" maxOccurs="1" ref="symbols" />
       </xsd:sequence>
       <xsd:attribute name="type" type="dataTypeIdentName" use="required" />
-      <xsd:attributeGroup ref="dataTypeDefElemAttrs" />
+      <xsd:attributeGroup ref="data-type-defining-element-attributes" />
     </xsd:complexType>
   </xsd:element>
 
   <!-- 3.9 structType element and class element (C++) -->
   <xsd:element name="structType" type="CXXClassElem" />
-  <xsd:element name="class" type="CXXClassElem" />
+  <xsd:element name="classType" type="CXXClassElem" />
   <xsd:complexType name="CXXClassElem">
     <xsd:sequence>
       <xsd:element minOccurs="0" maxOccurs="1" ref="inheritedFrom" />
@@ -327,7 +332,7 @@
     </xsd:sequence>
     <xsd:attribute name="type" type="dataTypeIdentName" use="required" />
     <xsd:attribute name="inherited" type="xsd:string" default="FIXME" />
-    <xsd:attributeGroup ref="dataTypeDefElemAttrs" />
+    <xsd:attributeGroup ref="data-type-defining-element-attributes" />
     <xsd:attributeGroup ref="SourceLocInfo" />
   </xsd:complexType>
 
@@ -348,7 +353,7 @@
         <xsd:element minOccurs="1" maxOccurs="1" ref="symbols" />
       </xsd:sequence>
       <xsd:attribute name="type" type="dataTypeIdentName" />
-      <xsd:attributeGroup ref="dataTypeDefElemAttrs" />
+      <xsd:attributeGroup ref="data-type-defining-element-attributes" />
     </xsd:complexType>
   </xsd:element>
 
@@ -359,7 +364,7 @@
         use="required" />
       <xsd:attribute name="element_type" type="dataTypeIdentName"
         use="required" />
-      <xsd:attributeGroup ref="dataTypeDefElemAttrs" />
+      <xsd:attributeGroup ref="data-type-defining-element-attributes" />
     </xsd:complexType>
   </xsd:element>
 
@@ -372,13 +377,29 @@
         <xsd:element minOccurs="0" maxOccurs="1" ref="bitField" />
         <xsd:element minOccurs="0" maxOccurs="1" ref="alignAs" />
       </xsd:sequence>
-      <xsd:attribute name="sclass" type="StorageClass" default="" />
-      <xsd:attribute name="fspec" type="FuncSpec" default="" />
-      <xsd:attribute name="type" type="dataTypeIdentName" default="" />
-      <xsd:attribute name="bit_field" type="FIXME" default="" />
-      <xsd:attribute name="align_as" type="FIXME" default="" />
-      <xsd:attribute name="is_gccThread" type="ExtBool" default="" />
-      <xsd:attribute name="is_gccExtension" type="ExtBool" default="" />
+      <xsd:attribute name="sclass" type="StorageClass" />
+      <xsd:attribute name="fspec" type="FuncSpec" />
+      <xsd:attribute name="type" type="dataTypeIdentName" />
+      <xsd:attribute name="bit_field" type="xsd:integer" />
+      <xsd:attribute name="align_as" type="xsd:string" />
+      <xsd:attribute name="is_gccThread" type="extended-boolean" />
+      <xsd:attribute name="is_gccExtension" type="extended-boolean" />
+    </xsd:complexType>
+  </xsd:element>
+
+  <xsd:element name="bitField">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:group ref="expression-element" minOccurs="1" maxOccurs="1" />
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+
+  <xsd:element name="alignAs">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:group ref="expression-element" minOccurs="1" maxOccurs="1" />
+      </xsd:sequence>
     </xsd:complexType>
   </xsd:element>
 
@@ -448,6 +469,7 @@
       </xsd:choice>
     </xsd:complexType>
   </xsd:element>
+
   <xsd:element name="functionDefinition">
     <xsd:complexType>
       <xsd:sequence>
@@ -461,7 +483,7 @@
         <xsd:element minOccurs="1" maxOccurs="1" ref="params" />
         <xsd:element minOccurs="1" maxOccurs="1" ref="body" />
       </xsd:sequence>
-      <xsd:attribute name="is_gccExtension" type="ExtBool" />
+      <xsd:attribute name="is_gccExtension" type="extended-boolean" />
     </xsd:complexType>
   </xsd:element>
 
@@ -476,7 +498,7 @@
         <xsd:element minOccurs="1" maxOccurs="1" ref="name" />
         <xsd:element minOccurs="1" maxOccurs="1" ref="value" />
       </xsd:sequence>
-      <xsd:attribute name="is_explicit" type="ExtBool" />
+      <xsd:attribute name="is_explicit" type="extended-boolean" />
     </xsd:complexType>
   </xsd:element>
 
@@ -522,7 +544,7 @@
       <xsd:sequence>
         <xsd:element ref="name" />
       </xsd:sequence>
-      <xsd:attribute name="namespace" type="ExtBool" />
+      <xsd:attribute name="namespace" type="extended-boolean" />
       <xsd:attributeGroup ref="SourceLocInfo" />
     </xsd:complexType>
   </xsd:element>
@@ -531,7 +553,7 @@
   <xsd:element name="exprStatement">
     <xsd:complexType>
       <xsd:sequence>
-        <xsd:element minOccurs="1" maxOccurs="1" ref="expression_element" />
+        <xsd:group minOccurs="1" maxOccurs="1" ref="expression-element" />
       </xsd:sequence>
       <xsd:attributeGroup ref="SourceLocInfo" />
     </xsd:complexType>
@@ -562,7 +584,7 @@
   <xsd:element name="condition">
     <xsd:complexType>
       <xsd:sequence>
-        <xsd:element minOccurs="1" maxOccurs="1" ref="expression_element" />
+        <xsd:group minOccurs="1" maxOccurs="1" ref="expression-element" />
       </xsd:sequence>
     </xsd:complexType>
   </xsd:element>
@@ -570,7 +592,7 @@
   <xsd:element name="then">
     <xsd:complexType>
       <xsd:sequence>
-        <xsd:element minOccurs="1" maxOccurs="1" ref="expression_element" />
+        <xsd:group minOccurs="1" maxOccurs="1" ref="expression-element" />
       </xsd:sequence>
     </xsd:complexType>
   </xsd:element>
@@ -578,7 +600,7 @@
   <xsd:element name="else">
     <xsd:complexType>
       <xsd:sequence>
-        <xsd:element minOccurs="1" maxOccurs="1" ref="expression_element" />
+        <xsd:group minOccurs="1" maxOccurs="1" ref="expression-element" />
       </xsd:sequence>
     </xsd:complexType>
   </xsd:element>
@@ -618,7 +640,7 @@
   <xsd:element name="iter">
     <xsd:complexType>
       <xsd:choice>
-        <xsd:element ref="expression_element" />
+        <xsd:group minOccurs="1" maxOccurs="1" ref="expression-element" />
         <xsd:element ref="symbols" />
       </xsd:choice>
     </xsd:complexType>
@@ -638,7 +660,7 @@
   <xsd:element name="range">
     <xsd:complexType>
       <xsd:sequence>
-        <xsd:element minOccurs="1" maxOccurs="1" ref="expression_element" />
+        <xsd:group minOccurs="1" maxOccurs="1" ref="expression-element" />
       </xsd:sequence>
     </xsd:complexType>
   </xsd:element>
@@ -657,7 +679,7 @@
   <xsd:element name="returnStatement">
     <xsd:complexType>
       <xsd:sequence>
-        <xsd:element minOccurs="1" maxOccurs="1" ref="expression_element" />
+        <xsd:group minOccurs="1" maxOccurs="1" ref="expression-element" />
       </xsd:sequence>
     </xsd:complexType>
   </xsd:element>
@@ -667,7 +689,7 @@
     <xsd:complexType>
       <xsd:choice>
         <xsd:element ref="name" />
-        <xsd:element ref="expression_element" />
+        <xsd:group minOccurs="1" maxOccurs="1" ref="expression-element" />
       </xsd:choice>
     </xsd:complexType>
   </xsd:element>
@@ -748,7 +770,7 @@
   <!-- 7 expression element attributes -->
   <xsd:attributeGroup name="exprElemAttrs">
     <xsd:attribute name="type" type="xsd:string" use="required" />
-    <xsd:attribute name="lvalue" type="ExtBool" use="optional" />
+    <xsd:attribute name="lvalue" type="extended-boolean" use="optional" />
   </xsd:attributeGroup>
 
   <!-- 7.1 constant element -->
@@ -1506,4 +1528,40 @@
     </xsd:complexType>
   </xsd:element>
 
+  <xsd:element name="classTemplate">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element name="symbols" minOccurs="1" maxOccurs="1" />
+        <xsd:element name="typeParams" minOccurs="1" maxOccurs="1" />
+        <xsd:element name="classType" minOccurs="1" maxOccurs="1" />
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+
+  <xsd:element name="functionTemplate">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element name="symbols" minOccurs="1" maxOccurs="1" />
+        <xsd:element name="typeParams" minOccurs="1" maxOccurs="1" />
+        <xsd:element name="functionDefinition" minOccurs="1" maxOccurs="1" />
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+
+  <xsd:element name="aliasTemplate">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element name="symbols" minOccurs="1" maxOccurs="1" />
+        <xsd:element name="typeParams" minOccurs="1" maxOccurs="1" />
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+
+  <xsd:element name="typeInstance">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element ref="typeArguments" minOccurs="1" maxOccurs="1" />
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
 </xsd:schema>
