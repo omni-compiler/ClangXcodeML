@@ -835,6 +835,16 @@ DEFINE_CB(memberFunctionCallProc) {
   return w.walk(function, src) + w.walk(arguments, src);
 }
 
+DEFINE_CB(valueProc) {
+  const auto child = findFirst(node, "*", src.ctxt);
+  if (getName(child) == "value") {
+    // aggregate (See {#sec:program.value})
+    const auto grandchildren = w.walkChildren(child, src);
+    return wrapWithBrace(join(",", grandchildren));
+  }
+  return w.walk(child, src);
+}
+
 DEFINE_CB(newExprProc) {
   const auto type = src.typeTable.at(getProp(node, "type"));
   // FIXME: Support scalar type
@@ -1147,6 +1157,7 @@ makeInnerNode,
   { "exprStatement", exprStatementProc },
   { "returnStatement", returnStatementProc },
   { "varDecl", varDeclProc },
+  { "value", valueProc },
   { "usingDecl", usingDeclProc },
   { "classDecl", classDeclProc },
 

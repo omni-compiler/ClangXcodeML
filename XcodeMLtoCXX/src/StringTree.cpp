@@ -171,6 +171,11 @@ wrapWithSquareBracket(const StringTreeRef& str) {
   return wrapWithStr("[", str, "]");
 }
 
+StringTreeRef
+wrapWithBrace(const StringTreeRef& str) {
+  return wrapWithStr("{", str, "}");
+}
+
 } // namespace CXXCodeGen
 
 CXXCodeGen::StringTreeRef operator+(

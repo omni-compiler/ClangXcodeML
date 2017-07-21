@@ -352,6 +352,12 @@
     </xsl:element>
   </xsl:template>
 
+  <xsl:template match="clangStmt[@class='InitListExpr']">
+    <value>
+      <xsl:apply-templates />
+    </value>
+  </xsl:template>
+
   <xsl:template match="clangStmt[@class='ImplicitCastExpr']">
     <implicitCastExpr>
       <xsl:apply-templates select="@*" />
