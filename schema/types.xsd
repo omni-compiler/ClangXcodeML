@@ -179,10 +179,8 @@
     <xsd:attribute name="is_volatile" type="extended-boolean" default="false" />
     <xsd:attribute name="is_restrict" type="extended-boolean" default="false" />
     <xsd:attribute name="is_static" type="extended-boolean" default="false" />
-    <xsd:attribute name="reference" type="ReferenceAttr" default="default" />
     <xsd:attribute name="access" type="access-specifier" default="private" />
     <xsd:attribute name="is_virtual" type="extended-boolean" default="false" />
-    <xsd:attribute name="is_userDefined" type="extended-boolean" default="false" />
   </xsd:attributeGroup>
 
   <xsd:attributeGroup name="SourceLocInfo">
