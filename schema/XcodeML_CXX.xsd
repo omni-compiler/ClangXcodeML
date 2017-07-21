@@ -22,17 +22,8 @@
     </xsd:complexType>
   </xsd:element>
 
-  <!-- 2.1 name element -->
-  <xsd:element name="name">
-    <xsd:complexType>
-      <xsd:simpleContent>
-        <xsd:extension base="xsd:string">
-          <xsd:attribute name="type" type="data-type-identifier"
-            use="optional" />
-        </xsd:extension>
-      </xsd:simpleContent>
-    </xsd:complexType>
-  </xsd:element>
+  <!-- 4.1 id element/name element -->
+  <xsd:element name="name" type="xsd:string" />
 
   <!-- 2.2 value element -->
   <xsd:element name="value">
