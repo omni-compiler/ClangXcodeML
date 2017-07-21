@@ -63,7 +63,7 @@
       <xsd:element ref="memberArrayRef" />
       <xsd:element ref="memberPointer" />
       <xsd:element ref="compoundValue" />
-      <xsd:element ref="compoundValueExpr" />
+      <xsd:element ref="compoundValueAddr" />
       <xsd:element ref="thisExpr" />
       <xsd:element ref="assignExpr" />
       <!-- binary operation -->
@@ -106,10 +106,10 @@
       <xsd:element ref="gccLabelAddr" />
       <xsd:element ref="functionCall" />
       <xsd:element ref="commaExpr" />
-      <xsd:element ref="PostIncrExpr" />
-      <xsd:element ref="PostDecrExpr" />
-      <xsd:element ref="PreIncrExpr" />
-      <xsd:element ref="PreDecrExpr" />
+      <xsd:element ref="postIncrExpr" />
+      <xsd:element ref="postDecrExpr" />
+      <xsd:element ref="preIncrExpr" />
+      <xsd:element ref="preDecrExpr" />
       <xsd:element ref="castExpr" />
       <xsd:element ref="staticCast" />
       <xsd:element ref="dynamicCast" />
