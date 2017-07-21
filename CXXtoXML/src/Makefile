@@ -1,5 +1,4 @@
 LLVM_CONFIG = /usr/local/bin/llvm-config
-LLVM_INCLUDE = /usr/local/include
 CXX = /usr/local/bin/clang++
 #LLVM_CONFIG = /usr/bin/llvm-config-3.6
 #CXX = /usr/bin/clang++-3.6
@@ -15,7 +14,7 @@ USEDLIBS += -lclangTooling -lclangFrontend -lclangSerialization -lclangDriver \
             -lclangIndex -lclangCodeGen -lclangFrontendTool \
             -lclangStaticAnalyzerCheckers -lclangRewrite -lclangRewriteFrontend
 INCLUDE = -I. \
-	  -I $(LLVM_INCLUDE) \
+	  -I $(shell $(LLVM_CONFIG) --includedir) \
 	  `pkg-config --cflags libxml-2.0`
 USEDLIBS += $(shell $(LLVM_CONFIG) --libs mcparser bitreader support mc option)
 USEDLIBS += -lpthread -ldl -ltinfo -lz
