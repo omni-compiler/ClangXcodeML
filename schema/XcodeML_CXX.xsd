@@ -14,11 +14,11 @@
         <xsd:element minOccurs="1" maxOccurs="1" ref="globalSymbols" />
         <xsd:element minOccurs="1" maxOccurs="1" ref="globalDeclarations" />
       </xsd:sequence>
-      <xsd:attribute name="compiler-info" use="optional" />
-      <xsd:attribute name="version" use="optional" />
-      <xsd:attribute name="time" use="optional" />
-      <xsd:attribute name="language" use="optional" />
-      <xsd:attribute name="source" use="optional" />
+      <xsd:attribute name="compiler-info" type="xsd:string" use="optional" />
+      <xsd:attribute name="version" type="xsd:string" use="optional" />
+      <xsd:attribute name="time" type="xsd:string" use="optional" />
+      <xsd:attribute name="language" type="source-language" use="optional" />
+      <xsd:attribute name="source" type="xsd:string" use="optional" />
     </xsd:complexType>
   </xsd:element>
 
