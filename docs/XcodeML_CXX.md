@@ -1422,6 +1422,23 @@ pointerRef要素は次の属性を持つことができる。
 
 のように表現される。ここで`P232`はint型へのポインタと宣言されている。後者は`arrayAddr`要素でないことに注意されたい。
 
+## `memberExpr`要素(C++拡張) {#sec:expr.memberexpr}
+クラスのオブジェクトがもつメンバーへの参照を表現する。
+
+| `<memberExpr>`
+|   式の要素
+|   `<name>`要素 or `<operator>` 要素 or `<destructor>`要素
+| `</memberExpr>`
+
+属性(必須)： `type`
+
+1番目の子要素として式の要素をもつ。
+2番目の子要素として、以下のいずれか一つの子要素をもつ。
+
+* `operator`要素 - 非staticメンバー関数の演算子関数のとき
+* `destructor`要素 - 疑似デストラクター呼び出し式のとき
+* `name`要素 - 上記以外のデータメンバーまたはメンバー関数のとき
+
 ## `memberRef`要素(C++拡張) {#sec:expr.memberref}
 
 構造型、クラス、または共用型のオブジェクトがもつ配列以外のメンバへの参照を表現する。
@@ -1689,17 +1706,17 @@ pointerRef要素は次の属性を持つことができる。
 `functionCall`要素は関数呼び出しを表す。
 
 | `<functionCall>`
-|   `<function>`または`<memberRef>`または`<operator>`
+|   `<function>`または`<memberFunction>`または`<operator>`
 |     式の要素
-|   `</function>`または`</memberRef>`または`</operator>`
+|   `</function>`または`</memberFunction>`または`</operator>`
 |   `arguments`要素([-@sec:expr.arguments]項)
 | `</functionCall>`
 
 属性(必須): `type`
 
 `function`要素には呼び出す関数のアドレスを指定する。
-`memberRef`　　　メンバ関数呼び出しの時のメンバアクセスの式を指定する。
-`operator`　　　グローバル関数の形の演算子オーバーロードの呼び出しの場合の演算子名を指定する。
+`memberFunction`　メンバー関数呼び出しを表す。memberExpr要素を子要素にもつ。
+`operator`　　　非メンバー関数の形の演算子関数の呼び出しの場合の演算子名を指定する。
 `arguments`要素には引数の並びを指定する。
 
 ### `arguments`要素 {#sec:expr.arguments}
