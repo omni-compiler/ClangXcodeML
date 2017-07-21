@@ -1229,7 +1229,7 @@
     </xsd:complexType>
   </xsd:element>
 
-  <xsd:element name="alignofExpr">
+  <xsd:element name="alignOfExpr">
     <xsd:complexType>
       <xsd:sequence>
         <xsd:element minOccurs="1" maxOccurs="1" ref="ElemAtSectionSeven" />
@@ -1319,7 +1319,7 @@
     </xsd:complexType>
   </xsd:element>
 
-  <xsd:element name="postDeclExpr">
+  <xsd:element name="postDecrExpr">
     <xsd:complexType>
       <xsd:sequence>
         <xsd:element minOccurs="1" maxOccurs="1" ref="ElemAtSectionSeven" />
@@ -1327,7 +1327,7 @@
     </xsd:complexType>
   </xsd:element>
 
-  <xsd:element name="preDeclExpr">
+  <xsd:element name="preDecrExpr">
     <xsd:complexType>
       <xsd:sequence>
         <xsd:element minOccurs="1" maxOccurs="1" ref="ElemAtSectionSeven" />
