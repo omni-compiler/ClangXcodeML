@@ -682,7 +682,7 @@
   <xsd:element name="pointerRef">
     <xsd:complexType>
       <xsd:sequence>
-        <xsd:element minOccurs="1" maxOccurs="1" ref="varRefElem" />
+        <xsd:group ref="expression-element" minOccurs="1" maxOccurs="1" />
       </xsd:sequence>
       <xsd:attributeGroup ref="exprElemAttrs" />
     </xsd:complexType>
