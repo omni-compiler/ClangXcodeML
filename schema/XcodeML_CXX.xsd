@@ -1300,6 +1300,31 @@
     </xsd:complexType>
   </xsd:element>
 
+  <xsd:element name="captures">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element ref="byReference" minOccurs="1" maxOccurs="1" />
+        <xsd:element ref="byValue" minOccurs="1" maxOccurs="1" />
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+
+  <xsd:element name="byReference">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element ref="name" minOccurs="0" maxOccurs="unbounded" />
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+
+  <xsd:element name="byValue">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element ref="name" minOccurs="0" maxOccurs="unbounded" />
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+
   <xsd:element name="classTemplate">
     <xsd:complexType>
       <xsd:sequence>
@@ -1325,6 +1350,14 @@
       <xsd:sequence>
         <xsd:element name="symbols" minOccurs="1" maxOccurs="1" />
         <xsd:element name="typeParams" minOccurs="1" maxOccurs="1" />
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+
+  <xsd:element name="typeArguments">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element ref="typeName" minOccurs="0" maxOccurs="unbounded" />
       </xsd:sequence>
     </xsd:complexType>
   </xsd:element>
