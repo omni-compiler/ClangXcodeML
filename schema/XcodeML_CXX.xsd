@@ -40,13 +40,13 @@
   <xsd:element name="value">
     <xsd:complexType>
       <xsd:sequence>
-        <xsd:element minOccurs="0" maxOccurs="unbounded"
+        <xsd:group minOccurs="0" maxOccurs="unbounded"
           ref="expression-element" />
       </xsd:sequence>
     </xsd:complexType>
   </xsd:element>
 
-  <xsd:complexType name="expression-element">
+  <xsd:group name="expression-element">
     <xsd:choice>
       <xsd:element ref="intConstant" />
       <xsd:element ref="longlongConstant" />
@@ -124,7 +124,7 @@
       <xsd:element ref="throwExpr" />
       <xsd:element ref="lambdaExpr" />
     </xsd:choice>
-  </xsd:complexType>
+  </xsd:group>
 
   <!-- 3 typeTable element and data type definition element -->
   <xsd:element name="typeTable">
