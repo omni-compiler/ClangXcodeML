@@ -2,6 +2,9 @@
 <xsd:schema targetNamespace="http://example/xcodeml/"
   xmlns:xsd="http://www.w3.org/2001/XMLSchema"
   xmlns="http://example/xcodeml/">
+
+  <xsd:include schemaLocation="types.xsd" />
+
   <!-- 2 Translation unit and XcodeProgram element -->
   <!-- FIXME: templateInstances element (テンプレートの展開結果)の仕様 -->
   <xsd:element name="XcodeProgram">
@@ -32,10 +35,6 @@
     </xsd:complexType>
   </xsd:element>
 
-  <xsd:simpleType name="dataTypeIdentName">
-    <xsd:restriction base="xsd:string" />
-  </xsd:simpleType>
-
   <!-- 2.2 value element -->
   <xsd:element name="value">
     <xsd:complexType>
@@ -45,86 +44,6 @@
       </xsd:sequence>
     </xsd:complexType>
   </xsd:element>
-
-  <xsd:group name="expression-element">
-    <xsd:choice>
-      <xsd:element ref="intConstant" />
-      <xsd:element ref="longlongConstant" />
-      <xsd:element ref="floatConstant" />
-      <xsd:element ref="stringConstant" />
-      <xsd:element ref="moeConstant" />
-      <xsd:element ref="booleanConstant" />
-      <xsd:element ref="funcAddr" />
-      <xsd:element ref="Var" />
-      <xsd:element ref="addrOfExpr" />
-      <xsd:element ref="pointerRef" />
-      <xsd:element ref="arrayRef" />
-      <xsd:element ref="memberRef" />
-      <xsd:element ref="memberArrayRef" />
-      <xsd:element ref="memberPointer" />
-      <xsd:element ref="compoundValue" />
-      <xsd:element ref="compoundValueAddr" />
-      <xsd:element ref="thisExpr" />
-      <xsd:element ref="assignExpr" />
-      <!-- binary operation -->
-      <xsd:element ref="plusExpr" />
-      <xsd:element ref="minusExpr" />
-      <xsd:element ref="mulExpr" />
-      <xsd:element ref="divExpr" />
-      <xsd:element ref="modExpr" />
-      <xsd:element ref="LshiftExpr" />
-      <xsd:element ref="RshiftExpr" />
-      <xsd:element ref="bitAndExpr" />
-      <xsd:element ref="bitOrExpr" />
-      <xsd:element ref="bitXorExpr" />
-      <xsd:element ref="asgPlusExpr" />
-      <xsd:element ref="asgMinusExpr" />
-      <xsd:element ref="asgMulExpr" />
-      <xsd:element ref="asgDivExpr" />
-      <xsd:element ref="asgModExpr" />
-      <xsd:element ref="asgLshiftExpr" />
-      <xsd:element ref="asgRshiftExpr" />
-      <xsd:element ref="asgBitAndExpr" />
-      <xsd:element ref="asgBitOrExpr" />
-      <xsd:element ref="asgBitXorExpr" />
-      <xsd:element ref="logEQExpr" />
-      <xsd:element ref="logNEQExpr" />
-      <xsd:element ref="logGEExpr" />
-      <xsd:element ref="logGTExpr" />
-      <xsd:element ref="logLEExpr" />
-      <xsd:element ref="logLTExpr" />
-      <xsd:element ref="logAndExpr" />
-      <xsd:element ref="logOrExpr" />
-      <!-- unary operation -->
-      <xsd:element ref="unaryMinusExpr" />
-      <xsd:element ref="bitNotExpr" />
-      <xsd:element ref="logNotExpr" />
-      <xsd:element ref="sizeOfExpr" />
-      <xsd:element ref="alignOfExpr" />
-      <xsd:element ref="typeidExpr" />
-      <xsd:element ref="gccAlignOfExpr" />
-      <xsd:element ref="gccLabelAddr" />
-      <xsd:element ref="functionCall" />
-      <xsd:element ref="commaExpr" />
-      <xsd:element ref="postIncrExpr" />
-      <xsd:element ref="postDecrExpr" />
-      <xsd:element ref="preIncrExpr" />
-      <xsd:element ref="preDecrExpr" />
-      <xsd:element ref="castExpr" />
-      <xsd:element ref="staticCast" />
-      <xsd:element ref="dynamicCast" />
-      <xsd:element ref="constCast" />
-      <xsd:element ref="reinterpretCast" />
-      <xsd:element ref="implicitCastExpr" />
-      <xsd:element ref="gccCompoundExpr" />
-      <xsd:element ref="newExpr" />
-      <xsd:element ref="newArrayExpr" />
-      <xsd:element ref="deleteExpr" />
-      <xsd:element ref="deleteArrayExpr" />
-      <xsd:element ref="throwExpr" />
-      <xsd:element ref="lambdaExpr" />
-    </xsd:choice>
-  </xsd:group>
 
   <!-- 3 typeTable element and data type definition element -->
   <xsd:element name="typeTable">
@@ -136,58 +55,6 @@
     </xsd:complexType>
   </xsd:element>
 
-  <!-- FIXME: structType/unionType are deprecated -->
-  <xsd:group name="data-type-defining-elements">
-    <xsd:choice>
-      <xsd:element ref="basicType" />
-      <xsd:element ref="pointerType" />
-      <xsd:element ref="functionType" />
-      <xsd:element ref="arrayType" />
-      <xsd:element ref="structType" />
-      <xsd:element ref="unionType" />
-      <xsd:element ref="classType" />
-      <xsd:element ref="enumType" />
-      <xsd:element ref="typeInstance" />
-      <xsd:element ref="classTemplate" />
-      <xsd:element ref="aliasTemplate" />
-    </xsd:choice>
-  </xsd:group>
-
-  <!-- 3.1 data type identifying name -->
-  <xsd:simpleType name="BuiltinDataTypeIdentName">
-    <xsd:restriction base="xsd:string">
-      <xsd:enumeration value="void" />
-      <xsd:enumeration value="char" />
-      <xsd:enumeration value="short" />
-      <xsd:enumeration value="int" />
-      <xsd:enumeration value="long" />
-      <xsd:enumeration value="long_long" />
-      <xsd:enumeration value="unsigned_char" />
-      <xsd:enumeration value="unsigned_short" />
-      <xsd:enumeration value="unsigned" />
-      <xsd:enumeration value="unsigned_long" />
-      <xsd:enumeration value="unsigned_long_long" />
-      <xsd:enumeration value="float" />
-      <xsd:enumeration value="double" />
-      <xsd:enumeration value="long_double" />
-      <xsd:enumeration value="wchar_t" />
-      <xsd:enumeration value="char16_t" />
-      <xsd:enumeration value="char32_t" />
-      <xsd:enumeration value="bool" />
-      <xsd:enumeration value="float_complex" />
-      <xsd:enumeration value="double_complex" />
-      <xsd:enumeration value="long_double_complex" />
-      <xsd:enumeration value="float_imaginary" />
-      <xsd:enumeration value="double_imaginary" />
-      <xsd:enumeration value="long_double_imaginary" />
-      <xsd:enumeration value="__builtin_va_arg" />
-      <xsd:enumeration value="auto" />
-      <xsd:enumeration value="namespace" />
-      <xsd:enumeration value="any_class" />
-      <xsd:enumeration value="any_template" />
-    </xsd:restriction>
-  </xsd:simpleType>
-
   <!-- 3.2 typeName element -->
   <!-- FIXME: inheritedFrom element対応 -->
   <xsd:element name="typeName">
@@ -197,50 +64,6 @@
       <xsd:attribute name="access" type="AccessSpec" default="private" />
     </xsd:complexType>
   </xsd:element>
-
-  <!-- 3.3 data type definition element attributes -->
-  <!-- FIXME: default of AccessSpec -->
-  <xsd:attributeGroup name="data-type-defining-element-attributes">
-    <xsd:attribute name="is_const" type="extended-boolean" default="false" />
-    <xsd:attribute name="is_volatile" type="extended-boolean" default="false" />
-    <xsd:attribute name="is_restrict" type="extended-boolean" default="false" />
-    <xsd:attribute name="is_static" type="extended-boolean" default="false" />
-    <xsd:attribute name="reference" type="ReferenceAttr" default="default" />
-    <xsd:attribute name="access" type="AccessSpec" default="private" />
-    <xsd:attribute name="is_virtual" type="extended-boolean" default="false" />
-    <xsd:attribute name="is_userDefined" type="extended-boolean" default="false" />
-  </xsd:attributeGroup>
-
-  <xsd:attributeGroup name="SourceLocInfo">
-    <xsd:attribute name="lineno" type="xsd:nonNegativeInteger" />
-    <xsd:attribute name="file" type="xsd:string" />
-  </xsd:attributeGroup>
-
-  <!-- FIXME: default of AccessSpec -->
-  <xsd:simpleType name="extended-boolean">
-    <xsd:restriction base="xsd:string">
-      <xsd:enumeration value="1" />
-      <xsd:enumeration value="0" />
-      <xsd:enumeration value="true" />
-      <xsd:enumeration value="false" />
-    </xsd:restriction>
-  </xsd:simpleType>
-
-  <xsd:simpleType name="ReferenceAttr">
-    <xsd:restriction base="xsd:string">
-      <xsd:enumeration value="lvalue" />
-      <xsd:enumeration value="rvalue" />
-      <xsd:enumeration value="default" />
-    </xsd:restriction>
-  </xsd:simpleType>
-
-  <xsd:simpleType name="AccessSpec">
-    <xsd:restriction base="xsd:string">
-      <xsd:enumeration value="private" />
-      <xsd:enumeration value="public" />
-      <xsd:enumeration value="protected" />
-    </xsd:restriction>
-  </xsd:simpleType>
 
   <xsd:attribute name="type" type="xsd:string" />
 
@@ -263,13 +86,6 @@
         type="reference-attribute-value" use="optional" />
     </xsd:complexType>
   </xsd:element>
-
-  <xsd:simpleType name="reference-attribute-value">
-    <xsd:restriction base="xsd:string">
-      <xsd:enumeration value="lvalue" />
-      <xsd:enumeration value="rvalue" />
-    </xsd:restriction>
-  </xsd:simpleType>
 
   <xsd:element name="functionType">
     <xsd:complexType>
@@ -403,42 +219,8 @@
     </xsd:complexType>
   </xsd:element>
 
-  <xsd:simpleType name="StorageClass">
-    <xsd:restriction base="xsd:string">
-      <xsd:enumeration value="auto" />
-      <xsd:enumeration value="param" />
-      <xsd:enumeration value="extern" />
-      <xsd:enumeration value="extern_def" />
-      <xsd:enumeration value="static" />
-      <xsd:enumeration value="register" />
-      <xsd:enumeration value="label" />
-      <xsd:enumeration value="tagname" />
-      <xsd:enumeration value="moe" />
-      <xsd:enumeration value="typedef_name" />
-      <xsd:enumeration value="template_param" />
-      <xsd:enumeration value="namespace_name" />
-      <xsd:enumeration value="thread_local" />
-      <xsd:enumeration value="alias_name" />
-    </xsd:restriction>
-  </xsd:simpleType>
-
-  <!-- FIXME: not MECE -->
-  <xsd:simpleType name="FuncSpec">
-    <xsd:restriction base="xsd:string">
-      <xsd:enumeration value="inline" />
-      <xsd:enumeration value="virtual" />
-      <xsd:enumeration value="explicit" />
-    </xsd:restriction>
-  </xsd:simpleType>
-
   <!-- 4.2 globalSymbols element -->
   <xsd:element name="globalSymbols" type="IdElems" />
-
-  <xsd:complexType name="IdElems">
-    <xsd:sequence>
-      <xsd:element minOccurs="0" maxOccurs="unbounded" ref="id" />
-    </xsd:sequence>
-  </xsd:complexType>
 
   <!-- 4.3 symbols element -->
   <xsd:element name="symbols" type="IdElems" />
@@ -885,27 +667,6 @@
       </xsd:simpleContent>
     </xsd:complexType>
   </xsd:element>
-
-  <xsd:attributeGroup name="varRefElemAttrs">
-    <xsd:attribute name="scope" type="ScopeVal" use="required" />
-  </xsd:attributeGroup>
-
-  <xsd:simpleType name="ScopeVal">
-    <xsd:restriction base="xsd:string">
-      <xsd:enumeration value="local" />
-      <xsd:enumeration value="global" />
-      <xsd:enumeration value="param" />
-    </xsd:restriction>
-  </xsd:simpleType>
-
-  <!-- 7.3 pointerRef element -->
-  <xsd:complexType name="varRefElem">
-    <xsd:choice minOccurs="1" maxOccurs="1">
-      <xsd:element ref="Var" />
-      <xsd:element ref="varAddr" />
-      <xsd:element ref="arrayAddr" />
-    </xsd:choice>
-  </xsd:complexType>
 
   <xsd:element name="pointerRef">
     <xsd:complexType>
