@@ -180,7 +180,7 @@
     <xsd:attribute name="is_restrict" type="extended-boolean" default="false" />
     <xsd:attribute name="is_static" type="extended-boolean" default="false" />
     <xsd:attribute name="reference" type="ReferenceAttr" default="default" />
-    <xsd:attribute name="access" type="AccessSpec" default="private" />
+    <xsd:attribute name="access" type="access-specifier" default="private" />
     <xsd:attribute name="is_virtual" type="extended-boolean" default="false" />
     <xsd:attribute name="is_userDefined" type="extended-boolean" default="false" />
   </xsd:attributeGroup>
@@ -208,7 +208,7 @@
     </xsd:restriction>
   </xsd:simpleType>
 
-  <xsd:simpleType name="AccessSpec">
+  <xsd:simpleType name="access-specifier">
     <xsd:restriction base="xsd:string">
       <xsd:enumeration value="private" />
       <xsd:enumeration value="public" />

@@ -51,7 +51,7 @@
     <xsd:complexType>
       <xsd:attribute name="ref" type="data-type-identifier"
         use="required" />
-      <xsd:attribute name="access" type="AccessSpec" default="private" />
+      <xsd:attribute name="access" type="access-specifier" use="optional" />
     </xsd:complexType>
   </xsd:element>
 
