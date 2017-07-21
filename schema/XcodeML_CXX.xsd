@@ -28,7 +28,7 @@
     <xsd:complexType>
       <xsd:simpleContent>
         <xsd:extension base="xsd:string">
-          <xsd:attribute name="type" type="dataTypeIdentName"
+          <xsd:attribute name="type" type="data-type-identifier"
             use="optional" />
         </xsd:extension>
       </xsd:simpleContent>
@@ -59,7 +59,7 @@
   <!-- FIXME: inheritedFrom element対応 -->
   <xsd:element name="typeName">
     <xsd:complexType>
-      <xsd:attribute name="ref" type="dataTypeIdentName"
+      <xsd:attribute name="ref" type="data-type-identifier"
         use="required" />
       <xsd:attribute name="access" type="AccessSpec" default="private" />
     </xsd:complexType>
@@ -92,9 +92,9 @@
       <xsd:sequence>
         <xsd:element minOccurs="1" maxOccurs="1" ref="params" />
       </xsd:sequence>
-      <xsd:attribute name="type" type="dataTypeIdentName"
+      <xsd:attribute name="type" type="data-type-identifier"
         use="required" />
-      <xsd:attribute name="return_type" type="dataTypeIdentName"
+      <xsd:attribute name="return_type" type="data-type-identifier"
         use="required" />
       <xsd:attribute name="is_inline" type="extended-boolean" />
     </xsd:complexType>
@@ -108,9 +108,9 @@
       <xsd:sequence>
         <xsd:element minOccurs="0" maxOccurs="unbounded" ref="arraySize" />
       </xsd:sequence>
-      <xsd:attribute name="type" type="dataTypeIdentName"
+      <xsd:attribute name="type" type="data-type-identifier"
         use="required" />
-      <xsd:attribute name="element_type" type="dataTypeIdentName"
+      <xsd:attribute name="element_type" type="data-type-identifier"
         use="required" />
       <xsd:attribute name="array_size" type="xsd:nonNegativeInteger"
         default="42" />
@@ -132,7 +132,7 @@
       <xsd:sequence>
         <xsd:element minOccurs="1" maxOccurs="1" ref="symbols" />
       </xsd:sequence>
-      <xsd:attribute name="type" type="dataTypeIdentName" use="required" />
+      <xsd:attribute name="type" type="data-type-identifier" use="required" />
       <xsd:attributeGroup ref="data-type-defining-element-attributes" />
     </xsd:complexType>
   </xsd:element>
@@ -146,7 +146,7 @@
       <xsd:element minOccurs="1" maxOccurs="1" ref="symbols" />
       <xsd:element minOccurs="0" maxOccurs="1" ref="declarations" />
     </xsd:sequence>
-    <xsd:attribute name="type" type="dataTypeIdentName" use="required" />
+    <xsd:attribute name="type" type="data-type-identifier" use="required" />
     <xsd:attribute name="inherited" type="xsd:string" default="FIXME" />
     <xsd:attributeGroup ref="data-type-defining-element-attributes" />
     <xsd:attributeGroup ref="SourceLocInfo" />
@@ -168,7 +168,7 @@
         <xsd:element minOccurs="0" maxOccurs="1" ref="name" />
         <xsd:element minOccurs="1" maxOccurs="1" ref="symbols" />
       </xsd:sequence>
-      <xsd:attribute name="type" type="dataTypeIdentName" />
+      <xsd:attribute name="type" type="data-type-identifier" />
       <xsd:attributeGroup ref="data-type-defining-element-attributes" />
     </xsd:complexType>
   </xsd:element>
@@ -176,9 +176,9 @@
   <!-- 3.11 parameterPack element (C++) -->
   <xsd:element name="parameterPack">
     <xsd:complexType>
-      <xsd:attribute name="type" type="dataTypeIdentName"
+      <xsd:attribute name="type" type="data-type-identifier"
         use="required" />
-      <xsd:attribute name="element_type" type="dataTypeIdentName"
+      <xsd:attribute name="element_type" type="data-type-identifier"
         use="required" />
       <xsd:attributeGroup ref="data-type-defining-element-attributes" />
     </xsd:complexType>
@@ -195,7 +195,7 @@
       </xsd:sequence>
       <xsd:attribute name="sclass" type="StorageClass" />
       <xsd:attribute name="fspec" type="FuncSpec" />
-      <xsd:attribute name="type" type="dataTypeIdentName" />
+      <xsd:attribute name="type" type="data-type-identifier" />
       <xsd:attribute name="bit_field" type="xsd:integer" />
       <xsd:attribute name="align_as" type="xsd:string" />
       <xsd:attribute name="is_gccThread" type="extended-boolean" />
