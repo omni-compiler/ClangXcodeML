@@ -269,6 +269,14 @@
     </xsd:complexType>
   </xsd:element>
 
+  <xsd:element name="body">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:group ref="statement-element" />
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+
   <!-- 5.3 operator element (C++) -->
   <!-- FIXME: operatorString instead of string -->
   <xsd:element name="operator" type="xsd:string" />
@@ -416,6 +424,15 @@
         <xsd:element minOccurs="0" maxOccurs="1" ref="iter" />
         <xsd:element minOccurs="1" maxOccurs="1" ref="body" />
       </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+
+  <xsd:element name="init">
+    <xsd:complexType>
+      <xsd:choice>
+        <xsd:group ref="expression-element" />
+        <xsd:element ref="varDecl" />
+      </xsd:choice>
     </xsd:complexType>
   </xsd:element>
 
