@@ -549,12 +549,6 @@
   <!-- 6.21 text element -->
   <xsd:element name="text" type="xsd:string" />
 
-  <!-- 7 expression element attributes -->
-  <xsd:attributeGroup name="exprElemAttrs">
-    <xsd:attribute name="type" type="xsd:string" use="required" />
-    <xsd:attribute name="lvalue" type="extended-boolean" use="optional" />
-  </xsd:attributeGroup>
-
   <!-- 7.1 constant element -->
   <xsd:element name="intConstant">
     <xsd:complexType>
