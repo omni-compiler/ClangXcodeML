@@ -87,7 +87,7 @@
         use="required" />
       <xsd:attribute name="return_type" type="data-type-identifier"
         use="required" />
-      <xsd:attribute name="is_inline" type="extended-boolean" />
+      <xsd:attribute name="is_inline" type="extended-boolean" default="false" />
     </xsd:complexType>
   </xsd:element>
 
