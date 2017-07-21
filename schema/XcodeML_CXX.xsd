@@ -102,8 +102,18 @@
         use="required" />
       <xsd:attribute name="element_type" type="data-type-identifier"
         use="required" />
-      <xsd:attribute name="array_size" type="xsd:nonNegativeInteger"
-        default="42" />
+      <xsd:attribute name="array_size">
+        <!-- non-negative integer or "*" -->
+        <xsd:simpleType>
+          <xsd:union memberTypes="xsd:nonNegativeInteger">
+            <xsd:simpleType>
+              <xsd:restriction base="xsd:string">
+                <xsd:enumeration value="*" />
+              </xsd:restriction>
+            </xsd:simpleType>
+          </xsd:union>
+        </xsd:simpleType>
+      </xsd:attribute>
       <xsd:attributeGroup ref="data-type-defining-element-attributes" />
     </xsd:complexType>
   </xsd:element>
