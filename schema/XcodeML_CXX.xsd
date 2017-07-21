@@ -1242,7 +1242,7 @@
   <xsd:element name="gccCompoundExpr">
     <xsd:complexType>
       <xsd:sequence>
-        <xsd:element minOccurs="1" maxOccurs="1" ref="compoundStatment" />
+        <xsd:element minOccurs="1" maxOccurs="1" ref="compoundStatement" />
       </xsd:sequence>
     </xsd:complexType>
   </xsd:element>
