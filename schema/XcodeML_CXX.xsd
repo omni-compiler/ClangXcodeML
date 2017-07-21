@@ -845,6 +845,14 @@
     </xsd:complexType>
   </xsd:element>
 
+  <xsd:element name="addrOfExpr">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:group ref="expression-element" minOccurs="1" maxOccurs="1" />
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+
   <xsd:element name="arrayAddr">
     <xsd:complexType>
       <xsd:simpleContent>
@@ -894,6 +902,49 @@
         <xsd:element minOccurs="1" maxOccurs="1" ref="ElemAtSectionSeven" />
       </xsd:sequence>
       <xsd:attributeGroup ref="exprElemAttrs" />
+    </xsd:complexType>
+  </xsd:element>
+
+  <xsd:element name="memberRef">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:group ref="expression-element" minOccurs="1" maxOccurs="1" />
+      </xsd:sequence>
+      <xsd:attribute name="member" type="xsd:string" use="required" />
+    </xsd:complexType>
+  </xsd:element>
+
+  <xsd:element name="memberArrayRef">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:group ref="expression-element" minOccurs="1" maxOccurs="1" />
+      </xsd:sequence>
+      <xsd:attribute name="member" type="xsd:string" use="required" />
+    </xsd:complexType>
+  </xsd:element>
+
+  <xsd:element name="memberPointer">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:group ref="expression-element" minOccurs="1" maxOccurs="1" />
+      </xsd:sequence>
+      <xsd:attribute name="name" type="xsd:string" use="required" />
+    </xsd:complexType>
+  </xsd:element>
+
+  <xsd:element name="compoundValue">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element ref="value" />
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+
+  <xsd:element name="compoundValueAddr">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element ref="value" />
+      </xsd:sequence>
     </xsd:complexType>
   </xsd:element>
 
@@ -1335,6 +1386,14 @@
     </xsd:complexType>
   </xsd:element>
 
+  <xsd:element name="castExpr">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:group ref="expression-element" minOccurs="1" maxOccurs="1" />
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+
   <!-- 7.16 cast elements -->
   <xsd:element name="staticCast">
     <xsd:complexType>
@@ -1368,6 +1427,14 @@
     </xsd:complexType>
   </xsd:element>
 
+  <xsd:element name="implicitCastExpr">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:group ref="expression-element" minOccurs="1" maxOccurs="1" />
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+
   <!-- 7.17 condExpr elements -->
   <xsd:element name="condExpr">
     <xsd:complexType>
@@ -1395,11 +1462,46 @@
     </xsd:complexType>
   </xsd:element>
 
+  <xsd:element name="newArrayExpr">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:group ref="expression-element" minOccurs="1" maxOccurs="1" />
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+
   <!-- 7.20 deleteExpr -->
   <xsd:element name="deleteExpr">
     <xsd:complexType>
       <xsd:sequence>
         <xsd:element minOccurs="1" maxOccurs="1" ref="ElemAtSectionSeven" />
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+
+  <xsd:element name="deleteArrayExpr">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:group ref="expression-element" minOccurs="1" maxOccurs="1" />
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+
+  <xsd:element name="throwExpr">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:group ref="expression-element" minOccurs="1" maxOccurs="1" />
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+
+  <xsd:element name="lambdaExpr">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element ref="captures" minOccurs="1" maxOccurs="1" />
+        <xsd:element ref="symbols" minOccurs="1" maxOccurs="1" />
+        <xsd:element ref="params" minOccurs="1" maxOccurs="1" />
+        <xsd:element ref="body" minOccurs="1" maxOccurs="1" />
       </xsd:sequence>
     </xsd:complexType>
   </xsd:element>
