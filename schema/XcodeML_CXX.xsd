@@ -4,6 +4,7 @@
   >
 
   <xsd:include schemaLocation="types.xsd" />
+  <xsd:include schemaLocation="clang.xsd" />
 
   <!-- 2 Translation unit and XcodeProgram element -->
   <!-- FIXME: templateInstances element (テンプレートの展開結果)の仕様 -->

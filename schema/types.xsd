@@ -37,6 +37,7 @@
       <xsd:element ref="defaultLabel" />
       <xsd:element ref="pragma" />
       <xsd:element ref="text" />
+      <xsd:element ref="clangStmt" />
     </xsd:choice>
   </xsd:group>
 
@@ -117,6 +118,7 @@
       <xsd:element ref="deleteArrayExpr" />
       <xsd:element ref="throwExpr" />
       <xsd:element ref="lambdaExpr" />
+      <xsd:element ref="clangStmt" />
     </xsd:choice>
   </xsd:group>
 
