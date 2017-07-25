@@ -722,6 +722,7 @@
         <xsd:group ref="expression-element" minOccurs="1" maxOccurs="1" />
       </xsd:sequence>
       <xsd:attributeGroup ref="expression-element-attributes" />
+      <xsd:attribute name="is_expedient" type="extended-boolean" default="false" />
     </xsd:complexType>
   </xsd:element>
 
