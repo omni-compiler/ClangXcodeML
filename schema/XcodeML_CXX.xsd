@@ -690,7 +690,7 @@
       <xsd:simpleContent>
         <xsd:extension base="xsd:string">
           <xsd:attributeGroup ref="expression-element-attributes" />
-          <xsd:attributeGroup ref="varRefElemAttrs" />
+          <xsd:attribute name="scope" type="variable-scope" use="required" />
         </xsd:extension>
       </xsd:simpleContent>
     </xsd:complexType>
@@ -720,7 +720,7 @@
       <xsd:simpleContent>
         <xsd:extension base="xsd:string">
           <xsd:attributeGroup ref="expression-element-attributes" />
-          <xsd:attributeGroup ref="varRefElemAttrs" />
+          <xsd:attribute name="scope" type="variable-scope" use="required" />
         </xsd:extension>
       </xsd:simpleContent>
     </xsd:complexType>

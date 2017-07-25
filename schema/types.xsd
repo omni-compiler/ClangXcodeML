@@ -248,11 +248,7 @@
     </xsd:sequence>
   </xsd:complexType>
 
-  <xsd:attributeGroup name="varRefElemAttrs">
-    <xsd:attribute name="scope" type="ScopeVal" use="required" />
-  </xsd:attributeGroup>
-
-  <xsd:simpleType name="ScopeVal">
+  <xsd:simpleType name="variable-scope">
     <xsd:restriction base="xsd:string">
       <xsd:enumeration value="local" />
       <xsd:enumeration value="global" />
