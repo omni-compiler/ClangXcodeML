@@ -761,6 +761,7 @@
         <xsd:group ref="expression-element" minOccurs="1" maxOccurs="1" />
       </xsd:sequence>
       <xsd:attribute name="name" type="xsd:string" use="required" />
+      <xsd:attributeGroup ref="expression-element-attributes" />
     </xsd:complexType>
   </xsd:element>
 
@@ -769,6 +770,7 @@
       <xsd:sequence>
         <xsd:element ref="value" />
       </xsd:sequence>
+      <xsd:attributeGroup ref="expression-element-attributes" />
     </xsd:complexType>
   </xsd:element>
 
@@ -777,6 +779,7 @@
       <xsd:sequence>
         <xsd:element ref="value" />
       </xsd:sequence>
+      <xsd:attributeGroup ref="expression-element-attributes" />
     </xsd:complexType>
   </xsd:element>
 
