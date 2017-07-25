@@ -165,7 +165,7 @@
   <xsd:element name="inheritedFrom">
     <xsd:complexType>
       <xsd:sequence>
-        <xsd:element minOccurs="1" maxOccurs="unbounded" ref="typeName" />
+        <xsd:element minOccurs="0" maxOccurs="unbounded" ref="typeName" />
       </xsd:sequence>
     </xsd:complexType>
   </xsd:element>
