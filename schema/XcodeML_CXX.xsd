@@ -532,11 +532,6 @@
     </xsd:complexType>
   </xsd:element>
 
-  <!-- 6.13 throwStatement element -->
-  <xsd:element name="throwStatement">
-    <xsd:complexType />
-  </xsd:element>
-
   <!-- 6.14 catchStatement element -->
   <xsd:element name="catchStatement">
     <xsd:complexType>
