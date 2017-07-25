@@ -118,6 +118,7 @@
       <xsd:element ref="deleteArrayExpr" />
       <xsd:element ref="throwExpr" />
       <xsd:element ref="lambdaExpr" />
+      <xsd:element ref="functionInstance" />
       <xsd:element ref="clangStmt" />
     </xsd:choice>
   </xsd:group>

@@ -1416,4 +1416,16 @@
       </xsd:sequence>
     </xsd:complexType>
   </xsd:element>
+
+  <xsd:element name="functionInstance">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element ref="typeArguments" minOccurs="1" maxOccurs="1" />
+        <xsd:element ref="functionCall" minOccurs="1" maxOccurs="1" />
+      </xsd:sequence>
+      <xsd:attribute ref="type" use="required" />
+      <!-- FIXME attribute? -->
+      <xsd:attribute name="name" type="xsd:string" use="required" />
+    </xsd:complexType>
+  </xsd:element>
 </xsd:schema>
