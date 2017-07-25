@@ -137,20 +137,29 @@
     </xsd:complexType>
   </xsd:element>
 
-  <!-- 3.9 structType element and class element (C++) -->
-  <xsd:element name="structType" type="CXXClassElem" />
-  <xsd:element name="classType" type="CXXClassElem" />
-  <xsd:complexType name="CXXClassElem">
-    <xsd:sequence>
-      <xsd:element minOccurs="0" maxOccurs="1" ref="inheritedFrom" />
-      <xsd:element minOccurs="1" maxOccurs="1" ref="symbols" />
-      <xsd:element minOccurs="0" maxOccurs="1" ref="declarations" />
-    </xsd:sequence>
-    <xsd:attribute name="type" type="data-type-identifier" use="required" />
-    <xsd:attribute name="inherited" type="xsd:string" default="FIXME" />
-    <xsd:attributeGroup ref="data-type-defining-element-attributes" />
-    <xsd:attributeGroup ref="SourceLocInfo" />
-  </xsd:complexType>
+  <xsd:element name="structType">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element minOccurs="1" maxOccurs="1" ref="symbols" />
+      </xsd:sequence>
+      <xsd:attribute ref="type" use="required" />
+      <xsd:attributeGroup ref="data-type-defining-element-attributes" />
+      <xsd:attributeGroup ref="source-location-info" />
+    </xsd:complexType>
+  </xsd:element>
+
+  <xsd:element name="classType">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element minOccurs="0" maxOccurs="1" ref="inheritedFrom" />
+        <xsd:element minOccurs="1" maxOccurs="1" ref="symbols" />
+        <xsd:element minOccurs="0" maxOccurs="1" ref="declarations" />
+      </xsd:sequence>
+      <xsd:attribute ref="type" use="required" />
+      <xsd:attributeGroup ref="data-type-defining-element-attributes" />
+      <xsd:attributeGroup ref="source-location-info" />
+    </xsd:complexType>
+  </xsd:element>
 
   <!-- 3.9.1 inheritedFrom element (C++) -->
   <xsd:element name="inheritedFrom">
