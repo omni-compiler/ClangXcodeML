@@ -856,32 +856,11 @@
   <xsd:element name="logOrExpr" type="binary-operation" />
 
   <!-- 7.11 unary operation elements -->
-  <xsd:element name="unaryMinusExpr">
-    <xsd:complexType>
-      <xsd:sequence>
-        <xsd:group ref="expression-element" minOccurs="1" maxOccurs="1" />
-      </xsd:sequence>
-      <xsd:attributeGroup ref="expression-element-attributes" />
-    </xsd:complexType>
-  </xsd:element>
+  <xsd:element name="unaryMinusExpr" type="unary-operation" />
 
-  <xsd:element name="bitNotExpr">
-    <xsd:complexType>
-      <xsd:sequence>
-        <xsd:group ref="expression-element" minOccurs="1" maxOccurs="1" />
-      </xsd:sequence>
-      <xsd:attributeGroup ref="expression-element-attributes" />
-    </xsd:complexType>
-  </xsd:element>
+  <xsd:element name="bitNotExpr" type="unary-operation" />
 
-  <xsd:element name="logNotExpr">
-    <xsd:complexType>
-      <xsd:sequence>
-        <xsd:group ref="expression-element" minOccurs="1" maxOccurs="1" />
-      </xsd:sequence>
-      <xsd:attributeGroup ref="expression-element-attributes" />
-    </xsd:complexType>
-  </xsd:element>
+  <xsd:element name="logNotExpr" type="unary-operation" />
 
   <xsd:element name="sizeOfExpr">
     <xsd:complexType>

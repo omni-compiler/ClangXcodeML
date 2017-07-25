@@ -270,4 +270,11 @@
     </xsd:sequence>
     <xsd:attributeGroup ref="expression-element-attributes" />
   </xsd:complexType>
+
+  <xsd:complexType name="unary-operation">
+    <xsd:sequence>
+      <xsd:group ref="expression-element" minOccurs="1" maxOccurs="1" />
+    </xsd:sequence>
+    <xsd:attributeGroup ref="expression-element-attributes" />
+  </xsd:complexType>
 </xsd:schema>
