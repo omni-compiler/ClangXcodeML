@@ -269,6 +269,7 @@
           <xsd:element ref="operator" />
           <xsd:element ref="constructor" />
           <xsd:element ref="destructor" />
+          <xsd:element ref="conversion" />
         </xsd:choice>
         <xsd:element minOccurs="1" maxOccurs="1" ref="symbols" />
         <xsd:element minOccurs="1" maxOccurs="1" ref="params" />
@@ -303,6 +304,13 @@
 
   <!-- 5.3.3 destructor element (C++) -->
   <xsd:element name="destructor" />
+
+  <xsd:element name="conversion">
+    <xsd:complexType>
+      <xsd:attribute name="destination_type"
+        type="data-type-identifier" use="required" />
+    </xsd:complexType>
+  </xsd:element>
 
   <!-- 5.3.4 params element -->
   <xsd:element name="params">
