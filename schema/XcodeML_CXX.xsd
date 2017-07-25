@@ -1101,6 +1101,8 @@
         <xsd:element ref="byReference" minOccurs="1" maxOccurs="1" />
         <xsd:element ref="byValue" minOccurs="1" maxOccurs="1" />
       </xsd:sequence>
+      <xsd:attribute name="default" type="capture-type" use="optional" />
+      <xsd:attribute name="is_mutable" type="extended-boolean" use="optional" />
     </xsd:complexType>
   </xsd:element>
 

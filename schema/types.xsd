@@ -285,4 +285,11 @@
     </xsd:choice>
     <xsd:attributeGroup ref="expression-element-attributes" />
   </xsd:complexType>
+
+  <xsd:simpleType name="capture-type">
+    <xsd:restriction base="xsd:string">
+      <xsd:enumeration value="by_reference" />
+      <xsd:enumeration value="by_value" />
+    </xsd:restriction>
+  </xsd:simpleType>
 </xsd:schema>
