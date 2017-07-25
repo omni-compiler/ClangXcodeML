@@ -401,7 +401,7 @@
   <xsd:element name="then">
     <xsd:complexType>
       <xsd:sequence>
-        <xsd:group minOccurs="1" maxOccurs="1" ref="expression-element" />
+        <xsd:group minOccurs="1" maxOccurs="1" ref="statement-element" />
       </xsd:sequence>
     </xsd:complexType>
   </xsd:element>
@@ -409,7 +409,7 @@
   <xsd:element name="else">
     <xsd:complexType>
       <xsd:sequence>
-        <xsd:group minOccurs="1" maxOccurs="1" ref="expression-element" />
+        <xsd:group minOccurs="1" maxOccurs="1" ref="statement-element" />
       </xsd:sequence>
     </xsd:complexType>
   </xsd:element>
