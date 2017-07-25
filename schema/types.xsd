@@ -242,15 +242,6 @@
     </xsd:restriction>
   </xsd:simpleType>
 
-  <!-- FIXME: not MECE -->
-  <xsd:simpleType name="FuncSpec">
-    <xsd:restriction base="xsd:string">
-      <xsd:enumeration value="inline" />
-      <xsd:enumeration value="virtual" />
-      <xsd:enumeration value="explicit" />
-    </xsd:restriction>
-  </xsd:simpleType>
-
   <xsd:complexType name="IdElems">
     <xsd:sequence>
       <xsd:element minOccurs="0" maxOccurs="unbounded" ref="id" />
