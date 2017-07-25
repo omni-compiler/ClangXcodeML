@@ -223,7 +223,7 @@
     </xsd:restriction>
   </xsd:simpleType>
 
-  <xsd:simpleType name="StorageClass">
+  <xsd:simpleType name="storage-class">
     <xsd:restriction base="xsd:string">
       <xsd:enumeration value="auto" />
       <xsd:enumeration value="param" />

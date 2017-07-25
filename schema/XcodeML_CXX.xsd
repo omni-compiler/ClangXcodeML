@@ -201,7 +201,7 @@
         <xsd:element minOccurs="0" maxOccurs="1" ref="bitField" />
         <xsd:element minOccurs="0" maxOccurs="1" ref="alignAs" />
       </xsd:sequence>
-      <xsd:attribute name="sclass" type="StorageClass" />
+      <xsd:attribute name="sclass" type="storage-class" />
       <xsd:attribute name="fspec" type="FuncSpec" />
       <xsd:attribute name="type" type="data-type-identifier" />
       <xsd:attribute name="bit_field" type="xsd:integer" />
