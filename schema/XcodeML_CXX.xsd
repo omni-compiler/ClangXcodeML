@@ -1021,7 +1021,7 @@
   <xsd:element name="condExpr">
     <xsd:complexType>
       <xsd:sequence>
-        <xsd:group ref="expression-element" minOccurs="1" maxOccurs="1" />
+        <xsd:group ref="expression-element" minOccurs="2" maxOccurs="3" />
       </xsd:sequence>
       <xsd:attributeGroup ref="expression-element-attributes" />
     </xsd:complexType>
