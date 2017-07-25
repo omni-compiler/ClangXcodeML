@@ -97,7 +97,7 @@
   <xsd:element name="arrayType">
     <xsd:complexType>
       <xsd:sequence>
-        <xsd:element minOccurs="0" maxOccurs="unbounded" ref="arraySize" />
+        <xsd:element minOccurs="0" maxOccurs="1" ref="arraySize" />
       </xsd:sequence>
       <xsd:attribute ref="type" use="required" />
       <xsd:attribute name="element_type" type="data-type-identifier"
