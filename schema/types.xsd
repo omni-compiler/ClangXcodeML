@@ -242,7 +242,7 @@
     </xsd:restriction>
   </xsd:simpleType>
 
-  <xsd:complexType name="IdElems">
+  <xsd:complexType name="id-element-list">
     <xsd:sequence>
       <xsd:element minOccurs="0" maxOccurs="unbounded" ref="id" />
     </xsd:sequence>

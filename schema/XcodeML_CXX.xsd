@@ -229,10 +229,10 @@
   </xsd:element>
 
   <!-- 4.2 globalSymbols element -->
-  <xsd:element name="globalSymbols" type="IdElems" />
+  <xsd:element name="globalSymbols" type="id-element-list" />
 
   <!-- 4.3 symbols element -->
-  <xsd:element name="symbols" type="IdElems" />
+  <xsd:element name="symbols" type="id-element-list" />
 
   <!-- 5.1 globalDeclarations element -->
   <xsd:element name="globalDeclarations">
