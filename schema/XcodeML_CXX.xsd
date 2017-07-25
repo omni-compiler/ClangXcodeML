@@ -884,7 +884,11 @@
   <xsd:element name="functionCall">
     <xsd:complexType>
       <xsd:sequence>
-        <xsd:element minOccurs="1" maxOccurs="1" ref="function" />
+        <xsd:choice minOccurs="1" maxOccurs="1">
+          <xsd:element ref="function" />
+          <xsd:element ref="memberRef" />
+          <xsd:element ref="operator" />
+        </xsd:choice>
         <xsd:element minOccurs="1" maxOccurs="1" ref="arguments" />
       </xsd:sequence>
     </xsd:complexType>
