@@ -277,4 +277,12 @@
     </xsd:sequence>
     <xsd:attributeGroup ref="expression-element-attributes" />
   </xsd:complexType>
+
+  <xsd:complexType name="meta-unary-operation">
+    <xsd:choice>
+      <xsd:group ref="expression-element" />
+      <xsd:element ref="typeName" />
+    </xsd:choice>
+    <xsd:attributeGroup ref="expression-element-attributes" />
+  </xsd:complexType>
 </xsd:schema>

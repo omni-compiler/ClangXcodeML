@@ -862,41 +862,13 @@
 
   <xsd:element name="logNotExpr" type="unary-operation" />
 
-  <xsd:element name="sizeOfExpr">
-    <xsd:complexType>
-      <xsd:sequence>
-        <xsd:group ref="expression-element" minOccurs="1" maxOccurs="1" />
-      </xsd:sequence>
-      <xsd:attributeGroup ref="expression-element-attributes" />
-    </xsd:complexType>
-  </xsd:element>
+  <xsd:element name="sizeOfExpr" type="meta-unary-operation" />
 
-  <xsd:element name="alignOfExpr">
-    <xsd:complexType>
-      <xsd:sequence>
-        <xsd:group ref="expression-element" minOccurs="1" maxOccurs="1" />
-      </xsd:sequence>
-      <xsd:attributeGroup ref="expression-element-attributes" />
-    </xsd:complexType>
-  </xsd:element>
+  <xsd:element name="alignOfExpr" type="meta-unary-operation" />
 
-  <xsd:element name="typeidExpr">
-    <xsd:complexType>
-      <xsd:sequence>
-        <xsd:group ref="expression-element" minOccurs="1" maxOccurs="1" />
-      </xsd:sequence>
-      <xsd:attributeGroup ref="expression-element-attributes" />
-    </xsd:complexType>
-  </xsd:element>
+  <xsd:element name="typeidExpr" type="meta-unary-operation" />
 
-  <xsd:element name="gccAlignOfExpr">
-    <xsd:complexType>
-      <xsd:sequence>
-        <xsd:group ref="expression-element" minOccurs="1" maxOccurs="1" />
-      </xsd:sequence>
-      <xsd:attributeGroup ref="expression-element-attributes" />
-    </xsd:complexType>
-  </xsd:element>
+  <xsd:element name="gccAlignOfExpr" type="meta-unary-operation" />
 
   <xsd:element name="gccLabelAddr">
     <xsd:complexType>
