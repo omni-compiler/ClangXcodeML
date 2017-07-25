@@ -701,6 +701,7 @@
       <xsd:sequence>
         <xsd:group ref="expression-element" minOccurs="1" maxOccurs="1" />
       </xsd:sequence>
+      <xsd:attribute ref="type" use="required" />
     </xsd:complexType>
   </xsd:element>
 
