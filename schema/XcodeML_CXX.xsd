@@ -1009,9 +1009,10 @@
 
   <xsd:element name="implicitCastExpr">
     <xsd:complexType>
-      <xsd:sequence>
-        <xsd:group ref="expression-element" minOccurs="1" maxOccurs="1" />
-      </xsd:sequence>
+      <xsd:choice>
+        <xsd:group ref="expression-element" />
+        <xsd:element ref="value" />
+      </xsd:choice>
       <xsd:attributeGroup ref="expression-element-attributes" />
     </xsd:complexType>
   </xsd:element>
