@@ -799,285 +799,61 @@
   </xsd:element>
 
   <!-- 7.10 binary operation elements -->
-  <xsd:element name="plusExpr">
-    <xsd:complexType>
-      <xsd:sequence>
-        <xsd:group ref="expression-element" minOccurs="1" maxOccurs="1" />
-        <xsd:group ref="expression-element" minOccurs="1" maxOccurs="1" />
-      </xsd:sequence>
-      <xsd:attributeGroup ref="expression-element-attributes" />
-    </xsd:complexType>
-  </xsd:element>
+  <xsd:element name="plusExpr" type="binary-operation" />
 
-  <xsd:element name="minusExpr">
-    <xsd:complexType>
-      <xsd:sequence>
-        <xsd:group ref="expression-element" minOccurs="1" maxOccurs="1" />
-        <xsd:group ref="expression-element" minOccurs="1" maxOccurs="1" />
-      </xsd:sequence>
-      <xsd:attributeGroup ref="expression-element-attributes" />
-    </xsd:complexType>
-  </xsd:element>
+  <xsd:element name="minusExpr" type="binary-operation" />
 
-  <xsd:element name="mulExpr">
-    <xsd:complexType>
-      <xsd:sequence>
-        <xsd:group ref="expression-element" minOccurs="1" maxOccurs="1" />
-        <xsd:group ref="expression-element" minOccurs="1" maxOccurs="1" />
-      </xsd:sequence>
-      <xsd:attributeGroup ref="expression-element-attributes" />
-    </xsd:complexType>
-  </xsd:element>
+  <xsd:element name="mulExpr" type="binary-operation" />
 
-  <xsd:element name="divExpr">
-    <xsd:complexType>
-      <xsd:sequence>
-        <xsd:group ref="expression-element" minOccurs="1" maxOccurs="1" />
-        <xsd:group ref="expression-element" minOccurs="1" maxOccurs="1" />
-      </xsd:sequence>
-      <xsd:attributeGroup ref="expression-element-attributes" />
-    </xsd:complexType>
-  </xsd:element>
+  <xsd:element name="divExpr" type="binary-operation" />
 
-  <xsd:element name="modExpr">
-    <xsd:complexType>
-      <xsd:sequence>
-        <xsd:group ref="expression-element" minOccurs="1" maxOccurs="1" />
-        <xsd:group ref="expression-element" minOccurs="1" maxOccurs="1" />
-      </xsd:sequence>
-      <xsd:attributeGroup ref="expression-element-attributes" />
-    </xsd:complexType>
-  </xsd:element>
+  <xsd:element name="modExpr" type="binary-operation" />
 
-  <xsd:element name="LshiftExpr">
-    <xsd:complexType>
-      <xsd:sequence>
-        <xsd:group ref="expression-element" minOccurs="1" maxOccurs="1" />
-        <xsd:group ref="expression-element" minOccurs="1" maxOccurs="1" />
-      </xsd:sequence>
-      <xsd:attributeGroup ref="expression-element-attributes" />
-    </xsd:complexType>
-  </xsd:element>
+  <xsd:element name="LshiftExpr" type="binary-operation" />
 
-  <xsd:element name="RshiftExpr">
-    <xsd:complexType>
-      <xsd:sequence>
-        <xsd:group ref="expression-element" minOccurs="1" maxOccurs="1" />
-        <xsd:group ref="expression-element" minOccurs="1" maxOccurs="1" />
-      </xsd:sequence>
-      <xsd:attributeGroup ref="expression-element-attributes" />
-    </xsd:complexType>
-  </xsd:element>
+  <xsd:element name="RshiftExpr" type="binary-operation" />
 
-  <xsd:element name="bitAndExpr">
-    <xsd:complexType>
-      <xsd:sequence>
-        <xsd:group ref="expression-element" minOccurs="1" maxOccurs="1" />
-        <xsd:group ref="expression-element" minOccurs="1" maxOccurs="1" />
-      </xsd:sequence>
-      <xsd:attributeGroup ref="expression-element-attributes" />
-    </xsd:complexType>
-  </xsd:element>
+  <xsd:element name="bitAndExpr" type="binary-operation" />
 
-  <xsd:element name="bitOrExpr">
-    <xsd:complexType>
-      <xsd:sequence>
-        <xsd:group ref="expression-element" minOccurs="1" maxOccurs="1" />
-        <xsd:group ref="expression-element" minOccurs="1" maxOccurs="1" />
-      </xsd:sequence>
-      <xsd:attributeGroup ref="expression-element-attributes" />
-    </xsd:complexType>
-  </xsd:element>
+  <xsd:element name="bitOrExpr" type="binary-operation" />
 
-  <xsd:element name="bitXorExpr">
-    <xsd:complexType>
-      <xsd:sequence>
-        <xsd:group ref="expression-element" minOccurs="1" maxOccurs="1" />
-        <xsd:group ref="expression-element" minOccurs="1" maxOccurs="1" />
-      </xsd:sequence>
-      <xsd:attributeGroup ref="expression-element-attributes" />
-    </xsd:complexType>
-  </xsd:element>
+  <xsd:element name="bitXorExpr" type="binary-operation" />
 
-  <xsd:element name="asgPlusExpr">
-    <xsd:complexType>
-      <xsd:sequence>
-        <xsd:group ref="expression-element" minOccurs="1" maxOccurs="1" />
-        <xsd:group ref="expression-element" minOccurs="1" maxOccurs="1" />
-      </xsd:sequence>
-      <xsd:attributeGroup ref="expression-element-attributes" />
-    </xsd:complexType>
-  </xsd:element>
+  <xsd:element name="asgPlusExpr" type="binary-operation" />
 
-  <xsd:element name="asgMinusExpr">
-    <xsd:complexType>
-      <xsd:sequence>
-        <xsd:group ref="expression-element" minOccurs="1" maxOccurs="1" />
-        <xsd:group ref="expression-element" minOccurs="1" maxOccurs="1" />
-      </xsd:sequence>
-      <xsd:attributeGroup ref="expression-element-attributes" />
-    </xsd:complexType>
-  </xsd:element>
+  <xsd:element name="asgMinusExpr" type="binary-operation" />
 
-  <xsd:element name="asgMulExpr">
-    <xsd:complexType>
-      <xsd:sequence>
-        <xsd:group ref="expression-element" minOccurs="1" maxOccurs="1" />
-        <xsd:group ref="expression-element" minOccurs="1" maxOccurs="1" />
-      </xsd:sequence>
-      <xsd:attributeGroup ref="expression-element-attributes" />
-    </xsd:complexType>
-  </xsd:element>
+  <xsd:element name="asgMulExpr" type="binary-operation" />
 
-  <xsd:element name="asgDivExpr">
-    <xsd:complexType>
-      <xsd:sequence>
-        <xsd:group ref="expression-element" minOccurs="1" maxOccurs="1" />
-        <xsd:group ref="expression-element" minOccurs="1" maxOccurs="1" />
-      </xsd:sequence>
-      <xsd:attributeGroup ref="expression-element-attributes" />
-    </xsd:complexType>
-  </xsd:element>
+  <xsd:element name="asgDivExpr" type="binary-operation" />
 
-  <xsd:element name="asgModExpr">
-    <xsd:complexType>
-      <xsd:sequence>
-        <xsd:group ref="expression-element" minOccurs="1" maxOccurs="1" />
-        <xsd:group ref="expression-element" minOccurs="1" maxOccurs="1" />
-      </xsd:sequence>
-      <xsd:attributeGroup ref="expression-element-attributes" />
-    </xsd:complexType>
-  </xsd:element>
+  <xsd:element name="asgModExpr" type="binary-operation" />
 
-  <xsd:element name="asgLshiftExpr">
-    <xsd:complexType>
-      <xsd:sequence>
-        <xsd:group ref="expression-element" minOccurs="1" maxOccurs="1" />
-        <xsd:group ref="expression-element" minOccurs="1" maxOccurs="1" />
-      </xsd:sequence>
-      <xsd:attributeGroup ref="expression-element-attributes" />
-    </xsd:complexType>
-  </xsd:element>
+  <xsd:element name="asgLshiftExpr" type="binary-operation" />
 
-  <xsd:element name="asgRshiftExpr">
-    <xsd:complexType>
-      <xsd:sequence>
-        <xsd:group ref="expression-element" minOccurs="1" maxOccurs="1" />
-        <xsd:group ref="expression-element" minOccurs="1" maxOccurs="1" />
-      </xsd:sequence>
-      <xsd:attributeGroup ref="expression-element-attributes" />
-    </xsd:complexType>
-  </xsd:element>
+  <xsd:element name="asgRshiftExpr" type="binary-operation" />
 
-  <xsd:element name="asgBitAndExpr">
-    <xsd:complexType>
-      <xsd:sequence>
-        <xsd:group ref="expression-element" minOccurs="1" maxOccurs="1" />
-        <xsd:group ref="expression-element" minOccurs="1" maxOccurs="1" />
-      </xsd:sequence>
-      <xsd:attributeGroup ref="expression-element-attributes" />
-    </xsd:complexType>
-  </xsd:element>
+  <xsd:element name="asgBitAndExpr" type="binary-operation" />
 
-  <xsd:element name="asgBitOrExpr">
-    <xsd:complexType>
-      <xsd:sequence>
-        <xsd:group ref="expression-element" minOccurs="1" maxOccurs="1" />
-        <xsd:group ref="expression-element" minOccurs="1" maxOccurs="1" />
-      </xsd:sequence>
-      <xsd:attributeGroup ref="expression-element-attributes" />
-    </xsd:complexType>
-  </xsd:element>
+  <xsd:element name="asgBitOrExpr" type="binary-operation" />
 
-  <xsd:element name="asgBitXorExpr">
-    <xsd:complexType>
-      <xsd:sequence>
-        <xsd:group ref="expression-element" minOccurs="1" maxOccurs="1" />
-        <xsd:group ref="expression-element" minOccurs="1" maxOccurs="1" />
-      </xsd:sequence>
-      <xsd:attributeGroup ref="expression-element-attributes" />
-    </xsd:complexType>
-  </xsd:element>
+  <xsd:element name="asgBitXorExpr" type="binary-operation" />
 
-  <xsd:element name="logEQExpr">
-    <xsd:complexType>
-      <xsd:sequence>
-        <xsd:group ref="expression-element" minOccurs="1" maxOccurs="1" />
-        <xsd:group ref="expression-element" minOccurs="1" maxOccurs="1" />
-      </xsd:sequence>
-      <xsd:attributeGroup ref="expression-element-attributes" />
-    </xsd:complexType>
-  </xsd:element>
+  <xsd:element name="logEQExpr" type="binary-operation" />
 
-  <xsd:element name="logNEQExpr">
-    <xsd:complexType>
-      <xsd:sequence>
-        <xsd:group ref="expression-element" minOccurs="1" maxOccurs="1" />
-        <xsd:group ref="expression-element" minOccurs="1" maxOccurs="1" />
-      </xsd:sequence>
-      <xsd:attributeGroup ref="expression-element-attributes" />
-    </xsd:complexType>
-  </xsd:element>
+  <xsd:element name="logNEQExpr" type="binary-operation" />
 
-  <xsd:element name="logGEExpr">
-    <xsd:complexType>
-      <xsd:sequence>
-        <xsd:group ref="expression-element" minOccurs="1" maxOccurs="1" />
-        <xsd:group ref="expression-element" minOccurs="1" maxOccurs="1" />
-      </xsd:sequence>
-      <xsd:attributeGroup ref="expression-element-attributes" />
-    </xsd:complexType>
-  </xsd:element>
+  <xsd:element name="logGEExpr" type="binary-operation" />
 
-  <xsd:element name="logGTExpr">
-    <xsd:complexType>
-      <xsd:sequence>
-        <xsd:group ref="expression-element" minOccurs="1" maxOccurs="1" />
-        <xsd:group ref="expression-element" minOccurs="1" maxOccurs="1" />
-      </xsd:sequence>
-      <xsd:attributeGroup ref="expression-element-attributes" />
-    </xsd:complexType>
-  </xsd:element>
+  <xsd:element name="logGTExpr" type="binary-operation" />
 
-  <xsd:element name="logLEExpr">
-    <xsd:complexType>
-      <xsd:sequence>
-        <xsd:group ref="expression-element" minOccurs="1" maxOccurs="1" />
-        <xsd:group ref="expression-element" minOccurs="1" maxOccurs="1" />
-      </xsd:sequence>
-      <xsd:attributeGroup ref="expression-element-attributes" />
-    </xsd:complexType>
-  </xsd:element>
+  <xsd:element name="logLEExpr" type="binary-operation" />
 
-  <xsd:element name="logLTExpr">
-    <xsd:complexType>
-      <xsd:sequence>
-        <xsd:group ref="expression-element" minOccurs="1" maxOccurs="1" />
-        <xsd:group ref="expression-element" minOccurs="1" maxOccurs="1" />
-      </xsd:sequence>
-      <xsd:attributeGroup ref="expression-element-attributes" />
-    </xsd:complexType>
-  </xsd:element>
+  <xsd:element name="logLTExpr" type="binary-operation" />
 
-  <xsd:element name="logAndExpr">
-    <xsd:complexType>
-      <xsd:sequence>
-        <xsd:group ref="expression-element" minOccurs="1" maxOccurs="1" />
-        <xsd:group ref="expression-element" minOccurs="1" maxOccurs="1" />
-      </xsd:sequence>
-      <xsd:attributeGroup ref="expression-element-attributes" />
-    </xsd:complexType>
-  </xsd:element>
+  <xsd:element name="logAndExpr" type="binary-operation" />
 
-  <xsd:element name="logOrExpr">
-    <xsd:complexType>
-      <xsd:sequence>
-        <xsd:group ref="expression-element" minOccurs="1" maxOccurs="1" />
-        <xsd:group ref="expression-element" minOccurs="1" maxOccurs="1" />
-      </xsd:sequence>
-      <xsd:attributeGroup ref="expression-element-attributes" />
-    </xsd:complexType>
-  </xsd:element>
+  <xsd:element name="logOrExpr" type="binary-operation" />
 
   <!-- 7.11 unary operation elements -->
   <xsd:element name="unaryMinusExpr">
