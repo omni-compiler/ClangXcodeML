@@ -84,8 +84,7 @@
       <xsd:sequence>
         <xsd:element minOccurs="1" maxOccurs="1" ref="params" />
       </xsd:sequence>
-      <xsd:attribute name="type" type="data-type-identifier"
-        use="required" />
+      <xsd:attribute ref="type" use="required" />
       <xsd:attribute name="return_type" type="data-type-identifier"
         use="required" />
       <xsd:attribute name="is_inline" type="extended-boolean" default="false" />
@@ -100,8 +99,7 @@
       <xsd:sequence>
         <xsd:element minOccurs="0" maxOccurs="unbounded" ref="arraySize" />
       </xsd:sequence>
-      <xsd:attribute name="type" type="data-type-identifier"
-        use="required" />
+      <xsd:attribute ref="type" use="required" />
       <xsd:attribute name="element_type" type="data-type-identifier"
         use="required" />
       <xsd:attribute name="array_size">
@@ -134,7 +132,7 @@
       <xsd:sequence>
         <xsd:element minOccurs="1" maxOccurs="1" ref="symbols" />
       </xsd:sequence>
-      <xsd:attribute name="type" type="data-type-identifier" use="required" />
+      <xsd:attribute ref="type" use="required" />
       <xsd:attributeGroup ref="data-type-defining-element-attributes" />
     </xsd:complexType>
   </xsd:element>
@@ -170,7 +168,7 @@
         <xsd:element minOccurs="0" maxOccurs="1" ref="name" />
         <xsd:element minOccurs="1" maxOccurs="1" ref="symbols" />
       </xsd:sequence>
-      <xsd:attribute name="type" type="data-type-identifier" />
+      <xsd:attribute ref="type" use="required" />
       <xsd:attributeGroup ref="data-type-defining-element-attributes" />
     </xsd:complexType>
   </xsd:element>
@@ -178,8 +176,7 @@
   <!-- 3.11 parameterPack element (C++) -->
   <xsd:element name="parameterPack">
     <xsd:complexType>
-      <xsd:attribute name="type" type="data-type-identifier"
-        use="required" />
+      <xsd:attribute ref="type" use="required" />
       <xsd:attribute name="element_type" type="data-type-identifier"
         use="required" />
       <xsd:attributeGroup ref="data-type-defining-element-attributes" />
