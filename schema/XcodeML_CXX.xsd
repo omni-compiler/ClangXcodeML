@@ -872,10 +872,11 @@
 
   <xsd:element name="gccLabelAddr">
     <xsd:complexType>
-      <xsd:sequence>
-        <xsd:group ref="expression-element" minOccurs="1" maxOccurs="1" />
-      </xsd:sequence>
-      <xsd:attributeGroup ref="expression-element-attributes" />
+      <xsd:simpleContent>
+        <xsd:extension base="xsd:string">
+          <xsd:attributeGroup ref="expression-element-attributes" />
+        </xsd:extension>
+      </xsd:simpleContent>
     </xsd:complexType>
   </xsd:element>
 
