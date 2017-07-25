@@ -453,7 +453,7 @@
     <xsd:complexType>
       <xsd:choice>
         <xsd:group ref="expression-element" />
-        <xsd:element ref="varDecl" />
+        <xsd:element ref="symbols" />
       </xsd:choice>
     </xsd:complexType>
   </xsd:element>
