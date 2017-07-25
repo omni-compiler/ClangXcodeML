@@ -696,17 +696,6 @@
     </xsd:complexType>
   </xsd:element>
 
-  <xsd:element name="varAddr">
-    <xsd:complexType>
-      <xsd:simpleContent>
-        <xsd:extension base="xsd:string">
-          <xsd:attributeGroup ref="expression-element-attributes" />
-          <xsd:attributeGroup ref="varRefElemAttrs" />
-        </xsd:extension>
-      </xsd:simpleContent>
-    </xsd:complexType>
-  </xsd:element>
-
   <xsd:element name="addrOfExpr">
     <xsd:complexType>
       <xsd:sequence>
