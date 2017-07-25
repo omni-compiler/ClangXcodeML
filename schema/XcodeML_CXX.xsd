@@ -337,7 +337,7 @@
         <xsd:element ref="name" />
       </xsd:sequence>
       <xsd:attribute name="namespace" type="extended-boolean" />
-      <xsd:attributeGroup ref="SourceLocInfo" />
+      <xsd:attributeGroup ref="source-location-info" />
     </xsd:complexType>
   </xsd:element>
 
@@ -347,7 +347,7 @@
       <xsd:sequence>
         <xsd:group minOccurs="1" maxOccurs="1" ref="expression-element" />
       </xsd:sequence>
-      <xsd:attributeGroup ref="SourceLocInfo" />
+      <xsd:attributeGroup ref="source-location-info" />
     </xsd:complexType>
   </xsd:element>
 

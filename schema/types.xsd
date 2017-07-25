@@ -185,7 +185,7 @@
     <xsd:attribute name="is_virtual" type="extended-boolean" default="false" />
   </xsd:attributeGroup>
 
-  <xsd:attributeGroup name="SourceLocInfo">
+  <xsd:attributeGroup name="source-location-info">
     <xsd:attribute name="lineno" type="xsd:nonNegativeInteger" />
     <xsd:attribute name="file" type="xsd:string" />
   </xsd:attributeGroup>
