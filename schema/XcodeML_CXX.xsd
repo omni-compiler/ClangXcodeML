@@ -374,6 +374,7 @@
         <xsd:element minOccurs="1" maxOccurs="1" ref="declarations" />
         <xsd:element minOccurs="1" maxOccurs="1" ref="body" />
       </xsd:sequence>
+      <xsd:attributeGroup ref="source-location-info" />
     </xsd:complexType>
   </xsd:element>
 
@@ -385,6 +386,7 @@
         <xsd:element minOccurs="1" maxOccurs="1" ref="then" />
         <xsd:element minOccurs="1" maxOccurs="1" ref="else" />
       </xsd:sequence>
+      <xsd:attributeGroup ref="source-location-info" />
     </xsd:complexType>
   </xsd:element>
 
@@ -419,6 +421,7 @@
         <xsd:element minOccurs="1" maxOccurs="1" ref="condition" />
         <xsd:element minOccurs="1" maxOccurs="1" ref="body" />
       </xsd:sequence>
+      <xsd:attributeGroup ref="source-location-info" />
     </xsd:complexType>
   </xsd:element>
 
@@ -429,6 +432,7 @@
         <xsd:element minOccurs="1" maxOccurs="1" ref="body" />
         <xsd:element minOccurs="1" maxOccurs="1" ref="condition" />
       </xsd:sequence>
+      <xsd:attributeGroup ref="source-location-info" />
     </xsd:complexType>
   </xsd:element>
 
@@ -441,6 +445,7 @@
         <xsd:element minOccurs="0" maxOccurs="1" ref="iter" />
         <xsd:element minOccurs="1" maxOccurs="1" ref="body" />
       </xsd:sequence>
+      <xsd:attributeGroup ref="source-location-info" />
     </xsd:complexType>
   </xsd:element>
 
@@ -470,6 +475,7 @@
         <xsd:element minOccurs="1" maxOccurs="1" ref="range" />
         <xsd:element minOccurs="1" maxOccurs="1" ref="body" />
       </xsd:sequence>
+      <xsd:attributeGroup ref="source-location-info" />
     </xsd:complexType>
   </xsd:element>
 
@@ -483,12 +489,16 @@
 
   <!-- 6.8 breakStatement element -->
   <xsd:element name="breakStatement">
-    <xsd:complexType />
+    <xsd:complexType>
+      <xsd:attributeGroup ref="source-location-info" />
+    </xsd:complexType>
   </xsd:element>
 
   <!-- 6.9 continueStatement element -->
   <xsd:element name="continueStatement">
-    <xsd:complexType />
+    <xsd:complexType>
+      <xsd:attributeGroup ref="source-location-info" />
+    </xsd:complexType>
   </xsd:element>
 
   <!-- 6.10 returnStatement element -->
@@ -497,6 +507,7 @@
       <xsd:sequence>
         <xsd:group minOccurs="1" maxOccurs="1" ref="expression-element" />
       </xsd:sequence>
+      <xsd:attributeGroup ref="source-location-info" />
     </xsd:complexType>
   </xsd:element>
 
@@ -507,6 +518,7 @@
         <xsd:element ref="name" />
         <xsd:group minOccurs="1" maxOccurs="1" ref="expression-element" />
       </xsd:choice>
+      <xsd:attributeGroup ref="source-location-info" />
     </xsd:complexType>
   </xsd:element>
 
@@ -516,6 +528,7 @@
       <xsd:sequence>
         <xsd:element minOccurs="1" maxOccurs="1" ref="body" />
       </xsd:sequence>
+      <xsd:attributeGroup ref="source-location-info" />
     </xsd:complexType>
   </xsd:element>
 
@@ -531,6 +544,7 @@
         <xsd:element minOccurs="1" maxOccurs="1" ref="params" />
         <xsd:element minOccurs="1" maxOccurs="1" ref="body" />
       </xsd:sequence>
+      <xsd:attributeGroup ref="source-location-info" />
     </xsd:complexType>
   </xsd:element>
 
@@ -550,6 +564,7 @@
         <xsd:element minOccurs="1" maxOccurs="1" ref="value" />
         <xsd:element minOccurs="1" maxOccurs="1" ref="body" />
       </xsd:sequence>
+      <xsd:attributeGroup ref="source-location-info" />
     </xsd:complexType>
   </xsd:element>
 
@@ -559,6 +574,7 @@
       <xsd:sequence>
         <xsd:element minOccurs="1" maxOccurs="1" ref="value" />
       </xsd:sequence>
+      <xsd:attributeGroup ref="source-location-info" />
     </xsd:complexType>
   </xsd:element>
 
@@ -569,19 +585,38 @@
         <xsd:element minOccurs="1" maxOccurs="1" ref="value" />
         <xsd:element minOccurs="1" maxOccurs="1" ref="value" />
       </xsd:sequence>
+      <xsd:attributeGroup ref="source-location-info" />
     </xsd:complexType>
   </xsd:element>
 
   <!-- 6.19 defaultLabel element -->
   <xsd:element name="defaultLabel">
-    <xsd:complexType />
+    <xsd:complexType>
+      <xsd:attributeGroup ref="source-location-info" />
+    </xsd:complexType>
   </xsd:element>
 
   <!-- 6.20 pragma element -->
-  <xsd:element name="pragma" type="xsd:string" />
+  <xsd:element name="pragma">
+    <xsd:complexType>
+      <xsd:simpleContent>
+        <xsd:extension base="xsd:string">
+          <xsd:attributeGroup ref="source-location-info" />
+        </xsd:extension>
+      </xsd:simpleContent>
+    </xsd:complexType>
+  </xsd:element>
 
   <!-- 6.21 text element -->
-  <xsd:element name="text" type="xsd:string" />
+  <xsd:element name="text">
+    <xsd:complexType>
+      <xsd:simpleContent>
+        <xsd:extension base="xsd:string">
+          <xsd:attributeGroup ref="source-location-info" />
+        </xsd:extension>
+      </xsd:simpleContent>
+    </xsd:complexType>
+  </xsd:element>
 
   <!-- 7.1 constant element -->
   <xsd:element name="intConstant">
