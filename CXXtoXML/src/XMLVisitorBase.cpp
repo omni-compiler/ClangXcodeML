@@ -63,11 +63,10 @@ void XMLVisitorBaseImpl::newBoolProp(const char *Name, bool Val, xmlNodePtr N) {
 
 void XMLVisitorBaseImpl::newComment(const xmlChar *str, xmlNodePtr N) {
     if (!N) N = curNode;
-    const auto VN = static_cast<std::string>(getVisitorName());
-    if (!VN.empty()) {
-        std::stringstream ss; ss << str;
-        const auto buf = VN + "::" + ss.str();
-        xmlNodePtr Comment = xmlNewComment(BAD_CAST(buf.c_str()));
+    if (auto pName = getVisitorName()) {
+        std::stringstream ss;
+        ss << pName << "::" << str;
+        xmlNodePtr Comment = xmlNewComment(BAD_CAST(ss.str().c_str()));
         xmlAddChild(N, Comment);
         //errs() << (const char *)Buf << "\n";
     }
