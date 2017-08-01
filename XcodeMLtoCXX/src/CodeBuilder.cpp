@@ -43,6 +43,22 @@ using cxxgen::separateByBlankLines;
 namespace {
 
 XcodeMl::CodeFragment
+makeOpNode(xmlNodePtr operatorNode) {
+  const auto opName = getContent(operatorNode);
+  const auto op = XcodeMl::OperatorNameToSpelling(opName);
+  if (!op.hasValue()) {
+    const auto lineno = xmlGetLineNo(operatorNode);
+    assert(lineno >= 0);
+    std::cerr
+      << "Unknown operator name: '" << opName << "'" << std::endl
+      << "lineno: " << lineno  << std::endl;
+    xmlDebugDumpNode(stderr, operatorNode, 0);
+    std::abort();
+  }
+  return makeTokenNode(*op);
+}
+
+XcodeMl::CodeFragment
 getDeclNameFromNameNode(
     xmlNodePtr nameNode,
     const llvm::Optional<XcodeMl::DataTypeIdent>& dtident,
