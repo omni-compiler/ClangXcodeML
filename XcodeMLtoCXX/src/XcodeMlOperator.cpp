@@ -16,6 +16,7 @@ opMap = {
   {"bitOrExpr", "|"},
   {"bitXorExpr", "^"},
 
+  {"assignExpr", "="},
   {"asgPlusExpr", "+="},
   {"asgMinusExpr", "-="},
   {"asgMulExpr", "*="},
