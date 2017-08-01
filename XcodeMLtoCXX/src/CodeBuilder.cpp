@@ -58,6 +58,27 @@ makeOpNode(xmlNodePtr operatorNode) {
   return makeTokenNode(*op);
 }
 
+llvm::Optional<XcodeMl::NnsRef>
+getNns(const XcodeMl::NnsMap& nnsTable, xmlNodePtr nameNode) {
+  using MaybeNnsRef = llvm::Optional<XcodeMl::NnsRef>;
+
+  const auto ident = getPropOrNull(nameNode, "nns");
+  if (!ident.hasValue()) {
+    return MaybeNnsRef();
+  }
+  const auto nns = getOrNull(nnsTable, *ident);
+  if (!nns.hasValue()) {
+    const auto lineno = xmlGetLineNo(nameNode);
+    assert(lineno >= 0);
+    std::cerr
+      << "Undefined NNS: '" << *ident << "'" << std::endl
+      << "lineno: " << lineno << std::endl;
+    xmlDebugDumpNode(stderr, nameNode, 0);
+    std::abort();
+  }
+  return nns;
+}
+
 XcodeMl::CodeFragment
 getDeclNameFromNameNode(
     xmlNodePtr nameNode,
