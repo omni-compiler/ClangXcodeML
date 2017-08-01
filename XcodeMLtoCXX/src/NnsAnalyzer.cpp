@@ -55,7 +55,7 @@ analyzeNnsTable(
 
   XcodeMl::NnsMap map = initialNnsMap;
   auto nnsNodes = findNodes(nnsTable, "*", ctxt);
-  for (auto nnsNode : nnsNodes) {
+  for (auto&& nnsNode : nnsNodes) {
     XcodeMLNNSAnalyzer.walk(nnsNode, ctxt, map);
   }
   return map;
