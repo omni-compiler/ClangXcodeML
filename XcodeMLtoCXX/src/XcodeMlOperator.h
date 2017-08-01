@@ -3,7 +3,7 @@
 
 namespace XcodeMl {
 
-std::string OperatorNameToSpelling(const std::string&);
+llvm::Optional<std::string> OperatorNameToSpelling(const std::string&);
 
 } // namespace XcodeMl
 

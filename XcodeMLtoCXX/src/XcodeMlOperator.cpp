@@ -42,15 +42,9 @@ opMap = {
 
 namespace XcodeMl {
 
-std::string
+llvm::Optional<std::string>
 OperatorNameToSpelling(const std::string& opName) {
-  const auto spelling = getOrNull(opMap, opName);
-  if (!spelling.hasValue()) {
-    std::cerr << "Unknown operator name: '" << opName << "'"
-      << std::endl;
-    std::abort();
-  }
-  return *spelling;
+  return getOrNull(opMap, opName);
 }
 
 } // namespace XcodeMl
