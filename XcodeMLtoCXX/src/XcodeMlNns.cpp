@@ -39,15 +39,14 @@ Nns::makeDeclaration(
     const NnsMap& nnss) const
 {
   const auto par = getParent();
-  if (par.hasValue()) {
-    const auto p = nnss.at(*par);
-    const auto prefix = p->makeDeclaration(
-        env,
-        nnss);
-    return prefix + makeNestedNameSpec(env, nnss);
-  } else {
+  if (!par.hasValue()) {
     return makeNestedNameSpec(env, nnss);
   }
+  const auto p = nnss.at(*par);
+  const auto prefix = p->makeDeclaration(
+      env,
+      nnss);
+  return prefix + makeNestedNameSpec(env, nnss);
 }
 
 llvm::Optional<NnsIdent>
