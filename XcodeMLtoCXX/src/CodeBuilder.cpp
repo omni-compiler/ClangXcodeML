@@ -16,6 +16,7 @@
 #include "Stream.h"
 #include "StringTree.h"
 #include "Symbol.h"
+#include "Util.h"
 #include "XcodeMlNns.h"
 #include "XcodeMlOperator.h"
 #include "XcodeMlType.h"
@@ -84,12 +85,16 @@ getQualifiedNameFromNameNode(
 {
   const auto name = getDeclNameFromNameNode(nameNode, dtident, src);
   const auto ident = getPropOrNull(nameNode, "nns");
-  if (ident.hasValue()) {
-    const auto nns = src.nnsTable.at(*ident);
-    return nns->makeDeclaration(src.typeTable, src.nnsTable) + name;
-  } else {
+  if (!ident.hasValue()) {
     return name;
   }
+  const auto nns = getOrNull(src.nnsTable, *ident);
+  if (!nns.hasValue()) {
+    std::cerr << "In getQualifiedNameFromNameNode:" << std::endl
+      << "Undefined NNS: '" << *ident << "'" << std::endl;
+    std::abort();
+  }
+  return (*nns)->makeDeclaration(src.typeTable, src.nnsTable) + name;
 }
 
 XcodeMl::CodeFragment
@@ -134,12 +139,16 @@ getQualifiedNameFromTypedNode(
   const auto name = getDeclNameFromTypedNode(node, src);
   auto nameNode = findFirst(node, "name", src.ctxt);
   const auto ident = getPropOrNull(nameNode, "nns");
-  if (ident.hasValue()) {
-    const auto nns = src.nnsTable.at(*ident);
-    return nns->makeDeclaration(src.typeTable, src.nnsTable) + name;
-  } else {
+  if (!ident.hasValue()) {
     return name;
   }
+  const auto nns = getOrNull(src.nnsTable, *ident);
+  if (!nns.hasValue()) {
+    std::cerr << "In getQualifiedNameFromTypedNode:" << std::endl
+      << "Undefined NNS: '" << *ident << "'" << std::endl;
+    std::abort();
+  }
+  return (*nns)->makeDeclaration(src.typeTable, src.nnsTable) + name;
 }
 
 XcodeMl::CodeFragment
@@ -173,8 +182,13 @@ makeNestedNameSpec(
     const std::string& ident,
     const SourceInfo& src)
 {
-  const auto nns = src.nnsTable.at(ident);
-  return makeNestedNameSpec(nns, src);
+  const auto nns = getOrNull(src.nnsTable, ident);
+  if (!nns.hasValue()) {
+    std::cerr << "In makeNestedNameSpec:" << std::endl
+      << "Undefined NNS: '" << ident << "'" << std::endl;
+    std::abort();
+  }
+  return makeNestedNameSpec(*nns, src);
 }
 
 bool

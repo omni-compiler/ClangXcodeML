@@ -1,5 +1,8 @@
+#include <iostream>
 #include <map>
 #include <string>
+#include "llvm/ADT/Optional.h"
+#include "Util.h"
 
 #include "XcodeMlOperator.h"
 
@@ -41,7 +44,13 @@ namespace XcodeMl {
 
 std::string
 OperatorNameToSpelling(const std::string& opName) {
-  return opMap.at(opName);
+  const auto spelling = getOrNull(opMap, opName);
+  if (!spelling.hasValue()) {
+    std::cerr << "Unknown operator name: '" << opName << "'"
+      << std::endl;
+    std::abort();
+  }
+  return *spelling;
 }
 
 } // namespace XcodeMl
