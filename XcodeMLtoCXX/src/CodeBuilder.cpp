@@ -119,15 +119,9 @@ getQualifiedNameFromNameNode(
     const SourceInfo& src)
 {
   const auto name = getDeclNameFromNameNode(nameNode, dtident, src);
-  const auto ident = getPropOrNull(nameNode, "nns");
-  if (!ident.hasValue()) {
-    return name;
-  }
-  const auto nns = getOrNull(src.nnsTable, *ident);
+  const auto nns = getNns(src.nnsTable, nameNode);
   if (!nns.hasValue()) {
-    std::cerr << "In getQualifiedNameFromNameNode:" << std::endl
-      << "Undefined NNS: '" << *ident << "'" << std::endl;
-    std::abort();
+    return name;
   }
   return (*nns)->makeDeclaration(src.typeTable, src.nnsTable) + name;
 }
@@ -171,15 +165,9 @@ getQualifiedNameFromTypedNode(
 {
   const auto name = getDeclNameFromTypedNode(node, src);
   auto nameNode = findFirst(node, "name", src.ctxt);
-  const auto ident = getPropOrNull(nameNode, "nns");
-  if (!ident.hasValue()) {
-    return name;
-  }
-  const auto nns = getOrNull(src.nnsTable, *ident);
+  const auto nns = getNns(src.nnsTable, nameNode);
   if (!nns.hasValue()) {
-    std::cerr << "In getQualifiedNameFromTypedNode:" << std::endl
-      << "Undefined NNS: '" << *ident << "'" << std::endl;
-    std::abort();
+    return name;
   }
   return (*nns)->makeDeclaration(src.typeTable, src.nnsTable) + name;
 }
