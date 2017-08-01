@@ -69,9 +69,7 @@ getDeclNameFromNameNode(
     return makeTokenNode(getContent(nameNode));
   } else if (kind == "operator") {
     using namespace XcodeMl;
-    const auto opName = getContent(nameNode);
-    const auto op = makeTokenNode(
-        OperatorNameToSpelling(opName));
+    const auto op = makeOpNode(nameNode);
     return makeTokenNode("operator") + op;
   } else if (getName(nameNode) == "conversion") {
     const auto dtident = getProp(nameNode, "destination_type");
@@ -134,9 +132,7 @@ getDeclNameFromTypedNode(
     return makeTokenNode("~") + (*name);
   } else if (const auto opNode = findFirst(node, "operator", src.ctxt)) {
     using namespace XcodeMl;
-    const auto opName = getContent(opNode);
-    const auto op = makeTokenNode(
-        OperatorNameToSpelling(opName));
+    const auto op = makeOpNode(opNode);
     return makeTokenNode("operator") + op;
   } else if (const auto conv = findFirst(node, "conversion", src.ctxt)) {
     const auto dtident = getProp(conv, "destination_type");
@@ -848,9 +844,7 @@ DEFINE_CB(functionCallProc) {
   xmlNodePtr arguments = findFirst(node, "arguments", src.ctxt);
 
   if (const auto opNode = findFirst(node, "operator", src.ctxt)) {
-    const auto opName = getContent(opNode);
-    const auto op = makeTokenNode(
-        XcodeMl::OperatorNameToSpelling(opName));
+    const auto op = makeOpNode(opNode);
     return makeTokenNode("operator") + op + w.walk(arguments, src);
   }
 
