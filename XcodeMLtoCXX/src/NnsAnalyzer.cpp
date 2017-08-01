@@ -49,11 +49,11 @@ analyzeNnsTable(
     xmlNodePtr nnsTable,
     xmlXPathContextPtr ctxt)
 {
-  XcodeMl::NnsMap map;
   if (nnsTable == nullptr) {
-    return map;
+    return initialNnsMap;
   }
 
+  XcodeMl::NnsMap map = initialNnsMap;
   auto nnsNodes = findNodes(nnsTable, "*", ctxt);
   for (auto nnsNode : nnsNodes) {
     XcodeMLNNSAnalyzer.walk(nnsNode, ctxt, map);
