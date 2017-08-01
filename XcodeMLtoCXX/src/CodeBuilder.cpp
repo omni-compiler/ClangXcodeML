@@ -661,17 +661,15 @@ DEFINE_CB(memberExprProc) {
 }
 
 DEFINE_CB(memberRefProc) {
-  const auto baseName = getProp(node, "member");
-  const auto nnsident = getPropOrNull(node, "nns");
-  const auto name =
-    (nnsident.hasValue() ?
-        makeNestedNameSpec(*nnsident, src)
-      : makeVoidNode()) +
-    makeTokenNode(baseName);
+  const auto expr = findFirst(node, "*", src.ctxt);
+  const auto name = getQualifiedNameFromNameNode(
+      findFirst(node, "*[2]", src.ctxt),
+      getPropOrNull(node, "type"),
+      src);
   return
-    makeInnerNode(w.walkChildren(node, src)) +
-    makeTokenNode("->") +
-    name;
+    w.walk(expr, src)
+    + makeTokenNode("->")
+    + name;
 }
 
 DEFINE_CB(memberAddrProc) {
