@@ -64,8 +64,10 @@ OpFuncId::clone() const {
 
 CodeFragment
 OpFuncId::toString(const Environment&) const {
+  const auto op = OperatorNameToSpelling(opName);
+  assert(op.hasValue());
   return makeTokenNode("operator")
-    + makeTokenNode(OperatorNameToSpelling(opName));
+    + makeTokenNode(*op);
 }
 
 bool
