@@ -39,24 +39,10 @@ using cxxgen::makeVoidNode;
 
 using cxxgen::insertNewLines;
 using cxxgen::separateByBlankLines;
+using XcodeMl::makeOpNode;
+
 
 namespace {
-
-XcodeMl::CodeFragment
-makeOpNode(xmlNodePtr operatorNode) {
-  const auto opName = getContent(operatorNode);
-  const auto op = XcodeMl::OperatorNameToSpelling(opName);
-  if (!op.hasValue()) {
-    const auto lineno = xmlGetLineNo(operatorNode);
-    assert(lineno >= 0);
-    std::cerr
-      << "Unknown operator name: '" << opName << "'" << std::endl
-      << "lineno: " << lineno  << std::endl;
-    xmlDebugDumpNode(stderr, operatorNode, 0);
-    std::abort();
-  }
-  return makeTokenNode(*op);
-}
 
 llvm::Optional<XcodeMl::NnsRef>
 getNns(const XcodeMl::NnsMap& nnsTable, xmlNodePtr nameNode) {
