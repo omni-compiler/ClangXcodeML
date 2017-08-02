@@ -35,6 +35,10 @@ opMap = {
   {"logLTExpr", "<"},
   {"logAndExpr", "&&"},
   {"logOrExpr", "||"},
+  {"newExpr", "new"},
+  {"newArrayExpr", "new[]"},
+  {"deleteExpr", "delete"},
+  {"deleteArrayExpr", "delete[]"},
 };
 
 namespace XcodeMl {
