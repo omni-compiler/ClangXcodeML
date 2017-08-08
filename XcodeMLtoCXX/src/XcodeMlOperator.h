@@ -3,7 +3,9 @@
 
 namespace XcodeMl {
 
-std::string OperatorNameToSpelling(const std::string&);
+llvm::Optional<std::string> OperatorNameToSpelling(const std::string&);
+
+XcodeMl::CodeFragment makeOpNode(xmlNodePtr);
 
 } // namespace XcodeMl
 

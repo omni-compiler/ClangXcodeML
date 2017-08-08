@@ -16,6 +16,7 @@
 #include "Stream.h"
 #include "StringTree.h"
 #include "Symbol.h"
+#include "Util.h"
 #include "XcodeMlNns.h"
 #include "XcodeMlOperator.h"
 #include "XcodeMlType.h"
@@ -38,8 +39,31 @@ using cxxgen::makeVoidNode;
 
 using cxxgen::insertNewLines;
 using cxxgen::separateByBlankLines;
+using XcodeMl::makeOpNode;
+
 
 namespace {
+
+llvm::Optional<XcodeMl::NnsRef>
+getNns(const XcodeMl::NnsMap& nnsTable, xmlNodePtr nameNode) {
+  using MaybeNnsRef = llvm::Optional<XcodeMl::NnsRef>;
+
+  const auto ident = getPropOrNull(nameNode, "nns");
+  if (!ident.hasValue()) {
+    return MaybeNnsRef();
+  }
+  const auto nns = getOrNull(nnsTable, *ident);
+  if (!nns.hasValue()) {
+    const auto lineno = xmlGetLineNo(nameNode);
+    assert(lineno >= 0);
+    std::cerr
+      << "Undefined NNS: '" << *ident << "'" << std::endl
+      << "lineno: " << lineno << std::endl;
+    xmlDebugDumpNode(stderr, nameNode, 0);
+    std::abort();
+  }
+  return nns;
+}
 
 XcodeMl::CodeFragment
 getDeclNameFromNameNode(
@@ -52,9 +76,7 @@ getDeclNameFromNameNode(
     return makeTokenNode(getContent(nameNode));
   } else if (kind == "operator") {
     using namespace XcodeMl;
-    const auto opName = getContent(nameNode);
-    const auto op = makeTokenNode(
-        OperatorNameToSpelling(opName));
+    const auto op = makeOpNode(nameNode);
     return makeTokenNode("operator") + op;
   } else if (getName(nameNode) == "conversion") {
     const auto dtident = getProp(nameNode, "destination_type");
@@ -83,13 +105,11 @@ getQualifiedNameFromNameNode(
     const SourceInfo& src)
 {
   const auto name = getDeclNameFromNameNode(nameNode, dtident, src);
-  const auto ident = getPropOrNull(nameNode, "nns");
-  if (ident.hasValue()) {
-    const auto nns = src.nnsTable.at(*ident);
-    return nns->makeDeclaration(src.typeTable, src.nnsTable) + name;
-  } else {
+  const auto nns = getNns(src.nnsTable, nameNode);
+  if (!nns.hasValue()) {
     return name;
   }
+  return (*nns)->makeDeclaration(src.typeTable, src.nnsTable) + name;
 }
 
 XcodeMl::CodeFragment
@@ -113,9 +133,7 @@ getDeclNameFromTypedNode(
     return makeTokenNode("~") + (*name);
   } else if (const auto opNode = findFirst(node, "operator", src.ctxt)) {
     using namespace XcodeMl;
-    const auto opName = getContent(opNode);
-    const auto op = makeTokenNode(
-        OperatorNameToSpelling(opName));
+    const auto op = makeOpNode(opNode);
     return makeTokenNode("operator") + op;
   } else if (const auto conv = findFirst(node, "conversion", src.ctxt)) {
     const auto dtident = getProp(conv, "destination_type");
@@ -133,13 +151,11 @@ getQualifiedNameFromTypedNode(
 {
   const auto name = getDeclNameFromTypedNode(node, src);
   auto nameNode = findFirst(node, "name", src.ctxt);
-  const auto ident = getPropOrNull(nameNode, "nns");
-  if (ident.hasValue()) {
-    const auto nns = src.nnsTable.at(*ident);
-    return nns->makeDeclaration(src.typeTable, src.nnsTable) + name;
-  } else {
+  const auto nns = getNns(src.nnsTable, nameNode);
+  if (!nns.hasValue()) {
     return name;
   }
+  return (*nns)->makeDeclaration(src.typeTable, src.nnsTable) + name;
 }
 
 XcodeMl::CodeFragment
@@ -173,8 +189,13 @@ makeNestedNameSpec(
     const std::string& ident,
     const SourceInfo& src)
 {
-  const auto nns = src.nnsTable.at(ident);
-  return makeNestedNameSpec(nns, src);
+  const auto nns = getOrNull(src.nnsTable, ident);
+  if (!nns.hasValue()) {
+    std::cerr << "In makeNestedNameSpec:" << std::endl
+      << "Undefined NNS: '" << ident << "'" << std::endl;
+    std::abort();
+  }
+  return makeNestedNameSpec(*nns, src);
 }
 
 bool
@@ -818,9 +839,7 @@ DEFINE_CB(functionCallProc) {
   xmlNodePtr arguments = findFirst(node, "arguments", src.ctxt);
 
   if (const auto opNode = findFirst(node, "operator", src.ctxt)) {
-    const auto opName = getContent(opNode);
-    const auto op = makeTokenNode(
-        XcodeMl::OperatorNameToSpelling(opName));
+    const auto op = makeOpNode(opNode);
     return makeTokenNode("operator") + op + w.walk(arguments, src);
   }
 

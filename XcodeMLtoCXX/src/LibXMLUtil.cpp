@@ -1,10 +1,12 @@
 #include <algorithm>
 #include <cassert>
+#include <iostream>
 #include <memory>
 #include <string>
 #include <sstream>
 #include <stdexcept>
 #include <vector>
+#include <libxml/debugXML.h>
 #include <libxml/tree.h>
 #include <libxml/parser.h>
 #include <libxml/xpath.h>
@@ -50,7 +52,10 @@ xmlNodePtr nth(xmlXPathObjectPtr obj, size_t n) {
 std::string getProp(xmlNodePtr node, const std::string& attr) {
   const auto value = getPropOrNull(node, attr);
   if (!value.hasValue()) {
-    throw std::runtime_error(attr + " not found");
+    std::cerr << "getProp: "
+      << attr << " not found" << std::endl;
+    xmlDebugDumpNode(stderr, node, 0);
+    std::abort();
   }
   return *value;
 }
