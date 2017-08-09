@@ -66,6 +66,28 @@ getNns(const XcodeMl::NnsMap& nnsTable, xmlNodePtr nameNode) {
 }
 
 XcodeMl::CodeFragment
+makeNestedNameSpec(
+    const XcodeMl::NnsRef& nns,
+    const SourceInfo& src)
+{
+  return nns->makeDeclaration(src.typeTable, src.nnsTable);
+}
+
+XcodeMl::CodeFragment
+makeNestedNameSpec(
+    const std::string& ident,
+    const SourceInfo& src)
+{
+  const auto nns = getOrNull(src.nnsTable, ident);
+  if (!nns.hasValue()) {
+    std::cerr << "In makeNestedNameSpec:" << std::endl
+      << "Undefined NNS: '" << ident << "'" << std::endl;
+    std::abort();
+  }
+  return makeNestedNameSpec(*nns, src);
+}
+
+XcodeMl::CodeFragment
 getDeclNameFromNameNode(
     xmlNodePtr nameNode,
     const llvm::Optional<XcodeMl::DataTypeIdent>& dtident,
@@ -174,28 +196,6 @@ wrapWithLangLink(
       content +
       makeTokenNode("}");
   }
-}
-
-XcodeMl::CodeFragment
-makeNestedNameSpec(
-    const XcodeMl::NnsRef& nns,
-    const SourceInfo& src)
-{
-  return nns->makeDeclaration(src.typeTable, src.nnsTable);
-}
-
-XcodeMl::CodeFragment
-makeNestedNameSpec(
-    const std::string& ident,
-    const SourceInfo& src)
-{
-  const auto nns = getOrNull(src.nnsTable, ident);
-  if (!nns.hasValue()) {
-    std::cerr << "In makeNestedNameSpec:" << std::endl
-      << "Undefined NNS: '" << ident << "'" << std::endl;
-    std::abort();
-  }
-  return makeNestedNameSpec(*nns, src);
 }
 
 bool
