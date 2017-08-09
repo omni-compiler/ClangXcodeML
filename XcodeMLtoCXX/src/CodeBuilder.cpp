@@ -716,10 +716,7 @@ getQualifiedNameFromMemberRefNode(
 DEFINE_CB(memberRefProc) {
   const auto expr = findFirst(node, "*", src.ctxt);
   const auto name = getQualifiedNameFromMemberRefNode(node, src);
-  return
-    w.walk(expr, src)
-    + makeTokenNode("->")
-    + name;
+  return w.walk(expr, src) + makeTokenNode("->") + name;
 }
 
 DEFINE_CB(memberAddrProc) {
