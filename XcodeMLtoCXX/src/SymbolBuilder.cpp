@@ -63,7 +63,7 @@ static StringTreeRef emitStructDefinition(
 
 DEFINE_SB(tagnameProc) {
   const auto tagname = getNameFromIdNode(node, src.ctxt);
-  const auto type = src.typeTable.at(static_cast<XMLString>( xmlGetProp(node, BAD_CAST "type") ));
+  const auto type = src.typeTable.at(getProp(node, "type"));
   return emitStructDefinition(src, type);
 }
 

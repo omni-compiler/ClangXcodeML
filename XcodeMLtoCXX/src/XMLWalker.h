@@ -50,7 +50,13 @@ public:
   {}
 
   const Procedure& operator[](const std::string& key) const {
-    return map.at(key);
+    const auto iter = map.find(key);
+    if (iter == map.end()) {
+      std::cerr << "In " << name << ":" << std::endl
+        << "Nonexistent procedure called: '" + key + "'" << std::endl;
+      std::abort();
+    }
+    return iter->second;
   }
 
   /*!
@@ -148,7 +154,13 @@ public:
   {}
 
   const Procedure& operator[](const std::string& key) const {
-    return map.at(key);
+    const auto iter = map.find(key);
+    if (iter == map.end()) {
+      std::cerr << "In " << name << ":" << std::endl
+        << "Nonexistent procedure called: '" + key + "'" << std::endl;
+      std::abort();
+    }
+    return iter->second;
   }
 
   void walkAll(xmlNodePtr node, T... args) const {

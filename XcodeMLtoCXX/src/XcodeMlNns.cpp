@@ -1,3 +1,4 @@
+#include <iostream>
 #include <map>
 #include <memory>
 #include <string>
@@ -5,6 +6,7 @@
 #include "llvm/ADT/Optional.h"
 #include "llvm/Support/Casting.h"
 #include "StringTree.h"
+#include "Util.h"
 #include "XcodeMlType.h"
 #include "XcodeMlEnvironment.h"
 
@@ -39,15 +41,18 @@ Nns::makeDeclaration(
     const NnsMap& nnss) const
 {
   const auto par = getParent();
-  if (par.hasValue()) {
-    const auto p = nnss.at(*par);
-    const auto prefix = p->makeDeclaration(
-        env,
-        nnss);
-    return prefix + makeNestedNameSpec(env, nnss);
-  } else {
+  if (!par.hasValue()) {
     return makeNestedNameSpec(env, nnss);
   }
+  const auto p = getOrNull(nnss, *par);
+  if (!p.hasValue()) {
+    std::cerr << "Undefined NNS: '" << *par << "'" << std::endl;
+    std::abort();
+  }
+  const auto prefix = (*p)->makeDeclaration(
+      env,
+      nnss);
+  return prefix + makeNestedNameSpec(env, nnss);
 }
 
 llvm::Optional<NnsIdent>
