@@ -681,6 +681,38 @@ DEFINE_CB(memberExprProc) {
     + name;
 }
 
+const XcodeMl::CodeFragment
+getQualifiedNameFromMemberRefNode(
+    xmlNodePtr node,
+    const SourceInfo& src)
+{
+  const auto nameProp = getPropOrNull(node, "name");
+  if (nameProp.hasValue()) {
+    const auto nnsident = getPropOrNull(node, "nns");
+    return
+      (nnsident.hasValue() ?
+          makeVoidNode()
+        : makeNestedNameSpec(*nnsident, src))
+      + makeTokenNode(*nameProp);
+  }
+  const auto nameNode = findFirst(node, "*[2]", src.ctxt);
+  if (!nameNode) {
+    const auto lineno = xmlGetLineNo(node);
+    assert(lineno >= 0);
+    std::cerr
+      << "<memberRef> element does have "
+         "neither 'name' attribute nor name element"
+      << std::endl
+      << "lineno: " << lineno << std::endl;
+    xmlDebugDumpNode(stderr, node, 0);
+    std::abort();
+  }
+  return getQualifiedNameFromNameNode(
+      nameNode,
+      getPropOrNull(node, "type"),
+      src);
+}
+
 DEFINE_CB(memberRefProc) {
   const auto expr = findFirst(node, "*", src.ctxt);
   const auto name = getQualifiedNameFromNameNode(
