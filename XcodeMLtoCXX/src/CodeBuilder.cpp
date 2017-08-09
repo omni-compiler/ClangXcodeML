@@ -131,7 +131,7 @@ getQualifiedNameFromNameNode(
   if (!nns.hasValue()) {
     return name;
   }
-  return (*nns)->makeDeclaration(src.typeTable, src.nnsTable) + name;
+  return makeNestedNameSpec(*nns, src) + name;
 }
 
 XcodeMl::CodeFragment
@@ -177,7 +177,7 @@ getQualifiedNameFromTypedNode(
   if (!nns.hasValue()) {
     return name;
   }
-  return (*nns)->makeDeclaration(src.typeTable, src.nnsTable) + name;
+  return makeNestedNameSpec(*nns, src) + name;
 }
 
 XcodeMl::CodeFragment
