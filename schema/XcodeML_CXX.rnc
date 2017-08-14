@@ -564,5 +564,399 @@ grammar {
       Expression
     }
 
+  CompoundValue =
+    element compoundValue {
+      ExpressionAttribute?,
+      Value
+    }
+
+  CompoundValueAddr =
+    element compoundValueAddr {
+      ExpressionAttribute?,
+      Value
+    }
+
+  ThisExpr = element thisExpr { ExpressionAttribute? }
+
+  AssignExpr =
+    element assignExpr {
+      ExpressionAttribute?,
+      Expression,
+      Expression
+    }
+
+  PlusExpr =
+    element plusExpr {
+      ExpressionAttribute?,
+      Expression,
+      Expression
+    }
+
+  MinusExpr =
+    element minusExpr {
+      ExpressionAttribute?,
+      Expression,
+      Expression
+    }
+
+  MulExpr =
+    element mulExpr {
+      ExpressionAttribute?,
+      Expression,
+      Expression
+    }
+
+  DivExpr =
+    element divExpr {
+      ExpressionAttribute?,
+      Expression,
+      Expression
+    }
+
+  ModExpr =
+    element modExpr {
+      ExpressionAttribute?,
+      Expression,
+      Expression
+    }
+
+  lshiftExpr =
+    element LshiftExpr {
+      ExpressionAttribute?,
+      Expression,
+      Expression
+    }
+
+  rshiftExpr =
+    element RshiftExpr {
+      ExpressionAttribute?,
+      Expression,
+      Expression
+    }
+
+  BitAndExpr =
+    element bitAndExpr {
+      ExpressionAttribute?,
+      Expression,
+      Expression
+    }
+
+  BitOrExpr =
+    element bitOrExpr {
+      ExpressionAttribute?,
+      Expression,
+      Expression
+    }
+
+  BitXorExpr =
+    element bitXorExpr {
+      ExpressionAttribute?,
+      Expression,
+      Expression
+    }
+
+  AsgPlusExpr =
+    element asgPlusExpr {
+      ExpressionAttribute?,
+      Expression,
+      Expression
+    }
+
+  AsgMinusExpr =
+    element asgMinusExpr {
+      ExpressionAttribute?,
+      Expression,
+      Expression
+    }
+
+  AsgMulExpr =
+    element asgMulExpr {
+      ExpressionAttribute?,
+      Expression,
+      Expression
+    }
+
+  AsgLshiftExpr =
+    element asgLshiftExpr {
+      ExpressionAttribute?,
+      Expression,
+      Expression
+    }
+
+  AsgRshiftExpr =
+    element asgRshiftExpr {
+      ExpressionAttribute?,
+      Expression,
+      Expression
+    }
+
+  AsgBitAndExpr =
+    element asgBitAndExpr {
+      ExpressionAttribute?,
+      Expression,
+      Expression
+    }
+
+  AsgBitOrExpr =
+    element asgBitOrExpr {
+      ExpressionAttribute?,
+      Expression,
+      Expression
+    }
+
+  AsgBitXorExpr =
+    element asgBitXorExpr {
+      ExpressionAttribute?,
+      Expression,
+      Expression
+    }
+
+  LogEQExpr =
+    element logEQExpr {
+      ExpressionAttribute?,
+      Expression,
+      Expression
+    }
+
+  LogNEQExpr =
+    element logNEQExpr {
+      ExpressionAttribute?,
+      Expression,
+      Expression
+    }
+
+  LogGEExpr =
+    element logGEExpr {
+      ExpressionAttribute?,
+      Expression,
+      Expression
+    }
+
+  LogGTExpr =
+    element logGTExpr {
+      ExpressionAttribute?,
+      Expression,
+      Expression
+    }
+
+  LogLEExpr =
+    element logLEExpr {
+      ExpressionAttribute?,
+      Expression,
+      Expression
+    }
+
+  LogLTExpr =
+    element logLTExpr {
+      ExpressionAttribute?,
+      Expression,
+      Expression
+    }
+
+  LogAndExpr =
+    element logAndExpr {
+      ExpressionAttribute?,
+      Expression,
+      Expression
+    }
+
+  LogOrExpr =
+    element logOrExpr {
+      ExpressionAttribute?,
+      Expression,
+      Expression
+    }
+
+  UnaryMinusExpr =
+    element unaryMinusExpr {
+      ExpressionAttribute?,
+      Expression
+    }
+
+  BitNotExpr =
+    element bitNotExpr {
+      ExpressionAttribute?,
+      Expression
+    }
+
+  LogNotExpr =
+    element logNotExpr {
+      ExpressionAttribute?,
+      Expression
+    }
+
+  SizeOfExpr =
+    element sizeOfExpr {
+      ExpressionAttribute?,
+      (Expression | typeName)
+    }
+
+  AlignOfExpr =
+    element alignOfExpr {
+      ExpressionAttribute?,
+      (Expression | typeName)
+    }
+
+  TypeidExpr =
+    element typeidExpr {
+      ExpressionAttribute?,
+      (Expression | typeName)
+    }
+
+  GccAlignOfExpr =
+    element gccAlignOfExpr {
+      ExpressionAttribute?,
+      (Expression | typeName)
+    }
+
+  GccLabelAddr =
+    element gccLabelAddr {
+      ExpressionAttribute?,
+      text
+    }
+
+  FunctionCall =
+    element functionCall {
+      ExpressionAttribute?,
+      (Function | MemberRef | Operator),
+      Arguments
+    }
+
+  Function = element function { Name }
+
+  Argments = element Argments { Expression* }
+
+  CommaExpr =
+    element commaExpr {
+      ExpressionAttribute?,
+      Expression,
+      Expression
+    }
+
+  PostIncrExpr =
+    element postIncrExpr {
+      ExpressionAttribute?,
+      Expression
+    }
+
+  PostDecrExpr =
+    element postDecrExpr {
+      ExpressionAttribute?,
+      Expression
+    }
+
+  PreIncrExpr =
+    element preIncrExpr {
+      ExpressionAttribute?,
+      Expression
+    }
+
+  PreDecrExpr =
+    element preDecrExpr {
+      ExpressionAttribute?,
+      Expression
+    }
+
+  CastExpr =
+    element castExpr {
+      ExpressionAttribute?,
+      (Expression | Value)
+    }
+
+  StaicCast =
+    element staicCast {
+      ExpressionAttribute?,
+      Expression
+    }
+
+  DynamicCast =
+    element dynamicCast {
+      ExpressionAttribute?,
+      Expression
+    }
+
+  ConstCast =
+    element constCast {
+      ExpressionAttribute?,
+      Expression
+    }
+
+  ReinterpretCast =
+    element reinterpretCast {
+      ExpressionAttribute?,
+      Expression
+    }
+
+  ImplicitCastExpr =
+    element implicitCastExpr {
+      ExpressionAttribute?,
+      Expression
+    }
+
+  CondExpr =
+    element condExpr {
+      ExpressionAttribute?,
+      Expression,
+      Expression?,
+      Expression
+    }
+
+  GccCompoundExpr =
+    element gccCompoundExpr {
+      ExpressionAttribute?,
+      CompoundStatement
+    }
+
+  NewExpr =
+    element newExpr {
+      ExpressionAttribute?,
+      Arguments
+    }
+
+  NewArrayExpr =
+    element newArrayExpr {
+      ExpressionAttribute?,
+      Expression
+    }
+
+  DeleteExpr =
+    element newExpr {
+      ExpressionAttribute?,
+      Arguments
+    }
+
+  DeleteArrayExpr =
+    element newArrayExpr {
+      ExpressionAttribute?,
+      Expression
+    }
+
+  ThrowExpr =
+    element throwExpr {
+      FileInfo?,
+      Expression
+    }
+
+  LambdaExpr =
+    element lambdaExpr {
+      ExpressionAttribute?,
+      Captures,
+      Symbols,
+      Params,
+      Body
+    }
+
+  Captures =
+    element captures {
+      attribute default { "by_reference" | "by_value" }?,
+      attribute is_mutable { ExtendedBoolean }?,
+      ByReference,
+      ByValue
+    }
+
+  ByReference = element byReference { Name* }
+
+  ByValue = element byValue { Name* }
+
   NnsTable =
 }
