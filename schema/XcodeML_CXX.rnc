@@ -382,9 +382,9 @@ grammar {
 
   Condition = element condition { Expression }
 
-  Then = element then { Expression }
+  Then = element then { Statement }
 
-  Else = element else { Expression }
+  Else = element else { Statement }
 
   WhileStatement =
     element whileStatement {
@@ -458,8 +458,18 @@ grammar {
     element switchStatement {
       FileInfo?,
       Value,
-      Body
+      element body {
+        StatementInSwitch*
+      }
     }
+
+  StatementInSwitch =
+    (Statement
+    | CaseLabel
+    | GccRangedCaseLabel
+    | DefaultLabel
+    | Pragma
+    | Text)
 
   CaseLabel =
     element caseLabel {
@@ -699,6 +709,19 @@ grammar {
 
   AsgMulExpr =
     element asgMulExpr {
+      ExpressionAttribute?,
+      Expression,
+      Expression
+    }
+
+  AsgDivExpr =
+    element asgDivExpr {
+      ExpressionAttribute?,
+      Expression
+    }
+
+  AsgModExpr =
+    element asgModExpr {
       ExpressionAttribute?,
       Expression,
       Expression
