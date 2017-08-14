@@ -1020,17 +1020,13 @@ grammar {
     element namespaceNNS {
       Nns,
       attribute is_inline { ExtendedBoolean }?,
-      Name,
-      Attributes
+      Name
     }
-
-  Attributes =
 
   UnnamedNamespaceNNS =
     element unnamedNamespaceNNS {
       Nns,
       attribute is_inline { ExtendedBoolean }?,
-      Attributes
     }
 
   ClassNNS =
