@@ -1,0 +1,568 @@
+grammar {
+  start = XXcodeProgram
+
+  XXcodeProgram =
+    element XcodeProgram {
+      CompilerInfo?,
+      Language?,
+      Source?,
+      Time?,
+      Version?,
+      NnsTable?,
+      TypeTable,
+      GlobalSymbols,
+      GlobalDeclarations
+    }
+
+  CompilerInfo = attribute compiler-info { text }
+
+  Language = attribute language { "C" | "C++" }
+
+  Source = attribute source { text }
+
+  Time = attribute time { text }
+
+  Version = attribute version { text }
+
+  Value =
+    element value {
+      (Expression | Value)*
+    }
+
+  TypeTable =
+    element typeTable {
+      DataTypeDefiningElement*
+    }
+
+  DataTypeDefiningElement =
+    (BasicType
+    | PointerType
+    | FunctionType
+    | ArrayType
+    | UnionType
+    | StructType
+    | ClassType
+    | EnumType
+    | typeInstance
+    | ClassTemplate
+    | AliasTemplate)
+
+  DataTypeIdentifier =
+    (FundamentalType
+    | ComplexNumericType
+    | GCCBuiltinType
+    | CXXTypeAbstraction
+    | UserDefinedType)
+
+  FundamentalType =
+    ("void"
+    | "char"
+    | "short"
+    | "int"
+    | "long"
+    | "long_long"
+    | "unsigned_char"
+    | "unsigned_short"
+    | "unsigned"
+    | "unsigned_long"
+    | "unsigned_long_long"
+    | "float"
+    | "double"
+    | "long_double"
+    | "wchar_t"
+    | "char16_t"
+    | "char32_t"
+    | "bool")
+
+  ComplexNumericType =
+    ("float_complex"
+    | "double_complex"
+    | "long_double_complex"
+    | "float_imaginary"
+    | "double_imaginary"
+    | "long_double_imaginary")
+
+  GCCBuiltinType = "_builtin_va_arg"
+
+  CXXTypeAbstraction = ("any_class" | "any_typename")
+
+  TypeName =
+    element typeName {
+      attribute ref { DataTypeIdentifier },
+      attribute access { AccessSpecifier } ?
+    }
+
+  AccessSpecifier = ("public" | "private" | "protected")
+
+  UserDefinedType = text
+
+  DataTypeDefiningElementAttributes =
+    list {
+      attribute is_const { ExtendedBoolean }?,
+      attribute is_volatile { ExtendedBoolean }?,
+      attribute is_restrict { ExtendedBoolean }?,
+      attribute access { AccessSpecifier }?,
+      attribute is_virtual { ExtendedBoolean } ?
+    }
+
+  ExtendedBoolean = "0" | "1" | "true" | "false"
+
+  BasicType =
+    element basicType {
+      attribute type { DataTypeIdentifier },
+      attribute name { DataTypeIdentifier },
+      attribute alignas { text }?, # ??
+      DataTypeDefiningElementAttributes ?
+    }
+
+  PointerType =
+    element pointerType {
+      attribute type { DataTypeIdentifier },
+      attribute ref { DataTypeIdentifier },
+      attribute reference { "rvalue" | "lvalue" }?,
+      DataTypeDefiningElementAttributes ?
+    }
+
+  FunctionType =
+    element functionType {
+      attribute type { DataTypeIdentifier },
+      attribute return_type { DataTypeIdentifier },
+      attribute is_inline { ExtendedBoolean }?,
+      Params
+    }
+
+  ArrayType =
+    element arrayType {
+      attribute type { DataTypeIdentifier },
+      attribute element_type { DataTypeIdentifier },
+      (attribute array_size { NonNegativeInteger }
+       | attribute array_size { "*" },
+         element arraySize { Expression })?,
+      DataTypeDefiningElementAttributes ?
+    }
+
+  NonNegativeInteger =
+
+  UnionType =
+    element unionType {
+      attribute type { DataTypeIdentifier },
+      DataTypeDefiningElementAttributes?,
+      Symbols
+    }
+
+  StructType =
+    element structType {
+      attribute type { DataTypeIdentifier },
+      DataTypeDefiningElementAttributes?,
+      FileInfo?,
+      Symbols
+    }
+
+  FileInfo =
+    list {
+      attribute lineno { text }?,
+      attribute file { text } ?
+    }
+
+  ClassType =
+    element classType {
+      attribute type { DataTypeIdentifier },
+      DataTypeDefiningElementAttributes?,
+      FileInfo?,
+      InheritedFrom?,
+      Symbols
+    }
+
+  InheritedFrom =
+    element inheritedFrom {
+      TypeName+
+    }
+
+  EnumType =
+    element enumType {
+      attribute type { DataTypeIdentifier },
+      DataTypeDefiningElementAttributes?,
+      Name?,
+      Symbols
+    }
+
+  Name = element name { text }
+
+  ParameterPack =
+    element parameterPack {
+      attribute type { DataTypeIdentifier },
+      DataTypeDefiningElementAttributes?,
+      attribute element_type { DataTypeIdentifier }
+    }
+
+  Id =
+    element id {
+      Sclass,
+      attribute is_inline { ExtendedBoolean }?,
+      attribute is_virtual { ExtendedBoolean }?,
+      attribute is_explicit { ExtendedBoolean }?,
+      attribute type { DataTypeIdentifier }?,
+      attribute is_thread_local { ExtendedBoolean }?,
+      attribute is_gccThread {ExtendedBoolean }?,
+      IsGccExtension?,
+
+      Name,
+
+      (attribute bit_field { NonNegativeInteger }?,
+      | attribute bit_field { "*" },
+        element bitField { Expression })?,
+
+      (attribute align_as { NonNegativeInteger | DataTypeIdentifier }
+      | attribute align_as { "*" },
+        element alignAs { Expression })?
+    }
+
+  Sclass =
+    ("auto"
+    | "param"
+    | "extern"
+    | "extern_def"
+    | "static"
+    | "register"
+    | "label"
+    | "tagname"
+    | "moe"
+    | "typedef_name"
+    | "template_param"
+    | "namespace_name"
+    | "alias_name")
+
+  IsGccExtension =
+
+  GlobalSymbols = element globalSymbols { Id* }
+
+  Symbols = element symbols { Id* }
+
+  GlobalDeclarations = element globalDeclarations { DeclarationElement* }
+
+  Declarations = element declarations { DeclarationElement* }
+
+  DeclarationElement =
+    (VarDecl
+    | FunctionDecl
+    | UsingDecl
+    | FunctionDecl
+    | FunctionDefinition
+    | Text)
+
+  FunctionDefinition =
+    element functionDefinition {
+      IsGccExtension?,
+      NameEtc,
+      Symbols,
+      Params,
+      Body
+    }
+
+  NameEtc =
+    (Name
+    | Operator
+    | Constructor
+    | Destructor
+    | Conversion)
+
+  Operator = element operator { OperatorName }
+
+  OperatorName =
+
+  Constructor =
+    element constructor {
+      attribute is_explicit { ExtendedBoolean }
+    }
+
+  Destructor = element destructor { }
+
+  Conversion =
+    element conversion {
+      attribute destination_type { DataTypeIdentifier }
+    }
+
+  Params =
+    element params {
+      (Name | Name Value)*,
+      Ellipsis?
+    }
+
+  Ellipsis = element ellipsis { }
+
+  VarDecl = VarDeclForNonReference | VarDeclForReference
+
+  VarDeclForNonReference = element varDecl { Name, Value?  }
+
+  VarDeclForReference =
+    element varDecl {
+      Name,
+      element value {
+        element addrOfExpr {
+          attribute is_expedient { "1" | "true" },
+          Expression
+        }
+      }
+    }
+
+  FunctionDecl = element functionDecl { NameEtc }
+
+  UsingDecl = element usingDecl { Name }
+
+  Statement =
+   (ExprStatement
+   | CompoundStatement
+   | IfStatement
+   | DoStatement
+   | ForStatement
+   | RangeForStatement
+   | BreakStatement
+   | ContinueStatement
+   | ReturnStatement
+   | GotoStatement
+   | TryStatement
+   | CatchStatement
+   | StatementLabel
+   | SwitchStatement
+   | CaseLabel
+   | GccRangedCaseLabel
+   | DefaultLabel
+   | Pragma
+   | Text)
+
+  ExprStatement =
+    element exprStatement {
+      FileInfo?,
+      Expression
+    }
+
+  CompoundStatement =
+    element compoundStatement {
+      FileInfo?,
+      Symbols,
+      Declarations,
+      Body
+    }
+
+  IfStatement =
+    element ifStatement {
+      FileInfo?,
+      Condition,
+      Then,
+      Else
+    }
+
+  Condition = element condition { Expression }
+
+  Then = element then { Expression }
+
+  Else = element else { Expression }
+
+  WhileStatement =
+    element whileStatement {
+      FileInfo?,
+      Condition,
+      Body
+    }
+
+  DoStatement =
+    element doStatement {
+      FileInfo?,
+      Body,
+      Condition
+    }
+
+  ForStatement =
+    element forStatement {
+      FileInfo?,
+      Init?,
+      Condition?,
+      Iter?,
+      Body
+    }
+
+  Init = element init { Expression | Symbols }
+
+  Iter = element iter { Expression }
+
+  RangeForStatement =
+    element rangeForStatement {
+      FileInfo?,
+      Id,
+      Range,
+      Body
+    }
+
+  Range = element range { Expression }
+
+  BreakStatement = element breakStatement { FileInfo? }
+
+  ContinueStatement = element continueStatement { FileInfo? }
+
+  ReturnStatement = element returnStatement { FileInfo? }
+
+  GotoStatement =
+    element gotoStatement {
+      FileInfo?,
+      (Name
+      | Expression) # gcc
+    }
+
+  TryStatement =
+    element tryStatement {
+      FileInfo?,
+      Body
+    }
+
+  CatchStatement =
+    element catchStatement {
+      FileInfo?,
+      element params { Name | Ellipsis },
+      Body
+    }
+
+  StatementLabel =
+    element statementLabel {
+      Name
+    }
+
+  SwitchStatement =
+    element switchStatement {
+      FileInfo?,
+      Value,
+      Body
+    }
+
+  CaseLabel =
+    element caseLabel {
+      FileInfo?,
+      Value
+    }
+
+
+  GccRangedCaseLabel =
+    element gccRangedCaseLabel {
+      FileInfo?,
+      Value,
+      Value
+    }
+
+  DefaultLabel = element defaultLabel { FileInfo? }
+
+  Pragma = element pragma { FileInfo?, text }
+
+  Text = element text { FileInfo?, text }
+
+  Expression =
+   (
+   | VVar
+
+   )
+
+  ExpressionAttribute =
+    list {
+      attribute type { DataTypeIdentifier }?,
+      attribute lvalue { ExtendedBoolean }? # deprecated
+    }
+
+  IntConstant =
+    element intConstant {
+      ExpressionAttribute?,
+      (Decimal
+      | Hexadecimal)
+    }
+
+  Decimal =
+
+  Hexadecimal =
+
+  LonglongConstant = element longlongConstant {
+      ExpressionAttribute?,
+      Hexadecimal,
+      Hexadecimal
+    }
+
+  FloatConstant =
+    element floatConstant {
+      ExpressionAttribute?,
+      FloatingLiteral
+    }
+
+  FloatingLiteral =
+
+
+  StringConstant =
+    element stringConstant {
+      ExpressionAttribute?,
+      text
+    }
+
+  MoeConstant =
+    element moeConstant {
+      ExpressionAttribute?,
+      text
+    }
+
+  BooleanConstant =
+    element booleanConstant {
+      ExpressionAttribute?,
+      ("true" | "false")
+    }
+
+  VVar =
+    element Var {
+      ExpressionAttribute?,
+      Scope?,
+      text
+    }
+
+  Scope = attribute scope { "local" | "global" | "param" }
+
+  AddrOfExpr =
+    element addrOfExpr {
+      ExpressionAttribute?,
+      Expression
+    }
+
+  ArrayAddr =
+    element arrayAddr {
+      ExpressionAttribute?,
+      text
+    }
+
+  PointerRef =
+    element pointerRef {
+      ExpressionAttribute?,
+      Expression
+    }
+
+  ArrayRef =
+    element arrayRef {
+      ExpressionAttribute?,
+      ArrayAddr,
+      Expression
+    }
+
+  MemberRef =
+    element memberRef {
+      ExpressionAttribute?,
+      Expression,
+      (attribute member { text } | element member { NameEtc })
+    }
+
+  MemberArrayRef =
+    element memberArrayRef {
+      ExpressionAttribute?,
+      Expression,
+      (attribute member { text } | element member { NameEtc })
+    }
+
+  MemberPointer = # ??
+    element memberPointer {
+      ExpressionAttribute,
+      attribute name { text },
+      Expression
+    }
+
+  NnsTable =
+}
