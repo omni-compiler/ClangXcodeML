@@ -232,8 +232,6 @@ grammar {
     | "namespace_name"
     | "alias_name")
 
-  IsGccExtension =
-
   GlobalSymbols = element globalSymbols { Id* }
 
   Symbols = element symbols { Id* }
@@ -958,5 +956,145 @@ grammar {
 
   ByValue = element byValue { Name* }
 
-  NnsTable =
+  NnsTable = element nnsTable { NnsDefiningElement* }
+
+  NnsDefiningElement =
+    ()
+
+  Nns = attribute nns { text }
+
+  NamespaceNNS =
+    element namespaceNNS {
+      Nns,
+      attribute is_inline { ExtendedBoolean }?,
+      Name,
+      Attributes
+    }
+
+  Attributes =
+
+  UnnamedNamespaceNNS =
+    element unnamedNamespaceNNS {
+      Nns,
+      attribute is_inline { ExtendedBoolean }?,
+      Attributes
+    }
+
+  ClassNNS =
+    element classNNS {
+      Nns,
+      attribute type { DataTypeIdentifier },
+      Name
+    }
+
+  EnumNNS =
+    element enumNNS {
+      Nns,
+      attribute type { DataTypeIdentifier },
+      Name
+    }
+
+  TypedefTypeNNS =
+    element typedefTypeNNS {
+      Nns,
+      attribute type { DataTypeIdentifier },
+      Name
+    }
+
+  TemplateParamTypeNNS =
+    element templateParamTypeNNS {
+      Nns,
+      Name
+    }
+
+  SimpleTemplateIdNNS =
+    element simpleTemplateIdNNS {
+      Nns,
+      element template { Name },
+      Arguments
+    }
+
+  TypeParams =
+    element typeParams {
+      TypeNameForTemplate*
+    }
+
+  TypeNameForTemplate =
+    element typeName {
+      attribute ref { DataTypeIdentifier },
+      element value { TypeName }?
+    }
+
+  ClassTemplate =
+    element classTemplate {
+      FileInfo?,
+      Symbols,
+      TypeParams,
+      ClassType
+    }
+
+  FunctionTemplate =
+    element functionTemplate {
+      FileInfo?,
+      Symbols,
+      TypeParams,
+      FunctionDefinition
+    }
+
+  AliasTemplate =
+    element aliasTemplate {
+      attribute type { DataTypeIdentifier },
+      attribute name { DataTypeIdentifier },
+      FileInfo?,
+      Symbols,
+      TypeParams
+    }
+
+  TypeArguments = element typeArguments { TypeName* }
+
+  TypeInstance =
+    element typeInstance {
+      attribute type { DataTypeIdentifier }?,
+      attribute ref { DataTypeIdentifier }?,
+      TypeArguments
+    }
+
+  FunctionInstance =
+    element functionInstance {
+      attribute type { DataTypeIdentifier },
+      attribute name { text },
+      TypeArguments,
+      FunctionCall
+    }
+
+  CoArrayType =
+    element coArrayType {
+      attribute type { DataTypeIdentifier },
+      attribute element_type { DataTypeIdentifier },
+      (attribute array_size { NonNegativeInteger }
+       | attribute array_size { "*" },
+         element arraySize { Expression })?,
+      DataTypeDefiningElementAttributes ?
+    }
+
+  CoArrayRef =
+    element coArrayRef {
+      Expression,
+      Expression+
+    }
+
+  SubArrayRef =
+    element subArrayRef {
+      Expression,
+      Expression+
+    }
+
+  IndexRange =
+    element indexRange {
+      element lowerBound { Expression },
+      element upperBound { Expression },
+      element step { Expression }
+    }
+
+  IsGccExtension = attribute is_gccExtension { ExtendedBoolean }
 }
