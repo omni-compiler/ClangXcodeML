@@ -141,7 +141,7 @@ grammar {
       DataTypeDefiningElementAttributes ?
     }
 
-  NonNegativeInteger =
+  NonNegativeInteger = text
 
   UnionType =
     element unionType {
@@ -267,6 +267,34 @@ grammar {
   Operator = element operator { OperatorName }
 
   OperatorName =
+    ("AssignExpr"
+    | "PlusExpr"
+    | "MinusExpr"
+    | "MulExpr"
+    | "DivExpr"
+    | "ModExpr"
+    | "LshiftExpr"
+    | "RshiftExpr"
+    | "BitAndExpr"
+    | "BitOrExpr"
+    | "BitXorExpr"
+    | "AsgPlusExpr"
+    | "AsgMinusExpr"
+    | "AsgMulExpr"
+    | "AsgDivExpr"
+    | "AsgModExpr"
+    | "AsgLshiftExpr"
+    | "AsgRshiftExpr"
+    | "AsgBitAndExpr"
+    | "AsgBitOrExpr"
+    | "AsgBitXorExpr"
+    | "LogEQExpr"
+    | "LogNEQExpr"
+    | "LogGEExpr"
+    | "LogGTExpr"
+    | "LogLTExpr"
+    | "LogAndExpr"
+    | "LogOrExpr")
 
   Constructor =
     element constructor {
@@ -341,6 +369,8 @@ grammar {
       Declarations,
       Body
     }
+
+  Body = element body { Statement* }
 
   IfStatement =
     element ifStatement {
@@ -470,9 +500,9 @@ grammar {
       | Hexadecimal)
     }
 
-  Decimal =
+  Decimal = text
 
-  Hexadecimal =
+  Hexadecimal = text
 
   LonglongConstant = element longlongConstant {
       ExpressionAttribute?,
@@ -486,7 +516,7 @@ grammar {
       FloatingLiteral
     }
 
-  FloatingLiteral =
+  FloatingLiteral = text
 
 
   StringConstant =
