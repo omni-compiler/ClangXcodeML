@@ -626,6 +626,8 @@ grammar {
       ("true" | "false")
     }
 
+  FuncAddr = element funcAddr { text }
+
   VVar =
     element Var {
       ExpressionAttribute?,
