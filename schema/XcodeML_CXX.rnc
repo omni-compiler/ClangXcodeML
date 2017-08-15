@@ -136,8 +136,8 @@ grammar {
       attribute type { DataTypeIdentifier },
       attribute element_type { DataTypeIdentifier },
       (attribute array_size { NonNegativeInteger }
-       | attribute array_size { "*" },
-         element arraySize { Expression })?,
+       | (attribute array_size { "*" },
+          element arraySize { Expression }))?,
       DataTypeDefiningElementAttributes ?
     }
 
@@ -208,13 +208,13 @@ grammar {
 
       Name,
 
-      (attribute bit_field { NonNegativeInteger }?,
-      | attribute bit_field { "*" },
-        element bitField { Expression })?,
+      (attribute bit_field { NonNegativeInteger }
+      | (attribute bit_field { "*" },
+         element bitField { Expression }))?,
 
       (attribute align_as { NonNegativeInteger | DataTypeIdentifier }
-      | attribute align_as { "*" },
-        element alignAs { Expression })?
+      | (attribute align_as { "*" },
+         element alignAs { Expression }))?
     }
 
   Sclass =
@@ -301,7 +301,7 @@ grammar {
       attribute is_explicit { ExtendedBoolean }
     }
 
-  Destructor = element destructor { }
+  Destructor = element destructor { empty }
 
   Conversion =
     element conversion {
@@ -310,11 +310,11 @@ grammar {
 
   Params =
     element params {
-      (Name | Name Value)*,
+      (Name | (Name, Value))*,
       Ellipsis?
     }
 
-  Ellipsis = element ellipsis { }
+  Ellipsis = element ellipsis { empty }
 
   VarDecl = VarDeclForNonReference | VarDeclForReference
 
@@ -1113,7 +1113,7 @@ grammar {
   UnnamedNamespaceNNS =
     element unnamedNamespaceNNS {
       Nns,
-      attribute is_inline { ExtendedBoolean }?,
+      attribute is_inline { ExtendedBoolean }?
     }
 
   ClassNNS =
@@ -1208,8 +1208,8 @@ grammar {
       attribute type { DataTypeIdentifier },
       attribute element_type { DataTypeIdentifier },
       (attribute array_size { NonNegativeInteger }
-       | attribute array_size { "*" },
-         element arraySize { Expression })?,
+       | (attribute array_size { "*" },
+          element arraySize { Expression }))?,
       DataTypeDefiningElementAttributes ?
     }
 
