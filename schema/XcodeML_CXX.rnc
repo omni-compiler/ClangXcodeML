@@ -995,8 +995,8 @@ grammar {
       (Expression | Value)
     }
 
-  StaicCast =
-    element staicCast {
+  StaticCast =
+    element staticCast {
       ExpressionAttribute?,
       Expression
     }
