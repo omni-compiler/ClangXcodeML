@@ -492,10 +492,89 @@ grammar {
   Text = element text { FileInfo?, text }
 
   Expression =
-   (
-   | VVar
+   (functionInstance
+    | Constant
+    | VVar
+    | AddrOfExpr
+    | ArrayAddr
+    | PointerRef
+    | ArrayRef
+    | MemberRef
+    | MemberArrayRef
+    | MemberPointer
+    | CompoundValue
+    | CompoundValueAddr
+    | ThisExpr
+    | AssignExpr
+    | BinaryOperation
+    | UnaryOperation
+    | FunctionCall
+    | CommaExpr
+    | PostIncrExpr
+    | PostDecrExpr
+    | PreIncrExpr
+    | PreDecrExpr
+    | CastExpr
+    | StaticCast
+    | DynamicCast
+    | ConstCast
+    | ReinterpretCast
+    | CondExpr
+    | GccCompoundExpr
+    | NewExpr
+    | NewArrayExpr
+    | DeleteExpr
+    | DeleteArrayExpr
+    | ThrowExpr
+    | LambdaExpr)
 
-   )
+  Constant =
+    (IntConstant
+    | longlongConstant
+    | FloatConstant
+    | StringConstant
+    | MoeConstant
+    | BooleanConstant
+    | FuncAddr)
+
+  BinaryOperation =
+    (PlusExpr
+    | MinusExpr
+    | MulExpr
+    | DivExpr
+    | ModExpr
+    | LshiftExpr
+    | RshiftExpr
+    | BitAndExpr
+    | BitOrExpr
+    | BitXorExpr
+    | AsgPlusExpr
+    | AsgMinusExpr
+    | AsgMulExpr
+    | AsgDivExpr
+    | AsgModExpr
+    | AsgLshiftExpr
+    | AsgRshiftExpr
+    | AsgBitAndExpr
+    | AsgBitOrExpr
+    | AsgBitOrExpr
+    | LogEQExpr
+    | LogNEQExpr
+    | LogGEExpr
+    | LogGTExpr
+    | LogLEExpr
+    | LogLTExpr
+    | LogAndExpr
+    | LogOrExpr)
+
+  UnaryOperation =
+    (UnaryMinusExpr
+    | BitNotExpr
+    | LogNotExpr
+    | SizeOfExpr
+    | TypeidExpr
+    | GccAlignOfExpr
+    | GccLabelAddr)
 
   ExpressionAttribute =
     list {
@@ -1012,7 +1091,13 @@ grammar {
   NnsTable = element nnsTable { NnsDefiningElement* }
 
   NnsDefiningElement =
-    ()
+    (namespaceNNS
+    | UnnamedNamespaceNNS
+    | ClassNNS
+    | EnumNNS
+    | TypedefTypeNNS
+    | TemplateParamTypeNNS
+    | SimpleTemplateIdNNS)
 
   Nns = attribute nns { text }
 
