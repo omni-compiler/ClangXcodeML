@@ -1,7 +1,7 @@
 grammar {
-  start = XXcodeProgram
+  start = XcodeProgram
 
-  XXcodeProgram =
+  XcodeProgram =
     element XcodeProgram {
       CompilerInfo?,
       Language?,
@@ -494,7 +494,7 @@ grammar {
   Expression =
    (functionInstance
     | Constant
-    | VVar
+    | Var
     | AddrOfExpr
     | ArrayAddr
     | PointerRef
@@ -628,7 +628,7 @@ grammar {
 
   FuncAddr = element funcAddr { text }
 
-  VVar =
+  Var =
     element Var {
       ExpressionAttribute?,
       Scope?,
