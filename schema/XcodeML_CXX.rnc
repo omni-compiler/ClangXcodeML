@@ -267,34 +267,34 @@ grammar {
   Operator = element operator { OperatorName }
 
   OperatorName =
-    ("AssignExpr"
-    | "PlusExpr"
-    | "MinusExpr"
-    | "MulExpr"
-    | "DivExpr"
-    | "ModExpr"
+    ("assignExpr"
+    | "plusExpr"
+    | "minusExpr"
+    | "mulExpr"
+    | "divExpr"
+    | "modExpr"
     | "LshiftExpr"
     | "RshiftExpr"
-    | "BitAndExpr"
-    | "BitOrExpr"
-    | "BitXorExpr"
-    | "AsgPlusExpr"
-    | "AsgMinusExpr"
-    | "AsgMulExpr"
-    | "AsgDivExpr"
-    | "AsgModExpr"
-    | "AsgLshiftExpr"
-    | "AsgRshiftExpr"
-    | "AsgBitAndExpr"
-    | "AsgBitOrExpr"
-    | "AsgBitXorExpr"
-    | "LogEQExpr"
-    | "LogNEQExpr"
-    | "LogGEExpr"
-    | "LogGTExpr"
-    | "LogLTExpr"
-    | "LogAndExpr"
-    | "LogOrExpr")
+    | "bitAndExpr"
+    | "bitOrExpr"
+    | "bitXorExpr"
+    | "asgPlusExpr"
+    | "asgMinusExpr"
+    | "asgMulExpr"
+    | "asgDivExpr"
+    | "asgModExpr"
+    | "asgLshiftExpr"
+    | "asgRshiftExpr"
+    | "asgBitAndExpr"
+    | "asgBitOrExpr"
+    | "asgBitXorExpr"
+    | "logEQExpr"
+    | "logNEQExpr"
+    | "logGEExpr"
+    | "logGTExpr"
+    | "logLTExpr"
+    | "logAndExpr"
+    | "logOrExpr")
 
   Constructor =
     element constructor {
@@ -739,14 +739,14 @@ grammar {
       Expression
     }
 
-  lshiftExpr =
+  LshiftExpr =
     element LshiftExpr {
       ExpressionAttribute?,
       Expression,
       Expression
     }
 
-  rshiftExpr =
+  RshiftExpr =
     element RshiftExpr {
       ExpressionAttribute?,
       Expression,
@@ -956,7 +956,7 @@ grammar {
 
   Function = element function { Name }
 
-  Argments = element Argments { Expression* }
+  Argments = element argments { Expression* }
 
   CommaExpr =
     element commaExpr {
