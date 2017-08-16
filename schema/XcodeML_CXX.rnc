@@ -350,9 +350,6 @@ grammar {
    | CatchStatement
    | StatementLabel
    | SwitchStatement
-   | CaseLabel
-   | GccRangedCaseLabel
-   | DefaultLabel
    | Pragma
    | Text)
 
