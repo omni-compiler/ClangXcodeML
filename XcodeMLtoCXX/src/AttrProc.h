@@ -26,17 +26,6 @@ public:
     }
   }
 
-  AttrProc(
-      const std::string& a,
-      std::function<ReturnT(const std::vector<ReturnT>&)> f,
-      Procedure d,
-      std::map<std::string, Procedure>&& m):
-    attr(a),
-    fold(f),
-    defaultProc(d),
-    map(m)
-  {}
-
   ReturnT walk(xmlNodePtr node, T... args) const {
     std::string getProp(xmlNodePtr, const std::string&);
     assert(node && node->type == XML_ELEMENT_NODE);
