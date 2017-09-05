@@ -79,13 +79,6 @@ public:
     }
   }
 
-  AttrProc(
-      const std::string& a,
-      std::map<std::string, Procedure>&& m):
-    attr(a),
-    map(m)
-  {}
-
   void walk(xmlNodePtr node, T... args) const {
     assert(node && node->type == XML_ELEMENT_NODE);
     XMLString prop(xmlGetProp(node, BAD_CAST attr.c_str()));
