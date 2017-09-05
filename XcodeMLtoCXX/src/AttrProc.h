@@ -66,10 +66,18 @@ public:
   AttrProc() = delete;
   AttrProc(
       const std::string& a,
-      std::initializer_list<std::tuple<std::string, Procedure>> m):
+      std::initializer_list<std::tuple<std::string, Procedure>> pairs):
     attr(a),
-    map(m)
-  {}
+    map()
+  {
+    for (auto&& p : pairs) {
+      const auto key = std::get<0>(p);
+      const auto value = std::get<1>(p);
+      if (map.find(key) == map.end()) {
+        map[key] = value;
+      }
+    }
+  }
 
   AttrProc(
       const std::string& a,
