@@ -11,23 +11,20 @@ public:
       const std::string& a,
       std::function<ReturnT(const std::vector<ReturnT>&)> f,
       Procedure d,
-      std::initializer_list<std::tuple<std::string, Procedure>> m):
+      std::initializer_list<std::tuple<std::string, Procedure>> pairs):
     attr(a),
     fold(f),
     defaultProc(d),
-    map(m)
-  {}
-
-  AttrProc(
-      const std::string& a,
-      std::function<ReturnT(const std::vector<ReturnT>&)> f,
-      Procedure d,
-      std::map<std::string, Procedure>&& m):
-    attr(a),
-    fold(f),
-    defaultProc(d),
-    map(m)
-  {}
+    map()
+  {
+    for (auto&& p : pairs) {
+      const auto key = std::get<0>(p);
+      const auto value = std::get<1>(p);
+      if (map.find(key) == map.end()) {
+        map[key] = value;
+      }
+    }
+  }
 
   ReturnT walk(xmlNodePtr node, T... args) const {
     std::string getProp(xmlNodePtr, const std::string&);
@@ -69,17 +66,18 @@ public:
   AttrProc() = delete;
   AttrProc(
       const std::string& a,
-      std::initializer_list<std::tuple<std::string, Procedure>> m):
+      std::initializer_list<std::tuple<std::string, Procedure>> pairs):
     attr(a),
-    map(m)
-  {}
-
-  AttrProc(
-      const std::string& a,
-      std::map<std::string, Procedure>&& m):
-    attr(a),
-    map(m)
-  {}
+    map()
+  {
+    for (auto&& p : pairs) {
+      const auto key = std::get<0>(p);
+      const auto value = std::get<1>(p);
+      if (map.find(key) == map.end()) {
+        map[key] = value;
+      }
+    }
+  }
 
   void walk(xmlNodePtr node, T... args) const {
     assert(node && node->type == XML_ELEMENT_NODE);
