@@ -681,6 +681,18 @@ DEFINE_CB(memberExprProc) {
     + name;
 }
 
+void
+showMemberRefErrorMsg(xmlNodePtr node) {
+  const auto lineno = xmlGetLineNo(node);
+  assert(lineno >= 0);
+  std::cerr
+    << "<memberRef> element does have "
+       "neither 'name' attribute nor name element"
+    << std::endl
+    << "lineno: " << lineno << std::endl;
+  xmlDebugDumpNode(stderr, node, 0);
+}
+
 const XcodeMl::CodeFragment
 getQualifiedNameFromMemberRefNode(
     xmlNodePtr node,
@@ -697,14 +709,7 @@ getQualifiedNameFromMemberRefNode(
   }
   const auto nameNode = findFirst(node, "*[2]", src.ctxt);
   if (!nameNode) {
-    const auto lineno = xmlGetLineNo(node);
-    assert(lineno >= 0);
-    std::cerr
-      << "<memberRef> element does have "
-         "neither 'name' attribute nor name element"
-      << std::endl
-      << "lineno: " << lineno << std::endl;
-    xmlDebugDumpNode(stderr, node, 0);
+    showMemberRefErrorMsg(node);
     std::abort();
   }
   return getQualifiedNameFromNameNode(
