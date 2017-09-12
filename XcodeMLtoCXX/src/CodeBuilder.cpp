@@ -691,8 +691,8 @@ getQualifiedNameFromMemberRefNode(
     const auto nnsident = getPropOrNull(node, "nns");
     return
       (nnsident.hasValue() ?
-          makeVoidNode()
-        : makeNestedNameSpec(*nnsident, src))
+          makeNestedNameSpec(*nnsident, src)
+        : makeVoidNode())
       + makeTokenNode(*nameProp);
   }
   const auto nameNode = findFirst(node, "*[2]", src.ctxt);
