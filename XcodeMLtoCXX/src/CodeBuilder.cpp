@@ -475,7 +475,7 @@ getParams(xmlNodePtr fnNode, const SourceInfo& src) {
     XMLString name = xmlNodeGetContent(p);
     vec.push_back(makeTokenNode(name));
   }
-  return std::move(vec);
+  return vec;
 }
 
 SymbolEntry
@@ -489,7 +489,7 @@ ClassSymbolsToSymbolEntry(const XcodeMl::ClassType* T) {
     std::tie(name, dtident) = member;
     entry[name] = dtident;
   }
-  return std::move(entry);
+  return vec;
 }
 
 XcodeMl::CodeFragment
