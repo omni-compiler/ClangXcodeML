@@ -489,7 +489,7 @@ ClassSymbolsToSymbolEntry(const XcodeMl::ClassType* T) {
     std::tie(name, dtident) = member;
     entry[name] = dtident;
   }
-  return vec;
+  return entry;
 }
 
 XcodeMl::CodeFragment
