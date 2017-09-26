@@ -66,6 +66,28 @@ getNns(const XcodeMl::NnsMap& nnsTable, xmlNodePtr nameNode) {
 }
 
 XcodeMl::CodeFragment
+makeNestedNameSpec(
+    const XcodeMl::NnsRef& nns,
+    const SourceInfo& src)
+{
+  return nns->makeDeclaration(src.typeTable, src.nnsTable);
+}
+
+XcodeMl::CodeFragment
+makeNestedNameSpec(
+    const std::string& ident,
+    const SourceInfo& src)
+{
+  const auto nns = getOrNull(src.nnsTable, ident);
+  if (!nns.hasValue()) {
+    std::cerr << "In makeNestedNameSpec:" << std::endl
+      << "Undefined NNS: '" << ident << "'" << std::endl;
+    std::abort();
+  }
+  return makeNestedNameSpec(*nns, src);
+}
+
+XcodeMl::CodeFragment
 getDeclNameFromNameNode(
     xmlNodePtr nameNode,
     const llvm::Optional<XcodeMl::DataTypeIdent>& dtident,
@@ -109,7 +131,7 @@ getQualifiedNameFromNameNode(
   if (!nns.hasValue()) {
     return name;
   }
-  return (*nns)->makeDeclaration(src.typeTable, src.nnsTable) + name;
+  return makeNestedNameSpec(*nns, src) + name;
 }
 
 XcodeMl::CodeFragment
@@ -155,7 +177,7 @@ getQualifiedNameFromTypedNode(
   if (!nns.hasValue()) {
     return name;
   }
-  return (*nns)->makeDeclaration(src.typeTable, src.nnsTable) + name;
+  return makeNestedNameSpec(*nns, src) + name;
 }
 
 XcodeMl::CodeFragment
@@ -174,28 +196,6 @@ wrapWithLangLink(
       content +
       makeTokenNode("}");
   }
-}
-
-XcodeMl::CodeFragment
-makeNestedNameSpec(
-    const XcodeMl::NnsRef& nns,
-    const SourceInfo& src)
-{
-  return nns->makeDeclaration(src.typeTable, src.nnsTable);
-}
-
-XcodeMl::CodeFragment
-makeNestedNameSpec(
-    const std::string& ident,
-    const SourceInfo& src)
-{
-  const auto nns = getOrNull(src.nnsTable, ident);
-  if (!nns.hasValue()) {
-    std::cerr << "In makeNestedNameSpec:" << std::endl
-      << "Undefined NNS: '" << ident << "'" << std::endl;
-    std::abort();
-  }
-  return makeNestedNameSpec(*nns, src);
 }
 
 bool
@@ -681,18 +681,47 @@ DEFINE_CB(memberExprProc) {
     + name;
 }
 
+void
+showMemberRefErrorMsg(xmlNodePtr node) {
+  const auto lineno = xmlGetLineNo(node);
+  assert(lineno >= 0);
+  std::cerr
+    << "<memberRef> element does have "
+       "neither 'name' attribute nor name element"
+    << std::endl
+    << "lineno: " << lineno << std::endl;
+  xmlDebugDumpNode(stderr, node, 0);
+}
+
+const XcodeMl::CodeFragment
+getQualifiedNameFromMemberRefNode(
+    xmlNodePtr node,
+    const SourceInfo& src)
+{
+  const auto nameProp = getPropOrNull(node, "name");
+  if (nameProp.hasValue()) {
+    const auto nnsident = getPropOrNull(node, "nns");
+    return
+      (nnsident.hasValue() ?
+          makeNestedNameSpec(*nnsident, src)
+        : makeVoidNode())
+      + makeTokenNode(*nameProp);
+  }
+  const auto nameNode = findFirst(node, "*[2]", src.ctxt);
+  if (!nameNode) {
+    showMemberRefErrorMsg(node);
+    std::abort();
+  }
+  return getQualifiedNameFromNameNode(
+      nameNode,
+      getPropOrNull(node, "type"),
+      src);
+}
+
 DEFINE_CB(memberRefProc) {
-  const auto baseName = getProp(node, "member");
-  const auto nnsident = getPropOrNull(node, "nns");
-  const auto name =
-    (nnsident.hasValue() ?
-        makeNestedNameSpec(*nnsident, src)
-      : makeVoidNode()) +
-    makeTokenNode(baseName);
-  return
-    makeInnerNode(w.walkChildren(node, src)) +
-    makeTokenNode("->") +
-    name;
+  const auto expr = findFirst(node, "*", src.ctxt);
+  const auto name = getQualifiedNameFromMemberRefNode(node, src);
+  return w.walk(expr, src) + makeTokenNode("->") + name;
 }
 
 DEFINE_CB(memberAddrProc) {
