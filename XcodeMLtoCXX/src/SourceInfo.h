@@ -9,8 +9,6 @@ class SourceInfo {
 public:
   xmlXPathContextPtr ctxt;
   XcodeMl::Environment typeTable;
-  /*! SymbolEntry stack in current scope. */
-  SymbolMap symTable;
   XcodeMl::NnsMap nnsTable;
 };
 

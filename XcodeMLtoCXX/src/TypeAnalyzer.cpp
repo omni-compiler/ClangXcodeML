@@ -16,10 +16,8 @@
 #include "XMLString.h"
 #include "XMLWalker.h"
 #include "StringTree.h"
-#include "Symbol.h"
 #include "XcodeMlType.h"
 #include "XcodeMlEnvironment.h"
-#include "SymbolAnalyzer.h"
 #include "TypeAnalyzer.h"
 
 using TypeAnalyzer =
@@ -248,8 +246,5 @@ parseTypeTable(
     XcodeMLTypeAnalyzer.walk(node, xpathCtx, map);
   }
   xmlXPathFreeObject(xpathObj);
-  xmlNodePtr globalSymbols =
-      findFirst(rootNode, "/XcodeProgram/globalSymbols", xpathCtx);
-  analyzeSymbols(globalSymbols, xpathCtx, map);
   return map;
 }

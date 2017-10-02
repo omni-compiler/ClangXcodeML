@@ -15,7 +15,6 @@
 #include "AttrProc.h"
 #include "Stream.h"
 #include "StringTree.h"
-#include "Symbol.h"
 #include "Util.h"
 #include "XcodeMlNns.h"
 #include "XcodeMlOperator.h"
@@ -185,86 +184,6 @@ isInClassDecl(xmlNodePtr node, const SourceInfo &src) {
 }
 
 /*!
- * \brief Traverse XcodeML node and make SymbolEntry.
- * \pre \c node is <globalSymbols> or <symbols> element.
- */
-SymbolEntry
-parseSymbols(xmlNodePtr node, xmlXPathContextPtr ctxt) {
-  if (!node) {
-    return SymbolEntry();
-  }
-  SymbolEntry entry;
-  auto idElems = findNodes(node, "id", ctxt);
-  for (auto idElem : idElems) {
-    xmlNodePtr nameElem = findFirst(idElem, "name|operator", ctxt);
-    const auto type = getProp(idElem, "type");
-    assert(type.length() != 0);
-    XMLString name(xmlNodeGetContent(nameElem));
-    if (!static_cast<std::string>(name).empty()) {
-      // Ignore unnamed parameters such as <name type="int"/>
-      entry[name] = type;
-    }
-  }
-  return entry;
-}
-
-/*!
- * \brief Search \c table for \c name visible .
- * \pre \c table contains \c name.
- * \return Data type identifier of \c name.
- */
-std::string
-findSymbolType(const SymbolMap &table, const std::string &name) {
-  for (auto iter = table.rbegin(); iter != table.rend(); ++iter) {
-    auto entry(*iter);
-    auto result(entry.find(name));
-    if (result != entry.end()) {
-      return result->second;
-    }
-  }
-  std::stringstream log;
-  log << std::endl << "{" << std::endl;
-  for (auto entry : table) {
-    log << "\t{";
-    for (auto p : entry) {
-      log << "(" << p.first << "," << p.second << "),";
-    }
-    log << "}" << std::endl;
-  }
-  log << "}" << std::endl;
-  throw std::runtime_error(name + " not found in SymbolMap: " + log.str());
-}
-
-std::string
-getDtidentFromTypedNode(
-    xmlNodePtr node, xmlXPathContextPtr ctxt, const SymbolMap &table) {
-  const auto dtident = getPropOrNull(node, "type");
-  if (dtident.hasValue()) {
-    return *dtident;
-  } else {
-    const auto name = getNameFromIdNode(node, ctxt);
-    return findSymbolType(table, name);
-  }
-}
-
-SymbolMap
-parseGlobalSymbols(
-    xmlNodePtr, xmlXPathContextPtr xpathCtx, std::stringstream &) {
-  xmlXPathObjectPtr xpathObj =
-      xmlXPathEvalExpression(BAD_CAST "/XcodeProgram/globalSymbols", xpathCtx);
-  if (xpathObj == nullptr
-      || !xmlXPathCastNodeSetToBoolean(xpathObj->nodesetval)) {
-    std::cerr << "Warning: This document does not have globalSymbols element"
-              << std::endl;
-    return SymbolMap();
-  }
-  assert(xpathObj && xpathObj->nodesetval && xpathObj->nodesetval->nodeTab
-      && xpathObj->nodesetval->nodeTab[0]);
-  auto initialEntry(parseSymbols(xpathObj->nodesetval->nodeTab[0], xpathCtx));
-  return {initialEntry};
-}
-
-/*!
  * \brief Arguments to be passed to CodeBuilder::Procedure.
  */
 #define CB_ARGS                                                               \
@@ -384,24 +303,6 @@ DEFINE_CB(castExprProc) {
   return wrapWithParen(wrapWithParen(Tstr) + wrapWithParen(child));
 }
 
-/*!
- * \brief Make a procedure that handles SourceInfo::symTable.
- * \return A procudure. It traverses <symbols> node and pushes new
- * entry to symTable before running \c mainProc. After \c mainProc,
- * it pops the entry.
- */
-CodeBuilder::Procedure
-handleSymTableStack(const CodeBuilder::Procedure mainProc) {
-  return [mainProc](CB_ARGS) {
-    SymbolEntry entry =
-        parseSymbols(findFirst(node, "symbols", src.ctxt), src.ctxt);
-    src.symTable.push_back(entry);
-    auto ret = mainProc(w, node, src);
-    src.symTable.pop_back();
-    return ret;
-  };
-}
-
 CodeBuilder::Procedure
 handleIndentation(const CodeBuilder::Procedure mainProc) {
   return [mainProc](CB_ARGS) { return mainProc(w, node, src); };
@@ -419,21 +320,6 @@ getParams(xmlNodePtr fnNode, const SourceInfo &src) {
     vec.push_back(makeTokenNode(name));
   }
   return vec;
-}
-
-SymbolEntry
-ClassSymbolsToSymbolEntry(const XcodeMl::ClassType *T) {
-  using namespace XcodeMl;
-  assert(T);
-  SymbolEntry entry;
-  auto members = T->getSymbols();
-  for (auto &&member : members) {
-    ClassType::MemberName name;
-    DataTypeIdent dtident;
-    std::tie(name, dtident) = member;
-    entry[name] = dtident;
-  }
-  return entry;
 }
 
 XcodeMl::CodeFragment
@@ -468,7 +354,6 @@ DEFINE_CB(emitClassDefinition) {
   assert(classType);
   const auto className = classType->name();
 
-  src.symTable.push_back(ClassSymbolsToSymbolEntry(classType));
   std::vector<XcodeMl::CodeFragment> decls;
 
   for (xmlNodePtr memberNode = xmlFirstElementChild(node); memberNode;
@@ -483,8 +368,6 @@ DEFINE_CB(emitClassDefinition) {
         makeTokenNode(access) + makeTokenNode(":") + w.walk(memberNode, src);
     decls.push_back(decl);
   }
-
-  src.symTable.pop_back();
 
   return makeTokenNode("class")
       + (className.hasValue() ? *className : makeVoidNode())
@@ -1037,15 +920,10 @@ buildCode(
   SourceInfo src = {
       ctxt,
       parseTypeTable(typeTableNode, ctxt, ss),
-      parseGlobalSymbols(rootNode, ctxt, ss),
       analyzeNnsTable(nnsTableNode, ctxt),
   };
 
   cxxgen::Stream out;
-  xmlNodePtr globalSymbols =
-      findFirst(rootNode, "/XcodeProgram/globalSymbols", src.ctxt);
-  buildSymbols(globalSymbols, src)->flush(out);
-
   xmlNodePtr globalDeclarations =
       findFirst(rootNode, "/XcodeProgram/globalDeclarations", src.ctxt);
   separateByBlankLines(CXXBuilder.walkChildren(globalDeclarations, src))

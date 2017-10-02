@@ -14,7 +14,6 @@
 #include "Stream.h"
 #include "StringTree.h"
 #include "XMLString.h"
-#include "Symbol.h"
 #include "XcodeMlNns.h"
 #include "XcodeMlType.h"
 #include "XcodeMlEnvironment.h"
