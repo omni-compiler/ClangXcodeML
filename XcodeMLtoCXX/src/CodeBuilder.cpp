@@ -407,9 +407,8 @@ handleIndentation(const CodeBuilder::Procedure mainProc) {
   return [mainProc](CB_ARGS) { return mainProc(w, node, src); };
 }
 
-const CodeBuilder::Procedure handleScope = handleBracketsLn("{",
-    "}",
-    handleIndentation(handleSymTableStack(walkChildrenWithInsertingNewLines)));
+const CodeBuilder::Procedure handleScope = handleBracketsLn(
+    "{", "}", handleIndentation(walkChildrenWithInsertingNewLines));
 
 std::vector<XcodeMl::CodeFragment>
 getParams(xmlNodePtr fnNode, const SourceInfo &src) {
