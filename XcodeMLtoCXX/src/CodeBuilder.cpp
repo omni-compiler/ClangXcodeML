@@ -516,7 +516,7 @@ makeFunctionDeclHead(xmlNodePtr node,
   const XMLString kind(nameElem->name);
   const auto nameNode = getQualifiedNameFromTypedNode(node, src);
 
-  const auto dtident = getDtidentFromTypedNode(node, src.ctxt, src.symTable);
+  const auto dtident = getProp(node, "type");
   const auto T = src.typeTable[dtident];
   const auto fnType = llvm::cast<XcodeMl::Function>(T.get());
   auto acc = makeVoidNode();
@@ -552,7 +552,7 @@ DEFINE_CB(functionDefinitionProc) {
 }
 
 DEFINE_CB(functionDeclProc) {
-  const auto fnDtident = getDtidentFromTypedNode(node, src.ctxt, src.symTable);
+  const auto fnDtident = getProp(node, "type");
   const auto fnType =
       llvm::cast<XcodeMl::Function>(src.typeTable[fnDtident].get());
   auto decl = makeFunctionDeclHead(node, fnType->argNames(), src);
@@ -829,7 +829,7 @@ declareClassTypeInit(
 
 DEFINE_CB(varDeclProc) {
   const auto name = getQualifiedNameFromTypedNode(node, src);
-  const auto dtident = getDtidentFromTypedNode(node, src.ctxt, src.symTable);
+  const auto dtident = getProp(node, "type");
   const auto type = src.typeTable.at(dtident);
   auto acc = makeVoidNode();
   if (isInClassDecl(node, src)
