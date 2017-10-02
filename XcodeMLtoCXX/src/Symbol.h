@@ -5,7 +5,7 @@
  * \brief Mapping from variable names(variables, constants, etc.)
  * to data type identifiers declared in a single scope.
  */
-using SymbolEntry = std::map<std::string,std::string>;
+using SymbolEntry = std::map<std::string, std::string>;
 /*!
  * \brief A stack of SymbolEntry.
  *

@@ -14,14 +14,12 @@
 using namespace clang;
 using namespace llvm;
 
-static cl::opt<bool>
-OptTraceDeclarations("trace-declarations",
-                     cl::desc("emit traces on <globalDeclarations>, <declarations>"),
-                     cl::cat(CXX2XMLCategory));
-static cl::opt<bool>
-OptDisableDeclarations("disable-declarations",
-                       cl::desc("disable <globalDeclarations>, <declarations>"),
-                       cl::cat(CXX2XMLCategory));
+static cl::opt<bool> OptTraceDeclarations("trace-declarations",
+    cl::desc("emit traces on <globalDeclarations>, <declarations>"),
+    cl::cat(CXX2XMLCategory));
+static cl::opt<bool> OptDisableDeclarations("disable-declarations",
+    cl::desc("disable <globalDeclarations>, <declarations>"),
+    cl::cat(CXX2XMLCategory));
 
 const char *
 DeclarationsVisitor::getVisitorName() const {
@@ -31,14 +29,11 @@ DeclarationsVisitor::getVisitorName() const {
 namespace {
 
 std::string
-getSpelling(clang::Expr *E, const clang::ASTContext& CXT) {
+getSpelling(clang::Expr *E, const clang::ASTContext &CXT) {
   const unsigned INIT_BUFFER_SIZE = 32;
   SmallVector<char, INIT_BUFFER_SIZE> buffer;
   auto spelling = clang::Lexer::getSpelling(
-      E->getExprLoc(),
-      buffer,
-      CXT.getSourceManager(),
-      CXT.getLangOpts());
+      E->getExprLoc(), buffer, CXT.getSourceManager(), CXT.getLangOpts());
   return spelling.str();
 }
 
@@ -62,23 +57,23 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
   newProp("class", S->getStmtClassName());
   setLocation(S->getLocStart());
 
- if (auto FS = dyn_cast<ForStmt>(S)) {
-   const std::vector<std::tuple<const char*, Stmt*>> children = {
-     std::make_tuple( "init", FS->getInit() ),
-     std::make_tuple( "cond", FS->getCond() ),
-     std::make_tuple( "iter", FS->getInc() ),
-     std::make_tuple( "body", FS->getBody() ),
-   };
-   for (auto& child : children) {
-     const char* kind; Stmt* stmt;
-     std::tie(kind, stmt) = child;
-     TraverseStmt(stmt);
-     xmlNewProp(
-         xmlGetLastChild(curNode),
-         BAD_CAST "for_stmt_kind", BAD_CAST kind);
-   }
-   return false; // already traversed
- }
+  if (auto FS = dyn_cast<ForStmt>(S)) {
+    const std::vector<std::tuple<const char *, Stmt *>> children = {
+        std::make_tuple("init", FS->getInit()),
+        std::make_tuple("cond", FS->getCond()),
+        std::make_tuple("iter", FS->getInc()),
+        std::make_tuple("body", FS->getBody()),
+    };
+    for (auto &child : children) {
+      const char *kind;
+      Stmt *stmt;
+      std::tie(kind, stmt) = child;
+      TraverseStmt(stmt);
+      xmlNewProp(
+          xmlGetLastChild(curNode), BAD_CAST "for_stmt_kind", BAD_CAST kind);
+    }
+    return false; // already traversed
+  }
 
   const BinaryOperator *BO = dyn_cast<const BinaryOperator>(S);
   if (BO) {
@@ -103,8 +98,7 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
 
   if (auto E = dyn_cast<clang::Expr>(S)) {
     newProp("valueCategory",
-        E->isXValue() ? "xvalue" :
-        E->isRValue() ? "prvalue": "lvalue");
+        E->isXValue() ? "xvalue" : E->isRValue() ? "prvalue" : "lvalue");
     auto T = E->getType();
     newProp("xcodemlType", typetableinfo->getTypeName(T).c_str());
   }
@@ -114,11 +108,8 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
   }
 
   if (auto OCE = dyn_cast<clang::CXXOperatorCallExpr>(S)) {
-    newProp(
-        "xcodeml_operator_kind",
-        OverloadedOperatorKindToString(
-          OCE->getOperator(),
-          OCE->getNumArgs()));
+    newProp("xcodeml_operator_kind",
+        OverloadedOperatorKindToString(OCE->getOperator(), OCE->getNumArgs()));
   }
 
   if (auto NL = dyn_cast<CXXNewExpr>(S)) {
@@ -146,21 +137,17 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
   }
 
   if (auto CL = dyn_cast<CharacterLiteral>(S)) {
-    newProp("hexadecimalNotation",
-        unsignedToHexString(CL->getValue()).c_str());
-    newProp("token",
-        getSpelling(CL, mangleContext->getASTContext()).c_str());
+    newProp(
+        "hexadecimalNotation", unsignedToHexString(CL->getValue()).c_str());
+    newProp("token", getSpelling(CL, mangleContext->getASTContext()).c_str());
   }
 
   if (auto IL = dyn_cast<IntegerLiteral>(S)) {
     const unsigned INIT_BUFFER_SIZE = 32;
     SmallVector<char, INIT_BUFFER_SIZE> buffer;
-    auto& CXT = mangleContext->getASTContext();
+    auto &CXT = mangleContext->getASTContext();
     auto spelling = clang::Lexer::getSpelling(
-        IL->getLocation(),
-        buffer,
-        CXT.getSourceManager(),
-        CXT.getLangOpts());
+        IL->getLocation(), buffer, CXT.getSourceManager(), CXT.getLangOpts());
     newProp("token", spelling.str().c_str());
     std::string decimalNotation = IL->getValue().toString(10, true);
     newProp("decimalNotation", decimalNotation.c_str());
@@ -169,12 +156,9 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
   if (auto FL = dyn_cast<FloatingLiteral>(S)) {
     const unsigned INIT_BUFFER_SIZE = 32;
     SmallVector<char, INIT_BUFFER_SIZE> buffer;
-    auto& CXT = mangleContext->getASTContext();
+    auto &CXT = mangleContext->getASTContext();
     auto spelling = clang::Lexer::getSpelling(
-        FL->getLocation(),
-        buffer,
-        CXT.getSourceManager(),
-        CXT.getLangOpts());
+        FL->getLocation(), buffer, CXT.getSourceManager(), CXT.getLangOpts());
     newProp("token", spelling.str().c_str());
   }
 
@@ -213,11 +197,11 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
 
   UnaryExprOrTypeTraitExpr *UEOTTE = dyn_cast<UnaryExprOrTypeTraitExpr>(S);
   if (UEOTTE) {
-    //7.8 sizeof, alignof
+    // 7.8 sizeof, alignof
     switch (UEOTTE->getKind()) {
     case UETT_SizeOf: {
       newChild("sizeOfExpr");
-      TraverseType(static_cast<Expr*>(S)->getType());
+      TraverseType(static_cast<Expr *>(S)->getType());
       if (UEOTTE->isArgumentType()) {
         newChild("typeName");
         TraverseType(UEOTTE->getArgumentType());
@@ -228,7 +212,7 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
     }
     case UETT_AlignOf: {
       newChild("gccAlignOfExpr");
-      TraverseType(static_cast<Expr*>(S)->getType());
+      TraverseType(static_cast<Expr *>(S)->getType());
       if (UEOTTE->isArgumentType()) {
         newChild("typeName");
         TraverseType(UEOTTE->getArgumentType());
@@ -236,15 +220,14 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
         TraverseStmt(UEOTTE->getArgumentExpr());
       }
       return true;
-
     }
     case UETT_VecStep:
       newChild("clangStmt");
       newProp("class", "UnaryExprOrTypeTraitExpr_UETT_VecStep");
       return true;
 
-    //case UETT_OpenMPRequiredSimdAlign:
-    //  NStmt("UnaryExprOrTypeTraitExpr(UETT_OpenMPRequiredSimdAlign");
+      // case UETT_OpenMPRequiredSimdAlign:
+      //  NStmt("UnaryExprOrTypeTraitExpr(UETT_OpenMPRequiredSimdAlign");
     }
   }
 
@@ -266,9 +249,7 @@ DeclarationsVisitor::PreVisitTypeLoc(TypeLoc TL) {
   newChild("TypeLoc");
   newProp("class", NameForTypeLoc(TL));
   const auto T = TL.getType();
-  newProp(
-      "type",
-      typetableinfo->getTypeName(T).c_str());
+  newProp("type", typetableinfo->getTypeName(T).c_str());
   return true;
 }
 
@@ -294,14 +275,12 @@ DeclarationsVisitor::PreVisitAttr(Attr *A) {
 
 namespace {
 
-const char*
+const char *
 getLanguageIdAsString(clang::LinkageSpecDecl::LanguageIDs id) {
   using clang::LinkageSpecDecl;
-  switch(id) {
-    case LinkageSpecDecl::lang_c:
-      return "C";
-    case LinkageSpecDecl::lang_cxx:
-      return "C++";
+  switch (id) {
+  case LinkageSpecDecl::lang_c: return "C";
+  case LinkageSpecDecl::lang_cxx: return "C++";
   }
 }
 
@@ -323,7 +302,7 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
   if (auto RC = CXT.getRawCommentForDeclNoCache(D)) {
     auto comment = static_cast<std::string>(RC->getRawText(SM));
     addChild("comment", comment.c_str());
-  } 
+  }
 
   if (D->isImplicit()) {
     newBoolProp("is_implicit", true);
@@ -342,9 +321,7 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
   }
 
   if (const auto LSD = dyn_cast<LinkageSpecDecl>(D)) {
-    newProp(
-        "language_id",
-        getLanguageIdAsString(LSD->getLanguage()));
+    newProp("language_id", getLanguageIdAsString(LSD->getLanguage()));
   }
 
   NamedDecl *ND = dyn_cast<NamedDecl>(D);
@@ -354,9 +331,7 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
   }
 
   if (auto UD = dyn_cast<UsingDecl>(D)) {
-    newBoolProp(
-        "is_access_declaration",
-        UD->isAccessDeclaration());
+    newBoolProp("is_access_declaration", UD->isAccessDeclaration());
   }
 
   if (auto VD = dyn_cast<ValueDecl>(D)) {
@@ -365,27 +340,24 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
   }
 
   if (auto TD = dyn_cast<TypeDecl>(D)) {
-    const auto T = QualType( TD->getTypeForDecl(), 0 );
+    const auto T = QualType(TD->getTypeForDecl(), 0);
     newProp("xcodemlType", typetableinfo->getTypeName(T).c_str());
   }
 
   if (auto TND = dyn_cast<TypedefNameDecl>(D)) {
     const auto T = TND->getUnderlyingType();
-    newProp( "xcodemlTypedefType",
-        typetableinfo->getTypeName(T).c_str());
+    newProp("xcodemlTypedefType", typetableinfo->getTypeName(T).c_str());
   }
 
   if (const auto RD = dyn_cast<RecordDecl>(D)) {
-    newBoolProp(
-        "is_this_declaration_a_definition",
+    newBoolProp("is_this_declaration_a_definition",
         RD->isThisDeclarationADefinition());
   }
 
   if (auto VD = dyn_cast<VarDecl>(D)) {
     const auto ll = VD->getLanguageLinkage();
     if (ll != NoLanguageLinkage) {
-      newProp("language_linkage",
-          stringifyLanguageLinkage(ll));
+      newProp("language_linkage", stringifyLanguageLinkage(ll));
     }
     newBoolProp("has_init", VD->hasInit());
     newBoolProp("is_static_data_member", VD->isStaticDataMember());
@@ -395,15 +367,14 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
   if (auto ND = dyn_cast<NamespaceDecl>(D)) {
     newBoolProp("is_inline", ND->isInline());
     newBoolProp("is_anonymous", ND->isAnonymousNamespace());
-    if (! ND->isAnonymousNamespace()) {
+    if (!ND->isAnonymousNamespace()) {
       newBoolProp("is_first_declared", ND->isOriginalNamespace());
     }
   }
   if (auto FD = dyn_cast<FunctionDecl>(D)) {
     const auto ll = FD->getLanguageLinkage();
     if (ll != NoLanguageLinkage) {
-      newProp("language_linkage",
-          stringifyLanguageLinkage(ll));
+      newProp("language_linkage", stringifyLanguageLinkage(ll));
     }
     newBoolProp("is_defaulted", FD->isDefaulted());
     newBoolProp("is_deleted", FD->isDeletedAsWritten());
@@ -417,9 +388,7 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
     if (auto RD = MD->getParent()) {
       assert(mangleContext);
       const auto T = mangleContext->getASTContext().getRecordType(RD);
-      newProp(
-          "parent_class",
-          typetableinfo->getTypeName(T).c_str());
+      newProp("parent_class", typetableinfo->getTypeName(T).c_str());
     } else {
       newBoolProp("clang_parent_class_not_found", true);
     }
@@ -428,7 +397,7 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
 }
 
 bool
-DeclarationsVisitor::PostVisitDecl(Decl* D) {
+DeclarationsVisitor::PostVisitDecl(Decl *D) {
   if (isa<TranslationUnitDecl>(D)) {
     typetableinfo->popTypeTableStack();
     nnstableinfo->popNnsTableStack();
@@ -441,17 +410,14 @@ DeclarationsVisitor::PreVisitDeclarationNameInfo(DeclarationNameInfo NI) {
   DeclarationName DN = NI.getName();
 
   const auto name = NI.getAsString();
-  newChild("clangDeclarationNameInfo",
-      name.c_str());
+  newChild("clangDeclarationNameInfo", name.c_str());
   newProp("class", NameForDeclarationName(DN));
   newBoolProp("is_empty", DN.isEmpty());
 
   // FIXME: not MECE
   const auto T = DN.getCXXNameType();
   if (!T.isNull()) {
-    newProp(
-        "clang_name_type",
-        typetableinfo->getTypeName(T).c_str());
+    newProp("clang_name_type", typetableinfo->getTypeName(T).c_str());
   }
   return true;
 }
@@ -459,74 +425,55 @@ DeclarationsVisitor::PreVisitDeclarationNameInfo(DeclarationNameInfo NI) {
 namespace {
 
 std::string
-SpecifierKindToString(
-    clang::NestedNameSpecifier::SpecifierKind kind)
-{
+SpecifierKindToString(clang::NestedNameSpecifier::SpecifierKind kind) {
   switch (kind) {
-    case NestedNameSpecifier::Identifier:
-      return "identifier";
-    case NestedNameSpecifier::Namespace:
-      return "namespace";
-    case NestedNameSpecifier::NamespaceAlias:
-      return "namespace_alias";
-    case NestedNameSpecifier::TypeSpec:
-      return "type_specifier";
-    case NestedNameSpecifier::TypeSpecWithTemplate:
-      return "type_specifier_with_template";
-    case NestedNameSpecifier::Global:
-      return "global";
-    case NestedNameSpecifier::Super:
-      return "MS_super";
+  case NestedNameSpecifier::Identifier: return "identifier";
+  case NestedNameSpecifier::Namespace: return "namespace";
+  case NestedNameSpecifier::NamespaceAlias: return "namespace_alias";
+  case NestedNameSpecifier::TypeSpec: return "type_specifier";
+  case NestedNameSpecifier::TypeSpecWithTemplate:
+    return "type_specifier_with_template";
+  case NestedNameSpecifier::Global: return "global";
+  case NestedNameSpecifier::Super: return "MS_super";
   }
 }
 
-clang::IdentifierInfo*
+clang::IdentifierInfo *
 getAsIdentifierInfo(clang::NestedNameSpecifier *NNS) {
   switch (NNS->getKind()) {
-    case NestedNameSpecifier::Identifier:
-      return NNS->getAsIdentifier();
-    case NestedNameSpecifier::Namespace:
-      return NNS->getAsNamespace()->getIdentifier();
-    case NestedNameSpecifier::NamespaceAlias:
-      return NNS->getAsNamespaceAlias()->getIdentifier();
-    case NestedNameSpecifier::Super:
-      return NNS->getAsRecordDecl()->getIdentifier();
-    case NestedNameSpecifier::TypeSpec:
-    case NestedNameSpecifier::TypeSpecWithTemplate:
-    case NestedNameSpecifier::Global:
-      return nullptr;
+  case NestedNameSpecifier::Identifier: return NNS->getAsIdentifier();
+  case NestedNameSpecifier::Namespace:
+    return NNS->getAsNamespace()->getIdentifier();
+  case NestedNameSpecifier::NamespaceAlias:
+    return NNS->getAsNamespaceAlias()->getIdentifier();
+  case NestedNameSpecifier::Super:
+    return NNS->getAsRecordDecl()->getIdentifier();
+  case NestedNameSpecifier::TypeSpec:
+  case NestedNameSpecifier::TypeSpecWithTemplate:
+  case NestedNameSpecifier::Global: return nullptr;
   }
 }
 
 } // namespace
 
 bool
-DeclarationsVisitor::PreVisitNestedNameSpecifierLoc(
-    NestedNameSpecifierLoc N)
-{
+DeclarationsVisitor::PreVisitNestedNameSpecifierLoc(NestedNameSpecifierLoc N) {
   if (auto NNS = N.getNestedNameSpecifier()) {
     newChild("clangNestedNameSpecifier");
     newProp("kind", SpecifierKindToString(NNS->getKind()).c_str());
-    newProp(
-        "nns",
-        nnstableinfo->getNnsName(NNS).c_str());
-    newProp("is_dependent", NNS->isDependent() ? "1":"0");
-    newProp(
-        "is_instantiation_dependent",
-        NNS->isInstantiationDependent() ? "1":"0");
+    newProp("nns", nnstableinfo->getNnsName(NNS).c_str());
+    newProp("is_dependent", NNS->isDependent() ? "1" : "0");
+    newProp("is_instantiation_dependent",
+        NNS->isInstantiationDependent() ? "1" : "0");
     if (auto ident = getAsIdentifierInfo(NNS)) {
-      newProp(
-          "name",
-          ident->getNameStart());
+      newProp("name", ident->getNameStart());
     }
   }
   return true;
 }
 
 bool
-DeclarationsVisitor::PreVisitConstructorInitializer(
-    CXXCtorInitializer* CI)
-{
+DeclarationsVisitor::PreVisitConstructorInitializer(CXXCtorInitializer *CI) {
   if (!CI) {
     return true;
   }

@@ -20,16 +20,15 @@
 #include "SourceInfo.h"
 #include "SymbolAnalyzer.h"
 
-using SymbolAnalyzer = AttrProc<
-  void,
-  xmlXPathContextPtr,
-  XcodeMl::Environment&>;
+using SymbolAnalyzer =
+    AttrProc<void, xmlXPathContextPtr, XcodeMl::Environment &>;
 
 using CXXCodeGen::makeTokenNode;
 
-#define SA_ARGS xmlNodePtr node __attribute__((unused)), \
-                xmlXPathContextPtr ctxt __attribute__((unused)), \
-                XcodeMl::Environment & map __attribute__((unused))
+#define SA_ARGS                                                               \
+  xmlNodePtr node __attribute__((unused)),                                    \
+      xmlXPathContextPtr ctxt __attribute__((unused)),                        \
+      XcodeMl::Environment &map __attribute__((unused))
 
 #define DEFINE_SA(name) static void name(SA_ARGS)
 
@@ -44,7 +43,6 @@ DEFINE_SA(tagnameProc) {
   } else if (auto ET = llvm::dyn_cast<XcodeMl::EnumType>(typeref.get())) {
     ET->setName(tagName);
   }
-
 }
 
 DEFINE_SA(classNameProc) {
@@ -56,18 +54,13 @@ DEFINE_SA(classNameProc) {
   CT->setName(name);
 }
 
-
-const SymbolAnalyzer CXXSymbolAnalyzer (
-    "sclass",
+const SymbolAnalyzer CXXSymbolAnalyzer("sclass",
     {
-      { "tagname", tagnameProc },
-      { "class_name", classNameProc },
+        {"tagname", tagnameProc}, {"class_name", classNameProc},
     });
 
-void analyzeSymbols(
-    xmlNodePtr node,
-    xmlXPathContextPtr ctxt,
-    XcodeMl::Environment& map
-) {
+void
+analyzeSymbols(
+    xmlNodePtr node, xmlXPathContextPtr ctxt, XcodeMl::Environment &map) {
   CXXSymbolAnalyzer.walkAll(node, ctxt, map);
 }

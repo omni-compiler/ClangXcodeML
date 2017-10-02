@@ -28,102 +28,115 @@ OptEmitSourceRange("range", cl::desc("emit 'range'"),
 // implementation of XMLVisitorBaseImpl
 
 XMLVisitorBaseImpl::XMLVisitorBaseImpl(MangleContext *MC,
-                                       xmlNodePtr CurNode,
-                                       TypeTableInfo *TTI,
-                                       NnsTableInfo *NTI)
-    : XMLRAVpool(this), mangleContext(MC), curNode(CurNode),
+    xmlNodePtr CurNode,
+    TypeTableInfo *TTI,
+    NnsTableInfo *NTI)
+    : XMLRAVpool(this),
+      mangleContext(MC),
+      curNode(CurNode),
       typetableinfo(TTI),
-      nnstableinfo(NTI)
-{}
-
-xmlNodePtr XMLVisitorBaseImpl::addChild(const char *Name, const char *Content) {
-    return xmlNewTextChild(curNode, nullptr, BAD_CAST Name, BAD_CAST Content);
+      nnstableinfo(NTI) {
 }
 
-void XMLVisitorBaseImpl::newChild(const char *Name, const char *Content) {
-    curNode = xmlNewTextChild(curNode, nullptr,
-                              BAD_CAST Name, BAD_CAST Content);
+xmlNodePtr
+XMLVisitorBaseImpl::addChild(const char *Name, const char *Content) {
+  return xmlNewTextChild(curNode, nullptr, BAD_CAST Name, BAD_CAST Content);
 }
 
-void XMLVisitorBaseImpl::newProp(const char *Name, int Val, xmlNodePtr N) {
-    if (!N) N = curNode;
-    const auto buf = std::to_string(Val);
-    xmlNewProp(N, BAD_CAST Name, BAD_CAST(buf.c_str()));
+void
+XMLVisitorBaseImpl::newChild(const char *Name, const char *Content) {
+  curNode = xmlNewTextChild(curNode, nullptr, BAD_CAST Name, BAD_CAST Content);
 }
 
-void XMLVisitorBaseImpl::newProp(const char *Name, const char *Val,
-                                 xmlNodePtr N) {
-    if (!N) N = curNode;
-    xmlNewProp(N, BAD_CAST Name, BAD_CAST Val);
+void
+XMLVisitorBaseImpl::newProp(const char *Name, int Val, xmlNodePtr N) {
+  if (!N)
+    N = curNode;
+  const auto buf = std::to_string(Val);
+  xmlNewProp(N, BAD_CAST Name, BAD_CAST(buf.c_str()));
 }
 
-void XMLVisitorBaseImpl::newBoolProp(const char *Name, bool Val, xmlNodePtr N) {
+void
+XMLVisitorBaseImpl::newProp(const char *Name, const char *Val, xmlNodePtr N) {
+  if (!N)
+    N = curNode;
+  xmlNewProp(N, BAD_CAST Name, BAD_CAST Val);
+}
+
+void
+XMLVisitorBaseImpl::newBoolProp(const char *Name, bool Val, xmlNodePtr N) {
   newProp(Name, Val ? "1" : "0", N);
 }
 
-void XMLVisitorBaseImpl::newComment(const xmlChar *str, xmlNodePtr N) {
-    if (!N) N = curNode;
-    if (const auto pName = getVisitorName()) {
-        std::stringstream ss;
-        ss << pName << "::" << str;
-        xmlNodePtr Comment = xmlNewComment(BAD_CAST(ss.str().c_str()));
-        xmlAddChild(N, Comment);
-        //errs() << (const char *)Buf << "\n";
+void
+XMLVisitorBaseImpl::newComment(const xmlChar *str, xmlNodePtr N) {
+  if (!N)
+    N = curNode;
+  if (const auto pName = getVisitorName()) {
+    std::stringstream ss;
+    ss << pName << "::" << str;
+    xmlNodePtr Comment = xmlNewComment(BAD_CAST(ss.str().c_str()));
+    xmlAddChild(N, Comment);
+    // errs() << (const char *)Buf << "\n";
+  }
+}
+
+void
+XMLVisitorBaseImpl::newComment(const char *str, xmlNodePtr N) {
+  newComment(BAD_CAST str, N);
+}
+
+void
+XMLVisitorBaseImpl::newComment(const std::string &str, xmlNodePtr N) {
+  newComment(str.c_str(), N);
+}
+
+void
+XMLVisitorBaseImpl::setLocation(SourceLocation Loc, xmlNodePtr N) {
+  if (!N)
+    N = curNode;
+  FullSourceLoc FLoc = mangleContext->getASTContext().getFullLoc(Loc);
+  if (FLoc.isValid()) {
+    PresumedLoc PLoc = FLoc.getManager().getPresumedLoc(FLoc);
+
+    newProp("column", PLoc.getColumn(), N);
+    newProp("lineno", PLoc.getLine(), N);
+    {
+      const char *filename = PLoc.getFilename();
+      static char cwd[BUFSIZ];
+      static size_t cwdlen;
+
+      if (cwdlen == 0) {
+        getcwd(cwd, sizeof(cwd));
+        cwdlen = strlen(cwd);
+      }
+      if (strncmp(filename, cwd, cwdlen) == 0 && filename[cwdlen] == '/') {
+        newProp("file", filename + cwdlen + 1, N);
+      } else {
+        newProp("file", filename, N);
+      }
     }
+  }
 }
 
-void XMLVisitorBaseImpl::newComment(const char *str, xmlNodePtr N) {
-    newComment(BAD_CAST str, N);
-}
-
-void XMLVisitorBaseImpl::newComment(const std::string &str, xmlNodePtr N) {
-    newComment(str.c_str(), N);
-}
-
-void XMLVisitorBaseImpl::setLocation(SourceLocation Loc, xmlNodePtr N) {
-    if (!N) N = curNode;
-    FullSourceLoc FLoc = mangleContext->getASTContext().getFullLoc(Loc);
-    if (FLoc.isValid()) {
-        PresumedLoc PLoc = FLoc.getManager().getPresumedLoc(FLoc);
-
-        newProp("column", PLoc.getColumn(), N);
-        newProp("lineno", PLoc.getLine(), N);
-        {
-            const char *filename = PLoc.getFilename();
-            static char cwd[BUFSIZ];
-            static size_t cwdlen;
-
-            if (cwdlen == 0) {
-                getcwd(cwd, sizeof(cwd));
-                cwdlen = strlen(cwd);
-            }
-            if (strncmp(filename, cwd, cwdlen) == 0
-                && filename[cwdlen] == '/') {
-                newProp("file", filename + cwdlen + 1, N);
-            } else {
-                newProp("file", filename, N);
-            }
-        }
-    }
-}
-
-std::string XMLVisitorBaseImpl::contentBySource(SourceLocation LocStart,
-                                                    SourceLocation LocEnd) {
-    ASTContext &CXT = mangleContext->getASTContext();
-    SourceManager &SM = CXT.getSourceManager();
-    SourceLocation LocEndOfToken = Lexer::getLocForEndOfToken(LocEnd, 0, SM,
-                                                              CXT.getLangOpts());
-    if (LocEndOfToken.isValid()) {
-        const char *b = SM.getCharacterData(LocStart);
-        const char *e = SM.getCharacterData(LocEndOfToken);
-        if (e > b && e < b + 256) {
-            return std::string(b, e - b);
-        } else {
-            return std::string("");
-        }
+std::string
+XMLVisitorBaseImpl::contentBySource(
+    SourceLocation LocStart, SourceLocation LocEnd) {
+  ASTContext &CXT = mangleContext->getASTContext();
+  SourceManager &SM = CXT.getSourceManager();
+  SourceLocation LocEndOfToken =
+      Lexer::getLocForEndOfToken(LocEnd, 0, SM, CXT.getLangOpts());
+  if (LocEndOfToken.isValid()) {
+    const char *b = SM.getCharacterData(LocStart);
+    const char *e = SM.getCharacterData(LocEndOfToken);
+    if (e > b && e < b + 256) {
+      return std::string(b, e - b);
     } else {
-        return std::string("");
+      return std::string("");
     }
+  } else {
+    return std::string("");
+  }
 }
 
 ///

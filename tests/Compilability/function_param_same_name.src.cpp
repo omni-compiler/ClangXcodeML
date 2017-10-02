@@ -1,3 +1,4 @@
-int f(int f) {
+int
+f(int f) {
   return f;
 }

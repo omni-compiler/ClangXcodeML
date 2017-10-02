@@ -23,7 +23,8 @@
 #include "SourceInfo.h"
 #include "CodeBuilder.h"
 
-int main(int argc, char** argv) {
+int
+main(int argc, char **argv) {
   if (argc < 2) {
     std::cout << "usage: " << argv[0] << " <filename>" << std::endl;
     return 0;
@@ -39,4 +40,3 @@ int main(int argc, char** argv) {
   xmlFreeDoc(doc);
   return 0;
 }
-

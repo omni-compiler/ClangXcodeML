@@ -1,4 +1,5 @@
-void f() {
+void
+f() {
   do {
   } while (0);
 }

@@ -22,6 +22,6 @@ IndentWrappedFunctionNames: false
 KeepEmptyLinesAtTheStartOfBlocks: false
 Language: Cpp
 NamespaceIndentation: None
-PointerAlignment: Left
+PointerAlignment: Right
 Standard: Cpp11
 UseTab: Never

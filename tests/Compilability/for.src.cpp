@@ -1,4 +1,5 @@
-void f() {
+void
+f() {
   int i = 0;
   for (i = 0; i - 10; i = i + 1) {
     int num = 1;
@@ -11,6 +12,7 @@ void f() {
   } while (i);
 }
 
-int square(int x) {
+int
+square(int x) {
   return x * x;
 }

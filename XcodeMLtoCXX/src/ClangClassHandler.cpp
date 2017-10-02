@@ -24,9 +24,10 @@
 
 namespace cxxgen = CXXCodeGen;
 
-#define CCH_ARGS xmlNodePtr node __attribute__((unused)), \
-                 const CodeBuilder& w __attribute__((unused)), \
-                 SourceInfo& src __attribute__((unused))
+#define CCH_ARGS                                                              \
+  xmlNodePtr node __attribute__((unused)),                                    \
+      const CodeBuilder &w __attribute__((unused)),                           \
+      SourceInfo &src __attribute__((unused))
 
 #define DEFINE_CCH(name) static XcodeMl::CodeFragment name(CCH_ARGS)
 
@@ -43,38 +44,31 @@ DEFINE_CCH(callExprProc) {
 }
 
 DEFINE_CCH(CXXCtorExprProc) {
-  return makeTokenNode("(")
-    + cxxgen::join(", ", w.walkChildren(node, src))
-    + makeTokenNode(")");
+  return makeTokenNode("(") + cxxgen::join(", ", w.walkChildren(node, src))
+      + makeTokenNode(")");
 }
 
 DEFINE_CCH(CXXTemporaryObjectExprProc) {
-  const auto resultT = src.typeTable.at(
-      getProp(node, "type"));
-  const auto name =
-    llvm::cast<XcodeMl::ClassType>(resultT.get())->name();
+  const auto resultT = src.typeTable.at(getProp(node, "type"));
+  const auto name = llvm::cast<XcodeMl::ClassType>(resultT.get())->name();
   assert(name.hasValue());
   auto children = findNodes(node, "*[position() > 1]", src.ctxt);
-    // ignore first child, which represents the result (class) type of
-    // the clang::CXXTemporaryObjectExpr
+  // ignore first child, which represents the result (class) type of
+  // the clang::CXXTemporaryObjectExpr
   std::vector<CodeFragment> args;
   for (auto child : children) {
     args.push_back(w.walk(child, src));
   }
-  return *name +
-    makeTokenNode("(") +
-    join(",", args) +
-    makeTokenNode(")");
+  return *name + makeTokenNode("(") + join(",", args) + makeTokenNode(")");
 }
 
-const ClangClassHandler ClangStmtHandler(
-    "class",
+const ClangClassHandler ClangStmtHandler("class",
     cxxgen::makeInnerNode,
     callCodeBuilder,
     {
-      { "CallExpr", callExprProc },
-      { "CXXConstructExpr", CXXCtorExprProc },
-      { "CXXTemporaryObjectExpr", CXXTemporaryObjectExprProc },
+        {"CallExpr", callExprProc},
+        {"CXXConstructExpr", CXXCtorExprProc},
+        {"CXXTemporaryObjectExpr", CXXTemporaryObjectExprProc},
     });
 
 DEFINE_CCH(FriendDeclProc) {
@@ -83,18 +77,15 @@ DEFINE_CCH(FriendDeclProc) {
     const auto dtident = getProp(TL, "type");
     const auto T = src.typeTable.at(dtident);
     return makeTokenNode("friend")
-      + makeDecl(T, cxxgen::makeVoidNode(), src.typeTable)
-      + makeTokenNode(";");
+        + makeDecl(T, cxxgen::makeVoidNode(), src.typeTable)
+        + makeTokenNode(";");
   }
-  return
-    makeTokenNode("friend") +
-    callCodeBuilder(node, w, src);
+  return makeTokenNode("friend") + callCodeBuilder(node, w, src);
 }
 
-const ClangClassHandler ClangDeclHandler(
-    "class",
+const ClangClassHandler ClangDeclHandler("class",
     cxxgen::makeInnerNode,
     callCodeBuilder,
     {
-      { "Friend", FriendDeclProc },
+        {"Friend", FriendDeclProc},
     });

@@ -16,17 +16,15 @@ using CXXCodeGen::makeTokenNode;
 
 namespace XcodeMl {
 
-Nns::Nns(NnsKind k, const NnsRef& nr, const NnsIdent& ni):
-  parent(nr ? nr->getParent() : llvm::Optional<NnsIdent>()),
-  kind(k),
-  ident(ni)
-{}
+Nns::Nns(NnsKind k, const NnsRef &nr, const NnsIdent &ni)
+    : parent(nr ? nr->getParent() : llvm::Optional<NnsIdent>()),
+      kind(k),
+      ident(ni) {
+}
 
-Nns::Nns(NnsKind k, const NnsIdent& par, const NnsIdent& ident):
-  parent(par),
-  kind(k),
-  ident(ident)
-{}
+Nns::Nns(NnsKind k, const NnsIdent &par, const NnsIdent &ident)
+    : parent(par), kind(k), ident(ident) {
+}
 
 Nns::~Nns() = default;
 
@@ -36,10 +34,7 @@ Nns::getKind() const {
 }
 
 CodeFragment
-Nns::makeDeclaration(
-    const Environment& env,
-    const NnsMap& nnss) const
-{
+Nns::makeDeclaration(const Environment &env, const NnsMap &nnss) const {
   const auto par = getParent();
   if (!par.hasValue()) {
     return makeNestedNameSpec(env, nnss);
@@ -49,9 +44,7 @@ Nns::makeDeclaration(
     std::cerr << "Undefined NNS: '" << *par << "'" << std::endl;
     std::abort();
   }
-  const auto prefix = (*p)->makeDeclaration(
-      env,
-      nnss);
+  const auto prefix = (*p)->makeDeclaration(env, nnss);
   return prefix + makeNestedNameSpec(env, nnss);
 }
 
@@ -60,11 +53,10 @@ Nns::getParent() const {
   return parent;
 }
 
-GlobalNns::GlobalNns():
-  Nns(NnsKind::Global, NnsRef(), "global")
-{}
+GlobalNns::GlobalNns() : Nns(NnsKind::Global, NnsRef(), "global") {
+}
 
-Nns*
+Nns *
 GlobalNns::clone() const {
   GlobalNns *copy = new GlobalNns(*this);
   return copy;
@@ -76,10 +68,7 @@ GlobalNns::classof(const Nns *N) {
 }
 
 CodeFragment
-GlobalNns::makeNestedNameSpec(
-    const Environment&,
-    const NnsMap&) const
-{
+GlobalNns::makeNestedNameSpec(const Environment &, const NnsMap &) const {
   return makeTokenNode("::");
 }
 
@@ -89,24 +78,18 @@ GlobalNns::getParent() const {
 }
 
 ClassNns::ClassNns(
-    const NnsIdent& ni,
-    const NnsRef& parent,
-    const DataTypeIdent& di):
-  Nns(NnsKind::Class, parent, ni),
-  dtident(di)
-{}
+    const NnsIdent &ni, const NnsRef &parent, const DataTypeIdent &di)
+    : Nns(NnsKind::Class, parent, ni), dtident(di) {
+}
 
-Nns*
+Nns *
 ClassNns::clone() const {
   ClassNns *copy = new ClassNns(*this);
   return copy;
 }
 
 CodeFragment
-ClassNns::makeNestedNameSpec(
-    const Environment& env,
-    const NnsMap&) const
-{
+ClassNns::makeNestedNameSpec(const Environment &env, const NnsMap &) const {
   const auto T = env.at(dtident);
   const auto classT = llvm::cast<XcodeMl::ClassType>(T.get());
   assert(classT);
@@ -116,7 +99,7 @@ ClassNns::makeNestedNameSpec(
 }
 
 bool
-ClassNns::classof(const Nns* N) {
+ClassNns::classof(const Nns *N) {
   return N->getKind() == NnsKind::Class;
 }
 
@@ -126,19 +109,14 @@ makeGlobalNns() {
 }
 
 NnsRef
-makeClassNns(
-    const NnsIdent& ident,
-    const NnsRef& parent,
-    const DataTypeIdent& classType)
-{
+makeClassNns(const NnsIdent &ident,
+    const NnsRef &parent,
+    const DataTypeIdent &classType) {
   return std::make_shared<ClassNns>(ident, parent, classType);
 }
 
 NnsRef
-makeClassNns(
-    const NnsIdent& ident,
-    const DataTypeIdent& classType)
-{
+makeClassNns(const NnsIdent &ident, const DataTypeIdent &classType) {
   return std::make_shared<ClassNns>(ident, nullptr, classType);
 }
 

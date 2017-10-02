@@ -1,21 +1,20 @@
 #ifndef SYMBOLVISITOR_H
 #define SYMBOLVISITOR_H
 
-class SymbolsVisitor
-    : public XcodeMlVisitorBase<SymbolsVisitor> {
+class SymbolsVisitor : public XcodeMlVisitorBase<SymbolsVisitor> {
 public:
-    // use base constructors
-    using XcodeMlVisitorBase::XcodeMlVisitorBase;
+  // use base constructors
+  using XcodeMlVisitorBase::XcodeMlVisitorBase;
 
-    const char *getVisitorName() const override;
-    bool PreVisitStmt(clang::Stmt *);
-    bool PreVisitType(clang::QualType);
-    bool PreVisitTypeLoc(clang::TypeLoc);
-    bool PreVisitAttr(clang::Attr *);
-    bool PreVisitDecl(clang::Decl *);
-    bool PreVisitNestedNameSpecifierLoc(clang::NestedNameSpecifierLoc);
-    bool PreVisitDeclarationNameInfo(clang::DeclarationNameInfo);
-    bool PreVisitConstructorInitializer(clang::CXXCtorInitializer *CI);
+  const char *getVisitorName() const override;
+  bool PreVisitStmt(clang::Stmt *);
+  bool PreVisitType(clang::QualType);
+  bool PreVisitTypeLoc(clang::TypeLoc);
+  bool PreVisitAttr(clang::Attr *);
+  bool PreVisitDecl(clang::Decl *);
+  bool PreVisitNestedNameSpecifierLoc(clang::NestedNameSpecifierLoc);
+  bool PreVisitDeclarationNameInfo(clang::DeclarationNameInfo);
+  bool PreVisitConstructorInitializer(clang::CXXCtorInitializer *CI);
 };
 
 #endif /* !SYMBOLVISITOR_H */

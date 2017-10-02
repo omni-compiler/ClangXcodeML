@@ -1,15 +1,18 @@
 struct A {
   int x;
-  int f() {
+  int
+  f() {
     return 0;
   }
 };
 
-int g() {
+int
+g() {
   return 0;
 }
 
-int main() {
+int
+main() {
   struct A a;
   a.x = 0;
   return a.f();

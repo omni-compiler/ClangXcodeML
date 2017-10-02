@@ -13,35 +13,25 @@ using namespace llvm;
 
 namespace {
 
-const char*
-getNameKind(const NamedDecl* ND) {
+const char *
+getNameKind(const NamedDecl *ND) {
   const auto DN = ND->getDeclName();
 
   using NK = clang::DeclarationName::NameKind;
   switch (DN.getNameKind()) {
-    case NK::Identifier:
-      return "name";
-    case NK::CXXOperatorName:
-      return "operator";
-    case NK::CXXConversionFunctionName:
-      return "conversion";
-    case NK::CXXConstructorName:
-      return "constructor";
-    case NK::CXXDestructorName:
-      return "destructor";
-    default:
-      assert(false && "not supported");
+  case NK::Identifier: return "name";
+  case NK::CXXOperatorName: return "operator";
+  case NK::CXXConversionFunctionName: return "conversion";
+  case NK::CXXConstructorName: return "constructor";
+  case NK::CXXDestructorName: return "destructor";
+  default: assert(false && "not supported");
   }
 }
 
 xmlNodePtr
-makeIdNode(
-    TypeTableInfo& TTI,
-    const ValueDecl* VD)
-{
+makeIdNode(TypeTableInfo &TTI, const ValueDecl *VD) {
   auto idNode = xmlNewNode(nullptr, BAD_CAST "id");
-  xmlNewProp(
-      idNode,
+  xmlNewProp(idNode,
       BAD_CAST "type",
       BAD_CAST TTI.getTypeName(VD->getType()).c_str());
   return idNode;
@@ -49,50 +39,28 @@ makeIdNode(
 
 void
 xmlNewBoolProp(xmlNodePtr node, const std::string &name, bool value) {
-  xmlNewProp(
-      node,
-      BAD_CAST(name.c_str()),
-      BAD_CAST(value ? "true" : "false"));
+  xmlNewProp(node, BAD_CAST(name.c_str()), BAD_CAST(value ? "true" : "false"));
 }
 
 xmlNodePtr
-makeCtorNode(
-    TypeTableInfo& TTI,
-    const CXXConstructorDecl* ctor)
-{
+makeCtorNode(TypeTableInfo &TTI, const CXXConstructorDecl *ctor) {
   auto node = xmlNewNode(nullptr, BAD_CAST "name");
-  xmlNewBoolProp(
-      node,
-      "is_implicit",
-      ctor->isExplicit());
-  xmlNewBoolProp(
-      node,
-      "is_copy_constructor",
-      ctor->isCopyConstructor());
-  xmlNewBoolProp(
-      node,
-      "is_move_constructor",
-      ctor->isMoveConstructor());
+  xmlNewBoolProp(node, "is_implicit", ctor->isExplicit());
+  xmlNewBoolProp(node, "is_copy_constructor", ctor->isCopyConstructor());
+  xmlNewBoolProp(node, "is_move_constructor", ctor->isMoveConstructor());
 
   const auto T = ctor->getDeclName().getCXXNameType();
-  xmlNewProp(
-      node,
-      BAD_CAST "ctor_type",
-      BAD_CAST TTI.getTypeName(T).c_str());
+  xmlNewProp(node, BAD_CAST "ctor_type", BAD_CAST TTI.getTypeName(T).c_str());
 
   return node;
 }
 
 xmlNodePtr
-makeConvNode(
-    TypeTableInfo& TTI,
-    const CXXConversionDecl* conv)
-{
+makeConvNode(TypeTableInfo &TTI, const CXXConversionDecl *conv) {
   auto node = xmlNewNode(nullptr, BAD_CAST "name");
 
   const auto convT = conv->getConversionType();
-  xmlNewProp(
-      node,
+  xmlNewProp(node,
       BAD_CAST "destination_type",
       BAD_CAST TTI.getTypeName(convT).c_str());
 
@@ -100,7 +68,7 @@ makeConvNode(
 }
 
 xmlNodePtr
-makeNameNodeForCXXOperator(TypeTableInfo&, const FunctionDecl* FD) {
+makeNameNodeForCXXOperator(TypeTableInfo &, const FunctionDecl *FD) {
   assert(FD->getOverloadedOperator() != OO_None);
   const auto opName = getOperatorString(FD);
   auto opNode = xmlNewNode(nullptr, BAD_CAST "name");
@@ -109,10 +77,7 @@ makeNameNodeForCXXOperator(TypeTableInfo&, const FunctionDecl* FD) {
 }
 
 xmlNodePtr
-makeNameNodeForCXXMethodDecl(
-    TypeTableInfo& TTI,
-    const CXXMethodDecl* MD)
-{
+makeNameNodeForCXXMethodDecl(TypeTableInfo &TTI, const CXXMethodDecl *MD) {
   // Assume `MD` is not an overloaded operator.
   // (makeNameNodeForCXXOperator handles them)
   using NK = clang::DeclarationName::NameKind;
@@ -138,10 +103,7 @@ makeNameNodeForCXXMethodDecl(
 } // namespace
 
 xmlNodePtr
-makeNameNode(
-    TypeTableInfo& TTI,
-    const NamedDecl* ND)
-{
+makeNameNode(TypeTableInfo &TTI, const NamedDecl *ND) {
   xmlNodePtr node = nullptr;
   using NK = clang::DeclarationName::NameKind;
   if (ND->getDeclName().getNameKind() == NK::CXXOperatorName) {
@@ -153,57 +115,38 @@ makeNameNode(
     node = makeNameNodeForCXXMethodDecl(TTI, MD);
   } else {
     node = xmlNewNode(nullptr, BAD_CAST "name");
-    xmlNodeSetContent(node, BAD_CAST (ND->getNameAsString().c_str()));
+    xmlNodeSetContent(node, BAD_CAST(ND->getNameAsString().c_str()));
   }
 
-  xmlNewProp(
-      node,
-      BAD_CAST "name_kind",
-      BAD_CAST getNameKind(ND));
-  xmlNewProp(
-      node,
+  xmlNewProp(node, BAD_CAST "name_kind", BAD_CAST getNameKind(ND));
+  xmlNewProp(node,
       BAD_CAST "fullName",
       BAD_CAST ND->getQualifiedNameAsString().c_str());
   if (ND->isLinkageValid()) {
-    const auto FL = ND->getFormalLinkage(),
-               LI = ND->getLinkageInternal();
-    xmlNewProp(
-        node,
-        BAD_CAST "linkage",
-        BAD_CAST stringifyLinkage(FL));
+    const auto FL = ND->getFormalLinkage(), LI = ND->getLinkageInternal();
+    xmlNewProp(node, BAD_CAST "linkage", BAD_CAST stringifyLinkage(FL));
     if (FL != LI) {
-      xmlNewProp(
-          node,
+      xmlNewProp(node,
           BAD_CAST "clang_linkage_internal",
           BAD_CAST stringifyLinkage(LI));
     }
   } else {
     // should not be executed
-    xmlNewProp(
-        node,
-        BAD_CAST "clang_has_invalid_linkage",
-        BAD_CAST "true");
+    xmlNewProp(node, BAD_CAST "clang_has_invalid_linkage", BAD_CAST "true");
   }
 
   return node;
 }
 
 xmlNodePtr
-makeNameNode(
-    TypeTableInfo& TTI,
-    const DeclRefExpr* DRE)
-{
+makeNameNode(TypeTableInfo &TTI, const DeclRefExpr *DRE) {
   return makeNameNode(TTI, DRE->getFoundDecl());
 }
 
 xmlNodePtr
-makeIdNodeForCXXMethodDecl(
-    TypeTableInfo& TTI,
-    const CXXMethodDecl* method)
-{
+makeIdNodeForCXXMethodDecl(TypeTableInfo &TTI, const CXXMethodDecl *method) {
   auto idNode = xmlNewNode(nullptr, BAD_CAST "id");
-  xmlNewProp(
-      idNode,
+  xmlNewProp(idNode,
       BAD_CAST "type",
       BAD_CAST TTI.getTypeName(method->getType()).c_str());
   auto nameNode = makeNameNode(TTI, method);
@@ -212,13 +155,9 @@ makeIdNodeForCXXMethodDecl(
 }
 
 xmlNodePtr
-makeIdNodeForFieldDecl(
-    TypeTableInfo& TTI,
-    const FieldDecl* field)
-{
+makeIdNodeForFieldDecl(TypeTableInfo &TTI, const FieldDecl *field) {
   auto idNode = xmlNewNode(nullptr, BAD_CAST "id");
-  xmlNewProp(
-      idNode,
+  xmlNewProp(idNode,
       BAD_CAST "type",
       BAD_CAST TTI.getTypeName(field->getType()).c_str());
   const auto fieldName = field->getIdentifier();

@@ -2,4 +2,4 @@ class A {
   class B;
 };
 
-class A::B { };
+class A::B {};

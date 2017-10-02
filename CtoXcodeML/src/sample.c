@@ -11,16 +11,15 @@ complex_t complex_add(complex_t x, double y);
 
 struct opaque *opaque_creator();
 
-main()
-{
+main() {
   complex_t z;
 
   x.real = 1.0;
   x.img = 2.0;
 
-  z = complex_add(x,1.0);
+  z = complex_add(x, 1.0);
 
-  printf("z=<%f,%f>\n",z.real,z.img);
+  printf("z=<%f,%f>\n", z.real, z.img);
 }
 
 typedef struct dummy {
@@ -29,14 +28,14 @@ typedef struct dummy {
   double dummy_double;
 } dummy_t;
 
-complex_t complex_add(complex_t x, double y)
-{
+complex_t
+complex_add(complex_t x, double y) {
   x.real += y;
   return x;
 }
 
-int iftest(int x, int y)
-{
+int
+iftest(int x, int y) {
   for (int i = 0; i < 10; i++) {
     if (x < y) {
       return (x + y) * 3;
@@ -46,25 +45,38 @@ int iftest(int x, int y)
   }
 }
 
-double get_real(complex_t *p)
-{
+double
+get_real(complex_t *p) {
   return p->real;
 }
 
-int compoundstmtdecls(int x)
-{
+int
+compoundstmtdecls(int x) {
   int i = x + 1;
   printf("%d\n", i);
   int j = x + 2;
   printf("%d\n", j);
   int k = i + j;
-  return ({static int tmp[10]; tmp[k % 10] = i; tmp[j];});
+  return ({
+    static int tmp[10];
+    tmp[k % 10] = i;
+    tmp[j];
+  });
 }
 
 enum color {
-  black, brown, red, orange, yellow, green, blue, purple, grey, white
+  black,
+  brown,
+  red,
+  orange,
+  yellow,
+  green,
+  blue,
+  purple,
+  grey,
+  white
 };
-  
+
 union aho {
   int i[2];
   double d;
@@ -76,8 +88,8 @@ union aho baka[10];
 typedef __builtin_va_list va_list;
 typedef __builtin_va_list __gnuc_va_list;
 
-int gototest(int x, ...)
-{
+int
+gototest(int x, ...) {
   va_list va;
 
   __builtin_va_start(va, x);
@@ -91,14 +103,15 @@ int gototest(int x, ...)
   goto *p;
   ;
   ;
- end:
+end:
   return 1024;
- hoge:
- moge: return -1;
- hunya:;
+hoge:
+moge:
+  return -1;
+hunya:;
 }
 
-int funcptrtest(int (*fp)(int), int x)
-{
+int
+funcptrtest(int (*fp)(int), int x) {
   return (*fp)(x);
 }

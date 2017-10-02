@@ -7,24 +7,26 @@
 using namespace clang;
 using namespace llvm;
 
-static cl::opt<bool>
-OptTraceSymbols("trace-symbols",
-                cl::desc("emit traces on <globalSymbols>, <symbols>"),
-                cl::cat(C2XcodeMLCategory));
-static cl::opt<bool>
-OptDisableSymbols("disable-symbols",
-                  cl::desc("disable <globalSymbols>, <symbols>"),
-                  cl::cat(C2XcodeMLCategory));
+static cl::opt<bool> OptTraceSymbols("trace-symbols",
+    cl::desc("emit traces on <globalSymbols>, <symbols>"),
+    cl::cat(C2XcodeMLCategory));
+static cl::opt<bool> OptDisableSymbols("disable-symbols",
+    cl::desc("disable <globalSymbols>, <symbols>"),
+    cl::cat(C2XcodeMLCategory));
 
-#define ND(mes) do {newComment(mes); return false;} while (0)
-#define NDeclName(mes) do {                                     \
-    newComment(mes);                                            \
-    newChild("name", nameString);                               \
-    return true;                                                \
+#define ND(mes)                                                               \
+  do {                                                                        \
+    newComment(mes);                                                          \
+    return false;                                                             \
+  } while (0)
+#define NDeclName(mes)                                                        \
+  do {                                                                        \
+    newComment(mes);                                                          \
+    newChild("name", nameString);                                             \
+    return true;                                                              \
   } while (0)
 
 std::string NAttr(std::string mes);
-
 
 const char *
 SymbolsVisitor::getVisitorName() const {
@@ -79,38 +81,38 @@ SymbolsVisitor::PreVisitDecl(Decl *D) {
     return false;
   }
 
-  HookForAttr = [this](Attr *A){
-      newChild("gccAttributes");
-      HookForAttr = nullptr;
-      return TraverseAttr(A);
+  HookForAttr = [this](Attr *A) {
+    newChild("gccAttributes");
+    HookForAttr = nullptr;
+    return TraverseAttr(A);
   };
 
   switch (D->getKind()) {
   case Decl::AccessSpec: ND("Decl_AccessSpec");
   case Decl::Block: ND("Decl_Block");
   case Decl::Captured: ND("Decl_Captured");
-  case Decl::ClassScopeFunctionSpecialization: ND("Decl_ClassScopeFunctionSpecialization");
+  case Decl::ClassScopeFunctionSpecialization:
+    ND("Decl_ClassScopeFunctionSpecialization");
   case Decl::Empty: ND("Decl_Empty");
   case Decl::FileScopeAsm: ND("Decl_FileScopeAsm");
   case Decl::Friend: ND("Decl_Friend");
   case Decl::FriendTemplate: ND("Decl_FriendTemplate");
   case Decl::Import: ND("Decl_Import");
   case Decl::LinkageSpec: ND("Decl_LinkageSpec");
-  case Decl::Label:
-    {
-      LabelDecl *LD = dyn_cast<LabelDecl>(D);
-      newComment("Decl_Label");
-      newChild("id");
-      newProp("type", typetableinfo->getTypeNameForLabel().c_str());
-      newProp("sclass", "label");
-      if (LD) {
-        IdentifierInfo *II = LD->getDeclName().getAsIdentifierInfo();
-        if (II) {
-          addChild("name", II->getNameStart());
-        }
+  case Decl::Label: {
+    LabelDecl *LD = dyn_cast<LabelDecl>(D);
+    newComment("Decl_Label");
+    newChild("id");
+    newProp("type", typetableinfo->getTypeNameForLabel().c_str());
+    newProp("sclass", "label");
+    if (LD) {
+      IdentifierInfo *II = LD->getDeclName().getAsIdentifierInfo();
+      if (II) {
+        addChild("name", II->getNameStart());
       }
-      return false;
     }
+    return false;
+  }
   case Decl::Namespace: ND("Decl_Namespace");
   case Decl::NamespaceAlias: ND("Decl_NamespaceAlias");
   case Decl::ObjCCompatibleAlias: ND("Decl_ObjCCompatibleAlias");
@@ -126,100 +128,99 @@ SymbolsVisitor::PreVisitDecl(Decl *D) {
   case Decl::TypeAliasTemplate: ND("Decl_TypeAliasTemplate");
   case Decl::VarTemplate: ND("Decl_VarTemplate");
   case Decl::TemplateTemplateParm: ND("Decl_TemplateTemplateParm");
-  case Decl::Enum:
-    {
-      newComment("Decl_Enum");
-      EnumDecl *ED = dyn_cast<EnumDecl>(D);
-      if (!ED) {
-        return false;
-      }
-      xmlNodePtr origCur = curNode;
-      newChild("id");
-      QualType T(ED->getTypeForDecl(), 0);
-      newProp("type", typetableinfo->getTypeName(T).c_str());
-      newProp("sclass", "tagname");
-      if (ED) {
-        IdentifierInfo *II = ED->getDeclName().getAsIdentifierInfo();
-        if (II) {
-          addName(ED, II->getNameStart());
-        }
-      }
-      curNode = origCur;
-
-      HookForDecl = [this, ED](Decl *D){
-
-        if (D->getKind() == Decl::EnumConstant) {
-          EnumConstantDecl *ECD = dyn_cast<EnumConstantDecl>(D);
-          xmlNodePtr origCur = curNode;
-
-          newComment("Decl_EnumConstant");
-          newChild("id");
-          QualType T(ED->getTypeForDecl(), 0);
-          newProp("type", typetableinfo->getTypeName(T).c_str());
-          newProp("sclass", "moe");
-          if (ECD) {
-            IdentifierInfo *II = ECD->getDeclName().getAsIdentifierInfo();
-            if (II) {
-              addName(ECD, II->getNameStart());
-            }
-          }
-          curNode = origCur;
-          return true;
-        } else {
-          return TraverseDecl(D);
-        }
-      };
-      return true; // traverse children
-    }
-
-  case Decl::Record:
-    {
-      RecordDecl *RD = dyn_cast<RecordDecl>(D);
-      if (RD && !RD->isFirstDecl()) {
-        newComment("Decl_Record (not 1st)");
-        return false;
-      }
-      newComment("Decl_Record");
-      newChild("id");
-      if (RD) {
-        QualType T(RD->getTypeForDecl(), 0);
-        newProp("type", typetableinfo->getTypeName(T).c_str());
-      }
-      newProp("sclass", "tagname");
-      if (RD) {
-        IdentifierInfo *II = RD->getDeclName().getAsIdentifierInfo();
-        if (II) {
-          addName(RD, II->getNameStart());
-        }
-      }
+  case Decl::Enum: {
+    newComment("Decl_Enum");
+    EnumDecl *ED = dyn_cast<EnumDecl>(D);
+    if (!ED) {
       return false;
     }
+    xmlNodePtr origCur = curNode;
+    newChild("id");
+    QualType T(ED->getTypeForDecl(), 0);
+    newProp("type", typetableinfo->getTypeName(T).c_str());
+    newProp("sclass", "tagname");
+    if (ED) {
+      IdentifierInfo *II = ED->getDeclName().getAsIdentifierInfo();
+      if (II) {
+        addName(ED, II->getNameStart());
+      }
+    }
+    curNode = origCur;
+
+    HookForDecl = [this, ED](Decl *D) {
+
+      if (D->getKind() == Decl::EnumConstant) {
+        EnumConstantDecl *ECD = dyn_cast<EnumConstantDecl>(D);
+        xmlNodePtr origCur = curNode;
+
+        newComment("Decl_EnumConstant");
+        newChild("id");
+        QualType T(ED->getTypeForDecl(), 0);
+        newProp("type", typetableinfo->getTypeName(T).c_str());
+        newProp("sclass", "moe");
+        if (ECD) {
+          IdentifierInfo *II = ECD->getDeclName().getAsIdentifierInfo();
+          if (II) {
+            addName(ECD, II->getNameStart());
+          }
+        }
+        curNode = origCur;
+        return true;
+      } else {
+        return TraverseDecl(D);
+      }
+    };
+    return true; // traverse children
+  }
+
+  case Decl::Record: {
+    RecordDecl *RD = dyn_cast<RecordDecl>(D);
+    if (RD && !RD->isFirstDecl()) {
+      newComment("Decl_Record (not 1st)");
+      return false;
+    }
+    newComment("Decl_Record");
+    newChild("id");
+    if (RD) {
+      QualType T(RD->getTypeForDecl(), 0);
+      newProp("type", typetableinfo->getTypeName(T).c_str());
+    }
+    newProp("sclass", "tagname");
+    if (RD) {
+      IdentifierInfo *II = RD->getDeclName().getAsIdentifierInfo();
+      if (II) {
+        addName(RD, II->getNameStart());
+      }
+    }
+    return false;
+  }
   case Decl::CXXRecord: ND("Decl_CXXRecord");
-  case Decl::ClassTemplateSpecialization: ND("Decl_ClassTemplateSpecialization");
-  case Decl::ClassTemplatePartialSpecialization: ND("Decl_ClassTemplatePartialSpecialization");
+  case Decl::ClassTemplateSpecialization:
+    ND("Decl_ClassTemplateSpecialization");
+  case Decl::ClassTemplatePartialSpecialization:
+    ND("Decl_ClassTemplatePartialSpecialization");
   case Decl::TemplateTypeParm: ND("Decl_TemplateTypeParm");
   case Decl::TypeAlias: ND("Decl_TypeAlias");
-  case Decl::Typedef:
-    {
-      TypedefDecl *TD = dyn_cast<TypedefDecl>(D);
-      newComment("Decl_Typedef");
-      if (TD && TD->getUnderlyingType()->isBuiltinType()) {
-        return true; // do not emit this typedef
-      }
-      newChild("id");
-      if (TD) {
-        QualType T = TD->getUnderlyingType();
-        newProp("type", typetableinfo->getTypeName(T).c_str());
-      }
-      newProp("sclass", "typedef_name");
-      if (TD) {
-        IdentifierInfo *II = TD->getDeclName().getAsIdentifierInfo();
-        if (II) {
-          addName(TD, II->getNameStart());
-        }
-      }
-      return true;
+  case Decl::Typedef: {
+    TypedefDecl *TD = dyn_cast<TypedefDecl>(D);
+    newComment("Decl_Typedef");
+    if (TD && TD->getUnderlyingType()->isBuiltinType()) {
+      return true; // do not emit this typedef
     }
+    newChild("id");
+    if (TD) {
+      QualType T = TD->getUnderlyingType();
+      newProp("type", typetableinfo->getTypeName(T).c_str());
+    }
+    newProp("sclass", "typedef_name");
+    if (TD) {
+      IdentifierInfo *II = TD->getDeclName().getAsIdentifierInfo();
+      if (II) {
+        addName(TD, II->getNameStart());
+      }
+    }
+    return true;
+  }
   case Decl::UnresolvedUsingTypename: ND("Decl_UnresolvedUsingTypename");
   case Decl::Using: ND("Decl_Using");
   case Decl::UsingDirective: ND("Decl_UsingDirective");
@@ -236,8 +237,7 @@ SymbolsVisitor::PreVisitDecl(Decl *D) {
           APSInt Value;
           ASTContext &Ctx = mangleContext->getASTContext();
           BW = FD->getBitWidth();
-          if (dyn_cast<IntegerLiteral>(BW)
-              && BW->EvaluateAsInt(Value, Ctx)) {
+          if (dyn_cast<IntegerLiteral>(BW) && BW->EvaluateAsInt(Value, Ctx)) {
             newProp("bit_field", Value.toString(10).c_str());
             BW = nullptr;
           } else {
@@ -254,7 +254,8 @@ SymbolsVisitor::PreVisitDecl(Decl *D) {
           addName(FD, II->getNameStart());
         }
         if (BW) {
-          DeclarationsVisitor DV(mangleContext, curNode, "bitField", typetableinfo); 
+          DeclarationsVisitor DV(
+              mangleContext, curNode, "bitField", typetableinfo);
           DV.TraverseStmt(BW);
         }
       }
@@ -266,119 +267,115 @@ SymbolsVisitor::PreVisitDecl(Decl *D) {
   case Decl::CXXMethod:
   case Decl::CXXConstructor:
   case Decl::CXXConversion:
-  case Decl::CXXDestructor:
-    {
-      FunctionDecl *FD = dyn_cast<FunctionDecl>(D);
-      if (!FD->isFirstDecl()) {
-        newComment("Decl_Function: not 1st");
-        IdentifierInfo *II = FD->getDeclName().getAsIdentifierInfo();
-        if (II) {
-          newComment(II->getNameStart());
-        }
-        return false;
-      }
-      newComment("Decl_Function");
-      newChild("id");
-
-      OverloadedOperatorKind OK = FD->getDeclName().getCXXOverloadedOperator();
-      if (OK != OO_None) {
-        newComment("Decl_CXXOperator");
-        bool is_member_function = FD->getKind() != Decl::Function;
-        unsigned param_size = FD->param_size() + (is_member_function? 1:0);
-        xmlNodePtr opNode = addChild(
-            "operator",
-            OverloadedOperatorKindToString(OK, param_size).c_str()
-        );
-        std::string full_name = FD->getQualifiedNameAsString();
-        newProp("fullName", full_name.c_str(), opNode);
-      }
-
-      if (FD) {
-        QualType T = FD->getType();
-        newProp("type", typetableinfo->getTypeName(T).c_str());
-      }
-      newProp("sclass", "extern_def");
-
-      CXXMethodDecl *MD = dyn_cast<CXXMethodDecl>(D);
-      if (MD) {
-        newProp("access", AccessSpec(MD->getAccess()).c_str());
-      }
-
-      if (FD) {
-        IdentifierInfo *II = FD->getDeclName().getAsIdentifierInfo();
-        if (II) {
-          addName(FD, II->getNameStart());
-        }
+  case Decl::CXXDestructor: {
+    FunctionDecl *FD = dyn_cast<FunctionDecl>(D);
+    if (!FD->isFirstDecl()) {
+      newComment("Decl_Function: not 1st");
+      IdentifierInfo *II = FD->getDeclName().getAsIdentifierInfo();
+      if (II) {
+        newComment(II->getNameStart());
       }
       return false;
     }
+    newComment("Decl_Function");
+    newChild("id");
+
+    OverloadedOperatorKind OK = FD->getDeclName().getCXXOverloadedOperator();
+    if (OK != OO_None) {
+      newComment("Decl_CXXOperator");
+      bool is_member_function = FD->getKind() != Decl::Function;
+      unsigned param_size = FD->param_size() + (is_member_function ? 1 : 0);
+      xmlNodePtr opNode = addChild(
+          "operator", OverloadedOperatorKindToString(OK, param_size).c_str());
+      std::string full_name = FD->getQualifiedNameAsString();
+      newProp("fullName", full_name.c_str(), opNode);
+    }
+
+    if (FD) {
+      QualType T = FD->getType();
+      newProp("type", typetableinfo->getTypeName(T).c_str());
+    }
+    newProp("sclass", "extern_def");
+
+    CXXMethodDecl *MD = dyn_cast<CXXMethodDecl>(D);
+    if (MD) {
+      newProp("access", AccessSpec(MD->getAccess()).c_str());
+    }
+
+    if (FD) {
+      IdentifierInfo *II = FD->getDeclName().getAsIdentifierInfo();
+      if (II) {
+        addName(FD, II->getNameStart());
+      }
+    }
+    return false;
+  }
   case Decl::MSProperty: ND("Decl_MSProperty");
   case Decl::NonTypeTemplateParm: ND("Decl_NonTypeTemplateParm");
-  case Decl::Var:
-    {
-      VarDecl *VD = dyn_cast<VarDecl>(D);
-      const char *sclass;
+  case Decl::Var: {
+    VarDecl *VD = dyn_cast<VarDecl>(D);
+    const char *sclass;
 
-      newComment("Decl_Var");
-      newChild("id");
-      if (VD) {
-        QualType T = VD->getType();
-        newProp("type", typetableinfo->getTypeName(T).c_str());
-      }
-      switch (VD->getStorageClass()) {
-      case SC_None:
-        switch (VD->getStorageDuration()) {
-        case SD_FullExpression: sclass = "auto"; break;
-        case SD_Automatic: sclass = "auto"; break;
-        case SD_Thread: sclass = "extern_def"; break; //???
-        case SD_Static: sclass = "extern_def"; break; // maybe OK
-        case SD_Dynamic: sclass = "auto"; break; //???
-        }
-        break;
-      case SC_Extern: sclass = "extern_def"; break; // "extern"??
-      case SC_Static: sclass = "static"; break;
-      case SC_PrivateExtern: sclass = "extern"; break; //??
-      case SC_OpenCLWorkGroupLocal: sclass = "SC_OpenCLWorkGroupLocal"; break;
-      case SC_Auto: sclass = "auto"; break;
-      case SC_Register: sclass = "register"; break;
-      }
-      newProp("sclass", sclass);
-      if (VD) {
-        IdentifierInfo *II = VD->getDeclName().getAsIdentifierInfo();
-        if (!II) {
-          return true;
-        }
-        if (VD->isLocalVarDecl()) {
-          addChild("name", II->getNameStart());
-        } else {
-          addName(VD, II->getNameStart());
-        }
-      }
-      return true;
+    newComment("Decl_Var");
+    newChild("id");
+    if (VD) {
+      QualType T = VD->getType();
+      newProp("type", typetableinfo->getTypeName(T).c_str());
     }
+    switch (VD->getStorageClass()) {
+    case SC_None:
+      switch (VD->getStorageDuration()) {
+      case SD_FullExpression: sclass = "auto"; break;
+      case SD_Automatic: sclass = "auto"; break;
+      case SD_Thread: sclass = "extern_def"; break; //???
+      case SD_Static: sclass = "extern_def"; break; // maybe OK
+      case SD_Dynamic: sclass = "auto"; break; //???
+      }
+      break;
+    case SC_Extern: sclass = "extern_def"; break; // "extern"??
+    case SC_Static: sclass = "static"; break;
+    case SC_PrivateExtern: sclass = "extern"; break; //??
+    case SC_OpenCLWorkGroupLocal: sclass = "SC_OpenCLWorkGroupLocal"; break;
+    case SC_Auto: sclass = "auto"; break;
+    case SC_Register: sclass = "register"; break;
+    }
+    newProp("sclass", sclass);
+    if (VD) {
+      IdentifierInfo *II = VD->getDeclName().getAsIdentifierInfo();
+      if (!II) {
+        return true;
+      }
+      if (VD->isLocalVarDecl()) {
+        addChild("name", II->getNameStart());
+      } else {
+        addName(VD, II->getNameStart());
+      }
+    }
+    return true;
+  }
   case Decl::ImplicitParam: ND("Decl_ImplicitParam");
-  case Decl::ParmVar:
-    {
-      ParmVarDecl *PVD = dyn_cast<ParmVarDecl>(D);
+  case Decl::ParmVar: {
+    ParmVarDecl *PVD = dyn_cast<ParmVarDecl>(D);
 
-      newComment("Decl_ParmVar");
-      newChild("id");
-      if (PVD) {
-        QualType T = PVD->getType();
-        newProp("type", typetableinfo->getTypeName(T).c_str());
-      }
-      newProp("sclass", "param");
-      if (PVD) {
-        IdentifierInfo *II = PVD->getDeclName().getAsIdentifierInfo();
-        if (II) {
-          addChild("name", II->getNameStart());
-        }
-      }
-      return false;
-      //return true;
+    newComment("Decl_ParmVar");
+    newChild("id");
+    if (PVD) {
+      QualType T = PVD->getType();
+      newProp("type", typetableinfo->getTypeName(T).c_str());
     }
+    newProp("sclass", "param");
+    if (PVD) {
+      IdentifierInfo *II = PVD->getDeclName().getAsIdentifierInfo();
+      if (II) {
+        addChild("name", II->getNameStart());
+      }
+    }
+    return false;
+    // return true;
+  }
   case Decl::VarTemplateSpecialization: ND("Decl_VarTemplateSpecialization");
-  case Decl::VarTemplatePartialSpecialization: ND("Decl_VarTemplatePartialSpecialization");
+  case Decl::VarTemplatePartialSpecialization:
+    ND("Decl_VarTemplatePartialSpecialization");
   case Decl::EnumConstant:
     // this is called from TypeTable (not from SymbolsVisitor's Decl::Enum)
     {

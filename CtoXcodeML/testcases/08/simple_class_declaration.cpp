@@ -1,6 +1,7 @@
 class A {
   int x;
-  void f() {
+  void
+  f() {
     return;
   }
   int operator*() {

@@ -1,3 +1,4 @@
-int return_the_answer() {
+int
+return_the_answer() {
   return 42;
 }

@@ -7,7 +7,8 @@ A operator+=(A a, int x) {
   return a;
 }
 
-void f() {
+void
+f() {
   A a = {0};
   a += 3;
 }

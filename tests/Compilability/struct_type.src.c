@@ -12,5 +12,3 @@ struct C {
   double d;
   int i;
 };
-
-

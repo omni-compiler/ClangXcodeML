@@ -14,48 +14,40 @@
 #include "XMLString.h"
 #include "XMLWalker.h"
 
-using NnsAnalyzer = XMLWalker<
-  void,
-  xmlXPathContextPtr,
-  XcodeMl::NnsMap&>;
+using NnsAnalyzer = XMLWalker<void, xmlXPathContextPtr, XcodeMl::NnsMap &>;
 
-#define NA_ARGS const NnsAnalyzer& w __attribute__((unused)), \
-                xmlNodePtr node __attribute__((unused)), \
-                xmlXPathContextPtr ctxt __attribute__((unused)), \
-                XcodeMl::NnsMap & map __attribute__((unused))
+#define NA_ARGS                                                               \
+  const NnsAnalyzer &w __attribute__((unused)),                               \
+      xmlNodePtr node __attribute__((unused)),                                \
+      xmlXPathContextPtr ctxt __attribute__((unused)),                        \
+      XcodeMl::NnsMap &map __attribute__((unused))
 
 #define DEFINE_NA(name) static void name(NA_ARGS)
 
 DEFINE_NA(classNnsProc) {
   const auto name = getProp(node, "nns");
   const auto type = getProp(node, "type");
-  map[name] = XcodeMl::makeClassNns(
-      name,
-      type);
+  map[name] = XcodeMl::makeClassNns(name, type);
 }
 
 const XcodeMl::NnsMap initialNnsMap = {
-  { "global", XcodeMl::makeGlobalNns() },
+    {"global", XcodeMl::makeGlobalNns()},
 };
 
-const NnsAnalyzer XcodeMLNNSAnalyzer(
-"NnsAnalyzer",
-{
-  { "classNNS", classNnsProc },
-});
+const NnsAnalyzer XcodeMLNNSAnalyzer("NnsAnalyzer",
+    {
+        {"classNNS", classNnsProc},
+    });
 
 XcodeMl::NnsMap
-analyzeNnsTable(
-    xmlNodePtr nnsTable,
-    xmlXPathContextPtr ctxt)
-{
+analyzeNnsTable(xmlNodePtr nnsTable, xmlXPathContextPtr ctxt) {
   if (nnsTable == nullptr) {
     return initialNnsMap;
   }
 
   XcodeMl::NnsMap map = initialNnsMap;
   auto nnsNodes = findNodes(nnsTable, "*", ctxt);
-  for (auto&& nnsNode : nnsNodes) {
+  for (auto &&nnsNode : nnsNodes) {
     XcodeMLNNSAnalyzer.walk(nnsNode, ctxt, map);
   }
   return map;

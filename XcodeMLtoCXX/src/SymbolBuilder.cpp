@@ -30,10 +30,11 @@ using CXXCodeGen::makeTokenNode;
 using CXXCodeGen::makeVoidNode;
 using CXXCodeGen::separateByBlankLines;
 
-using SymbolBuilder = AttrProc<StringTreeRef, SourceInfo&>;
+using SymbolBuilder = AttrProc<StringTreeRef, SourceInfo &>;
 
-#define SB_ARGS xmlNodePtr node __attribute__((unused)), \
-                SourceInfo& src __attribute__((unused))
+#define SB_ARGS                                                               \
+  xmlNodePtr node __attribute__((unused)),                                    \
+      SourceInfo &src __attribute__((unused))
 
 #define DEFINE_SB(name) static StringTreeRef name(SB_ARGS)
 
@@ -47,17 +48,14 @@ DEFINE_SB(typedefNameProc) {
   }
   const auto alias = getNameFromIdNode(node, src.ctxt);
   const auto type = src.typeTable.at(getProp(node, "type"));
-  return
-    makeTokenNode("typedef") +
-    makeDecl(type, makeTokenNode(alias), src.typeTable) +
-    makeTokenNode(";");
+  return makeTokenNode("typedef")
+      + makeDecl(type, makeTokenNode(alias), src.typeTable)
+      + makeTokenNode(";");
 }
 
-static StringTreeRef emitStructDefinition(
-    const SourceInfo& src,
-    const XcodeMl::TypeRef type
-) {
-  XcodeMl::Struct* structType = llvm::cast<XcodeMl::Struct>(type.get());
+static StringTreeRef
+emitStructDefinition(const SourceInfo &src, const XcodeMl::TypeRef type) {
+  XcodeMl::Struct *structType = llvm::cast<XcodeMl::Struct>(type.get());
   return structType->makeStructDefinition(src.typeTable);
 }
 
@@ -67,19 +65,14 @@ DEFINE_SB(tagnameProc) {
   return emitStructDefinition(src, type);
 }
 
-const SymbolBuilder CXXSymbolBuilder(
-    "sclass",
+const SymbolBuilder CXXSymbolBuilder("sclass",
     makeInnerNode,
     NullProc,
     {
-      { "typedef_name", typedefNameProc },
-      { "tagname", tagnameProc },
+        {"typedef_name", typedefNameProc}, {"tagname", tagnameProc},
     });
 
-StringTreeRef buildSymbols(
-    xmlNodePtr node,
-    SourceInfo& src
-) {
-  return separateByBlankLines(
-      CXXSymbolBuilder.walkAll(node, src));
+StringTreeRef
+buildSymbols(xmlNodePtr node, SourceInfo &src) {
+  return separateByBlankLines(CXXSymbolBuilder.walkAll(node, src));
 }

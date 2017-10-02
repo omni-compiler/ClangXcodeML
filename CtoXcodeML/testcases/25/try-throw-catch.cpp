@@ -2,7 +2,8 @@ struct A {
   int x;
 };
 
-int main() {
+int
+main() {
   try {
     A a;
     throw a;

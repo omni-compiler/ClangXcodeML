@@ -1,3 +1,4 @@
-void f() {
+void
+f() {
   int i = 1;
 }

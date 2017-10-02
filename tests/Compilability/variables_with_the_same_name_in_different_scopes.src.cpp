@@ -1,13 +1,14 @@
-void f() {
+void
+f() {
   int i = 0;
-  {
-    long i = 0;
-  }
+  { long i = 0; }
 }
 
-void g() {
+void
+g() {
   int g = 0;
 }
 
-void h(int g) {
+void
+h(int g) {
 }

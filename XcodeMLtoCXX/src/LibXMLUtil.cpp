@@ -16,9 +16,9 @@
 #include "XMLString.h"
 
 static xmlXPathObjectPtr getNodeSet(
-    xmlNodePtr, const char*, xmlXPathContextPtr);
+    xmlNodePtr, const char *, xmlXPathContextPtr);
 
-void XPathObjectReleaser::operator() (xmlXPathObjectPtr ptr) {
+void XPathObjectReleaser::operator()(xmlXPathObjectPtr ptr) {
   xmlXPathFreeObject(ptr);
 }
 
@@ -30,7 +30,9 @@ void XPathObjectReleaser::operator() (xmlXPathObjectPtr ptr) {
  * \return nullptr if any element in \c node doesn't match \c xpathExpr
  * \return The first element that matches \c xpathExpr.
  */
-xmlNodePtr findFirst(xmlNodePtr node, const char* xpathExpr, xmlXPathContextPtr xpathCtxt) {
+xmlNodePtr
+findFirst(
+    xmlNodePtr node, const char *xpathExpr, xmlXPathContextPtr xpathCtxt) {
   assert(node);
   xmlXPathObjectPtr xpathObj = getNodeSet(node, xpathExpr, xpathCtxt);
   if (!xpathObj) {
@@ -41,19 +43,21 @@ xmlNodePtr findFirst(xmlNodePtr node, const char* xpathExpr, xmlXPathContextPtr 
   return val;
 }
 
-size_t length(xmlXPathObjectPtr obj) {
-  return (obj->nodesetval)? obj->nodesetval->nodeNr:0;
+size_t
+length(xmlXPathObjectPtr obj) {
+  return (obj->nodesetval) ? obj->nodesetval->nodeNr : 0;
 }
 
-xmlNodePtr nth(xmlXPathObjectPtr obj, size_t n) {
+xmlNodePtr
+nth(xmlXPathObjectPtr obj, size_t n) {
   return obj->nodesetval->nodeTab[n];
 }
 
-std::string getProp(xmlNodePtr node, const std::string& attr) {
+std::string
+getProp(xmlNodePtr node, const std::string &attr) {
   const auto value = getPropOrNull(node, attr);
   if (!value.hasValue()) {
-    std::cerr << "getProp: "
-      << attr << " not found" << std::endl;
+    std::cerr << "getProp: " << attr << " not found" << std::endl;
     xmlDebugDumpNode(stderr, node, 0);
     std::abort();
   }
@@ -61,7 +65,7 @@ std::string getProp(xmlNodePtr node, const std::string& attr) {
 }
 
 llvm::Optional<std::string>
-getPropOrNull(xmlNodePtr node, const std::string& attr) {
+getPropOrNull(xmlNodePtr node, const std::string &attr) {
   using MaybeString = llvm::Optional<std::string>;
   const auto ptr = xmlGetProp(node, BAD_CAST attr.c_str());
   if (!ptr) {
@@ -88,7 +92,8 @@ getName(xmlNodePtr node) {
   return static_cast<XMLString>(node->name);
 }
 
-bool isTrueProp(xmlNodePtr node, const char* name, bool default_value) {
+bool
+isTrueProp(xmlNodePtr node, const char *name, bool default_value) {
   if (!xmlHasProp(node, BAD_CAST name)) {
     return default_value;
   }
@@ -101,11 +106,9 @@ bool isTrueProp(xmlNodePtr node, const char* name, bool default_value) {
   throw std::runtime_error("Invalid attribute value");
 }
 
-std::vector<xmlNodePtr> findNodes(
-    xmlNodePtr node,
-    const char* xpathExpr,
-    xmlXPathContextPtr xpathCtxt
-) {
+std::vector<xmlNodePtr>
+findNodes(
+    xmlNodePtr node, const char *xpathExpr, xmlXPathContextPtr xpathCtxt) {
   xmlXPathObjectPtr xpathObj = getNodeSet(node, xpathExpr, xpathCtxt);
   if (!xpathObj) {
     return {};
@@ -120,10 +123,8 @@ std::vector<xmlNodePtr> findNodes(
   return nodes;
 }
 
-std::string getNameFromIdNode(
-    xmlNodePtr idNode,
-    xmlXPathContextPtr ctxt
-) {
+std::string
+getNameFromIdNode(xmlNodePtr idNode, xmlXPathContextPtr ctxt) {
   if (!idNode) {
     throw std::domain_error("expected id node, but got null");
   }
@@ -134,10 +135,8 @@ std::string getNameFromIdNode(
   return static_cast<XMLString>(xmlNodeGetContent(nameNode));
 }
 
-llvm::Optional<std::string> getNameFromIdNodeOrNull(
-    xmlNodePtr idNode,
-    xmlXPathContextPtr ctxt)
-{
+llvm::Optional<std::string>
+getNameFromIdNodeOrNull(xmlNodePtr idNode, xmlXPathContextPtr ctxt) {
   using MaybeString = llvm::Optional<std::string>;
   if (!idNode) {
     throw std::domain_error("expected id node, but got null");
@@ -150,21 +149,18 @@ llvm::Optional<std::string> getNameFromIdNodeOrNull(
   return MaybeString(str);
 }
 
-bool isNaturalNumber(const std::string& prop) {
+bool
+isNaturalNumber(const std::string &prop) {
   return std::all_of(prop.begin(), prop.end(), isdigit);
 }
 
-static xmlXPathObjectPtr getNodeSet(
-    xmlNodePtr node,
-    const char* xpathExpr,
-    xmlXPathContextPtr xpathCtxt
-) {
+static xmlXPathObjectPtr
+getNodeSet(
+    xmlNodePtr node, const char *xpathExpr, xmlXPathContextPtr xpathCtxt) {
   assert(node && xpathExpr);
   xmlXPathSetContextNode(node, xpathCtxt);
-  xmlXPathObjectPtr xpathObj = xmlXPathNodeEval(
-      node,
-      BAD_CAST xpathExpr,
-      xpathCtxt);
+  xmlXPathObjectPtr xpathObj =
+      xmlXPathNodeEval(node, BAD_CAST xpathExpr, xpathCtxt);
   if (!xpathObj) {
     return nullptr;
   }
@@ -175,4 +171,3 @@ static xmlXPathObjectPtr getNodeSet(
   }
   return xpathObj;
 }
-

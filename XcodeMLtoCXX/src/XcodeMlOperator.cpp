@@ -13,49 +13,48 @@
 
 #include "XcodeMlOperator.h"
 
-const std::map<std::string, std::string>
-opMap = {
-  {"plusExpr", "+"},
-  {"minusExpr", "-"},
-  {"mulExpr", "*"},
-  {"divExpr", "/"},
-  {"modExpr", "%"},
-  {"LshiftExpr", "<<"},
-  {"RshiftExpr", ">>"},
-  {"bitAndExpr", "&"},
-  {"bitOrExpr", "|"},
-  {"bitXorExpr", "^"},
+const std::map<std::string, std::string> opMap = {
+    {"plusExpr", "+"},
+    {"minusExpr", "-"},
+    {"mulExpr", "*"},
+    {"divExpr", "/"},
+    {"modExpr", "%"},
+    {"LshiftExpr", "<<"},
+    {"RshiftExpr", ">>"},
+    {"bitAndExpr", "&"},
+    {"bitOrExpr", "|"},
+    {"bitXorExpr", "^"},
 
-  {"assignExpr", "="},
-  {"asgPlusExpr", "+="},
-  {"asgMinusExpr", "-="},
-  {"asgMulExpr", "*="},
-  {"asgDivExpr", "/="},
-  {"asgModExpr", "%="},
-  {"asgLshiftExpr", "<<="},
-  {"asgRshiftExpr", ">>="},
-  {"asgBitAndExpr", "&="},
-  {"asgBitOrExpr", "|="},
-  {"asgBitXorExpr", "^="},
+    {"assignExpr", "="},
+    {"asgPlusExpr", "+="},
+    {"asgMinusExpr", "-="},
+    {"asgMulExpr", "*="},
+    {"asgDivExpr", "/="},
+    {"asgModExpr", "%="},
+    {"asgLshiftExpr", "<<="},
+    {"asgRshiftExpr", ">>="},
+    {"asgBitAndExpr", "&="},
+    {"asgBitOrExpr", "|="},
+    {"asgBitXorExpr", "^="},
 
-  {"logEQExpr", "=="},
-  {"logNEQExpr", "!="},
-  {"logGEExpr", ">="},
-  {"logGTExpr", ">"},
-  {"logLEExpr", "<="},
-  {"logLTExpr", "<"},
-  {"logAndExpr", "&&"},
-  {"logOrExpr", "||"},
-  {"newExpr", "new"},
-  {"newArrayExpr", "new[]"},
-  {"deleteExpr", "delete"},
-  {"deleteArrayExpr", "delete[]"},
+    {"logEQExpr", "=="},
+    {"logNEQExpr", "!="},
+    {"logGEExpr", ">="},
+    {"logGTExpr", ">"},
+    {"logLEExpr", "<="},
+    {"logLTExpr", "<"},
+    {"logAndExpr", "&&"},
+    {"logOrExpr", "||"},
+    {"newExpr", "new"},
+    {"newArrayExpr", "new[]"},
+    {"deleteExpr", "delete"},
+    {"deleteArrayExpr", "delete[]"},
 };
 
 namespace XcodeMl {
 
 llvm::Optional<std::string>
-OperatorNameToSpelling(const std::string& opName) {
+OperatorNameToSpelling(const std::string &opName) {
   return getOrNull(opMap, opName);
 }
 
@@ -66,9 +65,8 @@ makeOpNode(xmlNodePtr operatorNode) {
   if (!op.hasValue()) {
     const auto lineno = xmlGetLineNo(operatorNode);
     assert(lineno >= 0);
-    std::cerr
-      << "Unknown operator name: '" << opName << "'" << std::endl
-      << "lineno: " << lineno  << std::endl;
+    std::cerr << "Unknown operator name: '" << opName << "'" << std::endl
+              << "lineno: " << lineno << std::endl;
     xmlDebugDumpNode(stderr, operatorNode, 0);
     std::abort();
   }

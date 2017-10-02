@@ -1,9 +1,11 @@
 class Base {
-  Base(int) { }
+  Base(int) {
+  }
 };
 
 class Derived : public Base {
 public:
-  Derived(int j): Base::Base(j), Base(j) { }
+  Derived(int j) : Base::Base(j), Base(j) {
+  }
   int Base;
 };

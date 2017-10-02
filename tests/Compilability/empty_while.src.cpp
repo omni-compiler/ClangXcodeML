@@ -1,3 +1,5 @@
-void f() {
-  while(1) { }
+void
+f() {
+  while (1) {
+  }
 }

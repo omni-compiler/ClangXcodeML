@@ -15,11 +15,13 @@ class UnqualId {
 public:
   UnqualId(UnqualIdKind);
   virtual ~UnqualId() = 0;
-  virtual UnqualId* clone() const = 0;
-  virtual CodeFragment toString(const Environment&) const = 0;
+  virtual UnqualId *clone() const = 0;
+  virtual CodeFragment toString(const Environment &) const = 0;
   UnqualIdKind getKind() const;
+
 protected:
-  UnqualId(const UnqualId&) = default;
+  UnqualId(const UnqualId &) = default;
+
 private:
   UnqualIdKind kind;
 };
@@ -35,39 +37,45 @@ private:
 
 class UIDIdent : public UnqualId {
 public:
-  UIDIdent(const std::string&);
+  UIDIdent(const std::string &);
   ~UIDIdent() override = default;
-  UnqualId* clone() const override;
-  CodeFragment toString(const Environment&) const override;
-  static bool classof(const UnqualId*);
+  UnqualId *clone() const override;
+  CodeFragment toString(const Environment &) const override;
+  static bool classof(const UnqualId *);
+
 protected:
-  UIDIdent(const UIDIdent&) = default;
+  UIDIdent(const UIDIdent &) = default;
+
 private:
   std::string ident;
 };
 
 class OpFuncId : public UnqualId {
 public:
-  OpFuncId(const std::string&);
+  OpFuncId(const std::string &);
   ~OpFuncId() override = default;
-  UnqualId* clone() const override;
-  CodeFragment toString(const Environment&) const override;
-  static bool classof(const UnqualId*);
+  UnqualId *clone() const override;
+  CodeFragment toString(const Environment &) const override;
+  static bool classof(const UnqualId *);
+
 protected:
-  OpFuncId(const OpFuncId&) = default;
+  OpFuncId(const OpFuncId &) = default;
+
 private:
   std::string opName;
 };
 
 class ConvFuncId : public UnqualId {
 public:
-  ConvFuncId(const DataTypeIdent&);
+  ConvFuncId(const DataTypeIdent &);
   ~ConvFuncId() override = default;
-  UnqualId* clone() const override;
-  CodeFragment toString(const Environment&) const override;
-  static bool classof(const UnqualId*);
+  UnqualId *clone() const override;
+  CodeFragment toString(const Environment &) const override;
+  static bool classof(const UnqualId *);
+
 protected:
-  ConvFuncId(const ConvFuncId&) = default;
+  ConvFuncId(const ConvFuncId &) = default;
+
 private:
   DataTypeIdent dtident;
 };

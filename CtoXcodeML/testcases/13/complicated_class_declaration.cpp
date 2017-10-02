@@ -2,7 +2,11 @@ class A {
   A() = default;
   A(A &a) = delete;
   virtual int f() = 0;
-  void g() { return; }
+  void
+  g() {
+    return;
+  }
+
 protected:
   const int x;
   static int a;
@@ -13,7 +17,8 @@ class B final : public A {
   int f() override;
 };
 
-int B::f() {
+int
+B::f() {
   return x;
 }
 

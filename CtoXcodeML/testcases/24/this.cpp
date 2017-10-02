@@ -1,5 +1,6 @@
 class A {
-  A self() {
+  A
+  self() {
     return *this;
   }
 };
