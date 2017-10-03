@@ -19,8 +19,6 @@ OBJS = XcodeMlType.o \
 	XMLString.o \
 	XcodeMlEnvironment.o \
 	StringTree.o \
-	SymbolBuilder.o \
-	SymbolAnalyzer.o \
 	ClangClassHandler.o \
 	XcodeMlName.o \
 	XcodeMlNns.o \
@@ -39,7 +37,6 @@ CodeBuilder.o: \
 	XcodeMlEnvironment.h \
 	NnsAnalyzer.o \
 	TypeAnalyzer.h \
-	Symbol.h \
 	CodeBuilder.h \
 	XMLWalker.h \
 	AttrProc.h \
@@ -47,8 +44,6 @@ CodeBuilder.o: \
 TypeAnalyzer.o: \
 	XMLString.h \
 	LibXMLUtil.h \
-	Symbol.h \
-	SymbolAnalyzer.h \
 	XcodeMlType.h \
 	XcodeMlEnvironment.h \
 	TypeAnalyzer.h \
@@ -59,7 +54,6 @@ XcodeMlNns.o: \
 	XcodeMlNns.h \
 	XcodeMlType.h
 XcodeMlType.o: \
-  Symbol.h \
 	TypeAnalyzer.h \
 	XcodeMlEnvironment.h
 
