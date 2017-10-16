@@ -114,4 +114,25 @@ CtorName::classof(const UnqualId *id) {
   return id->getKind() == UnqualIdKind::Ctor;
 }
 
+DtorName::DtorName(const DataTypeIdent &d)
+    : UnqualId(UnqualIdKind::Dtor), dtident(d) {
+}
+
+UnqualId *
+DtorName::clone() const {
+  auto copy = new DtorName(*this);
+  return copy;
+}
+
+CodeFragment
+DtorName::toString(const Environment &env) const {
+  const auto T = env.at(dtident);
+  return makeTokenNode("~") + T->makeDeclaration(makeVoidNode(), env);
+}
+
+bool
+DtorName::classof(const UnqualId *id) {
+  return id->getKind() == UnqualIdKind::Ctor;
+}
+
 } // namespace XcodeMl

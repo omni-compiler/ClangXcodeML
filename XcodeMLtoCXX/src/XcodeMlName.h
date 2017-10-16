@@ -98,6 +98,21 @@ private:
   DataTypeIdent dtident;
 };
 
+class DtorName : public UnqualId {
+public:
+  DtorName(const DataTypeIdent &);
+  ~DtorName() override = default;
+  UnqualId *clone() const override;
+  CodeFragment toString(const Environment &) const override;
+  static bool classof(const UnqualId *);
+
+protected:
+  DtorName(const DtorName &) = default;
+
+private:
+  DataTypeIdent dtident;
+};
+
 } // namespace XcodeMl
 
 #endif /*! XCODEMLNAME_H */
