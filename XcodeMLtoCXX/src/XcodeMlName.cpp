@@ -93,4 +93,25 @@ ConvFuncId::classof(const UnqualId *id) {
   return id->getKind() == UnqualIdKind::ConvFuncId;
 }
 
+CtorName::CtorName(const DataTypeIdent &d)
+    : UnqualId(UnqualIdKind::Ctor), dtident(d) {
+}
+
+UnqualId *
+CtorName::clone() const {
+  auto copy = new CtorName(*this);
+  return copy;
+}
+
+CodeFragment
+CtorName::toString(const Environment &env) const {
+  const auto T = env.at(dtident);
+  return T->makeDeclaration(makeVoidNode(), env);
+}
+
+bool
+CtorName::classof(const UnqualId *id) {
+  return id->getKind() == UnqualIdKind::Ctor;
+}
+
 } // namespace XcodeMl
