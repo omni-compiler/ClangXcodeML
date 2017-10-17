@@ -7,7 +7,6 @@
 #include "llvm/ADT/Optional.h"
 #include "llvm/Support/Casting.h"
 #include "StringTree.h"
-#include "Symbol.h"
 #include "XcodeMlType.h"
 #include "XcodeMlEnvironment.h"
 #include "XcodeMlType.h"
