@@ -232,8 +232,7 @@ const TypeAnalyzer XcodeMLTypeAnalyzer("TypeAnalyzer",
  * type identifiers to data types defined in it.
  */
 XcodeMl::Environment
-parseTypeTable(
-    xmlNodePtr rootNode, xmlXPathContextPtr xpathCtx, std::stringstream &) {
+parseTypeTable(xmlNodePtr, xmlXPathContextPtr xpathCtx, std::stringstream &) {
   xmlXPathObjectPtr xpathObj =
       xmlXPathEvalExpression(BAD_CAST "/XcodeProgram/typeTable/*", xpathCtx);
   if (xpathObj == nullptr) {
