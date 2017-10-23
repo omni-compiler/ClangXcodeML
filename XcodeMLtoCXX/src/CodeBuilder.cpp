@@ -288,6 +288,22 @@ DEFINE_CB(classDeclProc) {
 }
 
 XcodeMl::CodeFragment
+makeFunctionDeclHead(XcodeMl::Function *func,
+    const XcodeMl::Name &name,
+    const std::vector<XcodeMl::CodeFragment> &args,
+    const SourceInfo &src) {
+  const auto nameSpelling = name.toString(src.typeTable, src.nnsTable);
+  const auto pUnqualId = name.getUnqualId();
+  if (llvm::isa<XcodeMl::CtorName>(pUnqualId.get())
+      || llvm::isa<XcodeMl::DtorName>(pUnqualId.get())) {
+    return func->makeDeclarationWithoutReturnType(
+        nameSpelling, args, src.typeTable);
+  } else {
+    return func->makeDeclaration(nameSpelling, args, src.typeTable);
+  }
+}
+
+XcodeMl::CodeFragment
 makeFunctionDeclHead(xmlNodePtr node,
     const std::vector<XcodeMl::CodeFragment> args,
     const SourceInfo &src) {
