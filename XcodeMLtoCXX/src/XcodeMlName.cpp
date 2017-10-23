@@ -24,6 +24,13 @@ Name::Name(
     : id(id_), nns(nns_) {
 }
 
+CodeFragment
+Name::toString(const Environment &typeTable, const NnsMap &nnsTable) const {
+  assert(id);
+  return (nns ? nns->makeDeclaration(typeTable, nnsTable) : makeVoidNode())
+      + id->toString(typeTable);
+}
+
 UnqualId::UnqualId(UnqualIdKind k) : kind(k) {
 }
 
