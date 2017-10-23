@@ -5,9 +5,9 @@ namespace XcodeMl {
 class UnqualId;
 }
 
-std::shared_ptr<XcodeMl::UnqualId> getNameFromNameNode(xmlNodePtr idNode);
+std::shared_ptr<XcodeMl::UnqualId> getUnqualIdFromNameNode(xmlNodePtr idNode);
 
-std::shared_ptr<XcodeMl::UnqualId> getNameFromIdNode(
+std::shared_ptr<XcodeMl::UnqualId> getUnqualdFromIdNode(
     xmlNodePtr nameNode, xmlXPathContextPtr ctxt);
 
 #endif /* !XCODEMLUTIL_H */
