@@ -257,11 +257,7 @@ makeFunctionDeclHead(xmlNodePtr node,
   if (isInClassDecl(node, src) && isTrueProp(node, "is_static", false)) {
     acc = acc + makeTokenNode("static");
   }
-  acc = acc
-      + (kind == "constructor" || kind == "destructor" || kind == "conversion"
-                ? fnType->makeDeclarationWithoutReturnType(
-                      nameNode, args, src.typeTable)
-                : fnType->makeDeclaration(nameNode, args, src.typeTable));
+  acc = acc + makeFunctionDeclHead(fnType, name, args, src);
   return acc;
 }
 
