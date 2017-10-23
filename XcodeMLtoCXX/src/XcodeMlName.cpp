@@ -19,6 +19,11 @@ using CXXCodeGen::makeVoidNode;
 
 namespace XcodeMl {
 
+Name::Name(
+    const std::shared_ptr<UnqualId> &id_, const std::shared_ptr<Nns> &nns_)
+    : id(id_), nns(nns_) {
+}
+
 UnqualId::UnqualId(UnqualIdKind k) : kind(k) {
 }
 
