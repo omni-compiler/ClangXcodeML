@@ -74,16 +74,6 @@ getQualifiedNameFromNameNode(xmlNodePtr nameNode,
   return (*nns)->makeDeclaration(src.typeTable, src.nnsTable) + name;
 }
 
-XcodeMl::CodeFragment
-getQualifiedNameFromTypedNode(xmlNodePtr node, const SourceInfo &src) {
-  const auto name = getDeclNameFromTypedNode(node, src);
-  auto nameNode = findFirst(node, "name", src.ctxt);
-  const auto nns = getNns(src.nnsTable, nameNode);
-  if (!nns.hasValue()) {
-    return name;
-  }
-  return (*nns)->makeDeclaration(src.typeTable, src.nnsTable) + name;
-}
 
 XcodeMl::CodeFragment
 wrapWithLangLink(const XcodeMl::CodeFragment &content, xmlNodePtr node) {
