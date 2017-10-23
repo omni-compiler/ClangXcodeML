@@ -625,6 +625,23 @@ ClassType::ClassType(const DataTypeIdent &ident,
       classScopeSymbols(symbols) {
 }
 
+ClassType::ClassType(
+    const DataTypeIdent &ident, const ClassType::Symbols &symbols)
+    : Type(TypeKind::Class, ident),
+      name_(),
+      bases_(),
+      classScopeSymbols(symbols) {
+}
+
+ClassType::ClassType(const DataTypeIdent &ident,
+    const std::vector<BaseClass> &b,
+    const ClassType::Symbols &symbols)
+    : Type(TypeKind::Class, ident),
+      name_(),
+      bases_(b),
+      classScopeSymbols(symbols) {
+}
+
 CodeFragment
 ClassType::makeDeclaration(CodeFragment var, const Environment &) {
   assert(name_);
