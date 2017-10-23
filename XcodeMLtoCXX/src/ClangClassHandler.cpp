@@ -92,8 +92,11 @@ emitClassDefinition(xmlNodePtr node, const CodeBuilder &w, SourceInfo &src) {
        memberNode = xmlNextElementSibling(memberNode)) {
     const auto accessProp = getPropOrNull(memberNode, "access");
     if (!accessProp.hasValue()) {
-      return makeTokenNode("/* ignored a member with no access specifier */")
+      const auto decl =
+          makeTokenNode("/* ignored a member with no access specifier */")
           + cxxgen::makeNewLineNode();
+      decls.push_back(decl);
+      continue;
     }
     const auto access = *accessProp;
     const auto decl = makeTokenNode(access) + makeTokenNode(":")
