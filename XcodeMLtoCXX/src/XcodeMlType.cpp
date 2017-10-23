@@ -798,14 +798,14 @@ makeStructType(const DataTypeIdent &ident,
 
 TypeRef
 makeClassType(const DataTypeIdent &ident, const ClassType::Symbols &symbols) {
-  return std::make_shared<ClassType>(ident, nullptr, symbols);
+  return std::make_shared<ClassType>(ident, symbols);
 }
 
 TypeRef
 makeClassType(const DataTypeIdent &ident,
     const std::vector<ClassType::BaseClass> &bases,
     const ClassType::Symbols &symbols) {
-  return std::make_shared<ClassType>(ident, nullptr, bases, symbols);
+  return std::make_shared<ClassType>(ident, bases, symbols);
 }
 
 TypeRef
