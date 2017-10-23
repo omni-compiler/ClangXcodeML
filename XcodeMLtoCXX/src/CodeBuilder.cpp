@@ -222,72 +222,6 @@ getParams(xmlNodePtr fnNode, const SourceInfo &src) {
 }
 
 XcodeMl::CodeFragment
-makeBases(XcodeMl::ClassType *T, SourceInfo &src) {
-  using namespace XcodeMl;
-  assert(T);
-  const auto bases = T->getBases();
-  std::vector<CodeFragment> decls;
-  std::transform(bases.begin(),
-      bases.end(),
-      std::back_inserter(decls),
-      [&src](ClassType::BaseClass base) {
-        const auto T = src.typeTable.at(std::get<1>(base));
-        const auto classT = llvm::cast<ClassType>(T.get());
-        assert(classT);
-        assert(classT->name().hasValue());
-        return makeTokenNode(std::get<0>(base))
-            + makeTokenNode(std::get<2>(base) ? "virtual" : "")
-            + *(classT->name());
-      });
-  return decls.empty() ? makeVoidNode()
-                       : makeTokenNode(":") + cxxgen::join(",", decls);
-}
-
-DEFINE_CB(emitClassDefinition) {
-  if (isTrueProp(node, "is_implicit", false)) {
-    return makeVoidNode();
-  }
-  const auto typeName = getProp(node, "type");
-  const auto type = src.typeTable.at(typeName);
-  auto classType = llvm::dyn_cast<XcodeMl::ClassType>(type.get());
-  assert(classType);
-  const auto className = classType->name();
-
-  std::vector<XcodeMl::CodeFragment> decls;
-
-  for (xmlNodePtr memberNode = xmlFirstElementChild(node); memberNode;
-       memberNode = xmlNextElementSibling(memberNode)) {
-    const auto accessProp = getPropOrNull(memberNode, "access");
-    if (!accessProp.hasValue()) {
-      return makeTokenNode("/* ignored a member with no access specifier */")
-          + makeNewLineNode();
-    }
-    const auto access = *accessProp;
-    const auto decl =
-        makeTokenNode(access) + makeTokenNode(":") + w.walk(memberNode, src);
-    decls.push_back(decl);
-  }
-
-  return makeTokenNode("class")
-      + (className.hasValue() ? *className : makeVoidNode())
-      + makeBases(classType, src) + makeTokenNode("{")
-      + separateByBlankLines(decls) + makeTokenNode("}") + makeTokenNode(";")
-      + makeNewLineNode();
-}
-
-DEFINE_CB(classDeclProc) {
-  if (isTrueProp(node, "is_this_declaration_a_definition", false)) {
-    return emitClassDefinition(w, node, src);
-  }
-  const auto T = src.typeTable.at(getProp(node, "type"));
-  auto classT = llvm::dyn_cast<XcodeMl::ClassType>(T.get());
-  assert(classT);
-  const auto name = classT->name();
-  assert(name.hasValue());
-  return makeTokenNode("class") + (*name) + makeTokenNode(";");
-}
-
-XcodeMl::CodeFragment
 makeFunctionDeclHead(XcodeMl::Function *func,
     const XcodeMl::Name &name,
     const std::vector<XcodeMl::CodeFragment> &args,
@@ -802,7 +736,6 @@ const CodeBuilder CXXBuilder("CodeBuilder",
         {"varDecl", varDeclProc},
         {"value", valueProc},
         {"usingDecl", usingDeclProc},
-        {"classDecl", classDeclProc},
 
         /* out of specification */
         {"constructorInitializer", ctorInitProc},
