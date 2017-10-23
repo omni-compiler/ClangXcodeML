@@ -666,6 +666,10 @@ ClassType::setName(const std::string &name) {
   name_ = makeTokenNode(name);
 }
 
+void
+ClassType::setName(const CodeFragment &name) {
+  name_ = name;
+}
 ClassType::Symbols
 ClassType::getSymbols() const {
   return classScopeSymbols;

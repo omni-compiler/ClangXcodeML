@@ -335,6 +335,7 @@ public:
   Type *clone() const override;
   ClassName name() const;
   void setName(const std::string &);
+  void setName(const CodeFragment &);
   Symbols getSymbols() const;
   std::vector<BaseClass> getBases() const;
   static bool classof(const Type *);
