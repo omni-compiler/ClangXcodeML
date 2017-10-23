@@ -11,5 +11,4 @@ ${CXXTOXML} $@ |
       xsltproc ${XSLTsDIR}/add_symbols_elem.xsl -  |
       xsltproc ${XSLTsDIR}/add_globalsymbols_elem.xsl -  |
       xsltproc ${XSLTsDIR}/Program2XcodeProgram.xsl -  |
-      xsltproc ${XSLTsDIR}/handle_name_elem.xsl -  |
       xmllint --format - 
