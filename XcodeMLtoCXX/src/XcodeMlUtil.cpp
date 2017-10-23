@@ -15,7 +15,7 @@
 #include "XcodeMlUtil.h"
 
 std::shared_ptr<XcodeMl::UnqualId>
-getNameFromNameNode(xmlNodePtr nameNode) {
+getUnqualIdFromNameNode(xmlNodePtr nameNode) {
   const auto kind = getProp(nameNode, "name_kind");
 
   if (kind == "constructor") {
@@ -40,7 +40,7 @@ getNameFromNameNode(xmlNodePtr nameNode) {
 }
 
 std::shared_ptr<XcodeMl::UnqualId>
-getNameFromIdNode(xmlNodePtr idNode, xmlXPathContextPtr ctxt) {
+getUnqualIdFromIdNode(xmlNodePtr idNode, xmlXPathContextPtr ctxt) {
   if (!idNode) {
     throw std::domain_error("expected id node, but got null");
   }
@@ -48,5 +48,5 @@ getNameFromIdNode(xmlNodePtr idNode, xmlXPathContextPtr ctxt) {
   if (!nameNode) {
     throw std::domain_error("name node not found");
   }
-  return getNameFromNameNode(nameNode);
+  return getUnqualIdFromNameNode(nameNode);
 }
