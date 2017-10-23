@@ -22,7 +22,8 @@ OBJS = XcodeMlType.o \
 	ClangClassHandler.o \
 	XcodeMlName.o \
 	XcodeMlNns.o \
-	XcodeMlOperator.o
+	XcodeMlOperator.o \
+	XcodeMlUtil.o
 
 $(XCODEMLTOCXX): $(OBJS)
 	$(CXX) $(CXXFLAGS) $(OBJS) $(USEDLIBS) -o $(XCODEMLTOCXX)
@@ -56,6 +57,9 @@ XcodeMlNns.o: \
 XcodeMlType.o: \
 	TypeAnalyzer.h \
 	XcodeMlEnvironment.h
+
+XcodeMlUtil.o: \
+	XcodeMlUtil.h
 
 clean:
 	rm -f $(XCODEMLTOCXX)
