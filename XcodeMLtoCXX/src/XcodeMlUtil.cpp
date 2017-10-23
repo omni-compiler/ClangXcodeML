@@ -1,16 +1,22 @@
+#include <iostream>
 #include <map>
 #include <memory>
 #include <string>
 #include <vector>
+#include <libxml/debugXML.h>
 #include <libxml/tree.h>
 #include <libxml/xpath.h>
 #include "llvm/ADT/Optional.h"
 #include "LibXMLUtil.h"
 #include "StringTree.h"
+#include "Util.h"
+#include "XcodeMlType.h"
+#include "XcodeMlEnvironment.h"
 #include "XcodeMlNns.h"
 #include "XcodeMlName.h"
 #include "XcodeMlOperator.h"
 #include "XMLString.h"
+#include "SourceInfo.h"
 
 #include "XcodeMlUtil.h"
 
