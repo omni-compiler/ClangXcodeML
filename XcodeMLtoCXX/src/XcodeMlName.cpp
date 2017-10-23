@@ -31,6 +31,13 @@ Name::toString(const Environment &typeTable, const NnsMap &nnsTable) const {
       + id->toString(typeTable);
 }
 
+std::shared_ptr<UnqualId>
+Name::getUnqualId() const {
+  assert(id);
+  auto pId = id->clone();
+  return std::shared_ptr<UnqualId>(pId);
+}
+
 UnqualId::UnqualId(UnqualIdKind k) : kind(k) {
 }
 
