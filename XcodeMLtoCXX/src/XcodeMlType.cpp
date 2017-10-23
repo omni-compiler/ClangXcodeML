@@ -8,6 +8,8 @@
 #include "llvm/ADT/Optional.h"
 #include "StringTree.h"
 #include "XcodeMlType.h"
+#include "XcodeMlNns.h"
+#include "XcodeMlName.h"
 #include "XcodeMlEnvironment.h"
 #include "llvm/Support/Casting.h"
 
