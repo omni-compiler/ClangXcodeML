@@ -19,6 +19,18 @@ using CXXCodeGen::makeVoidNode;
 
 namespace XcodeMl {
 
+Name::Name(
+    const std::shared_ptr<UnqualId> &id_, const std::shared_ptr<Nns> &nns_)
+    : id(id_), nns(nns_) {
+}
+
+CodeFragment
+Name::toString(const Environment &typeTable, const NnsMap &nnsTable) const {
+  assert(id);
+  return (nns ? nns->makeDeclaration(typeTable, nnsTable) : makeVoidNode())
+      + id->toString(typeTable);
+}
+
 UnqualId::UnqualId(UnqualIdKind k) : kind(k) {
 }
 

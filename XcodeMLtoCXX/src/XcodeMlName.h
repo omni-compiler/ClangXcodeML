@@ -33,6 +33,11 @@ private:
  * corresponds to the name elements in XcodeML, such as.
  */
 class Name {
+public:
+  explicit Name(
+      const std::shared_ptr<UnqualId> &, const std::shared_ptr<Nns> &);
+  CodeFragment toString(const Environment &, const NnsMap &) const;
+
 private:
   std::shared_ptr<UnqualId> id;
   std::shared_ptr<Nns> nns;
