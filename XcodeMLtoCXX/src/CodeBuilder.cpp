@@ -241,15 +241,13 @@ XcodeMl::CodeFragment
 makeFunctionDeclHead(xmlNodePtr node,
     const std::vector<XcodeMl::CodeFragment> args,
     const SourceInfo &src) {
-  xmlNodePtr nameElem = findFirst(
-      node, "name|operator|conversion|constructor|destructor", src.ctxt);
-  const XMLString name(xmlNodeGetContent(nameElem));
-  const XMLString kind(nameElem->name);
-  const auto nameNode = getQualifiedNameFromTypedNode(node, src);
+  const auto nameNode = findFirst(node, "name", src.ctxt);
+  const auto name = getQualifiedNameFromNameNode(nameNode, src);
 
   const auto dtident = getProp(node, "type");
   const auto T = src.typeTable[dtident];
   const auto fnType = llvm::cast<XcodeMl::Function>(T.get());
+
   auto acc = makeVoidNode();
   if (isInClassDecl(node, src) && isTrueProp(node, "is_virtual", false)) {
     acc = acc + makeTokenNode("virtual");
@@ -301,9 +299,10 @@ DEFINE_CB(varProc) {
 
 DEFINE_CB(memberExprProc) {
   const auto expr = findFirst(node, "*", src.ctxt);
-  const auto name = getQualifiedNameFromNameNode(
-      findFirst(node, "*[2]", src.ctxt), getPropOrNull(node, "type"), src);
-  return w.walk(expr, src) + makeTokenNode(".") + name;
+  const auto name =
+      getQualifiedNameFromNameNode(findFirst(node, "*[2]", src.ctxt), src);
+  return w.walk(expr, src) + makeTokenNode(".")
+      + name.toString(src.typeTable, src.nnsTable);
 }
 
 DEFINE_CB(memberRefProc) {
@@ -555,15 +554,20 @@ declareClassTypeInit(
 }
 
 DEFINE_CB(varDeclProc) {
-  const auto name = getQualifiedNameFromTypedNode(node, src);
+  const auto nameNode = findFirst(node, "name", src.ctxt);
+  const auto name = getQualifiedNameFromNameNode(nameNode, src);
+
   const auto dtident = getProp(node, "type");
   const auto type = src.typeTable.at(dtident);
+
   auto acc = makeVoidNode();
   if (isInClassDecl(node, src)
       && isTrueProp(node, "is_static_data_member", false)) {
     acc = acc + makeTokenNode("static");
   }
-  acc = acc + makeDecl(type, name, src.typeTable);
+  acc = acc + makeDecl(type,
+                  name.toString(src.typeTable, src.nnsTable),
+                  src.typeTable);
   xmlNodePtr valueElem = findFirst(node, "value", src.ctxt);
   if (!valueElem) {
     return wrapWithLangLink(acc + makeTokenNode(";"), node);
@@ -582,12 +586,14 @@ DEFINE_CB(varDeclProc) {
 }
 
 DEFINE_CB(usingDeclProc) {
-  const auto name = getQualifiedNameFromTypedNode(node, src);
+  const auto nameNode = findFirst(node, "name", src.ctxt);
+  const auto name = getQualifiedNameFromNameNode(nameNode, src);
   // FIXME: using declaration of base constructor
   const auto head = isTrueProp(node, "is_access_declaration", false)
       ? makeVoidNode()
       : makeTokenNode("using");
-  return head + name + makeTokenNode(";");
+  return head + name.toString(src.typeTable, src.nnsTable)
+      + makeTokenNode(";");
 }
 
 DEFINE_CB(ctorInitListProc) {
