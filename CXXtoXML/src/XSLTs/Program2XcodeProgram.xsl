@@ -96,15 +96,6 @@
 
   <xsl:template match="clangDecl[@class='Record']" />
 
-  <xsl:template match="clangDecl[@class='CXXRecord']">
-    <classDecl>
-      <xsl:apply-templates select="@*" />
-      <xsl:apply-templates
-        select="clangDecl[
-        not (@is_implicit = '1' or @is_implicit = 'true')]" />
-    </classDecl>
-  </xsl:template>
-
   <xsl:template match="clangDecl[@class='Field']">
     <varDecl>
       <xsl:apply-templates select="@*" />
