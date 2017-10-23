@@ -3,6 +3,9 @@
 
 namespace XcodeMl {
 
+class Environment;
+class Nns;
+
 enum class UnqualIdKind {
   Ident,
   OpFuncId,
@@ -75,6 +78,36 @@ public:
 
 protected:
   ConvFuncId(const ConvFuncId &) = default;
+
+private:
+  DataTypeIdent dtident;
+};
+
+class CtorName : public UnqualId {
+public:
+  CtorName(const DataTypeIdent &);
+  ~CtorName() override = default;
+  UnqualId *clone() const override;
+  CodeFragment toString(const Environment &) const override;
+  static bool classof(const UnqualId *);
+
+protected:
+  CtorName(const CtorName &) = default;
+
+private:
+  DataTypeIdent dtident;
+};
+
+class DtorName : public UnqualId {
+public:
+  DtorName(const DataTypeIdent &);
+  ~DtorName() override = default;
+  UnqualId *clone() const override;
+  CodeFragment toString(const Environment &) const override;
+  static bool classof(const UnqualId *);
+
+protected:
+  DtorName(const DtorName &) = default;
 
 private:
   DataTypeIdent dtident;
