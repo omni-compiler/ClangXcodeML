@@ -326,6 +326,9 @@ public:
       const CodeFragment &,
       const std::vector<BaseClass> &,
       const Symbols &);
+  ClassType(const DataTypeIdent &, const Symbols &);
+  ClassType(
+      const DataTypeIdent &, const std::vector<BaseClass> &, const Symbols &);
   CodeFragment makeDeclaration(CodeFragment, const Environment &) override;
   ~ClassType() override = default;
   Type *clone() const override;
