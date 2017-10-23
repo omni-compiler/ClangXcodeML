@@ -17,9 +17,11 @@
 #include "StringTree.h"
 #include "Util.h"
 #include "XcodeMlNns.h"
+#include "XcodeMlName.h"
 #include "XcodeMlOperator.h"
 #include "XcodeMlType.h"
 #include "XcodeMlEnvironment.h"
+#include "XcodeMlUtil.h"
 #include "NnsAnalyzer.h"
 #include "TypeAnalyzer.h"
 #include "SourceInfo.h"
@@ -41,39 +43,6 @@ using cxxgen::separateByBlankLines;
 using XcodeMl::makeOpNode;
 
 namespace {
-
-llvm::Optional<XcodeMl::NnsRef>
-getNns(const XcodeMl::NnsMap &nnsTable, xmlNodePtr nameNode) {
-  using MaybeNnsRef = llvm::Optional<XcodeMl::NnsRef>;
-
-  const auto ident = getPropOrNull(nameNode, "nns");
-  if (!ident.hasValue()) {
-    return MaybeNnsRef();
-  }
-  const auto nns = getOrNull(nnsTable, *ident);
-  if (!nns.hasValue()) {
-    const auto lineno = xmlGetLineNo(nameNode);
-    assert(lineno >= 0);
-    std::cerr << "Undefined NNS: '" << *ident << "'" << std::endl
-              << "lineno: " << lineno << std::endl;
-    xmlDebugDumpNode(stderr, nameNode, 0);
-    std::abort();
-  }
-  return nns;
-}
-
-XcodeMl::CodeFragment
-getQualifiedNameFromNameNode(xmlNodePtr nameNode,
-    const llvm::Optional<XcodeMl::DataTypeIdent> &dtident,
-    const SourceInfo &src) {
-  const auto name = getDeclNameFromNameNode(nameNode, dtident, src);
-  const auto nns = getNns(src.nnsTable, nameNode);
-  if (!nns.hasValue()) {
-    return name;
-  }
-  return (*nns)->makeDeclaration(src.typeTable, src.nnsTable) + name;
-}
-
 
 XcodeMl::CodeFragment
 wrapWithLangLink(const XcodeMl::CodeFragment &content, xmlNodePtr node) {
