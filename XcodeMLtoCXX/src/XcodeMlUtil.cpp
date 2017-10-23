@@ -1,16 +1,22 @@
+#include <iostream>
 #include <map>
 #include <memory>
 #include <string>
 #include <vector>
+#include <libxml/debugXML.h>
 #include <libxml/tree.h>
 #include <libxml/xpath.h>
 #include "llvm/ADT/Optional.h"
 #include "LibXMLUtil.h"
 #include "StringTree.h"
+#include "Util.h"
+#include "XcodeMlType.h"
+#include "XcodeMlEnvironment.h"
 #include "XcodeMlNns.h"
 #include "XcodeMlName.h"
 #include "XcodeMlOperator.h"
 #include "XMLString.h"
+#include "SourceInfo.h"
 
 #include "XcodeMlUtil.h"
 
@@ -49,4 +55,29 @@ getUnqualIdFromIdNode(xmlNodePtr idNode, xmlXPathContextPtr ctxt) {
     throw std::domain_error("name node not found");
   }
   return getUnqualIdFromNameNode(nameNode);
+}
+
+std::shared_ptr<XcodeMl::Nns>
+getNns(const XcodeMl::NnsMap &nnsTable, xmlNodePtr nameNode) {
+  const auto ident = getPropOrNull(nameNode, "nns");
+  if (!ident.hasValue()) {
+    return std::shared_ptr<XcodeMl::Nns>();
+  }
+  const auto nns = getOrNull(nnsTable, *ident);
+  if (!nns.hasValue()) {
+    const auto lineno = xmlGetLineNo(nameNode);
+    assert(lineno >= 0);
+    std::cerr << "Undefined NNS: '" << *ident << "'" << std::endl
+              << "lineno: " << lineno << std::endl;
+    xmlDebugDumpNode(stderr, nameNode, 0);
+    std::abort();
+  }
+  return *nns;
+}
+
+XcodeMl::Name
+getQualifiedNameFromNameNode(xmlNodePtr nameNode, const SourceInfo &src) {
+  const auto id = getUnqualIdFromNameNode(nameNode);
+  const auto nns = getNns(src.nnsTable, nameNode);
+  return XcodeMl::Name(id, nns);
 }
