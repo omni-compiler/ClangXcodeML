@@ -486,7 +486,7 @@ DEFINE_CB(newExprProc) {
   return makeTokenNode("new")
       + (hasParen(pointeeT, src.typeTable) ? wrapWithParen(NewTypeId)
                                            : NewTypeId)
-      + w.walk(arguments, src);
+      + (arguments ? w.walk(arguments, src) : makeVoidNode());
 }
 
 DEFINE_CB(newArrayExprProc) {
