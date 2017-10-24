@@ -54,6 +54,11 @@ DEFINE_CCH(CXXCtorExprProc) {
       + makeTokenNode(")");
 }
 
+DEFINE_CCH(CXXDeleteExprProc) {
+  const auto allocated = findFirst(node, "*", src.ctxt);
+  return makeTokenNode("delete") + w.walk(allocated, src);
+}
+
 XcodeMl::CodeFragment
 makeBases(XcodeMl::ClassType *T, SourceInfo &src) {
   using namespace XcodeMl;
@@ -151,6 +156,7 @@ const ClangClassHandler ClangStmtHandler("class",
         {"BreakStmt", BreakStmtProc},
         {"CallExpr", callExprProc},
         {"CXXConstructExpr", CXXCtorExprProc},
+        {"CXXDeleteExpr", CXXDeleteExprProc},
         {"CXXTemporaryObjectExpr", CXXTemporaryObjectExprProc},
     });
 
