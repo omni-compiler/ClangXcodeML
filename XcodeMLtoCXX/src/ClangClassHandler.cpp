@@ -41,6 +41,10 @@ DEFINE_CCH(callCodeBuilder) {
   return makeInnerNode(w.walkChildren(node, src));
 }
 
+DEFINE_CCH(BreakStmtProc) {
+  return makeTokenNode("break");
+}
+
 DEFINE_CCH(callExprProc) {
   return (w["functionCall"])(w, node, src);
 }
@@ -144,6 +148,7 @@ const ClangClassHandler ClangStmtHandler("class",
     cxxgen::makeInnerNode,
     callCodeBuilder,
     {
+        {"BreakStmt", BreakStmtProc},
         {"CallExpr", callExprProc},
         {"CXXConstructExpr", CXXCtorExprProc},
         {"CXXTemporaryObjectExpr", CXXTemporaryObjectExprProc},
