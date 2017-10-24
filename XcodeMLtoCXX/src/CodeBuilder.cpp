@@ -305,6 +305,19 @@ DEFINE_CB(memberExprProc) {
       + name.toString(src.typeTable, src.nnsTable);
 }
 
+XcodeMl::CodeFragment
+getNameFromMemberRefNode(xmlNodePtr node, const SourceInfo &src) {
+  /* If the <memberRef> element has two children, use the second child. */
+  const auto memberName = findFirst(node, "name", src.ctxt);
+  if (memberName) {
+    const auto name = getQualifiedNameFromNameNode(memberName, src);
+    return name.toString(src.typeTable, src.nnsTable);
+  }
+  /* Otherwise, it must have `member` attribute. */
+  const auto name = getProp(node, "member");
+  return makeTokenNode(name);
+}
+
 DEFINE_CB(memberRefProc) {
   const auto baseName = getProp(node, "member");
   const auto nnsident = getPropOrNull(node, "nns");
