@@ -56,6 +56,17 @@ makeCtorNode(TypeTableInfo &TTI, const CXXConstructorDecl *ctor) {
 }
 
 xmlNodePtr
+makeDtorNode(TypeTableInfo &TTI, const CXXDestructorDecl *dtor) {
+  auto node = xmlNewNode(nullptr, BAD_CAST "name");
+  xmlNewBoolProp(node, "is_implicit", dtor->isImplicit());
+
+  const auto T = dtor->getDeclName().getCXXNameType();
+  xmlNewProp(node, BAD_CAST "dtor_type", BAD_CAST TTI.getTypeName(T).c_str());
+
+  return node;
+}
+
+xmlNodePtr
 makeConvNode(TypeTableInfo &TTI, const CXXConversionDecl *conv) {
   auto node = xmlNewNode(nullptr, BAD_CAST "name");
 
@@ -85,8 +96,8 @@ makeNameNodeForCXXMethodDecl(TypeTableInfo &TTI, const CXXMethodDecl *MD) {
 
   if (const auto ctor = dyn_cast<CXXConstructorDecl>(MD)) {
     return makeCtorNode(TTI, ctor);
-  } else if (isa<CXXDestructorDecl>(MD)) {
-    return xmlNewNode(nullptr, BAD_CAST "name");
+  } else if (const auto dtor = dyn_cast<CXXDestructorDecl>(MD)) {
+    return makeDtorNode(TTI, dtor);
   } else if (const auto conv = dyn_cast<CXXConversionDecl>(MD)) {
     return makeConvNode(TTI, conv);
   }
