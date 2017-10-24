@@ -16,7 +16,10 @@
 #include "XMLString.h"
 #include "XMLWalker.h"
 #include "StringTree.h"
+#include "XcodeMlNns.h"
+#include "XcodeMlName.h"
 #include "XcodeMlType.h"
+#include "XcodeMlUtil.h"
 #include "XcodeMlEnvironment.h"
 #include "TypeAnalyzer.h"
 
@@ -155,12 +158,8 @@ DEFINE_TA(classTypeProc) {
   const auto ids = findNodes(node, "symbols/id", ctxt);
   for (auto &idElem : ids) {
     const auto dtident = getProp(idElem, "type");
-    const auto name = getNameFromIdNodeOrNull(idElem, ctxt);
-    if (name.hasValue()) {
-      symbols.emplace_back(*name, dtident);
-    } else {
-      symbols.emplace_back("", dtident);
-    }
+    const auto pName = getUnqualIdFromIdNode(idElem, ctxt);
+    symbols.emplace_back(pName, dtident);
   }
   map[elemName] = XcodeMl::makeClassType(elemName, bases, symbols);
 }

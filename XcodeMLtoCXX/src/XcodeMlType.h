@@ -12,6 +12,7 @@ using DataTypeIdent = std::string;
 using CodeFragment = CXXCodeGen::StringTreeRef;
 
 class Environment;
+class UnqualId;
 
 class MemberDecl {
 public:
@@ -318,7 +319,7 @@ AccessSpec accessSpec_of_string(const std::string &);
 class ClassType : public Type {
 public:
   using ClassName = llvm::Optional<CodeFragment>;
-  using MemberName = std::string;
+  using MemberName = std::shared_ptr<UnqualId>;
   using Symbols = std::vector<std::tuple<MemberName, DataTypeIdent>>;
   using BaseClass = std::tuple<std::string, DataTypeIdent, bool>;
   ClassType(const DataTypeIdent &, const CodeFragment &, const Symbols &);
@@ -334,6 +335,7 @@ public:
   Type *clone() const override;
   ClassName name() const;
   void setName(const std::string &);
+  void setName(const CodeFragment &);
   Symbols getSymbols() const;
   std::vector<BaseClass> getBases() const;
   static bool classof(const Type *);
