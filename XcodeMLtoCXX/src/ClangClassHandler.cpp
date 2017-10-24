@@ -99,8 +99,8 @@ emitClassDefinition(xmlNodePtr node, const CodeBuilder &w, SourceInfo &src) {
       continue;
     }
     const auto access = *accessProp;
-    const auto decl = makeTokenNode(access) + makeTokenNode(":")
-        + callCodeBuilder(memberNode, w, src);
+    const auto decl =
+        makeTokenNode(access) + makeTokenNode(":") + w.walk(memberNode, src);
     decls.push_back(decl);
   }
 
