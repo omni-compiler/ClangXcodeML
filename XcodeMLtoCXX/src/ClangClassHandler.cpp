@@ -112,6 +112,9 @@ emitClassDefinition(xmlNodePtr node, const CodeBuilder &w, SourceInfo &src) {
 }
 
 DEFINE_CCH(CXXRecordProc) {
+  if (isTrueProp(node, "is_implicit", false)) {
+    return cxxgen::makeVoidNode();
+  }
   if (isTrueProp(node, "is_this_declaration_a_definition", false)) {
     return emitClassDefinition(node, w, src);
   }
