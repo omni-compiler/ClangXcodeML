@@ -72,7 +72,7 @@ DEFINE_TA(functionTypeProc) {
   XMLString returnName = xmlGetProp(node, BAD_CAST "return_type");
   auto returnType = map[returnName];
   xmlXPathObjectPtr paramsNode =
-      xmlXPathNodeEval(node, BAD_CAST "params/name", ctxt);
+      xmlXPathNodeEval(node, BAD_CAST "params/paramTypeName", ctxt);
   XcodeMl::Function::Params params;
   for (size_t i = 0, len = length(paramsNode); i < len; ++i) {
     xmlNodePtr param = nth(paramsNode, i);
