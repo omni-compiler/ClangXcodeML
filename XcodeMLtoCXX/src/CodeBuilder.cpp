@@ -319,11 +319,7 @@ getNameFromMemberRefNode(xmlNodePtr node, const SourceInfo &src) {
 }
 
 DEFINE_CB(memberRefProc) {
-  const auto baseName = getProp(node, "member");
-  const auto nnsident = getPropOrNull(node, "nns");
-  const auto name = (nnsident.hasValue() ? makeNestedNameSpec(*nnsident, src)
-                                         : makeVoidNode())
-      + makeTokenNode(baseName);
+  const auto name = getNameFromMemberRefNode(node, src);
   return makeInnerNode(w.walkChildren(node, src)) + makeTokenNode("->") + name;
 }
 
