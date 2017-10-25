@@ -10,8 +10,6 @@ env:
 
 before_install:
   - pwd
-  - docker-compose up -d
-  - docker-compose ps
 
 script:
   - docker-compose run workspace make -C /worktree/XcodeMLtoCXX check
