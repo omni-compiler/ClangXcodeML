@@ -153,11 +153,11 @@ const ClangClassHandler ClangStmtHandler("class",
     cxxgen::makeInnerNode,
     callCodeBuilder,
     {
-        {"BreakStmt", BreakStmtProc},
-        {"CallExpr", callExprProc},
-        {"CXXConstructExpr", CXXCtorExprProc},
-        {"CXXDeleteExpr", CXXDeleteExprProc},
-        {"CXXTemporaryObjectExpr", CXXTemporaryObjectExprProc},
+        std::make_tuple("BreakStmt", BreakStmtProc),
+        std::make_tuple("CallExpr", callExprProc),
+        std::make_tuple("CXXConstructExpr", CXXCtorExprProc),
+        std::make_tuple("CXXDeleteExpr", CXXDeleteExprProc),
+        std::make_tuple("CXXTemporaryObjectExpr", CXXTemporaryObjectExprProc),
     });
 
 DEFINE_CCH(FriendDeclProc) {
@@ -176,5 +176,6 @@ const ClangClassHandler ClangDeclHandler("class",
     cxxgen::makeInnerNode,
     callCodeBuilder,
     {
-        {"CXXRecord", CXXRecordProc}, {"Friend", FriendDeclProc},
+        std::make_tuple("CXXRecord", CXXRecordProc),
+        std::make_tuple("Friend", FriendDeclProc),
     });

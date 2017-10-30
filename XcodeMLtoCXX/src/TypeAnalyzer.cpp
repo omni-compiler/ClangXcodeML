@@ -217,13 +217,13 @@ const XcodeMl::Environment FundamentalDataTypeIdentMap = []() {
 
 const TypeAnalyzer XcodeMLTypeAnalyzer("TypeAnalyzer",
     {
-        {"basicType", basicTypeProc},
-        {"pointerType", pointerTypeProc},
-        {"functionType", functionTypeProc},
-        {"arrayType", arrayTypeProc},
-        {"structType", structTypeProc},
-        {"classType", classTypeProc},
-        {"enumType", enumTypeProc},
+        std::make_tuple("basicType", basicTypeProc),
+        std::make_tuple("pointerType", pointerTypeProc),
+        std::make_tuple("functionType", functionTypeProc),
+        std::make_tuple("arrayType", arrayTypeProc),
+        std::make_tuple("structType", structTypeProc),
+        std::make_tuple("classType", classTypeProc),
+        std::make_tuple("enumType", enumTypeProc),
     });
 
 /*!
