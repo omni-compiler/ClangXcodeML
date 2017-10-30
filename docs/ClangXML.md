@@ -21,7 +21,9 @@
 | `</clangStmt>`
 
 `CaseStmt`はcaseラベルを表現する。
+
 第1子要素は式。
+
 第2要素はcaseラベルに引き続く文。
 
 ## `SwitchStmt`: switch文
@@ -32,6 +34,9 @@
 | `</clangStmt>`
 
 `SwitchStmt`はswitch文を表現する。
-第1子要素は条件式。
+
+第1子要素は条件式を表現する。
+
 第2子要素以降の子要素は`CaseStmt`または`DefaultStmt`で、
+
 各要素はswitch文本体のラベルとそれに引き続く文を表現する。
