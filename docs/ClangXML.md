@@ -2,7 +2,7 @@
 % XcalableMP/Omni Compiler Project
 %
 
-## `clangStmt`要素
+# `clangStmt`要素
 
 | `<clangStmt`
 |   `class="` _属性_ `"`
@@ -13,7 +13,7 @@
 `clangStmt`要素はC/C++の式または文を表す要素。
 式または文の種類は`class`属性によって決められる。
 
-### `CaseStmt`: caseラベル
+## `CaseStmt`: caseラベル
 
 | `<clangStmt class="CaseStmt">`
 |   _`clangStmt`要素_
@@ -24,7 +24,7 @@
 第1子要素は式。
 第2要素はcaseラベルに引き続く文。
 
-### `SwitchStmt`: switch文
+## `SwitchStmt`: switch文
 
 | `<clangStmt class="SwitchStmt">`
 |   _`clangStmt`要素_
