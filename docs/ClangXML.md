@@ -26,6 +26,29 @@
 
 第2要素はcaseラベルに引き続く文。
 
+## `Function`: 関数定義
+
+| `<clangStmt class="Function"`
+|    `is_implicit` = `"true"` | `"false"` | `"1"` | `"0"`
+|  `>`
+|   _`name`要素_
+|   _`params`要素_
+|   _`clangStmt`要素_
+| `</clangStmt>`
+
+`Function`は関数定義を表現する。
+
+第1子要素は関数名を表現する。
+
+第2子要素は仮引数リストを表現する。
+
+第3子要素は関数本体を表現する。
+これは`CompoundStmt`または`tryStmt`である。
+
+この要素は、オプションで`is_implicit`属性を利用できる。
+`is_implicit`属性の値は`"true"`, `"false"`, `"1"`, `"0"`のいずれかであり、
+`"true"`または`"1"`のとき関数が暗黙に定義されたことを表す。
+
 ## `SwitchStmt`: switch文
 
 | `<clangStmt class="SwitchStmt">`
