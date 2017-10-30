@@ -89,3 +89,14 @@
 第2子要素以降の子要素は`CaseStmt`または`DefaultStmt`で、
 
 各要素はswitch文本体のラベルとそれに引き続く文を表現する。
+
+# clangConstructorInitializer要素
+
+| `<clangConstructorInitializer `
+|   `is_written=` `"true"` | `"false"` | `"1"` | `"0"`
+|   `member="` _メンバー名_ `"`
+|   `>`
+|   _`clangStmt`要素_
+| `</clangStmt>`
+
+
