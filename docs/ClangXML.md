@@ -1,5 +1,6 @@
-ClangXMLの要素
-==============
+% ClangXMLの要素
+% XcalableMP/Omni Compiler Project
+%
 
 ## `clangStmt`要素
 
