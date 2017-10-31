@@ -69,7 +69,8 @@ const SymbolBuilder CXXSymbolBuilder("sclass",
     makeInnerNode,
     NullProc,
     {
-        {"typedef_name", typedefNameProc}, {"tagname", tagnameProc},
+        std::make_tuple("typedef_name", typedefNameProc),
+        std::make_tuple("tagname", tagnameProc),
     });
 
 StringTreeRef
