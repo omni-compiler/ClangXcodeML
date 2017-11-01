@@ -45,7 +45,7 @@
           <xsl:apply-templates select="@*" />
           <xsl:apply-templates select="name" />
 
-          <xsl:apply-templates select="params" />
+          <xsl:apply-templates select="TypeLoc" />
 
           <xsl:if test="@class='CXXConstructor'">
             <constructorInitializerList>
