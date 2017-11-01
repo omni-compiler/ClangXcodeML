@@ -152,7 +152,6 @@ DtorName::toString(const Environment &env) const {
   const auto ClassT = llvm::cast<XcodeMl::ClassType>(T.get());
   const auto name = ClassT->name();
   assert(name.hasValue() && *name);
-  std::cerr << to_string(*name) << std::endl;
   return makeTokenNode("~") + (*name);
 }
 
