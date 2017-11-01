@@ -154,7 +154,7 @@ DtorName::toString(const Environment &env) const {
 
 bool
 DtorName::classof(const UnqualId *id) {
-  return id->getKind() == UnqualIdKind::Ctor;
+  return id->getKind() == UnqualIdKind::Dtor;
 }
 
 } // namespace XcodeMl
