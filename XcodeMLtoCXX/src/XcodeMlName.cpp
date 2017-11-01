@@ -149,12 +149,15 @@ DtorName::clone() const {
 CodeFragment
 DtorName::toString(const Environment &env) const {
   const auto T = env.at(dtident);
-  return makeTokenNode("~") + T->makeDeclaration(makeVoidNode(), env);
+  const auto ClassT = llvm::cast<XcodeMl::ClassType>(T.get());
+  const auto name = ClassT->name();
+  assert(name.hasValue() && *name);
+  return makeTokenNode("~") + (*name);
 }
 
 bool
 DtorName::classof(const UnqualId *id) {
-  return id->getKind() == UnqualIdKind::Ctor;
+  return id->getKind() == UnqualIdKind::Dtor;
 }
 
 } // namespace XcodeMl
