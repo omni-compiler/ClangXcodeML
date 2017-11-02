@@ -311,6 +311,15 @@ DEFINE_CB(emitInlineMemberFunctionDefinition) {
   return acc;
 }
 
+DEFINE_CB(emitMemberFunctionDecl) {
+  const auto fnDtident = getProp(node, "type");
+  const auto fnType =
+      llvm::cast<XcodeMl::Function>(src.typeTable[fnDtident].get());
+  auto decl = makeFunctionDeclHead(node, fnType->argNames(), src);
+  decl = decl + makeTokenNode(";");
+  return wrapWithLangLink(decl, node);
+}
+
 DEFINE_CB(memberExprProc) {
   const auto expr = findFirst(node, "*", src.ctxt);
   const auto name =
