@@ -306,7 +306,14 @@ DEFINE_CB(emitMemberFunctionDecl) {
   const auto fnDtident = getProp(node, "type");
   const auto fnType =
       llvm::cast<XcodeMl::Function>(src.typeTable[fnDtident].get());
-  auto decl = makeFunctionDeclHead(node, fnType->argNames(), src);
+  auto decl = makeVoidNode();
+  if (isTrueProp(node, "is_virtual", false)) {
+    decl = decl + makeTokenNode("virtual");
+  }
+  if (isTrueProp(node, "is_static", false)) {
+    decl = decl + makeTokenNode("static");
+  }
+  decl = decl + makeFunctionDeclHead(node, fnType->argNames(), src);
   if (isTrueProp(node, "is_pure", false)) {
     decl = decl + makeTokenNode("=") + makeTokenNode("0");
   }
