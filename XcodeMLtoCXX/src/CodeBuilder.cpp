@@ -298,6 +298,19 @@ DEFINE_CB(varProc) {
   return makeNestedNameSpec(*nnsident, src) + name;
 }
 
+DEFINE_CB(emitInlineMemberFunctionDefinition) {
+  const auto args = getParams(node, src);
+  auto acc = makeVoidNode();
+  acc = acc + makeFunctionDeclHead(node, args, src);
+
+  auto body = findFirst(node, "body", src.ctxt);
+  assert(body);
+  acc = acc + makeTokenNode("{");
+  acc = acc + ProgramBuilder.walk(body, src);
+  acc = acc + makeTokenNode("}");
+  return acc;
+}
+
 DEFINE_CB(memberExprProc) {
   const auto expr = findFirst(node, "*", src.ctxt);
   const auto name =
