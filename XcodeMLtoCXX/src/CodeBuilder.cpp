@@ -300,6 +300,11 @@ DEFINE_CB(emitInlineMemberFunctionDefinition) {
   }
   acc = acc + makeFunctionDeclHead(node, args, src);
 
+  if (auto ctorInitList =
+          findFirst(node, "constructorInitializerList", src.ctxt)) {
+    acc = acc + ProgramBuilder.walk(ctorInitList, src);
+  }
+
   auto body = findFirst(node, "body", src.ctxt);
   assert(body);
   acc = acc + makeTokenNode("{");
