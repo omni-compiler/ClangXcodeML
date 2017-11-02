@@ -71,17 +71,6 @@ makeNestedNameSpec(const std::string &ident, const SourceInfo &src) {
   return makeNestedNameSpec(*nns, src);
 }
 
-bool
-isInClassDecl(xmlNodePtr node, const SourceInfo &src) {
-  // FIXME: temporary implementation
-  auto parent = findFirst(node, "..", src.ctxt);
-  if (!parent) {
-    return false;
-  }
-  const auto name = static_cast<XMLString>(parent->name);
-  return name == "classDecl";
-}
-
 /*!
  * \brief Arguments to be passed to CodeBuilder::Procedure.
  */
