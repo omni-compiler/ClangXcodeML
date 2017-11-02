@@ -628,6 +628,20 @@ DEFINE_CB(usingDeclProc) {
       + makeTokenNode(";");
 }
 
+DEFINE_CB(emitDataMemberDecl) {
+  const auto nameNode = findFirst(node, "name", src.ctxt);
+  const auto name = getQualifiedNameFromNameNode(nameNode, src);
+
+  const auto dtident = getProp(node, "type");
+  const auto type = src.typeTable.at(dtident);
+
+  auto acc = makeVoidNode();
+  acc = acc + makeDecl(type,
+                  name.toString(src.typeTable, src.nnsTable),
+                  src.typeTable);
+  return wrapWithLangLink(acc, node);
+}
+
 DEFINE_CB(ctorInitListProc) {
   auto inits = findNodes(node, "constructorInitializer", src.ctxt);
   if (inits.empty()) {
