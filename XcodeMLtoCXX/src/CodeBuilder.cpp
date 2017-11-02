@@ -250,12 +250,6 @@ makeFunctionDeclHead(xmlNodePtr node,
   const auto fnType = llvm::cast<XcodeMl::Function>(T.get());
 
   auto acc = makeVoidNode();
-  if (isInClassDecl(node, src) && isTrueProp(node, "is_virtual", false)) {
-    acc = acc + makeTokenNode("virtual");
-  }
-  if (isInClassDecl(node, src) && isTrueProp(node, "is_static", false)) {
-    acc = acc + makeTokenNode("static");
-  }
   acc = acc + makeFunctionDeclHead(fnType, name, args, src);
   return acc;
 }
@@ -301,6 +295,12 @@ DEFINE_CB(varProc) {
 DEFINE_CB(emitInlineMemberFunctionDefinition) {
   const auto args = getParams(node, src);
   auto acc = makeVoidNode();
+  if (isTrueProp(node, "is_virtual", false)) {
+    acc = acc + makeTokenNode("virtual");
+  }
+  if (isTrueProp(node, "is_static", false)) {
+    acc = acc + makeTokenNode("static");
+  }
   acc = acc + makeFunctionDeclHead(node, args, src);
 
   auto body = findFirst(node, "body", src.ctxt);
