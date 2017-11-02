@@ -632,6 +632,21 @@ DEFINE_CB(emitDataMemberDecl) {
   acc = acc + makeDecl(type,
                   name.toString(src.typeTable, src.nnsTable),
                   src.typeTable);
+  xmlNodePtr valueElem = findFirst(node, "value", src.ctxt);
+  if (!valueElem) {
+    return wrapWithLangLink(acc + makeTokenNode(";"), node);
+  }
+
+  auto ctorExpr =
+      findFirst(valueElem, "clangStmt[@class='CXXConstructExpr']", src.ctxt);
+  if (ctorExpr) {
+    const auto decl =
+        acc + declareClassTypeInit(w, ctorExpr, src) + makeTokenNode(";");
+    return wrapWithLangLink(decl, node);
+  }
+
+  acc = acc + makeTokenNode("=") + ProgramBuilder.walk(valueElem, src)
+      + makeTokenNode(";");
   return wrapWithLangLink(acc, node);
 }
 
