@@ -195,6 +195,17 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
     newProp("stringLiteral", literalAsString.c_str());
   }
 
+  if (auto ILE = dyn_cast<InitListExpr>(S)) {
+    /* `InitListExpr` has two kinds of children, `SyntacticForm`
+     * and `SemanticForm`. Do not traverse `SyntacticForm`,
+     * otherwise it emits the elements twice.
+     */
+    for (Stmt::child_range range = ILE->children(); range; ++range) {
+      TraverseStmt(*range);
+    }
+    return false;
+  }
+
   UnaryExprOrTypeTraitExpr *UEOTTE = dyn_cast<UnaryExprOrTypeTraitExpr>(S);
   if (UEOTTE) {
     // 7.8 sizeof, alignof
