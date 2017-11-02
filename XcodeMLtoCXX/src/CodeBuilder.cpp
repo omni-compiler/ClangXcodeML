@@ -669,7 +669,7 @@ DEFINE_CB(clangDeclProc) {
 
 } // namespace
 
-const CodeBuilder CXXBuilder("CodeBuilder",
+const CodeBuilder ProgramBuilder("ProgramBuilder",
     makeInnerNode,
     {
         std::make_tuple("typeTable", NullProc),
@@ -787,7 +787,7 @@ buildCode(
   cxxgen::Stream out;
   xmlNodePtr globalDeclarations =
       findFirst(rootNode, "/XcodeProgram/globalDeclarations", src.ctxt);
-  separateByBlankLines(CXXBuilder.walkChildren(globalDeclarations, src))
+  separateByBlankLines(ProgramBuilder.walkChildren(globalDeclarations, src))
       ->flush(out);
 
   ss << out.str();

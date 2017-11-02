@@ -3,7 +3,7 @@
 
 using CodeBuilder = XMLWalker<CXXCodeGen::StringTreeRef, SourceInfo &>;
 
-extern CodeBuilder const CXXBuilder;
+extern CodeBuilder const ProgramBuilder;
 
 void buildCode(xmlNodePtr, xmlXPathContextPtr, std::stringstream &);
 
