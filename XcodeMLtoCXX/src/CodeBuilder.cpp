@@ -593,10 +593,6 @@ DEFINE_CB(varDeclProc) {
   const auto type = src.typeTable.at(dtident);
 
   auto acc = makeVoidNode();
-  if (isInClassDecl(node, src)
-      && isTrueProp(node, "is_static_data_member", false)) {
-    acc = acc + makeTokenNode("static");
-  }
   acc = acc + makeDecl(type,
                   name.toString(src.typeTable, src.nnsTable),
                   src.typeTable);
@@ -636,6 +632,9 @@ DEFINE_CB(emitDataMemberDecl) {
   const auto type = src.typeTable.at(dtident);
 
   auto acc = makeVoidNode();
+  if (isTrueProp(node, "is_static_data_member", false)) {
+    acc = acc + makeTokenNode("static");
+  }
   acc = acc + makeDecl(type,
                   name.toString(src.typeTable, src.nnsTable),
                   src.typeTable);
