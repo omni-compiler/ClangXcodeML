@@ -806,6 +806,19 @@ const CodeBuilder ProgramBuilder("ProgramBuilder",
         // Ignore Decl_Record (structs are already emitted)
     });
 
+const CodeBuilder ClassDefinitionBuilder("ClassDefinitionBuilder",
+    makeInnerNode,
+    {
+        std::make_tuple("functionDecl", emitMemberFunctionDecl),
+        std::make_tuple(
+            "functionDefinition", emitInlineMemberFunctionDefinition),
+        std::make_tuple("usingDecl", usingDeclProc),
+        std::make_tuple("varDecl", emitDataMemberDecl),
+
+        /* for elements defined by clang */
+        std::make_tuple("clangDecl", clangDeclProc),
+    });
+
 /*!
  * \brief Traverse an XcodeML document and generate C++ source code.
  * \param[in] doc XcodeML document.
