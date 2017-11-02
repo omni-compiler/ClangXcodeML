@@ -232,6 +232,11 @@ makeFunctionDeclHead(XcodeMl::Function *func,
   if (llvm::isa<XcodeMl::CtorName>(pUnqualId.get())
       || llvm::isa<XcodeMl::DtorName>(pUnqualId.get())
       || llvm::isa<XcodeMl::ConvFuncId>(pUnqualId.get())) {
+    /* Do not emit return type
+     *    void A::A();
+     *    void A::~A();
+     *    int A::operator int();
+     */
     return func->makeDeclarationWithoutReturnType(
         nameSpelling, args, src.typeTable);
   } else {
