@@ -3,6 +3,8 @@
 
 using CodeBuilder = XMLWalker<CXXCodeGen::StringTreeRef, SourceInfo &>;
 
+extern CodeBuilder const CXXBuilder;
+
 void buildCode(xmlNodePtr, xmlXPathContextPtr, std::stringstream &);
 
 #endif /* !CODEBUILDER_H */

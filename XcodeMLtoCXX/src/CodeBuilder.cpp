@@ -667,6 +667,8 @@ DEFINE_CB(clangDeclProc) {
   return ClangDeclHandler.walk(node, w, src);
 }
 
+} // namespace
+
 const CodeBuilder CXXBuilder("CodeBuilder",
     makeInnerNode,
     {
@@ -763,8 +765,6 @@ const CodeBuilder CXXBuilder("CodeBuilder",
         std::make_tuple("Decl_Record", NullProc),
         // Ignore Decl_Record (structs are already emitted)
     });
-
-} // namespace
 
 /*!
  * \brief Traverse an XcodeML document and generate C++ source code.
