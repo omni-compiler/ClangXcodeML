@@ -38,7 +38,7 @@ using cxxgen::makeTokenNode;
 using XcodeMl::CodeFragment;
 
 DEFINE_CCH(callCodeBuilder) {
-  return makeInnerNode(w.walkChildren(node, src));
+  return makeInnerNode(ProgramBuilder.walkChildren(node, src));
 }
 
 DEFINE_CCH(BreakStmtProc) {
@@ -125,7 +125,7 @@ DEFINE_CCH(CXXRecordProc) {
     return cxxgen::makeVoidNode();
   }
   if (isTrueProp(node, "is_this_declaration_a_definition", false)) {
-    return emitClassDefinition(node, w, src);
+    return emitClassDefinition(node, ClassDefinitionBuilder, src);
   }
   const auto T = src.typeTable.at(getProp(node, "type"));
   auto classT = llvm::dyn_cast<XcodeMl::ClassType>(T.get());

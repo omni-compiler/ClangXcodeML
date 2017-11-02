@@ -71,17 +71,6 @@ makeNestedNameSpec(const std::string &ident, const SourceInfo &src) {
   return makeNestedNameSpec(*nns, src);
 }
 
-bool
-isInClassDecl(xmlNodePtr node, const SourceInfo &src) {
-  // FIXME: temporary implementation
-  auto parent = findFirst(node, "..", src.ctxt);
-  if (!parent) {
-    return false;
-  }
-  const auto name = static_cast<XMLString>(parent->name);
-  return name == "classDecl";
-}
-
 /*!
  * \brief Arguments to be passed to CodeBuilder::Procedure.
  */
@@ -256,12 +245,6 @@ makeFunctionDeclHead(xmlNodePtr node,
   const auto fnType = llvm::cast<XcodeMl::Function>(T.get());
 
   auto acc = makeVoidNode();
-  if (isInClassDecl(node, src) && isTrueProp(node, "is_virtual", false)) {
-    acc = acc + makeTokenNode("virtual");
-  }
-  if (isInClassDecl(node, src) && isTrueProp(node, "is_static", false)) {
-    acc = acc + makeTokenNode("static");
-  }
   acc = acc + makeFunctionDeclHead(fnType, name, args, src);
   return acc;
 }
@@ -288,9 +271,6 @@ DEFINE_CB(functionDeclProc) {
   const auto fnType =
       llvm::cast<XcodeMl::Function>(src.typeTable[fnDtident].get());
   auto decl = makeFunctionDeclHead(node, fnType->argNames(), src);
-  if (isTrueProp(node, "is_pure", false)) {
-    decl = decl + makeTokenNode("=") + makeTokenNode("0");
-  }
   decl = decl + makeTokenNode(";");
   return wrapWithLangLink(decl, node);
 }
@@ -302,6 +282,49 @@ DEFINE_CB(varProc) {
     return name;
   }
   return makeNestedNameSpec(*nnsident, src) + name;
+}
+
+DEFINE_CB(emitInlineMemberFunctionDefinition) {
+  const auto args = getParams(node, src);
+  auto acc = makeVoidNode();
+  if (isTrueProp(node, "is_virtual", false)) {
+    acc = acc + makeTokenNode("virtual");
+  }
+  if (isTrueProp(node, "is_static", false)) {
+    acc = acc + makeTokenNode("static");
+  }
+  acc = acc + makeFunctionDeclHead(node, args, src);
+
+  if (auto ctorInitList =
+          findFirst(node, "constructorInitializerList", src.ctxt)) {
+    acc = acc + ProgramBuilder.walk(ctorInitList, src);
+  }
+
+  auto body = findFirst(node, "body", src.ctxt);
+  assert(body);
+  acc = acc + makeTokenNode("{");
+  acc = acc + ProgramBuilder.walk(body, src);
+  acc = acc + makeTokenNode("}");
+  return acc;
+}
+
+DEFINE_CB(emitMemberFunctionDecl) {
+  const auto fnDtident = getProp(node, "type");
+  const auto fnType =
+      llvm::cast<XcodeMl::Function>(src.typeTable[fnDtident].get());
+  auto decl = makeVoidNode();
+  if (isTrueProp(node, "is_virtual", false)) {
+    decl = decl + makeTokenNode("virtual");
+  }
+  if (isTrueProp(node, "is_static", false)) {
+    decl = decl + makeTokenNode("static");
+  }
+  decl = decl + makeFunctionDeclHead(node, fnType->argNames(), src);
+  if (isTrueProp(node, "is_pure", false)) {
+    decl = decl + makeTokenNode("=") + makeTokenNode("0");
+  }
+  decl = decl + makeTokenNode(";");
+  return wrapWithLangLink(decl, node);
 }
 
 DEFINE_CB(memberExprProc) {
@@ -577,10 +600,6 @@ DEFINE_CB(varDeclProc) {
   const auto type = src.typeTable.at(dtident);
 
   auto acc = makeVoidNode();
-  if (isInClassDecl(node, src)
-      && isTrueProp(node, "is_static_data_member", false)) {
-    acc = acc + makeTokenNode("static");
-  }
   acc = acc + makeDecl(type,
                   name.toString(src.typeTable, src.nnsTable),
                   src.typeTable);
@@ -610,6 +629,38 @@ DEFINE_CB(usingDeclProc) {
       : makeTokenNode("using");
   return head + name.toString(src.typeTable, src.nnsTable)
       + makeTokenNode(";");
+}
+
+DEFINE_CB(emitDataMemberDecl) {
+  const auto nameNode = findFirst(node, "name", src.ctxt);
+  const auto name = getQualifiedNameFromNameNode(nameNode, src);
+
+  const auto dtident = getProp(node, "type");
+  const auto type = src.typeTable.at(dtident);
+
+  auto acc = makeVoidNode();
+  if (isTrueProp(node, "is_static_data_member", false)) {
+    acc = acc + makeTokenNode("static");
+  }
+  acc = acc + makeDecl(type,
+                  name.toString(src.typeTable, src.nnsTable),
+                  src.typeTable);
+  xmlNodePtr valueElem = findFirst(node, "value", src.ctxt);
+  if (!valueElem) {
+    return wrapWithLangLink(acc + makeTokenNode(";"), node);
+  }
+
+  auto ctorExpr =
+      findFirst(valueElem, "clangStmt[@class='CXXConstructExpr']", src.ctxt);
+  if (ctorExpr) {
+    const auto decl =
+        acc + declareClassTypeInit(w, ctorExpr, src) + makeTokenNode(";");
+    return wrapWithLangLink(decl, node);
+  }
+
+  acc = acc + makeTokenNode("=") + ProgramBuilder.walk(valueElem, src)
+      + makeTokenNode(";");
+  return wrapWithLangLink(acc, node);
 }
 
 DEFINE_CB(ctorInitListProc) {
@@ -673,7 +724,9 @@ DEFINE_CB(clangDeclProc) {
   return ClangDeclHandler.walk(node, w, src);
 }
 
-const CodeBuilder CXXBuilder("CodeBuilder",
+} // namespace
+
+const CodeBuilder ProgramBuilder("ProgramBuilder",
     makeInnerNode,
     {
         std::make_tuple("typeTable", NullProc),
@@ -770,7 +823,18 @@ const CodeBuilder CXXBuilder("CodeBuilder",
         // Ignore Decl_Record (structs are already emitted)
     });
 
-} // namespace
+const CodeBuilder ClassDefinitionBuilder("ClassDefinitionBuilder",
+    makeInnerNode,
+    {
+        std::make_tuple("functionDecl", emitMemberFunctionDecl),
+        std::make_tuple(
+            "functionDefinition", emitInlineMemberFunctionDefinition),
+        std::make_tuple("usingDecl", usingDeclProc),
+        std::make_tuple("varDecl", emitDataMemberDecl),
+
+        /* for elements defined by clang */
+        std::make_tuple("clangDecl", clangDeclProc),
+    });
 
 /*!
  * \brief Traverse an XcodeML document and generate C++ source code.
@@ -793,7 +857,7 @@ buildCode(
   cxxgen::Stream out;
   xmlNodePtr globalDeclarations =
       findFirst(rootNode, "/XcodeProgram/globalDeclarations", src.ctxt);
-  separateByBlankLines(CXXBuilder.walkChildren(globalDeclarations, src))
+  separateByBlankLines(ProgramBuilder.walkChildren(globalDeclarations, src))
       ->flush(out);
 
   ss << out.str();
