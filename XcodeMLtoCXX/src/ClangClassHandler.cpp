@@ -38,7 +38,7 @@ using cxxgen::makeTokenNode;
 using XcodeMl::CodeFragment;
 
 DEFINE_CCH(callCodeBuilder) {
-  return makeInnerNode(w.walkChildren(node, src));
+  return makeInnerNode(ProgramBuilder.walkChildren(node, src));
 }
 
 DEFINE_CCH(BreakStmtProc) {
