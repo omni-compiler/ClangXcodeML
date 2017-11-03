@@ -881,12 +881,10 @@ buildCode(
       findFirst(rootNode, "/XcodeProgram/typeTable", ctxt);
   xmlNodePtr nnsTableNode =
       findFirst(rootNode, "/XcodeProgram/nnsTable", ctxt);
-  SourceInfo src = {
-      ctxt,
+  SourceInfo src(ctxt,
       parseTypeTable(typeTableNode, ctxt, ss),
       analyzeNnsTable(nnsTableNode, ctxt),
-      getSourceLanguage(rootNode, ctxt),
-  };
+      getSourceLanguage(rootNode, ctxt));
 
   cxxgen::Stream out;
   xmlNodePtr globalDeclarations =
