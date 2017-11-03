@@ -1,6 +1,10 @@
 #ifndef SOURCEINFO_H
 #define SOURCEINFO_H
 
+namespace XcodeMl {
+class Environment;
+} // namespace XcodeMl
+
 enum class Language {
   Invalid,
   C,
@@ -13,6 +17,9 @@ enum class Language {
  */
 class SourceInfo {
 public:
+  explicit SourceInfo(xmlXPathContextPtr c,
+      const XcodeMl::Environment &e,
+      const XcodeMl::NnsMap &n);
   std::string getUniqueName();
 
   xmlXPathContextPtr ctxt;
