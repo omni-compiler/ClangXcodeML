@@ -98,6 +98,11 @@ getName(xmlNodePtr node) {
 }
 
 bool
+isEmpty(xmlNodePtr node) {
+  return getContent(node).empty();
+}
+
+bool
 isTrueProp(xmlNodePtr node, const char *name, bool default_value) {
   if (!xmlHasProp(node, BAD_CAST name)) {
     return default_value;
