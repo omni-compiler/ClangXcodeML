@@ -81,7 +81,10 @@ makeBases(const XcodeMl::ClassType &T, SourceInfo &src) {
 }
 
 CodeFragment
-emitClassDefinition(xmlNodePtr node, const CodeBuilder &w, SourceInfo &src) {
+emitClassDefinition(xmlNodePtr node,
+    const CodeBuilder &w,
+    SourceInfo &src,
+    const XcodeMl::ClassType &classType) {
   if (isTrueProp(node, "is_implicit", false)) {
     return cxxgen::makeVoidNode();
   }
@@ -104,11 +107,11 @@ emitClassDefinition(xmlNodePtr node, const CodeBuilder &w, SourceInfo &src) {
     decls.push_back(decl);
   }
 
-  return makeTokenNode("class")
-      + className.toString(src.typeTable, src.nnsTable)
-      + makeBases(classType, src) + makeTokenNode("{")
-      + separateByBlankLines(decls) + makeTokenNode("}") + makeTokenNode(";")
-      + cxxgen::makeNewLineNode();
+  const auto name = classType.name().getValueOr(cxxgen::makeVoidNode());
+
+  return makeTokenNode("class") + name + makeBases(classType, src)
+      + makeTokenNode("{") + separateByBlankLines(decls) + makeTokenNode("}")
+      + makeTokenNode(";") + cxxgen::makeNewLineNode();
 }
 
 DEFINE_CCH(CXXRecordProc) {
@@ -126,7 +129,7 @@ DEFINE_CCH(CXXRecordProc) {
   classT->setName(nameSpelling);
 
   if (isTrueProp(node, "is_this_declaration_a_definition", false)) {
-    return emitClassDefinition(node, ClassDefinitionBuilder, src);
+    return emitClassDefinition(node, ClassDefinitionBuilder, src, *classT);
   }
 
   /* forward declaration */
