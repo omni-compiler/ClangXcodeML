@@ -13,10 +13,15 @@ enum class Language {
  */
 class SourceInfo {
 public:
+  std::string getUniqueName();
+
   xmlXPathContextPtr ctxt;
   XcodeMl::Environment typeTable;
   XcodeMl::NnsMap nnsTable;
   Language language;
+
+private:
+  size_t uniqueNameIndex;
 };
 
 #endif /* !SOURCEINFO_H */
