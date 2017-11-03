@@ -124,9 +124,7 @@ DEFINE_CCH(CXXRecordProc) {
   if (isTrueProp(node, "is_implicit", false)) {
     return cxxgen::makeVoidNode();
   }
-  if (isTrueProp(node, "is_this_declaration_a_definition", false)) {
-    return emitClassDefinition(node, ClassDefinitionBuilder, src);
-  }
+
   const auto T = src.typeTable.at(getProp(node, "type"));
   auto classT = llvm::dyn_cast<XcodeMl::ClassType>(T.get());
   assert(classT);
@@ -135,6 +133,10 @@ DEFINE_CCH(CXXRecordProc) {
   const auto className = getQualifiedNameFromNameNode(nameNode, src);
   const auto nameSpelling = className.toString(src.typeTable, src.nnsTable);
   classT->setName(nameSpelling);
+
+  if (isTrueProp(node, "is_this_declaration_a_definition", false)) {
+    return emitClassDefinition(node, ClassDefinitionBuilder, src);
+  }
 
   /* forward declaration */
   return makeTokenNode("class") + nameSpelling + makeTokenNode(";");
