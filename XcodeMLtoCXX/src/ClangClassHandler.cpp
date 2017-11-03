@@ -60,10 +60,9 @@ DEFINE_CCH(CXXDeleteExprProc) {
 }
 
 XcodeMl::CodeFragment
-makeBases(XcodeMl::ClassType *T, SourceInfo &src) {
+makeBases(const XcodeMl::ClassType &T, SourceInfo &src) {
   using namespace XcodeMl;
-  assert(T);
-  const auto bases = T->getBases();
+  const auto bases = T.getBases();
   std::vector<CodeFragment> decls;
   std::transform(bases.begin(),
       bases.end(),
