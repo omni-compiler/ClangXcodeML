@@ -118,6 +118,19 @@ emitClassDefinition(xmlNodePtr node,
       + cxxgen::makeNewLineNode();
 }
 
+void
+setClassName(XcodeMl::ClassType &classType, xmlNodePtr node, SourceInfo &src) {
+  const auto nameNode = findFirst(node, "name", src.ctxt);
+  if (!nameNode || isEmpty(nameNode)) {
+    /* classType is unnamed */
+    classType.setName(src.getUniqueName());
+    return;
+  }
+  const auto className = getQualifiedNameFromNameNode(nameNode, src);
+  const auto nameSpelling = className.toString(src.typeTable, src.nnsTable);
+  classType.setName(nameSpelling);
+}
+
 DEFINE_CCH(CXXRecordProc) {
   if (isTrueProp(node, "is_implicit", false)) {
     return cxxgen::makeVoidNode();
