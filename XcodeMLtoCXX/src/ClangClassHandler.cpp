@@ -130,9 +130,14 @@ DEFINE_CCH(CXXRecordProc) {
   const auto T = src.typeTable.at(getProp(node, "type"));
   auto classT = llvm::dyn_cast<XcodeMl::ClassType>(T.get());
   assert(classT);
-  const auto name = classT->name();
-  assert(name.hasValue());
-  return makeTokenNode("class") + (*name) + makeTokenNode(";");
+
+  const auto nameNode = findFirst(node, "name", src.ctxt);
+  const auto className = getQualifiedNameFromNameNode(nameNode, src);
+  const auto nameSpelling = className.toString(src.typeTable, src.nnsTable);
+  classT->setName(nameSpelling);
+
+  /* forward declaration */
+  return makeTokenNode("class") + nameSpelling + makeTokenNode(";");
 }
 
 DEFINE_CCH(CXXTemporaryObjectExprProc) {
