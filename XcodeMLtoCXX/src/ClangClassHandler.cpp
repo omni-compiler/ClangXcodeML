@@ -85,14 +85,6 @@ emitClassDefinition(xmlNodePtr node, const CodeBuilder &w, SourceInfo &src) {
   if (isTrueProp(node, "is_implicit", false)) {
     return cxxgen::makeVoidNode();
   }
-  const auto nameNode = findFirst(node, "name", src.ctxt);
-  const auto className = getQualifiedNameFromNameNode(nameNode, src);
-
-  const auto typeName = getProp(node, "type");
-  const auto type = src.typeTable.at(typeName);
-  auto classType = llvm::dyn_cast<XcodeMl::ClassType>(type.get());
-  assert(classType);
-  classType->setName(className.toString(src.typeTable, src.nnsTable));
 
   std::vector<XcodeMl::CodeFragment> decls;
 
