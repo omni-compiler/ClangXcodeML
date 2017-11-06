@@ -116,3 +116,8 @@ XcodeMlPwdType
 getXcodeMlPath(xmlNodePtr node) {
   return {node};
 }
+
+std::ostream &operator<<(std::ostream &os, const XcodeMlPwdType &x) {
+  xcodeMlPwd(x.node, os);
+  return os;
+}

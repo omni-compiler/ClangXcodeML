@@ -26,4 +26,6 @@ struct XcodeMlPwdType {
 
 XcodeMlPwdType getXcodeMlPath(xmlNodePtr);
 
+std::ostream &operator<<(std::ostream &, const XcodeMlPwdType &);
+
 #endif /* !XCODEMLUTIL_H */
