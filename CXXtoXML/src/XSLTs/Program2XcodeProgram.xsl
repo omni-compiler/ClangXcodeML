@@ -262,9 +262,9 @@
           <memberFunction>
             <memberExpr>
               <xsl:apply-templates select="clangStmt[2]" />
-              <operator>
+              <name name_kind="operator">
                 <xsl:value-of select="@xcodeml_operator_kind" />
-              </operator>
+              </name>
             </memberExpr>
           </memberFunction>
           <arguments>
