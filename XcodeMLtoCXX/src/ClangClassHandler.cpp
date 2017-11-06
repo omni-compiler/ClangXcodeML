@@ -60,10 +60,9 @@ DEFINE_CCH(CXXDeleteExprProc) {
 }
 
 XcodeMl::CodeFragment
-makeBases(XcodeMl::ClassType *T, SourceInfo &src) {
+makeBases(const XcodeMl::ClassType &T, SourceInfo &src) {
   using namespace XcodeMl;
-  assert(T);
-  const auto bases = T->getBases();
+  const auto bases = T.getBases();
   std::vector<CodeFragment> decls;
   std::transform(bases.begin(),
       bases.end(),
@@ -82,18 +81,13 @@ makeBases(XcodeMl::ClassType *T, SourceInfo &src) {
 }
 
 CodeFragment
-emitClassDefinition(xmlNodePtr node, const CodeBuilder &w, SourceInfo &src) {
+emitClassDefinition(xmlNodePtr node,
+    const CodeBuilder &w,
+    SourceInfo &src,
+    const XcodeMl::ClassType &classType) {
   if (isTrueProp(node, "is_implicit", false)) {
     return cxxgen::makeVoidNode();
   }
-  const auto nameNode = findFirst(node, "name", src.ctxt);
-  const auto className = getQualifiedNameFromNameNode(nameNode, src);
-
-  const auto typeName = getProp(node, "type");
-  const auto type = src.typeTable.at(typeName);
-  auto classType = llvm::dyn_cast<XcodeMl::ClassType>(type.get());
-  assert(classType);
-  classType->setName(className.toString(src.typeTable, src.nnsTable));
 
   std::vector<XcodeMl::CodeFragment> decls;
 
@@ -113,26 +107,33 @@ emitClassDefinition(xmlNodePtr node, const CodeBuilder &w, SourceInfo &src) {
     decls.push_back(decl);
   }
 
-  return makeTokenNode("class")
-      + className.toString(src.typeTable, src.nnsTable)
-      + makeBases(classType, src) + makeTokenNode("{")
-      + separateByBlankLines(decls) + makeTokenNode("}") + makeTokenNode(";")
-      + cxxgen::makeNewLineNode();
+  const auto name = classType.name().getValueOr(cxxgen::makeVoidNode());
+
+  return makeTokenNode("class") + name + makeBases(classType, src)
+      + makeTokenNode("{") + separateByBlankLines(decls) + makeTokenNode("}")
+      + makeTokenNode(";") + cxxgen::makeNewLineNode();
 }
 
 DEFINE_CCH(CXXRecordProc) {
   if (isTrueProp(node, "is_implicit", false)) {
     return cxxgen::makeVoidNode();
   }
-  if (isTrueProp(node, "is_this_declaration_a_definition", false)) {
-    return emitClassDefinition(node, ClassDefinitionBuilder, src);
-  }
+
   const auto T = src.typeTable.at(getProp(node, "type"));
   auto classT = llvm::dyn_cast<XcodeMl::ClassType>(T.get());
   assert(classT);
-  const auto name = classT->name();
-  assert(name.hasValue());
-  return makeTokenNode("class") + (*name) + makeTokenNode(";");
+
+  const auto nameNode = findFirst(node, "name", src.ctxt);
+  const auto className = getQualifiedNameFromNameNode(nameNode, src);
+  const auto nameSpelling = className.toString(src.typeTable, src.nnsTable);
+  classT->setName(nameSpelling);
+
+  if (isTrueProp(node, "is_this_declaration_a_definition", false)) {
+    return emitClassDefinition(node, ClassDefinitionBuilder, src, *classT);
+  }
+
+  /* forward declaration */
+  return makeTokenNode("class") + nameSpelling + makeTokenNode(";");
 }
 
 DEFINE_CCH(CXXTemporaryObjectExprProc) {
