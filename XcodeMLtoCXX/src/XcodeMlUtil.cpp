@@ -81,3 +81,43 @@ getQualifiedNameFromNameNode(xmlNodePtr nameNode, const SourceInfo &src) {
   const auto nns = getNns(src.nnsTable, nameNode);
   return XcodeMl::Name(id, nns);
 }
+
+void
+xcodeMlPwd(xmlNodePtr node, std::ostream &os) {
+  assert(node);
+  if (!(node->parent)) {
+    os << "/";
+    return;
+  }
+
+  xcodeMlPwd(node->parent, os);
+  const auto name = getName(node);
+  const auto comment = static_cast<std::string>("(:")
+      + std::to_string(xmlGetLineNo(node)) + static_cast<std::string>(":)");
+
+  const std::map<std::string, std::string> specialNodes = {
+      {"clangStmt", "class"}, {"clangDecl", "class"},
+  };
+  const auto iter = specialNodes.find(name);
+  if (iter == specialNodes.end()) {
+    os << name << comment << "/";
+    return;
+  }
+  const auto attrVal = getPropOrNull(node, iter->second);
+  if (!attrVal.hasValue()) {
+    os << name << comment << "(:no @" << iter->second << ":)/";
+    return;
+  }
+  os << name << "[@" << iter->second << "='" << *attrVal << "']" << comment
+     << "/";
+}
+
+XcodeMlPwdType
+getXcodeMlPath(xmlNodePtr node) {
+  return {node};
+}
+
+std::ostream &operator<<(std::ostream &os, const XcodeMlPwdType &x) {
+  xcodeMlPwd(x.node, os);
+  return os;
+}

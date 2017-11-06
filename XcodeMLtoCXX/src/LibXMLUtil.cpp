@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <cassert>
 #include <iostream>
+#include <map>
 #include <memory>
 #include <string>
 #include <sstream>
@@ -13,6 +14,10 @@
 #include <libxml/xpathInternals.h>
 #include "llvm/ADT/Optional.h"
 #include "LibXMLUtil.h"
+#include "StringTree.h"
+#include "XcodeMlNns.h"
+#include "XcodeMlName.h"
+#include "XcodeMlUtil.h"
 #include "XMLString.h"
 
 static xmlXPathObjectPtr getNodeSet(
@@ -58,6 +63,7 @@ getProp(xmlNodePtr node, const std::string &attr) {
   const auto value = getPropOrNull(node, attr);
   if (!value.hasValue()) {
     std::cerr << "getProp: " << attr << " not found" << std::endl;
+    std::cerr << getXcodeMlPath(node) << std::endl;
     xmlDebugDumpNode(stderr, node, 0);
     std::abort();
   }

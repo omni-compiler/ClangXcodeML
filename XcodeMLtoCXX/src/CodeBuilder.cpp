@@ -477,6 +477,11 @@ DEFINE_CB(functionCallProc) {
   }
 
   xmlNodePtr function = findFirst(node, "function|memberFunction", src.ctxt);
+  if (!function) {
+    std::cerr << "error: callee not found" << getXcodeMlPath(node)
+              << std::endl;
+    std::abort();
+  }
   const auto callee = findFirst(function, "*", src.ctxt);
   return w.walk(callee, src) + w.walk(arguments, src);
 }
