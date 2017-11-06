@@ -70,7 +70,7 @@ UIDIdent::classof(const UnqualId *id) {
 }
 
 OpFuncId::OpFuncId(const std::string &op)
-    : UnqualId(UnqualIdKind::OpFuncId), opName(op) {
+    : UnqualId(UnqualIdKind::OpFuncId), opSpelling(op) {
 }
 
 UnqualId *
@@ -81,9 +81,7 @@ OpFuncId::clone() const {
 
 CodeFragment
 OpFuncId::toString(const Environment &) const {
-  const auto op = OperatorNameToSpelling(opName);
-  assert(op.hasValue());
-  return makeTokenNode("operator") + makeTokenNode(*op);
+  return makeTokenNode("operator") + makeTokenNode(opSpelling);
 }
 
 bool

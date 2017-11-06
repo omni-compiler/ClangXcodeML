@@ -71,7 +71,7 @@ protected:
   OpFuncId(const OpFuncId &) = default;
 
 private:
-  std::string opName;
+  std::string opSpelling;
 };
 
 class ConvFuncId : public UnqualId {
