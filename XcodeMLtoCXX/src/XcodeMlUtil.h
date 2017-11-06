@@ -18,4 +18,6 @@ std::shared_ptr<XcodeMl::Nns> getNns(
 XcodeMl::Name getQualifiedNameFromNameNode(
     xmlNodePtr nameNode, const SourceInfo &);
 
+void xcodeMlPwd(xmlNodePtr, std::ostream &);
+
 #endif /* !XCODEMLUTIL_H */
