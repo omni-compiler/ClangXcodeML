@@ -92,19 +92,22 @@ xcodeMlPwd(xmlNodePtr node, std::ostream &os) {
 
   xcodeMlPwd(node->parent, os);
   const auto name = getName(node);
+  const auto comment = static_cast<std::string>("(:")
+      + std::to_string(xmlGetLineNo(node)) + static_cast<std::string>(":)");
 
   const std::map<std::string, std::string> specialNodes = {
       {"clangStmt", "class"}, {"clangDecl", "class"},
   };
   const auto iter = specialNodes.find(name);
   if (iter == specialNodes.end()) {
-    os << name << "/";
+    os << name << comment << "/";
     return;
   }
   const auto attrVal = getPropOrNull(node, iter->second);
   if (!attrVal.hasValue()) {
-    os << name << "(no @" << iter->second << ")/";
+    os << name << comment << "(:no @" << iter->second << ":)/";
     return;
   }
-  os << name << "[@" << iter->second << "='" << *attrVal << "']/";
+  os << name << "[@" << iter->second << "='" << *attrVal << "']" << comment
+     << "/";
 }
