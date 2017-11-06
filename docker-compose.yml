@@ -2,7 +2,7 @@ version: '2'
 
 services:
   workspace:
-    image: hnagamin/llvm-3.9
+    image: koyama41/llvm-3.9
     volumes:
       - /etc/localtime:/etc/localtime
       - /home:/home
