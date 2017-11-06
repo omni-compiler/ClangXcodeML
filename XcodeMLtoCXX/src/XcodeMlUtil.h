@@ -20,4 +20,10 @@ XcodeMl::Name getQualifiedNameFromNameNode(
 
 void xcodeMlPwd(xmlNodePtr, std::ostream &);
 
+struct XcodeMlPwdType {
+  xmlNodePtr node;
+};
+
+XcodeMlPwdType getXcodeMlPath(xmlNodePtr);
+
 #endif /* !XCODEMLUTIL_H */

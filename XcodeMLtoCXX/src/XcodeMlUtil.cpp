@@ -111,3 +111,8 @@ xcodeMlPwd(xmlNodePtr node, std::ostream &os) {
   os << name << "[@" << iter->second << "='" << *attrVal << "']" << comment
      << "/";
 }
+
+XcodeMlPwdType
+getXcodeMlPath(xmlNodePtr node) {
+  return {node};
+}
