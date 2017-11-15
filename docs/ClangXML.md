@@ -2,6 +2,44 @@
 % XcalableMP/Omni Compiler Project
 %
 
+この文書はClangXML形式の構文と意味内容を定義する。
+ClangXML形式とは、C++プログラムをXMLで表現するための形式である。
+
+# ClangXML文書の構造
+
+ClangXML文書は次の構造に従う。
+
+| `<Program>`
+|   `<clangAST>`
+|     `<clangDecl class="TranslationUnit">`
+|       `<xcodemlTypeTable>`
+|         _データ型定義要素_ ...
+|       `</xcodemlTypeTable>`
+|       `<xcodemlNnsTable>`
+|         _NNS定義要素_ ...
+|       `</xcodemlNnsTable>`
+|     `</clangDecl>`
+|     _C++プログラムを表現する`clangDecl`要素_ ...
+|   `</clangAST>`
+| `</Program>`
+
+ひとつのClangXML文書は、C++のひとつの翻訳単位をXML文書として表現する。
+
+ClangXML文書のルート要素は`Program`要素である。
+`Program`要素はただひとつの子要素として`clangAST`要素をもつ。
+`clangAST`要素はただひとつの子要素として`clangDecl`(`TranslationUnit`)要素をもつ。
+
+C++プログラム中で使用される型はデータ型識別要素とデータ型識別名によって表現される。
+
+データ型識別要素は型を定義する。
+すべてのデータ型識別要素は`xcodemlTypeTable`要素の直接の子要素である。
+
+## 型
+
+
+
+## NNS
+
 # `Program`要素
 
 | `<Program`
