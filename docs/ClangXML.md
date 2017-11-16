@@ -90,6 +90,36 @@ C++プログラム中で使用される型(データ型)をデータ型識別名
 
 ### `classType`要素
 
+| `<classType`
+|   `cxx_class_kind=` `"class"` | `"struct"`
+|   `is_anonymous=` `"true"` | `"false"` | `"1"` | `"0"`
+|   `type="` _ユーザ定義されたデータ型識別名_ `"`
+|   `>`
+|   _`inheritedFrom`要素_
+|   _`symbols`要素_
+| `</classType>`
+
+`classType`要素はクラス型を表現する。
+
+`inheritedFrom`子要素はこのクラスの派生元クラスのリストを表現する。
+このクラスが派生クラスでない場合、`inheritedFrom`要素は子要素をもたない。
+このクラスが派生クラスである場合、
+`inheritedFrom`要素は派生元クラスを表す`typeName`要素を1個以上子要素にもつ。
+`typeName`要素の順番は、派生クラスのリストの順番と等しい。
+
+`symbols`子要素はこのクラスのメンバーのリストを表現する。
+
+
+この要素は、必須属性として`type`属性をもつ。
+`type`属性の値はユーザ定義されたデータ型識別名であり、
+この要素によって定義されるクラス型に与えられるデータ型識別名を表す。
+
+この要素は、オプションで`cxx_class_kind`属性、`is_anonymous`属性を利用できる。
+`cxx_class_kind`属性の値は`"class"`,`"struct"`のいずれかであり、
+C++プログラム中でこのクラスを宣言するのに使われたキーワードを表す。
+`is_anonymous`属性の値は`"true"`, `"false"`, `"1"`, `"0"`のいずれかであり、
+`"true"`または`"1"`のとき無名クラスであることを表す。
+
 ### `structType`要素
 
 ### `unionType`要素
