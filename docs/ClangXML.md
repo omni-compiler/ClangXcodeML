@@ -40,16 +40,45 @@ C++プログラム中で使用される型(データ型)をデータ型識別名
 
 *データ型識別名*はデータ型に与えられる名前で、アルファベット、数字、およびアンダースコア(`_`)
 からなる有限長文字列である。
+データ型識別名には、
+予約データ型識別名とユーザ定義されたデータ型識別名と2種類がある。
 ひとつのClangXML文書中で、ひとつのデータ型識別名はただひとつの同じデータ型を指示する。
 ひとつのClangXML文書中で、同じデータ型に複数のデータ型識別名を与えてもよい。
 
 *予約データ型識別名*はデータ型識別名の一種である。
 予約データ型識別名は次のいずれかである。
 
+* `bool`
 * `char`
+* `char16_t`
+* `char32_t`
+* `double`
+* `double_complex`
+* `double_imaginary`
+* `float`
+* `float_complex`
+* `float_imaginary`
 * `int`
+* `long`
+* `long_double`
+* `long_double_complex`
+* `long_double_imaginary`
+* `long_long`
 * `short`
+* `unsigned`
+* `unsigned_char`
+* `unsigned_long`
+* `unsigned_long_long`
+* `unsigned_short`
 * `void`
+* `wchar_t`
+* `__builtin_va_arg`
+
+それ以外のデータ型識別名はユーザ定義されたデータ型識別名とよばれる。
+*ユーザ定義されたデータ型識別名*は、
+アルファベットの大文字で始まる。
+また、連続したアンダースコアを含んではならない。
+
 
 *データ型定義要素*は、`xcodemlTypeTable`要素の直接の子要素であって、
 データ型識別名とそれが指示するデータ型を対応づける。
