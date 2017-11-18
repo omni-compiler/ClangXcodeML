@@ -93,18 +93,17 @@ emitClassDefinition(xmlNodePtr node,
 
   for (xmlNodePtr memberNode = xmlFirstElementChild(node); memberNode;
        memberNode = xmlNextElementSibling(memberNode)) {
+    /* Traverse `memberNode` regardless of whether `CodeBuilder` prints it. */
+    const auto decl = w.walk(memberNode, src);
+
     const auto accessProp = getPropOrNull(memberNode, "access");
-    if (!accessProp.hasValue()) {
-      const auto decl =
-          makeTokenNode("/* ignored a member with no access specifier */")
-          + cxxgen::makeNewLineNode();
-      decls.push_back(decl);
-      continue;
+    if (accessProp.hasValue()) {
+      const auto access = *accessProp;
+      decls.push_back(makeTokenNode(access) + makeTokenNode(":") + decl);
+    } else {
+      decls.push_back(makeTokenNode(
+          "\n/* Ignored a member with no access specifier */\n"));
     }
-    const auto access = *accessProp;
-    const auto decl =
-        makeTokenNode(access) + makeTokenNode(":") + w.walk(memberNode, src);
-    decls.push_back(decl);
   }
 
   const auto name = classType.name().getValueOr(cxxgen::makeVoidNode());
