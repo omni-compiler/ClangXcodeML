@@ -167,8 +167,8 @@ public:
   ParamList(const std::vector<DataTypeIdent> &paramTypes, bool ellipsis);
   bool isVariadic() const;
   bool isEmpty() const;
-  CodeFragment makeDeclaration(
-      const std::vector<CodeFragment> &, const Environment &) const;
+  CodeFragment makeDeclaration(const std::vector<CodeFragment> &paramNames,
+      const Environment &typeTable) const;
 
 private:
   std::vector<DataTypeIdent> dtidents;
