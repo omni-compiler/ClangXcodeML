@@ -765,14 +765,6 @@ makeLValueReferenceType(const DataTypeIdent &ident, const DataTypeIdent &ref) {
 }
 
 TypeRef
-makeFunctionType(DataTypeIdent ident,
-    TypeRef returnType,
-    const Function::Params &params,
-    bool isVariadic) {
-  return std::make_shared<Function>(ident, returnType, params, isVariadic);
-}
-
-TypeRef
 makeArrayType(DataTypeIdent ident, TypeRef elemType, size_t size) {
   return std::make_shared<Array>(ident, elemType->dataTypeIdent(), size);
 }
