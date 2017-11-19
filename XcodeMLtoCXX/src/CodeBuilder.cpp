@@ -200,7 +200,7 @@ const CodeBuilder::Procedure handleScope = handleBracketsLn(
     "{", "}", handleIndentation(walkChildrenWithInsertingNewLines));
 
 std::vector<XcodeMl::CodeFragment>
-getParams(xmlNodePtr fnNode, const SourceInfo &src) {
+getParamNames(xmlNodePtr fnNode, const SourceInfo &src) {
   std::vector<XcodeMl::CodeFragment> vec;
   const auto params =
       findNodes(fnNode, "TypeLoc/clangDecl[@class='ParmVar']/name", src.ctxt);
@@ -250,7 +250,7 @@ makeFunctionDeclHead(xmlNodePtr node,
 }
 
 DEFINE_CB(functionDefinitionProc) {
-  const auto args = getParams(node, src);
+  const auto args = getParamNames(node, src);
   auto acc = makeFunctionDeclHead(node, args, src);
 
   if (auto ctorInitList =
@@ -285,7 +285,7 @@ DEFINE_CB(varProc) {
 }
 
 DEFINE_CB(emitInlineMemberFunctionDefinition) {
-  const auto args = getParams(node, src);
+  const auto args = getParamNames(node, src);
   auto acc = makeVoidNode();
   if (isTrueProp(node, "is_virtual", false)) {
     acc = acc + makeTokenNode("virtual");
