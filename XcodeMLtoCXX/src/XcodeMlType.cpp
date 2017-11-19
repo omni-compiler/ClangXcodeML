@@ -247,8 +247,9 @@ LValueReferenceType::classof(const Type *T) {
   return T->getKind() == TypeKind::LValueReference;
 }
 
-ParamList::ParamList(const std::vector<DataTypeIdent> &d, bool e)
-    : dtidents(d), hasEllipsis(e) {
+ParamList::ParamList(
+    const std::vector<DataTypeIdent> &paramTypes, bool ellipsis)
+    : dtidents(paramTypes), hasEllipsis(ellipsis) {
 }
 
 bool

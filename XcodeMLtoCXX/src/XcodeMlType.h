@@ -164,7 +164,7 @@ class ParamList {
 public:
   ParamList() = default;
   ParamList &operator=(const ParamList &) = default;
-  ParamList(const std::vector<DataTypeIdent> &, bool);
+  ParamList(const std::vector<DataTypeIdent> &paramTypes, bool ellipsis);
   bool isVariadic() const;
   bool isEmpty() const;
   CodeFragment makeDeclaration(
