@@ -772,6 +772,13 @@ makeArrayType(DataTypeIdent ident, DataTypeIdent elemName, Array::Size size) {
 }
 
 TypeRef
+makeFunctionType(const DataTypeIdent &ident,
+    const DataTypeIdent &returnType,
+    const std::vector<DataTypeIdent> &paramTypes) {
+  return std::make_shared<Function>(ident, returnType, paramTypes);
+}
+
+TypeRef
 makeEnumType(const DataTypeIdent &ident) {
   return std::make_shared<EnumType>(ident, EnumType::EnumName());
 }

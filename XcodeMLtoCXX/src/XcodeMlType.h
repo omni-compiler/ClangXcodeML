@@ -376,6 +376,9 @@ TypeRef makeClassType(const DataTypeIdent &, const ClassType::Symbols &);
 TypeRef makeClassType(const DataTypeIdent &,
     const std::vector<ClassType::BaseClass> &,
     const ClassType::Symbols &);
+TypeRef makeFunctionType(const DataTypeIdent &ident,
+    const DataTypeIdent &returnType,
+    const std::vector<DataTypeIdent> &paramTypes);
 TypeRef makeStructType(
     const DataTypeIdent &, const CodeFragment &, const Struct::MemberList &);
 TypeRef makeOtherType(const DataTypeIdent &);
