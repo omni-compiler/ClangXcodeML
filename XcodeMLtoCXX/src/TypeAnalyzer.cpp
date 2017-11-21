@@ -73,20 +73,20 @@ DEFINE_TA(functionTypeProc) {
   auto returnType = map[returnName];
   xmlXPathObjectPtr paramsNode =
       xmlXPathNodeEval(node, BAD_CAST "params/paramTypeName", ctxt);
-  XcodeMl::Function::Params params;
+  std::vector<XcodeMl::DataTypeIdent> paramTypes;
   for (size_t i = 0, len = length(paramsNode); i < len; ++i) {
-    xmlNodePtr param = nth(paramsNode, i);
-    XMLString paramType(xmlGetProp(param, BAD_CAST "type"));
-    XMLString paramName(xmlNodeGetContent(param));
-    params.emplace_back(paramType, makeTokenNode(paramName));
+    xmlNodePtr ithParamNode = nth(paramsNode, i);
+    const auto paramType = getProp(ithParamNode, "type");
+    paramTypes.push_back(paramType);
   }
-  XMLString name(xmlGetProp(node, BAD_CAST "type"));
-  map.setReturnType(name, returnType);
-  auto func = XcodeMl::makeFunctionType(
-      name, returnType, params, findFirst(node, "params/ellipsis", ctxt));
+  const auto dtident = getProp(node, "type");
+  map.setReturnType(dtident, returnType);
+  const auto func = findFirst(node, "params/ellipsis", ctxt)
+      ? XcodeMl::makeVariadicFunctionType(dtident, returnName, paramTypes)
+      : XcodeMl::makeFunctionType(dtident, returnName, paramTypes);
   func->setConst(isTrueProp(node, "is_const", false));
   func->setVolatile(isTrueProp(node, "is_volatile", false));
-  map[name] = func;
+  map[dtident] = func;
 }
 
 DEFINE_TA(arrayTypeProc) {
