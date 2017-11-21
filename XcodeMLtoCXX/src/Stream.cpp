@@ -31,6 +31,29 @@ struct StreamImpl {
   char lastChar;
 };
 
+namespace {
+
+void
+outputIndentation(StreamImpl &impl) {
+  if (impl.alreadyIndented) {
+    return;
+  }
+  impl.ss << std::string(impl.curIndent, '\t');
+  impl.lastChar = '\t';
+  impl.alreadyIndented = true;
+}
+
+void
+emit(StreamImpl &impl, const std::string &str) {
+  if (str.empty()) {
+    return;
+  }
+  impl.ss << str;
+  impl.lastChar = str.back();
+}
+
+} // namespace
+
 Stream::Stream() : ss(), curIndent(0), alreadyIndented(false), lastChar('\n') {
 }
 
@@ -97,28 +120,6 @@ Stream::insert(const std::string &token) {
     emit(" ");
   }
   emit(token);
-}
-
-void
-Stream::outputIndentation() {
-  if (alreadyIndented) {
-    return;
-  }
-
-  for (size_t i = 0; i < curIndent; ++i) {
-    ss << "\t";
-  }
-  lastChar = '\t';
-  alreadyIndented = true;
-}
-
-void
-Stream::emit(const std::string &str) {
-  if (str.empty()) {
-    return;
-  }
-  ss << str;
-  lastChar = str.back();
 }
 
 } // namespace CXXCodeGen
