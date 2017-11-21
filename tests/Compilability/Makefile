@@ -14,6 +14,7 @@ CTOXCODEML = $(ROOTDIR)/scripts/CXXtoXcodeML
 CXXTOXCODEML = $(ROOTDIR)/scripts/CXXtoXcodeML
 CTOXCODEMLFLAGS = --
 CXXTOXCODEMLFLAGS = --
+CXXTOXMLFLAGS = --
 XCODEMLTOCXX = $(XCODEMLTOCXXDIR)/XcodeMLtoCXX
 CTESTCASES = $(wildcard *.src.c)
 CTESTOBJECTS = $(CTESTCASES:.src.c=.dst.c)
@@ -33,6 +34,9 @@ CXXTESTOBJECTS = $(CXXTESTCASES:.src.cpp=.dst.cpp)
 
 %.dst.cpp: %.cpp.xcodeml
 	$(XCODEMLTOCXX) $< > $@
+
+%.cpp.xml: %.src.cpp
+	../../CXXtoXML/src/CXXtoXML $< $(CXXTOXMLFLAGS) > $@
 
 check: $(CXXTESTOBJECTS) $(CTESTOBJECTS)
 	set -e; \
