@@ -54,7 +54,7 @@ emit(StreamImpl &impl, const std::string &str) {
 
 } // namespace
 
-Stream::Stream() : ss(), curIndent(0), alreadyIndented(false), lastChar('\n') {
+Stream::Stream() : pimpl(make_unique<StreamImpl>()) {
 }
 
 std::string
