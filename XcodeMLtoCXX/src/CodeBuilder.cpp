@@ -200,7 +200,7 @@ const CodeBuilder::Procedure handleScope = handleBracketsLn(
     "{", "}", handleIndentation(walkChildrenWithInsertingNewLines));
 
 std::vector<XcodeMl::CodeFragment>
-getParams(xmlNodePtr fnNode, const SourceInfo &src) {
+getParamNames(xmlNodePtr fnNode, const SourceInfo &src) {
   std::vector<XcodeMl::CodeFragment> vec;
   const auto params =
       findNodes(fnNode, "TypeLoc/clangDecl[@class='ParmVar']/name", src.ctxt);
@@ -214,7 +214,7 @@ getParams(xmlNodePtr fnNode, const SourceInfo &src) {
 XcodeMl::CodeFragment
 makeFunctionDeclHead(XcodeMl::Function *func,
     const XcodeMl::Name &name,
-    const std::vector<XcodeMl::CodeFragment> &args,
+    const std::vector<XcodeMl::CodeFragment> &paramNames,
     const SourceInfo &src) {
   const auto nameSpelling = name.toString(src.typeTable, src.nnsTable);
   const auto pUnqualId = name.getUnqualId();
@@ -227,15 +227,15 @@ makeFunctionDeclHead(XcodeMl::Function *func,
      *    int A::operator int();
      */
     return func->makeDeclarationWithoutReturnType(
-        nameSpelling, args, src.typeTable);
+        nameSpelling, paramNames, src.typeTable);
   } else {
-    return func->makeDeclaration(nameSpelling, args, src.typeTable);
+    return func->makeDeclaration(nameSpelling, paramNames, src.typeTable);
   }
 }
 
 XcodeMl::CodeFragment
 makeFunctionDeclHead(xmlNodePtr node,
-    const std::vector<XcodeMl::CodeFragment> args,
+    const std::vector<XcodeMl::CodeFragment> paramNames,
     const SourceInfo &src) {
   const auto nameNode = findFirst(node, "name", src.ctxt);
   const auto name = getQualifiedNameFromNameNode(nameNode, src);
@@ -245,13 +245,13 @@ makeFunctionDeclHead(xmlNodePtr node,
   const auto fnType = llvm::cast<XcodeMl::Function>(T.get());
 
   auto acc = makeVoidNode();
-  acc = acc + makeFunctionDeclHead(fnType, name, args, src);
+  acc = acc + makeFunctionDeclHead(fnType, name, paramNames, src);
   return acc;
 }
 
 DEFINE_CB(functionDefinitionProc) {
-  const auto args = getParams(node, src);
-  auto acc = makeFunctionDeclHead(node, args, src);
+  const auto paramNames = getParamNames(node, src);
+  auto acc = makeFunctionDeclHead(node, paramNames, src);
 
   if (auto ctorInitList =
           findFirst(node, "constructorInitializerList", src.ctxt)) {
@@ -285,7 +285,7 @@ DEFINE_CB(varProc) {
 }
 
 DEFINE_CB(emitInlineMemberFunctionDefinition) {
-  const auto args = getParams(node, src);
+  const auto paramNames = getParamNames(node, src);
   auto acc = makeVoidNode();
   if (isTrueProp(node, "is_virtual", false)) {
     acc = acc + makeTokenNode("virtual");
@@ -293,7 +293,7 @@ DEFINE_CB(emitInlineMemberFunctionDefinition) {
   if (isTrueProp(node, "is_static", false)) {
     acc = acc + makeTokenNode("static");
   }
-  acc = acc + makeFunctionDeclHead(node, args, src);
+  acc = acc + makeFunctionDeclHead(node, paramNames, src);
 
   if (auto ctorInitList =
           findFirst(node, "constructorInitializerList", src.ctxt)) {

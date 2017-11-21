@@ -164,11 +164,11 @@ class ParamList {
 public:
   ParamList() = default;
   ParamList &operator=(const ParamList &) = default;
-  ParamList(const std::vector<DataTypeIdent> &, bool);
+  ParamList(const std::vector<DataTypeIdent> &paramTypes, bool ellipsis);
   bool isVariadic() const;
   bool isEmpty() const;
-  CodeFragment makeDeclaration(
-      const std::vector<CodeFragment> &, const Environment &) const;
+  CodeFragment makeDeclaration(const std::vector<CodeFragment> &paramNames,
+      const Environment &typeTable) const;
 
 private:
   std::vector<DataTypeIdent> dtidents;
@@ -177,12 +177,10 @@ private:
 
 class Function : public Type {
 public:
-  using Params = std::vector<std::tuple<DataTypeIdent, CodeFragment>>;
   Function(DataTypeIdent,
-      TypeRef,
+      const DataTypeIdent &,
       const std::vector<DataTypeIdent> &,
       bool = false);
-  Function(DataTypeIdent, TypeRef, const Params &, bool = false);
   CodeFragment makeDeclarationWithoutReturnType(
       CodeFragment, const std::vector<CodeFragment> &, const Environment &);
   CodeFragment makeDeclarationWithoutReturnType(
@@ -368,8 +366,6 @@ TypeRef makeQualifiedType(
 TypeRef makePointerType(DataTypeIdent, TypeRef);
 TypeRef makePointerType(DataTypeIdent, DataTypeIdent);
 TypeRef makeLValueReferenceType(const DataTypeIdent &, const DataTypeIdent &);
-TypeRef makeFunctionType(
-    DataTypeIdent, TypeRef, const Function::Params &, bool = false);
 TypeRef makeArrayType(DataTypeIdent, TypeRef, size_t);
 TypeRef makeArrayType(DataTypeIdent, TypeRef, size_t);
 TypeRef makeArrayType(DataTypeIdent, TypeRef, Array::Size);
@@ -380,8 +376,14 @@ TypeRef makeClassType(const DataTypeIdent &, const ClassType::Symbols &);
 TypeRef makeClassType(const DataTypeIdent &,
     const std::vector<ClassType::BaseClass> &,
     const ClassType::Symbols &);
+TypeRef makeFunctionType(const DataTypeIdent &ident,
+    const DataTypeIdent &returnType,
+    const std::vector<DataTypeIdent> &paramTypes);
 TypeRef makeStructType(
     const DataTypeIdent &, const CodeFragment &, const Struct::MemberList &);
+TypeRef makeVariadicFunctionType(const DataTypeIdent &ident,
+    const DataTypeIdent &returnType,
+    const std::vector<DataTypeIdent> &paramTypes);
 TypeRef makeOtherType(const DataTypeIdent &);
 
 bool hasParen(const TypeRef &, const Environment &);

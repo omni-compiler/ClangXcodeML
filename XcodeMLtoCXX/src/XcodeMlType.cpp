@@ -247,8 +247,9 @@ LValueReferenceType::classof(const Type *T) {
   return T->getKind() == TypeKind::LValueReference;
 }
 
-ParamList::ParamList(const std::vector<DataTypeIdent> &d, bool e)
-    : dtidents(d), hasEllipsis(e) {
+ParamList::ParamList(
+    const std::vector<DataTypeIdent> &paramTypes, bool ellipsis)
+    : dtidents(paramTypes), hasEllipsis(ellipsis) {
 }
 
 bool
@@ -265,12 +266,13 @@ ParamList::isEmpty() const {
 }
 
 CodeFragment
-ParamList::makeDeclaration(
-    const std::vector<CodeFragment> &vars, const Environment &env) const {
-  assert(dtidents.size() == vars.size());
+ParamList::makeDeclaration(const std::vector<CodeFragment> &paramNames,
+    const Environment &typeTable) const {
+  assert(dtidents.size() == paramNames.size());
   std::vector<CodeFragment> decls;
   for (int i = 0, len = dtidents.size(); i < len; ++i) {
-    decls.push_back(makeDecl(env[dtidents[i]], vars[i], env));
+    const auto ithType = typeTable.at(dtidents[i]);
+    decls.push_back(makeDecl(ithType, paramNames[i], typeTable));
   }
   return CXXCodeGen::join(",", decls)
       + (isVariadic() ? makeTokenNode(",") + makeTokenNode("...")
@@ -278,26 +280,13 @@ ParamList::makeDeclaration(
 }
 
 Function::Function(DataTypeIdent ident,
-    TypeRef r,
+    const DataTypeIdent &r,
     const std::vector<DataTypeIdent> &p,
     bool v)
     : Type(TypeKind::Function, ident),
-      returnValue(r->dataTypeIdent()),
+      returnValue(r),
       params(p, v),
       defaultArgs(p.size(), makeVoidNode()) {
-}
-
-Function::Function(DataTypeIdent ident, TypeRef r, const Params &p, bool v)
-    : Type(TypeKind::Function, ident),
-      returnValue(r->dataTypeIdent()),
-      params(),
-      defaultArgs() {
-  std::vector<DataTypeIdent> dtidents;
-  for (auto param : p) {
-    dtidents.push_back(std::get<0>(param));
-    defaultArgs.push_back(std::get<1>(param));
-  }
-  params = ParamList(dtidents, v);
 }
 
 CodeFragment
@@ -763,14 +752,6 @@ makeLValueReferenceType(const DataTypeIdent &ident, const DataTypeIdent &ref) {
 }
 
 TypeRef
-makeFunctionType(DataTypeIdent ident,
-    TypeRef returnType,
-    const Function::Params &params,
-    bool isVariadic) {
-  return std::make_shared<Function>(ident, returnType, params, isVariadic);
-}
-
-TypeRef
 makeArrayType(DataTypeIdent ident, TypeRef elemType, size_t size) {
   return std::make_shared<Array>(ident, elemType->dataTypeIdent(), size);
 }
@@ -788,6 +769,20 @@ makeArrayType(DataTypeIdent ident, TypeRef elemType, Array::Size size) {
 TypeRef
 makeArrayType(DataTypeIdent ident, DataTypeIdent elemName, Array::Size size) {
   return std::make_shared<Array>(ident, elemName, size);
+}
+
+TypeRef
+makeFunctionType(const DataTypeIdent &ident,
+    const DataTypeIdent &returnType,
+    const std::vector<DataTypeIdent> &paramTypes) {
+  return std::make_shared<Function>(ident, returnType, paramTypes);
+}
+
+TypeRef
+makeVariadicFunctionType(const DataTypeIdent &ident,
+    const DataTypeIdent &returnType,
+    const std::vector<DataTypeIdent> &paramTypes) {
+  return std::make_shared<Function>(ident, returnType, paramTypes, true);
 }
 
 TypeRef
