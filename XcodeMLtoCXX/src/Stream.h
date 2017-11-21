@@ -33,4 +33,11 @@ private:
 
 } // namespace CXXCodeGen
 
+CXXCodeGen::Stream &operator<<(
+    CXXCodeGen::Stream &, const CXXCodeGen::space_t &);
+CXXCodeGen::Stream &operator<<(
+    CXXCodeGen::Stream &, const CXXCodeGen::newline_t &);
+CXXCodeGen::Stream &operator<<(CXXCodeGen::Stream &, const std::string &);
+CXXCodeGen::Stream &operator<<(CXXCodeGen::Stream &, char);
+
 #endif /* !CXXCODEGEN_H */
