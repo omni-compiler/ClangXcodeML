@@ -102,12 +102,14 @@ Stream::emit(const std::string &str) {
 
 } // namespace CXXCodeGen
 
-CXXCodeGen::Stream &operator<<(CXXCodeGen::Stream &s, CXXCodeGen::space_t) {
+CXXCodeGen::Stream &operator<<(
+    CXXCodeGen::Stream &s, const CXXCodeGen::space_t &) {
   s.insertSpace();
   return s;
 }
 
-CXXCodeGen::Stream &operator<<(CXXCodeGen::Stream &s, CXXCodeGen::newline_t) {
+CXXCodeGen::Stream &operator<<(
+    CXXCodeGen::Stream &s, const CXXCodeGen::newline_t &) {
   s.insertNewLine();
   return s;
 }
