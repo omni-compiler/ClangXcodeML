@@ -177,7 +177,6 @@ private:
 
 class Function : public Type {
 public:
-  using Params = std::vector<std::tuple<DataTypeIdent, CodeFragment>>;
   Function(DataTypeIdent,
       TypeRef,
       const std::vector<DataTypeIdent> &,
