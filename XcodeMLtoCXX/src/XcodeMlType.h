@@ -381,6 +381,9 @@ TypeRef makeFunctionType(const DataTypeIdent &ident,
     const std::vector<DataTypeIdent> &paramTypes);
 TypeRef makeStructType(
     const DataTypeIdent &, const CodeFragment &, const Struct::MemberList &);
+TypeRef makeVariadicFunctionType(const DataTypeIdent &ident,
+    const DataTypeIdent &returnType,
+    const std::vector<DataTypeIdent> &paramTypes);
 TypeRef makeOtherType(const DataTypeIdent &);
 
 bool hasParen(const TypeRef &, const Environment &);
