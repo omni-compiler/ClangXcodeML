@@ -16,6 +16,9 @@ struct StreamImpl;
 class Stream {
 public:
   Stream();
+  ~Stream();
+  Stream(Stream &&);
+  Stream &operator=(Stream &&);
   std::string str();
   void indent(size_t);
   void insertNewLine();

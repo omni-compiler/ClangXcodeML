@@ -57,6 +57,12 @@ emit(StreamImpl &impl, const std::string &str) {
 Stream::Stream() : pimpl(make_unique<StreamImpl>()) {
 }
 
+Stream::~Stream() = default;
+
+Stream::Stream(Stream &&) = default;
+
+Stream &Stream::operator=(Stream &&) = default;
+
 std::string
 Stream::str() {
   return ss.str();
