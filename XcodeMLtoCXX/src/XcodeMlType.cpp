@@ -280,11 +280,11 @@ ParamList::makeDeclaration(const std::vector<CodeFragment> &paramNames,
 }
 
 Function::Function(DataTypeIdent ident,
-    TypeRef r,
+    const DataTypeIdent &r,
     const std::vector<DataTypeIdent> &p,
     bool v)
     : Type(TypeKind::Function, ident),
-      returnValue(r->dataTypeIdent()),
+      returnValue(r),
       params(p, v),
       defaultArgs(p.size(), makeVoidNode()) {
 }

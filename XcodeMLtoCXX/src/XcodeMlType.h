@@ -178,7 +178,7 @@ private:
 class Function : public Type {
 public:
   Function(DataTypeIdent,
-      TypeRef,
+      const DataTypeIdent &,
       const std::vector<DataTypeIdent> &,
       bool = false);
   CodeFragment makeDeclarationWithoutReturnType(
