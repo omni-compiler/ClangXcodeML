@@ -65,32 +65,32 @@ Stream &Stream::operator=(Stream &&) = default;
 
 std::string
 Stream::str() {
-  return ss.str();
+  return pimpl->ss.str();
 }
 
 void
 Stream::indent(size_t amount) {
-  curIndent += amount;
+  pimpl->curIndent += amount;
 }
 
 void
 Stream::unindent(size_t amount) {
-  assert(curIndent >= amount);
-  curIndent -= amount;
+  assert(pimpl->curIndent >= amount);
+  pimpl->curIndent -= amount;
 }
 
 void
 Stream::insertSpace() {
   const std::string separators = "\n\t ";
-  if (separators.find(lastChar) == std::string::npos) {
-    emit(" ");
+  if (separators.find(pimpl->lastChar) == std::string::npos) {
+    emit(*pimpl, " ");
   }
 }
 
 void
 Stream::insertNewLine() {
-  emit("\n");
-  alreadyIndented = false;
+  emit(*pimpl, "\n");
+  pimpl->alreadyIndented = false;
 }
 
 namespace {
@@ -120,12 +120,12 @@ Stream::insert(const std::string &token) {
     return;
   }
 
-  outputIndentation();
+  outputIndentation(*pimpl);
 
-  if (shouldInterleaveSpace(lastChar, token[0])) {
-    emit(" ");
+  if (shouldInterleaveSpace(pimpl->lastChar, token[0])) {
+    emit(*pimpl, " ");
   }
-  emit(token);
+  emit(*pimpl, token);
 }
 
 } // namespace CXXCodeGen
