@@ -779,6 +779,14 @@ makeFunctionType(const DataTypeIdent &ident,
 }
 
 TypeRef
+makeFunctionType(const DataTypeIdent &ident,
+    const TypeRef &returnType,
+    const std::vector<DataTypeIdent> &paramTypes) {
+  return std::make_shared<Function>(
+      ident, returnType->dataTypeIdent(), paramTypes);
+}
+
+TypeRef
 makeVariadicFunctionType(const DataTypeIdent &ident,
     const DataTypeIdent &returnType,
     const std::vector<DataTypeIdent> &paramTypes) {
