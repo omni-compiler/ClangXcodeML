@@ -169,6 +169,15 @@ ClangXMLのルート要素は`Program`要素である。
 
 # `clangDecl`要素
 
+| `<clangDecl`
+|   `class` `=` _属性_
+| `>`
+| _子要素_ ...
+| `</clangDecl>`
+
+`clangDecl`要素はC/C++の宣言を表現する。
+宣言の種類は`class`属性の値によって決められる。
+
 ## `CXXConstructor`: コンストラクター宣言
 
 | `<clangDecl class="CXXConstructor"`
@@ -219,6 +228,27 @@ clangStmt子要素は関数本体を表現する。
 `is_implicit`属性の値は`"true"`, `"false"`, `"1"`, `"0"`のいずれかであり、
 `"true"`または`"1"`のとき関数が暗黙に定義されたことを表す。
 
+## `LinkageSpec`: リンケージ指定
+
+
+## `ParmVar`: 仮引数
+
+| `<clangDecl class="ParmVar"`
+| `has_init` `=` `"true"` | `"false"` | `"1"` | "`0`"
+| `xcodemlType` `=` _データ型識別名_
+| `>`
+|   _`name`要素_
+|   _`TypeLoc`要素_
+|   [ _`clangStmt`要素_ ]
+| `</clangDecl>`
+
+`ParmVar`は関数宣言中の仮引数の宣言を表現する。
+
+第1子要素は`name`要素で、引数名を表現する。
+
+第2子要素は`TypeLoc`要素である。
+
+第3子要素は`clangStmt`
 
 ## `TranslationUnit`: 翻訳単位
 
@@ -229,16 +259,32 @@ clangStmt子要素は関数本体を表現する。
 | `>`
 
 
+## `Typedef`: `typedef`宣言
+
+| `<clangDecl class="Typedef"`
+| `xcodemlTypedefType` `=` _データ型識別名_
+| `>`
+|   _`name`要素_
+| `</clangDecl>`
+
+`Typedef`は`typedef`宣言を表現する。
+
+第1子要素は`name`要素で、`typedef`名を表現する。
+
+この要素は必須属性として`xcodemlTypedefType`属性をもつ。
+`xcodemlTypedefType`属性の値はデータ型識別名であり、
+`typedef`名が表す型を表現する。
+
 # `clangStmt`要素
 
 | `<clangStmt`
 |   `class` `=` _属性_
 | `>`
-| _子要素_
+| _子要素_ ...
 | `</clangStmt>`
 
 `clangStmt`要素はC/C++の式または文を表す要素。
-式または文の種類は`class`属性によって決められる。
+式または文の種類は`class`属性の値によって決められる。
 
 ## `CaseStmt`: caseラベル
 
