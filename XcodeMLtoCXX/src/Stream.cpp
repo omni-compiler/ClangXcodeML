@@ -21,6 +21,16 @@ const space_t space = {};
 
 const newline_t newline = {};
 
+struct StreamImpl {
+  StreamImpl() : ss(), curIndent(0), alreadyIndented(false), lastChar('\n') {
+  }
+
+  std::stringstream ss;
+  size_t curIndent;
+  bool alreadyIndented;
+  char lastChar;
+};
+
 Stream::Stream() : ss(), curIndent(0), alreadyIndented(false), lastChar('\n') {
 }
 
