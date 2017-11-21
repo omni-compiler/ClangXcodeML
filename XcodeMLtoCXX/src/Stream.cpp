@@ -29,27 +29,29 @@ Stream::unindent(size_t amount) {
   curIndent -= amount;
 }
 
-Stream &Stream::operator<<(const space_t &) {
+void
+Stream::insertSpace() {
   const std::string separators = "\n\t ";
   if (separators.find(lastChar) == std::string::npos) {
     emit(" ");
   }
-  return *this;
 }
 
-Stream &Stream::operator<<(const newline_t &) {
+void
+Stream::insertNewLine() {
   emit("\n");
   alreadyIndented = false;
-  return *this;
 }
 
-static bool
+namespace {
+
+bool
 isAllowedInIdent(char c) {
   /* FIXME: C++ allows universal character */
   return isalnum(c) || c == '_';
 }
 
-static bool
+bool
 shouldInterleaveSpace(char last, char next) {
   const std::string operators = "+-*/%^&|!><";
   const std::string repeatables = "+-><&|=";
@@ -60,9 +62,12 @@ shouldInterleaveSpace(char last, char next) {
       (last == '>' && next == '*'); // `->*`
 }
 
-Stream &Stream::operator<<(const std::string &token) {
+} // namespace
+
+void
+Stream::insert(const std::string &token) {
   if (token.empty()) {
-    return *this;
+    return;
   }
 
   outputIndentation();
@@ -71,12 +76,6 @@ Stream &Stream::operator<<(const std::string &token) {
     emit(" ");
   }
   emit(token);
-
-  return *this;
-}
-
-Stream &Stream::operator<<(char c) {
-  return (*this) << std::string(1, c);
 }
 
 void
@@ -100,4 +99,25 @@ Stream::emit(const std::string &str) {
   ss << str;
   lastChar = str.back();
 }
+
+} // namespace CXXCodeGen
+
+CXXCodeGen::Stream &operator<<(CXXCodeGen::Stream &s, CXXCodeGen::space_t) {
+  s.insertSpace();
+  return s;
+}
+
+CXXCodeGen::Stream &operator<<(CXXCodeGen::Stream &s, CXXCodeGen::newline_t) {
+  s.insertNewLine();
+  return s;
+}
+
+CXXCodeGen::Stream &operator<<(CXXCodeGen::Stream &s, const std::string &str) {
+  s.insert(str);
+  return s;
+}
+
+CXXCodeGen::Stream &operator<<(CXXCodeGen::Stream &s, char c) {
+  s.insert(std::string(1, c));
+  return s;
 }
