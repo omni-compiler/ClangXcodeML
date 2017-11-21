@@ -182,7 +182,6 @@ public:
       TypeRef,
       const std::vector<DataTypeIdent> &,
       bool = false);
-  Function(DataTypeIdent, TypeRef, const Params &, bool = false);
   CodeFragment makeDeclarationWithoutReturnType(
       CodeFragment, const std::vector<CodeFragment> &, const Environment &);
   CodeFragment makeDeclarationWithoutReturnType(

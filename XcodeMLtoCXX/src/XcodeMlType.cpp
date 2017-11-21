@@ -289,19 +289,6 @@ Function::Function(DataTypeIdent ident,
       defaultArgs(p.size(), makeVoidNode()) {
 }
 
-Function::Function(DataTypeIdent ident, TypeRef r, const Params &p, bool v)
-    : Type(TypeKind::Function, ident),
-      returnValue(r->dataTypeIdent()),
-      params(),
-      defaultArgs() {
-  std::vector<DataTypeIdent> dtidents;
-  for (auto param : p) {
-    dtidents.push_back(std::get<0>(param));
-    defaultArgs.push_back(std::get<1>(param));
-  }
-  params = ParamList(dtidents, v);
-}
-
 CodeFragment
 Function::makeDeclarationWithoutReturnType(CodeFragment var,
     const std::vector<CodeFragment> &args,
