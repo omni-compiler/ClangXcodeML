@@ -257,7 +257,7 @@ DeclarationsVisitor::PreVisitType(QualType T) {
 
 bool
 DeclarationsVisitor::PreVisitTypeLoc(TypeLoc TL) {
-  newChild("TypeLoc");
+  newChild("clangTypeLoc");
   newProp("class", NameForTypeLoc(TL));
   const auto T = TL.getType();
   newProp("type", typetableinfo->getTypeName(T).c_str());
