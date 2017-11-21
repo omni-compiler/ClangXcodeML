@@ -79,10 +79,6 @@ Stream &Stream::operator<<(const std::string &token) {
   return *this;
 }
 
-Stream &Stream::operator<<(char c) {
-  return (*this) << std::string(1, c);
-}
-
 void
 Stream::outputIndentation() {
   if (alreadyIndented) {
