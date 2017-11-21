@@ -104,4 +104,5 @@ Stream::emit(const std::string &str) {
   ss << str;
   lastChar = str.back();
 }
-}
+
+} // namespace CXXCodeGen

@@ -31,6 +31,7 @@ private:
   bool alreadyIndented;
   char lastChar;
 };
-}
+
+} // namespace CXXCodeGen
 
 #endif /* !CXXCODEGEN_H */
