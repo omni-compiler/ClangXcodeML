@@ -91,9 +91,9 @@ C++プログラム中で使用される型(データ型)をデータ型識別名
 ### `classType`要素
 
 | `<classType`
-|   `cxx_class_kind=` `"class"` | `"struct"`
-|   `is_anonymous=` `"true"` | `"false"` | `"1"` | `"0"`
-|   `type="` _ユーザ定義されたデータ型識別名_ `"`
+|   `cxx_class_kind` `=` `"class"` | `"struct"`
+|   `is_anonymous` `=` `"true"` | `"false"` | `"1"` | `"0"`
+|   `type` `=` _ユーザ定義されたデータ型識別名_
 |   `>`
 |   _`inheritedFrom`要素_
 |   _`symbols`要素_
@@ -146,9 +146,9 @@ C++プログラム中でこのクラスを宣言するのに使われたキー�
 # `Program`要素
 
 | `<Program`
-|   `source="` _パス名_ `"`
+|   `source` `=` _パス名_
 |   `language=` `"C++"` | `"C"`
-|   `time="` _時刻_ `"`
+|   `time` `=` _時刻_
 |   `>`
 |   _`clangAST`要素_
 | `</Program>`
@@ -232,7 +232,7 @@ clangStmt子要素は関数本体を表現する。
 # `clangStmt`要素
 
 | `<clangStmt`
-|   `class="` _属性_ `"`
+|   `class` `=` _属性_
 | `>`
 | _子要素_
 | `</clangStmt>`
@@ -272,7 +272,7 @@ clangStmt子要素は関数本体を表現する。
 
 | `<clangConstructorInitializer `
 |   `is_written=` `"true"` | `"false"` | `"1"` | `"0"`
-|   `member="` _メンバー名_ `"`
+|   `member` `=` _メンバー名_
 |   `>`
 |   _`clangStmt`要素_
 | `</clangStmt>`
