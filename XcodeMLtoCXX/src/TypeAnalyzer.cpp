@@ -69,8 +69,8 @@ DEFINE_TA(pointerTypeProc) {
 }
 
 DEFINE_TA(functionTypeProc) {
-  XMLString returnName = xmlGetProp(node, BAD_CAST "return_type");
-  auto returnType = map[returnName];
+  const auto returnDTI = getProp(node, "return_type");
+  const auto returnType = map[returnDTI];
   xmlXPathObjectPtr paramsNode =
       xmlXPathNodeEval(node, BAD_CAST "params/paramTypeName", ctxt);
   std::vector<XcodeMl::DataTypeIdent> paramTypes;
@@ -82,8 +82,8 @@ DEFINE_TA(functionTypeProc) {
   const auto dtident = getProp(node, "type");
   map.setReturnType(dtident, returnType);
   const auto func = findFirst(node, "params/ellipsis", ctxt)
-      ? XcodeMl::makeVariadicFunctionType(dtident, returnName, paramTypes)
-      : XcodeMl::makeFunctionType(dtident, returnName, paramTypes);
+      ? XcodeMl::makeVariadicFunctionType(dtident, returnDTI, paramTypes)
+      : XcodeMl::makeFunctionType(dtident, returnDTI, paramTypes);
   func->setConst(isTrueProp(node, "is_const", false));
   func->setVolatile(isTrueProp(node, "is_volatile", false));
   map[dtident] = func;
