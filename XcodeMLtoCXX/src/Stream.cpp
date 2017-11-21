@@ -29,18 +29,18 @@ Stream::unindent(size_t amount) {
   curIndent -= amount;
 }
 
-Stream &Stream::operator<<(const space_t &) {
+void
+Stream::insertSpace() {
   const std::string separators = "\n\t ";
   if (separators.find(lastChar) == std::string::npos) {
     emit(" ");
   }
-  return *this;
 }
 
-Stream &Stream::operator<<(const newline_t &) {
+void
+Stream::insertNewLine() {
   emit("\n");
   alreadyIndented = false;
-  return *this;
 }
 
 namespace {
@@ -64,9 +64,10 @@ shouldInterleaveSpace(char last, char next) {
 
 } // namespace
 
-Stream &Stream::operator<<(const std::string &token) {
+void
+Stream::insert(const std::string &token) {
   if (token.empty()) {
-    return *this;
+    return;
   }
 
   outputIndentation();
@@ -75,8 +76,6 @@ Stream &Stream::operator<<(const std::string &token) {
     emit(" ");
   }
   emit(token);
-
-  return *this;
 }
 
 void

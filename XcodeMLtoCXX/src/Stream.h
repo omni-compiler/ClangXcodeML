@@ -16,10 +16,10 @@ public:
   Stream();
   std::string str();
   void indent(size_t);
+  void insertNewLine();
+  void insertSpace();
+  void insert(const std::string &);
   void unindent(size_t);
-  Stream &operator<<(const space_t &);
-  Stream &operator<<(const newline_t &);
-  Stream &operator<<(const std::string &);
 
 private:
   void outputIndentation();
