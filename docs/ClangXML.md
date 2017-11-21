@@ -169,7 +169,7 @@ ClangXMLのルート要素は`Program`要素である。
 
 # `clangDecl`要素
 
-## `CXXConstructor`: コンストラクター定義
+## `CXXConstructor`: コンストラクター宣言
 
 | `<clangDecl class="CXXConstructor"`
 |    `is_implicit=` `"true"`  | `"false"` | `"1"` | `"0"`
@@ -196,7 +196,7 @@ clangStmt子要素は関数本体を表現する。
 `is_implicit`属性の値は`"true"`, `"false"`, `"1"`, `"0"`のいずれかであり、
 `"true"`または`"1"`のとき関数が暗黙に定義されたことを表す。
 
-## `Function`: 関数定義
+## `Function`: 関数宣言
 
 | `<clangDecl class="Function"`
 |    `is_implicit` = `"true"` | `"false"` | `"1"` | `"0"`
