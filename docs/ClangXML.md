@@ -18,8 +18,8 @@ ClangXML文書は次の構造に従う。
 |       `<xcodemlNnsTable>`
 |         _NNS定義要素_ ...
 |       `</xcodemlNnsTable>`
+|       _C++プログラムを表現する`clangDecl`要素_ ...
 |     `</clangDecl>`
-|     _C++プログラムを表現する`clangDecl`要素_ ...
 |   `</clangAST>`
 | `</Program>`
 
