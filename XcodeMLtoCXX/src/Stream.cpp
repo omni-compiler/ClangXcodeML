@@ -43,13 +43,15 @@ Stream &Stream::operator<<(const newline_t &) {
   return *this;
 }
 
-static bool
+namespace {
+
+bool
 isAllowedInIdent(char c) {
   /* FIXME: C++ allows universal character */
   return isalnum(c) || c == '_';
 }
 
-static bool
+bool
 shouldInterleaveSpace(char last, char next) {
   const std::string operators = "+-*/%^&|!><";
   const std::string repeatables = "+-><&|=";
@@ -59,6 +61,8 @@ shouldInterleaveSpace(char last, char next) {
       || (last == '-' && next == '>') || // `->`
       (last == '>' && next == '*'); // `->*`
 }
+
+} // namespace
 
 Stream &Stream::operator<<(const std::string &token) {
   if (token.empty()) {
