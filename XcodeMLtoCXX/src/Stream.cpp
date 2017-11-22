@@ -133,6 +133,11 @@ Stream::insert(const std::string &token) {
   emit(*pimpl, token);
 }
 
+void
+Stream::setLineInfo(const std::string &filename, size_t lineno) {
+  pimpl->line = StreamImpl::LineInfo(filename, lineno);
+}
+
 } // namespace CXXCodeGen
 
 CXXCodeGen::Stream &operator<<(

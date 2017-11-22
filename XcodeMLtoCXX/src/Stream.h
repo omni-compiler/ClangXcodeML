@@ -24,6 +24,7 @@ public:
   void insertNewLine();
   void insertSpace();
   void insert(const std::string &);
+  void setLineInfo(const std::string &filename, size_t lineno);
   void unindent(size_t);
 
 private:
