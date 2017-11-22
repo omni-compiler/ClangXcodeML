@@ -1,7 +1,6 @@
 #define BOOST_TEST_MODULE CXXCodeGen::Stream
 #include <boost/test/included/unit_test.hpp>
 #include <string>
-#include <sstream>
 #include <tuple>
 #include <utility>
 

@@ -1,8 +1,19 @@
 #include <cassert>
+#include <memory>
 #include <sstream>
 #include <string>
 
 #include "Stream.h"
+
+namespace {
+
+template <typename T, typename... Ts>
+std::unique_ptr<T>
+make_unique(Ts &&... params) {
+  return std::unique_ptr<T>(new T(std::forward<Ts>(params)...));
+}
+
+} // namespace
 
 namespace CXXCodeGen {
 
@@ -10,37 +21,76 @@ const space_t space = {};
 
 const newline_t newline = {};
 
-Stream::Stream() : ss(), curIndent(0), alreadyIndented(false), lastChar('\n') {
+struct StreamImpl {
+  StreamImpl() : ss(), curIndent(0), alreadyIndented(false), lastChar('\n') {
+  }
+
+  std::stringstream ss;
+  size_t curIndent;
+  bool alreadyIndented;
+  char lastChar;
+};
+
+namespace {
+
+void
+outputIndentation(StreamImpl &impl) {
+  if (impl.alreadyIndented) {
+    return;
+  }
+  impl.ss << std::string(impl.curIndent, '\t');
+  impl.lastChar = '\t';
+  impl.alreadyIndented = true;
 }
+
+void
+emit(StreamImpl &impl, const std::string &str) {
+  if (str.empty()) {
+    return;
+  }
+  impl.ss << str;
+  impl.lastChar = str.back();
+}
+
+} // namespace
+
+Stream::Stream() : pimpl(make_unique<StreamImpl>()) {
+}
+
+Stream::~Stream() = default;
+
+Stream::Stream(Stream &&) = default;
+
+Stream &Stream::operator=(Stream &&) = default;
 
 std::string
 Stream::str() {
-  return ss.str();
+  return pimpl->ss.str();
 }
 
 void
 Stream::indent(size_t amount) {
-  curIndent += amount;
+  pimpl->curIndent += amount;
 }
 
 void
 Stream::unindent(size_t amount) {
-  assert(curIndent >= amount);
-  curIndent -= amount;
+  assert(pimpl->curIndent >= amount);
+  pimpl->curIndent -= amount;
 }
 
 void
 Stream::insertSpace() {
   const std::string separators = "\n\t ";
-  if (separators.find(lastChar) == std::string::npos) {
-    emit(" ");
+  if (separators.find(pimpl->lastChar) == std::string::npos) {
+    emit(*pimpl, " ");
   }
 }
 
 void
 Stream::insertNewLine() {
-  emit("\n");
-  alreadyIndented = false;
+  emit(*pimpl, "\n");
+  pimpl->alreadyIndented = false;
 }
 
 namespace {
@@ -70,34 +120,12 @@ Stream::insert(const std::string &token) {
     return;
   }
 
-  outputIndentation();
+  outputIndentation(*pimpl);
 
-  if (shouldInterleaveSpace(lastChar, token[0])) {
-    emit(" ");
+  if (shouldInterleaveSpace(pimpl->lastChar, token[0])) {
+    emit(*pimpl, " ");
   }
-  emit(token);
-}
-
-void
-Stream::outputIndentation() {
-  if (alreadyIndented) {
-    return;
-  }
-
-  for (size_t i = 0; i < curIndent; ++i) {
-    ss << "\t";
-  }
-  lastChar = '\t';
-  alreadyIndented = true;
-}
-
-void
-Stream::emit(const std::string &str) {
-  if (str.empty()) {
-    return;
-  }
-  ss << str;
-  lastChar = str.back();
+  emit(*pimpl, token);
 }
 
 } // namespace CXXCodeGen

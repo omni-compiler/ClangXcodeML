@@ -11,9 +11,14 @@ struct newline_t {};
 
 extern const newline_t newline;
 
+struct StreamImpl;
+
 class Stream {
 public:
   Stream();
+  ~Stream();
+  Stream(Stream &&);
+  Stream &operator=(Stream &&);
   std::string str();
   void indent(size_t);
   void insertNewLine();
@@ -22,13 +27,7 @@ public:
   void unindent(size_t);
 
 private:
-  void outputIndentation();
-  void emit(const std::string &);
-
-  std::stringstream ss;
-  size_t curIndent;
-  bool alreadyIndented;
-  char lastChar;
+  std::unique_ptr<StreamImpl> pimpl;
 };
 
 } // namespace CXXCodeGen
