@@ -94,7 +94,17 @@ Stream::insertSpace() {
 
 void
 Stream::insertNewLine() {
-  emit(*pimpl, "\n");
+  if (pimpl->line) {
+    std::string filename;
+    size_t lineno;
+    std::tie(filename, lineno) = *(pimpl->line);
+
+    const auto directive =
+        std::string("#line ") + filename + " " + std::to_string(lineno);
+    emit(*pimpl, std::string("\n") + directive + "\n");
+  } else {
+    emit(*pimpl, "\n");
+  }
   pimpl->alreadyIndented = false;
 }
 
