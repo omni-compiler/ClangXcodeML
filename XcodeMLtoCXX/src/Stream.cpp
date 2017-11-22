@@ -2,6 +2,8 @@
 #include <memory>
 #include <sstream>
 #include <string>
+#include <tuple>
+#include "llvm/ADT/Optional.h"
 
 #include "Stream.h"
 
@@ -22,13 +24,16 @@ const space_t space = {};
 const newline_t newline = {};
 
 struct StreamImpl {
-  StreamImpl() : ss(), curIndent(0), alreadyIndented(false), lastChar('\n') {
+  StreamImpl()
+      : ss(), curIndent(0), alreadyIndented(false), lastChar('\n'), line() {
   }
 
+  using LineInfo = std::tuple<std::string, size_t>;
   std::stringstream ss;
   size_t curIndent;
   bool alreadyIndented;
   char lastChar;
+  llvm::Optional<LineInfo> line;
 };
 
 namespace {
