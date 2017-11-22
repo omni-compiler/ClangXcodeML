@@ -1,7 +1,6 @@
 #include <cassert>
 #include <memory>
 #include <map>
-#include <sstream>
 #include <string>
 #include <vector>
 #include <libxml/tree.h>

@@ -4,7 +4,6 @@
 #include <map>
 #include <memory>
 #include <string>
-#include <sstream>
 #include <stdexcept>
 #include <vector>
 #include <libxml/debugXML.h>

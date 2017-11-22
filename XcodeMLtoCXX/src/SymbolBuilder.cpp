@@ -1,5 +1,4 @@
 #include <functional>
-#include <sstream>
 #include <memory>
 #include <map>
 #include <cassert>
