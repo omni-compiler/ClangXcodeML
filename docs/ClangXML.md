@@ -196,7 +196,7 @@ name子要素は関数名を表現する。
 
 params要素は仮引数リストを表現する。
 
-clangConstructorInitializer子要素は初期化リストを
+`clangConstructorInitializer`子要素は初期化リストを表現する。
 
 clangStmt子要素は関数本体を表現する。
 これは`CompoundStmt`または`tryStmt`である。
@@ -283,8 +283,13 @@ clangStmt子要素は関数本体を表現する。
 | _子要素_ ...
 | `</clangStmt>`
 
-`clangStmt`要素はC/C++の式または文を表す要素。
-式または文の種類は`class`属性の値によって決められる。
+`clangStmt`要素は
+Clang の `clang::Stmt` クラスから派生したクラスのデータを表す要素であり、
+式や文を表現する。
+`class`属性の値で具体的なクラス名を表す。
+以下では逆変換に用いる部分について個別に解説する。
+その他については Clang の実装を参照のこと。
+
 
 ## `CaseStmt`: caseラベル
 
