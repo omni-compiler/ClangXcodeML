@@ -170,13 +170,30 @@ ClangXMLのルート要素は`Program`要素である。
 # `clangDecl`要素
 
 | `<clangDecl`
-|   `class` `=` _属性_
+|   `class` `=` _宣言の種類(後述)_
 | `>`
 | _子要素_ ...
 | `</clangDecl>`
 
 `clangDecl`要素はC/C++の宣言を表現する。
-宣言の種類は`class`属性の値によって決められる。
+
+この要素は、必須属性として`class`属性をもつ。
+
+`class`属性の値は文字列であり、宣言の種類を表す。
+
+*宣言の種類*は、
+[`clang::Decl::Kind`](https://clang.llvm.org/doxygen/classclang_1_1Decl.html)
+を表す文字列である。
+以下に主要な宣言の種類を挙げる。
+
+| 宣言の種類           | `clang::Decl::Kind`の値 | 意味                   |
+|----------------------|-------------------------|------------------------|
+| `"CXXConstructor"`   | `CXXConstructor`        | コンストラクター宣言      |
+| `"Function"`         | `Function`              | 関数宣言               |
+| `"LinkageSpec"`      | `LinkageSpec`           | リンケージ指定          |
+| `"ParmVar"`          | `ParmVar`               | 仮引数                 |
+| `"TranslationUnit"`  | `TranslationUnit`       | 翻訳単位               |
+| `"Typedef"`          | `Typedef`               | `typedef`宣言          |
 
 ## `CXXConstructor`: コンストラクター宣言
 
