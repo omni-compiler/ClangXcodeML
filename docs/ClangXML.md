@@ -18,8 +18,8 @@ ClangXML文書は次の構造に従う。
 |       `<xcodemlNnsTable>`
 |         _NNS定義要素_ ...
 |       `</xcodemlNnsTable>`
+|       _C++プログラムを表現する`clangDecl`要素_ ...
 |     `</clangDecl>`
-|     _C++プログラムを表現する`clangDecl`要素_ ...
 |   `</clangAST>`
 | `</Program>`
 
@@ -81,7 +81,7 @@ C++プログラム中で使用される型(データ型)をデータ型識別名
 
 
 *データ型定義要素*は、`xcodemlTypeTable`要素の直接の子要素であって、
-データ型識別名とそれが指示するデータ型を対応づける。
+ユーザ定義されたデータ型識別名とそれが指示するデータ型を対応づける。
 ひとつのデータ型識別名を複数のデータ型定義要素で定義してはならない。
 
 ## 組み込み・修飾型(`basicType`要素)
@@ -91,9 +91,9 @@ C++プログラム中で使用される型(データ型)をデータ型識別名
 ### `classType`要素
 
 | `<classType`
-|   `cxx_class_kind=` `"class"` | `"struct"`
-|   `is_anonymous=` `"true"` | `"false"` | `"1"` | `"0"`
-|   `type="` _ユーザ定義されたデータ型識別名_ `"`
+|   `cxx_class_kind` `=` `"class"` | `"struct"` | `"union"`
+|   `is_anonymous` `=` `"true"` | `"false"` | `"1"` | `"0"`
+|   `type` `=` _ユーザ定義されたデータ型識別名_
 |   `>`
 |   _`inheritedFrom`要素_
 |   _`symbols`要素_
@@ -101,22 +101,25 @@ C++プログラム中で使用される型(データ型)をデータ型識別名
 
 `classType`要素はクラス型を表現する。
 
-`inheritedFrom`子要素はこのクラスの派生元クラスのリストを表現する。
+第1子要素は`inheritedFrom`要素で、このクラスの派生元クラスのリストを表現する。
 このクラスが派生クラスでない場合、`inheritedFrom`要素は子要素をもたない。
 このクラスが派生クラスである場合、
-`inheritedFrom`要素は派生元クラスを表す`typeName`要素を1個以上子要素にもつ。
+`inheritedFrom`要素は、派生元クラスを表す`typeName`要素を1個以上子要素にもつ。
 `typeName`要素の順番は、派生クラスのリストの順番と等しい。
 
-`symbols`子要素はこのクラスのメンバーのリストを表現する。
-
+第2子要素は`symbols`要素で、このクラスのメンバーのリストを表現する。
+`symbols`要素は、メンバー名を表す`id`要素を0個以上子要素にもつ。
 
 この要素は、必須属性として`type`属性をもつ。
+
 `type`属性の値はユーザ定義されたデータ型識別名であり、
 この要素によって定義されるクラス型に与えられるデータ型識別名を表す。
 
 この要素は、オプションで`cxx_class_kind`属性、`is_anonymous`属性を利用できる。
-`cxx_class_kind`属性の値は`"class"`,`"struct"`のいずれかであり、
+
+`cxx_class_kind`属性の値は`"class"`,`"struct"`, `"union"`のいずれかであり、
 C++プログラム中でこのクラスを宣言するのに使われたキーワードを表す。
+
 `is_anonymous`属性の値は`"true"`, `"false"`, `"1"`, `"0"`のいずれかであり、
 `"true"`または`"1"`のとき無名クラスであることを表す。
 
@@ -143,9 +146,9 @@ C++プログラム中でこのクラスを宣言するのに使われたキー�
 # `Program`要素
 
 | `<Program`
-|   `source="` _パス名_ `"`
+|   `source` `=` _パス名_
 |   `language=` `"C++"` | `"C"`
-|   `time="` _時刻_ `"`
+|   `time` `=` _時刻_
 |   `>`
 |   _`clangAST`要素_
 | `</Program>`
@@ -166,7 +169,33 @@ ClangXMLのルート要素は`Program`要素である。
 
 # `clangDecl`要素
 
-## `CXXConstructor`: コンストラクター定義
+| `<clangDecl`
+|   `class` `=` _宣言の種類(後述)_
+| `>`
+| _子要素_ ...
+| `</clangDecl>`
+
+`clangDecl`要素はC/C++の宣言を表現する。
+
+この要素は、必須属性として`class`属性をもつ。
+
+`class`属性の値は文字列であり、宣言の種類を表す。
+
+*宣言の種類*は、
+[`clang::Decl::Kind`](https://clang.llvm.org/doxygen/classclang_1_1Decl.html)
+を表す文字列である。
+以下に主要な宣言の種類を挙げる。
+
+| 宣言の種類           | `clang::Decl::Kind`の値 | 意味                   |
+|----------------------|-------------------------|------------------------|
+| `"CXXConstructor"`   | `CXXConstructor`        | コンストラクター宣言      |
+| `"Function"`         | `Function`              | 関数宣言               |
+| `"LinkageSpec"`      | `LinkageSpec`           | リンケージ指定          |
+| `"ParmVar"`          | `ParmVar`               | 仮引数                 |
+| `"TranslationUnit"`  | `TranslationUnit`       | 翻訳単位               |
+| `"Typedef"`          | `Typedef`               | `typedef`宣言          |
+
+## `CXXConstructor`: コンストラクター宣言
 
 | `<clangDecl class="CXXConstructor"`
 |    `is_implicit=` `"true"`  | `"false"` | `"1"` | `"0"`
@@ -184,7 +213,7 @@ name子要素は関数名を表現する。
 
 params要素は仮引数リストを表現する。
 
-clangConstructorInitializer子要素は初期化リストを
+`clangConstructorInitializer`子要素は初期化リストを表現する。
 
 clangStmt子要素は関数本体を表現する。
 これは`CompoundStmt`または`tryStmt`である。
@@ -193,7 +222,7 @@ clangStmt子要素は関数本体を表現する。
 `is_implicit`属性の値は`"true"`, `"false"`, `"1"`, `"0"`のいずれかであり、
 `"true"`または`"1"`のとき関数が暗黙に定義されたことを表す。
 
-## `Function`: 関数定義
+## `Function`: 関数宣言
 
 | `<clangDecl class="Function"`
 |    `is_implicit` = `"true"` | `"false"` | `"1"` | `"0"`
@@ -216,6 +245,27 @@ clangStmt子要素は関数本体を表現する。
 `is_implicit`属性の値は`"true"`, `"false"`, `"1"`, `"0"`のいずれかであり、
 `"true"`または`"1"`のとき関数が暗黙に定義されたことを表す。
 
+## `LinkageSpec`: リンケージ指定
+
+
+## `ParmVar`: 仮引数
+
+| `<clangDecl class="ParmVar"`
+| `has_init` `=` `"true"` | `"false"` | `"1"` | "`0`"
+| `xcodemlType` `=` _データ型識別名_
+| `>`
+|   _`name`要素_
+|   _`TypeLoc`要素_
+|   [ _`clangStmt`要素_ ]
+| `</clangDecl>`
+
+`ParmVar`は関数宣言中の仮引数の宣言を表現する。
+
+第1子要素は`name`要素で、引数名を表現する。
+
+第2子要素は`TypeLoc`要素である。
+
+第3子要素は`clangStmt`
 
 ## `TranslationUnit`: 翻訳単位
 
@@ -226,16 +276,37 @@ clangStmt子要素は関数本体を表現する。
 | `>`
 
 
+## `Typedef`: `typedef`宣言
+
+| `<clangDecl class="Typedef"`
+| `xcodemlTypedefType` `=` _データ型識別名_
+| `>`
+|   _`name`要素_
+| `</clangDecl>`
+
+`Typedef`は`typedef`宣言を表現する。
+
+第1子要素は`name`要素で、`typedef`名を表現する。
+
+この要素は必須属性として`xcodemlTypedefType`属性をもつ。
+`xcodemlTypedefType`属性の値はデータ型識別名であり、
+`typedef`名が表す型を表現する。
+
 # `clangStmt`要素
 
 | `<clangStmt`
-|   `class="` _属性_ `"`
+|   `class` `=` _属性_
 | `>`
-| _子要素_
+| _子要素_ ...
 | `</clangStmt>`
 
-`clangStmt`要素はC/C++の式または文を表す要素。
-式または文の種類は`class`属性によって決められる。
+`clangStmt`要素は
+Clang の `clang::Stmt` クラスから派生したクラスのデータを表す要素であり、
+式や文を表現する。
+`class`属性の値で具体的なクラス名を表す。
+以下では逆変換に用いる部分について個別に解説する。
+その他については Clang の実装を参照のこと。
+
 
 ## `CaseStmt`: caseラベル
 
@@ -249,6 +320,40 @@ clangStmt子要素は関数本体を表現する。
 第1子要素は式。
 
 第2要素はcaseラベルに引き続く文。
+
+## `ImplicitCastExpr`: 暗黙の型変換
+
+| `<clangStmt class="ImplicitCastExpr"`
+|   `xcodemlType` `=` _データ型識別名_
+|   `clangCastKind` `=` _型変換の種類(後述)_
+|  `>`
+|  _`clangStmt`要素_
+| `</clangStmt>`
+
+`ImplicitCastExpr`は暗黙の型変換を表現する。
+
+第1子要素は`clangStmt`要素で、型変換の対象になる式を表す。
+
+この要素は、オプションで`xcodemlType`属性、`clangCastKind`属性を利用できる。
+
+`xcodemlType`属性の値はデータ型識別名で、型変換後のデータ型を表す。
+逆変換では用いない。
+
+`clangCastKind`属性の値は文字列で、キャストの種類を表す。
+逆変換では用いない。
+
+*型変換の種類*は、
+[`clang::CastKind`](https://clang.llvm.org/doxygen/classclang_1_1CastExpr.html)
+を表す文字列である。
+以下に主要な型変換の種類を挙げる。
+
+| 型変換の種類               | `clang::CastKind`の値       | 意味                                      |
+|----------------------------|-----------------------------|-------------------------------------------|
+| `"NoOp"`                   | `CK_NoOp`                   | 何もしないか、または修飾子を付け加える        |
+| `"ArrayToPointerDecay"`    | `CK_ArrayToPointerDecay`    | 配列からポインターへの型変換([conv.array]) |
+| `"FunctionToPointerDecay"` | `CK_FunctionToPointerDecay` | 関数からポインターへの型変換([conv.func])  |
+| `"LValueToRValue"`         | `CK_LValueToRValue`         | lvalueからrvalueへの型変換([conv.lval])   |
+
 
 ## `SwitchStmt`: switch文
 
@@ -269,7 +374,7 @@ clangStmt子要素は関数本体を表現する。
 
 | `<clangConstructorInitializer `
 |   `is_written=` `"true"` | `"false"` | `"1"` | `"0"`
-|   `member="` _メンバー名_ `"`
+|   `member` `=` _メンバー名_
 |   `>`
 |   _`clangStmt`要素_
 | `</clangStmt>`
