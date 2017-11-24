@@ -12,6 +12,7 @@ XCODEMLTOCXXDIR = $(ROOTDIR)/XcodeMLtoCXX
 XCODEMLTOCXX = $(XCODEMLTOCXXDIR)/XcodeMLtoCXX
 CXXTESTCASES = $(wildcard *.src.cpp)
 CXXDECOMPTESTOBJECTS = $(CXXTESTCASES:.src.cpp=.dst.cpp)
+CXXCLANGXMLOBJECTS = $(CXXTESTCASES:.src.cpp=.xml)
 CXXFLAGS = -pedantic -fsyntax-only
 
 CPPTEST_TARBALL = ../../../CppTest.tar.gz
@@ -37,6 +38,8 @@ check: $(CXXDECOMPTESTOBJECTS)
 
 clean:
 	rm -rf *.xml *.dst.cpp *.xcodeml
+
+clangxml: $(CXXCLANGXMLOBJECTS)
 
 build:
 	(cd $(ROOTDIR)/CXXtoXML/src; make clean; make)
