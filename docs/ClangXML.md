@@ -304,6 +304,40 @@ Clang の `clang::Stmt` クラスから派生したクラスのデータを表�
 
 第2要素はcaseラベルに引き続く文。
 
+## `ImplicitCastExpr`: 暗黙の型変換
+
+| `<clangStmt class="ImplicitCastExpr"`
+|   `xcodemlType` `=` _データ型識別名_
+|   `clangCastKind` `=` _型変換の種類(後述)_
+|  `>`
+|  _`clangStmt`要素_
+| `</clangStmt>`
+
+`ImplicitCastExpr`は暗黙の型変換を表現する。
+
+第1子要素は`clangStmt`要素で、型変換の対象になる式を表す。
+
+この要素は、オプションで`xcodemlType`属性、`clangCastKind`属性を利用できる。
+
+`xcodemlType`属性の値はデータ型識別名で、型変換後のデータ型を表す。
+逆変換では用いない。
+
+`clangCastKind`属性の値は文字列で、キャストの種類を表す。
+逆変換では用いない。
+
+*型変換の種類*は、
+[`clang::CastKind`](https://clang.llvm.org/doxygen/classclang_1_1CastExpr.html)
+を表す文字列である。
+以下に主要な型変換の種類を挙げる。
+
+| 型変換の種類               | `clang::CastKind`の値       | 意味                                      |
+|----------------------------|-----------------------------|-------------------------------------------|
+| `"NoOp"`                   | `CK_NoOp`                   | 何もしないか、または修飾子を付け加える        |
+| `"ArrayToPointerDecay"`    | `CK_ArrayToPointerDecay`    | 配列からポインターへの型変換([conv.array]) |
+| `"FunctionToPointerDecay"` | `CK_FunctionToPointerDecay` | 関数からポインターへの型変換([conv.func])  |
+| `"LValueToRValue"`         | `CK_LValueToRValue`         | lvalueからrvalueへの型変換([conv.lval])   |
+
+
 ## `SwitchStmt`: switch文
 
 | `<clangStmt class="SwitchStmt">`
