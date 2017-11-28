@@ -308,6 +308,54 @@ Clang の `clang::Stmt` クラスから派生したクラスのデータを表�
 その他については Clang の実装を参照のこと。
 
 
+## `BinaryOperator`: 二項演算
+
+| `<clangStmt class="BinaryOperator"`
+| `binOpName` `=` _二項演算名(後述)_
+| `xcodemlType` `=` _データ型識別名_
+| `>`
+|   _`clangStmt`要素_
+|   _`clangStmt`要素_
+| `</clangStmt>`
+
+`BinaryOperator`は(複合代入演算でない)二項演算を表現する。
+複合代入演算は`CompoundAssignOperator`によって表現する。
+
+第1、 第2子要素は`clangStmt`要素で、それぞれ二項演算の左辺式、右辺式を表現する。
+
+この要素は、必須属性として`binOpName`属性をもつ。
+
+`binOpName`属性の値は文字列で、二項演算名を表す。
+
+*二項演算名*は、`clang::BinaryOperatorKind`を表す文字列である。
+以下に主要な二項演算名を挙げる。
+
+| 二項演算名            | `clang::BinaryOperatorKind`の値 | 意味                                           |
+|-----------------------|---------------------------------|------------------------------------------------|
+| `"memberPointerRef"`  | `BO_PtrMemD`                    | メンバーポインターによるメンバーアクセス `.*`  |
+| `"memberIndirectRef"` | `BO_PtrMemI`                    | メンバーポインターによるメンバーアクセス `->*  |
+| `"mulExpr"`           | `BO_Mul`                        | 乗算 `*`                                       |
+| `"divExpr"`           | `BO_Div`                        | 除算 `/`                                       |
+| `"modExpr"`           | `BO_Rem`                        | 剰余 `%`                                       |
+| `"plusExpr"`          | `BO_Add`                        | 加算 `+`                                       |
+| `"minusExpr"`         | `BO_Sub`                        | 減算 `-`                                       |
+| `"LshiftExpr"`        | `BO_Shl`                        | 左シフト `<<`                                  |
+| `"RshiftExpr"`        | `BO_Shr`                        | 右シフト `>>`                                  |
+| `"logLTExpr"`         | `BO_LT`                         | 大小比較 `<`                                   |
+| `"logGTExpr"`         | `BO_GT`                         | 大小比較 `>`                                   |
+| `"logLEExpr"`         | `BO_LE`                         | 大小比較 `<=`                                  |
+| `"logGEExpr"`         | `BO_GE`                         | 大小比較 `>=`                                  |
+| `"logEQExpr"`         | `BO_EQ`                         | 等価比較 `==`                                  |
+| `"logNEQExpr"`        | `BO_NE`                         | 等価比較 `!=`                                  |
+| `"bitAndExpr"`        | `BO_And`                        | ビットAND `&`                                  |
+| `"bitXorExpr"`        | `BO_Xor`                        | ビットXOR `^`                                  |
+| `"bitOrExpr"`         | `BO_Or`                         | ビットOR `|`                                   |
+| `"logAndExpr"`        | `BO_LAnd`                       | 論理積 `&&`                                    |
+| `"logOrExpr"`         | `BO_LOr`                        | 論理和 `||`                                    |
+| `"assignExpr"`        | `BO_Assign`                     | 代入 `=`                                       |
+| `"commaExpr"`         | `BO_Comma`                      | カンマ演算 `,`                                 |
+
+
 ## `CaseStmt`: caseラベル
 
 | `<clangStmt class="CaseStmt">`
