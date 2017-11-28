@@ -321,6 +321,41 @@ Clang の `clang::Stmt` クラスから派生したクラスのデータを表�
 
 第2要素はcaseラベルに引き続く文。
 
+## `CompoundAssignOperator`: 複合代入演算
+
+| `<clangStmt class="CompoundAssignOperator"`
+|   `binOpName` `=` _二項演算名(後述)_
+|   `xcodemlType` `=` _データ型識別名_
+| `>`
+|   _`clangStmt`要素_
+|   _`clangStmt`要素_
+| `</clangStmt>`
+
+`CompoundAssignOperator`は複合代入演算を表現する。
+
+第1、第2子要素はともに`clangStmt`要素で、
+それぞれ複合代入演算の左辺、右辺を表現する。
+
+この要素は、必須属性として`binOpName`属性をもつ。
+
+`binOpName`属性の値は文字列で、二項演算名を表す。
+
+*二項演算名*は、`clang::BinaryOperatorKind`を表す文字列である。
+以下に主要な二項演算名を挙げる。
+
+| 二項演算名         | `clang::BinaryOperatorKind`の値 | 意味                         |
+|--------------------|---------------------------------|------------------------------|
+| `"asgMulExpr"`     | `BO_MulAssign`                  | 乗算の複合代入演算 `*=`      |
+| `"asgDivExpr"`     | `BO_DivAssign`                  | 除算の複合代入演算 `/=`      |
+| `"asgModExpr"`     | `BO_RemAssign`                  | 剰余の複合代入演算 `%=`      |
+| `"asgPlusExpr"`    | `BO_AddAssign`                  | 加算の複合代入演算 `+=`      |
+| `"asgMinusExpr"`   | `BO_SubAssign`                  | 減算の複合代入演算 `-=`      |
+| `"asgLshiftExpr"`  | `BO_ShlAssign`                  | 左シフトの複合代入演算 `<<=` |
+| `"asgRshiftExpr"`  | `BO_ShrAssign`                  | 右シフトの複合代入演算 `>>=` |
+| `"asnBitAndExpr"`  | `BO_AndAssign`                  | ビットANDの複合代入演算 `&=` |
+| `"asgBitOrExpr"`   | `BO_OrAssign`                   | ビットORの複合代入演算 `|=`  |
+| `"asgXorExpr"`     | `BO_XorAssign`                  | ビットXORの複合代入演算 `^=` |
+
 ## `CompoundStmt`: 複合文
 
 | `<clangStmt class="CompoundStmt">`
