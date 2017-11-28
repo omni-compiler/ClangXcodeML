@@ -403,6 +403,17 @@ Clang の `clang::Stmt` クラスから派生したクラスのデータを表�
 `xcodemlType`属性の値はデータ型識別名で、変数の型を表現する。
 逆変換では使用しない。
 
+
+## `DeclStmt`: 宣言文
+
+| `<clangStmt class="DeclStmt">`
+|   _`clangDecl`要素_
+| `</clangStmt>`
+
+`DeclStmt`は宣言文を表現する。
+
+第1子要素は`clangDecl`要素で、その宣言を表す。
+
 ## `ImplicitCastExpr`: 暗黙の型変換
 
 | `<clangStmt class="ImplicitCastExpr"`
