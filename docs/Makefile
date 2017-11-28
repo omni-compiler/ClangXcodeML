@@ -3,7 +3,7 @@
 all: XcodeML_CXX.docx ClangXML.docx
 
 
-%.docx: reference.docx %.md
+%.docx: %.md reference.docx
 	pandoc \
 		--filter pandoc-crossref \
 		--toc \
