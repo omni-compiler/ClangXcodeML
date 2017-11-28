@@ -550,6 +550,18 @@ Clang の `clang::Stmt` クラスから派生したクラスのデータを表�
 `xcodemlType`属性の値はデータ型識別名であり、データメンバーの型を表現する。
 逆変換では使用しない。
 
+
+## `ReturnStmt`: `return`文
+
+| `<clangStmt class="ReturnStmt">`
+|   _`clangStmt`要素_
+| `</clangStmt>`
+
+`ReturnStmt`は`return`文を表現する。
+
+第1子要素は`clangStmt`要素で、返す式を表す。
+
+
 ## `SwitchStmt`: switch文
 
 | `<clangStmt class="SwitchStmt">`
