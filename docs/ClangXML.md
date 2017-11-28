@@ -603,6 +603,49 @@ Clang の `clang::Stmt` クラスから派生したクラスのデータを表�
 
 各要素はswitch文本体のラベルとそれに引き続く文を表現する。
 
+
+## `UnaryOperator`: 単項演算式
+
+| `<clangStmt class="UnaryOperator"`
+|   `unaryOpName` `=` _単項演算名(後述)_
+|   `xcodemlType` `=` _データ型識別名_
+| `>`
+|   _`clangStmt`要素_
+| `</clangStmt>`
+
+
+`UnaryOperator`は単項演算式を表現する。
+
+第1子要素は`clangStmt`要素で、オペランドの式を表す。
+
+この要素は、必須属性として`unaryOpName`属性をもつ。
+
+`unaryOpName`属性の値は文字列で、単項演算名を表す。
+
+*単項演算名*は、`clang::UnaryOperatorKind`を表す文字列である。
+以下に主要な単項演算名を挙げる。
+
+| 単項演算名         | `clang::UnaryOperatorKind`の値 | 意味                    |
+|--------------------|--------------------------------|-------------------------|
+| `"postIncrExpr"`   | `UO_PostInc`                   | 後置インクリメント `++` |
+| `"postDecrExpr"`   | `UO_PostDec`                   | 後置デクリメント `--`   |
+| `"preIncrExpr"`    | `UO_PreInc`                    | 前置インクリメント `++` |
+| `"preDecrExpr"`    | `UO_PreDec`                    | 前置デクリメント `--`   |
+| `"AddrOfExpr"`     | `UO_AddrOf`                    | アドレス取得 `&`        |
+| `"pointerRef"`     | `UO_Deref`                     | 間接参照 `*`            |
+| `"unaryPlusExpr"`  | `UO_Plus`                      | 符号指定 `+`            |
+| `"unaryMinusExpr"` | `UO_MInus`                     | 符号指定 `-`            |
+| `"bitNotExpr"`     | `UO_Not`                       | ビットNOT `~`           |
+| `"logNotExpr"`     | `UO_LNot`                      | 論理否定 `!`            |
+
+<!-- このほかに`unaryRealExpr`などがある(ClangOperator.cpp)が、用途は不明 -->
+
+この要素は、オプションで`xcodemlType`属性を利用できる。
+
+`xcodemlType`属性の値はデータ型識別名で、単項演算式の型を表す。
+逆変換では使用しない。
+
+
 # clangConstructorInitializer要素
 
 | `<clangConstructorInitializer `
