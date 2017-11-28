@@ -422,6 +422,38 @@ Clang の `clang::Stmt` クラスから派生したクラスのデータを表�
 | `"LValueToRValue"`         | `CK_LValueToRValue`         | lvalueからrvalueへの型変換([conv.lval])   |
 
 
+## `MemberExpr`: クラスメンバーアクセス
+
+| `<clangStmt class="MemberExpr"`
+|   `is_arrow` `=` `"true"` | `"false"` | `"1"` | `"0"`
+|   `xcodemlType` `=` _データ型識別名_
+| `>`
+|   _`name`要素_
+|   _`clangDeclarationNameInfo`要素_
+|   _`clangStmt`要素_
+| `</clangStmt>`
+
+`MemberExpr`は、クラス型オブジェクトか、またはクラス型へのポインターのデータメンバーへのアクセス(`E1.E2`, `E1->E2`)を表現する。
+これら2つの演算が同じ形式で表されているのは、Clangでの内部表現
+([`clang::MemberExpr`](https://clang.llvm.org/doxygen/classclang_1_1MemberExpr.html))
+を反映している。
+
+第1子要素は`name`要素で、アクセスするメンバー名を表現する。
+
+第2子要素は`clangDeclarationNameInfo`要素で、逆変換では使用しない。
+
+第3子要素は`clangStmt`要素で、アクセスするクラス型オブジェクトまたはクラス型へのポインターを表現する。
+
+この要素は、必須属性として`is_arrow`属性をもつ。
+
+`is_arrow`属性の値は`"true"`、`"false"`、`"1"`、`"0"`のいずれかであり、
+`"true"`または`"1"`のときポインターに対するメンバーアクセス(`E1->E2`)であることを表す。
+
+この要素は、オプションで`xcodemlType`属性を利用できる。
+
+`xcodemlType`属性の値はデータ型識別名であり、データメンバーの型を表現する。
+逆変換では使用しない。
+
 ## `SwitchStmt`: switch文
 
 | `<clangStmt class="SwitchStmt">`
