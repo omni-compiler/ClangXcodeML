@@ -568,14 +568,14 @@ Clang の `clang::Stmt` クラスから派生したクラスのデータを表�
 
 | `<clangStmt class="MemberExpr"`
 |   `is_arrow` `=` `"true"` | `"false"` | `"1"` | `"0"`
-|   `xcodemlType` `=` _データ型識別名_
+|   `xcodemlType` `=` _データ型識別名_ | `"_bound_member_function_type_"`
 | `>`
 |   _`name`要素_
 |   _`clangDeclarationNameInfo`要素_
 |   _`clangStmt`要素_
 | `</clangStmt>`
 
-`MemberExpr`は、クラス型オブジェクトか、またはクラス型へのポインターのデータメンバーへのアクセス(`E1.E2`, `E1->E2`)を表現する。
+`MemberExpr`は、クラス型オブジェクトか、またはクラス型へのポインターのメンバーへのアクセス(`E1.E2`, `E1->E2`)を表現する。
 これら2つの演算が同じ形式で表されているのは、Clangでの内部表現
 ([`clang::MemberExpr`](https://clang.llvm.org/doxygen/classclang_1_1MemberExpr.html))
 を反映している。
@@ -593,7 +593,11 @@ Clang の `clang::Stmt` クラスから派生したクラスのデータを表�
 
 この要素は、オプションで`xcodemlType`属性を利用できる。
 
-`xcodemlType`属性の値はデータ型識別名であり、データメンバーの型を表現する。
+`xcodemlType`属性の値はデータ型識別名であるか、または
+`"_bound_member_function_type_"`である。
+データ型識別名のとき、メンバーの型を表す。
+`"_bound_member_function_type_"`のとき、
+この式がオブジェクトの非`static`メンバー関数への参照であることを表す。
 逆変換では使用しない。
 
 
