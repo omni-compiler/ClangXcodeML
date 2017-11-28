@@ -518,6 +518,32 @@ Clang の `clang::Stmt` クラスから派生したクラスのデータを表�
 | `"LValueToRValue"`         | `CK_LValueToRValue`         | lvalueからrvalueへの型変換([conv.lval])   |
 
 
+## `IntegerLiteral`: 整数リテラル
+
+| `<clangStmt class="IntegerLiteral"`
+|   `token` `=` _文字列_
+|   `decimalNotation` `=` _文字列_
+|   `xcodemlType` `=` _データ型識別名_
+| `/>`
+
+`IntegerLiteral`は整数リテラルを表現する。
+
+この要素は子要素をもたない。
+
+この要素は、必須属性として`token`属性をもつ。
+
+`token`属性の値は文字列で、(接尾辞を含んだ)リテラルを表す。
+
+この要素は、オプションで`decimalNotation`、`xcodemlType`属性を利用できる。
+
+`decimalNotation`属性の値は数字またはハイフンマイナス(`-`)からなる文字列で、
+整数の十進表現を表す。
+逆変換では使用しない。
+
+`xcodemlType`属性の値はデータ型識別名で、型を表す。
+逆変換では使用しない。
+
+
 ## `MemberExpr`: クラスメンバーアクセス
 
 | `<clangStmt class="MemberExpr"`
