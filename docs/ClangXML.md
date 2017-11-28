@@ -321,6 +321,18 @@ Clang の `clang::Stmt` クラスから派生したクラスのデータを表�
 
 第2要素はcaseラベルに引き続く文。
 
+## `CompoundStmt`: 複合文
+
+| `<clangStmt class="CompoundStmt">`
+|   _`clangStmt`要素_ ...
+| `</clangStmt>`
+
+`CompoundStmt`は複合文を表現する。
+
+この要素は0個以上の`clangStmt`要素を子要素にもつ。
+各`clangStmt`要素は複合文に含まれる各文を表現する。
+`clangStmt`要素の順序は文の順序と一致しなくてはならない。
+
 ## `DeclRefExpr`: 変数参照
 
 | `<clangStmt class="DeclRefExpr"`
