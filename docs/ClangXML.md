@@ -438,6 +438,26 @@ Clang の `clang::Stmt` クラスから派生したクラスのデータを表�
 逆変換では使用しない。
 
 
+## `CXXMemberCallExpr`: メンバー関数呼び出し
+
+| `<clangStmt class="CXXMemberCallExpr"`
+|   `xcodemlType` `=` _データ型識別名_
+| `>`
+|   _`clangStmt`要素_
+|   _`clangStmt`要素_ ...
+| `</clangStmt>`
+
+`CXXMemberCallExpr`はメンバー関数呼び出し式を表現する。
+
+第1子要素は`clangStmt`要素で、呼び出される非`static`メンバー関数を表す。
+この要素の`class`属性の値は`"MemberExpr"`でなければならない。
+
+第2子要素以降の子要素は`clangStmt`要素で、
+メンバー関数に渡される実引数リストを表す。
+この要素は0個以上ある。
+`clangStmt`要素の順序と実引数の順序は一致しなくてはならない。
+
+
 ## `CXXThisExpr`: `this`ポインター
 
 | `<clangStmt class="CXXThisExpr"`
