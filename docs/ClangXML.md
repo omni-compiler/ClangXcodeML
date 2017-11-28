@@ -504,6 +504,25 @@ Clang の `clang::Stmt` クラスから派生したクラスのデータを表�
 
 第1子要素は`clangDecl`要素で、その宣言を表す。
 
+## `IfStmt`: `if`文
+
+| `<clangStmt class="IfStmt">`
+|   _`clangStmt`要素_
+|   _`clangStmt`要素_
+|   [ _`clangStmt`要素_ ]
+| `</clangStmt>`
+
+`IfStmt`は`if`文を表現する。
+
+第1子要素は`clangStmt`要素で、条件式を表す。
+
+第2子要素は`clangStmt`要素で、then節の文を表す。
+
+第3子要素は`clangStmt`要素で、else節の文を表す。
+第3子要素は省略されることがある。
+省略された場合、元の`if`文がelse節をもたないことを表す。
+
+
 ## `ImplicitCastExpr`: 暗黙の型変換
 
 | `<clangStmt class="ImplicitCastExpr"`
