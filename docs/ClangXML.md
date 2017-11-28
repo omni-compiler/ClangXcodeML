@@ -416,6 +416,28 @@ Clang の `clang::Stmt` クラスから派生したクラスのデータを表�
 各`clangStmt`要素は複合文に含まれる各文を表現する。
 `clangStmt`要素の順序は文の順序と一致しなくてはならない。
 
+
+## `ConditionalOperator`: 条件演算式
+
+| `<clangStmt class="ConditionalOperator"`
+|   `xcodemlType` `=` _データ型識別名_
+| `>`
+|   _`clangStmt`要素_
+|   _`clangStmt`要素_
+|   _`clangStmt`要素_
+| `</clangStmt>`
+
+`ConditionalOperator`は条件演算式(`E1 ? E2 : E3`)を表現する。
+
+第1、 第2、第3子要素は`clangStmt`要素で、
+それぞれ条件演算式の第1、第2、第3オペランドを表す。
+
+この要素は、オプションで`xcodemlType`属性を利用できる。
+
+`xcodemlType`属性の値はデータ型識別名で、条件演算式全体の型を表す。
+逆変換では使用しない。
+
+
 ## `CXXThisExpr`: `this`ポインター
 
 | `<clangStmt class="CXXThisExpr"`
