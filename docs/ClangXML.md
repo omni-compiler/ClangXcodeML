@@ -321,6 +321,26 @@ Clang の `clang::Stmt` クラスから派生したクラスのデータを表�
 
 第2要素はcaseラベルに引き続く文。
 
+## `DeclRefExpr`: 変数参照
+
+| `<clangStmt class="DeclRefExpr"`
+|   `xcodemlType` `=` _データ型識別名_
+| `>`
+|   _`name`要素_
+|   _`clangDeclarationNameInfo`要素_
+| `</clangStmt>`
+
+`DeclRefExpr`は変数参照を表現する。
+
+第1子要素は`name`要素で、変数名を表現する。
+
+第2子要素は`clangDeclarationNameInfo`要素で、逆変換では使用しない。
+
+この要素は、オプションで`xcodemlType`属性を利用できる。
+
+`xcodemlType`属性の値はデータ型識別名で、変数の型を表現する。
+逆変換では使用しない。
+
 ## `ImplicitCastExpr`: 暗黙の型変換
 
 | `<clangStmt class="ImplicitCastExpr"`
