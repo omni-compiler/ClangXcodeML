@@ -368,6 +368,21 @@ Clang の `clang::Stmt` クラスから派生したクラスのデータを表�
 各`clangStmt`要素は複合文に含まれる各文を表現する。
 `clangStmt`要素の順序は文の順序と一致しなくてはならない。
 
+## `CXXThisExpr`: `this`ポインター
+
+| `<clangStmt class="CXXThisExpr"`
+|   `xcodemlType` `=` _データ型識別名_
+| `/>`
+
+`CXXThisExpr`は`this`ポインターを表現する。
+
+この要素は子要素をもたない。
+
+この要素は、オプションで`xcodemlType`属性を利用できる。
+
+`xcodemlType`属性の値はデータ型識別名であり、`this`ポインターの型を表す。
+逆変換では使用しない。
+
 ## `DeclRefExpr`: 変数参照
 
 | `<clangStmt class="DeclRefExpr"`
