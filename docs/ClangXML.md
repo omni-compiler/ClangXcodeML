@@ -396,6 +396,40 @@ Clang の `clang::Stmt` クラスから派生したクラスのデータを表�
 
 第2要素はcaseラベルに引き続く文。
 
+
+## `CharacterLiteral`: 文字リテラル
+
+| `<clangStmt class="CharacterLiteral"`
+|   `hexadecimalNotation` `=` _文字列_
+|   `token` `=` _文字列_
+|   `xcodemlType` `=` _データ型識別名_
+| `/>`
+
+`CharacterLiteral`は文字リテラルを表現する。
+
+この要素は子要素をもたない。
+
+この要素は、必須属性として`hexadecimalNotation`属性をもつ。
+
+`hexadecimalNotation`属性の値は次の形式の文字列で、
+文字リテラル値の十六進表現を表す。
+
+```
+0x[0-9]+
+```
+
+この要素は、オプションで`token`、`xcodemlType`属性を利用できる。
+
+`token`属性の値は次の形式の文字列で、
+接頭辞やシングルクオーテーション(`'`)を含む文字リテラルそれ自体を表す。
+
+```
+(u|U|L)?'.+'
+```
+
+`xcodemlType`属性の値はデータ型識別名で、文字列リテラルのデータ型を表す。
+
+
 ## `CompoundAssignOperator`: 複合代入演算
 
 | `<clangStmt class="CompoundAssignOperator"`
