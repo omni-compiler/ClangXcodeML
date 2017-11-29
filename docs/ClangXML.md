@@ -356,6 +356,24 @@ Clang の `clang::Stmt` クラスから派生したクラスのデータを表�
 | `"commaExpr"`         | `BO_Comma`                      | カンマ演算 `,`                                 |
 
 
+## `CallExpr`: 関数呼び出し
+
+| `<clangStmt class="CallExpr"`
+|   `xcodemlType` `=` _データ型識別名_
+| `>`
+|   _`clangStmt`要素_
+|   _`clangStmt`要素_ ...
+| `</clangStmt>`
+
+`CallExpr`は関数呼呼び出し式を表現する。
+
+第1子要素は`clangStmt`要素で、呼び出される関数を表現する。
+
+第2子要素以降の子要素は`clangStmt`要素で、関数に渡される実引数リストを表現する。
+この要素は0個以上ある。
+`clangStmt`要素の順序は実引数の順序と一致しなくてはならない。
+
+
 ## `CaseStmt`: caseラベル
 
 | `<clangStmt class="CaseStmt">`
