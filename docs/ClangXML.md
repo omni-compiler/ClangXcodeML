@@ -356,6 +356,15 @@ Clang の `clang::Stmt` クラスから派生したクラスのデータを表�
 | `"commaExpr"`         | `BO_Comma`                      | カンマ演算 `,`                                 |
 
 
+## `BreakStmt`: `break`文
+
+| `<clangStmt class="BreakStmt">`
+
+`BreakStmt`は`break`文を表現する。
+
+この要素は子要素をもたない。
+
+
 ## `CallExpr`: 関数呼び出し
 
 | `<clangStmt class="CallExpr"`
