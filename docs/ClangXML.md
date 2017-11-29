@@ -649,6 +649,30 @@ Clang の `clang::Stmt` クラスから派生したクラスのデータを表�
 第1子要素は`clangStmt`要素で、返す式を表す。
 
 
+## `StringLiteral`: 文字列リテラル
+
+| `<clangStmt class="StringLiteral"`
+|   `stringLiteral` `=` _文字列_
+|   `xcodemlType` `=` _データ型識別名_
+| `/>`
+
+`StringLiteral`は、文字列リテラルを表現する。
+現在`char`型の文字列リテラルにのみ対応している。
+
+この要素は子要素をもたない。
+
+この要素は、必須属性として`stringLiteral`属性をもつ。
+
+`stringLiteral`属性の値は文字列で、(終端の`'\0'`を除いた)文字列リテラルの内容を表す。
+ただし、終端以外の`'\0'`は`"\484848"`として表される。
+<!-- 484848となる理由はよく分からない -->
+
+この要素は、オプションで`xcodemlType`属性を利用できる。
+
+`xcodemlType`属性の値はデータ型識別名で、文字列リテラルの型を表す。
+逆変換では使用しない。
+
+
 ## `SwitchStmt`: switch文
 
 | `<clangStmt class="SwitchStmt">`
