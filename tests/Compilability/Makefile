@@ -1,5 +1,5 @@
 .PHONY: check clean
-.PRECIOUS: %.cpp.xcodeml %.c.xcodeml
+.PRECIOUS: %.cpp.xcodeml %.c.xcodeml %.cpp.xml %.c.xml
 .DELETE_ON_ERROR:
 
 all: check
@@ -14,6 +14,7 @@ CTOXCODEML = $(ROOTDIR)/scripts/CXXtoXcodeML
 CXXTOXCODEML = $(ROOTDIR)/scripts/CXXtoXcodeML
 CTOXCODEMLFLAGS = --
 CXXTOXCODEMLFLAGS = --
+CTOXMLFLAGS = --
 CXXTOXMLFLAGS = --
 XCODEMLTOCXX = $(XCODEMLTOCXXDIR)/XcodeMLtoCXX
 CTESTCASES = $(wildcard *.src.c)
@@ -34,6 +35,9 @@ CXXTESTOBJECTS = $(CXXTESTCASES:.src.cpp=.dst.cpp)
 
 %.dst.cpp: %.cpp.xcodeml
 	$(XCODEMLTOCXX) $< > $@
+
+%.c.xml: %.src.c
+	../../CXXtoXML/src/CXXtoXML $< $(CTOXMLFLAGS) > $@
 
 %.cpp.xml: %.src.cpp
 	../../CXXtoXML/src/CXXtoXML $< $(CXXTOXMLFLAGS) > $@
