@@ -1,6 +1,7 @@
-% ClangXMLの要素
-% XcalableMP/Omni Compiler Project
-%
+---
+title: ClangXMLの要素
+author: XcalableMP/Omni Compiler Project
+---
 
 この文書はClangXML形式の構文と意味内容を定義する。
 ClangXML形式とは、C++プログラムをXMLで表現するための形式である。
