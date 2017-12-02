@@ -132,7 +132,8 @@ DEFINE_CCH(CXXRecordProc) {
   }
 
   /* forward declaration */
-  return makeTokenNode("class") + nameSpelling + makeTokenNode(";");
+  const auto classKey = getClassKey(classT->classKind());
+  return makeTokenNode(classKey) + nameSpelling + makeTokenNode(";");
 }
 
 DEFINE_CCH(CXXTemporaryObjectExprProc) {
