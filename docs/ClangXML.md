@@ -1,6 +1,7 @@
 ---
 title: ClangXMLの要素
 author: XcalableMP/Omni Compiler Project
+layout: default
 ---
 
 この文書はClangXML形式の構文と意味内容を定義する。
