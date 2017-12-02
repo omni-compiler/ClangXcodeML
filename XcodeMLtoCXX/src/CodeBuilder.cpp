@@ -202,8 +202,8 @@ const CodeBuilder::Procedure handleScope = handleBracketsLn(
 std::vector<XcodeMl::CodeFragment>
 getParamNames(xmlNodePtr fnNode, const SourceInfo &src) {
   std::vector<XcodeMl::CodeFragment> vec;
-  const auto params =
-      findNodes(fnNode, "TypeLoc/clangDecl[@class='ParmVar']/name", src.ctxt);
+  const auto params = findNodes(
+      fnNode, "clangTypeLoc/clangDecl[@class='ParmVar']/name", src.ctxt);
   for (auto p : params) {
     XMLString name = xmlNodeGetContent(p);
     vec.push_back(makeTokenNode(name));
