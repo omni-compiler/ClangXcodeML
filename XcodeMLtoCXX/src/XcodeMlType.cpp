@@ -839,6 +839,14 @@ makeClassType(const DataTypeIdent &ident,
 }
 
 TypeRef
+makeCXXUnionType(const DataTypeIdent &ident,
+    const std::vector<ClassType::BaseClass> &bases,
+    const ClassType::Symbols &members) {
+  return std::make_shared<ClassType>(
+      ident, CXXClassKind::Union, bases, members);
+}
+
+TypeRef
 makeOtherType(const DataTypeIdent &ident) {
   return std::make_shared<OtherType>(ident);
 }
