@@ -40,7 +40,7 @@ public:
     TypeTableInfo *TTI = &typetableinfo;
     NnsTableInfo nnstableinfo(MC, TTI);
     NnsTableInfo *NTI = &nnstableinfo;
-    DeclarationsVisitor DV(MC, rootNode, "clangAST", TTI, NTI);
+    DeclarationsVisitor DV(MC, rootNode, nullptr, TTI, NTI);
     Decl *D = CXT.getTranslationUnitDecl();
 
     DV.TraverseDecl(D);
@@ -65,7 +65,7 @@ public:
       clang::CompilerInstance &CI, StringRef Filename) override {
     (void)CI; // suppress warnings
     xmlDoc = xmlNewDoc(BAD_CAST "1.0");
-    xmlNodePtr rootnode = xmlNewNode(nullptr, BAD_CAST "Program");
+    xmlNodePtr rootnode = xmlNewNode(nullptr, BAD_CAST "clangAST");
     xmlDocSetRootElement(xmlDoc, rootnode);
 
     char strftimebuf[BUFSIZ];
