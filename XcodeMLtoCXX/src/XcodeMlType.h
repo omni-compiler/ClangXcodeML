@@ -314,6 +314,12 @@ enum class AccessSpec {
 std::string string_of_accessSpec(AccessSpec);
 AccessSpec accessSpec_of_string(const std::string &);
 
+enum class CXXClassKind {
+  Class,
+  Struct,
+  Union,
+};
+
 class ClassType : public Type {
 public:
   using ClassName = llvm::Optional<CodeFragment>;
