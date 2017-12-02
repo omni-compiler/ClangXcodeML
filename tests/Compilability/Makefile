@@ -1,4 +1,4 @@
-.PHONY: check clean
+.PHONY: check clean clangxml
 .PRECIOUS: %.cpp.xcodeml %.c.xcodeml %.cpp.xml %.c.xml
 .DELETE_ON_ERROR:
 
@@ -21,6 +21,7 @@ CTESTCASES = $(wildcard *.src.c)
 CTESTOBJECTS = $(CTESTCASES:.src.c=.dst.c)
 CXXTESTCASES = $(wildcard *.src.cpp)
 CXXTESTOBJECTS = $(CXXTESTCASES:.src.cpp=.dst.cpp)
+CLANGXMLOBJECTS = $(CTESTCASES:.src.c=.c.xml) $(CXXTESTCASES:.src.cpp=.cpp.xml)
 
 %.c.xcodeml: %.src.c
 	$(CTOXCODEML) $< $(CTOXCODEMLFLAGS) \
@@ -52,5 +53,7 @@ check: $(CXXTESTOBJECTS) $(CTESTOBJECTS)
 		$(CC) $(CFLAGS) $$testobj; \
 	done
 
+clangxml: $(CLANGXMLOBJECTS)
+
 clean:
-	rm -f *.dst.c *.dst.cpp *.xcodeml
+	rm -f *.dst.c *.dst.cpp *.xcodeml *.xml
