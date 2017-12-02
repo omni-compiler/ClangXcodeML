@@ -659,6 +659,11 @@ ClassType::clone() const {
   return copy;
 }
 
+CXXClassKind
+ClassType::classKind() const {
+  return classKind_;
+}
+
 ClassType::ClassName
 ClassType::name() const {
   return name_;

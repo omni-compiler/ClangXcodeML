@@ -342,6 +342,7 @@ public:
   CodeFragment makeDeclaration(CodeFragment, const Environment &) override;
   ~ClassType() override = default;
   Type *clone() const override;
+  CXXClassKind classKind() const;
   ClassName name() const;
   void setName(const std::string &);
   void setName(const CodeFragment &);
