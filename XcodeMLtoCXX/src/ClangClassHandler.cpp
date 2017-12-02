@@ -160,7 +160,7 @@ const ClangClassHandler ClangStmtHandler("class",
     });
 
 DEFINE_CCH(FriendDeclProc) {
-  if (auto TL = findFirst(node, "TypeLoc", src.ctxt)) {
+  if (auto TL = findFirst(node, "clangTypeLoc", src.ctxt)) {
     /* friend class declaration */
     const auto dtident = getProp(TL, "type");
     const auto T = src.typeTable.at(dtident);
