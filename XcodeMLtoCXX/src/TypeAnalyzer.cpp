@@ -161,7 +161,13 @@ DEFINE_TA(classTypeProc) {
     const auto pName = getUnqualIdFromIdNode(idElem, ctxt);
     symbols.emplace_back(pName, dtident);
   }
-  map[elemName] = XcodeMl::makeClassType(elemName, bases, symbols);
+
+  const auto classKind = getProp(node, "cxx_class_kind");
+  if (classKind == "union") {
+    map[elemName] = XcodeMl::makeCXXUnionType(elemName, bases, symbols);
+  } else {
+    map[elemName] = XcodeMl::makeClassType(elemName, bases, symbols);
+  }
 }
 
 DEFINE_TA(enumTypeProc) {
