@@ -328,12 +328,15 @@ public:
   using BaseClass = std::tuple<std::string, DataTypeIdent, bool>;
   ClassType(const DataTypeIdent &, const CodeFragment &, const Symbols &);
   ClassType(const DataTypeIdent &,
+      CXXClassKind,
       const CodeFragment &,
       const std::vector<BaseClass> &,
       const Symbols &);
   ClassType(const DataTypeIdent &, const Symbols &);
-  ClassType(
-      const DataTypeIdent &, const std::vector<BaseClass> &, const Symbols &);
+  ClassType(const DataTypeIdent &,
+      CXXClassKind,
+      const std::vector<BaseClass> &,
+      const Symbols &);
   CodeFragment makeDeclaration(CodeFragment, const Environment &) override;
   ~ClassType() override = default;
   Type *clone() const override;
@@ -348,6 +351,7 @@ protected:
   ClassType(const ClassType &);
 
 private:
+  CXXClassKind classKind_;
   ClassName name_;
   std::vector<BaseClass> bases_;
   Symbols classScopeSymbols;
