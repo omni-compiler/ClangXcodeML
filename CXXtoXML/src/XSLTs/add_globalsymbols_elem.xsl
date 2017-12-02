@@ -124,6 +124,7 @@
       <typeTable>
         <xsl:apply-templates
             select="
+            clangAST/
             clangDecl[@class='TranslationUnit']/
             xcodemlTypeTable/*"/>
       </typeTable>
@@ -131,18 +132,19 @@
       <nnsTable>
         <xsl:apply-templates
             select="
+            clangAST/
             clangDecl[@class='TranslationUnit']/
             xcodemlNnsTable/*"/>
       </nnsTable>
 
       <globalSymbols>
         <xsl:for-each
-          select="clangDecl[@class='TranslationUnit']">
+          select="clangAST/clangDecl[@class='TranslationUnit']">
           <xsl:call-template name="emit-id-list-in-namespace"/>
         </xsl:for-each>
       </globalSymbols>
 
-      <xsl:apply-templates select="clangDecl" />
+      <xsl:apply-templates select="clangAST" />
 
     </Program>
   </xsl:template>
