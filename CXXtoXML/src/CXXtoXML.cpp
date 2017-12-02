@@ -65,7 +65,7 @@ public:
       clang::CompilerInstance &CI, StringRef Filename) override {
     (void)CI; // suppress warnings
     xmlDoc = xmlNewDoc(BAD_CAST "1.0");
-    xmlNodePtr rootnode = xmlNewNode(nullptr, BAD_CAST "Program");
+    xmlNodePtr rootnode = xmlNewNode(nullptr, BAD_CAST "clangAST");
     xmlDocSetRootElement(xmlDoc, rootnode);
 
     char strftimebuf[BUFSIZ];
