@@ -40,7 +40,7 @@ public:
     TypeTableInfo *TTI = &typetableinfo;
     NnsTableInfo nnstableinfo(MC, TTI);
     NnsTableInfo *NTI = &nnstableinfo;
-    DeclarationsVisitor DV(MC, rootNode, "clangAST", TTI, NTI);
+    DeclarationsVisitor DV(MC, rootNode, nullptr, TTI, NTI);
     Decl *D = CXT.getTranslationUnitDecl();
 
     DV.TraverseDecl(D);
