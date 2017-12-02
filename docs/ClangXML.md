@@ -9,19 +9,19 @@ ClangXML形式とは、C++プログラムをXMLで表現するための形式で
 
 ClangXML文書は次の構造に従う。
 
-| `<Program>`
-|   `<clangAST>`
-|     `<clangDecl class="TranslationUnit">`
-|       `<xcodemlTypeTable>`
-|         _データ型定義要素_ ...
-|       `</xcodemlTypeTable>`
-|       `<xcodemlNnsTable>`
-|         _NNS定義要素_ ...
-|       `</xcodemlNnsTable>`
-|       _C++プログラムを表現する`clangDecl`要素_ ...
-|     `</clangDecl>`
-|   `</clangAST>`
-| `</Program>`
+`<Program>`  
+  `<clangAST>`  
+    `<clangDecl class="TranslationUnit">`  
+      `<xcodemlTypeTable>`  
+        _データ型定義要素_ ...  
+      `</xcodemlTypeTable>`  
+      `<xcodemlNnsTable>`  
+        _NNS定義要素_ ...  
+      `</xcodemlNnsTable>`  
+      _C++プログラムを表現する`clangDecl`要素_ ...  
+    `</clangDecl>`  
+  `</clangAST>`  
+`</Program>`  
 
 ひとつのClangXML文書は、C++のひとつの翻訳単位をXML文書として表現する。
 
@@ -90,14 +90,14 @@ C++プログラム中で使用される型(データ型)をデータ型識別名
 
 ### `classType`要素
 
-| `<classType`
-|   `cxx_class_kind` `=` `"class"` | `"struct"` | `"union"`
-|   `is_anonymous` `=` `"true"` | `"false"` | `"1"` | `"0"`
-|   `type` `=` _ユーザ定義されたデータ型識別名_
-|   `>`
-|   _`inheritedFrom`要素_
-|   _`symbols`要素_
-| `</classType>`
+`<classType`  
+  `cxx_class_kind` `=` `"class"` | `"struct"` | `"union"`  
+  `is_anonymous` `=` `"true"` | `"false"` | `"1"` | `"0"`  
+  `type` `=` _ユーザ定義されたデータ型識別名_  
+  `>`  
+  _`inheritedFrom`要素_  
+  _`symbols`要素_  
+`</classType>`  
 
 `classType`要素はクラス型を表現する。
 
@@ -145,13 +145,13 @@ C++プログラム中でこのクラスを宣言するのに使われたキー�
 
 # `Program`要素
 
-| `<Program`
-|   `source` `=` _パス名_
-|   `language=` `"C++"` | `"C"`
-|   `time` `=` _時刻_
-|   `>`
-|   _`clangAST`要素_
-| `</Program>`
+`<Program`  
+  `source` `=` _パス名_  
+  `language=` `"C++"` | `"C"`  
+  `time` `=` _時刻_  
+  `>`  
+  _`clangAST`要素_  
+`</Program>`  
 
 ClangXMLのルート要素は`Program`要素である。
 
@@ -161,19 +161,19 @@ ClangXMLのルート要素は`Program`要素である。
 
 # `clangAST`要素
 
-| `<clangAST>`
-|   _`clangDecl`要素_
-| `</clangAST>`
+`<clangAST>`  
+  _`clangDecl`要素_  
+`</clangAST>`  
 
 `clangDecl`要素の`class`属性の値は`"TranslationUnit"`でなければならない。
 
 # `clangDecl`要素
 
-| `<clangDecl`
-|   `class` `=` _宣言の種類(後述)_
-| `>`
-| _子要素_ ...
-| `</clangDecl>`
+`<clangDecl`  
+  `class` `=` _宣言の種類(後述)_  
+`>`  
+_子要素_ ...  
+`</clangDecl>`  
 
 `clangDecl`要素はC/C++の宣言を表現する。
 
@@ -197,14 +197,14 @@ ClangXMLのルート要素は`Program`要素である。
 
 ## `CXXConstructor`: コンストラクター宣言
 
-| `<clangDecl class="CXXConstructor"`
-|    `is_implicit=` `"true"`  | `"false"` | `"1"` | `"0"`
-|  `>`
-|   _`name`要素_
-|   _`TypeLoc`要素_
-|   _`clangConstructorInitializer`要素_...
-|   _`clangStmt`要素_
-| `</clangDecl>`
+`<clangDecl class="CXXConstructor"`  
+   `is_implicit=` `"true"`  | `"false"` | `"1"` | `"0"`  
+ `>`  
+  _`name`要素_  
+  _`TypeLoc`要素_  
+  _`clangConstructorInitializer`要素_...  
+  _`clangStmt`要素_  
+`</clangDecl>`  
 
 `CXXConstructor`はコンストラクター定義を表現する。
 
@@ -224,13 +224,13 @@ clangStmt子要素は関数本体を表現する。
 
 ## `Function`: 関数宣言
 
-| `<clangDecl class="Function"`
-|    `is_implicit` = `"true"` | `"false"` | `"1"` | `"0"`
-|  `>`
-|   _`name`要素_
-|   _`params`要素_
-|   _`clangStmt`要素_
-| `</clangDecl>`
+`<clangDecl class="Function"`  
+   `is_implicit` = `"true"` | `"false"` | `"1"` | `"0"`  
+ `>`  
+  _`name`要素_  
+  _`params`要素_  
+  _`clangStmt`要素_  
+`</clangDecl>`  
 
 `Function`は関数定義を表現する。
 
@@ -250,14 +250,14 @@ clangStmt子要素は関数本体を表現する。
 
 ## `ParmVar`: 仮引数
 
-| `<clangDecl class="ParmVar"`
-| `has_init` `=` `"true"` | `"false"` | `"1"` | "`0`"
-| `xcodemlType` `=` _データ型識別名_
-| `>`
-|   _`name`要素_
-|   _`TypeLoc`要素_
-|   [ _`clangStmt`要素_ ]
-| `</clangDecl>`
+`<clangDecl class="ParmVar"`  
+`has_init` `=` `"true"` | `"false"` | `"1"` | "`0`"  
+`xcodemlType` `=` _データ型識別名_  
+`>`  
+  _`name`要素_  
+  _`TypeLoc`要素_  
+  [ _`clangStmt`要素_ ]  
+`</clangDecl>`  
 
 `ParmVar`は関数宣言中の仮引数の宣言を表現する。
 
@@ -269,20 +269,20 @@ clangStmt子要素は関数本体を表現する。
 
 ## `TranslationUnit`: 翻訳単位
 
-| `<clangDecl class="TranslationUnit"`
-|   _`xcodemlTypeTable`要素_
-|   _`xcodemlNnsTable`要素_
-|   _`clangDecl`要素_ ...
-| `>`
+`<clangDecl class="TranslationUnit"`  
+  _`xcodemlTypeTable`要素_  
+  _`xcodemlNnsTable`要素_  
+  _`clangDecl`要素_ ...  
+`>`  
 
 
 ## `Typedef`: `typedef`宣言
 
-| `<clangDecl class="Typedef"`
-| `xcodemlTypedefType` `=` _データ型識別名_
-| `>`
-|   _`name`要素_
-| `</clangDecl>`
+`<clangDecl class="Typedef"`  
+`xcodemlTypedefType` `=` _データ型識別名_  
+`>`  
+  _`name`要素_  
+`</clangDecl>`  
 
 `Typedef`は`typedef`宣言を表現する。
 
@@ -294,11 +294,11 @@ clangStmt子要素は関数本体を表現する。
 
 # `clangStmt`要素
 
-| `<clangStmt`
-|   `class` `=` _属性_
-| `>`
-| _子要素_ ...
-| `</clangStmt>`
+`<clangStmt`  
+  `class` `=` _属性_  
+`>`  
+_子要素_ ...  
+`</clangStmt>`  
 
 `clangStmt`要素は
 Clang の `clang::Stmt` クラスから派生したクラスのデータを表す要素であり、
@@ -310,13 +310,13 @@ Clang の `clang::Stmt` クラスから派生したクラスのデータを表�
 
 ## `BinaryOperator`: 二項演算
 
-| `<clangStmt class="BinaryOperator"`
-| `binOpName` `=` _二項演算名(後述)_
-| `xcodemlType` `=` _データ型識別名_
-| `>`
-|   _`clangStmt`要素_
-|   _`clangStmt`要素_
-| `</clangStmt>`
+`<clangStmt class="BinaryOperator"`  
+`binOpName` `=` _二項演算名(後述)_  
+`xcodemlType` `=` _データ型識別名_  
+`>`  
+  _`clangStmt`要素_  
+  _`clangStmt`要素_  
+`</clangStmt>`  
 
 `BinaryOperator`は(複合代入演算でない)二項演算を表現する。
 複合代入演算は`CompoundAssignOperator`によって表現する。
@@ -358,7 +358,7 @@ Clang の `clang::Stmt` クラスから派生したクラスのデータを表�
 
 ## `BreakStmt`: `break`文
 
-| `<clangStmt class="BreakStmt">`
+`<clangStmt class="BreakStmt">`  
 
 `BreakStmt`は`break`文を表現する。
 
@@ -367,12 +367,12 @@ Clang の `clang::Stmt` クラスから派生したクラスのデータを表�
 
 ## `CallExpr`: 関数呼び出し
 
-| `<clangStmt class="CallExpr"`
-|   `xcodemlType` `=` _データ型識別名_
-| `>`
-|   _`clangStmt`要素_
-|   _`clangStmt`要素_ ...
-| `</clangStmt>`
+`<clangStmt class="CallExpr"`  
+  `xcodemlType` `=` _データ型識別名_  
+`>`  
+  _`clangStmt`要素_  
+  _`clangStmt`要素_ ...  
+`</clangStmt>`  
 
 `CallExpr`は関数呼呼び出し式を表現する。
 
@@ -385,10 +385,10 @@ Clang の `clang::Stmt` クラスから派生したクラスのデータを表�
 
 ## `CaseStmt`: caseラベル
 
-| `<clangStmt class="CaseStmt">`
-|   _`clangStmt`要素_
-|   _`clangStmt`要素_
-| `</clangStmt>`
+`<clangStmt class="CaseStmt">`  
+  _`clangStmt`要素_  
+  _`clangStmt`要素_  
+`</clangStmt>`  
 
 `CaseStmt`はcaseラベルを表現する。
 
@@ -399,11 +399,11 @@ Clang の `clang::Stmt` クラスから派生したクラスのデータを表�
 
 ## `CharacterLiteral`: 文字リテラル
 
-| `<clangStmt class="CharacterLiteral"`
-|   `hexadecimalNotation` `=` _文字列_
-|   `token` `=` _文字列_
-|   `xcodemlType` `=` _データ型識別名_
-| `/>`
+`<clangStmt class="CharacterLiteral"`  
+  `hexadecimalNotation` `=` _文字列_  
+  `token` `=` _文字列_  
+  `xcodemlType` `=` _データ型識別名_  
+`/>`  
 
 `CharacterLiteral`は文字リテラルを表現する。
 
@@ -432,13 +432,13 @@ Clang の `clang::Stmt` クラスから派生したクラスのデータを表�
 
 ## `CompoundAssignOperator`: 複合代入演算
 
-| `<clangStmt class="CompoundAssignOperator"`
-|   `binOpName` `=` _二項演算名(後述)_
-|   `xcodemlType` `=` _データ型識別名_
-| `>`
-|   _`clangStmt`要素_
-|   _`clangStmt`要素_
-| `</clangStmt>`
+`<clangStmt class="CompoundAssignOperator"`  
+  `binOpName` `=` _二項演算名(後述)_  
+  `xcodemlType` `=` _データ型識別名_  
+`>`  
+  _`clangStmt`要素_  
+  _`clangStmt`要素_  
+`</clangStmt>`  
 
 `CompoundAssignOperator`は複合代入演算を表現する。
 
@@ -467,9 +467,9 @@ Clang の `clang::Stmt` クラスから派生したクラスのデータを表�
 
 ## `CompoundStmt`: 複合文
 
-| `<clangStmt class="CompoundStmt">`
-|   _`clangStmt`要素_ ...
-| `</clangStmt>`
+`<clangStmt class="CompoundStmt">`  
+  _`clangStmt`要素_ ...  
+`</clangStmt>`  
 
 `CompoundStmt`は複合文を表現する。
 
@@ -480,13 +480,13 @@ Clang の `clang::Stmt` クラスから派生したクラスのデータを表�
 
 ## `ConditionalOperator`: 条件演算式
 
-| `<clangStmt class="ConditionalOperator"`
-|   `xcodemlType` `=` _データ型識別名_
-| `>`
-|   _`clangStmt`要素_
-|   _`clangStmt`要素_
-|   _`clangStmt`要素_
-| `</clangStmt>`
+`<clangStmt class="ConditionalOperator"`  
+  `xcodemlType` `=` _データ型識別名_  
+`>`  
+  _`clangStmt`要素_  
+  _`clangStmt`要素_  
+  _`clangStmt`要素_  
+`</clangStmt>`  
 
 `ConditionalOperator`は条件演算式(`E1 ? E2 : E3`)を表現する。
 
@@ -501,12 +501,12 @@ Clang の `clang::Stmt` クラスから派生したクラスのデータを表�
 
 ## `CXXMemberCallExpr`: メンバー関数呼び出し
 
-| `<clangStmt class="CXXMemberCallExpr"`
-|   `xcodemlType` `=` _データ型識別名_
-| `>`
-|   _`clangStmt`要素_
-|   _`clangStmt`要素_ ...
-| `</clangStmt>`
+`<clangStmt class="CXXMemberCallExpr"`  
+  `xcodemlType` `=` _データ型識別名_  
+`>`  
+  _`clangStmt`要素_  
+  _`clangStmt`要素_ ...  
+`</clangStmt>`  
 
 `CXXMemberCallExpr`はメンバー関数呼び出し式を表現する。
 
@@ -521,9 +521,9 @@ Clang の `clang::Stmt` クラスから派生したクラスのデータを表�
 
 ## `CXXThisExpr`: `this`ポインター
 
-| `<clangStmt class="CXXThisExpr"`
-|   `xcodemlType` `=` _データ型識別名_
-| `/>`
+`<clangStmt class="CXXThisExpr"`  
+  `xcodemlType` `=` _データ型識別名_  
+`/>`  
 
 `CXXThisExpr`は`this`ポインターを表現する。
 
@@ -536,12 +536,12 @@ Clang の `clang::Stmt` クラスから派生したクラスのデータを表�
 
 ## `DeclRefExpr`: 変数参照
 
-| `<clangStmt class="DeclRefExpr"`
-|   `xcodemlType` `=` _データ型識別名_
-| `>`
-|   _`name`要素_
-|   _`clangDeclarationNameInfo`要素_
-| `</clangStmt>`
+`<clangStmt class="DeclRefExpr"`  
+  `xcodemlType` `=` _データ型識別名_  
+`>`  
+  _`name`要素_  
+  _`clangDeclarationNameInfo`要素_  
+`</clangStmt>`  
 
 `DeclRefExpr`は変数参照を表現する。
 
@@ -557,9 +557,9 @@ Clang の `clang::Stmt` クラスから派生したクラスのデータを表�
 
 ## `DeclStmt`: 宣言文
 
-| `<clangStmt class="DeclStmt">`
-|   _`clangDecl`要素_
-| `</clangStmt>`
+`<clangStmt class="DeclStmt">`  
+  _`clangDecl`要素_  
+`</clangStmt>`  
 
 `DeclStmt`は宣言文を表現する。
 
@@ -567,11 +567,11 @@ Clang の `clang::Stmt` クラスから派生したクラスのデータを表�
 
 ## `IfStmt`: `if`文
 
-| `<clangStmt class="IfStmt">`
-|   _`clangStmt`要素_
-|   _`clangStmt`要素_
-|   [ _`clangStmt`要素_ ]
-| `</clangStmt>`
+`<clangStmt class="IfStmt">`  
+  _`clangStmt`要素_  
+  _`clangStmt`要素_  
+  [ _`clangStmt`要素_ ]  
+`</clangStmt>`  
 
 `IfStmt`は`if`文を表現する。
 
@@ -586,12 +586,12 @@ Clang の `clang::Stmt` クラスから派生したクラスのデータを表�
 
 ## `ImplicitCastExpr`: 暗黙の型変換
 
-| `<clangStmt class="ImplicitCastExpr"`
-|   `xcodemlType` `=` _データ型識別名_
-|   `clangCastKind` `=` _型変換の種類(後述)_
-|  `>`
-|  _`clangStmt`要素_
-| `</clangStmt>`
+`<clangStmt class="ImplicitCastExpr"`  
+  `xcodemlType` `=` _データ型識別名_  
+  `clangCastKind` `=` _型変換の種類(後述)_  
+ `>`  
+ _`clangStmt`要素_  
+`</clangStmt>`  
 
 `ImplicitCastExpr`は暗黙の型変換を表現する。
 
@@ -620,11 +620,11 @@ Clang の `clang::Stmt` クラスから派生したクラスのデータを表�
 
 ## `IntegerLiteral`: 整数リテラル
 
-| `<clangStmt class="IntegerLiteral"`
-|   `token` `=` _文字列_
-|   `decimalNotation` `=` _文字列_
-|   `xcodemlType` `=` _データ型識別名_
-| `/>`
+`<clangStmt class="IntegerLiteral"`  
+  `token` `=` _文字列_  
+  `decimalNotation` `=` _文字列_  
+  `xcodemlType` `=` _データ型識別名_  
+`/>`  
 
 `IntegerLiteral`は整数リテラルを表現する。
 
@@ -646,14 +646,14 @@ Clang の `clang::Stmt` クラスから派生したクラスのデータを表�
 
 ## `MemberExpr`: クラスメンバーアクセス
 
-| `<clangStmt class="MemberExpr"`
-|   `is_arrow` `=` `"true"` | `"false"` | `"1"` | `"0"`
-|   `xcodemlType` `=` _データ型識別名_ | `"_bound_member_function_type_"`
-| `>`
-|   _`name`要素_
-|   _`clangDeclarationNameInfo`要素_
-|   _`clangStmt`要素_
-| `</clangStmt>`
+`<clangStmt class="MemberExpr"`  
+  `is_arrow` `=` `"true"` | `"false"` | `"1"` | `"0"`  
+  `xcodemlType` `=` _データ型識別名_ | `"_bound_member_function_type_"`  
+`>`  
+  _`name`要素_  
+  _`clangDeclarationNameInfo`要素_  
+  _`clangStmt`要素_  
+`</clangStmt>`  
 
 `MemberExpr`は、クラス型オブジェクトか、またはクラス型へのポインターのメンバーへのアクセス(`E1.E2`, `E1->E2`)を表現する。
 これら2つの演算が同じ形式で表されているのは、Clangでの内部表現
@@ -683,9 +683,9 @@ Clang の `clang::Stmt` クラスから派生したクラスのデータを表�
 
 ## `ReturnStmt`: `return`文
 
-| `<clangStmt class="ReturnStmt">`
-|   _`clangStmt`要素_
-| `</clangStmt>`
+`<clangStmt class="ReturnStmt">`  
+  _`clangStmt`要素_  
+`</clangStmt>`  
 
 `ReturnStmt`は`return`文を表現する。
 
@@ -694,10 +694,10 @@ Clang の `clang::Stmt` クラスから派生したクラスのデータを表�
 
 ## `StringLiteral`: 文字列リテラル
 
-| `<clangStmt class="StringLiteral"`
-|   `stringLiteral` `=` _文字列_
-|   `xcodemlType` `=` _データ型識別名_
-| `/>`
+`<clangStmt class="StringLiteral"`  
+  `stringLiteral` `=` _文字列_  
+  `xcodemlType` `=` _データ型識別名_  
+`/>`  
 
 `StringLiteral`は、文字列リテラルを表現する。
 現在`char`型の文字列リテラルにのみ対応している。
@@ -718,10 +718,10 @@ Clang の `clang::Stmt` クラスから派生したクラスのデータを表�
 
 ## `SwitchStmt`: switch文
 
-| `<clangStmt class="SwitchStmt">`
-|   _`clangStmt`要素_
-|   _`clangStmt`要素_ ...
-| `</clangStmt>`
+`<clangStmt class="SwitchStmt">`  
+  _`clangStmt`要素_  
+  _`clangStmt`要素_ ...  
+`</clangStmt>`  
 
 `SwitchStmt`はswitch文を表現する。
 
@@ -734,12 +734,12 @@ Clang の `clang::Stmt` クラスから派生したクラスのデータを表�
 
 ## `UnaryOperator`: 単項演算式
 
-| `<clangStmt class="UnaryOperator"`
-|   `unaryOpName` `=` _単項演算名(後述)_
-|   `xcodemlType` `=` _データ型識別名_
-| `>`
-|   _`clangStmt`要素_
-| `</clangStmt>`
+`<clangStmt class="UnaryOperator"`  
+  `unaryOpName` `=` _単項演算名(後述)_  
+  `xcodemlType` `=` _データ型識別名_  
+`>`  
+  _`clangStmt`要素_  
+`</clangStmt>`  
 
 
 `UnaryOperator`は単項演算式を表現する。
@@ -776,11 +776,11 @@ Clang の `clang::Stmt` クラスから派生したクラスのデータを表�
 
 # clangConstructorInitializer要素
 
-| `<clangConstructorInitializer `
-|   `is_written=` `"true"` | `"false"` | `"1"` | `"0"`
-|   `member` `=` _メンバー名_
-|   `>`
-|   _`clangStmt`要素_
-| `</clangStmt>`
+`<clangConstructorInitializer `  
+  `is_written=` `"true"` | `"false"` | `"1"` | `"0"`  
+  `member` `=` _メンバー名_  
+  `>`  
+  _`clangStmt`要素_  
+`</clangStmt>`  
 
 
