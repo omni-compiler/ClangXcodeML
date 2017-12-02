@@ -320,6 +320,8 @@ enum class CXXClassKind {
   Union,
 };
 
+std::string getClassKey(CXXClassKind kind);
+
 class ClassType : public Type {
 public:
   using ClassName = llvm::Optional<CodeFragment>;

@@ -638,6 +638,15 @@ ClassType::ClassType(const DataTypeIdent &ident,
       classScopeSymbols(symbols) {
 }
 
+std::string
+getClassKey(CXXClassKind kind) {
+  switch (kind) {
+  case CXXClassKind::Class: return "class";
+  case CXXClassKind::Struct: return "struct";
+  case CXXClassKind::Union: return "union";
+  }
+}
+
 CodeFragment
 ClassType::makeDeclaration(CodeFragment var, const Environment &) {
   assert(name_);
