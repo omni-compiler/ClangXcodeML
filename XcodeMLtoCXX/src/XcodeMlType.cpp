@@ -650,7 +650,7 @@ getClassKey(CXXClassKind kind) {
 CodeFragment
 ClassType::makeDeclaration(CodeFragment var, const Environment &) {
   assert(name_);
-  return makeTokenNode("class") + *name_ + var;
+  return makeTokenNode(getClassKey(classKind())) + *name_ + var;
 }
 
 Type *
