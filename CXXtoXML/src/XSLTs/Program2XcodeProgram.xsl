@@ -29,10 +29,6 @@
     </globalDeclarations>
   </xsl:template>
 
-  <xsl:template match="clangAST">
-    <xsl:apply-templates />
-  </xsl:template>
-
   <xsl:template match="clangDecl[@class='Function'
       or @class='CXXMethod'
       or @class='CXXConversion'
