@@ -314,6 +314,14 @@ enum class AccessSpec {
 std::string string_of_accessSpec(AccessSpec);
 AccessSpec accessSpec_of_string(const std::string &);
 
+enum class CXXClassKind {
+  Class,
+  Struct,
+  Union,
+};
+
+std::string getClassKey(CXXClassKind kind);
+
 class ClassType : public Type {
 public:
   using ClassName = llvm::Optional<CodeFragment>;
@@ -322,15 +330,19 @@ public:
   using BaseClass = std::tuple<std::string, DataTypeIdent, bool>;
   ClassType(const DataTypeIdent &, const CodeFragment &, const Symbols &);
   ClassType(const DataTypeIdent &,
+      CXXClassKind,
       const CodeFragment &,
       const std::vector<BaseClass> &,
       const Symbols &);
   ClassType(const DataTypeIdent &, const Symbols &);
-  ClassType(
-      const DataTypeIdent &, const std::vector<BaseClass> &, const Symbols &);
+  ClassType(const DataTypeIdent &,
+      CXXClassKind,
+      const std::vector<BaseClass> &,
+      const Symbols &);
   CodeFragment makeDeclaration(CodeFragment, const Environment &) override;
   ~ClassType() override = default;
   Type *clone() const override;
+  CXXClassKind classKind() const;
   ClassName name() const;
   void setName(const std::string &);
   void setName(const CodeFragment &);
@@ -342,6 +354,7 @@ protected:
   ClassType(const ClassType &);
 
 private:
+  CXXClassKind classKind_;
   ClassName name_;
   std::vector<BaseClass> bases_;
   Symbols classScopeSymbols;
@@ -376,6 +389,9 @@ TypeRef makeClassType(const DataTypeIdent &, const ClassType::Symbols &);
 TypeRef makeClassType(const DataTypeIdent &,
     const std::vector<ClassType::BaseClass> &,
     const ClassType::Symbols &);
+TypeRef makeCXXUnionType(const DataTypeIdent &ident,
+    const std::vector<ClassType::BaseClass> &bases,
+    const ClassType::Symbols &members);
 TypeRef makeFunctionType(const DataTypeIdent &ident,
     const DataTypeIdent &returnType,
     const std::vector<DataTypeIdent> &paramTypes);

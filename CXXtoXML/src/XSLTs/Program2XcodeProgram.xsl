@@ -4,7 +4,7 @@
     encoding="UTF-8"
     indent="yes"
     method="xml" />
-  <xsl:template match="Program">
+  <xsl:template match="clangAST">
     <XcodeProgram>
       <xsl:apply-templates />
     </XcodeProgram>
@@ -27,10 +27,6 @@
     <globalDeclarations>
       <xsl:apply-templates />
     </globalDeclarations>
-  </xsl:template>
-
-  <xsl:template match="clangAST">
-    <xsl:apply-templates />
   </xsl:template>
 
   <xsl:template match="clangDecl[@class='Function'

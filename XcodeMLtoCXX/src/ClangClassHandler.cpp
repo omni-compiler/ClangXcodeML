@@ -105,11 +105,12 @@ emitClassDefinition(xmlNodePtr node,
     }
   }
 
+  const auto classKey = makeTokenNode(getClassKey(classType.classKind()));
   const auto name = classType.name().getValueOr(cxxgen::makeVoidNode());
 
-  return makeTokenNode("class") + name + makeBases(classType, src)
-      + makeTokenNode("{") + separateByBlankLines(decls) + makeTokenNode("}")
-      + makeTokenNode(";") + cxxgen::makeNewLineNode();
+  return classKey + name + makeBases(classType, src) + makeTokenNode("{")
+      + separateByBlankLines(decls) + makeTokenNode("}") + makeTokenNode(";")
+      + cxxgen::makeNewLineNode();
 }
 
 DEFINE_CCH(CXXRecordProc) {
@@ -131,7 +132,8 @@ DEFINE_CCH(CXXRecordProc) {
   }
 
   /* forward declaration */
-  return makeTokenNode("class") + nameSpelling + makeTokenNode(";");
+  const auto classKey = getClassKey(classT->classKind());
+  return makeTokenNode(classKey) + nameSpelling + makeTokenNode(";");
 }
 
 DEFINE_CCH(CXXTemporaryObjectExprProc) {

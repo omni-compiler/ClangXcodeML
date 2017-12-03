@@ -600,16 +600,19 @@ ClassType::ClassType(const DataTypeIdent &ident,
     const CodeFragment &className,
     const ClassType::Symbols &symbols)
     : Type(TypeKind::Class, ident),
+      classKind_(CXXClassKind::Class),
       name_(className),
       bases_(),
       classScopeSymbols(symbols) {
 }
 
 ClassType::ClassType(const DataTypeIdent &ident,
+    CXXClassKind kind,
     const CodeFragment &className,
     const std::vector<BaseClass> &b,
     const ClassType::Symbols &symbols)
     : Type(TypeKind::Class, ident),
+      classKind_(kind),
       name_(className),
       bases_(b),
       classScopeSymbols(symbols) {
@@ -618,30 +621,47 @@ ClassType::ClassType(const DataTypeIdent &ident,
 ClassType::ClassType(
     const DataTypeIdent &ident, const ClassType::Symbols &symbols)
     : Type(TypeKind::Class, ident),
+      classKind_(CXXClassKind::Class),
       name_(),
       bases_(),
       classScopeSymbols(symbols) {
 }
 
 ClassType::ClassType(const DataTypeIdent &ident,
+    CXXClassKind kind,
     const std::vector<BaseClass> &b,
     const ClassType::Symbols &symbols)
     : Type(TypeKind::Class, ident),
+      classKind_(kind),
       name_(),
       bases_(b),
       classScopeSymbols(symbols) {
 }
 
+std::string
+getClassKey(CXXClassKind kind) {
+  switch (kind) {
+  case CXXClassKind::Class: return "class";
+  case CXXClassKind::Struct: return "struct";
+  case CXXClassKind::Union: return "union";
+  }
+}
+
 CodeFragment
 ClassType::makeDeclaration(CodeFragment var, const Environment &) {
   assert(name_);
-  return makeTokenNode("class") + *name_ + var;
+  return makeTokenNode(getClassKey(classKind())) + *name_ + var;
 }
 
 Type *
 ClassType::clone() const {
   ClassType *copy = new ClassType(*this);
   return copy;
+}
+
+CXXClassKind
+ClassType::classKind() const {
+  return classKind_;
 }
 
 ClassType::ClassName
@@ -675,6 +695,7 @@ ClassType::classof(const Type *T) {
 
 ClassType::ClassType(const ClassType &other)
     : Type(other),
+      classKind_(other.classKind_),
       name_(other.name_),
       classScopeSymbols(other.classScopeSymbols) {
 }
@@ -813,7 +834,16 @@ TypeRef
 makeClassType(const DataTypeIdent &ident,
     const std::vector<ClassType::BaseClass> &bases,
     const ClassType::Symbols &symbols) {
-  return std::make_shared<ClassType>(ident, bases, symbols);
+  return std::make_shared<ClassType>(
+      ident, CXXClassKind::Class, bases, symbols);
+}
+
+TypeRef
+makeCXXUnionType(const DataTypeIdent &ident,
+    const std::vector<ClassType::BaseClass> &bases,
+    const ClassType::Symbols &members) {
+  return std::make_shared<ClassType>(
+      ident, CXXClassKind::Union, bases, members);
 }
 
 TypeRef
