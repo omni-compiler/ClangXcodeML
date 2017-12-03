@@ -1,5 +1,5 @@
-.PHONY: check clean
-.PRECIOUS: %.cpp.xcodeml %.c.xcodeml
+.PHONY: check clean clangxml
+.PRECIOUS: %.cpp.xcodeml %.c.xcodeml %.cpp.xml %.c.xml
 .DELETE_ON_ERROR:
 
 all: check
@@ -14,12 +14,14 @@ CTOXCODEML = $(ROOTDIR)/scripts/CXXtoXcodeML
 CXXTOXCODEML = $(ROOTDIR)/scripts/CXXtoXcodeML
 CTOXCODEMLFLAGS = --
 CXXTOXCODEMLFLAGS = --
+CTOXMLFLAGS = --
 CXXTOXMLFLAGS = --
 XCODEMLTOCXX = $(XCODEMLTOCXXDIR)/XcodeMLtoCXX
 CTESTCASES = $(wildcard *.src.c)
 CTESTOBJECTS = $(CTESTCASES:.src.c=.dst.c)
 CXXTESTCASES = $(wildcard *.src.cpp)
 CXXTESTOBJECTS = $(CXXTESTCASES:.src.cpp=.dst.cpp)
+CLANGXMLOBJECTS = $(CTESTCASES:.src.c=.c.xml) $(CXXTESTCASES:.src.cpp=.cpp.xml)
 
 %.c.xcodeml: %.src.c
 	$(CTOXCODEML) $< $(CTOXCODEMLFLAGS) \
@@ -35,6 +37,9 @@ CXXTESTOBJECTS = $(CXXTESTCASES:.src.cpp=.dst.cpp)
 %.dst.cpp: %.cpp.xcodeml
 	$(XCODEMLTOCXX) $< > $@
 
+%.c.xml: %.src.c
+	../../CXXtoXML/src/CXXtoXML $< $(CTOXMLFLAGS) > $@
+
 %.cpp.xml: %.src.cpp
 	../../CXXtoXML/src/CXXtoXML $< $(CXXTOXMLFLAGS) > $@
 
@@ -48,5 +53,7 @@ check: $(CXXTESTOBJECTS) $(CTESTOBJECTS)
 		$(CC) $(CFLAGS) $$testobj; \
 	done
 
+clangxml: $(CLANGXMLOBJECTS)
+
 clean:
-	rm -f *.dst.c *.dst.cpp *.xcodeml
+	rm -f *.dst.c *.dst.cpp *.xcodeml *.xml
