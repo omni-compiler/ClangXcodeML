@@ -359,27 +359,6 @@
     </castExpr>
   </xsl:template>
 
-  <xsl:template match="clangStmt[@class='CharacterLiteral']">
-    <intConstant>
-      <xsl:apply-templates select="@*" />
-      <xsl:value-of select="@hexadecimalNotation" />
-    </intConstant>
-  </xsl:template>
-
-  <xsl:template match="clangStmt[@class='IntegerLiteral']">
-    <intConstant>
-      <xsl:apply-templates select="@*" />
-      <xsl:value-of select="@decimalNotation" />
-    </intConstant>
-  </xsl:template>
-
-  <xsl:template match="clangStmt[@class='FloatingLiteral']">
-    <floatConstant>
-      <xsl:apply-templates select="@*" />
-      <xsl:value-of select="@token" />
-    </floatConstant>
-  </xsl:template>
-
   <xsl:template match="clangStmt[@class='StringLiteral']">
     <stringConstant>
       <xsl:apply-templates select="@*" />
