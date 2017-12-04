@@ -145,7 +145,7 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
   if (auto IL = dyn_cast<IntegerLiteral>(S)) {
     const unsigned INIT_BUFFER_SIZE = 32;
     SmallVector<char, INIT_BUFFER_SIZE> buffer;
-    auto &CXT = mangleContext->getASTContext();
+    const auto &CXT = mangleContext->getASTContext();
     const auto location = CXT.getSourceManager().getSpellingLoc(IL->getLocation());
     auto spelling = clang::Lexer::getSpelling(
         location, buffer, CXT.getSourceManager(), CXT.getLangOpts());
