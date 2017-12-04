@@ -36,7 +36,11 @@ C++プログラム中で使用される型(データ型)をデータ型識別名
 
 # `clangAST`要素
 
-`<clangAST>`  
+`<clangAST`  
+  `source` `=` _パス名_  
+  `language=` `"C++"` | `"C"`  
+  `time` `=` _時刻_  
+`>`  
   _`clangDecl`要素_  
 `</clangAST>`  
 
@@ -44,6 +48,14 @@ ClangXML文書のルート要素は`clangAST`要素である。
 
 第1子要素は`clangDecl`要素で、このClangXML文書が表現する翻訳単位を表す。
 この`clangDecl`要素の`class`属性の値は`"TranslationUnit"`でなければならない。
+
+この要素は、オプションで`source`属性、`language`属性、`time`属性を利用できる。
+
+`source`属性の値は文字列で、元となるプログラムのファイル名を表す。
+
+`language`属性の値は`"C++"`または`"C"`で、言語を表す。
+
+`time`属性の値は文字列で、ClangXML文書が作られた時刻を表す。
 
 # `clangDecl`要素
 
