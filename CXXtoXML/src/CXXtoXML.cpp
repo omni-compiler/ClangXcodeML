@@ -15,6 +15,7 @@
 
 #include <libxml/xmlsave.h>
 #include <time.h>
+#include <iostream>
 #include <string>
 
 using namespace clang;
@@ -24,6 +25,22 @@ using namespace llvm;
 
 static cl::extrahelp CommonHelp(CommonOptionsParser::HelpMessage);
 static std::unique_ptr<opt::OptTable> Options(createDriverOptTable());
+
+namespace {
+
+const char *
+getLanguageString(const LangOptions &Opts) {
+  if (Opts.CPlusPlus) {
+    return "C++";
+  } else if (Opts.C99 || Opts.C11) {
+    return "C";
+  } else {
+    std::cout << "Invalid file" << std::endl;
+    std::abort();
+  }
+}
+
+} // namespace
 
 class XMLASTConsumer : public ASTConsumer {
   xmlNodePtr rootNode;
