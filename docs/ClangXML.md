@@ -4,7 +4,7 @@ author: XcalableMP/Omni Compiler Project
 layout: default
 ---
 
-* Table of Contents
+1. Table of Contents
 {:toc}
 
 
