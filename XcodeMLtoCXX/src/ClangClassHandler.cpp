@@ -161,6 +161,7 @@ const ClangClassHandler ClangStmtHandler("class",
     {
         std::make_tuple("BreakStmt", BreakStmtProc),
         std::make_tuple("CallExpr", callExprProc),
+        std::make_tuple("CharacterLiteral", emitTokenAttrValue),
         std::make_tuple("CXXConstructExpr", CXXCtorExprProc),
         std::make_tuple("CXXDeleteExpr", CXXDeleteExprProc),
         std::make_tuple("CXXTemporaryObjectExpr", CXXTemporaryObjectExprProc),
