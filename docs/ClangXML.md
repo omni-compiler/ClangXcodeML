@@ -16,50 +16,52 @@ ClangXML形式とは、C++プログラムをXMLで表現するための形式で
 
 ClangXML文書は次の構造に従う。
 
-`<Program>`  
-  `<clangAST>`  
-    `<clangDecl class="TranslationUnit">`  
-      `<xcodemlTypeTable>`  
-        _データ型定義要素_ ...  
-      `</xcodemlTypeTable>`  
-      `<xcodemlNnsTable>`  
-        _NNS定義要素_ ...  
-      `</xcodemlNnsTable>`  
-      _C++プログラムを表現する`clangDecl`要素_ ...  
-    `</clangDecl>`  
-  `</clangAST>`  
-`</Program>`  
+`<clangAST>`  
+  `<clangDecl class="TranslationUnit">`  
+    `<xcodemlTypeTable>`  
+      _データ型定義要素_ ...  
+    `</xcodemlTypeTable>`  
+    `<xcodemlNnsTable>`  
+      _NNS定義要素_ ...  
+    `</xcodemlNnsTable>`  
+    _C++プログラムを表現する`clangDecl`要素_ ...  
+  `</clangDecl>`  
+`</clangAST>`  
 
 ひとつのClangXML文書は、C++のひとつの翻訳単位をXML文書として表現する。
 
-ClangXML文書のルート要素は`Program`要素である。
-`Program`要素はただひとつの子要素として`clangAST`要素をもつ。
-`clangAST`要素はただひとつの子要素として`clangDecl`(`TranslationUnit`)要素をもつ。
+ClangXML文書のルート要素は`clangAST`要素である。
+`clangAST`要素はただひとつの子要素として`clangDecl`要素をもつ。
+この`clangDecl`要素の`class 属性の値は`"TranslationUnit" である。
 
 ClangXML文書は、
 C++プログラム中で使用される型(データ型)をデータ型識別名とデータ型定義要素によって表現する。
 データ型識別名はデータ型に与えられる名前である。
 データ型定義要素はデータ型識別名とそれが指示するデータ型の内容を定義する。
 
-# `Program`要素
-
-`<Program`  
-  `source` `=` _パス名_  
-  `language=` `"C++"` | `"C"`  
-  `time` `=` _時刻_  
-  `>`  
-  _`clangAST`要素_  
-`</Program>`  
-
-ClangXMLのルート要素は`Program`要素である。
 
 # `clangAST`要素
 
-`<clangAST>`  
+`<clangAST`  
+  `source` `=` _パス名_  
+  `language=` `"C++"` | `"C"`  
+  `time` `=` _時刻_  
+`>`  
   _`clangDecl`要素_  
 `</clangAST>`  
 
-`clangDecl`要素の`class`属性の値は`"TranslationUnit"`でなければならない。
+ClangXML文書のルート要素は`clangAST`要素である。
+
+第1子要素は`clangDecl`要素で、このClangXML文書が表現する翻訳単位を表す。
+この`clangDecl`要素の`class`属性の値は`"TranslationUnit"`でなければならない。
+
+この要素は、オプションで`source`属性、`language`属性、`time`属性を利用できる。
+
+`source`属性の値は文字列で、元となるプログラムのファイル名を表す。
+
+`language`属性の値は`"C++"`または`"C"`で、言語を表す。
+
+`time`属性の値は文字列で、ClangXML文書が作られた時刻を表す。
 
 # `clangDecl`要素
 

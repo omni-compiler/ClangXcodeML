@@ -58,6 +58,11 @@ DEFINE_CCH(CXXDeleteExprProc) {
   return makeTokenNode("delete") + w.walk(allocated, src);
 }
 
+DEFINE_CCH(emitTokenAttrValue) {
+  const auto token = getProp(node, "token");
+  return makeTokenNode(token);
+}
+
 XcodeMl::CodeFragment
 makeBases(const XcodeMl::ClassType &T, SourceInfo &src) {
   using namespace XcodeMl;
@@ -156,9 +161,12 @@ const ClangClassHandler ClangStmtHandler("class",
     {
         std::make_tuple("BreakStmt", BreakStmtProc),
         std::make_tuple("CallExpr", callExprProc),
+        std::make_tuple("CharacterLiteral", emitTokenAttrValue),
         std::make_tuple("CXXConstructExpr", CXXCtorExprProc),
         std::make_tuple("CXXDeleteExpr", CXXDeleteExprProc),
         std::make_tuple("CXXTemporaryObjectExpr", CXXTemporaryObjectExprProc),
+        std::make_tuple("IntegerLiteral", emitTokenAttrValue),
+        std::make_tuple("FloatingLiteral", emitTokenAttrValue),
     });
 
 DEFINE_CCH(FriendDeclProc) {
