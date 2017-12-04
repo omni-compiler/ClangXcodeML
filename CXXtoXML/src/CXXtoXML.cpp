@@ -80,7 +80,6 @@ public:
   bool
   BeginSourceFileAction(
       clang::CompilerInstance &CI, StringRef Filename) override {
-    (void)CI; // suppress warnings
     xmlDoc = xmlNewDoc(BAD_CAST "1.0");
     xmlNodePtr rootnode = xmlNewNode(nullptr, BAD_CAST "clangAST");
     xmlDocSetRootElement(xmlDoc, rootnode);
@@ -91,7 +90,9 @@ public:
     strftime(strftimebuf, sizeof strftimebuf, "%F %T", localtime(&t));
 
     xmlNewProp(rootnode, BAD_CAST "source", BAD_CAST Filename.data());
-    xmlNewProp(rootnode, BAD_CAST "language", BAD_CAST "C");
+    xmlNewProp(rootnode,
+        BAD_CAST "language",
+        BAD_CAST getLanguageString(CI.getLangOpts()));
     xmlNewProp(rootnode, BAD_CAST "time", BAD_CAST strftimebuf);
 
     return true;
