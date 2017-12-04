@@ -146,9 +146,10 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
     const unsigned INIT_BUFFER_SIZE = 32;
     SmallVector<char, INIT_BUFFER_SIZE> buffer;
     const auto &CXT = mangleContext->getASTContext();
-    const auto location = CXT.getSourceManager().getSpellingLoc(IL->getLocation());
-    auto spelling = clang::Lexer::getSpelling(
-        location, buffer, CXT.getSourceManager(), CXT.getLangOpts());
+    const auto &SM = CXT.getSourceManager();
+    const auto location = SM.getSpellingLoc(IL->getLocation());
+    const auto spelling =
+        clang::Lexer::getSpelling(location, buffer, SM, CXT.getLangOpts());
     newProp("token", spelling.str().c_str());
     std::string decimalNotation = IL->getValue().toString(10, true);
     newProp("decimalNotation", decimalNotation.c_str());
