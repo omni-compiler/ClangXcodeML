@@ -2,7 +2,7 @@ version: '2'
 
 services:
   workspace:
-    image: koyama41/llvm-3.9
+    image: hnagamin/clangxcodeml-test-env-14-3.6
     volumes:
       - /etc/localtime:/etc/localtime
       - /home:/home
