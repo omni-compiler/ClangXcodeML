@@ -13,7 +13,7 @@ before_install:
 
 script:
   - "docker-compose run workspace bash -c
-    'make -C /worktree/CXXtoXML
-     && make -C /worktree/XcodeMLtoCXX
+    'make -j4 -C /worktree/CXXtoXML
+     && make -j4 -C /worktree/XcodeMLtoCXX
      && make -C /worktree/XcodeMLtoCXX check
      && make -C /worktree/tests/Compilability check'"
