@@ -7,13 +7,16 @@ XCODEMLTOCXXSRCDIR = $(XCODEMLTOCXXDIR)/src
 LLVM_CONFIG = /usr/local/bin/llvm-config
 CXX = /usr/local/bin/clang++
 CXXFLAGS = -O2 -std=c++11 \
-	`pkg-config --cflags libxml-2.0` \
+	$(PKG_CFLAGS) \
 	-I$(XCODEMLTOCXXSRCDIR) \
 	-D__STDC_LIMIT_MACROS -D__STDC_CONSTANT_MACROS $(PCHFLAGS)
 
 USEDLIBS += -lpthread -ldl -ltinfo -lz
-USEDLIBS += `pkg-config --libs libxml-2.0`
+USEDLIBS += $(PKG_LIBS)
 USEDLIBS += $(OTHERLIBS)
+
+PKG_CFLAGS = $(shell pkg-config --cflags libxml-2.0 2>/dev/null || echo -I/usr/include/libxml2)
+PKG_LIBS = $(shell pkg-config --libs libxml-2.0 2>/dev/null || echo -lxml2)
 
 TARGETS = $(basename $(wildcard *.cpp))
 

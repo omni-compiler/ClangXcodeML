@@ -1,9 +1,9 @@
 #include <algorithm>
 #include <cassert>
 #include <iostream>
+#include <map>
 #include <memory>
 #include <string>
-#include <sstream>
 #include <stdexcept>
 #include <vector>
 #include <libxml/debugXML.h>
@@ -13,6 +13,10 @@
 #include <libxml/xpathInternals.h>
 #include "llvm/ADT/Optional.h"
 #include "LibXMLUtil.h"
+#include "StringTree.h"
+#include "XcodeMlNns.h"
+#include "XcodeMlName.h"
+#include "XcodeMlUtil.h"
 #include "XMLString.h"
 
 static xmlXPathObjectPtr getNodeSet(
@@ -58,6 +62,7 @@ getProp(xmlNodePtr node, const std::string &attr) {
   const auto value = getPropOrNull(node, attr);
   if (!value.hasValue()) {
     std::cerr << "getProp: " << attr << " not found" << std::endl;
+    std::cerr << getXcodeMlPath(node) << std::endl;
     xmlDebugDumpNode(stderr, node, 0);
     std::abort();
   }
@@ -121,32 +126,6 @@ findNodes(
   }
   xmlXPathFreeObject(xpathObj);
   return nodes;
-}
-
-std::string
-getNameFromIdNode(xmlNodePtr idNode, xmlXPathContextPtr ctxt) {
-  if (!idNode) {
-    throw std::domain_error("expected id node, but got null");
-  }
-  xmlNodePtr nameNode = findFirst(idNode, "name|operator", ctxt);
-  if (!nameNode) {
-    throw std::runtime_error("name element not found");
-  }
-  return static_cast<XMLString>(xmlNodeGetContent(nameNode));
-}
-
-llvm::Optional<std::string>
-getNameFromIdNodeOrNull(xmlNodePtr idNode, xmlXPathContextPtr ctxt) {
-  using MaybeString = llvm::Optional<std::string>;
-  if (!idNode) {
-    throw std::domain_error("expected id node, but got null");
-  }
-  xmlNodePtr nameNode = findFirst(idNode, "name|operator", ctxt);
-  if (!nameNode) {
-    return MaybeString();
-  }
-  const auto str = static_cast<XMLString>(xmlNodeGetContent(nameNode));
-  return MaybeString(str);
 }
 
 bool

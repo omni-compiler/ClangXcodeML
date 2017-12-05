@@ -1,13 +1,14 @@
 #include <cassert>
 #include <memory>
 #include <map>
-#include <sstream>
 #include <string>
 #include <vector>
 #include <libxml/tree.h>
 #include "llvm/ADT/Optional.h"
 #include "StringTree.h"
 #include "XcodeMlType.h"
+#include "XcodeMlNns.h"
+#include "XcodeMlName.h"
 #include "XcodeMlEnvironment.h"
 #include "llvm/Support/Casting.h"
 
@@ -245,8 +246,9 @@ LValueReferenceType::classof(const Type *T) {
   return T->getKind() == TypeKind::LValueReference;
 }
 
-ParamList::ParamList(const std::vector<DataTypeIdent> &d, bool e)
-    : dtidents(d), hasEllipsis(e) {
+ParamList::ParamList(
+    const std::vector<DataTypeIdent> &paramTypes, bool ellipsis)
+    : dtidents(paramTypes), hasEllipsis(ellipsis) {
 }
 
 bool
@@ -263,12 +265,13 @@ ParamList::isEmpty() const {
 }
 
 CodeFragment
-ParamList::makeDeclaration(
-    const std::vector<CodeFragment> &vars, const Environment &env) const {
-  assert(dtidents.size() == vars.size());
+ParamList::makeDeclaration(const std::vector<CodeFragment> &paramNames,
+    const Environment &typeTable) const {
+  assert(dtidents.size() == paramNames.size());
   std::vector<CodeFragment> decls;
   for (int i = 0, len = dtidents.size(); i < len; ++i) {
-    decls.push_back(makeDecl(env[dtidents[i]], vars[i], env));
+    const auto ithType = typeTable.at(dtidents[i]);
+    decls.push_back(makeDecl(ithType, paramNames[i], typeTable));
   }
   return CXXCodeGen::join(",", decls)
       + (isVariadic() ? makeTokenNode(",") + makeTokenNode("...")
@@ -276,26 +279,13 @@ ParamList::makeDeclaration(
 }
 
 Function::Function(DataTypeIdent ident,
-    TypeRef r,
+    const DataTypeIdent &r,
     const std::vector<DataTypeIdent> &p,
     bool v)
     : Type(TypeKind::Function, ident),
-      returnValue(r->dataTypeIdent()),
+      returnValue(r),
       params(p, v),
       defaultArgs(p.size(), makeVoidNode()) {
-}
-
-Function::Function(DataTypeIdent ident, TypeRef r, const Params &p, bool v)
-    : Type(TypeKind::Function, ident),
-      returnValue(r->dataTypeIdent()),
-      params(),
-      defaultArgs() {
-  std::vector<DataTypeIdent> dtidents;
-  for (auto param : p) {
-    dtidents.push_back(std::get<0>(param));
-    defaultArgs.push_back(std::get<1>(param));
-  }
-  params = ParamList(dtidents, v);
 }
 
 CodeFragment
@@ -610,31 +600,68 @@ ClassType::ClassType(const DataTypeIdent &ident,
     const CodeFragment &className,
     const ClassType::Symbols &symbols)
     : Type(TypeKind::Class, ident),
+      classKind_(CXXClassKind::Class),
       name_(className),
       bases_(),
       classScopeSymbols(symbols) {
 }
 
 ClassType::ClassType(const DataTypeIdent &ident,
+    CXXClassKind kind,
     const CodeFragment &className,
     const std::vector<BaseClass> &b,
     const ClassType::Symbols &symbols)
     : Type(TypeKind::Class, ident),
+      classKind_(kind),
       name_(className),
       bases_(b),
       classScopeSymbols(symbols) {
 }
 
+ClassType::ClassType(
+    const DataTypeIdent &ident, const ClassType::Symbols &symbols)
+    : Type(TypeKind::Class, ident),
+      classKind_(CXXClassKind::Class),
+      name_(),
+      bases_(),
+      classScopeSymbols(symbols) {
+}
+
+ClassType::ClassType(const DataTypeIdent &ident,
+    CXXClassKind kind,
+    const std::vector<BaseClass> &b,
+    const ClassType::Symbols &symbols)
+    : Type(TypeKind::Class, ident),
+      classKind_(kind),
+      name_(),
+      bases_(b),
+      classScopeSymbols(symbols) {
+}
+
+std::string
+getClassKey(CXXClassKind kind) {
+  switch (kind) {
+  case CXXClassKind::Class: return "class";
+  case CXXClassKind::Struct: return "struct";
+  case CXXClassKind::Union: return "union";
+  }
+}
+
 CodeFragment
 ClassType::makeDeclaration(CodeFragment var, const Environment &) {
   assert(name_);
-  return makeTokenNode("class") + *name_ + var;
+  return makeTokenNode(getClassKey(classKind())) + *name_ + var;
 }
 
 Type *
 ClassType::clone() const {
   ClassType *copy = new ClassType(*this);
   return copy;
+}
+
+CXXClassKind
+ClassType::classKind() const {
+  return classKind_;
 }
 
 ClassType::ClassName
@@ -647,6 +674,10 @@ ClassType::setName(const std::string &name) {
   name_ = makeTokenNode(name);
 }
 
+void
+ClassType::setName(const CodeFragment &name) {
+  name_ = name;
+}
 ClassType::Symbols
 ClassType::getSymbols() const {
   return classScopeSymbols;
@@ -664,6 +695,7 @@ ClassType::classof(const Type *T) {
 
 ClassType::ClassType(const ClassType &other)
     : Type(other),
+      classKind_(other.classKind_),
       name_(other.name_),
       classScopeSymbols(other.classScopeSymbols) {
 }
@@ -740,14 +772,6 @@ makeLValueReferenceType(const DataTypeIdent &ident, const DataTypeIdent &ref) {
 }
 
 TypeRef
-makeFunctionType(DataTypeIdent ident,
-    TypeRef returnType,
-    const Function::Params &params,
-    bool isVariadic) {
-  return std::make_shared<Function>(ident, returnType, params, isVariadic);
-}
-
-TypeRef
 makeArrayType(DataTypeIdent ident, TypeRef elemType, size_t size) {
   return std::make_shared<Array>(ident, elemType->dataTypeIdent(), size);
 }
@@ -768,6 +792,28 @@ makeArrayType(DataTypeIdent ident, DataTypeIdent elemName, Array::Size size) {
 }
 
 TypeRef
+makeFunctionType(const DataTypeIdent &ident,
+    const DataTypeIdent &returnType,
+    const std::vector<DataTypeIdent> &paramTypes) {
+  return std::make_shared<Function>(ident, returnType, paramTypes);
+}
+
+TypeRef
+makeFunctionType(const DataTypeIdent &ident,
+    const TypeRef &returnType,
+    const std::vector<DataTypeIdent> &paramTypes) {
+  return std::make_shared<Function>(
+      ident, returnType->dataTypeIdent(), paramTypes);
+}
+
+TypeRef
+makeVariadicFunctionType(const DataTypeIdent &ident,
+    const DataTypeIdent &returnType,
+    const std::vector<DataTypeIdent> &paramTypes) {
+  return std::make_shared<Function>(ident, returnType, paramTypes, true);
+}
+
+TypeRef
 makeEnumType(const DataTypeIdent &ident) {
   return std::make_shared<EnumType>(ident, EnumType::EnumName());
 }
@@ -781,14 +827,23 @@ makeStructType(const DataTypeIdent &ident,
 
 TypeRef
 makeClassType(const DataTypeIdent &ident, const ClassType::Symbols &symbols) {
-  return std::make_shared<ClassType>(ident, nullptr, symbols);
+  return std::make_shared<ClassType>(ident, symbols);
 }
 
 TypeRef
 makeClassType(const DataTypeIdent &ident,
     const std::vector<ClassType::BaseClass> &bases,
     const ClassType::Symbols &symbols) {
-  return std::make_shared<ClassType>(ident, nullptr, bases, symbols);
+  return std::make_shared<ClassType>(
+      ident, CXXClassKind::Class, bases, symbols);
+}
+
+TypeRef
+makeCXXUnionType(const DataTypeIdent &ident,
+    const std::vector<ClassType::BaseClass> &bases,
+    const ClassType::Symbols &members) {
+  return std::make_shared<ClassType>(
+      ident, CXXClassKind::Union, bases, members);
 }
 
 TypeRef

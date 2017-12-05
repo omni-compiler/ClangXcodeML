@@ -19,6 +19,25 @@ using CXXCodeGen::makeVoidNode;
 
 namespace XcodeMl {
 
+Name::Name(
+    const std::shared_ptr<UnqualId> &id_, const std::shared_ptr<Nns> &nns_)
+    : id(id_), nns(nns_) {
+}
+
+CodeFragment
+Name::toString(const Environment &typeTable, const NnsMap &nnsTable) const {
+  assert(id);
+  return (nns ? nns->makeDeclaration(typeTable, nnsTable) : makeVoidNode())
+      + id->toString(typeTable);
+}
+
+std::shared_ptr<UnqualId>
+Name::getUnqualId() const {
+  assert(id);
+  auto pId = id->clone();
+  return std::shared_ptr<UnqualId>(pId);
+}
+
 UnqualId::UnqualId(UnqualIdKind k) : kind(k) {
 }
 
@@ -51,7 +70,7 @@ UIDIdent::classof(const UnqualId *id) {
 }
 
 OpFuncId::OpFuncId(const std::string &op)
-    : UnqualId(UnqualIdKind::OpFuncId), opName(op) {
+    : UnqualId(UnqualIdKind::OpFuncId), opSpelling(op) {
 }
 
 UnqualId *
@@ -62,9 +81,7 @@ OpFuncId::clone() const {
 
 CodeFragment
 OpFuncId::toString(const Environment &) const {
-  const auto op = OperatorNameToSpelling(opName);
-  assert(op.hasValue());
-  return makeTokenNode("operator") + makeTokenNode(*op);
+  return makeTokenNode("operator") + makeTokenNode(opSpelling);
 }
 
 bool
@@ -91,6 +108,54 @@ ConvFuncId::toString(const Environment &env) const {
 bool
 ConvFuncId::classof(const UnqualId *id) {
   return id->getKind() == UnqualIdKind::ConvFuncId;
+}
+
+CtorName::CtorName(const DataTypeIdent &d)
+    : UnqualId(UnqualIdKind::Ctor), dtident(d) {
+}
+
+UnqualId *
+CtorName::clone() const {
+  auto copy = new CtorName(*this);
+  return copy;
+}
+
+CodeFragment
+CtorName::toString(const Environment &env) const {
+  const auto T = env.at(dtident);
+  const auto ClassT = llvm::cast<XcodeMl::ClassType>(T.get());
+  const auto name = ClassT->name();
+  assert(name.hasValue() && *name);
+  return *name;
+}
+
+bool
+CtorName::classof(const UnqualId *id) {
+  return id->getKind() == UnqualIdKind::Ctor;
+}
+
+DtorName::DtorName(const DataTypeIdent &d)
+    : UnqualId(UnqualIdKind::Dtor), dtident(d) {
+}
+
+UnqualId *
+DtorName::clone() const {
+  auto copy = new DtorName(*this);
+  return copy;
+}
+
+CodeFragment
+DtorName::toString(const Environment &env) const {
+  const auto T = env.at(dtident);
+  const auto ClassT = llvm::cast<XcodeMl::ClassType>(T.get());
+  const auto name = ClassT->name();
+  assert(name.hasValue() && *name);
+  return makeTokenNode("~") + (*name);
+}
+
+bool
+DtorName::classof(const UnqualId *id) {
+  return id->getKind() == UnqualIdKind::Dtor;
 }
 
 } // namespace XcodeMl

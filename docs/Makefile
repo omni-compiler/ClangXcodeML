@@ -1,18 +1,21 @@
 .PHONY: all clean
 
-all: XcodeML_CXX.docx
+all: XcodeML_CXX.docx ClangXML.docx
 
-XcodeML_CXX.docx: reference.docx XcodeML_CXX.md
+
+%.docx: %.md reference.docx
 	pandoc \
 		--filter pandoc-crossref \
+		--from=markdown+yaml_metadata_block \
 		--toc \
 		--reference-docx=reference.docx\
-		XcodeML_CXX.md -o $@
+		$< -o $@
 
-XcodeML_CXX.html: XcodeML_CXX.md
+%.html: %.md
 	pandoc \
 		-s \
 		--filter pandoc-crossref \
+		--from=markdown+yaml_metadata_block \
 		--toc \
 		--number-sections \
-		XcodeML_CXX.md -o $@
+		$< -o $@

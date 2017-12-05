@@ -12,6 +12,7 @@ using DataTypeIdent = std::string;
 using CodeFragment = CXXCodeGen::StringTreeRef;
 
 class Environment;
+class UnqualId;
 
 class MemberDecl {
 public:
@@ -163,11 +164,11 @@ class ParamList {
 public:
   ParamList() = default;
   ParamList &operator=(const ParamList &) = default;
-  ParamList(const std::vector<DataTypeIdent> &, bool);
+  ParamList(const std::vector<DataTypeIdent> &paramTypes, bool ellipsis);
   bool isVariadic() const;
   bool isEmpty() const;
-  CodeFragment makeDeclaration(
-      const std::vector<CodeFragment> &, const Environment &) const;
+  CodeFragment makeDeclaration(const std::vector<CodeFragment> &paramNames,
+      const Environment &typeTable) const;
 
 private:
   std::vector<DataTypeIdent> dtidents;
@@ -176,12 +177,10 @@ private:
 
 class Function : public Type {
 public:
-  using Params = std::vector<std::tuple<DataTypeIdent, CodeFragment>>;
   Function(DataTypeIdent,
-      TypeRef,
+      const DataTypeIdent &,
       const std::vector<DataTypeIdent> &,
       bool = false);
-  Function(DataTypeIdent, TypeRef, const Params &, bool = false);
   CodeFragment makeDeclarationWithoutReturnType(
       CodeFragment, const std::vector<CodeFragment> &, const Environment &);
   CodeFragment makeDeclarationWithoutReturnType(
@@ -315,22 +314,38 @@ enum class AccessSpec {
 std::string string_of_accessSpec(AccessSpec);
 AccessSpec accessSpec_of_string(const std::string &);
 
+enum class CXXClassKind {
+  Class,
+  Struct,
+  Union,
+};
+
+std::string getClassKey(CXXClassKind kind);
+
 class ClassType : public Type {
 public:
   using ClassName = llvm::Optional<CodeFragment>;
-  using MemberName = std::string;
+  using MemberName = std::shared_ptr<UnqualId>;
   using Symbols = std::vector<std::tuple<MemberName, DataTypeIdent>>;
   using BaseClass = std::tuple<std::string, DataTypeIdent, bool>;
   ClassType(const DataTypeIdent &, const CodeFragment &, const Symbols &);
   ClassType(const DataTypeIdent &,
+      CXXClassKind,
       const CodeFragment &,
+      const std::vector<BaseClass> &,
+      const Symbols &);
+  ClassType(const DataTypeIdent &, const Symbols &);
+  ClassType(const DataTypeIdent &,
+      CXXClassKind,
       const std::vector<BaseClass> &,
       const Symbols &);
   CodeFragment makeDeclaration(CodeFragment, const Environment &) override;
   ~ClassType() override = default;
   Type *clone() const override;
+  CXXClassKind classKind() const;
   ClassName name() const;
   void setName(const std::string &);
+  void setName(const CodeFragment &);
   Symbols getSymbols() const;
   std::vector<BaseClass> getBases() const;
   static bool classof(const Type *);
@@ -339,6 +354,7 @@ protected:
   ClassType(const ClassType &);
 
 private:
+  CXXClassKind classKind_;
   ClassName name_;
   std::vector<BaseClass> bases_;
   Symbols classScopeSymbols;
@@ -363,8 +379,6 @@ TypeRef makeQualifiedType(
 TypeRef makePointerType(DataTypeIdent, TypeRef);
 TypeRef makePointerType(DataTypeIdent, DataTypeIdent);
 TypeRef makeLValueReferenceType(const DataTypeIdent &, const DataTypeIdent &);
-TypeRef makeFunctionType(
-    DataTypeIdent, TypeRef, const Function::Params &, bool = false);
 TypeRef makeArrayType(DataTypeIdent, TypeRef, size_t);
 TypeRef makeArrayType(DataTypeIdent, TypeRef, size_t);
 TypeRef makeArrayType(DataTypeIdent, TypeRef, Array::Size);
@@ -375,8 +389,20 @@ TypeRef makeClassType(const DataTypeIdent &, const ClassType::Symbols &);
 TypeRef makeClassType(const DataTypeIdent &,
     const std::vector<ClassType::BaseClass> &,
     const ClassType::Symbols &);
+TypeRef makeCXXUnionType(const DataTypeIdent &ident,
+    const std::vector<ClassType::BaseClass> &bases,
+    const ClassType::Symbols &members);
+TypeRef makeFunctionType(const DataTypeIdent &ident,
+    const DataTypeIdent &returnType,
+    const std::vector<DataTypeIdent> &paramTypes);
+TypeRef makeFunctionType(const DataTypeIdent &ident,
+    const TypeRef &returnType,
+    const std::vector<DataTypeIdent> &paramTypes);
 TypeRef makeStructType(
     const DataTypeIdent &, const CodeFragment &, const Struct::MemberList &);
+TypeRef makeVariadicFunctionType(const DataTypeIdent &ident,
+    const DataTypeIdent &returnType,
+    const std::vector<DataTypeIdent> &paramTypes);
 TypeRef makeOtherType(const DataTypeIdent &);
 
 bool hasParen(const TypeRef &, const Environment &);

@@ -15,11 +15,15 @@ USEDLIBS += -lclangTooling -lclangFrontend -lclangSerialization -lclangDriver \
             -lclangStaticAnalyzerCheckers -lclangRewrite -lclangRewriteFrontend
 INCLUDE = -I. \
 	  -I $(shell $(LLVM_CONFIG) --includedir) \
-	  $(shell pkg-config --cflags libxml-2.0)
+	  $(PKG_CFLAGS)
 USEDLIBS += $(shell $(LLVM_CONFIG) --libs mcparser bitreader support mc option)
 USEDLIBS += -lpthread -ldl -ltinfo -lz
-USEDLIBS += $(shell pkg-config --libs libxml-2.0) -lclang
+USEDLIBS += $(PKG_LIBS) \
+	    -lclang
 USEDLIBS += $(OTHERLIBS)
+
+PKG_CFLAGS = $(shell pkg-config --cflags libxml-2.0 2>/dev/null || echo -I/usr/include/libxml2)
+PKG_LIBS = $(shell pkg-config --libs libxml-2.0 2>/dev/null || echo -lxml2)
 
 RAVOBJS = XMLRAV.o
 OBJS =  CXXtoXML.o \

@@ -145,9 +145,11 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
   if (auto IL = dyn_cast<IntegerLiteral>(S)) {
     const unsigned INIT_BUFFER_SIZE = 32;
     SmallVector<char, INIT_BUFFER_SIZE> buffer;
-    auto &CXT = mangleContext->getASTContext();
-    auto spelling = clang::Lexer::getSpelling(
-        IL->getLocation(), buffer, CXT.getSourceManager(), CXT.getLangOpts());
+    const auto &CXT = mangleContext->getASTContext();
+    const auto &SM = CXT.getSourceManager();
+    const auto location = SM.getSpellingLoc(IL->getLocation());
+    const auto spelling =
+        clang::Lexer::getSpelling(location, buffer, SM, CXT.getLangOpts());
     newProp("token", spelling.str().c_str());
     std::string decimalNotation = IL->getValue().toString(10, true);
     newProp("decimalNotation", decimalNotation.c_str());
@@ -193,6 +195,17 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
     }
     OS.str();
     newProp("stringLiteral", literalAsString.c_str());
+  }
+
+  if (auto ILE = dyn_cast<InitListExpr>(S)) {
+    /* `InitListExpr` has two kinds of children, `SyntacticForm`
+     * and `SemanticForm`. Do not traverse `SyntacticForm`,
+     * otherwise it emits the elements twice.
+     */
+    for (Stmt::child_range range = ILE->children(); range; ++range) {
+      TraverseStmt(*range);
+    }
+    return false;
   }
 
   UnaryExprOrTypeTraitExpr *UEOTTE = dyn_cast<UnaryExprOrTypeTraitExpr>(S);
@@ -246,7 +259,7 @@ DeclarationsVisitor::PreVisitType(QualType T) {
 
 bool
 DeclarationsVisitor::PreVisitTypeLoc(TypeLoc TL) {
-  newChild("TypeLoc");
+  newChild("clangTypeLoc");
   newProp("class", NameForTypeLoc(TL));
   const auto T = TL.getType();
   newProp("type", typetableinfo->getTypeName(T).c_str());

@@ -1,3 +1,4 @@
+#include <functional>
 #include <map>
 #include <memory>
 #include <string>
@@ -36,7 +37,7 @@ const XcodeMl::NnsMap initialNnsMap = {
 
 const NnsAnalyzer XcodeMLNNSAnalyzer("NnsAnalyzer",
     {
-        {"classNNS", classNnsProc},
+        std::make_tuple("classNNS", classNnsProc),
     });
 
 XcodeMl::NnsMap

@@ -3,6 +3,9 @@
 
 namespace XcodeMl {
 
+class Environment;
+class Nns;
+
 enum class UnqualIdKind {
   Ident,
   OpFuncId,
@@ -30,6 +33,12 @@ private:
  * corresponds to the name elements in XcodeML, such as.
  */
 class Name {
+public:
+  explicit Name(
+      const std::shared_ptr<UnqualId> &, const std::shared_ptr<Nns> &);
+  CodeFragment toString(const Environment &, const NnsMap &) const;
+  std::shared_ptr<UnqualId> getUnqualId() const;
+
 private:
   std::shared_ptr<UnqualId> id;
   std::shared_ptr<Nns> nns;
@@ -62,7 +71,7 @@ protected:
   OpFuncId(const OpFuncId &) = default;
 
 private:
-  std::string opName;
+  std::string opSpelling;
 };
 
 class ConvFuncId : public UnqualId {
@@ -75,6 +84,36 @@ public:
 
 protected:
   ConvFuncId(const ConvFuncId &) = default;
+
+private:
+  DataTypeIdent dtident;
+};
+
+class CtorName : public UnqualId {
+public:
+  CtorName(const DataTypeIdent &);
+  ~CtorName() override = default;
+  UnqualId *clone() const override;
+  CodeFragment toString(const Environment &) const override;
+  static bool classof(const UnqualId *);
+
+protected:
+  CtorName(const CtorName &) = default;
+
+private:
+  DataTypeIdent dtident;
+};
+
+class DtorName : public UnqualId {
+public:
+  DtorName(const DataTypeIdent &);
+  ~DtorName() override = default;
+  UnqualId *clone() const override;
+  CodeFragment toString(const Environment &) const override;
+  static bool classof(const UnqualId *);
+
+protected:
+  DtorName(const DtorName &) = default;
 
 private:
   DataTypeIdent dtident;

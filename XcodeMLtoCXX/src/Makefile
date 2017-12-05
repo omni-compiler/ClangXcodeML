@@ -1,12 +1,17 @@
 LLVM_CONFIG = /usr/local/bin/llvm-config
 CXX = /usr/local/bin/clang++
-CXXFLAGS = -O2 -g -Wall -Wextra -fno-rtti -std=c++11 -pedantic \
-	`pkg-config --cflags libxml-2.0` \
+CXXFLAGS = $(OPTIMIZERFLAGS) -g -Wall -Wextra -fno-rtti -std=c++11 -pedantic \
+	$(PKG_CFLAGS) \
 	-D__STDC_LIMIT_MACROS -D__STDC_CONSTANT_MACROS $(PCHFLAGS)
 
 USEDLIBS += -lpthread -ldl -ltinfo -lz
-USEDLIBS += `pkg-config --libs libxml-2.0`
+USEDLIBS += $(PKG_LIBS)
 USEDLIBS += $(OTHERLIBS)
+
+OPTIMIZERFLAGS = -O2
+PKG_CFLAGS = $(shell pkg-config --cflags libxml-2.0 2>/dev/null || echo -I/usr/include/libxml2)
+PKG_LIBS = $(shell pkg-config --libs libxml-2.0 2>/dev/null || echo -lxml2)
+
 XCODEMLTOCXX = ../XcodeMLtoCXX
 
 OBJS = XcodeMlType.o \
@@ -22,7 +27,8 @@ OBJS = XcodeMlType.o \
 	ClangClassHandler.o \
 	XcodeMlName.o \
 	XcodeMlNns.o \
-	XcodeMlOperator.o
+	XcodeMlOperator.o \
+	XcodeMlUtil.o
 
 $(XCODEMLTOCXX): $(OBJS)
 	$(CXX) $(CXXFLAGS) $(OBJS) $(USEDLIBS) -o $(XCODEMLTOCXX)
@@ -56,6 +62,9 @@ XcodeMlNns.o: \
 XcodeMlType.o: \
 	TypeAnalyzer.h \
 	XcodeMlEnvironment.h
+
+XcodeMlUtil.o: \
+	XcodeMlUtil.h
 
 clean:
 	rm -f $(XCODEMLTOCXX)

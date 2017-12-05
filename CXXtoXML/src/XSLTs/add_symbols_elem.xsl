@@ -37,31 +37,6 @@
     </clangStmt>
   </xsl:template>
 
-  <xsl:template match="clangDecl[@class='Function'
-      or @class='CXXMethod'
-      or @class='CXXConstructor'
-      or @class='CXXDestructor']">
-    <clangDecl>
-      <xsl:apply-templates select="@*" />
-
-      <params>
-        <xsl:for-each
-          select="TypeLoc[@class='FunctionProto']
-            /clangDecl[@class='ParmVar']">
-          <name>
-            <xsl:copy-of select="name/@*" />
-            <xsl:attribute name="type">
-              <xsl:value-of select="@xcodemlType" />
-            </xsl:attribute>
-            <xsl:value-of select="name" />
-          </name>
-        </xsl:for-each>
-      </params>
-
-      <xsl:apply-templates />
-    </clangDecl>
-  </xsl:template>
-
   <xsl:template match="node()|@*">
     <xsl:copy>
       <xsl:apply-templates select="node()|@*"/>

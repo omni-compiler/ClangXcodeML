@@ -4,7 +4,7 @@
     encoding="UTF-8"
     indent="yes"
     method="xml" />
-  <xsl:template match="Program">
+  <xsl:template match="clangAST">
     <XcodeProgram>
       <xsl:apply-templates />
     </XcodeProgram>
@@ -29,10 +29,6 @@
     </globalDeclarations>
   </xsl:template>
 
-  <xsl:template match="clangAST">
-    <xsl:apply-templates />
-  </xsl:template>
-
   <xsl:template match="clangDecl[@class='Function'
       or @class='CXXMethod'
       or @class='CXXConversion'
@@ -45,7 +41,7 @@
           <xsl:apply-templates select="@*" />
           <xsl:apply-templates select="name" />
 
-          <xsl:apply-templates select="params" />
+          <xsl:apply-templates select="clangTypeLoc" />
 
           <xsl:if test="@class='CXXConstructor'">
             <constructorInitializerList>
@@ -95,15 +91,6 @@
   </xsl:template>
 
   <xsl:template match="clangDecl[@class='Record']" />
-
-  <xsl:template match="clangDecl[@class='CXXRecord']">
-    <classDecl>
-      <xsl:apply-templates select="@*" />
-      <xsl:apply-templates
-        select="clangDecl[
-        not (@is_implicit = '1' or @is_implicit = 'true')]" />
-    </classDecl>
-  </xsl:template>
 
   <xsl:template match="clangDecl[@class='Field']">
     <varDecl>
@@ -271,9 +258,9 @@
           <memberFunction>
             <memberExpr>
               <xsl:apply-templates select="clangStmt[2]" />
-              <operator>
+              <name name_kind="operator">
                 <xsl:value-of select="@xcodeml_operator_kind" />
-              </operator>
+              </name>
             </memberExpr>
           </memberFunction>
           <arguments>
@@ -370,27 +357,6 @@
       <xsl:apply-templates select="@*" />
       <xsl:apply-templates select="*[2]" />
     </castExpr>
-  </xsl:template>
-
-  <xsl:template match="clangStmt[@class='CharacterLiteral']">
-    <intConstant>
-      <xsl:apply-templates select="@*" />
-      <xsl:value-of select="@hexadecimalNotation" />
-    </intConstant>
-  </xsl:template>
-
-  <xsl:template match="clangStmt[@class='IntegerLiteral']">
-    <intConstant>
-      <xsl:apply-templates select="@*" />
-      <xsl:value-of select="@decimalNotation" />
-    </intConstant>
-  </xsl:template>
-
-  <xsl:template match="clangStmt[@class='FloatingLiteral']">
-    <floatConstant>
-      <xsl:apply-templates select="@*" />
-      <xsl:value-of select="@token" />
-    </floatConstant>
   </xsl:template>
 
   <xsl:template match="clangStmt[@class='StringLiteral']">
