@@ -12,4 +12,8 @@ before_install:
   - pwd
 
 script:
-  - docker-compose run workspace make -C /worktree/XcodeMLtoCXX check
+  - "docker-compose run workspace bash -c
+    'make -C /worktree/CXXtoXML
+     && make -C /worktree/XcodeMLtoCXX
+     && make -C /worktree/XcodeMLtoCXX check
+     && make -C /worktree/tests/Compilability check'"
