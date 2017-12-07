@@ -2,6 +2,7 @@
 #define SOURCEINFO_H
 
 enum class Language {
+  Invalid,
   C,
   CPlusPlus,
 };
