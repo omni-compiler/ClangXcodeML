@@ -5,20 +5,11 @@ language: cpp
 services:
   - docker
 
-cache:
-  directories:
-    - cache
-
 env:
   DOCKER_COMPOSE_VERSION: 1.8.0
 
 before_install:
   - pwd
-  - if [ -f cache/docker-image.tar.gz ]; then zcat cache/docker-image.tar.gz | docker load; fi
-
-install:
-  - docker pull hnagamin/clangxcodeml-test-env-14-3.6:latest
-
 
 script:
   - "docker-compose run workspace bash -c
@@ -26,7 +17,3 @@ script:
      && make -j4 -C /worktree/XcodeMLtoCXX
      && make -C /worktree/XcodeMLtoCXX check
      && make -C /worktree/tests/Compilability check'"
-
-before_cache:
-  - mkdir -p cache
-  - docker save hnagamin/clangxcodeml-test-env-14-3.6:latest | gzip > cache/docker-image.tar.gz
