@@ -828,6 +828,29 @@ const CodeBuilder ProgramBuilder("ProgramBuilder",
         // Ignore Decl_Record (structs are already emitted)
     });
 
+namespace {
+
+Language
+getSourceLanguage(xmlNodePtr rootNode, xmlXPathContextPtr ctxt) {
+  const auto topNode = findFirst(rootNode, "/XcodeProgram", ctxt);
+
+  const auto lang = getPropOrNull(topNode, "language");
+  if (!lang.hasValue()) {
+    // The default value of `language` attribute is "C++"
+    return Language::CPlusPlus;
+  }
+
+  if (*lang == "C++") {
+    return Language::CPlusPlus;
+  } else if (*lang == "C") {
+    return Language::C;
+  } else {
+    return Language::Invalid;
+  }
+}
+
+} // namespace
+
 const CodeBuilder ClassDefinitionBuilder("ClassDefinitionBuilder",
     makeInnerNode,
     {
