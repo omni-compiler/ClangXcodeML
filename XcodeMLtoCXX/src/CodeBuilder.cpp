@@ -45,7 +45,12 @@ using XcodeMl::makeOpNode;
 namespace {
 
 XcodeMl::CodeFragment
-wrapWithLangLink(const XcodeMl::CodeFragment &content, xmlNodePtr node) {
+wrapWithLangLink(const XcodeMl::CodeFragment &content,
+    xmlNodePtr node,
+    const SourceInfo &src) {
+  if (src.language != Language::CPlusPlus) {
+    return content;
+  }
   const auto lang = getPropOrNull(node, "language_linkage");
   if (!lang.hasValue() || *lang == "C++") {
     return content;
@@ -263,7 +268,7 @@ DEFINE_CB(functionDefinitionProc) {
   acc = acc + makeTokenNode("{") + makeNewLineNode();
   acc = acc + w.walk(body, src);
   acc = acc + makeTokenNode("}");
-  return wrapWithLangLink(acc, node);
+  return wrapWithLangLink(acc, node, src);
 }
 
 DEFINE_CB(functionDeclProc) {
@@ -272,7 +277,7 @@ DEFINE_CB(functionDeclProc) {
       llvm::cast<XcodeMl::Function>(src.typeTable[fnDtident].get());
   auto decl = makeFunctionDeclHead(node, fnType->argNames(), src);
   decl = decl + makeTokenNode(";");
-  return wrapWithLangLink(decl, node);
+  return wrapWithLangLink(decl, node, src);
 }
 
 DEFINE_CB(varProc) {
@@ -324,7 +329,7 @@ DEFINE_CB(emitMemberFunctionDecl) {
     decl = decl + makeTokenNode("=") + makeTokenNode("0");
   }
   decl = decl + makeTokenNode(";");
-  return wrapWithLangLink(decl, node);
+  return wrapWithLangLink(decl, node, src);
 }
 
 DEFINE_CB(memberExprProc) {
@@ -610,7 +615,7 @@ DEFINE_CB(varDeclProc) {
                   src.typeTable);
   xmlNodePtr valueElem = findFirst(node, "value", src.ctxt);
   if (!valueElem) {
-    return wrapWithLangLink(acc + makeTokenNode(";"), node);
+    return wrapWithLangLink(acc + makeTokenNode(";"), node, src);
   }
 
   auto ctorExpr =
@@ -618,11 +623,11 @@ DEFINE_CB(varDeclProc) {
   if (ctorExpr) {
     const auto decl =
         acc + declareClassTypeInit(w, ctorExpr, src) + makeTokenNode(";");
-    return wrapWithLangLink(decl, node);
+    return wrapWithLangLink(decl, node, src);
   }
 
   acc = acc + makeTokenNode("=") + w.walk(valueElem, src) + makeTokenNode(";");
-  return wrapWithLangLink(acc, node);
+  return wrapWithLangLink(acc, node, src);
 }
 
 DEFINE_CB(usingDeclProc) {
@@ -652,7 +657,7 @@ DEFINE_CB(emitDataMemberDecl) {
                   src.typeTable);
   xmlNodePtr valueElem = findFirst(node, "value", src.ctxt);
   if (!valueElem) {
-    return wrapWithLangLink(acc + makeTokenNode(";"), node);
+    return wrapWithLangLink(acc + makeTokenNode(";"), node, src);
   }
 
   auto ctorExpr =
@@ -660,12 +665,12 @@ DEFINE_CB(emitDataMemberDecl) {
   if (ctorExpr) {
     const auto decl =
         acc + declareClassTypeInit(w, ctorExpr, src) + makeTokenNode(";");
-    return wrapWithLangLink(decl, node);
+    return wrapWithLangLink(decl, node, src);
   }
 
   acc = acc + makeTokenNode("=") + ProgramBuilder.walk(valueElem, src)
       + makeTokenNode(";");
-  return wrapWithLangLink(acc, node);
+  return wrapWithLangLink(acc, node, src);
 }
 
 DEFINE_CB(ctorInitListProc) {
