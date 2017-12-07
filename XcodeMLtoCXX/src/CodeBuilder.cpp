@@ -880,6 +880,7 @@ buildCode(
       ctxt,
       parseTypeTable(typeTableNode, ctxt, ss),
       analyzeNnsTable(nnsTableNode, ctxt),
+      getSourceLanguage(rootNode, ctxt),
   };
 
   cxxgen::Stream out;
