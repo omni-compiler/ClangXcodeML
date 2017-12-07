@@ -11,6 +11,9 @@ env:
 before_install:
   - pwd
 
+install:
+  - docker pull hnagamin/clangxcodeml-test-env-14-3.6:latest
+
 script:
   - "docker-compose run workspace bash -c
     'make -j4 -C /worktree/CXXtoXML
