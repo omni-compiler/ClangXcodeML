@@ -15,6 +15,7 @@ public:
   xmlXPathContextPtr ctxt;
   XcodeMl::Environment typeTable;
   XcodeMl::NnsMap nnsTable;
+  Language language;
 };
 
 #endif /* !SOURCEINFO_H */
