@@ -63,6 +63,13 @@ DEFINE_CCH(emitTokenAttrValue) {
   return makeTokenNode(token);
 }
 
+DEFINE_CCH(TemplateTypeParmProc) {
+  const auto nameNode = findFirst(node, "name", src.ctxt);
+  const auto name = getQualifiedNameFromNameNode(nameNode, src);
+  return makeTokenNode("typename")
+      + name.toString(src.typeTable, src.nnsTable);
+}
+
 XcodeMl::CodeFragment
 makeBases(const XcodeMl::ClassType &T, SourceInfo &src) {
   using namespace XcodeMl;
@@ -187,4 +194,5 @@ const ClangClassHandler ClangDeclHandler("class",
     {
         std::make_tuple("CXXRecord", CXXRecordProc),
         std::make_tuple("Friend", FriendDeclProc),
+        std::make_tuple("TemplateTypeParm", TemplateTypeParmProc),
     });
