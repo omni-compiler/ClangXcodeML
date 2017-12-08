@@ -63,6 +63,20 @@ DEFINE_CCH(emitTokenAttrValue) {
   return makeTokenNode(token);
 }
 
+DEFINE_CCH(FunctionTemplateProc) {
+  const auto paramNodes =
+      findNodes(node, "clangDecl[@class='TemplateTypeParm']", src.ctxt);
+  const auto body = findFirst(node, "functionDefinition", src.ctxt);
+
+  std::vector<CXXCodeGen::StringTreeRef> params;
+  for (auto &&paramNode : paramNodes) {
+    params.push_back(w.walk(paramNode, src));
+  }
+
+  return makeTokenNode("template") + makeTokenNode("<") + join(",", params)
+      + makeTokenNode(">") + w.walk(body, src);
+}
+
 DEFINE_CCH(TemplateTypeParmProc) {
   const auto nameNode = findFirst(node, "name", src.ctxt);
   const auto name = getQualifiedNameFromNameNode(nameNode, src);
@@ -194,5 +208,6 @@ const ClangClassHandler ClangDeclHandler("class",
     {
         std::make_tuple("CXXRecord", CXXRecordProc),
         std::make_tuple("Friend", FriendDeclProc),
+        std::make_tuple("FunctionTemplate", FunctionTemplateProc),
         std::make_tuple("TemplateTypeParm", TemplateTypeParmProc),
     });
