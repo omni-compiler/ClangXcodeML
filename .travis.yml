@@ -1,0 +1,21 @@
+sudo: required
+
+language: cpp
+
+services:
+  - docker
+
+env:
+  DOCKER_COMPOSE_VERSION: 1.8.0
+
+before_install:
+  - pwd
+
+install:
+  - docker pull hnagamin/clangxcodeml-test-env-14-3.6:latest
+
+script:
+  - docker-compose run workspace make -j4 -C /worktree/CXXtoXML
+  - docker-compose run workspace make -j4 -C /worktree/XcodeMLtoCXX
+  - docker-compose run workspace make -C /worktree/XcodeMLtoCXX check
+  - docker-compose run workspace make -C /worktree/tests/Compilability check
