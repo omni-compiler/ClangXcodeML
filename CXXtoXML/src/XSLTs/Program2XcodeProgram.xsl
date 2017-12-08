@@ -6,6 +6,7 @@
     method="xml" />
   <xsl:template match="clangAST">
     <XcodeProgram>
+      <xsl:apply-templates select="@*" />
       <xsl:apply-templates />
     </XcodeProgram>
   </xsl:template>
