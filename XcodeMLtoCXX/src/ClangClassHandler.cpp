@@ -118,6 +118,16 @@ emitClassDefinition(xmlNodePtr node,
       + cxxgen::makeNewLineNode();
 }
 
+namespace {
+
+bool
+isUnnamedClassDecl(xmlNodePtr node, const SourceInfo &src) {
+  const auto nameNode = findFirst(node, "name", src.ctxt);
+  return getContent(nameNode).empty();
+}
+
+} // namespace
+
 DEFINE_CCH(CXXRecordProc) {
   if (isTrueProp(node, "is_implicit", false)) {
     return cxxgen::makeVoidNode();
