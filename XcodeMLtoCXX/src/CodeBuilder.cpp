@@ -610,9 +610,17 @@ DEFINE_CB(varDeclProc) {
   const auto type = src.typeTable.at(dtident);
 
   auto acc = makeVoidNode();
-  acc = acc + makeDecl(type,
-                  name.toString(src.typeTable, src.nnsTable),
-                  src.typeTable);
+  if (src.unnamedClassDecls.find(dtident) != src.unnamedClassDecls.end()) {
+    // unnamed class declaration: `class { } a;`
+    // The definition of unnamed class should have been appeared
+    acc = acc + src.unnamedClassDecls[dtident]
+        + name.toString(src.typeTable, src.nnsTable);
+  } else {
+    acc = acc + makeDecl(type,
+                    name.toString(src.typeTable, src.nnsTable),
+                    src.typeTable);
+  }
+
   xmlNodePtr valueElem = findFirst(node, "value", src.ctxt);
   if (!valueElem) {
     return wrapWithLangLink(acc + makeTokenNode(";"), node, src);
