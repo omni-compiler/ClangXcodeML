@@ -114,8 +114,7 @@ emitClassDefinition(xmlNodePtr node,
   const auto name = classType.name().getValueOr(cxxgen::makeVoidNode());
 
   return classKey + name + makeBases(classType, src) + makeTokenNode("{")
-      + separateByBlankLines(decls) + makeTokenNode("}") + makeTokenNode(";")
-      + cxxgen::makeNewLineNode();
+      + separateByBlankLines(decls) + makeTokenNode("}");
 }
 
 namespace {
@@ -133,7 +132,8 @@ DEFINE_CCH(CXXRecordProc) {
     return cxxgen::makeVoidNode();
   }
 
-  const auto T = src.typeTable.at(getProp(node, "type"));
+  const auto dtident = getProp(node, "type");
+  const auto T = src.typeTable.at(dtident);
   auto classT = llvm::dyn_cast<XcodeMl::ClassType>(T.get());
   assert(classT);
 
@@ -142,8 +142,20 @@ DEFINE_CCH(CXXRecordProc) {
   const auto nameSpelling = className.toString(src.typeTable, src.nnsTable);
   classT->setName(nameSpelling);
 
+  const auto classDecl =
+      emitClassDefinition(node, ClassDefinitionBuilder, src, *classT);
+  if (isUnnamedClassDecl(node, src)) {
+    if (isTrueProp(node, "is_this_declaration_a_definition", false)) {
+      src.unnamedClassDecls[dtident] = classDecl;
+      return cxxgen::makeVoidNode();
+    } else {
+      std::cerr << "error: Unnamed class declaration must be a definition"
+                << getXcodeMlPath(node) << std::endl;
+      std::abort();
+    }
+  }
   if (isTrueProp(node, "is_this_declaration_a_definition", false)) {
-    return emitClassDefinition(node, ClassDefinitionBuilder, src, *classT);
+    return classDecl + makeTokenNode(";");
   }
 
   /* forward declaration */
