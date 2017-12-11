@@ -17,7 +17,6 @@ public:
   XcodeMl::Environment typeTable;
   XcodeMl::NnsMap nnsTable;
   Language language;
-  std::map<std::string, CXXCodeGen::StringTreeRef> unnamedClassDecls;
 };
 
 #endif /* !SOURCEINFO_H */
