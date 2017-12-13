@@ -15,8 +15,9 @@
 
 SourceInfo::SourceInfo(xmlXPathContextPtr c,
     const XcodeMl::Environment &e,
-    const XcodeMl::NnsMap &n)
-    : ctxt(c), typeTable(e), nnsTable(n), uniqueNameIndex(0) {
+    const XcodeMl::NnsMap &n,
+    Language l)
+    : ctxt(c), typeTable(e), nnsTable(n), language(l), uniqueNameIndex(0) {
 }
 
 std::string

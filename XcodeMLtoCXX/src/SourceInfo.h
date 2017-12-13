@@ -19,7 +19,8 @@ class SourceInfo {
 public:
   explicit SourceInfo(xmlXPathContextPtr c,
       const XcodeMl::Environment &e,
-      const XcodeMl::NnsMap &n);
+      const XcodeMl::NnsMap &n,
+      Language l);
   std::string getUniqueName();
 
   xmlXPathContextPtr ctxt;
