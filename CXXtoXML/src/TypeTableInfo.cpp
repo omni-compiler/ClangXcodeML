@@ -561,6 +561,9 @@ TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
       Node = createNode(T, "TemplateTypeParmType", nullptr);
       const auto TTP = cast<TemplateTypeParmType>(T.getTypePtr());
       xmlNewProp(Node,
+          BAD_CAST "clang_depth",
+          BAD_CAST std::to_string(TTP->getDepth()).c_str());
+      xmlNewProp(Node,
           BAD_CAST "clang_index",
           BAD_CAST std::to_string(TTP->getIndex()).c_str());
       pushType(T, Node);
