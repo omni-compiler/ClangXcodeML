@@ -556,9 +556,14 @@ TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
       pushType(T, Node);
       break;
     }
+    case Type::TemplateTypeParm: {
+      rawname = registerTemplateTypeParmType(T);
+      Node = createNode(T, "TemplateTypeParmType", nullptr);
+      pushType(T, Node);
+      break;
+    }
     case Type::Elaborated:
     case Type::Attributed:
-    case Type::TemplateTypeParm:
     case Type::SubstTemplateTypeParm:
     case Type::SubstTemplateTypeParmPack:
     case Type::TemplateSpecialization:
