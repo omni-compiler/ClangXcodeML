@@ -76,6 +76,14 @@ ClangXML文書のルート要素は`clangAST`要素である。
 _子要素_ ...  
 `</clangDecl>`  
 
+必須:
+
+* `class`属性
+* その他、以下の小節で必須属性が指定されることがある。
+
+オプショナル属性なし
+(ただし、以下の小節でオプショナル属性が指定されることがある)
+
 `clangDecl`要素はC/C++の宣言を表現する。
 
 この要素は、必須属性として`class`属性をもつ。
@@ -106,6 +114,12 @@ _子要素_ ...
   _`clangConstructorInitializer`要素_...  
   _`clangStmt`要素_  
 `</clangDecl>`  
+
+必須属性なし
+
+オプショナル:
+
+* `is_implicit`属性
 
 `CXXConstructor`はコンストラクター定義を表現する。
 
