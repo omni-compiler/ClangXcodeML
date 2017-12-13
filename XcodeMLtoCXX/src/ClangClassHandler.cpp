@@ -144,7 +144,7 @@ DEFINE_CCH(CXXRecordProc) {
   assert(classT);
 
   setClassName(*classT, node, src);
-  const auto nameSpelling = classT->name().getValueOr(cxxgen::makeVoidNode());
+  const auto nameSpelling = *(classT->name()); // now class name must exist
 
   if (isTrueProp(node, "is_this_declaration_a_definition", false)) {
     return emitClassDefinition(node, ClassDefinitionBuilder, src, *classT);
