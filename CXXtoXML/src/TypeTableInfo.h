@@ -24,6 +24,7 @@ class TypeTableInfo {
   int seqForUnionType;
   int seqForEnumType;
   int seqForClassType;
+  int seqForTemplateTypeParmType;
   int seqForOtherType;
 
   std::unordered_map<clang::QualType, xmlNodePtr> TypeElements;

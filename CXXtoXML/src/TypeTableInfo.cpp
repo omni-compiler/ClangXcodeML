@@ -48,6 +48,7 @@ TypeTableInfo::TypeTableInfo(MangleContext *MC, InheritanceInfo *II)
   seqForUnionType = 0;
   seqForEnumType = 0;
   seqForClassType = 0;
+  seqForTemplateTypeParmType = 0;
   seqForOtherType = 0;
 
   TypeElements.clear();
