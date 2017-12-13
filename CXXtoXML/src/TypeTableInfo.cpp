@@ -146,6 +146,17 @@ TypeTableInfo::registerEnumType(QualType T) {
 }
 
 std::string
+TypeTableInfo::registerTemplateTypeParmType(QualType T) {
+  assert(T->getTypeClass() == Type::TemplateTypeParm);
+  std::string name = mapFromQualTypeToName[T];
+  assert(name.empty());
+
+  raw_string_ostream OS(name);
+  OS << "TemplateTypeParm" << seqForTemplateTypeParmType++;
+  return mapFromQualTypeToName[T] = OS.str();
+}
+
+std::string
 TypeTableInfo::registerOtherType(QualType T) {
   std::string name = mapFromQualTypeToName[T];
   assert(name.empty());
