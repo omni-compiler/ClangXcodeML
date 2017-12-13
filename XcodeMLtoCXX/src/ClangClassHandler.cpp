@@ -122,7 +122,10 @@ void
 setClassName(XcodeMl::ClassType &classType, xmlNodePtr node, SourceInfo &src) {
   const auto nameNode = findFirst(node, "name", src.ctxt);
   if (!nameNode || isEmpty(nameNode)) {
-    /* classType is unnamed */
+    /* `classType` is unnamed.
+     * Unnamed classes are problematic, so give a name to `classType`
+     * such as `__xcodeml_1`.
+     */
     classType.setName(src.getUniqueName());
     return;
   }
