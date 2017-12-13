@@ -44,6 +44,12 @@ C++プログラム中で使用される型(データ型)をデータ型識別名
   _`clangDecl`要素_  
 `</clangAST>`  
 
+* 必須属性なし
+* オプショナル
+  + `source`属性
+  + `language`属性
+  + `time`属性
+
 ClangXML文書のルート要素は`clangAST`要素である。
 
 第1子要素は`clangDecl`要素で、このClangXML文書が表現する翻訳単位を表す。
