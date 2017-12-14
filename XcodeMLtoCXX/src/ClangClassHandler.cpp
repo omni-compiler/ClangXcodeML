@@ -83,6 +83,14 @@ DEFINE_CCH(FunctionTemplateProc) {
 DEFINE_CCH(TemplateTypeParmProc) {
   const auto nameNode = findFirst(node, "name", src.ctxt);
   const auto name = getQualifiedNameFromNameNode(nameNode, src);
+  const auto nameSpelling = name.toString(src.typeTable, src.nnsTable);
+
+  const auto dtident = getProp(node, "type");
+  auto T = src.typeTable.at(dtident);
+  auto TTPT = llvm::cast<XcodeMl::TemplateTypeParm>(T.get());
+  assert(TTPT);
+  TTPT->setSpelling(nameSpelling);
+
   return makeTokenNode("typename")
       + name.toString(src.typeTable, src.nnsTable);
 }
