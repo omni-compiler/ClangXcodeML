@@ -705,7 +705,7 @@ TemplateTypeParm::TemplateTypeParm(DataTypeIdent dtident)
 }
 
 CodeFragment
-TemplateTypeParm::makeDeclaration(CodeFragment var, const Environment &env) {
+TemplateTypeParm::makeDeclaration(CodeFragment var, const Environment &) {
   assert(pSpelling.hasValue());
   return (*pSpelling) + var;
 }
