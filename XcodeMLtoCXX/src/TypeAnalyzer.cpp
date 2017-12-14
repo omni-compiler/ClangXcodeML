@@ -252,3 +252,15 @@ parseTypeTable(xmlNodePtr, xmlXPathContextPtr xpathCtx, std::stringstream &) {
   xmlXPathFreeObject(xpathObj);
   return map;
 }
+
+XcodeMl::Environment
+expandEnvironment(const XcodeMl::Environment &env,
+    xmlNodePtr typeTable,
+    xmlXPathContextPtr ctxt) {
+  auto newEnv = env;
+  const auto definitions = findNodes(typeTable, "*", ctxt);
+  for (auto &&definition : definitions) {
+    XcodeMLTypeAnalyzer.walk(definition, ctxt, newEnv);
+  }
+  return newEnv;
+}
