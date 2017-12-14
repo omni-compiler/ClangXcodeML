@@ -91,8 +91,7 @@ DEFINE_CCH(TemplateTypeParmProc) {
   assert(TTPT);
   TTPT->setSpelling(nameSpelling);
 
-  return makeTokenNode("typename")
-      + name.toString(src.typeTable, src.nnsTable);
+  return makeTokenNode("typename") + nameSpelling;
 }
 
 XcodeMl::CodeFragment
