@@ -877,6 +877,11 @@ makeCXXUnionType(const DataTypeIdent &ident,
 }
 
 TypeRef
+makeTemplateTypeParm(const DataTypeIdent &dtident) {
+  return std::make_shared<TemplateTypeParm>(dtident);
+}
+
+TypeRef
 makeOtherType(const DataTypeIdent &ident) {
   return std::make_shared<OtherType>(ident);
 }
