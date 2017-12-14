@@ -700,6 +700,31 @@ ClassType::ClassType(const ClassType &other)
       classScopeSymbols(other.classScopeSymbols) {
 }
 
+TemplateTypeParm::TemplateTypeParm(DataTypeIdent dtident)
+    : Type(TypeKind::TemplateTypeParm, dtident) {
+}
+
+CodeFragment
+TemplateTypeParm::makeDeclaration(CodeFragment var, const Environment &env) {
+  assert(pSpelling.hasValue());
+  return (*pSpelling) + var;
+}
+
+Type *
+TemplateTypeParm::clone() const {
+  TemplateTypeParm *copy = new TemplateTypeParm(*this);
+  return copy;
+}
+
+TemplateTypeParm::TemplateTypeParm(const TemplateTypeParm &other)
+    : Type(other), pSpelling(other.pSpelling) {
+}
+
+bool
+TemplateTypeParm::classof(const Type *T) {
+  return T->getKind() == TypeKind::TemplateTypeParm;
+}
+
 OtherType::OtherType(const DataTypeIdent &ident)
     : Type(TypeKind::Other, ident) {
 }

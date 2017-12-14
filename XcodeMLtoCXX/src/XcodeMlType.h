@@ -49,6 +49,8 @@ enum class TypeKind {
   Union,
   /*! C++-style class */
   Class,
+  /*! Template type parameter */
+  TemplateTypeParm,
   /*! Other type */
   Other,
 };
@@ -358,6 +360,21 @@ private:
   ClassName name_;
   std::vector<BaseClass> bases_;
   Symbols classScopeSymbols;
+};
+
+class TemplateTypeParm : public Type {
+public:
+  TemplateTypeParm(DataTypeIdent);
+  ~TemplateTypeParm() override = default;
+  CodeFragment makeDeclaration(CodeFragment, const Environment &) override;
+  Type *clone() const override;
+  static bool classof(const Type *);
+
+protected:
+  TemplateTypeParm(const TemplateTypeParm &);
+
+private:
+  llvm::Optional<CodeFragment> pSpelling;
 };
 
 class OtherType : public Type {
