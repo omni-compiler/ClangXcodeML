@@ -175,6 +175,11 @@ DEFINE_TA(enumTypeProc) {
   map[dtident] = XcodeMl::makeEnumType(dtident);
 }
 
+DEFINE_TA(TemplateTypeParmTypeProc) {
+  const auto dtident = getProp(node, "type");
+  map[dtident] = XcodeMl::makeTemplateTypeParm(dtident);
+}
+
 const std::vector<std::string> identicalFndDataTypeIdents = {
     "void",
     "char",
@@ -230,6 +235,7 @@ const TypeAnalyzer XcodeMLTypeAnalyzer("TypeAnalyzer",
         std::make_tuple("structType", structTypeProc),
         std::make_tuple("classType", classTypeProc),
         std::make_tuple("enumType", enumTypeProc),
+        std::make_tuple("TemplateTypeParmType", TemplateTypeParmTypeProc),
     });
 
 /*!
