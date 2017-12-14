@@ -725,6 +725,11 @@ TemplateTypeParm::classof(const Type *T) {
   return T->getKind() == TypeKind::TemplateTypeParm;
 }
 
+void
+TemplateTypeParm::setSpelling(CodeFragment T) {
+  pSpelling = T;
+}
+
 OtherType::OtherType(const DataTypeIdent &ident)
     : Type(TypeKind::Other, ident) {
 }

@@ -369,6 +369,7 @@ public:
   CodeFragment makeDeclaration(CodeFragment, const Environment &) override;
   Type *clone() const override;
   static bool classof(const Type *);
+  void setSpelling(CodeFragment);
 
 protected:
   TemplateTypeParm(const TemplateTypeParm &);
