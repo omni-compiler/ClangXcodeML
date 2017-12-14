@@ -118,6 +118,22 @@ emitClassDefinition(xmlNodePtr node,
       + cxxgen::makeNewLineNode();
 }
 
+void
+setClassName(XcodeMl::ClassType &classType, xmlNodePtr node, SourceInfo &src) {
+  const auto nameNode = findFirst(node, "name", src.ctxt);
+  if (!nameNode || isEmpty(nameNode)) {
+    /* `classType` is unnamed.
+     * Unnamed classes are problematic, so give a name to `classType`
+     * such as `__xcodeml_1`.
+     */
+    classType.setName(src.getUniqueName());
+    return;
+  }
+  const auto className = getQualifiedNameFromNameNode(nameNode, src);
+  const auto nameSpelling = className.toString(src.typeTable, src.nnsTable);
+  classType.setName(nameSpelling);
+}
+
 DEFINE_CCH(CXXRecordProc) {
   if (isTrueProp(node, "is_implicit", false)) {
     return cxxgen::makeVoidNode();
@@ -127,10 +143,8 @@ DEFINE_CCH(CXXRecordProc) {
   auto classT = llvm::dyn_cast<XcodeMl::ClassType>(T.get());
   assert(classT);
 
-  const auto nameNode = findFirst(node, "name", src.ctxt);
-  const auto className = getQualifiedNameFromNameNode(nameNode, src);
-  const auto nameSpelling = className.toString(src.typeTable, src.nnsTable);
-  classT->setName(nameSpelling);
+  setClassName(*classT, node, src);
+  const auto nameSpelling = *(classT->name()); // now class name must exist
 
   if (isTrueProp(node, "is_this_declaration_a_definition", false)) {
     return emitClassDefinition(node, ClassDefinitionBuilder, src, *classT);

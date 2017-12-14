@@ -1,0 +1,9 @@
+version: '2'
+
+services:
+  workspace:
+    image: hnagamin/clangxcodeml-test-env-14-3.6
+    volumes:
+      - /etc/localtime:/etc/localtime
+      - /home:/home
+      - .:/worktree
