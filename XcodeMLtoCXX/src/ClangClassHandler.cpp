@@ -65,8 +65,10 @@ DEFINE_CCH(emitTokenAttrValue) {
 }
 
 DEFINE_CCH(FunctionTemplateProc) {
-  const auto typeTableNode = findFirst(node, "xcodemlTypeTable", src.ctxt);
-  src.typeTable = expandEnvironment(src.typeTable, typeTableNode, src.ctxt);
+  if (const auto typeTableNode =
+          findFirst(node, "xcodemlTypeTable", src.ctxt)) {
+    src.typeTable = expandEnvironment(src.typeTable, typeTableNode, src.ctxt);
+  }
   const auto paramNodes =
       findNodes(node, "clangDecl[@class='TemplateTypeParm']", src.ctxt);
   const auto body = findFirst(node, "functionDefinition", src.ctxt);
