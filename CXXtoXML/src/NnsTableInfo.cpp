@@ -44,6 +44,8 @@ NnsTableInfo::NnsTableInfo(clang::MangleContext *MC, TypeTableInfo *TTI)
     : pimpl(make_unique<NnsTableInfoImpl>(MC, TTI)) {
 }
 
+NnsTableInfo::~NnsTableInfo() = default;
+
 std::string
 NnsTableInfo::getNnsName(const clang::NestedNameSpecifier *NestedNameSpec) {
   using SK = clang::NestedNameSpecifier::SpecifierKind;

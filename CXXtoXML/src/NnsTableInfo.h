@@ -12,6 +12,7 @@ public:
   NnsTableInfo(NnsTableInfo &&) = delete;
   NnsTableInfo &operator=(const NnsTableInfo &&) = delete;
   NnsTableInfo &operator=(NnsTableInfo &&) = delete;
+  ~NnsTableInfo();
 
   explicit NnsTableInfo(clang::MangleContext *, TypeTableInfo *);
   std::string getNnsName(const clang::NestedNameSpecifier *);
