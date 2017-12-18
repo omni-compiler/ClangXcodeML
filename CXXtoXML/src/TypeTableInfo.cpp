@@ -48,6 +48,7 @@ TypeTableInfo::TypeTableInfo(MangleContext *MC, InheritanceInfo *II)
   seqForUnionType = 0;
   seqForEnumType = 0;
   seqForClassType = 0;
+  seqForTemplateTypeParmType = 0;
   seqForOtherType = 0;
 
   TypeElements.clear();
@@ -141,6 +142,17 @@ TypeTableInfo::registerEnumType(QualType T) {
 
   raw_string_ostream OS(name);
   OS << "Enum" << seqForEnumType++;
+  return mapFromQualTypeToName[T] = OS.str();
+}
+
+std::string
+TypeTableInfo::registerTemplateTypeParmType(QualType T) {
+  assert(T->getTypeClass() == Type::TemplateTypeParm);
+  std::string name = mapFromQualTypeToName[T];
+  assert(name.empty());
+
+  raw_string_ostream OS(name);
+  OS << "TemplateTypeParm" << seqForTemplateTypeParmType++;
   return mapFromQualTypeToName[T] = OS.str();
 }
 
@@ -544,9 +556,21 @@ TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
       pushType(T, Node);
       break;
     }
+    case Type::TemplateTypeParm: {
+      rawname = registerTemplateTypeParmType(T);
+      Node = createNode(T, "TemplateTypeParmType", nullptr);
+      const auto TTP = cast<TemplateTypeParmType>(T.getTypePtr());
+      xmlNewProp(Node,
+          BAD_CAST "clang_depth",
+          BAD_CAST std::to_string(TTP->getDepth()).c_str());
+      xmlNewProp(Node,
+          BAD_CAST "clang_index",
+          BAD_CAST std::to_string(TTP->getIndex()).c_str());
+      pushType(T, Node);
+      break;
+    }
     case Type::Elaborated:
     case Type::Attributed:
-    case Type::TemplateTypeParm:
     case Type::SubstTemplateTypeParm:
     case Type::SubstTemplateTypeParmPack:
     case Type::TemplateSpecialization:

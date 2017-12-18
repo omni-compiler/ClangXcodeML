@@ -147,10 +147,6 @@
     </clangAST>
   </xsl:template>
 
-  <xsl:template match="xcodemlTypeTable" />
-
-  <xsl:template match="xcodemlNnsTable" />
-
   <xsl:template match="node()|@*">
     <xsl:copy>
       <xsl:apply-templates select="node()|@*"/>
