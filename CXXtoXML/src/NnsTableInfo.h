@@ -21,7 +21,6 @@ public:
 
 private:
   xmlNodePtr getNnsNode(const clang::NestedNameSpecifier *) const;
-  void registerNestedNameSpec(const clang::NestedNameSpecifier *);
 
 private:
   std::unique_ptr<NnsTableInfoImpl> pimpl;

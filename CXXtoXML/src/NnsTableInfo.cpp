@@ -14,6 +14,9 @@ namespace {
 
 void pushNns(NnsTableInfoImpl &, const clang::NestedNameSpecifier *);
 
+void registerNestedNameSpec(
+    NnsTableInfoImpl &, const clang::NestedNameSpecifier *);
+
 template <typename T, typename... Ts>
 std::unique_ptr<T>
 make_unique(Ts &&... params) {
@@ -144,9 +147,11 @@ makeNnsIdentNodeForNestedNameSpec(const clang::MangleContext &MC,
 
 } // namespace
 
+namespace {
+
 void
-NnsTableInfo::registerNestedNameSpec(
-    const clang::NestedNameSpecifier *NestedNameSpec) {
+registerNestedNameSpec(
+    NnsTableInfoImpl &info, const clang::NestedNameSpecifier *NestedNameSpec) {
   assert(NestedNameSpec);
 
   using SK = clang::NestedNameSpecifier::SpecifierKind;
@@ -156,13 +161,15 @@ NnsTableInfo::registerNestedNameSpec(
   }
 
   const auto prefix = static_cast<std::string>("NNS");
-  const auto name = prefix + std::to_string(seqForOther++);
-  mapForOtherNns[NestedNameSpec] = name;
-  mapFromNestedNameSpecToXmlNodePtr[NestedNameSpec] =
+  const auto name = prefix + std::to_string(info.seqForOther++);
+  info.mapForOtherNns[NestedNameSpec] = name;
+  info.mapFromNestedNameSpecToXmlNodePtr[NestedNameSpec] =
       makeNnsIdentNodeForNestedNameSpec(
-          *mangleContext, *this, *typetableinfo, NestedNameSpec);
-  pushNns(NestedNameSpec);
+          *(info.mangleContext), info, *info.typetableinfo, NestedNameSpec);
+  pushNns(info, NestedNameSpec);
 }
+
+} // namespace
 
 xmlNodePtr
 NnsTableInfo::getNnsNode(const clang::NestedNameSpecifier *Spec) const {
