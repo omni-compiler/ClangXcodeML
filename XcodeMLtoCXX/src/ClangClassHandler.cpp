@@ -179,8 +179,8 @@ const ClangClassHandler ClangStmtHandler("class",
         std::make_tuple("CXXConstructExpr", CXXCtorExprProc),
         std::make_tuple("CXXDeleteExpr", CXXDeleteExprProc),
         std::make_tuple("CXXTemporaryObjectExpr", CXXTemporaryObjectExprProc),
-        std::make_tuple("IntegerLiteral", emitTokenAttrValue),
         std::make_tuple("FloatingLiteral", emitTokenAttrValue),
+        std::make_tuple("IntegerLiteral", emitTokenAttrValue),
     });
 
 DEFINE_CCH(FriendDeclProc) {
