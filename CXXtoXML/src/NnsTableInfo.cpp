@@ -41,12 +41,7 @@ struct NnsTableInfoImpl {
 };
 
 NnsTableInfo::NnsTableInfo(clang::MangleContext *MC, TypeTableInfo *TTI)
-    : seqForOther(0),
-      mangleContext(MC),
-      typetableinfo(TTI),
-      mapForOtherNns(),
-      mapFromNestedNameSpecToXmlNodePtr() {
-  assert(typetableinfo);
+    : pimpl(make_unique<NnsTableInfoImpl>(MC, TTI)) {
 }
 
 std::string
