@@ -51,6 +51,24 @@ NnsTableInfo::NnsTableInfo(clang::MangleContext *MC, TypeTableInfo *TTI)
 
 NnsTableInfo::~NnsTableInfo() = default;
 
+namespace {
+
+std::string
+getOrRegisterNnsName(
+    NnsTableInfoImpl &info, const clang::NestedNameSpecifier *NestedNameSpec) {
+  using SK = clang::NestedNameSpecifier::SpecifierKind;
+  if (NestedNameSpec->getKind() == SK::Global) {
+    return "global";
+  }
+
+  if (info.mapForOtherNns.count(NestedNameSpec) == 0) {
+    registerNestedNameSpec(info, NestedNameSpec);
+  }
+  return info.mapForOtherNns[NestedNameSpec];
+}
+
+} // namespace
+
 std::string
 NnsTableInfo::getNnsName(const clang::NestedNameSpecifier *NestedNameSpec) {
   using SK = clang::NestedNameSpecifier::SpecifierKind;
