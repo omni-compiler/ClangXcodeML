@@ -20,9 +20,6 @@ public:
   void pushNnsTableStack(xmlNodePtr);
 
 private:
-  xmlNodePtr getNnsNode(const clang::NestedNameSpecifier *) const;
-
-private:
   std::unique_ptr<NnsTableInfoImpl> pimpl;
 };
 

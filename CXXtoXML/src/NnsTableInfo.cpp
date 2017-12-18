@@ -12,6 +12,9 @@
 
 namespace {
 
+xmlNodePtr getNnsNode(
+    const NnsTableInfoImpl &, const clang::NestedNameSpecifier *);
+
 void pushNns(NnsTableInfoImpl &, const clang::NestedNameSpecifier *);
 
 void registerNestedNameSpec(
@@ -187,11 +190,12 @@ registerNestedNameSpec(
   pushNns(info, NestedNameSpec);
 }
 
-} // namespace
-
 xmlNodePtr
-NnsTableInfo::getNnsNode(const clang::NestedNameSpecifier *Spec) const {
-  auto iter = mapFromNestedNameSpecToXmlNodePtr.find(Spec);
-  assert(iter != mapFromNestedNameSpecToXmlNodePtr.end());
+getNnsNode(
+    const NnsTableInfoImpl &info, const clang::NestedNameSpecifier *Spec) {
+  const auto iter = info.mapFromNestedNameSpecToXmlNodePtr.find(Spec);
+  assert(iter != info.mapFromNestedNameSpecToXmlNodePtr.cend());
   return iter->second;
 }
+
+} // namespace
