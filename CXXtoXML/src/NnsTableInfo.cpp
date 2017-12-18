@@ -168,10 +168,6 @@ makeNnsIdentNodeForNestedNameSpec(const clang::MangleContext &MC,
   return nullptr;
 }
 
-} // namespace
-
-namespace {
-
 void
 registerNestedNameSpec(
     NnsTableInfoImpl &info, const clang::NestedNameSpecifier *NestedNameSpec) {
