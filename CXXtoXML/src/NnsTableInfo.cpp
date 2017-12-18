@@ -79,10 +79,10 @@ NnsTableInfo::getNnsName(const clang::NestedNameSpecifier *NestedNameSpec) {
     return "global";
   }
 
-  if (mapForOtherNns.count(NestedNameSpec) == 0) {
-    registerNestedNameSpec(NestedNameSpec);
+  if (pimpl->mapForOtherNns.count(NestedNameSpec) == 0) {
+    registerNestedNameSpec(*pimpl, NestedNameSpec);
   }
-  return mapForOtherNns[NestedNameSpec];
+  return pimpl->mapForOtherNns[NestedNameSpec];
 }
 
 namespace {
@@ -96,19 +96,19 @@ pushNns(NnsTableInfoImpl &info, const clang::NestedNameSpecifier *Spec) {
 
 void
 NnsTableInfo::pushNnsTableStack(xmlNodePtr nnsTableNode) {
-  nnsTableStack.push(std::make_tuple(
+  pimpl->nnsTableStack.push(std::make_tuple(
       nnsTableNode, std::vector<const clang::NestedNameSpecifier *>()));
 }
 
 void
 NnsTableInfo::popNnsTableStack() {
-  assert(!nnsTableStack.empty());
-  const auto nnsTableNode = std::get<0>(nnsTableStack.top());
-  const auto nnssInCurScope = std::get<1>(nnsTableStack.top());
+  assert(!pimpl->nnsTableStack.empty());
+  const auto nnsTableNode = std::get<0>(pimpl->nnsTableStack.top());
+  const auto nnssInCurScope = std::get<1>(pimpl->nnsTableStack.top());
   for (auto &nns : nnssInCurScope) {
-    xmlAddChild(nnsTableNode, getNnsNode(nns));
+    xmlAddChild(nnsTableNode, getNnsNode(*pimpl, nns));
   }
-  nnsTableStack.pop();
+  pimpl->nnsTableStack.pop();
 }
 
 namespace {
