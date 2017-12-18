@@ -1,5 +1,6 @@
 #include <iostream>
 #include <map>
+#include <memory>
 #include <stack>
 #include <string>
 #include <libxml/tree.h>
@@ -8,6 +9,16 @@
 #include "TypeTableInfo.h"
 
 #include "NnsTableInfo.h"
+
+namespace {
+
+template <typename T, typename... Ts>
+std::unique_ptr<T>
+make_unique(Ts &&... params) {
+  return std::unique_ptr<T>(new T(std::forward<Ts>(params)...));
+}
+
+} // namespace
 
 NnsTableInfo::NnsTableInfo(clang::MangleContext *MC, TypeTableInfo *TTI)
     : seqForOther(0),
