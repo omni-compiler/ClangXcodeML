@@ -24,14 +24,7 @@ private:
   void registerNestedNameSpec(const clang::NestedNameSpecifier *);
 
 private:
-  int seqForOther;
-  clang::MangleContext *mangleContext;
-  TypeTableInfo *typetableinfo;
-  std::map<const clang::NestedNameSpecifier *, std::string> mapForOtherNns;
-  std::map<const clang::NestedNameSpecifier *, xmlNodePtr>
-      mapFromNestedNameSpecToXmlNodePtr;
-  std::stack<std::tuple<xmlNodePtr,
-      std::vector<const clang::NestedNameSpecifier *>>> nnsTableStack;
+  std::unique_ptr<NnsTableInfoImpl> pimpl;
 };
 
 #endif
