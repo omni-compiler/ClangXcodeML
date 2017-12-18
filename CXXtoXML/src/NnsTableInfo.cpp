@@ -114,7 +114,7 @@ NnsTableInfo::popNnsTableStack() {
 namespace {
 
 xmlNodePtr
-makeNnsIdentNodeForType(NnsTableInfo &NTI,
+makeNnsIdentNodeForType(NnsTableInfoImpl &info,
     TypeTableInfo &TTI,
     const clang::NestedNameSpecifier *Spec) {
   assert(Spec);
@@ -124,7 +124,9 @@ makeNnsIdentNodeForType(NnsTableInfo &NTI,
   auto node = xmlNewNode(nullptr, BAD_CAST "classNNS");
   auto dtident = TTI.getTypeName(clang::QualType(T, 0));
   xmlNewProp(node, BAD_CAST "type", BAD_CAST(dtident.c_str()));
-  xmlNewProp(node, BAD_CAST "nns", BAD_CAST(NTI.getNnsName(Spec).c_str()));
+  xmlNewProp(node,
+      BAD_CAST "nns",
+      BAD_CAST(getOrRegisterNnsName(info, Spec).c_str()));
 
   return node;
 }
@@ -142,13 +144,13 @@ dump(const clang::NestedNameSpecifier &Spec, const clang::MangleContext &MC) {
 
 xmlNodePtr
 makeNnsIdentNodeForNestedNameSpec(const clang::MangleContext &MC,
-    NnsTableInfo &NTI,
+    NnsTableInfoImpl &info,
     TypeTableInfo &TTI,
     const clang::NestedNameSpecifier *Spec) {
   assert(Spec);
   using SK = clang::NestedNameSpecifier::SpecifierKind;
   switch (Spec->getKind()) {
-  case SK::TypeSpec: return makeNnsIdentNodeForType(NTI, TTI, Spec);
+  case SK::TypeSpec: return makeNnsIdentNodeForType(info, TTI, Spec);
 
   case SK::Global:
     // do not make Nns Identifier node for global namespace
