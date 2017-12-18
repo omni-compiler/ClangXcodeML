@@ -25,6 +25,11 @@ const std::map<std::string, std::string> opMap = {
     {"bitOrExpr", "|"},
     {"bitXorExpr", "^"},
 
+    {"preIncrExpr", "++"},
+    {"preDecrExpr", "--"},
+    {"postIncrExpr", "++"},
+    {"postDecrExpr", "--"},
+
     {"assignExpr", "="},
     {"asgPlusExpr", "+="},
     {"asgMinusExpr", "-="},
