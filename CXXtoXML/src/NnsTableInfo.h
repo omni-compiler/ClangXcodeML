@@ -21,7 +21,6 @@ public:
 
 private:
   xmlNodePtr getNnsNode(const clang::NestedNameSpecifier *) const;
-  void pushNns(const clang::NestedNameSpecifier *);
   void registerNestedNameSpec(const clang::NestedNameSpecifier *);
 
 private:

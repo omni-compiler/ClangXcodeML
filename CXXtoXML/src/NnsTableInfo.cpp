@@ -12,6 +12,8 @@
 
 namespace {
 
+void pushNns(NnsTableInfoImpl &, const clang::NestedNameSpecifier *);
+
 template <typename T, typename... Ts>
 std::unique_ptr<T>
 make_unique(Ts &&... params) {
@@ -59,10 +61,14 @@ NnsTableInfo::getNnsName(const clang::NestedNameSpecifier *NestedNameSpec) {
   return mapForOtherNns[NestedNameSpec];
 }
 
+namespace {
+
 void
-NnsTableInfo::pushNns(const clang::NestedNameSpecifier *Spec) {
-  std::get<1>(nnsTableStack.top()).push_back(Spec);
+pushNns(NnsTableInfoImpl &info, const clang::NestedNameSpecifier *Spec) {
+  std::get<1>(info.nnsTableStack.top()).push_back(Spec);
 }
+
+} // namespace
 
 void
 NnsTableInfo::pushNnsTableStack(xmlNodePtr nnsTableNode) {
