@@ -74,15 +74,7 @@ getOrRegisterNnsName(
 
 std::string
 NnsTableInfo::getNnsName(const clang::NestedNameSpecifier *NestedNameSpec) {
-  using SK = clang::NestedNameSpecifier::SpecifierKind;
-  if (NestedNameSpec->getKind() == SK::Global) {
-    return "global";
-  }
-
-  if (pimpl->mapForOtherNns.count(NestedNameSpec) == 0) {
-    registerNestedNameSpec(*pimpl, NestedNameSpec);
-  }
-  return pimpl->mapForOtherNns[NestedNameSpec];
+  return getOrRegisterNnsName(*pimpl, NestedNameSpec);
 }
 
 namespace {
