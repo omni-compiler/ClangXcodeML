@@ -700,6 +700,36 @@ ClassType::ClassType(const ClassType &other)
       classScopeSymbols(other.classScopeSymbols) {
 }
 
+TemplateTypeParm::TemplateTypeParm(DataTypeIdent dtident)
+    : Type(TypeKind::TemplateTypeParm, dtident) {
+}
+
+CodeFragment
+TemplateTypeParm::makeDeclaration(CodeFragment var, const Environment &) {
+  assert(pSpelling.hasValue());
+  return (*pSpelling) + var;
+}
+
+Type *
+TemplateTypeParm::clone() const {
+  TemplateTypeParm *copy = new TemplateTypeParm(*this);
+  return copy;
+}
+
+TemplateTypeParm::TemplateTypeParm(const TemplateTypeParm &other)
+    : Type(other), pSpelling(other.pSpelling) {
+}
+
+bool
+TemplateTypeParm::classof(const Type *T) {
+  return T->getKind() == TypeKind::TemplateTypeParm;
+}
+
+void
+TemplateTypeParm::setSpelling(CodeFragment T) {
+  pSpelling = T;
+}
+
 OtherType::OtherType(const DataTypeIdent &ident)
     : Type(TypeKind::Other, ident) {
 }
@@ -844,6 +874,11 @@ makeCXXUnionType(const DataTypeIdent &ident,
     const ClassType::Symbols &members) {
   return std::make_shared<ClassType>(
       ident, CXXClassKind::Union, bases, members);
+}
+
+TypeRef
+makeTemplateTypeParm(const DataTypeIdent &dtident) {
+  return std::make_shared<TemplateTypeParm>(dtident);
 }
 
 TypeRef

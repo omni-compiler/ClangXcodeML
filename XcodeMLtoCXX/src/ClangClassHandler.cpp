@@ -19,6 +19,7 @@
 #include "XcodeMlType.h"
 #include "XcodeMlEnvironment.h"
 #include "SourceInfo.h"
+#include "TypeAnalyzer.h"
 #include "CodeBuilder.h"
 #include "ClangClassHandler.h"
 #include "XcodeMlUtil.h"
@@ -61,6 +62,38 @@ DEFINE_CCH(CXXDeleteExprProc) {
 DEFINE_CCH(emitTokenAttrValue) {
   const auto token = getProp(node, "token");
   return makeTokenNode(token);
+}
+
+DEFINE_CCH(FunctionTemplateProc) {
+  if (const auto typeTableNode =
+          findFirst(node, "xcodemlTypeTable", src.ctxt)) {
+    src.typeTable = expandEnvironment(src.typeTable, typeTableNode, src.ctxt);
+  }
+  const auto paramNodes =
+      findNodes(node, "clangDecl[@class='TemplateTypeParm']", src.ctxt);
+  const auto body = findFirst(node, "functionDefinition", src.ctxt);
+
+  std::vector<CXXCodeGen::StringTreeRef> params;
+  for (auto &&paramNode : paramNodes) {
+    params.push_back(w.walk(paramNode, src));
+  }
+
+  return makeTokenNode("template") + makeTokenNode("<") + join(",", params)
+      + makeTokenNode(">") + w.walk(body, src);
+}
+
+DEFINE_CCH(TemplateTypeParmProc) {
+  const auto nameNode = findFirst(node, "name", src.ctxt);
+  const auto name = getQualifiedNameFromNameNode(nameNode, src);
+  const auto nameSpelling = name.toString(src.typeTable, src.nnsTable);
+
+  const auto dtident = getProp(node, "type");
+  auto T = src.typeTable.at(dtident);
+  auto TTPT = llvm::cast<XcodeMl::TemplateTypeParm>(T.get());
+  assert(TTPT);
+  TTPT->setSpelling(nameSpelling);
+
+  return makeTokenNode("typename") + nameSpelling;
 }
 
 XcodeMl::CodeFragment
@@ -201,4 +234,6 @@ const ClangClassHandler ClangDeclHandler("class",
     {
         std::make_tuple("CXXRecord", CXXRecordProc),
         std::make_tuple("Friend", FriendDeclProc),
+        std::make_tuple("FunctionTemplate", FunctionTemplateProc),
+        std::make_tuple("TemplateTypeParm", TemplateTypeParmProc),
     });
