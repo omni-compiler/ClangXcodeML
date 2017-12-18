@@ -3,6 +3,8 @@
 
 class TypeTableInfo;
 
+struct NnsTableInfoImpl;
+
 class NnsTableInfo {
 public:
   NnsTableInfo() = delete;

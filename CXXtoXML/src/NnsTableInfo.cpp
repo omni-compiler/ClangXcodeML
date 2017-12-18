@@ -20,6 +20,26 @@ make_unique(Ts &&... params) {
 
 } // namespace
 
+struct NnsTableInfoImpl {
+  explicit NnsTableInfoImpl(clang::MangleContext *MC, TypeTableInfo *TTI)
+      : seqForOther(0),
+        mangleContext(MC),
+        typetableinfo(TTI),
+        mapForOtherNns(),
+        mapFromNestedNameSpecToXmlNodePtr() {
+    assert(typetableinfo);
+  }
+
+  int seqForOther;
+  clang::MangleContext *mangleContext;
+  TypeTableInfo *typetableinfo;
+  std::map<const clang::NestedNameSpecifier *, std::string> mapForOtherNns;
+  std::map<const clang::NestedNameSpecifier *, xmlNodePtr>
+      mapFromNestedNameSpecToXmlNodePtr;
+  std::stack<std::tuple<xmlNodePtr,
+      std::vector<const clang::NestedNameSpecifier *>>> nnsTableStack;
+};
+
 NnsTableInfo::NnsTableInfo(clang::MangleContext *MC, TypeTableInfo *TTI)
     : seqForOther(0),
       mangleContext(MC),
