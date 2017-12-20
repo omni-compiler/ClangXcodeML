@@ -38,7 +38,7 @@ struct NnsTableInfoImpl {
     assert(typetableinfo);
   }
 
-  int seqForOther;
+  size_t seqForOther;
   clang::MangleContext *mangleContext;
   TypeTableInfo *typetableinfo;
   std::map<const clang::NestedNameSpecifier *, std::string> mapForOtherNns;
