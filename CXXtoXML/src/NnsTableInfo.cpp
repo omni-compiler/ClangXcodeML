@@ -106,7 +106,7 @@ NnsTableInfo::popNnsTableStack() {
 namespace {
 
 xmlNodePtr
-makeNnsIdentNodeForType(NnsTableInfoImpl &info,
+makeNnsDefNodeForType(NnsTableInfoImpl &info,
     TypeTableInfo &TTI,
     const clang::NestedNameSpecifier *Spec) {
   assert(Spec);
@@ -135,17 +135,17 @@ dump(const clang::NestedNameSpecifier &Spec, const clang::MangleContext &MC) {
 }
 
 xmlNodePtr
-makeNnsIdentNodeForNestedNameSpec(const clang::MangleContext &MC,
+makeNnsDefNodeForNestedNameSpec(const clang::MangleContext &MC,
     NnsTableInfoImpl &info,
     TypeTableInfo &TTI,
     const clang::NestedNameSpecifier *Spec) {
   assert(Spec);
   using SK = clang::NestedNameSpecifier::SpecifierKind;
   switch (Spec->getKind()) {
-  case SK::TypeSpec: return makeNnsIdentNodeForType(info, TTI, Spec);
+  case SK::TypeSpec: return makeNnsDefNodeForType(info, TTI, Spec);
 
   case SK::Global:
-    // do not make Nns Identifier node for global namespace
+    // do not make Nns definition node for global namespace
     assert(false);
 
   case SK::Identifier:
@@ -175,7 +175,7 @@ registerNestedNameSpec(
   const auto name = prefix + std::to_string(info.seqForOther++);
   info.mapForOtherNns[NestedNameSpec] = name;
   info.mapFromNestedNameSpecToXmlNodePtr[NestedNameSpec] =
-      makeNnsIdentNodeForNestedNameSpec(
+      makeNnsDefNodeForNestedNameSpec(
           *(info.mangleContext), info, *info.typetableinfo, NestedNameSpec);
   pushNns(info, NestedNameSpec);
 }
