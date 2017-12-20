@@ -33,6 +33,7 @@ struct NnsTableInfoImpl {
       : mangleContext(MC),
         typetableinfo(TTI),
         mapFromNestedNameSpecToXmlNodePtr(),
+        nnsTableStack(),
         seqForOther(0),
         mapForOtherNns() {
     assert(typetableinfo);
