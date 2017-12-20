@@ -50,6 +50,7 @@ struct NnsTableInfoImpl {
    */
   std::stack<std::tuple<xmlNodePtr, std::vector<std::string>>> nnsTableStack;
 
+  /*! counter for others */
   size_t seqForOther;
   std::map<const clang::NestedNameSpecifier *, std::string> mapForOtherNns;
 };
