@@ -44,6 +44,14 @@ struct NnsTableInfoImpl {
   std::map<const clang::NestedNameSpecifier *, std::string> mapForOtherNns;
   std::map<const clang::NestedNameSpecifier *, xmlNodePtr>
       mapFromNestedNameSpecToXmlNodePtr;
+
+  /*! stack of node-NNSs pairs.
+   *  Each node-NNSs pair consists
+   *  - an XML <nnsTable> element (`xmlNodePtr`)
+   *  - and a list of NNSs that belong to the NNS-scope
+   *    defined by the <nnsTable> element
+   *    (std::vector<const clang::NestedNameSpecifier *>>)
+   */
   std::stack<std::tuple<xmlNodePtr,
       std::vector<const clang::NestedNameSpecifier *>>> nnsTableStack;
 };
