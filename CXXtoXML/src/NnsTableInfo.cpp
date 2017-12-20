@@ -12,8 +12,7 @@
 
 namespace {
 
-xmlNodePtr getNnsDefElem(
-    const NnsTableInfoImpl &, const clang::NestedNameSpecifier *);
+xmlNodePtr getNnsDefElem(const NnsTableInfoImpl &, const std::string &);
 
 void pushNns(NnsTableInfoImpl &, const std::string &);
 
@@ -32,7 +31,7 @@ struct NnsTableInfoImpl {
   explicit NnsTableInfoImpl(clang::MangleContext *MC, TypeTableInfo *TTI)
       : mangleContext(MC),
         typetableinfo(TTI),
-        mapFromNestedNameSpecToXmlNodePtr(),
+        mapFromNnsIdentToXmlNodePtr(),
         nnsTableStack(),
         seqForOther(0),
         mapForOtherNns() {
@@ -41,8 +40,7 @@ struct NnsTableInfoImpl {
 
   clang::MangleContext *mangleContext;
   TypeTableInfo *typetableinfo;
-  std::map<const clang::NestedNameSpecifier *, xmlNodePtr>
-      mapFromNestedNameSpecToXmlNodePtr;
+  std::map<std::string, xmlNodePtr> mapFromNnsIdentToXmlNodePtr;
 
   /*! stack of node-NNSs pairs.
    *  Each node-NNSs pair consists
@@ -182,17 +180,15 @@ registerNestedNameSpec(
   const auto prefix = static_cast<std::string>("NNS");
   const auto name = prefix + std::to_string(info.seqForOther++);
   info.mapForOtherNns[NestedNameSpec] = name;
-  info.mapFromNestedNameSpecToXmlNodePtr[NestedNameSpec] =
-      makeNnsDefNodeForNestedNameSpec(
-          *(info.mangleContext), info, *info.typetableinfo, NestedNameSpec);
+  info.mapFromNnsIdentToXmlNodePtr[name] = makeNnsDefNodeForNestedNameSpec(
+      *(info.mangleContext), info, *info.typetableinfo, NestedNameSpec);
   pushNns(info, name);
 }
 
 xmlNodePtr
-getNnsDefElem(
-    const NnsTableInfoImpl &info, const clang::NestedNameSpecifier *Spec) {
-  const auto iter = info.mapFromNestedNameSpecToXmlNodePtr.find(Spec);
-  assert(iter != info.mapFromNestedNameSpecToXmlNodePtr.cend());
+getNnsDefElem(const NnsTableInfoImpl &info, const std::string &nns) {
+  const auto iter = info.mapFromNnsIdentToXmlNodePtr.find(nns);
+  assert(iter != info.mapFromNnsIdentToXmlNodePtr.cend());
   return iter->second;
 }
 
