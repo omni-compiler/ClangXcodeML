@@ -15,7 +15,7 @@ namespace {
 xmlNodePtr getNnsDefElem(
     const NnsTableInfoImpl &, const clang::NestedNameSpecifier *);
 
-void pushNns(NnsTableInfoImpl &, const clang::NestedNameSpecifier *);
+void pushNns(NnsTableInfoImpl &, const std::string &);
 
 void registerNestedNameSpec(
     NnsTableInfoImpl &, const clang::NestedNameSpecifier *);
@@ -48,11 +48,9 @@ struct NnsTableInfoImpl {
    *  Each node-NNSs pair consists
    *  - an XML <nnsTable> element (`xmlNodePtr`)
    *  - and a list of NNSs that belong to the NNS-scope
-   *    defined by the <nnsTable> element
-   *    (std::vector<const clang::NestedNameSpecifier *>>)
+   *    defined by the <nnsTable> element (`std::vector<std::string>`)
    */
-  std::stack<std::tuple<xmlNodePtr,
-      std::vector<const clang::NestedNameSpecifier *>>> nnsTableStack;
+  std::stack<std::tuple<xmlNodePtr, std::vector<std::string>>> nnsTableStack;
 
   size_t seqForOther;
   std::map<const clang::NestedNameSpecifier *, std::string> mapForOtherNns;
@@ -90,16 +88,16 @@ NnsTableInfo::getNnsName(const clang::NestedNameSpecifier *NestedNameSpec) {
 namespace {
 
 void
-pushNns(NnsTableInfoImpl &info, const clang::NestedNameSpecifier *Spec) {
-  std::get<1>(info.nnsTableStack.top()).push_back(Spec);
+pushNns(NnsTableInfoImpl &info, const std::string &nns) {
+  std::get<1>(info.nnsTableStack.top()).push_back(nns);
 }
 
 } // namespace
 
 void
 NnsTableInfo::pushNnsTableStack(xmlNodePtr nnsTableNode) {
-  pimpl->nnsTableStack.push(std::make_tuple(
-      nnsTableNode, std::vector<const clang::NestedNameSpecifier *>()));
+  pimpl->nnsTableStack.push(
+      std::make_tuple(nnsTableNode, std::vector<std::string>()));
 }
 
 void
@@ -187,7 +185,7 @@ registerNestedNameSpec(
   info.mapFromNestedNameSpecToXmlNodePtr[NestedNameSpec] =
       makeNnsDefNodeForNestedNameSpec(
           *(info.mangleContext), info, *info.typetableinfo, NestedNameSpec);
-  pushNns(info, NestedNameSpec);
+  pushNns(info, name);
 }
 
 xmlNodePtr
