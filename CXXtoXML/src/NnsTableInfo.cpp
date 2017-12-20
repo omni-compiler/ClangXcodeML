@@ -12,7 +12,7 @@
 
 namespace {
 
-xmlNodePtr getNnsNode(
+xmlNodePtr getNnsDefElem(
     const NnsTableInfoImpl &, const clang::NestedNameSpecifier *);
 
 void pushNns(NnsTableInfoImpl &, const clang::NestedNameSpecifier *);
@@ -98,7 +98,7 @@ NnsTableInfo::popNnsTableStack() {
   const auto nnsTableNode = std::get<0>(pimpl->nnsTableStack.top());
   const auto nnssInCurScope = std::get<1>(pimpl->nnsTableStack.top());
   for (auto &nns : nnssInCurScope) {
-    xmlAddChild(nnsTableNode, getNnsNode(*pimpl, nns));
+    xmlAddChild(nnsTableNode, getNnsDefElem(*pimpl, nns));
   }
   pimpl->nnsTableStack.pop();
 }
@@ -181,7 +181,7 @@ registerNestedNameSpec(
 }
 
 xmlNodePtr
-getNnsNode(
+getNnsDefElem(
     const NnsTableInfoImpl &info, const clang::NestedNameSpecifier *Spec) {
   const auto iter = info.mapFromNestedNameSpecToXmlNodePtr.find(Spec);
   assert(iter != info.mapFromNestedNameSpecToXmlNodePtr.cend());
