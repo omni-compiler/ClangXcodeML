@@ -59,6 +59,23 @@ DEFINE_CCH(CXXDeleteExprProc) {
   return makeTokenNode("delete") + w.walk(allocated, src);
 }
 
+DEFINE_CCH(DeclRefExprProc) {
+  const auto nameNode = findFirst(node, "name", src.ctxt);
+  const auto name = getQualifiedNameFromNameNode(nameNode, src);
+
+  if (const auto TAL = findFirst(node, "TemplateArgumentLoc", src.ctxt)) {
+    const auto templArgNodes = findNodes(TAL, "*", src.ctxt);
+    std::vector<CodeFragment> args;
+    for (auto &&argNode : templArgNodes) {
+      args.push_back(w.walk(argNode, src));
+    }
+    return name.toString(src.typeTable, src.nnsTable) + makeTokenNode("<")
+        + join(",", args) + makeTokenNode(">");
+  }
+
+  return name.toString(src.typeTable, src.nnsTable);
+}
+
 DEFINE_CCH(emitTokenAttrValue) {
   const auto token = getProp(node, "token");
   return makeTokenNode(token);
@@ -212,6 +229,7 @@ const ClangClassHandler ClangStmtHandler("class",
         std::make_tuple("CXXConstructExpr", CXXCtorExprProc),
         std::make_tuple("CXXDeleteExpr", CXXDeleteExprProc),
         std::make_tuple("CXXTemporaryObjectExpr", CXXTemporaryObjectExprProc),
+        std::make_tuple("DeclRefExpr", DeclRefExprProc),
         std::make_tuple("FloatingLiteral", emitTokenAttrValue),
         std::make_tuple("IntegerLiteral", emitTokenAttrValue),
     });
