@@ -243,3 +243,10 @@ DEFINE_CCH(BuiltinTypeProc) {
   return makeDecl(
       src.typeTable.at(dtident), cxxgen::makeVoidNode(), src.typeTable);
 }
+
+const ClangClassHandler ClangTypeLocHandler("class",
+    cxxgen::makeInnerNode,
+    callCodeBuilder,
+    {
+        std::make_tuple("Builtin", BuiltinTypeProc),
+    });
