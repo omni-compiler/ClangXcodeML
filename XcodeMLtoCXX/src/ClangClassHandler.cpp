@@ -237,3 +237,9 @@ const ClangClassHandler ClangDeclHandler("class",
         std::make_tuple("FunctionTemplate", FunctionTemplateProc),
         std::make_tuple("TemplateTypeParm", TemplateTypeParmProc),
     });
+
+DEFINE_CCH(BuiltinTypeProc) {
+  const auto dtident = getProp(node, "type");
+  return makeDecl(
+      src.typeTable.at(dtident), cxxgen::makeVoidNode(), src.typeTable);
+}
