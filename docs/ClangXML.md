@@ -149,7 +149,7 @@ clangStmt子要素は関数本体を表現する。
 
 必須属性なし
 
-オプショナル：
+オプショナル:
 
 * `is_implicit`属性
 
@@ -180,11 +180,11 @@ clangStmt子要素は関数本体を表現する。
   [ _`clangStmt`要素_ ]  
 `</clangDecl>`  
 
-必須属性：
+必須属性:
 
 * `xcodemlType`属性
 
-オプショナル：
+オプショナル:
 
 * `has_init`属性
 
@@ -213,7 +213,7 @@ clangStmt子要素は関数本体を表現する。
   _`name`要素_  
 `</clangDecl>`  
 
-必須属性：
+必須属性:
 
 * `xcodemlTypedefType`属性
 
@@ -233,7 +233,7 @@ clangStmt子要素は関数本体を表現する。
 _子要素_ ...  
 `</clangStmt>`  
 
-必須：
+必須:
 
 * `class`属性
 * その他，以下の小節で必須属性が指定されることがある．
@@ -256,11 +256,11 @@ Clang の `clang::Stmt` クラスから派生したクラスのデータを表�
   _`clangStmt`要素_  
 `</clangStmt>`  
 
-必須：
+必須:
 
 * `binOpName`属性
 
-オプショナル：
+オプショナル:
 
 * `xcodemlType`属性
 
@@ -322,7 +322,7 @@ Clang の `clang::Stmt` クラスから派生したクラスのデータを表�
   _`clangStmt`要素_ ...  
 `</clangStmt>`  
 
-オプショナル：
+オプショナル:
 
 * `xcodemlType`属性
 
@@ -359,11 +359,11 @@ Clang の `clang::Stmt` クラスから派生したクラスのデータを表�
   `xcodemlType` `=` _データ型識別名_  
 `/>`  
 
-必須：
+必須:
 
 * `hexadecimalNotation`属性
 
-オプショナル：
+オプショナル:
 
 * `token`属性
 * `xcodemlType`属性
@@ -403,7 +403,7 @@ Clang の `clang::Stmt` クラスから派生したクラスのデータを表�
   _`clangStmt`要素_  
 `</clangStmt>`  
 
-必須：
+必須:
 
 * `binOpName`属性
 * `xcodemlType`属性
@@ -458,7 +458,7 @@ Clang の `clang::Stmt` クラスから派生したクラスのデータを表�
   _`clangStmt`要素_  
 `</clangStmt>`  
 
-オプショナル：
+オプショナル:
 
 * `xcodemlType`属性
 
@@ -484,7 +484,7 @@ Clang の `clang::Stmt` クラスから派生したクラスのデータを表�
 
 必須属性なし
 
-オプショナル：
+オプショナル:
 
 * `xcodemlType`属性
 
@@ -507,7 +507,7 @@ Clang の `clang::Stmt` クラスから派生したクラスのデータを表�
 
 必須属性なし
 
-オプショナル：
+オプショナル:
 
 * `xcodemlType`属性
 
@@ -531,7 +531,7 @@ Clang の `clang::Stmt` クラスから派生したクラスのデータを表�
 
 必須属性なし
 
-オプショナル：
+オプショナル:
 
 * `xcodemlType`属性
 
@@ -591,7 +591,7 @@ Clang の `clang::Stmt` クラスから派生したクラスのデータを表�
 
 必須属性なし
 
-オプショナル：
+オプショナル:
 
 * `xcodemlType`属性
 * `clangCastKind`属性
@@ -629,11 +629,11 @@ Clang の `clang::Stmt` クラスから派生したクラスのデータを表�
   `xcodemlType` `=` _データ型識別名_  
 `/>`  
 
-必須：
+必須:
 
 * `token`属性
 
-オプショナル：
+オプショナル:
 
 * `decimalNotation`属性
 * `xcodemlType`属性
@@ -667,11 +667,11 @@ Clang の `clang::Stmt` クラスから派生したクラスのデータを表�
   _`clangStmt`要素_  
 `</clangStmt>`  
 
-必須：
+必須:
 
 * `is_arrow`属性
 
-オプショナル：
+オプショナル:
 
 * `xcodemlType`属性
 
@@ -721,11 +721,11 @@ Clang の `clang::Stmt` クラスから派生したクラスのデータを表�
   `xcodemlType` `=` _データ型識別名_  
 `/>`  
 
-必須：
+必須:
 
 * `stringLiteral`属性
 
-オプショナル：
+オプショナル:
 
 * `xcodemlType`属性
 
@@ -773,11 +773,11 @@ Clang の `clang::Stmt` クラスから派生したクラスのデータを表�
   _`clangStmt`要素_  
 `</clangStmt>`  
 
-必須：
+必須:
 
 * `unaryOpName`属性
 
-オプショナル：
+オプショナル:
 
 * `xcodemlType`属性
 
