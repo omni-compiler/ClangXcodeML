@@ -186,21 +186,23 @@ clangStmt子要素は関数本体を表現する。
   [ _`clangStmt`要素_ ]  
 `</clangDecl>`  
 
-必須属性:
-
-* `xcodemlType`属性
+必須属性なし
 
 オプショナル:
 
+* `xcodemlType`属性
 * `has_init`属性
 
 `ParmVar`は関数宣言中の仮引数の宣言を表現する。
 
 第1子要素は`name`要素で、引数名を表現する。
 
-第2子要素は`TypeLoc`要素である。
+第2子要素は`clangTypeLoc`要素である。
+逆変換では使用しない。
 
-第3子要素は`clangStmt`
+第3子要素は`clangStmt`要素で、デフォルト実引数を表現する。
+この要素は省略されることがある。
+そのとき、デフォルト実引数は指定されていない。
 
 ## `TranslationUnit`: 翻訳単位
 
