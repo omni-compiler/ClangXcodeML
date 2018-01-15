@@ -143,8 +143,9 @@ clangStmt子要素は関数本体を表現する。
    `is_implicit` = `"true"` | `"false"` | `"1"` | `"0"`  
  `>`  
   _`name`要素_  
-  _`params`要素_  
-  _`clangStmt`要素_  
+  _`clangDeclarationNameInfo`要素_  
+  _`clangTypeLoc`要素_  
+  [ _`clangStmt`要素_ ]  
 `</clangDecl>`  
 
 必須属性なし
@@ -153,18 +154,23 @@ clangStmt子要素は関数本体を表現する。
 
 * `is_implicit`属性
 
-`Function`は関数定義を表現する。
+`Function`は関数宣言または関数定義を表現する。
 
-第1子要素は関数名を表現する。
+第1子要素は`name`要素で、関数名を表現する。
 
-第2子要素は仮引数リストを表現する。
+第2子要素は`clangDeclarationNameInfo`要素である。逆変換では使用しない。
 
-第3子要素は関数本体を表現する。
-これは`CompoundStmt`または`tryStmt`である。
+第3子要素は`clangTypeLoc`要素で、仮引数リストを表現する。
+この要素の`class`属性の値は`FunctionProto`である。
+
+第4子要素は`clangStmt`要素で、関数本体を表現する。
+この要素は省略されることがある。このとき関数本体はない。
+この要素の`class`属性の値は`CompoundStmt`または`tryStmt`である。
 
 この要素は、オプションで`is_implicit`属性を利用できる。
 `is_implicit`属性の値は`"true"`, `"false"`, `"1"`, `"0"`のいずれかであり、
 `"true"`または`"1"`のとき関数が暗黙に定義されたことを表す。
+
 
 ## `LinkageSpec`: リンケージ指定
 
