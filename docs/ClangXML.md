@@ -116,7 +116,7 @@ _子要素_ ...
    `is_implicit=` `"true"`  | `"false"` | `"1"` | `"0"`  
  `>`  
   _`name`要素_  
-  _`TypeLoc`要素_  
+  _`clangTypeLoc`要素_  
   _`clangConstructorInitializer`要素_...  
   _`clangStmt`要素_  
 `</clangDecl>`  
@@ -149,22 +149,34 @@ clangStmt子要素は関数本体を表現する。
    `is_implicit` = `"true"` | `"false"` | `"1"` | `"0"`  
  `>`  
   _`name`要素_  
-  _`params`要素_  
-  _`clangStmt`要素_  
+  _`clangDeclarationNameInfo`要素_  
+  _`clangTypeLoc`要素_  
+  [ _`clangStmt`要素_ ]  
 `</clangDecl>`  
 
-`Function`は関数定義を表現する。
+必須属性なし
 
-第1子要素は関数名を表現する。
+オプショナル:
 
-第2子要素は仮引数リストを表現する。
+* `is_implicit`属性
 
-第3子要素は関数本体を表現する。
-これは`CompoundStmt`または`tryStmt`である。
+`Function`は関数宣言または関数定義を表現する。
+
+第1子要素は`name`要素で、関数名を表現する。
+
+第2子要素は`clangDeclarationNameInfo`要素である。逆変換では使用しない。
+
+第3子要素は`clangTypeLoc`要素で、仮引数リストを表現する。
+この要素の`class`属性の値は`FunctionProto`である。
+
+第4子要素は`clangStmt`要素で、関数本体を表現する。
+この要素は省略されることがある。このとき関数本体はない。
+この要素の`class`属性の値は`CompoundStmt`または`tryStmt`である。
 
 この要素は、オプションで`is_implicit`属性を利用できる。
 `is_implicit`属性の値は`"true"`, `"false"`, `"1"`, `"0"`のいずれかであり、
 `"true"`または`"1"`のとき関数が暗黙に定義されたことを表す。
+
 
 ## `LinkageSpec`: リンケージ指定
 
@@ -176,17 +188,27 @@ clangStmt子要素は関数本体を表現する。
 `xcodemlType` `=` _データ型識別名_  
 `>`  
   _`name`要素_  
-  _`TypeLoc`要素_  
+  _`clangTypeLoc`要素_  
   [ _`clangStmt`要素_ ]  
 `</clangDecl>`  
+
+必須属性なし
+
+オプショナル:
+
+* `xcodemlType`属性
+* `has_init`属性
 
 `ParmVar`は関数宣言中の仮引数の宣言を表現する。
 
 第1子要素は`name`要素で、引数名を表現する。
 
-第2子要素は`TypeLoc`要素である。
+第2子要素は`clangTypeLoc`要素である。
+逆変換では使用しない。
 
-第3子要素は`clangStmt`
+第3子要素は`clangStmt`要素で、デフォルト実引数を表現する。
+この要素は省略されることがある。
+そのとき、デフォルト実引数は指定されていない。
 
 ## `TranslationUnit`: 翻訳単位
 
@@ -205,6 +227,10 @@ clangStmt子要素は関数本体を表現する。
   _`name`要素_  
 `</clangDecl>`  
 
+必須属性:
+
+* `xcodemlTypedefType`属性
+
 `Typedef`は`typedef`宣言を表現する。
 
 第1子要素は`name`要素で、`typedef`名を表現する。
@@ -220,6 +246,11 @@ clangStmt子要素は関数本体を表現する。
 `>`  
 _子要素_ ...  
 `</clangStmt>`  
+
+必須:
+
+* `class`属性
+* その他、以下の小節で必須属性が指定されることがある。
 
 `clangStmt`要素は
 Clang の `clang::Stmt` クラスから派生したクラスのデータを表す要素であり、
@@ -238,6 +269,14 @@ Clang の `clang::Stmt` クラスから派生したクラスのデータを表�
   _`clangStmt`要素_  
   _`clangStmt`要素_  
 `</clangStmt>`  
+
+必須:
+
+* `binOpName`属性
+
+オプショナル:
+
+* `xcodemlType`属性
 
 `BinaryOperator`は(複合代入演算でない)二項演算を表現する。
 複合代入演算は`CompoundAssignOperator`によって表現する。
@@ -281,6 +320,8 @@ Clang の `clang::Stmt` クラスから派生したクラスのデータを表�
 
 `<clangStmt class="BreakStmt">`  
 
+必須属性なし
+
 `BreakStmt`は`break`文を表現する。
 
 この要素は子要素をもたない。
@@ -294,6 +335,10 @@ Clang の `clang::Stmt` クラスから派生したクラスのデータを表�
   _`clangStmt`要素_  
   _`clangStmt`要素_ ...  
 `</clangStmt>`  
+
+オプショナル:
+
+* `xcodemlType`属性
 
 `CallExpr`は関数呼呼び出し式を表現する。
 
@@ -311,6 +356,8 @@ Clang の `clang::Stmt` クラスから派生したクラスのデータを表�
   _`clangStmt`要素_  
 `</clangStmt>`  
 
+必須属性なし
+
 `CaseStmt`はcaseラベルを表現する。
 
 第1子要素は式。
@@ -325,6 +372,15 @@ Clang の `clang::Stmt` クラスから派生したクラスのデータを表�
   `token` `=` _文字列_  
   `xcodemlType` `=` _データ型識別名_  
 `/>`  
+
+必須:
+
+* `hexadecimalNotation`属性
+
+オプショナル:
+
+* `token`属性
+* `xcodemlType`属性
 
 `CharacterLiteral`は文字リテラルを表現する。
 
@@ -361,6 +417,11 @@ Clang の `clang::Stmt` クラスから派生したクラスのデータを表�
   _`clangStmt`要素_  
 `</clangStmt>`  
 
+必須:
+
+* `binOpName`属性
+* `xcodemlType`属性
+
 `CompoundAssignOperator`は複合代入演算を表現する。
 
 第1、第2子要素はともに`clangStmt`要素で、
@@ -392,6 +453,8 @@ Clang の `clang::Stmt` クラスから派生したクラスのデータを表�
   _`clangStmt`要素_ ...  
 `</clangStmt>`  
 
+必須属性なし
+
 `CompoundStmt`は複合文を表現する。
 
 この要素は0個以上の`clangStmt`要素を子要素にもつ。
@@ -408,6 +471,10 @@ Clang の `clang::Stmt` クラスから派生したクラスのデータを表�
   _`clangStmt`要素_  
   _`clangStmt`要素_  
 `</clangStmt>`  
+
+オプショナル:
+
+* `xcodemlType`属性
 
 `ConditionalOperator`は条件演算式(`E1 ? E2 : E3`)を表現する。
 
@@ -429,6 +496,12 @@ Clang の `clang::Stmt` クラスから派生したクラスのデータを表�
   _`clangStmt`要素_ ...  
 `</clangStmt>`  
 
+必須属性なし
+
+オプショナル:
+
+* `xcodemlType`属性
+
 `CXXMemberCallExpr`はメンバー関数呼び出し式を表現する。
 
 第1子要素は`clangStmt`要素で、呼び出される非`static`メンバー関数を表す。
@@ -445,6 +518,12 @@ Clang の `clang::Stmt` クラスから派生したクラスのデータを表�
 `<clangStmt class="CXXThisExpr"`  
   `xcodemlType` `=` _データ型識別名_  
 `/>`  
+
+必須属性なし
+
+オプショナル:
+
+* `xcodemlType`属性
 
 `CXXThisExpr`は`this`ポインターを表現する。
 
@@ -464,6 +543,12 @@ Clang の `clang::Stmt` クラスから派生したクラスのデータを表�
   _`clangDeclarationNameInfo`要素_  
 `</clangStmt>`  
 
+必須属性なし
+
+オプショナル:
+
+* `xcodemlType`属性
+
 `DeclRefExpr`は変数参照を表現する。
 
 第1子要素は`name`要素で、変数名を表現する。
@@ -482,6 +567,8 @@ Clang の `clang::Stmt` クラスから派生したクラスのデータを表�
   _`clangDecl`要素_  
 `</clangStmt>`  
 
+必須属性なし
+
 `DeclStmt`は宣言文を表現する。
 
 第1子要素は`clangDecl`要素で、その宣言を表す。
@@ -493,6 +580,8 @@ Clang の `clang::Stmt` クラスから派生したクラスのデータを表�
   _`clangStmt`要素_  
   [ _`clangStmt`要素_ ]  
 `</clangStmt>`  
+
+必須属性なし
 
 `IfStmt`は`if`文を表現する。
 
@@ -513,6 +602,13 @@ Clang の `clang::Stmt` クラスから派生したクラスのデータを表�
  `>`  
  _`clangStmt`要素_  
 `</clangStmt>`  
+
+必須属性なし
+
+オプショナル:
+
+* `xcodemlType`属性
+* `clangCastKind`属性
 
 `ImplicitCastExpr`は暗黙の型変換を表現する。
 
@@ -547,6 +643,15 @@ Clang の `clang::Stmt` クラスから派生したクラスのデータを表�
   `xcodemlType` `=` _データ型識別名_  
 `/>`  
 
+必須:
+
+* `token`属性
+
+オプショナル:
+
+* `decimalNotation`属性
+* `xcodemlType`属性
+
 `IntegerLiteral`は整数リテラルを表現する。
 
 この要素は子要素をもたない。
@@ -575,6 +680,14 @@ Clang の `clang::Stmt` クラスから派生したクラスのデータを表�
   _`clangDeclarationNameInfo`要素_  
   _`clangStmt`要素_  
 `</clangStmt>`  
+
+必須:
+
+* `is_arrow`属性
+
+オプショナル:
+
+* `xcodemlType`属性
 
 `MemberExpr`は、クラス型オブジェクトか、またはクラス型へのポインターのメンバーへのアクセス(`E1.E2`, `E1->E2`)を表現する。
 これら2つの演算が同じ形式で表されているのは、Clangでの内部表現
@@ -608,6 +721,8 @@ Clang の `clang::Stmt` クラスから派生したクラスのデータを表�
   _`clangStmt`要素_  
 `</clangStmt>`  
 
+必須属性なし
+
 `ReturnStmt`は`return`文を表現する。
 
 第1子要素は`clangStmt`要素で、返す式を表す。
@@ -619,6 +734,14 @@ Clang の `clang::Stmt` クラスから派生したクラスのデータを表�
   `stringLiteral` `=` _文字列_  
   `xcodemlType` `=` _データ型識別名_  
 `/>`  
+
+必須:
+
+* `stringLiteral`属性
+
+オプショナル:
+
+* `xcodemlType`属性
 
 `StringLiteral`は、文字列リテラルを表現する。
 現在`char`型の文字列リテラルにのみ対応している。
@@ -644,6 +767,8 @@ Clang の `clang::Stmt` クラスから派生したクラスのデータを表�
   _`clangStmt`要素_ ...  
 `</clangStmt>`  
 
+必須属性なし
+
 `SwitchStmt`はswitch文を表現する。
 
 第1子要素は条件式を表現する。
@@ -662,6 +787,13 @@ Clang の `clang::Stmt` クラスから派生したクラスのデータを表�
   _`clangStmt`要素_  
 `</clangStmt>`  
 
+必須:
+
+* `unaryOpName`属性
+
+オプショナル:
+
+* `xcodemlType`属性
 
 `UnaryOperator`は単項演算式を表現する。
 
@@ -695,6 +827,12 @@ Clang の `clang::Stmt` クラスから派生したクラスのデータを表�
 逆変換では使用しない。
 
 
+
+# `clangTypeLoc`要素
+
+## `Builtin`: 普遍型
+
+## `FunctionProto`: 関数型
 
 # `xcodemlTypeTable`要素
 

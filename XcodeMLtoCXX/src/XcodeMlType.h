@@ -49,6 +49,8 @@ enum class TypeKind {
   Union,
   /*! C++-style class */
   Class,
+  /*! Template type parameter */
+  TemplateTypeParm,
   /*! Other type */
   Other,
 };
@@ -360,6 +362,22 @@ private:
   Symbols classScopeSymbols;
 };
 
+class TemplateTypeParm : public Type {
+public:
+  TemplateTypeParm(DataTypeIdent);
+  ~TemplateTypeParm() override = default;
+  CodeFragment makeDeclaration(CodeFragment, const Environment &) override;
+  Type *clone() const override;
+  static bool classof(const Type *);
+  void setSpelling(CodeFragment);
+
+protected:
+  TemplateTypeParm(const TemplateTypeParm &);
+
+private:
+  llvm::Optional<CodeFragment> pSpelling;
+};
+
 class OtherType : public Type {
 public:
   OtherType(const DataTypeIdent &);
@@ -400,6 +418,7 @@ TypeRef makeFunctionType(const DataTypeIdent &ident,
     const std::vector<DataTypeIdent> &paramTypes);
 TypeRef makeStructType(
     const DataTypeIdent &, const CodeFragment &, const Struct::MemberList &);
+TypeRef makeTemplateTypeParm(const DataTypeIdent &);
 TypeRef makeVariadicFunctionType(const DataTypeIdent &ident,
     const DataTypeIdent &returnType,
     const std::vector<DataTypeIdent> &paramTypes);

@@ -6,5 +6,6 @@ using ClangClassHandler =
 
 extern const ClangClassHandler ClangStmtHandler;
 extern const ClangClassHandler ClangDeclHandler;
+extern const ClangClassHandler ClangTypeLocHandler;
 
 #endif /* !CLANGCLASSHANDLER_H */

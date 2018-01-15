@@ -406,12 +406,22 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
       newBoolProp("clang_parent_class_not_found", true);
     }
   }
+
+  if (isa<TemplateDecl>(D)) {
+    auto typetable = addChild("xcodemlTypeTable");
+    typetableinfo->pushTypeTableStack(typetable);
+    auto nnsTable = addChild("xcodemlNnsTable");
+    nnstableinfo->pushNnsTableStack(nnsTable);
+  }
   return true;
 }
 
 bool
 DeclarationsVisitor::PostVisitDecl(Decl *D) {
-  if (isa<TranslationUnitDecl>(D)) {
+  if (!D) {
+    return true;
+  }
+  if (isa<TemplateDecl>(D) || isa<TranslationUnitDecl>(D)) {
     typetableinfo->popTypeTableStack();
     nnstableinfo->popNnsTableStack();
   }

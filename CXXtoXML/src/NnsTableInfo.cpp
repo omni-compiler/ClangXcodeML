@@ -1,5 +1,6 @@
 #include <iostream>
 #include <map>
+#include <memory>
 #include <stack>
 #include <string>
 #include <libxml/tree.h>
@@ -9,54 +10,103 @@
 
 #include "NnsTableInfo.h"
 
-NnsTableInfo::NnsTableInfo(clang::MangleContext *MC, TypeTableInfo *TTI)
-    : seqForOther(0),
-      mangleContext(MC),
-      typetableinfo(TTI),
-      mapForOtherNns(),
-      mapFromNestedNameSpecToXmlNodePtr() {
-  assert(typetableinfo);
+namespace {
+
+xmlNodePtr getNnsNode(
+    const NnsTableInfoImpl &, const clang::NestedNameSpecifier *);
+
+void pushNns(NnsTableInfoImpl &, const clang::NestedNameSpecifier *);
+
+void registerNestedNameSpec(
+    NnsTableInfoImpl &, const clang::NestedNameSpecifier *);
+
+template <typename T, typename... Ts>
+std::unique_ptr<T>
+make_unique(Ts &&... params) {
+  return std::unique_ptr<T>(new T(std::forward<Ts>(params)...));
 }
 
+} // namespace
+
+struct NnsTableInfoImpl {
+  explicit NnsTableInfoImpl(clang::MangleContext *MC, TypeTableInfo *TTI)
+      : seqForOther(0),
+        mangleContext(MC),
+        typetableinfo(TTI),
+        mapForOtherNns(),
+        mapFromNestedNameSpecToXmlNodePtr() {
+    assert(typetableinfo);
+  }
+
+  int seqForOther;
+  clang::MangleContext *mangleContext;
+  TypeTableInfo *typetableinfo;
+  std::map<const clang::NestedNameSpecifier *, std::string> mapForOtherNns;
+  std::map<const clang::NestedNameSpecifier *, xmlNodePtr>
+      mapFromNestedNameSpecToXmlNodePtr;
+  std::stack<std::tuple<xmlNodePtr,
+      std::vector<const clang::NestedNameSpecifier *>>> nnsTableStack;
+};
+
+NnsTableInfo::NnsTableInfo(clang::MangleContext *MC, TypeTableInfo *TTI)
+    : pimpl(make_unique<NnsTableInfoImpl>(MC, TTI)) {
+}
+
+NnsTableInfo::~NnsTableInfo() = default;
+
+namespace {
+
 std::string
-NnsTableInfo::getNnsName(const clang::NestedNameSpecifier *NestedNameSpec) {
+getOrRegisterNnsName(
+    NnsTableInfoImpl &info, const clang::NestedNameSpecifier *NestedNameSpec) {
   using SK = clang::NestedNameSpecifier::SpecifierKind;
   if (NestedNameSpec->getKind() == SK::Global) {
     return "global";
   }
 
-  if (mapForOtherNns.count(NestedNameSpec) == 0) {
-    registerNestedNameSpec(NestedNameSpec);
+  if (info.mapForOtherNns.count(NestedNameSpec) == 0) {
+    registerNestedNameSpec(info, NestedNameSpec);
   }
-  return mapForOtherNns[NestedNameSpec];
+  return info.mapForOtherNns[NestedNameSpec];
 }
 
-void
-NnsTableInfo::pushNns(const clang::NestedNameSpecifier *Spec) {
-  std::get<1>(nnsTableStack.top()).push_back(Spec);
+} // namespace
+
+std::string
+NnsTableInfo::getNnsName(const clang::NestedNameSpecifier *NestedNameSpec) {
+  return getOrRegisterNnsName(*pimpl, NestedNameSpec);
 }
+
+namespace {
+
+void
+pushNns(NnsTableInfoImpl &info, const clang::NestedNameSpecifier *Spec) {
+  std::get<1>(info.nnsTableStack.top()).push_back(Spec);
+}
+
+} // namespace
 
 void
 NnsTableInfo::pushNnsTableStack(xmlNodePtr nnsTableNode) {
-  nnsTableStack.push(std::make_tuple(
+  pimpl->nnsTableStack.push(std::make_tuple(
       nnsTableNode, std::vector<const clang::NestedNameSpecifier *>()));
 }
 
 void
 NnsTableInfo::popNnsTableStack() {
-  assert(!nnsTableStack.empty());
-  const auto nnsTableNode = std::get<0>(nnsTableStack.top());
-  const auto nnssInCurScope = std::get<1>(nnsTableStack.top());
+  assert(!pimpl->nnsTableStack.empty());
+  const auto nnsTableNode = std::get<0>(pimpl->nnsTableStack.top());
+  const auto nnssInCurScope = std::get<1>(pimpl->nnsTableStack.top());
   for (auto &nns : nnssInCurScope) {
-    xmlAddChild(nnsTableNode, getNnsNode(nns));
+    xmlAddChild(nnsTableNode, getNnsNode(*pimpl, nns));
   }
-  nnsTableStack.pop();
+  pimpl->nnsTableStack.pop();
 }
 
 namespace {
 
 xmlNodePtr
-makeNnsIdentNodeForType(NnsTableInfo &NTI,
+makeNnsIdentNodeForType(NnsTableInfoImpl &info,
     TypeTableInfo &TTI,
     const clang::NestedNameSpecifier *Spec) {
   assert(Spec);
@@ -66,7 +116,9 @@ makeNnsIdentNodeForType(NnsTableInfo &NTI,
   auto node = xmlNewNode(nullptr, BAD_CAST "classNNS");
   auto dtident = TTI.getTypeName(clang::QualType(T, 0));
   xmlNewProp(node, BAD_CAST "type", BAD_CAST(dtident.c_str()));
-  xmlNewProp(node, BAD_CAST "nns", BAD_CAST(NTI.getNnsName(Spec).c_str()));
+  xmlNewProp(node,
+      BAD_CAST "nns",
+      BAD_CAST(getOrRegisterNnsName(info, Spec).c_str()));
 
   return node;
 }
@@ -84,13 +136,13 @@ dump(const clang::NestedNameSpecifier &Spec, const clang::MangleContext &MC) {
 
 xmlNodePtr
 makeNnsIdentNodeForNestedNameSpec(const clang::MangleContext &MC,
-    NnsTableInfo &NTI,
+    NnsTableInfoImpl &info,
     TypeTableInfo &TTI,
     const clang::NestedNameSpecifier *Spec) {
   assert(Spec);
   using SK = clang::NestedNameSpecifier::SpecifierKind;
   switch (Spec->getKind()) {
-  case SK::TypeSpec: return makeNnsIdentNodeForType(NTI, TTI, Spec);
+  case SK::TypeSpec: return makeNnsIdentNodeForType(info, TTI, Spec);
 
   case SK::Global:
     // do not make Nns Identifier node for global namespace
@@ -108,11 +160,9 @@ makeNnsIdentNodeForNestedNameSpec(const clang::MangleContext &MC,
   return nullptr;
 }
 
-} // namespace
-
 void
-NnsTableInfo::registerNestedNameSpec(
-    const clang::NestedNameSpecifier *NestedNameSpec) {
+registerNestedNameSpec(
+    NnsTableInfoImpl &info, const clang::NestedNameSpecifier *NestedNameSpec) {
   assert(NestedNameSpec);
 
   using SK = clang::NestedNameSpecifier::SpecifierKind;
@@ -122,17 +172,20 @@ NnsTableInfo::registerNestedNameSpec(
   }
 
   const auto prefix = static_cast<std::string>("NNS");
-  const auto name = prefix + std::to_string(seqForOther++);
-  mapForOtherNns[NestedNameSpec] = name;
-  mapFromNestedNameSpecToXmlNodePtr[NestedNameSpec] =
+  const auto name = prefix + std::to_string(info.seqForOther++);
+  info.mapForOtherNns[NestedNameSpec] = name;
+  info.mapFromNestedNameSpecToXmlNodePtr[NestedNameSpec] =
       makeNnsIdentNodeForNestedNameSpec(
-          *mangleContext, *this, *typetableinfo, NestedNameSpec);
-  pushNns(NestedNameSpec);
+          *(info.mangleContext), info, *info.typetableinfo, NestedNameSpec);
+  pushNns(info, NestedNameSpec);
 }
 
 xmlNodePtr
-NnsTableInfo::getNnsNode(const clang::NestedNameSpecifier *Spec) const {
-  auto iter = mapFromNestedNameSpecToXmlNodePtr.find(Spec);
-  assert(iter != mapFromNestedNameSpecToXmlNodePtr.end());
+getNnsNode(
+    const NnsTableInfoImpl &info, const clang::NestedNameSpecifier *Spec) {
+  const auto iter = info.mapFromNestedNameSpecToXmlNodePtr.find(Spec);
+  assert(iter != info.mapFromNestedNameSpecToXmlNodePtr.cend());
   return iter->second;
 }
+
+} // namespace
