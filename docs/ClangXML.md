@@ -820,6 +820,12 @@ Clang の `clang::Stmt` クラスから派生したクラスのデータを表�
 
 
 
+# `clangTypeLoc`要素
+
+## `Builtin`: 普遍型
+
+## `FunctionProto`: 関数型
+
 # `xcodemlTypeTable`要素
 
 ## データ型識別名とデータ型定義要素
