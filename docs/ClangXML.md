@@ -110,7 +110,7 @@ _子要素_ ...
    `is_implicit=` `"true"`  | `"false"` | `"1"` | `"0"`  
  `>`  
   _`name`要素_  
-  _`TypeLoc`要素_  
+  _`clangTypeLoc`要素_  
   _`clangConstructorInitializer`要素_...  
   _`clangStmt`要素_  
 `</clangDecl>`  
@@ -182,7 +182,7 @@ clangStmt子要素は関数本体を表現する。
 `xcodemlType` `=` _データ型識別名_  
 `>`  
   _`name`要素_  
-  _`TypeLoc`要素_  
+  _`clangTypeLoc`要素_  
   [ _`clangStmt`要素_ ]  
 `</clangDecl>`  
 
