@@ -40,7 +40,7 @@ public:
   StringTree *clone() const override;
   void flush(Stream &) const override;
   InnerNode *lift() const override;
-  void amend(const StringTreeRef &);
+  void amend(const StringTreeRef &other);
 
 protected:
   InnerNode(const InnerNode &) = default;
@@ -69,7 +69,7 @@ std::string to_string(const StringTreeRef &);
 
 StringTreeRef makeVoidNode();
 StringTreeRef makeNewLineNode();
-StringTreeRef makeInnerNode(const std::vector<StringTreeRef> &);
+StringTreeRef makeInnerNode(const std::vector<StringTreeRef> &nodes);
 StringTreeRef makeTokenNode(const std::string &);
 
 StringTreeRef insertNewLines(const std::vector<StringTreeRef> &);
