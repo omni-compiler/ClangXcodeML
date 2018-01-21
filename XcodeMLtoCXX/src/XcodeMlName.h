@@ -6,19 +6,35 @@ namespace XcodeMl {
 class Environment;
 class Nns;
 
+/*! Represents the kinds of C++ _unqualified-id_ ([expr.prim.id.unqual]).
+ * NOTE: non-exhaustive (example: _literal-operator-id_) */
 enum class UnqualIdKind {
+  /*! _Identifier_ (an sequence of alphabets, digits or underscores) */
   Ident,
+  /*! C++ _operator-function-id_ (`operator+`, `operator()`, ...) */
   OpFuncId,
+  /*! C++ _conversion-function-id_ */
   ConvFuncId,
+  /*! Constructor name */
   Ctor,
+  /*! Destructor name */
   Dtor,
 };
 
+/*!
+ * \brief Represents C++ _unqualified-id_ ([expr.prim.id.unqual]),
+ *
+ * This class uses LLVM-style RTTI.
+ */
 class UnqualId {
 public:
   UnqualId(UnqualIdKind);
   virtual ~UnqualId() = 0;
   virtual UnqualId *clone() const = 0;
+  /*!
+   * \brief Returns the source-code representation,
+   * like `abc`, `~A`, or `operator+`.
+   */
   virtual CodeFragment toString(const Environment &) const = 0;
   UnqualIdKind getKind() const;
 
@@ -30,7 +46,9 @@ private:
 };
 
 /**
- * corresponds to the name elements in XcodeML, such as.
+ * \brief Represents C++ name.
+ *
+ * A name is a pair of _nested-name-specifier_ and _unqualified-id_.
  */
 class Name {
 public:
@@ -44,6 +62,7 @@ private:
   std::shared_ptr<Nns> nns;
 };
 
+/*! \brief Represents C++ _identifier_. */
 class UIDIdent : public UnqualId {
 public:
   UIDIdent(const std::string &);
@@ -59,6 +78,7 @@ private:
   std::string ident;
 };
 
+/*! \brief Represents C++ _operator-function-id_. */
 class OpFuncId : public UnqualId {
 public:
   OpFuncId(const std::string &);
@@ -74,6 +94,7 @@ private:
   std::string opSpelling;
 };
 
+/*! \brief Represents C++ _conversion-function-id_. */
 class ConvFuncId : public UnqualId {
 public:
   ConvFuncId(const DataTypeIdent &);
@@ -89,6 +110,7 @@ private:
   DataTypeIdent dtident;
 };
 
+/*! \brief Represents constructor name. */
 class CtorName : public UnqualId {
 public:
   CtorName(const DataTypeIdent &);
@@ -104,6 +126,7 @@ private:
   DataTypeIdent dtident;
 };
 
+/*! \brief Represents destructor name. */
 class DtorName : public UnqualId {
 public:
   DtorName(const DataTypeIdent &);
