@@ -27,12 +27,19 @@ void XPathObjectReleaser::operator()(xmlXPathObjectPtr ptr) {
 }
 
 /*!
- * \brief Search for an element that matches given XPath expression.
+ * \brief Search for a single XML node that matches the given XPath expression.
+ *
+ * \param node      the XML context node of \c xpathExpr
+ * \param xpathExpr the XPath expression
+ * \param xpathCtxt the XPath context object
+ *
  * \pre \c node is not null.
  * \pre \c xpathExpr is not null.
  * \pre \c xpathCtxt is not null.
- * \return nullptr if any element in \c node doesn't match \c xpathExpr
- * \return The first element that matches \c xpathExpr.
+ *
+ * \return Returns null if none of the XML nodes in \c node matches
+ * \c xpathExpr.
+ * Otherwise, returns the first element that matches \c xpathExpr.
  */
 xmlNodePtr
 findFirst(
@@ -47,16 +54,36 @@ findFirst(
   return val;
 }
 
+/*!
+ * \brief Returns the number of XML nodes that belong to the XPath search
+ * result.
+ */
 size_t
 length(xmlXPathObjectPtr obj) {
   return (obj->nodesetval) ? obj->nodesetval->nodeNr : 0;
 }
 
+/*!
+ * \brief Returns the \c n th XML node (0-indexed) of XPath search result.
+ *
+ * \pre the size (the number of nodes containing) of \c obj is greater than \c
+ * n.
+ */
 xmlNodePtr
 nth(xmlXPathObjectPtr obj, size_t n) {
   return obj->nodesetval->nodeTab[n];
 }
 
+/*!
+ * \brief Returns the value of the attribute on the XML node
+ * as \c std::string.
+ *
+ * This function is the wrapper of \c xmlGetProp.
+ * It terminates the whole program if \c node does not have
+ * the attribute \c attr.
+ *
+ * \pre \c node has the attribute named \c attr.
+ */
 std::string
 getProp(xmlNodePtr node, const std::string &attr) {
   const auto value = getPropOrNull(node, attr);
@@ -69,6 +96,16 @@ getProp(xmlNodePtr node, const std::string &attr) {
   return *value;
 }
 
+/*!
+ * \brief Returns the value of the attribute on the XML node
+ * as \c std::string.
+ *
+ * This function is a wrapper of \c xmlGetProp.
+ *
+ * \return Returns \c llvm::Optional<std::string>() if
+ * the specified attribute does not exist.
+ * Otherwise, returns the value of the attribute.
+ */
 llvm::Optional<std::string>
 getPropOrNull(xmlNodePtr node, const std::string &attr) {
   using MaybeString = llvm::Optional<std::string>;
@@ -81,6 +118,11 @@ getPropOrNull(xmlNodePtr node, const std::string &attr) {
   return MaybeString(value);
 }
 
+/*!
+ * \brief Returns the XML content text.
+ *
+ * This function is a wrapper of \c xmlNodeGetContent.
+ */
 std::string
 getContent(xmlNodePtr node) {
   const auto ptr = xmlNodeGetContent(node);
@@ -92,16 +134,42 @@ getContent(xmlNodePtr node) {
   return content;
 }
 
+/*!
+ * \brief Returns the XML element name as \c std::string.
+ */
 std::string
 getName(xmlNodePtr node) {
   return static_cast<XMLString>(node->name);
 }
 
+/*!
+ * \brief Determine if the specified XML node does not contain XML content
+ * text.
+ */
 bool
 isEmpty(xmlNodePtr node) {
   return getContent(node).empty();
 }
 
+/*!
+ * \brief Determine if the value of the specified attribute of the XML node
+ * evaluates to true.
+ *
+ * An attribute value evaluates to true if it is \c "true" or \c "1",
+ * or false if it is \c "false" or "0".
+ *
+ * \pre The attribute value is one of:
+ * - "true"
+ * - "false"
+ * - "1"
+ * - "0"
+ *
+ * \param node the XML node
+ * \param name the name of attribute
+ * \param default_value the default value of the attribute (true or false).
+ *
+ * \throw std::runtime_error if the attribute value is invalid.
+ */
 bool
 isTrueProp(xmlNodePtr node, const char *name, bool default_value) {
   if (!xmlHasProp(node, BAD_CAST name)) {
@@ -116,6 +184,17 @@ isTrueProp(xmlNodePtr node, const char *name, bool default_value) {
   throw std::runtime_error("Invalid attribute value");
 }
 
+/*!
+ * \brief Search for XML nodes that matches the given XPath expression.
+ *
+ * \param node      the XML context node of \c xpathExpr
+ * \param xpathExpr the XPath expression
+ * \param xpathCtxt the XPath context object
+ *
+ * \return Returns the list of XML nodes that match \c xpathExpr.
+ * If none of the XML nodes in \c node matches \c xpathExpr, it returns empty
+ * list.
+ */
 std::vector<xmlNodePtr>
 findNodes(
     xmlNodePtr node, const char *xpathExpr, xmlXPathContextPtr xpathCtxt) {
@@ -133,11 +212,25 @@ findNodes(
   return nodes;
 }
 
+/*!
+ * \brief Determine if the given string is a natural number (including 0).
+ */
 bool
 isNaturalNumber(const std::string &prop) {
   return std::all_of(prop.begin(), prop.end(), isdigit);
 }
 
+/*!
+ * \brief Search for XML nodes that matches the given XPath expression.
+ *
+ * \param node      the XML context node of \c xpathExpr
+ * \param xpathExpr the XPath expression
+ * \param xpathCtxt the XPath context object
+ *
+ * \return Returns null if such node does not exist.
+ * Otherwise, returns the XPath search result.
+ * The caller has to free the search result object.
+ */
 static xmlXPathObjectPtr
 getNodeSet(
     xmlNodePtr node, const char *xpathExpr, xmlXPathContextPtr xpathCtxt) {

@@ -418,6 +418,9 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
 
 bool
 DeclarationsVisitor::PostVisitDecl(Decl *D) {
+  if (!D) {
+    return true;
+  }
   if (isa<TemplateDecl>(D) || isa<TranslationUnitDecl>(D)) {
     typetableinfo->popTypeTableStack();
     nnstableinfo->popNnsTableStack();
