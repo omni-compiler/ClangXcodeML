@@ -104,6 +104,11 @@ NnsTableInfo::getNnsName(const clang::NestedNameSpecifier *NestedNameSpec) {
   return getOrRegisterNnsName(*pimpl, NestedNameSpec);
 }
 
+std::string
+NnsTableInfo::getNnsName(const clang::DeclContext *DC) {
+  return getOrRegisterNnsName(*pimpl, DC);
+}
+
 namespace {
 
 void
