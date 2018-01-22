@@ -20,6 +20,8 @@ void pushNns(NnsTableInfoImpl &, const std::string &);
 void registerNestedNameSpec(
     NnsTableInfoImpl &, const clang::NestedNameSpecifier *);
 
+void registerNestedNameSpec(NnsTableInfoImpl &, const clang::DeclContext *DC);
+
 template <typename T, typename... Ts>
 std::unique_ptr<T>
 make_unique(Ts &&... params) {
@@ -187,6 +189,19 @@ registerNestedNameSpec(
   info.mapFromNnsIdentToXmlNodePtr[name] = makeNnsDefNodeForNestedNameSpec(
       *(info.mangleContext), info, *info.typetableinfo, NestedNameSpec);
   pushNns(info, name);
+}
+
+void
+registerNestedNameSpec(NnsTableInfoImpl &info, const clang::DeclContext *DC) {
+  assert(DC);
+
+  if (DC->getDeclKind() == clang::Decl::TranslationUnit) {
+    // no need to register
+    return;
+  }
+  const auto prefix = static_cast<std::string>("NNS");
+  const auto name = prefix + std::to_string(info.seqForOther++);
+  info.mapForDC[DC] = name;
 }
 
 xmlNodePtr
