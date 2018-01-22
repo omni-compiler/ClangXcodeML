@@ -78,7 +78,7 @@ nth(xmlXPathObjectPtr obj, size_t n) {
  * \brief Returns the value of the attribute on the XML node
  * as \c std::string.
  *
- * This function is the wrapper of \c xmlGetProp.
+ * This function is a wrapper of \c xmlGetProp.
  * It terminates the whole program if \c node does not have
  * the attribute \c attr.
  *
