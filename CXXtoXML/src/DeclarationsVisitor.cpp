@@ -340,6 +340,20 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
   NamedDecl *ND = dyn_cast<NamedDecl>(D);
   if (ND) {
     auto nameNode = makeNameNode(*typetableinfo, ND);
+
+    /* experimental */
+    const auto D1 = ND->getDeclContext();
+    assert(D1);
+    const auto D2 = D1->getParent();
+    // const auto parent =  D2 ? D2 : D1;
+    const auto parent = D1;
+    xmlNewProp(nameNode,
+        BAD_CAST "test_nns_decl_kind",
+        BAD_CAST(parent->getDeclKindName()));
+    xmlNewProp(nameNode,
+        BAD_CAST "test_nns",
+        BAD_CAST(nnstableinfo->getNnsName(parent).c_str()));
+
     xmlAddChild(curNode, nameNode);
   }
 
