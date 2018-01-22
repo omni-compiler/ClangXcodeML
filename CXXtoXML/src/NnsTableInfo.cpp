@@ -6,6 +6,7 @@
 #include <libxml/tree.h>
 #include "clang/AST/Mangle.h"
 #include "clang/AST/ASTContext.h"
+#include "clang/AST/DeclBase.h"
 #include "TypeTableInfo.h"
 
 #include "NnsTableInfo.h"
@@ -53,6 +54,8 @@ struct NnsTableInfoImpl {
   /*! counter for others */
   size_t seqForOther;
   std::map<const clang::NestedNameSpecifier *, std::string> mapForOtherNns;
+
+  std::map<const clang::DeclContext *, std::string> mapForDC;
 };
 
 NnsTableInfo::NnsTableInfo(clang::MangleContext *MC, TypeTableInfo *TTI)
