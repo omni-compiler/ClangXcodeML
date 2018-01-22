@@ -3,6 +3,15 @@ func(int func_i, int func_j) {
   int func_x;
 }
 
+namespace ns {
+
+void
+ns_func(int ns_func_i) {
+  int ns_func_x;
+}
+
+} // namespace ns
+
 extern "C" {
 
 void
