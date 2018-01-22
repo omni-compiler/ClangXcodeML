@@ -112,7 +112,16 @@ NnsRef makeGlobalNns();
 NnsRef makeClassNns(const NnsIdent &nident,
     const NnsRef &prefix,
     const DataTypeIdent &classType);
-NnsRef makeClassNns(const NnsIdent &, const DataTypeIdent &);
-}
+
+/*!
+ * \brief Make and return an `XcodeMl::ClassNns` object that does not have
+ * prefix NNS.
+ *
+ * \param nident the NNS identifier
+ * \param classType the data type identifier of the corresponding class
+ */
+NnsRef makeClassNns(const NnsIdent &nident, const DataTypeIdent &classType);
+
+} // namespace XcodeMl
 
 #endif /* !XCODEMLNNS_H */
