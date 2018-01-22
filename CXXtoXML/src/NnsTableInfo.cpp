@@ -82,6 +82,21 @@ getOrRegisterNnsName(
   return info.mapForOtherNns[NestedNameSpec];
 }
 
+std::string
+getOrRegisterNnsName(NnsTableInfoImpl &info, const clang::DeclContext *DC) {
+  using namespace clang;
+
+  const auto kind = DC->getDeclKind();
+  if (kind == Decl::TranslationUnit) {
+    return "global";
+  }
+
+  if (info.mapForDC.count(DC) == 0) {
+    registerNestedNameSpec(info, DC);
+  }
+  return info.mapForDC[DC];
+}
+
 } // namespace
 
 std::string
