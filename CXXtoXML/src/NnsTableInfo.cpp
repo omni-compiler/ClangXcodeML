@@ -192,6 +192,18 @@ makeNnsDefNodeForNestedNameSpec(const clang::MangleContext &MC,
   return nullptr;
 }
 
+xmlNodePtr
+makeNnsDefNodeForDeclContext(const clang::MangleContext &MC,
+    NnsTableInfoImpl &info,
+    TypeTableInfo &TTI,
+    const clang::DeclContext *DC) {
+  using namespace clang;
+  assert(DC);
+  const auto node = xmlNewNode(nullptr, BAD_CAST "DCNNS");
+  xmlNewProp(node, BAD_CAST "kind", BAD_CAST(DC->getDeclKindName()));
+  return node;
+}
+
 void
 registerNestedNameSpec(
     NnsTableInfoImpl &info, const clang::NestedNameSpecifier *NestedNameSpec) {
