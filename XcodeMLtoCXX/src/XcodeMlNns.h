@@ -101,7 +101,17 @@ private:
 
 /*! \brief Make and return the XcodeML globalNNS. */
 NnsRef makeGlobalNns();
-NnsRef makeClassNns(const NnsIdent &, const NnsRef &, const DataTypeIdent &);
+
+/*!
+ * \brief Make and return an `XcodeMl::ClassNns` object.
+ *
+ * \param nident the NNS identifier
+ * \param prefix the prefix (or parent) NNS
+ * \param classType the data type identifier of the corresponding class
+ */
+NnsRef makeClassNns(const NnsIdent &nident,
+    const NnsRef &prefix,
+    const DataTypeIdent &classType);
 NnsRef makeClassNns(const NnsIdent &, const DataTypeIdent &);
 }
 
