@@ -6,14 +6,18 @@ namespace XcodeMl {
 class Type;
 using TypeRef = std::shared_ptr<Type>;
 
-/* data type identifier (3.1 data type identifier) */
+/*! XcodeML data type identifier (3.1 data type identifier) */
 using DataTypeIdent = std::string;
 
+/*! Represents a string that may appear in C++ source code. */
 using CodeFragment = CXXCodeGen::StringTreeRef;
 
 class Environment;
 class UnqualId;
 
+/*!
+ * \brief Represents a member declaration in C-style struct or union.
+ */
 class MemberDecl {
 public:
   MemberDecl(const DataTypeIdent &, const CodeFragment &);
@@ -29,25 +33,25 @@ private:
 enum class TypeKind {
   /*! Built-in type */
   Reserved,
-  /*! basic data type (3.4 <basicType> element) */
+  /*! XcodeML basic data type (3.4 <basicType> element) */
   Qualified,
-  /*! pointer (3.5 <pointerType> element) */
+  /*! Pointer type (3.5 <pointerType> element) */
   Pointer,
-  /*! lvalue reference */
+  /*! Lvalue reference type */
   LValueReference,
-  /*! rvalue reference */
+  /*! Rvalue reference type */
   RValueReference,
-  /*! function (3.6 <functionType> element) */
+  /*! Function type (3.6 <functionType> element) */
   Function,
-  /*! C-style array (3.7 <ArrayType> element) */
+  /*! C-style array type (3.7 <ArrayType> element) */
   Array,
-  /*! C-Style struct (3.xx <structType> element) */
+  /*! C-Style struct type (3.xx <structType> element) */
   Struct,
   /*! C-style enum type */
   Enum,
   /*! C-style union type */
   Union,
-  /*! C++-style class */
+  /*! (C++-style) class type */
   Class,
   /*! Template type parameter */
   TemplateTypeParm,
@@ -58,6 +62,10 @@ enum class TypeKind {
 TypeKind typeKind(TypeRef);
 CodeFragment makeDecl(TypeRef, CodeFragment, const Environment &);
 
+/*!
+ * \brief Returns a code fragment string that represents the given data type
+ * e.g. `int (*)(const double&)`.
+ */
 CodeFragment TypeRefToString(TypeRef, const Environment &env);
 
 /*!
@@ -88,6 +96,12 @@ private:
   bool volatility;
 };
 
+/*!
+ * \brief Represents built-in data type e.g. `int`.
+ *
+ * A type name may contain whitespaces (`unsigned short`)
+ * while XcodeML data type identifier can't (`unsigned_short`).
+ */
 class Reserved : public Type {
 public:
   Reserved(DataTypeIdent, CodeFragment);
