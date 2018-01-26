@@ -77,7 +77,32 @@ public:
   virtual ~Type() = 0;
   virtual Type *clone() const = 0;
   virtual CodeFragment makeDeclaration(CodeFragment, const Environment &) = 0;
+
+  /*!
+   * \brief Return a code fragment string created by adding the `const`
+   * qualifier
+   * to the given declarator.
+   *
+   * Typically, this function adds the prefix "const" to the beginning of the
+   * given
+   * string (`x` -> `const x`). Some derived classes use different ways. For
+   * example,
+   * `XcodeMl::Array::addConstQualifier` returns a string identical to the
+   * parameter.
+   */
   virtual CodeFragment addConstQualifier(CodeFragment) const;
+
+  /*!
+   * \brief Return a code fragment string created by adding the `volatile`
+   * qualifier to the given declarator.
+   *
+   * Typically, this function adds the prefix "volatile" to the beginning of
+   * the
+   * given string (`x` -> `volatile x`). Some derived classes use different
+   * ways.
+   * For example, `XcodeMl::Array::addVolatileQualifier` returns a string
+   * identical to the parameter.
+   */
   virtual CodeFragment addVolatileQualifier(CodeFragment) const;
   bool isConst() const;
   bool isVolatile() const;
@@ -117,6 +142,12 @@ private:
   CodeFragment name;
 };
 
+/*!
+ * \brief Represents a cv-qualified type.
+ *
+ * This class was introduced in March 2017 in order to implement
+ * XcodeML `basicType` element.
+ */
 class QualifiedType : public Type {
 public:
   QualifiedType(DataTypeIdent dtident,
@@ -154,6 +185,7 @@ private:
   DataTypeIdent ref;
 };
 
+/*! \brief Represents an lvalue or rvalue reference type. */
 class ReferenceType : public Type {
 public:
   ReferenceType(const DataTypeIdent &dtident,
@@ -231,6 +263,7 @@ private:
   std::vector<CodeFragment> defaultArgs;
 };
 
+/*! \brief Represents C/C++ array. */
 class Array : public Type {
 public:
   struct Size {
@@ -257,6 +290,7 @@ public:
   CodeFragment addConstQualifier(CodeFragment) const override;
   CodeFragment addVolatileQualifier(CodeFragment) const override;
   static bool classof(const Type *);
+  /*! Returns the element type as `XcodeMl::TypeRef`. */
   TypeRef getElemType(const Environment &) const;
 
 protected:
@@ -330,6 +364,7 @@ private:
   std::vector<MemberDecl> members;
 };
 
+/*! \brief Represents access-specifier. */
 enum class AccessSpec {
   Public,
   Private,
@@ -339,14 +374,20 @@ enum class AccessSpec {
 std::string string_of_accessSpec(AccessSpec);
 AccessSpec accessSpec_of_string(const std::string &);
 
+/*! \brief Represents class-key (`class`, `struct`, or `union`). */
 enum class CXXClassKind {
   Class,
   Struct,
   Union,
 };
 
+/*!
+ * \brief Converts `XcodeMl::CXXClassKind` to string (`"class"`,
+ * `"struct"`, or `"union"`)
+ */
 std::string getClassKey(CXXClassKind kind);
 
+/*! \brief Represents (C++-style) class. */
 class ClassType : public Type {
 public:
   using ClassName = llvm::Optional<CodeFragment>;
