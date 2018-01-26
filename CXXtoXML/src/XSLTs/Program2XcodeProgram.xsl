@@ -321,18 +321,6 @@
     </newExpr>
   </xsl:template>
 
-  <xsl:template match="clangStmt[@class='DeclRefExpr']">
-    <Var>
-      <xsl:if test="clangNestedNameSpecifier">
-        <xsl:attribute name="nns">
-          <xsl:value-of select="clangNestedNameSpecifier/@nns" />
-        </xsl:attribute>
-      </xsl:if>
-      <xsl:value-of
-        select="clangDeclarationNameInfo[@class='Identifier']" />
-    </Var>
-  </xsl:template>
-
   <xsl:template match="clangStmt[
     @class='UnaryOperator' and @unaryOpName]">
     <xsl:element name="{@unaryOpName}">

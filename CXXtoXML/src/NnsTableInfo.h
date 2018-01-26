@@ -16,6 +16,7 @@ public:
 
   explicit NnsTableInfo(clang::MangleContext *, TypeTableInfo *);
   std::string getNnsName(const clang::NestedNameSpecifier *);
+  std::string getNnsName(const clang::DeclContext *);
   void popNnsTableStack();
   void pushNnsTableStack(xmlNodePtr);
 

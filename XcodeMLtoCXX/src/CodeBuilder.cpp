@@ -27,7 +27,6 @@
 #include "SourceInfo.h"
 #include "CodeBuilder.h"
 #include "ClangClassHandler.h"
-#include "SymbolBuilder.h"
 #include "LibXMLUtil.h"
 
 namespace cxxgen = CXXCodeGen;
@@ -734,6 +733,10 @@ DEFINE_CB(clangDeclProc) {
   return ClangDeclHandler.walk(node, w, src);
 }
 
+DEFINE_CB(clangTypeLocProc) {
+  return ClangTypeLocHandler.walk(node, w, src);
+}
+
 } // namespace
 
 const CodeBuilder ProgramBuilder("ProgramBuilder",
@@ -827,6 +830,7 @@ const CodeBuilder ProgramBuilder("ProgramBuilder",
         /* for elements defined by clang */
         std::make_tuple("clangStmt", clangStmtProc),
         std::make_tuple("clangDecl", clangDeclProc),
+        std::make_tuple("clangTypeLoc", clangTypeLocProc),
 
         /* for CtoXcodeML */
         std::make_tuple("Decl_Record", NullProc),
