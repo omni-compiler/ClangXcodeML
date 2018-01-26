@@ -246,6 +246,18 @@ DEFINE_CCH(FriendDeclProc) {
   return makeTokenNode("friend") + callCodeBuilder(node, w, src);
 }
 
+DEFINE_CCH(TypedefProc) {
+  const auto dtident = getProp(node, "xcodemlTypedefType");
+  const auto T = src.typeTable.at(dtident);
+
+  const auto nameNode = findFirst(node, "name", src.ctxt);
+  const auto typedefName =
+      getUnqualIdFromNameNode(nameNode)->toString(src.typeTable);
+
+  return makeTokenNode("typedef") + makeDecl(T, typedefName, src.typeTable)
+      + makeTokenNode(";");
+}
+
 const ClangClassHandler ClangDeclHandler("class",
     cxxgen::makeInnerNode,
     callCodeBuilder,
@@ -254,6 +266,7 @@ const ClangClassHandler ClangDeclHandler("class",
         std::make_tuple("Friend", FriendDeclProc),
         std::make_tuple("FunctionTemplate", FunctionTemplateProc),
         std::make_tuple("TemplateTypeParm", TemplateTypeParmProc),
+        std::make_tuple("Typedef", TypedefProc),
     });
 
 DEFINE_CCH(BuiltinTypeProc) {
