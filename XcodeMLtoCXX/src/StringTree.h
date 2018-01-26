@@ -92,19 +92,19 @@ StringTreeRef makeInnerNode(const std::vector<StringTreeRef> &nodes);
 StringTreeRef makeTokenNode(const std::string &);
 
 /*!
- * \brief Returns a string-node created by concatnating the string-nodes,
+ * \brief Returns a string-node created by concatenating the string-nodes,
  * separated by line break("\n").
  */
 StringTreeRef insertNewLines(const std::vector<StringTreeRef> &);
 
 /*!
- * \brief Returns a string-node created by concatnating the string-nodes,
+ * \brief Returns a string-node created by concatenating the string-nodes,
  * separated by empty line("\n\n").
  */
 StringTreeRef separateByBlankLines(const std::vector<StringTreeRef> &);
 
 /*!
- * \brief Returns a string-node created by concatnating the string-nodes,
+ * \brief Returns a string-node created by concatenating the string-nodes,
  * separated by the given separator.
  */
 StringTreeRef join(const std::string &, const std::vector<StringTreeRef> &);
