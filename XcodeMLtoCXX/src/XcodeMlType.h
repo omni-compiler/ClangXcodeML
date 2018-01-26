@@ -406,8 +406,10 @@ protected:
 
 TypeRef makeReservedType(
     DataTypeIdent, CodeFragment, bool = false, bool = false);
-TypeRef makeQualifiedType(
-    const DataTypeIdent &, const DataTypeIdent &, bool, bool);
+TypeRef makeQualifiedType(const DataTypeIdent &ident,
+    const DataTypeIdent &underlyingType,
+    bool isConst,
+    bool isVolatile);
 TypeRef makePointerType(DataTypeIdent, TypeRef);
 TypeRef makePointerType(DataTypeIdent, DataTypeIdent);
 TypeRef makeLValueReferenceType(const DataTypeIdent &, const DataTypeIdent &);
