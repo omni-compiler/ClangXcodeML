@@ -119,7 +119,10 @@ private:
 
 class QualifiedType : public Type {
 public:
-  QualifiedType(DataTypeIdent, DataTypeIdent, bool, bool);
+  QualifiedType(DataTypeIdent dtident,
+      DataTypeIdent underlyingType,
+      bool isConst,
+      bool isVolatile);
   CodeFragment makeDeclaration(CodeFragment, const Environment &) override;
   ~QualifiedType() override;
   Type *clone() const override;
@@ -136,8 +139,8 @@ private:
 
 class Pointer : public Type {
 public:
-  Pointer(DataTypeIdent, TypeRef);
-  Pointer(DataTypeIdent, DataTypeIdent);
+  Pointer(DataTypeIdent dtident, TypeRef pointee);
+  Pointer(DataTypeIdent dtident, DataTypeIdent pointee);
   CodeFragment makeDeclaration(CodeFragment, const Environment &) override;
   ~Pointer() override;
   Type *clone() const override;
@@ -153,7 +156,9 @@ private:
 
 class ReferenceType : public Type {
 public:
-  ReferenceType(const DataTypeIdent &, TypeKind, const DataTypeIdent &);
+  ReferenceType(const DataTypeIdent &dtident,
+      TypeKind kind,
+      const DataTypeIdent &pointee);
   CodeFragment makeDeclaration(CodeFragment, const Environment &) override = 0;
   ~ReferenceType() override = 0;
   Type *clone() const override = 0;
@@ -166,7 +171,8 @@ protected:
 
 class LValueReferenceType : public ReferenceType {
 public:
-  LValueReferenceType(const DataTypeIdent &, const DataTypeIdent &);
+  LValueReferenceType(
+      const DataTypeIdent &dtident, const DataTypeIdent &pointee);
   CodeFragment makeDeclaration(CodeFragment, const Environment &) override;
   ~LValueReferenceType() override = default;
   Type *clone() const override;
@@ -194,16 +200,19 @@ private:
 class Function : public Type {
 public:
   Function(DataTypeIdent,
-      const DataTypeIdent &,
-      const std::vector<DataTypeIdent> &,
-      bool = false);
+      const DataTypeIdent &dtident,
+      const std::vector<DataTypeIdent> &paramTypes,
+      bool isVariadic = false);
+  CodeFragment makeDeclarationWithoutReturnType(CodeFragment funcName,
+      const std::vector<CodeFragment> &argNames,
+      const Environment &env);
   CodeFragment makeDeclarationWithoutReturnType(
-      CodeFragment, const std::vector<CodeFragment> &, const Environment &);
-  CodeFragment makeDeclarationWithoutReturnType(
-      CodeFragment, const Environment &);
-  CodeFragment makeDeclaration(CodeFragment, const Environment &) override;
+      CodeFragment funcName, const Environment &env);
   CodeFragment makeDeclaration(
-      CodeFragment, const std::vector<CodeFragment> &, const Environment &);
+      CodeFragment funcName, const Environment &env) override;
+  CodeFragment makeDeclaration(CodeFragment funcName,
+      const std::vector<CodeFragment> &argNames,
+      const Environment &env);
   virtual CodeFragment addConstQualifier(CodeFragment) const override;
   virtual CodeFragment addVolatileQualifier(CodeFragment) const override;
   std::vector<CodeFragment> argNames() const;
@@ -240,8 +249,8 @@ public:
   };
 
 public:
-  Array(DataTypeIdent, DataTypeIdent, Size);
-  Array(DataTypeIdent, DataTypeIdent, size_t);
+  Array(DataTypeIdent dtident, DataTypeIdent element, Size size);
+  Array(DataTypeIdent dtident, DataTypeIdent element, size_t size);
   CodeFragment makeDeclaration(CodeFragment, const Environment &) override;
   ~Array() override;
   Type *clone() const override;
