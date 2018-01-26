@@ -247,6 +247,9 @@ DEFINE_CCH(FriendDeclProc) {
 }
 
 DEFINE_CCH(TypedefProc) {
+  if (isTrueProp(node, "is_implicit", 0)) {
+    return cxxgen::makeVoidNode();
+  }
   const auto dtident = getProp(node, "xcodemlTypedefType");
   const auto T = src.typeTable.at(dtident);
 
