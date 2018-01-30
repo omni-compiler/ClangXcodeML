@@ -514,6 +514,16 @@ TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
         if (auto CTS = dyn_cast<ClassTemplateSpecializationDecl>(RD)) {
           xmlNewProp(
               Node, BAD_CAST "is_template_instantiation", BAD_CAST "true");
+          const auto templArgs =
+              xmlNewNode(nullptr, BAD_CAST "templateArguments");
+          for (auto &&arg : CTS->getTemplateArgs().asArray()) {
+            const auto typeNode = xmlNewNode(nullptr, BAD_CAST "typeName");
+            xmlNewProp(typeNode,
+                BAD_CAST "ref",
+                BAD_CAST getTypeName(arg.getAsType()).c_str());
+            xmlAddChild(templArgs, typeNode);
+          }
+          xmlAddChild(Node, templArgs);
         }
 
         xmlAddChild(Node, makeInheritanceNode(*this, RD));
