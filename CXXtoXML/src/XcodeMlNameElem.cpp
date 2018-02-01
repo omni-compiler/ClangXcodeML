@@ -174,7 +174,7 @@ makeIdNodeForFieldDecl(TypeTableInfo &TTI, const FieldDecl *field) {
   const auto fieldName = field->getIdentifier();
   if (fieldName) {
     /* Emit only if the field has name.
-     * Some field does not have name.
+     * Some fields do not have names.
      *  Example: `struct A { int : 0; }; // unnamed bit field`
      */
     auto nameNode = makeNameNode(TTI, field);
