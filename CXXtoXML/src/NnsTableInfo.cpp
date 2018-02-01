@@ -34,7 +34,7 @@ struct NnsTableInfoImpl {
         mapFromNnsIdentToXmlNodePtr(),
         nnsTableStack(),
         seqForOther(0),
-        {
+        mapForDC() {
     assert(typetableinfo);
   }
 
