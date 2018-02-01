@@ -234,6 +234,9 @@ registerNestedNameSpec(NnsTableInfoImpl &info, const clang::DeclContext *DC) {
   const auto prefix = static_cast<std::string>("NNS");
   const auto name = prefix + std::to_string(info.seqForOther++);
   info.mapForDC[DC] = name;
+  info.mapFromNnsIdentToXmlNodePtr[name] = makeNnsDefNodeForDeclContext(
+      *(info.mangleContext), info, *info.typetableinfo, DC);
+  pushNns(info, name);
 }
 
 xmlNodePtr
