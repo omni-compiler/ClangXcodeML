@@ -459,53 +459,8 @@ DeclarationsVisitor::PreVisitDeclarationNameInfo(DeclarationNameInfo NI) {
   return true;
 }
 
-namespace {
-
-std::string
-SpecifierKindToString(clang::NestedNameSpecifier::SpecifierKind kind) {
-  switch (kind) {
-  case NestedNameSpecifier::Identifier: return "identifier";
-  case NestedNameSpecifier::Namespace: return "namespace";
-  case NestedNameSpecifier::NamespaceAlias: return "namespace_alias";
-  case NestedNameSpecifier::TypeSpec: return "type_specifier";
-  case NestedNameSpecifier::TypeSpecWithTemplate:
-    return "type_specifier_with_template";
-  case NestedNameSpecifier::Global: return "global";
-  case NestedNameSpecifier::Super: return "MS_super";
-  }
-}
-
-clang::IdentifierInfo *
-getAsIdentifierInfo(clang::NestedNameSpecifier *NNS) {
-  switch (NNS->getKind()) {
-  case NestedNameSpecifier::Identifier: return NNS->getAsIdentifier();
-  case NestedNameSpecifier::Namespace:
-    return NNS->getAsNamespace()->getIdentifier();
-  case NestedNameSpecifier::NamespaceAlias:
-    return NNS->getAsNamespaceAlias()->getIdentifier();
-  case NestedNameSpecifier::Super:
-    return NNS->getAsRecordDecl()->getIdentifier();
-  case NestedNameSpecifier::TypeSpec:
-  case NestedNameSpecifier::TypeSpecWithTemplate:
-  case NestedNameSpecifier::Global: return nullptr;
-  }
-}
-
-} // namespace
-
 bool
 DeclarationsVisitor::PreVisitNestedNameSpecifierLoc(NestedNameSpecifierLoc N) {
-  if (auto NNS = N.getNestedNameSpecifier()) {
-    newChild("clangNestedNameSpecifier");
-    newProp("kind", SpecifierKindToString(NNS->getKind()).c_str());
-    newProp("nns", nnstableinfo->getNnsName(NNS).c_str());
-    newProp("is_dependent", NNS->isDependent() ? "1" : "0");
-    newProp("is_instantiation_dependent",
-        NNS->isInstantiationDependent() ? "1" : "0");
-    if (auto ident = getAsIdentifierInfo(NNS)) {
-      newProp("name", ident->getNameStart());
-    }
-  }
   return true;
 }
 
