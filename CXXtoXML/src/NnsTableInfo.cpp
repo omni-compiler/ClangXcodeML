@@ -155,7 +155,7 @@ makeNnsDefNodeForType(NnsTableInfoImpl &info,
   return node;
 }
 
-// clang::NestedNameSpecifier::dump is not a const member fucntion.
+// clang::NestedNameSpecifier::dump is not a const member function.
 void
 dump(const clang::NestedNameSpecifier &Spec, const clang::MangleContext &MC) {
   const clang::PrintingPolicy policy(MC.getASTContext().getLangOpts());
