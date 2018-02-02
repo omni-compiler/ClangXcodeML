@@ -17,7 +17,7 @@ xmlNodePtr getNnsDefElem(const NnsTableInfoImpl &, const std::string &);
 
 void pushNns(NnsTableInfoImpl &, const std::string &);
 
-void registerNestedNameSpec(NnsTableInfoImpl &, const clang::DeclContext *DC);
+void registerDeclContext(NnsTableInfoImpl &, const clang::DeclContext *DC);
 
 template <typename T, typename... Ts>
 std::unique_ptr<T>
@@ -74,7 +74,7 @@ getOrRegisterNnsName(NnsTableInfoImpl &info, const clang::DeclContext *DC) {
   }
 
   if (info.mapForDC.count(DC) == 0) {
-    registerNestedNameSpec(info, DC);
+    registerDeclContext(info, DC);
   }
   return info.mapForDC[DC];
 }
@@ -129,7 +129,7 @@ makeNnsDefNodeForDeclContext(const clang::MangleContext &MC,
 }
 
 void
-registerNestedNameSpec(NnsTableInfoImpl &info, const clang::DeclContext *DC) {
+registerDeclContext(NnsTableInfoImpl &info, const clang::DeclContext *DC) {
   assert(DC);
 
   if (DC->getDeclKind() == clang::Decl::TranslationUnit) {
