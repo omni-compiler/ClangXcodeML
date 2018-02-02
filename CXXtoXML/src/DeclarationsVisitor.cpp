@@ -351,7 +351,7 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
         BAD_CAST "test_nns_decl_kind",
         BAD_CAST(parent->getDeclKindName()));
     xmlNewProp(nameNode,
-        BAD_CAST "test_nns",
+        BAD_CAST "nns",
         BAD_CAST(nnstableinfo->getNnsName(parent).c_str()));
 
     xmlAddChild(curNode, nameNode);
