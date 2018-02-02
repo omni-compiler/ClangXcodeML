@@ -134,13 +134,24 @@ makeClassNnsNode(const clang::MangleContext &,
 }
 
 xmlNodePtr
+nnsNewNode(const clang::MangleContext &MC,
+    NnsTableInfoImpl &info,
+    TypeTableInfo &TTI,
+    const clang::DeclContext &DC) {
+  using namespace clang;
+  switch (DC.getDeclKind()) {
+  case Decl::CXXRecord: return makeClassNnsNode(MC, info, TTI, DC);
+  default: return xmlNewNode(nullptr, BAD_CAST "DCNNS");
+  }
+}
+
+xmlNodePtr
 makeNnsDefNodeForDeclContext(const clang::MangleContext &MC,
     NnsTableInfoImpl &info,
     TypeTableInfo &TTI,
     const clang::DeclContext *DC) {
-  using namespace clang;
   assert(DC);
-  const auto node = xmlNewNode(nullptr, BAD_CAST "DCNNS");
+  const auto node = nnsNewNode(MC, info, TTI, *DC);
   xmlNewProp(node, BAD_CAST "kind", BAD_CAST(DC->getDeclKindName()));
   xmlNewProp(
       node, BAD_CAST "nns", BAD_CAST(getOrRegisterNnsName(info, DC).c_str()));
