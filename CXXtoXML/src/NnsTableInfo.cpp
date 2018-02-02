@@ -7,6 +7,7 @@
 #include "clang/AST/Mangle.h"
 #include "clang/AST/ASTContext.h"
 #include "clang/AST/DeclBase.h"
+#include "clang/AST/DeclCXX.h"
 #include "TypeTableInfo.h"
 
 #include "NnsTableInfo.h"
@@ -113,6 +114,24 @@ NnsTableInfo::popNnsTableStack() {
 }
 
 namespace {
+
+xmlNodePtr
+makeClassNnsNode(const clang::MangleContext &,
+    NnsTableInfoImpl &,
+    TypeTableInfo &TTI,
+    const clang::DeclContext &DC) {
+  const auto CRD = llvm::cast<clang::CXXRecordDecl>(DC);
+  const auto node = xmlNewNode(nullptr, BAD_CAST "classNNS");
+
+  const auto dtident =
+      TTI.getTypeName(clang::QualType(CRD.getTypeForDecl(), 0));
+  xmlNewProp(node, BAD_CAST "type", BAD_CAST(dtident.c_str()));
+
+  const auto name = CRD.getDeclName().getAsString();
+  xmlNodeAddContent(node, BAD_CAST(name.c_str()));
+
+  return node;
+}
 
 xmlNodePtr
 makeNnsDefNodeForDeclContext(const clang::MangleContext &MC,
