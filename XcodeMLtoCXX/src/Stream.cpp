@@ -108,10 +108,6 @@ shouldInterleaveSpace(char last, char next) {
   return (isAllowedInIdent(last) && isAllowedInIdent(next))
       || (operators.find(last) != std::string::npos && next == '=')
       || (last == next && repeatables.find(last) != std::string::npos)
-      || (next == ':')
-      /* `label1:::i = 1;`
-       * `void::Class1::func() { }`
-       */
       || (last == '-' && next == '>') || // `->`
       (last == '>' && next == '*'); // `->*`
 }
