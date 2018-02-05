@@ -35,6 +35,7 @@ enum class NnsKind {
  */
 class Nns {
 public:
+  Nns(NnsKind kind, const NnsIdent &ident);
   Nns(NnsKind kind, const NnsRef &parent, const NnsIdent &ident);
   Nns(NnsKind kind, const NnsIdent &parent, const NnsIdent &ident);
   virtual ~Nns() = 0;
