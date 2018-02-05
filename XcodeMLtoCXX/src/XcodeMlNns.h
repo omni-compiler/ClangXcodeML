@@ -35,8 +35,8 @@ enum class NnsKind {
  */
 class Nns {
 public:
-  Nns(NnsKind, const NnsRef &, const NnsIdent &);
-  Nns(NnsKind, const NnsIdent &, const NnsIdent &);
+  Nns(NnsKind kind, const NnsRef &parent, const NnsIdent &ident);
+  Nns(NnsKind kind, const NnsIdent &parent, const NnsIdent &ident);
   virtual ~Nns() = 0;
   virtual Nns *clone() const = 0;
   NnsKind getKind() const;
