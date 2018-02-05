@@ -26,6 +26,8 @@ enum class NnsKind {
   Global,
   /*! classNNS */
   Class,
+  /*! functionNNS */
+  Function,
 };
 
 /*!
@@ -98,6 +100,19 @@ protected:
 private:
   /*! XcodeML data type identifier of the class */
   DataTypeIdent dtident;
+};
+
+class FuncNns : public Nns {
+public:
+  FuncNns(const NnsIdent &ident);
+  ~FuncNns() override = default;
+  Nns *clone() const override;
+  static bool classof(const Nns *);
+
+protected:
+  FuncNns(const FuncNns &) = default;
+  CodeFragment makeNestedNameSpec(
+      const Environment &, const NnsMap &) const override;
 };
 
 /*! \brief Make and return the XcodeML globalNNS. */
