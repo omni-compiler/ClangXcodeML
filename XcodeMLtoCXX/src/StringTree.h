@@ -20,7 +20,10 @@ public:
   virtual ~StringTree() = 0;
   virtual StringTree *clone() const = 0;
   virtual void flush(Stream &) const = 0;
-  /* Cast to CXXCodeGen::InnerNode. */
+  /*!
+   * \brief Returns an object created by casting this object to
+   * CXXCodeGen::InnerNode.
+   */
   virtual InnerNode *lift() const = 0;
   StringTreeKind getKind() const;
 
@@ -60,6 +63,10 @@ public:
   ~TokenNode() = default;
   StringTree *clone() const override;
   void flush(Stream &) const override;
+  /*!
+   * \brief Make and return an `XcodeMl::InnerNode` object containing a
+   * child-string-node that is a copy of this object.
+   */
   InnerNode *lift() const override;
 
 protected:
@@ -92,24 +99,39 @@ StringTreeRef makeInnerNode(const std::vector<StringTreeRef> &nodes);
 StringTreeRef makeTokenNode(const std::string &);
 
 /*!
- * \brief Returns a string-node created by concatnating the string-nodes,
+ * \brief Returns a string-node created by concatenating the string-nodes,
  * separated by line break("\n").
  */
 StringTreeRef insertNewLines(const std::vector<StringTreeRef> &);
 
 /*!
- * \brief Returns a string-node created by concatnating the string-nodes,
+ * \brief Returns a string-node created by concatenating the string-nodes,
  * separated by empty line("\n\n").
  */
 StringTreeRef separateByBlankLines(const std::vector<StringTreeRef> &);
 
 /*!
- * \brief Returns a string-node created by concatnating the string-nodes,
+ * \brief Returns a string-node created by concatenating the string-nodes,
  * separated by the given separator.
  */
 StringTreeRef join(const std::string &, const std::vector<StringTreeRef> &);
+
+/*!
+ * \brief Returns a string-node created by putting parentheses ("()") around
+ * the given string.
+ */
 StringTreeRef wrapWithParen(const StringTreeRef &);
+
+/*!
+ * \brief Returns a string-node created by putting square brackets ("[]")
+ * around the given string.
+ */
 StringTreeRef wrapWithSquareBracket(const StringTreeRef &);
+
+/*!
+ * \brief Returns a string-node created by putting braces ("{}") around
+ * the given string.
+ */
 StringTreeRef wrapWithBrace(const StringTreeRef &);
 }
 

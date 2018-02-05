@@ -6,8 +6,11 @@ namespace XcodeMl {
 class Environment;
 class Nns;
 
-/*! Represents the kinds of C++ _unqualified-id_ ([expr.prim.id.unqual]).
- * NOTE: non-exhaustive (example: _literal-operator-id_) */
+/*!
+ * \brief Represents the kinds of C++ _unqualified-id_ ([expr.prim.id.unqual]).
+ *
+ * NOTE: non-exhaustive (example: _literal-operator-id_)
+ */
 enum class UnqualIdKind {
   /*! _Identifier_ (an sequence of alphabets, digits or underscores) */
   Ident,

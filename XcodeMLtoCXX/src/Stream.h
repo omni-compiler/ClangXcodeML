@@ -3,10 +3,12 @@
 
 namespace CXXCodeGen {
 
+/*! \brief Represents space character(' '). */
 struct space_t {};
 
 extern const space_t space;
 
+/*! \brief Represents newline character('\n'). */
 struct newline_t {};
 
 extern const newline_t newline;
@@ -20,10 +22,17 @@ public:
   Stream(Stream &&);
   Stream &operator=(Stream &&);
   std::string str();
+  /*! \brief Increases indent. */
   void indent(size_t);
   void insertNewLine();
+  /*! \brief Emits a space character if necessary. */
   void insertSpace();
+  /*! \brief Emits the given string.
+   *
+   * It emits a space character (token separator) if necessary.
+   */
   void insert(const std::string &);
+  /*! \brief Decreases indent. */
   void unindent(size_t);
 
 private:

@@ -18,6 +18,8 @@ using XcodeMl::CodeFragment;
 using CXXCodeGen::makeTokenNode;
 using CXXCodeGen::makeVoidNode;
 
+namespace {
+
 CodeFragment
 cv_qualify(const XcodeMl::TypeRef &type, const CodeFragment &var) {
   CodeFragment str(var);
@@ -29,6 +31,8 @@ cv_qualify(const XcodeMl::TypeRef &type, const CodeFragment &var) {
   }
   return str;
 }
+
+} // namespace
 
 namespace XcodeMl {
 
