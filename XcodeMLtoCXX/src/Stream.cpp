@@ -104,7 +104,7 @@ isAllowedInIdent(char c) {
 bool
 shouldInterleaveSpace(char last, char next) {
   const std::string operators = "+-*/%^&|!><";
-  const std::string repeatables = "+-><&|=";
+  const std::string repeatables = "+-><&|=:";
   return (isAllowedInIdent(last) && isAllowedInIdent(next))
       || (operators.find(last) != std::string::npos && next == '=')
       || (last == next && repeatables.find(last) != std::string::npos)
