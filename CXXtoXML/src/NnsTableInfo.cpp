@@ -156,7 +156,8 @@ makeNnsDefNodeForDeclContext(const clang::MangleContext &MC,
     const clang::DeclContext *DC) {
   assert(DC);
   const auto node = nnsNewNode(MC, info, TTI, *DC);
-  xmlNewProp(node, BAD_CAST "kind", BAD_CAST(DC->getDeclKindName()));
+  xmlNewProp(
+      node, BAD_CAST "clang_decl_kind", BAD_CAST(DC->getDeclKindName()));
   xmlNewProp(
       node, BAD_CAST "nns", BAD_CAST(getOrRegisterNnsName(info, DC).c_str()));
   return node;
