@@ -116,10 +116,7 @@ NnsTableInfo::popNnsTableStack() {
 namespace {
 
 xmlNodePtr
-makeClassNnsNode(const clang::MangleContext &,
-    NnsTableInfoImpl &,
-    TypeTableInfo &TTI,
-    const clang::DeclContext &DC) {
+makeClassNnsNode(TypeTableInfo &TTI, const clang::DeclContext &DC) {
   const auto CRD = llvm::cast<clang::CXXRecordDecl>(DC);
   const auto node = xmlNewNode(nullptr, BAD_CAST "classNNS");
 
@@ -149,7 +146,7 @@ nnsNewNode(const clang::MangleContext &MC,
     const clang::DeclContext &DC) {
   using namespace clang;
   switch (DC.getDeclKind()) {
-  case Decl::CXXRecord: return makeClassNnsNode(MC, info, TTI, DC);
+  case Decl::CXXRecord: return makeClassNnsNode(TTI, DC);
   case Decl::Namespace: return makeNamespaceNnsNode(DC);
   default: return xmlNewNode(nullptr, BAD_CAST "otherNNS");
   }
