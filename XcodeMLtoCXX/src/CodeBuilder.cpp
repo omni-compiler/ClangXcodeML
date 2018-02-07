@@ -219,7 +219,8 @@ XcodeMl::CodeFragment
 makeFunctionDeclHead(XcodeMl::Function *func,
     const XcodeMl::Name &name,
     const std::vector<XcodeMl::CodeFragment> &paramNames,
-    const SourceInfo &src) {
+    const SourceInfo &src,
+    bool emitNameSpec = false) {
   const auto nameSpelling = name.toString(src.typeTable, src.nnsTable);
   const auto pUnqualId = name.getUnqualId();
   if (llvm::isa<XcodeMl::CtorName>(pUnqualId.get())
@@ -240,7 +241,8 @@ makeFunctionDeclHead(XcodeMl::Function *func,
 XcodeMl::CodeFragment
 makeFunctionDeclHead(xmlNodePtr node,
     const std::vector<XcodeMl::CodeFragment> paramNames,
-    const SourceInfo &src) {
+    const SourceInfo &src,
+    bool emitNameSpec = false) {
   const auto nameNode = findFirst(node, "name", src.ctxt);
   const auto name = getQualifiedNameFromNameNode(nameNode, src);
 
