@@ -24,6 +24,9 @@ Name::Name(
     : id(id_), nns(nns_) {
 }
 
+Name::Name(const std::shared_ptr<UnqualId> &id_) : id(id_), nns() {
+}
+
 CodeFragment
 Name::toString(const Environment &typeTable, const NnsMap &nnsTable) const {
   assert(id);
