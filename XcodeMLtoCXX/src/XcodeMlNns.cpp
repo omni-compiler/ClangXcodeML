@@ -16,6 +16,9 @@ using CXXCodeGen::makeTokenNode;
 
 namespace XcodeMl {
 
+Nns::Nns(NnsKind k, const NnsIdent &ni) : parent(), kind(k), ident(ni) {
+}
+
 Nns::Nns(NnsKind k, const NnsRef &nr, const NnsIdent &ni)
     : parent(nr ? nr->getParent() : llvm::Optional<NnsIdent>()),
       kind(k),
@@ -103,6 +106,52 @@ ClassNns::classof(const Nns *N) {
   return N->getKind() == NnsKind::Class;
 }
 
+NamespaceNns::NamespaceNns(
+    const NnsIdent &nident, const std::string &namespaceName)
+    : Nns(NnsKind::Namespace, nident), name(namespaceName) {
+}
+
+NamespaceNns::NamespaceNns(const NnsIdent &nident,
+    const std::string &namespaceName,
+    const NnsIdent &parent)
+    : Nns(NnsKind::Namespace, parent, nident), name(namespaceName) {
+}
+
+Nns *
+NamespaceNns::clone() const {
+  NamespaceNns *copy = new NamespaceNns(*this);
+  return copy;
+}
+
+bool
+NamespaceNns::classof(const Nns *N) {
+  return N->getKind() == NnsKind::Namespace;
+}
+
+CodeFragment
+NamespaceNns::makeNestedNameSpec(const Environment &, const NnsMap &) const {
+  return makeTokenNode(name) + makeTokenNode("::");
+}
+
+OtherNns::OtherNns(const NnsIdent &ident) : Nns(NnsKind::Other, ident) {
+}
+
+Nns *
+OtherNns::clone() const {
+  OtherNns *copy = new OtherNns(*this);
+  return copy;
+}
+
+bool
+OtherNns::classof(const Nns *N) {
+  return N->getKind() == NnsKind::Other;
+}
+
+CodeFragment
+OtherNns::makeNestedNameSpec(const Environment &, const NnsMap &) const {
+  return CXXCodeGen::makeVoidNode();
+}
+
 NnsRef
 makeGlobalNns() {
   return std::make_shared<GlobalNns>();
@@ -118,6 +167,11 @@ makeClassNns(const NnsIdent &ident,
 NnsRef
 makeClassNns(const NnsIdent &ident, const DataTypeIdent &classType) {
   return std::make_shared<ClassNns>(ident, nullptr, classType);
+}
+
+NnsRef
+makeOtherNns(const NnsIdent &nident) {
+  return std::make_shared<OtherNns>(nident);
 }
 
 } // namespace XcodeMl
