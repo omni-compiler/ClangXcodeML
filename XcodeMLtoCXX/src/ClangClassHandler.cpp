@@ -9,7 +9,6 @@
 #include "llvm/ADT/Optional.h"
 #include "llvm/Support/Casting.h"
 #include "LibXMLUtil.h"
-#include "Stream.h"
 #include "StringTree.h"
 #include "XMLString.h"
 #include "XMLWalker.h"
