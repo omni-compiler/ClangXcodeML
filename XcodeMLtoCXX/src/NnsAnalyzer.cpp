@@ -36,6 +36,12 @@ DEFINE_NA(otherNnsProc) {
   map[nident] = XcodeMl::makeOtherNns(nident);
 }
 
+DEFINE_NA(namespaceNnsProc) {
+  const auto nident = getProp(node, "nns");
+  const auto namespaceName = getContent(node);
+  map[nident] = XcodeMl::makeNamespaceNns(nident, namespaceName);
+}
+
 const XcodeMl::NnsMap initialNnsMap = {
     {"global", XcodeMl::makeGlobalNns()},
 };
@@ -43,6 +49,7 @@ const XcodeMl::NnsMap initialNnsMap = {
 const NnsAnalyzer XcodeMLNNSAnalyzer("NnsAnalyzer",
     {
         std::make_tuple("classNNS", classNnsProc),
+        std::make_tuple("namespaceNNS", namespaceNnsProc),
         std::make_tuple("otherNNS", otherNnsProc),
     });
 
