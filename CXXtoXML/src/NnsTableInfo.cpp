@@ -124,9 +124,6 @@ makeClassNnsNode(TypeTableInfo &TTI, const clang::DeclContext &DC) {
       TTI.getTypeName(clang::QualType(CRD.getTypeForDecl(), 0));
   xmlNewProp(node, BAD_CAST "type", BAD_CAST(dtident.c_str()));
 
-  const auto name = CRD.getDeclName().getAsString();
-  xmlNodeAddContent(node, BAD_CAST(name.c_str()));
-
   return node;
 }
 
