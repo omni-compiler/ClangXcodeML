@@ -608,15 +608,13 @@ declareClassTypeInit(
 
 DEFINE_CB(varDeclProc) {
   const auto nameNode = findFirst(node, "name", src.ctxt);
-  const auto name = getQualifiedNameFromNameNode(nameNode, src);
+  const auto name = getUnqualIdFromNameNode(nameNode);
 
   const auto dtident = getProp(node, "type");
   const auto type = src.typeTable.at(dtident);
 
   auto acc = makeVoidNode();
-  acc = acc + makeDecl(type,
-                  name.toString(src.typeTable, src.nnsTable),
-                  src.typeTable);
+  acc = acc + makeDecl(type, name->toString(src.typeTable), src.typeTable);
   xmlNodePtr valueElem = findFirst(node, "value", src.ctxt);
   if (!valueElem) {
     return wrapWithLangLink(acc + makeTokenNode(";"), node, src);
