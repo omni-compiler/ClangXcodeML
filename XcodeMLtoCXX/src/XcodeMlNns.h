@@ -26,6 +26,8 @@ enum class NnsKind {
   Global,
   /*! classNNS */
   Class,
+  /*! functionNNS */
+  Function,
 };
 
 /*!
@@ -35,8 +37,9 @@ enum class NnsKind {
  */
 class Nns {
 public:
-  Nns(NnsKind, const NnsRef &, const NnsIdent &);
-  Nns(NnsKind, const NnsIdent &, const NnsIdent &);
+  Nns(NnsKind kind, const NnsIdent &ident);
+  Nns(NnsKind kind, const NnsRef &parent, const NnsIdent &ident);
+  Nns(NnsKind kind, const NnsIdent &parent, const NnsIdent &ident);
   virtual ~Nns() = 0;
   virtual Nns *clone() const = 0;
   NnsKind getKind() const;
@@ -99,6 +102,19 @@ private:
   DataTypeIdent dtident;
 };
 
+class FuncLocalNns : public Nns {
+public:
+  FuncLocalNns(const NnsIdent &ident);
+  ~FuncLocalNns() override = default;
+  Nns *clone() const override;
+  static bool classof(const Nns *);
+
+protected:
+  FuncLocalNns(const FuncLocalNns &) = default;
+  CodeFragment makeNestedNameSpec(
+      const Environment &, const NnsMap &) const override;
+};
+
 /*! \brief Make and return the XcodeML globalNNS. */
 NnsRef makeGlobalNns();
 
@@ -121,6 +137,8 @@ NnsRef makeClassNns(const NnsIdent &nident,
  * \param classType the data type identifier of the corresponding class
  */
 NnsRef makeClassNns(const NnsIdent &nident, const DataTypeIdent &classType);
+
+NnsRef makeFuncLocalNns(const NnsIdent &nident);
 
 } // namespace XcodeMl
 

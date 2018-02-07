@@ -16,6 +16,9 @@ using CXXCodeGen::makeTokenNode;
 
 namespace XcodeMl {
 
+Nns::Nns(NnsKind k, const NnsIdent &ni) : parent(), kind(k), ident(ni) {
+}
+
 Nns::Nns(NnsKind k, const NnsRef &nr, const NnsIdent &ni)
     : parent(nr ? nr->getParent() : llvm::Optional<NnsIdent>()),
       kind(k),
@@ -103,6 +106,26 @@ ClassNns::classof(const Nns *N) {
   return N->getKind() == NnsKind::Class;
 }
 
+FuncLocalNns::FuncLocalNns(const NnsIdent &ident)
+    : Nns(NnsKind::Function, ident) {
+}
+
+Nns *
+FuncLocalNns::clone() const {
+  FuncLocalNns *copy = new FuncLocalNns(*this);
+  return copy;
+}
+
+bool
+FuncLocalNns::classof(const Nns *N) {
+  return N->getKind() == NnsKind::Function;
+}
+
+CodeFragment
+FuncLocalNns::makeNestedNameSpec(const Environment &, const NnsMap &) const {
+  return CXXCodeGen::makeVoidNode();
+}
+
 NnsRef
 makeGlobalNns() {
   return std::make_shared<GlobalNns>();
@@ -118,6 +141,11 @@ makeClassNns(const NnsIdent &ident,
 NnsRef
 makeClassNns(const NnsIdent &ident, const DataTypeIdent &classType) {
   return std::make_shared<ClassNns>(ident, nullptr, classType);
+}
+
+NnsRef
+makeFuncLocalNns(const NnsIdent &nident) {
+  return std::make_shared<FuncLocalNns>(nident);
 }
 
 } // namespace XcodeMl
