@@ -133,6 +133,13 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
     const auto kind = DRE->getDecl()->getDeclKindName();
     newProp("declkind", kind);
     auto nameNode = makeNameNode(*typetableinfo, DRE);
+
+    const auto parent = DRE->getFoundDecl()->getDeclContext();
+    assert(parent);
+    xmlNewProp(nameNode,
+        BAD_CAST "nns",
+        BAD_CAST(nnstableinfo->getNnsName(parent).c_str()));
+
     xmlAddChild(curNode, nameNode);
   }
 
