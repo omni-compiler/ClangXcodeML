@@ -100,6 +100,19 @@ private:
   DataTypeIdent dtident;
 };
 
+class OtherNns : public Nns {
+public:
+  OtherNns(const NnsIdent &);
+  ~OtherNns() override = default;
+  Nns *clone() const override;
+  static bool classof(const Nns *);
+
+protected:
+  OtherNns(const OtherNns &) = default;
+  virtual CodeFragment makeNestedNameSpec(
+      const Environment &, const NnsMap &) const override;
+};
+
 /*! \brief Make and return the XcodeML globalNNS. */
 NnsRef makeGlobalNns();
 
