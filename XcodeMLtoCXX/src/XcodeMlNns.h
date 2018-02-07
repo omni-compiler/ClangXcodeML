@@ -22,10 +22,14 @@ using NnsMap = std::map<NnsIdent, NnsRef>;
  * NOTE: non-exhaustive (example: namespaceNNS)
  */
 enum class NnsKind {
+  /*! otherNNS */
+  Other,
   /*! global namespace */
   Global,
   /*! classNNS */
   Class,
+  /*! namespaceNNS */
+  Namespace,
 };
 
 /*!
@@ -35,8 +39,9 @@ enum class NnsKind {
  */
 class Nns {
 public:
-  Nns(NnsKind, const NnsRef &, const NnsIdent &);
-  Nns(NnsKind, const NnsIdent &, const NnsIdent &);
+  Nns(NnsKind kind, const NnsIdent &ident);
+  Nns(NnsKind kind, const NnsRef &parent, const NnsIdent &ident);
+  Nns(NnsKind kind, const NnsIdent &parent, const NnsIdent &ident);
   virtual ~Nns() = 0;
   virtual Nns *clone() const = 0;
   NnsKind getKind() const;
@@ -99,6 +104,37 @@ private:
   DataTypeIdent dtident;
 };
 
+class NamespaceNns : public Nns {
+public:
+  NamespaceNns(const NnsIdent &nident, const std::string &name);
+  NamespaceNns(
+      const NnsIdent &nident, const std::string &name, const NnsIdent &parent);
+  ~NamespaceNns() override = default;
+  Nns *clone() const override;
+  static bool classof(const Nns *);
+
+protected:
+  NamespaceNns(const NamespaceNns &) = default;
+  virtual CodeFragment makeNestedNameSpec(
+      const Environment &, const NnsMap &) const override;
+
+private:
+  std::string name;
+};
+
+class OtherNns : public Nns {
+public:
+  OtherNns(const NnsIdent &);
+  ~OtherNns() override = default;
+  Nns *clone() const override;
+  static bool classof(const Nns *);
+
+protected:
+  OtherNns(const OtherNns &) = default;
+  virtual CodeFragment makeNestedNameSpec(
+      const Environment &, const NnsMap &) const override;
+};
+
 /*! \brief Make and return the XcodeML globalNNS. */
 NnsRef makeGlobalNns();
 
@@ -121,6 +157,8 @@ NnsRef makeClassNns(const NnsIdent &nident,
  * \param classType the data type identifier of the corresponding class
  */
 NnsRef makeClassNns(const NnsIdent &nident, const DataTypeIdent &classType);
+
+NnsRef makeOtherNns(const NnsIdent &nident);
 
 } // namespace XcodeMl
 

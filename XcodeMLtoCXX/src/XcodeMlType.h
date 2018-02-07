@@ -6,14 +6,18 @@ namespace XcodeMl {
 class Type;
 using TypeRef = std::shared_ptr<Type>;
 
-/* data type identifier (3.1 data type identifier) */
+/*! XcodeML data type identifier (3.1 data type identifier) */
 using DataTypeIdent = std::string;
 
+/*! Represents a string that may appear in C++ source code. */
 using CodeFragment = CXXCodeGen::StringTreeRef;
 
 class Environment;
 class UnqualId;
 
+/*!
+ * \brief Represents a member declaration in C-style struct or union.
+ */
 class MemberDecl {
 public:
   MemberDecl(const DataTypeIdent &, const CodeFragment &);
@@ -29,25 +33,25 @@ private:
 enum class TypeKind {
   /*! Built-in type */
   Reserved,
-  /*! basic data type (3.4 <basicType> element) */
+  /*! XcodeML basic data type (3.4 <basicType> element) */
   Qualified,
-  /*! pointer (3.5 <pointerType> element) */
+  /*! Pointer type (3.5 <pointerType> element) */
   Pointer,
-  /*! lvalue reference */
+  /*! Lvalue reference type */
   LValueReference,
-  /*! rvalue reference */
+  /*! Rvalue reference type */
   RValueReference,
-  /*! function (3.6 <functionType> element) */
+  /*! Function type (3.6 <functionType> element) */
   Function,
-  /*! C-style array (3.7 <ArrayType> element) */
+  /*! C-style array type (3.7 <ArrayType> element) */
   Array,
-  /*! C-Style struct (3.xx <structType> element) */
+  /*! C-Style struct type (3.xx <structType> element) */
   Struct,
   /*! C-style enum type */
   Enum,
   /*! C-style union type */
   Union,
-  /*! C++-style class */
+  /*! (C++-style) class type */
   Class,
   /*! Template type parameter */
   TemplateTypeParm,
@@ -58,6 +62,10 @@ enum class TypeKind {
 TypeKind typeKind(TypeRef);
 CodeFragment makeDecl(TypeRef, CodeFragment, const Environment &);
 
+/*!
+ * \brief Returns a code fragment string that represents the given data type
+ * e.g. `int (*)(const double&)`.
+ */
 CodeFragment TypeRefToString(TypeRef, const Environment &env);
 
 /*!
@@ -69,7 +77,32 @@ public:
   virtual ~Type() = 0;
   virtual Type *clone() const = 0;
   virtual CodeFragment makeDeclaration(CodeFragment, const Environment &) = 0;
+
+  /*!
+   * \brief Return a code fragment string created by adding the `const`
+   * qualifier
+   * to the given declarator.
+   *
+   * Typically, this function adds the prefix "const" to the beginning of the
+   * given
+   * string (`x` -> `const x`). Some derived classes use different ways. For
+   * example,
+   * `XcodeMl::Array::addConstQualifier` returns a string identical to the
+   * parameter.
+   */
   virtual CodeFragment addConstQualifier(CodeFragment) const;
+
+  /*!
+   * \brief Return a code fragment string created by adding the `volatile`
+   * qualifier to the given declarator.
+   *
+   * Typically, this function adds the prefix "volatile" to the beginning of
+   * the
+   * given string (`x` -> `volatile x`). Some derived classes use different
+   * ways.
+   * For example, `XcodeMl::Array::addVolatileQualifier` returns a string
+   * identical to the parameter.
+   */
   virtual CodeFragment addVolatileQualifier(CodeFragment) const;
   bool isConst() const;
   bool isVolatile() const;
@@ -88,6 +121,12 @@ private:
   bool volatility;
 };
 
+/*!
+ * \brief Represents built-in data type e.g. `int`.
+ *
+ * A type name may contain whitespaces (`unsigned short`)
+ * while XcodeML data type identifier can't (`unsigned_short`).
+ */
 class Reserved : public Type {
 public:
   Reserved(DataTypeIdent, CodeFragment);
@@ -103,9 +142,18 @@ private:
   CodeFragment name;
 };
 
+/*!
+ * \brief Represents a cv-qualified type.
+ *
+ * This class was introduced in March 2017 in order to implement
+ * XcodeML `basicType` element.
+ */
 class QualifiedType : public Type {
 public:
-  QualifiedType(DataTypeIdent, DataTypeIdent, bool, bool);
+  QualifiedType(DataTypeIdent dtident,
+      DataTypeIdent underlyingType,
+      bool isConst,
+      bool isVolatile);
   CodeFragment makeDeclaration(CodeFragment, const Environment &) override;
   ~QualifiedType() override;
   Type *clone() const override;
@@ -122,8 +170,8 @@ private:
 
 class Pointer : public Type {
 public:
-  Pointer(DataTypeIdent, TypeRef);
-  Pointer(DataTypeIdent, DataTypeIdent);
+  Pointer(DataTypeIdent dtident, TypeRef pointee);
+  Pointer(DataTypeIdent dtident, DataTypeIdent pointee);
   CodeFragment makeDeclaration(CodeFragment, const Environment &) override;
   ~Pointer() override;
   Type *clone() const override;
@@ -137,9 +185,12 @@ private:
   DataTypeIdent ref;
 };
 
+/*! \brief Represents an lvalue or rvalue reference type. */
 class ReferenceType : public Type {
 public:
-  ReferenceType(const DataTypeIdent &, TypeKind, const DataTypeIdent &);
+  ReferenceType(const DataTypeIdent &dtident,
+      TypeKind kind,
+      const DataTypeIdent &pointee);
   CodeFragment makeDeclaration(CodeFragment, const Environment &) override = 0;
   ~ReferenceType() override = 0;
   Type *clone() const override = 0;
@@ -152,7 +203,8 @@ protected:
 
 class LValueReferenceType : public ReferenceType {
 public:
-  LValueReferenceType(const DataTypeIdent &, const DataTypeIdent &);
+  LValueReferenceType(
+      const DataTypeIdent &dtident, const DataTypeIdent &pointee);
   CodeFragment makeDeclaration(CodeFragment, const Environment &) override;
   ~LValueReferenceType() override = default;
   Type *clone() const override;
@@ -180,16 +232,19 @@ private:
 class Function : public Type {
 public:
   Function(DataTypeIdent,
-      const DataTypeIdent &,
-      const std::vector<DataTypeIdent> &,
-      bool = false);
+      const DataTypeIdent &dtident,
+      const std::vector<DataTypeIdent> &paramTypes,
+      bool isVariadic = false);
+  CodeFragment makeDeclarationWithoutReturnType(CodeFragment funcName,
+      const std::vector<CodeFragment> &argNames,
+      const Environment &env);
   CodeFragment makeDeclarationWithoutReturnType(
-      CodeFragment, const std::vector<CodeFragment> &, const Environment &);
-  CodeFragment makeDeclarationWithoutReturnType(
-      CodeFragment, const Environment &);
-  CodeFragment makeDeclaration(CodeFragment, const Environment &) override;
+      CodeFragment funcName, const Environment &env);
   CodeFragment makeDeclaration(
-      CodeFragment, const std::vector<CodeFragment> &, const Environment &);
+      CodeFragment funcName, const Environment &env) override;
+  CodeFragment makeDeclaration(CodeFragment funcName,
+      const std::vector<CodeFragment> &argNames,
+      const Environment &env);
   virtual CodeFragment addConstQualifier(CodeFragment) const override;
   virtual CodeFragment addVolatileQualifier(CodeFragment) const override;
   std::vector<CodeFragment> argNames() const;
@@ -208,6 +263,7 @@ private:
   std::vector<CodeFragment> defaultArgs;
 };
 
+/*! \brief Represents C/C++ array. */
 class Array : public Type {
 public:
   struct Size {
@@ -226,14 +282,15 @@ public:
   };
 
 public:
-  Array(DataTypeIdent, DataTypeIdent, Size);
-  Array(DataTypeIdent, DataTypeIdent, size_t);
+  Array(DataTypeIdent dtident, DataTypeIdent element, Size size);
+  Array(DataTypeIdent dtident, DataTypeIdent element, size_t size);
   CodeFragment makeDeclaration(CodeFragment, const Environment &) override;
   ~Array() override;
   Type *clone() const override;
   CodeFragment addConstQualifier(CodeFragment) const override;
   CodeFragment addVolatileQualifier(CodeFragment) const override;
   static bool classof(const Type *);
+  /*! Returns the element type as `XcodeMl::TypeRef`. */
   TypeRef getElemType(const Environment &) const;
 
 protected:
@@ -307,6 +364,7 @@ private:
   std::vector<MemberDecl> members;
 };
 
+/*! \brief Represents access-specifier. */
 enum class AccessSpec {
   Public,
   Private,
@@ -316,14 +374,20 @@ enum class AccessSpec {
 std::string string_of_accessSpec(AccessSpec);
 AccessSpec accessSpec_of_string(const std::string &);
 
+/*! \brief Represents class-key (`class`, `struct`, or `union`). */
 enum class CXXClassKind {
   Class,
   Struct,
   Union,
 };
 
+/*!
+ * \brief Converts `XcodeMl::CXXClassKind` to string (`"class"`,
+ * `"struct"`, or `"union"`)
+ */
 std::string getClassKey(CXXClassKind kind);
 
+/*! \brief Represents (C++-style) class. */
 class ClassType : public Type {
 public:
   using ClassName = llvm::Optional<CodeFragment>;
@@ -392,8 +456,10 @@ protected:
 
 TypeRef makeReservedType(
     DataTypeIdent, CodeFragment, bool = false, bool = false);
-TypeRef makeQualifiedType(
-    const DataTypeIdent &, const DataTypeIdent &, bool, bool);
+TypeRef makeQualifiedType(const DataTypeIdent &ident,
+    const DataTypeIdent &underlyingType,
+    bool isConst,
+    bool isVolatile);
 TypeRef makePointerType(DataTypeIdent, TypeRef);
 TypeRef makePointerType(DataTypeIdent, DataTypeIdent);
 TypeRef makeLValueReferenceType(const DataTypeIdent &, const DataTypeIdent &);
