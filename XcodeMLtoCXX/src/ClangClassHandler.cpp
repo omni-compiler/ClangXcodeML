@@ -183,8 +183,8 @@ setClassName(XcodeMl::ClassType &classType, xmlNodePtr node, SourceInfo &src) {
     classType.setName(src.getUniqueName());
     return;
   }
-  const auto className = getQualifiedNameFromNameNode(nameNode, src);
-  const auto nameSpelling = className.toString(src.typeTable, src.nnsTable);
+  const auto className = getUnqualIdFromNameNode(nameNode);
+  const auto nameSpelling = className->toString(src.typeTable);
   classType.setName(nameSpelling);
 }
 
