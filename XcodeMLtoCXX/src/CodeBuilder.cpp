@@ -27,7 +27,6 @@
 #include "SourceInfo.h"
 #include "CodeBuilder.h"
 #include "ClangClassHandler.h"
-#include "SymbolBuilder.h"
 #include "LibXMLUtil.h"
 
 namespace cxxgen = CXXCodeGen;
@@ -45,7 +44,12 @@ using XcodeMl::makeOpNode;
 namespace {
 
 XcodeMl::CodeFragment
-wrapWithLangLink(const XcodeMl::CodeFragment &content, xmlNodePtr node) {
+wrapWithLangLink(const XcodeMl::CodeFragment &content,
+    xmlNodePtr node,
+    const SourceInfo &src) {
+  if (src.language != Language::CPlusPlus) {
+    return content;
+  }
   const auto lang = getPropOrNull(node, "language_linkage");
   if (!lang.hasValue() || *lang == "C++") {
     return content;
@@ -202,8 +206,8 @@ const CodeBuilder::Procedure handleScope = handleBracketsLn(
 std::vector<XcodeMl::CodeFragment>
 getParamNames(xmlNodePtr fnNode, const SourceInfo &src) {
   std::vector<XcodeMl::CodeFragment> vec;
-  const auto params =
-      findNodes(fnNode, "TypeLoc/clangDecl[@class='ParmVar']/name", src.ctxt);
+  const auto params = findNodes(
+      fnNode, "clangTypeLoc/clangDecl[@class='ParmVar']/name", src.ctxt);
   for (auto p : params) {
     XMLString name = xmlNodeGetContent(p);
     vec.push_back(makeTokenNode(name));
@@ -263,7 +267,7 @@ DEFINE_CB(functionDefinitionProc) {
   acc = acc + makeTokenNode("{") + makeNewLineNode();
   acc = acc + w.walk(body, src);
   acc = acc + makeTokenNode("}");
-  return wrapWithLangLink(acc, node);
+  return wrapWithLangLink(acc, node, src);
 }
 
 DEFINE_CB(functionDeclProc) {
@@ -272,7 +276,7 @@ DEFINE_CB(functionDeclProc) {
       llvm::cast<XcodeMl::Function>(src.typeTable[fnDtident].get());
   auto decl = makeFunctionDeclHead(node, fnType->argNames(), src);
   decl = decl + makeTokenNode(";");
-  return wrapWithLangLink(decl, node);
+  return wrapWithLangLink(decl, node, src);
 }
 
 DEFINE_CB(varProc) {
@@ -324,7 +328,7 @@ DEFINE_CB(emitMemberFunctionDecl) {
     decl = decl + makeTokenNode("=") + makeTokenNode("0");
   }
   decl = decl + makeTokenNode(";");
-  return wrapWithLangLink(decl, node);
+  return wrapWithLangLink(decl, node, src);
 }
 
 DEFINE_CB(memberExprProc) {
@@ -610,7 +614,7 @@ DEFINE_CB(varDeclProc) {
                   src.typeTable);
   xmlNodePtr valueElem = findFirst(node, "value", src.ctxt);
   if (!valueElem) {
-    return wrapWithLangLink(acc + makeTokenNode(";"), node);
+    return wrapWithLangLink(acc + makeTokenNode(";"), node, src);
   }
 
   auto ctorExpr =
@@ -618,11 +622,11 @@ DEFINE_CB(varDeclProc) {
   if (ctorExpr) {
     const auto decl =
         acc + declareClassTypeInit(w, ctorExpr, src) + makeTokenNode(";");
-    return wrapWithLangLink(decl, node);
+    return wrapWithLangLink(decl, node, src);
   }
 
   acc = acc + makeTokenNode("=") + w.walk(valueElem, src) + makeTokenNode(";");
-  return wrapWithLangLink(acc, node);
+  return wrapWithLangLink(acc, node, src);
 }
 
 DEFINE_CB(usingDeclProc) {
@@ -652,7 +656,7 @@ DEFINE_CB(emitDataMemberDecl) {
                   src.typeTable);
   xmlNodePtr valueElem = findFirst(node, "value", src.ctxt);
   if (!valueElem) {
-    return wrapWithLangLink(acc + makeTokenNode(";"), node);
+    return wrapWithLangLink(acc + makeTokenNode(";"), node, src);
   }
 
   auto ctorExpr =
@@ -660,12 +664,12 @@ DEFINE_CB(emitDataMemberDecl) {
   if (ctorExpr) {
     const auto decl =
         acc + declareClassTypeInit(w, ctorExpr, src) + makeTokenNode(";");
-    return wrapWithLangLink(decl, node);
+    return wrapWithLangLink(decl, node, src);
   }
 
   acc = acc + makeTokenNode("=") + ProgramBuilder.walk(valueElem, src)
       + makeTokenNode(";");
-  return wrapWithLangLink(acc, node);
+  return wrapWithLangLink(acc, node, src);
 }
 
 DEFINE_CB(ctorInitListProc) {
@@ -727,6 +731,10 @@ DEFINE_CB(clangStmtProc) {
 
 DEFINE_CB(clangDeclProc) {
   return ClangDeclHandler.walk(node, w, src);
+}
+
+DEFINE_CB(clangTypeLocProc) {
+  return ClangTypeLocHandler.walk(node, w, src);
 }
 
 } // namespace
@@ -822,11 +830,35 @@ const CodeBuilder ProgramBuilder("ProgramBuilder",
         /* for elements defined by clang */
         std::make_tuple("clangStmt", clangStmtProc),
         std::make_tuple("clangDecl", clangDeclProc),
+        std::make_tuple("clangTypeLoc", clangTypeLocProc),
 
         /* for CtoXcodeML */
         std::make_tuple("Decl_Record", NullProc),
         // Ignore Decl_Record (structs are already emitted)
     });
+
+namespace {
+
+Language
+getSourceLanguage(xmlNodePtr rootNode, xmlXPathContextPtr ctxt) {
+  const auto topNode = findFirst(rootNode, "/XcodeProgram", ctxt);
+
+  const auto lang = getPropOrNull(topNode, "language");
+  if (!lang.hasValue()) {
+    // The default value of `language` attribute is "C++"
+    return Language::CPlusPlus;
+  }
+
+  if (*lang == "C++") {
+    return Language::CPlusPlus;
+  } else if (*lang == "C") {
+    return Language::C;
+  } else {
+    return Language::Invalid;
+  }
+}
+
+} // namespace
 
 const CodeBuilder ClassDefinitionBuilder("ClassDefinitionBuilder",
     makeInnerNode,
@@ -853,11 +885,10 @@ buildCode(
       findFirst(rootNode, "/XcodeProgram/typeTable", ctxt);
   xmlNodePtr nnsTableNode =
       findFirst(rootNode, "/XcodeProgram/nnsTable", ctxt);
-  SourceInfo src = {
-      ctxt,
+  SourceInfo src(ctxt,
       parseTypeTable(typeTableNode, ctxt, ss),
       analyzeNnsTable(nnsTableNode, ctxt),
-  };
+      getSourceLanguage(rootNode, ctxt));
 
   cxxgen::Stream out;
   xmlNodePtr globalDeclarations =
