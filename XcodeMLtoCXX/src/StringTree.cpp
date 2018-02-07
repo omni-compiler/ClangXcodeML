@@ -90,6 +90,9 @@ NewLineNode::classof(const StringTree *node) {
   return node->getKind() == StringTreeKind::NewLine;
 }
 
+NewLineNode::NewLineNode() : StringTree(StringTreeKind::NewLine) {
+};
+
 StringTree *
 NewLineNode::clone() const {
   return (StringTree *)this;
