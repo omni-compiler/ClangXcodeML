@@ -25,16 +25,34 @@ const newline_t newline = {};
 
 struct StreamImpl {
   StreamImpl()
-      : ss(), curIndent(0), alreadyIndented(false), lastChar('\n'), line() {
+      : ss(), curIndent(0), alreadyIndented(false), lastChar('\n'),
+	currline(), nextline() {
   }
 
   using LineInfo = std::tuple<std::string, size_t>;
+
   std::stringstream ss;
   size_t curIndent;
   bool alreadyIndented;
   char lastChar;
-  llvm::Optional<LineInfo> line;
+  llvm::Optional<LineInfo> currline;
+  llvm::Optional<LineInfo> nextline;
 };
+
+bool operator ==(const llvm::Optional<StreamImpl::LineInfo> &x,
+                 const llvm::Optional<StreamImpl::LineInfo> &y) {
+  if (!x && !y) {
+    return true;
+  }
+  if (!x || !y) {
+    return false;
+  }
+  return *x == *y;
+}
+bool operator !=(const llvm::Optional<StreamImpl::LineInfo> &x,
+                 const llvm::Optional<StreamImpl::LineInfo> &y) {
+  return ! (x == y);
+}
 
 namespace {
 
@@ -94,16 +112,24 @@ Stream::insertSpace() {
 
 void
 Stream::insertNewLine() {
-  if (pimpl->line) {
+  if (pimpl->currline && pimpl->currline != pimpl->nextline) {
     std::string filename;
     size_t lineno;
-    std::tie(filename, lineno) = *(pimpl->line);
+    std::tie(filename, lineno) = *(pimpl->currline);
 
     const auto directive =
         std::string("#line ") + filename + " " + std::to_string(lineno);
     emit(*pimpl, std::string("\n") + directive + "\n");
+    pimpl->nextline = StreamImpl::LineInfo(filename, lineno + 1);
   } else {
     emit(*pimpl, "\n");
+    if (pimpl->nextline) {
+      std::string filename;
+      size_t lineno;
+      std::tie(filename, lineno) = *(pimpl->currline);
+
+      pimpl->nextline = StreamImpl::LineInfo(filename, lineno + 1);
+    }
   }
   pimpl->alreadyIndented = false;
 }
@@ -145,7 +171,7 @@ Stream::insert(const std::string &token) {
 
 void
 Stream::setLineInfo(const std::string &filename, size_t lineno) {
-  pimpl->line = StreamImpl::LineInfo(filename, lineno);
+  pimpl->currline = StreamImpl::LineInfo(filename, lineno);
 }
 
 } // namespace CXXCodeGen
