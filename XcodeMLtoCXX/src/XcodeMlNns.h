@@ -22,6 +22,8 @@ using NnsMap = std::map<NnsIdent, NnsRef>;
  * NOTE: non-exhaustive (example: namespaceNNS)
  */
 enum class NnsKind {
+  /*! otherNNS */
+  Other,
   /*! global namespace */
   Global,
   /*! classNNS */

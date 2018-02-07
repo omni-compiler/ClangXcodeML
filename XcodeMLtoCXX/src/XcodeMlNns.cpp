@@ -106,6 +106,25 @@ ClassNns::classof(const Nns *N) {
   return N->getKind() == NnsKind::Class;
 }
 
+OtherNns::OtherNns(const NnsIdent &ident) : Nns(NnsKind::Other, ident) {
+}
+
+Nns *
+OtherNns::clone() const {
+  OtherNns *copy = new OtherNns(*this);
+  return copy;
+}
+
+bool
+OtherNns::classof(const Nns *N) {
+  return N->getKind() == NnsKind::Other;
+}
+
+CodeFragment
+OtherNns::makeNestedNameSpec(const Environment &, const NnsMap &) const {
+  return CXXCodeGen::makeVoidNode();
+}
+
 NnsRef
 makeGlobalNns() {
   return std::make_shared<GlobalNns>();
