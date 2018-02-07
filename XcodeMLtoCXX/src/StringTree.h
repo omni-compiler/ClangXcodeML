@@ -8,6 +8,8 @@ enum class StringTreeKind {
   Inner,
   /*! leaf node containing a string */
   Token,
+  /*! leaf node which represents a "\n" */
+  NewLine,
 };
 
 class InnerNode;
@@ -64,6 +66,23 @@ protected:
 private:
   std::string token;
 };
+
+class NewLineNode : public StringTree {
+public:
+  static bool classof(const StringTree *);
+  ~NewLineNode() = default;
+  StringTree *clone() const override;
+  void flush(Stream &) const override;
+  InnerNode *lift() const override;
+
+  static StringTreeRef getsingleton();
+
+protected:
+  explicit NewLineNode();
+  NewLineNode(const NewLineNode &) = default;
+};
+
+extern const NewLineNode newlinenode;
 
 class LineInfoNode : public StringTree {
 public:
