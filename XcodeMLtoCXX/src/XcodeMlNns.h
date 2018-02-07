@@ -158,6 +158,8 @@ NnsRef makeClassNns(const NnsIdent &nident,
  */
 NnsRef makeClassNns(const NnsIdent &nident, const DataTypeIdent &classType);
 
+NnsRef makeNamespaceNns(const NnsIdent &nident, const std::string &name);
+
 NnsRef makeOtherNns(const NnsIdent &nident);
 
 } // namespace XcodeMl

@@ -170,6 +170,11 @@ makeClassNns(const NnsIdent &ident, const DataTypeIdent &classType) {
 }
 
 NnsRef
+makeNamespaceNns(const NnsIdent &nident, const std::string &name) {
+  return std::make_shared<NamespaceNns>(nident, name);
+}
+
+NnsRef
 makeOtherNns(const NnsIdent &nident) {
   return std::make_shared<OtherNns>(nident);
 }
