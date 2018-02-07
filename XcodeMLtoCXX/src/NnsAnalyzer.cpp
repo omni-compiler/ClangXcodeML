@@ -53,3 +53,15 @@ analyzeNnsTable(xmlNodePtr nnsTable, xmlXPathContextPtr ctxt) {
   }
   return map;
 }
+
+XcodeMl::NnsMap
+expandNnsMap(const XcodeMl::NnsMap &table,
+    xmlNodePtr nnsTableNode,
+    xmlXPathContextPtr ctxt) {
+  auto newTable = table;
+  const auto definitions = findNodes(nnsTableNode, "*", ctxt);
+  for (auto &&definition : definitions) {
+    XcodeMLNNSAnalyzer.walk(definition, ctxt, newTable);
+  }
+  return newTable;
+}
