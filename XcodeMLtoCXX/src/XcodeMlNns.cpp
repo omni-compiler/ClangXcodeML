@@ -106,22 +106,23 @@ ClassNns::classof(const Nns *N) {
   return N->getKind() == NnsKind::Class;
 }
 
-FuncNns::FuncNns(const NnsIdent &ident) : Nns(NnsKind::Function, ident) {
+FuncLocalNns::FuncLocalNns(const NnsIdent &ident)
+    : Nns(NnsKind::Function, ident) {
 }
 
 Nns *
-FuncNns::clone() const {
-  FuncNns *copy = new FuncNns(*this);
+FuncLocalNns::clone() const {
+  FuncLocalNns *copy = new FuncLocalNns(*this);
   return copy;
 }
 
 bool
-FuncNns::classof(const Nns *N) {
+FuncLocalNns::classof(const Nns *N) {
   return N->getKind() == NnsKind::Function;
 }
 
 CodeFragment
-FuncNns::makeNestedNameSpec(const Environment &, const NnsMap &) const {
+FuncLocalNns::makeNestedNameSpec(const Environment &, const NnsMap &) const {
   return CXXCodeGen::makeVoidNode();
 }
 
@@ -143,8 +144,8 @@ makeClassNns(const NnsIdent &ident, const DataTypeIdent &classType) {
 }
 
 NnsRef
-makeFuncNns(const NnsIdent &nident) {
-  return std::make_shared<FuncNns>(nident);
+makeFuncLocalNns(const NnsIdent &nident) {
+  return std::make_shared<FuncLocalNns>(nident);
 }
 
 } // namespace XcodeMl

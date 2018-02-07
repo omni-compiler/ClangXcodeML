@@ -102,15 +102,15 @@ private:
   DataTypeIdent dtident;
 };
 
-class FuncNns : public Nns {
+class FuncLocalNns : public Nns {
 public:
-  FuncNns(const NnsIdent &ident);
-  ~FuncNns() override = default;
+  FuncLocalNns(const NnsIdent &ident);
+  ~FuncLocalNns() override = default;
   Nns *clone() const override;
   static bool classof(const Nns *);
 
 protected:
-  FuncNns(const FuncNns &) = default;
+  FuncLocalNns(const FuncLocalNns &) = default;
   CodeFragment makeNestedNameSpec(
       const Environment &, const NnsMap &) const override;
 };
@@ -138,7 +138,7 @@ NnsRef makeClassNns(const NnsIdent &nident,
  */
 NnsRef makeClassNns(const NnsIdent &nident, const DataTypeIdent &classType);
 
-NnsRef makeFuncNns(const NnsIdent &nident);
+NnsRef makeFuncLocalNns(const NnsIdent &nident);
 
 } // namespace XcodeMl
 
