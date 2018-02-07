@@ -57,6 +57,7 @@ class Name {
 public:
   explicit Name(
       const std::shared_ptr<UnqualId> &, const std::shared_ptr<Nns> &);
+  explicit Name(const std::shared_ptr<UnqualId> &);
   CodeFragment toString(const Environment &, const NnsMap &) const;
   std::shared_ptr<UnqualId> getUnqualId() const;
 

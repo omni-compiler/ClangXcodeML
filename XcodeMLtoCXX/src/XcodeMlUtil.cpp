@@ -78,6 +78,9 @@ getNns(const XcodeMl::NnsMap &nnsTable, xmlNodePtr nameNode) {
 XcodeMl::Name
 getQualifiedNameFromNameNode(xmlNodePtr nameNode, const SourceInfo &src) {
   const auto id = getUnqualIdFromNameNode(nameNode);
+  if (src.language == Language::C) {
+    return XcodeMl::Name(id);
+  }
   const auto nns = getNns(src.nnsTable, nameNode);
   return XcodeMl::Name(id, nns);
 }

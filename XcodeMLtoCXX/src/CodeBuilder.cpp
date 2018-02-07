@@ -219,9 +219,12 @@ XcodeMl::CodeFragment
 makeFunctionDeclHead(XcodeMl::Function *func,
     const XcodeMl::Name &name,
     const std::vector<XcodeMl::CodeFragment> &paramNames,
-    const SourceInfo &src) {
-  const auto nameSpelling = name.toString(src.typeTable, src.nnsTable);
+    const SourceInfo &src,
+    bool emitNameSpec = false) {
   const auto pUnqualId = name.getUnqualId();
+  const auto nameSpelling = emitNameSpec
+      ? name.toString(src.typeTable, src.nnsTable)
+      : pUnqualId->toString(src.typeTable);
   if (llvm::isa<XcodeMl::CtorName>(pUnqualId.get())
       || llvm::isa<XcodeMl::DtorName>(pUnqualId.get())
       || llvm::isa<XcodeMl::ConvFuncId>(pUnqualId.get())) {
@@ -240,7 +243,8 @@ makeFunctionDeclHead(XcodeMl::Function *func,
 XcodeMl::CodeFragment
 makeFunctionDeclHead(xmlNodePtr node,
     const std::vector<XcodeMl::CodeFragment> paramNames,
-    const SourceInfo &src) {
+    const SourceInfo &src,
+    bool emitNameSpec = false) {
   const auto nameNode = findFirst(node, "name", src.ctxt);
   const auto name = getQualifiedNameFromNameNode(nameNode, src);
 
@@ -249,13 +253,17 @@ makeFunctionDeclHead(xmlNodePtr node,
   const auto fnType = llvm::cast<XcodeMl::Function>(T.get());
 
   auto acc = makeVoidNode();
-  acc = acc + makeFunctionDeclHead(fnType, name, paramNames, src);
+  acc = acc + makeFunctionDeclHead(fnType,
+                  name,
+                  paramNames,
+                  src,
+                  emitNameSpec && xmlHasProp(node, BAD_CAST "parent_class"));
   return acc;
 }
 
 DEFINE_CB(functionDefinitionProc) {
   const auto paramNames = getParamNames(node, src);
-  auto acc = makeFunctionDeclHead(node, paramNames, src);
+  auto acc = makeFunctionDeclHead(node, paramNames, src, true);
 
   if (auto ctorInitList =
           findFirst(node, "constructorInitializerList", src.ctxt)) {
@@ -603,15 +611,13 @@ declareClassTypeInit(
 
 DEFINE_CB(varDeclProc) {
   const auto nameNode = findFirst(node, "name", src.ctxt);
-  const auto name = getQualifiedNameFromNameNode(nameNode, src);
+  const auto name = getUnqualIdFromNameNode(nameNode);
 
   const auto dtident = getProp(node, "type");
   const auto type = src.typeTable.at(dtident);
 
   auto acc = makeVoidNode();
-  acc = acc + makeDecl(type,
-                  name.toString(src.typeTable, src.nnsTable),
-                  src.typeTable);
+  acc = acc + makeDecl(type, name->toString(src.typeTable), src.typeTable);
   xmlNodePtr valueElem = findFirst(node, "value", src.ctxt);
   if (!valueElem) {
     return wrapWithLangLink(acc + makeTokenNode(";"), node, src);
@@ -642,7 +648,7 @@ DEFINE_CB(usingDeclProc) {
 
 DEFINE_CB(emitDataMemberDecl) {
   const auto nameNode = findFirst(node, "name", src.ctxt);
-  const auto name = getQualifiedNameFromNameNode(nameNode, src);
+  const auto name = getUnqualIdFromNameNode(nameNode);
 
   const auto dtident = getProp(node, "type");
   const auto type = src.typeTable.at(dtident);
@@ -651,9 +657,7 @@ DEFINE_CB(emitDataMemberDecl) {
   if (isTrueProp(node, "is_static_data_member", false)) {
     acc = acc + makeTokenNode("static");
   }
-  acc = acc + makeDecl(type,
-                  name.toString(src.typeTable, src.nnsTable),
-                  src.typeTable);
+  acc = acc + makeDecl(type, name->toString(src.typeTable), src.typeTable);
   xmlNodePtr valueElem = findFirst(node, "value", src.ctxt);
   if (!valueElem) {
     return wrapWithLangLink(acc + makeTokenNode(";"), node, src);

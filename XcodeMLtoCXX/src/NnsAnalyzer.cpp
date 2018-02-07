@@ -31,6 +31,17 @@ DEFINE_NA(classNnsProc) {
   map[name] = XcodeMl::makeClassNns(name, type);
 }
 
+DEFINE_NA(otherNnsProc) {
+  const auto nident = getProp(node, "nns");
+  map[nident] = XcodeMl::makeOtherNns(nident);
+}
+
+DEFINE_NA(namespaceNnsProc) {
+  const auto nident = getProp(node, "nns");
+  const auto namespaceName = getContent(node);
+  map[nident] = XcodeMl::makeNamespaceNns(nident, namespaceName);
+}
+
 const XcodeMl::NnsMap initialNnsMap = {
     {"global", XcodeMl::makeGlobalNns()},
 };
@@ -38,6 +49,8 @@ const XcodeMl::NnsMap initialNnsMap = {
 const NnsAnalyzer XcodeMLNNSAnalyzer("NnsAnalyzer",
     {
         std::make_tuple("classNNS", classNnsProc),
+        std::make_tuple("namespaceNNS", namespaceNnsProc),
+        std::make_tuple("otherNNS", otherNnsProc),
     });
 
 XcodeMl::NnsMap
@@ -52,4 +65,16 @@ analyzeNnsTable(xmlNodePtr nnsTable, xmlXPathContextPtr ctxt) {
     XcodeMLNNSAnalyzer.walk(nnsNode, ctxt, map);
   }
   return map;
+}
+
+XcodeMl::NnsMap
+expandNnsMap(const XcodeMl::NnsMap &table,
+    xmlNodePtr nnsTableNode,
+    xmlXPathContextPtr ctxt) {
+  auto newTable = table;
+  const auto definitions = findNodes(nnsTableNode, "*", ctxt);
+  for (auto &&definition : definitions) {
+    XcodeMLNNSAnalyzer.walk(definition, ctxt, newTable);
+  }
+  return newTable;
 }

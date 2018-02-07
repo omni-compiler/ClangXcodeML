@@ -19,6 +19,7 @@
 #include "XcodeMlEnvironment.h"
 #include "SourceInfo.h"
 #include "TypeAnalyzer.h"
+#include "NnsAnalyzer.h"
 #include "CodeBuilder.h"
 #include "ClangClassHandler.h"
 #include "XcodeMlUtil.h"
@@ -84,6 +85,9 @@ DEFINE_CCH(FunctionTemplateProc) {
   if (const auto typeTableNode =
           findFirst(node, "xcodemlTypeTable", src.ctxt)) {
     src.typeTable = expandEnvironment(src.typeTable, typeTableNode, src.ctxt);
+  }
+  if (const auto nnsTableNode = findFirst(node, "xcodemlNnsTable", src.ctxt)) {
+    src.nnsTable = expandNnsMap(src.nnsTable, nnsTableNode, src.ctxt);
   }
   const auto paramNodes =
       findNodes(node, "clangDecl[@class='TemplateTypeParm']", src.ctxt);
@@ -178,8 +182,8 @@ setClassName(XcodeMl::ClassType &classType, xmlNodePtr node, SourceInfo &src) {
     classType.setName(src.getUniqueName());
     return;
   }
-  const auto className = getQualifiedNameFromNameNode(nameNode, src);
-  const auto nameSpelling = className.toString(src.typeTable, src.nnsTable);
+  const auto className = getUnqualIdFromNameNode(nameNode);
+  const auto nameSpelling = className->toString(src.typeTable);
   classType.setName(nameSpelling);
 }
 
