@@ -110,10 +110,13 @@ NewLineNode::lift() const {
   return node;
 }
 
+static void nop(void *) {
+}
+
 StringTreeRef
 NewLineNode::getsingleton() {
   static NewLineNode singleton;
-  static StringTreeRef singletonptr(&singleton);
+  static StringTreeRef singletonptr(&singleton, nop);
   return singletonptr;
 }
 
