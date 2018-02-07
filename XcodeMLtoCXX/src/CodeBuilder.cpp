@@ -221,8 +221,10 @@ makeFunctionDeclHead(XcodeMl::Function *func,
     const std::vector<XcodeMl::CodeFragment> &paramNames,
     const SourceInfo &src,
     bool emitNameSpec = false) {
-  const auto nameSpelling = name.toString(src.typeTable, src.nnsTable);
   const auto pUnqualId = name.getUnqualId();
+  const auto nameSpelling = emitNameSpec
+      ? name.toString(src.typeTable, src.nnsTable)
+      : pUnqualId->toString(src.typeTable);
   if (llvm::isa<XcodeMl::CtorName>(pUnqualId.get())
       || llvm::isa<XcodeMl::DtorName>(pUnqualId.get())
       || llvm::isa<XcodeMl::ConvFuncId>(pUnqualId.get())) {
@@ -251,7 +253,8 @@ makeFunctionDeclHead(xmlNodePtr node,
   const auto fnType = llvm::cast<XcodeMl::Function>(T.get());
 
   auto acc = makeVoidNode();
-  acc = acc + makeFunctionDeclHead(fnType, name, paramNames, src);
+  acc =
+      acc + makeFunctionDeclHead(fnType, name, paramNames, src, emitNameSpec);
   return acc;
 }
 
