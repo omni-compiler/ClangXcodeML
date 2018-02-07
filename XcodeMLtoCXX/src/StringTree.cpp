@@ -85,6 +85,41 @@ InnerNode::amend(const StringTreeRef &node) {
       IN->children.begin(), IN->children.end(), std::back_inserter(children));
 }
 
+bool
+NewLineNode::classof(const StringTree *node) {
+  return node->getKind() == StringTreeKind::NewLine;
+}
+
+NewLineNode::NewLineNode() : StringTree(StringTreeKind::NewLine) {
+};
+
+StringTree *
+NewLineNode::clone() const {
+  return (StringTree *)this;
+}
+
+void
+NewLineNode::flush(Stream &ss) const {
+  ss << CXXCodeGen::newline;
+}
+
+InnerNode *
+NewLineNode::lift() const {
+  std::vector<StringTreeRef> v({getsingleton()});
+  InnerNode *node = new InnerNode(v);
+  return node;
+}
+
+static void nop(void *) {
+}
+
+StringTreeRef
+NewLineNode::getsingleton() {
+  static NewLineNode singleton;
+  static StringTreeRef singletonptr(&singleton, nop);
+  return singletonptr;
+}
+
 StringTreeRef
 makeInnerNode(const std::vector<StringTreeRef> &v) {
   return std::make_shared<InnerNode>(v);
@@ -92,7 +127,7 @@ makeInnerNode(const std::vector<StringTreeRef> &v) {
 
 StringTreeRef
 makeNewLineNode() {
-  return std::make_shared<TokenNode>("\n");
+  return NewLineNode::getsingleton();
 }
 
 StringTreeRef

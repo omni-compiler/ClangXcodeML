@@ -32,6 +32,10 @@ public:
    * It emits a space character (token separator) if necessary.
    */
   void insert(const std::string &);
+
+  /*! \brief Set the source position to emit #-line directive properly. */
+  void setLineInfo(const std::string &filename, size_t lineno);
+
   /*! \brief Decreases indent. */
   void unindent(size_t);
 

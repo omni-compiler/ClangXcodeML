@@ -11,7 +11,6 @@
 #include <memory>
 #include <vector>
 #include "llvm/ADT/Optional.h"
-#include "Stream.h"
 #include "StringTree.h"
 #include "XMLString.h"
 #include "XcodeMlNns.h"
