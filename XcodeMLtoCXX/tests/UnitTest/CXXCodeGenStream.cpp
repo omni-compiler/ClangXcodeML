@@ -90,6 +90,7 @@ BOOST_AUTO_TEST_CASE(space_interleaving_test) {
       {"_", "1"},
       {"+", "+"},
       {"+", "="},
+      {"label1:", "::i = 1;"},
   };
 
   for (auto &&tc : testcases) {

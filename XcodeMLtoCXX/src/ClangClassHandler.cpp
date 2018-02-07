@@ -19,6 +19,7 @@
 #include "XcodeMlType.h"
 #include "XcodeMlEnvironment.h"
 #include "SourceInfo.h"
+#include "TypeAnalyzer.h"
 #include "CodeBuilder.h"
 #include "ClangClassHandler.h"
 #include "XcodeMlUtil.h"
@@ -56,6 +57,60 @@ DEFINE_CCH(CXXCtorExprProc) {
 DEFINE_CCH(CXXDeleteExprProc) {
   const auto allocated = findFirst(node, "*", src.ctxt);
   return makeTokenNode("delete") + w.walk(allocated, src);
+}
+
+DEFINE_CCH(DeclRefExprProc) {
+  const auto nameNode = findFirst(node, "name", src.ctxt);
+  const auto name = getQualifiedNameFromNameNode(nameNode, src);
+
+  if (const auto TAL = findFirst(node, "TemplateArgumentLoc", src.ctxt)) {
+    const auto templArgNodes = findNodes(TAL, "*", src.ctxt);
+    std::vector<CodeFragment> args;
+    for (auto &&argNode : templArgNodes) {
+      args.push_back(w.walk(argNode, src));
+    }
+    return name.toString(src.typeTable, src.nnsTable) + makeTokenNode("<")
+        + join(",", args) + makeTokenNode(">");
+  }
+
+  return name.toString(src.typeTable, src.nnsTable);
+}
+
+DEFINE_CCH(emitTokenAttrValue) {
+  const auto token = getProp(node, "token");
+  return makeTokenNode(token);
+}
+
+DEFINE_CCH(FunctionTemplateProc) {
+  if (const auto typeTableNode =
+          findFirst(node, "xcodemlTypeTable", src.ctxt)) {
+    src.typeTable = expandEnvironment(src.typeTable, typeTableNode, src.ctxt);
+  }
+  const auto paramNodes =
+      findNodes(node, "clangDecl[@class='TemplateTypeParm']", src.ctxt);
+  const auto body = findFirst(node, "functionDefinition", src.ctxt);
+
+  std::vector<CXXCodeGen::StringTreeRef> params;
+  for (auto &&paramNode : paramNodes) {
+    params.push_back(w.walk(paramNode, src));
+  }
+
+  return makeTokenNode("template") + makeTokenNode("<") + join(",", params)
+      + makeTokenNode(">") + w.walk(body, src);
+}
+
+DEFINE_CCH(TemplateTypeParmProc) {
+  const auto nameNode = findFirst(node, "name", src.ctxt);
+  const auto name = getQualifiedNameFromNameNode(nameNode, src);
+  const auto nameSpelling = name.toString(src.typeTable, src.nnsTable);
+
+  const auto dtident = getProp(node, "type");
+  auto T = src.typeTable.at(dtident);
+  auto TTPT = llvm::cast<XcodeMl::TemplateTypeParm>(T.get());
+  assert(TTPT);
+  TTPT->setSpelling(nameSpelling);
+
+  return makeTokenNode("typename") + nameSpelling;
 }
 
 XcodeMl::CodeFragment
@@ -105,11 +160,28 @@ emitClassDefinition(xmlNodePtr node,
     }
   }
 
+  const auto classKey = makeTokenNode(getClassKey(classType.classKind()));
   const auto name = classType.name().getValueOr(cxxgen::makeVoidNode());
 
-  return makeTokenNode("class") + name + makeBases(classType, src)
-      + makeTokenNode("{") + separateByBlankLines(decls) + makeTokenNode("}")
-      + makeTokenNode(";") + cxxgen::makeNewLineNode();
+  return classKey + name + makeBases(classType, src) + makeTokenNode("{")
+      + separateByBlankLines(decls) + makeTokenNode("}") + makeTokenNode(";")
+      + cxxgen::makeNewLineNode();
+}
+
+void
+setClassName(XcodeMl::ClassType &classType, xmlNodePtr node, SourceInfo &src) {
+  const auto nameNode = findFirst(node, "name", src.ctxt);
+  if (!nameNode || isEmpty(nameNode)) {
+    /* `classType` is unnamed.
+     * Unnamed classes are problematic, so give a name to `classType`
+     * such as `__xcodeml_1`.
+     */
+    classType.setName(src.getUniqueName());
+    return;
+  }
+  const auto className = getQualifiedNameFromNameNode(nameNode, src);
+  const auto nameSpelling = className.toString(src.typeTable, src.nnsTable);
+  classType.setName(nameSpelling);
 }
 
 DEFINE_CCH(CXXRecordProc) {
@@ -121,17 +193,16 @@ DEFINE_CCH(CXXRecordProc) {
   auto classT = llvm::dyn_cast<XcodeMl::ClassType>(T.get());
   assert(classT);
 
-  const auto nameNode = findFirst(node, "name", src.ctxt);
-  const auto className = getQualifiedNameFromNameNode(nameNode, src);
-  const auto nameSpelling = className.toString(src.typeTable, src.nnsTable);
-  classT->setName(nameSpelling);
+  setClassName(*classT, node, src);
+  const auto nameSpelling = *(classT->name()); // now class name must exist
 
   if (isTrueProp(node, "is_this_declaration_a_definition", false)) {
     return emitClassDefinition(node, ClassDefinitionBuilder, src, *classT);
   }
 
   /* forward declaration */
-  return makeTokenNode("class") + nameSpelling + makeTokenNode(";");
+  const auto classKey = getClassKey(classT->classKind());
+  return makeTokenNode(classKey) + nameSpelling + makeTokenNode(";");
 }
 
 DEFINE_CCH(CXXTemporaryObjectExprProc) {
@@ -154,13 +225,17 @@ const ClangClassHandler ClangStmtHandler("class",
     {
         std::make_tuple("BreakStmt", BreakStmtProc),
         std::make_tuple("CallExpr", callExprProc),
+        std::make_tuple("CharacterLiteral", emitTokenAttrValue),
         std::make_tuple("CXXConstructExpr", CXXCtorExprProc),
         std::make_tuple("CXXDeleteExpr", CXXDeleteExprProc),
         std::make_tuple("CXXTemporaryObjectExpr", CXXTemporaryObjectExprProc),
+        std::make_tuple("DeclRefExpr", DeclRefExprProc),
+        std::make_tuple("FloatingLiteral", emitTokenAttrValue),
+        std::make_tuple("IntegerLiteral", emitTokenAttrValue),
     });
 
 DEFINE_CCH(FriendDeclProc) {
-  if (auto TL = findFirst(node, "TypeLoc", src.ctxt)) {
+  if (auto TL = findFirst(node, "clangTypeLoc", src.ctxt)) {
     /* friend class declaration */
     const auto dtident = getProp(TL, "type");
     const auto T = src.typeTable.at(dtident);
@@ -171,10 +246,41 @@ DEFINE_CCH(FriendDeclProc) {
   return makeTokenNode("friend") + callCodeBuilder(node, w, src);
 }
 
+DEFINE_CCH(TypedefProc) {
+  if (isTrueProp(node, "is_implicit", 0)) {
+    return cxxgen::makeVoidNode();
+  }
+  const auto dtident = getProp(node, "xcodemlTypedefType");
+  const auto T = src.typeTable.at(dtident);
+
+  const auto nameNode = findFirst(node, "name", src.ctxt);
+  const auto typedefName =
+      getUnqualIdFromNameNode(nameNode)->toString(src.typeTable);
+
+  return makeTokenNode("typedef") + makeDecl(T, typedefName, src.typeTable)
+      + makeTokenNode(";");
+}
+
 const ClangClassHandler ClangDeclHandler("class",
     cxxgen::makeInnerNode,
     callCodeBuilder,
     {
         std::make_tuple("CXXRecord", CXXRecordProc),
         std::make_tuple("Friend", FriendDeclProc),
+        std::make_tuple("FunctionTemplate", FunctionTemplateProc),
+        std::make_tuple("TemplateTypeParm", TemplateTypeParmProc),
+        std::make_tuple("Typedef", TypedefProc),
+    });
+
+DEFINE_CCH(BuiltinTypeProc) {
+  const auto dtident = getProp(node, "type");
+  return makeDecl(
+      src.typeTable.at(dtident), cxxgen::makeVoidNode(), src.typeTable);
+}
+
+const ClangClassHandler ClangTypeLocHandler("class",
+    cxxgen::makeInnerNode,
+    callCodeBuilder,
+    {
+        std::make_tuple("Builtin", BuiltinTypeProc),
     });

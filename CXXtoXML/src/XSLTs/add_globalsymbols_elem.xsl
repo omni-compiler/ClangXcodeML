@@ -117,14 +117,13 @@
     </xsl:for-each>
   </xsl:template>
 
-  <xsl:template match="/Program">
-    <Program>
+  <xsl:template match="/clangAST">
+    <clangAST>
       <xsl:apply-templates select="@*" />
 
       <typeTable>
         <xsl:apply-templates
             select="
-            clangAST/
             clangDecl[@class='TranslationUnit']/
             xcodemlTypeTable/*"/>
       </typeTable>
@@ -132,26 +131,21 @@
       <nnsTable>
         <xsl:apply-templates
             select="
-            clangAST/
             clangDecl[@class='TranslationUnit']/
             xcodemlNnsTable/*"/>
       </nnsTable>
 
       <globalSymbols>
         <xsl:for-each
-          select="clangAST/clangDecl[@class='TranslationUnit']">
+          select="clangDecl[@class='TranslationUnit']">
           <xsl:call-template name="emit-id-list-in-namespace"/>
         </xsl:for-each>
       </globalSymbols>
 
-      <xsl:apply-templates select="clangAST" />
+      <xsl:apply-templates select="clangDecl" />
 
-    </Program>
+    </clangAST>
   </xsl:template>
-
-  <xsl:template match="xcodemlTypeTable" />
-
-  <xsl:template match="xcodemlNnsTable" />
 
   <xsl:template match="node()|@*">
     <xsl:copy>

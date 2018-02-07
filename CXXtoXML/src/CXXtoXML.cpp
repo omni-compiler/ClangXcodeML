@@ -15,6 +15,7 @@
 
 #include <libxml/xmlsave.h>
 #include <time.h>
+#include <iostream>
 #include <string>
 
 using namespace clang;
@@ -24,6 +25,22 @@ using namespace llvm;
 
 static cl::extrahelp CommonHelp(CommonOptionsParser::HelpMessage);
 static std::unique_ptr<opt::OptTable> Options(createDriverOptTable());
+
+namespace {
+
+const char *
+getLanguageString(const LangOptions &Opts) {
+  if (Opts.CPlusPlus) {
+    return "C++";
+  } else if (Opts.C99 || Opts.C11) {
+    return "C";
+  } else {
+    std::cout << "Invalid file" << std::endl;
+    std::abort();
+  }
+}
+
+} // namespace
 
 class XMLASTConsumer : public ASTConsumer {
   xmlNodePtr rootNode;
@@ -40,7 +57,7 @@ public:
     TypeTableInfo *TTI = &typetableinfo;
     NnsTableInfo nnstableinfo(MC, TTI);
     NnsTableInfo *NTI = &nnstableinfo;
-    DeclarationsVisitor DV(MC, rootNode, "clangAST", TTI, NTI);
+    DeclarationsVisitor DV(MC, rootNode, nullptr, TTI, NTI);
     Decl *D = CXT.getTranslationUnitDecl();
 
     DV.TraverseDecl(D);
@@ -63,9 +80,8 @@ public:
   bool
   BeginSourceFileAction(
       clang::CompilerInstance &CI, StringRef Filename) override {
-    (void)CI; // suppress warnings
     xmlDoc = xmlNewDoc(BAD_CAST "1.0");
-    xmlNodePtr rootnode = xmlNewNode(nullptr, BAD_CAST "Program");
+    xmlNodePtr rootnode = xmlNewNode(nullptr, BAD_CAST "clangAST");
     xmlDocSetRootElement(xmlDoc, rootnode);
 
     char strftimebuf[BUFSIZ];
@@ -74,7 +90,9 @@ public:
     strftime(strftimebuf, sizeof strftimebuf, "%F %T", localtime(&t));
 
     xmlNewProp(rootnode, BAD_CAST "source", BAD_CAST Filename.data());
-    xmlNewProp(rootnode, BAD_CAST "language", BAD_CAST "C");
+    xmlNewProp(rootnode,
+        BAD_CAST "language",
+        BAD_CAST getLanguageString(CI.getLangOpts()));
     xmlNewProp(rootnode, BAD_CAST "time", BAD_CAST strftimebuf);
 
     return true;

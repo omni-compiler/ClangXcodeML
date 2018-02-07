@@ -145,9 +145,11 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
   if (auto IL = dyn_cast<IntegerLiteral>(S)) {
     const unsigned INIT_BUFFER_SIZE = 32;
     SmallVector<char, INIT_BUFFER_SIZE> buffer;
-    auto &CXT = mangleContext->getASTContext();
-    auto spelling = clang::Lexer::getSpelling(
-        IL->getLocation(), buffer, CXT.getSourceManager(), CXT.getLangOpts());
+    const auto &CXT = mangleContext->getASTContext();
+    const auto &SM = CXT.getSourceManager();
+    const auto location = SM.getSpellingLoc(IL->getLocation());
+    const auto spelling =
+        clang::Lexer::getSpelling(location, buffer, SM, CXT.getLangOpts());
     newProp("token", spelling.str().c_str());
     std::string decimalNotation = IL->getValue().toString(10, true);
     newProp("decimalNotation", decimalNotation.c_str());
@@ -338,6 +340,20 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
   NamedDecl *ND = dyn_cast<NamedDecl>(D);
   if (ND) {
     auto nameNode = makeNameNode(*typetableinfo, ND);
+
+    /* experimental */
+    const auto D1 = ND->getDeclContext();
+    assert(D1);
+    const auto D2 = D1->getParent();
+    // const auto parent =  D2 ? D2 : D1;
+    const auto parent = D1;
+    xmlNewProp(nameNode,
+        BAD_CAST "test_nns_decl_kind",
+        BAD_CAST(parent->getDeclKindName()));
+    xmlNewProp(nameNode,
+        BAD_CAST "test_nns",
+        BAD_CAST(nnstableinfo->getNnsName(parent).c_str()));
+
     xmlAddChild(curNode, nameNode);
   }
 
@@ -404,12 +420,22 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
       newBoolProp("clang_parent_class_not_found", true);
     }
   }
+
+  if (isa<TemplateDecl>(D)) {
+    auto typetable = addChild("xcodemlTypeTable");
+    typetableinfo->pushTypeTableStack(typetable);
+    auto nnsTable = addChild("xcodemlNnsTable");
+    nnstableinfo->pushNnsTableStack(nnsTable);
+  }
   return true;
 }
 
 bool
 DeclarationsVisitor::PostVisitDecl(Decl *D) {
-  if (isa<TranslationUnitDecl>(D)) {
+  if (!D) {
+    return true;
+  }
+  if (isa<TemplateDecl>(D) || isa<TranslationUnitDecl>(D)) {
     typetableinfo->popTypeTableStack();
     nnstableinfo->popNnsTableStack();
   }
