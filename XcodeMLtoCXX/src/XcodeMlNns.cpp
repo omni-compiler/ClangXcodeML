@@ -106,6 +106,33 @@ ClassNns::classof(const Nns *N) {
   return N->getKind() == NnsKind::Class;
 }
 
+NamespaceNns::NamespaceNns(
+    const NnsIdent &nident, const std::string &namespaceName)
+    : Nns(NnsKind::Namespace, nident), name(namespaceName) {
+}
+
+NamespaceNns::NamespaceNns(const NnsIdent &nident,
+    const std::string &namespaceName,
+    const NnsIdent &parent)
+    : Nns(NnsKind::Namespace, parent, nident), name(namespaceName) {
+}
+
+Nns *
+NamespaceNns::clone() const {
+  NamespaceNns *copy = new NamespaceNns(*this);
+  return copy;
+}
+
+bool
+NamespaceNns::classof(const Nns *N) {
+  return N->getKind() == NnsKind::Namespace;
+}
+
+CodeFragment
+NamespaceNns::makeNestedNameSpec(const Environment &, const NnsMap &) const {
+  return makeTokenNode(name) + makeTokenNode("::");
+}
+
 OtherNns::OtherNns(const NnsIdent &ident) : Nns(NnsKind::Other, ident) {
 }
 

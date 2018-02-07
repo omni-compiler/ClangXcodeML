@@ -28,6 +28,8 @@ enum class NnsKind {
   Global,
   /*! classNNS */
   Class,
+  /*! namespaceNNS */
+  Namespace,
 };
 
 /*!
@@ -100,6 +102,24 @@ protected:
 private:
   /*! XcodeML data type identifier of the class */
   DataTypeIdent dtident;
+};
+
+class NamespaceNns : public Nns {
+public:
+  NamespaceNns(const NnsIdent &nident, const std::string &name);
+  NamespaceNns(
+      const NnsIdent &nident, const std::string &name, const NnsIdent &parent);
+  ~NamespaceNns() override = default;
+  Nns *clone() const override;
+  static bool classof(const Nns *);
+
+protected:
+  NamespaceNns(const NamespaceNns &) = default;
+  virtual CodeFragment makeNestedNameSpec(
+      const Environment &, const NnsMap &) const override;
+
+private:
+  std::string name;
 };
 
 class OtherNns : public Nns {
