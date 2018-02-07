@@ -141,7 +141,7 @@ nnsNewNode(const clang::MangleContext &MC,
   using namespace clang;
   switch (DC.getDeclKind()) {
   case Decl::CXXRecord: return makeClassNnsNode(MC, info, TTI, DC);
-  default: return xmlNewNode(nullptr, BAD_CAST "DCNNS");
+  default: return xmlNewNode(nullptr, BAD_CAST "otherNNS");
   }
 }
 
