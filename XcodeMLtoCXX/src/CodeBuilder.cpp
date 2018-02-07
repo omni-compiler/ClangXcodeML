@@ -253,14 +253,17 @@ makeFunctionDeclHead(xmlNodePtr node,
   const auto fnType = llvm::cast<XcodeMl::Function>(T.get());
 
   auto acc = makeVoidNode();
-  acc =
-      acc + makeFunctionDeclHead(fnType, name, paramNames, src, emitNameSpec);
+  acc = acc + makeFunctionDeclHead(fnType,
+                  name,
+                  paramNames,
+                  src,
+                  emitNameSpec && xmlHasProp(node, BAD_CAST "parent_class"));
   return acc;
 }
 
 DEFINE_CB(functionDefinitionProc) {
   const auto paramNames = getParamNames(node, src);
-  auto acc = makeFunctionDeclHead(node, paramNames, src);
+  auto acc = makeFunctionDeclHead(node, paramNames, src, true);
 
   if (auto ctorInitList =
           findFirst(node, "constructorInitializerList", src.ctxt)) {
