@@ -138,6 +138,8 @@ NnsRef makeClassNns(const NnsIdent &nident,
  */
 NnsRef makeClassNns(const NnsIdent &nident, const DataTypeIdent &classType);
 
+NnsRef makeOtherNns(const NnsIdent &nident);
+
 } // namespace XcodeMl
 
 #endif /* !XCODEMLNNS_H */
