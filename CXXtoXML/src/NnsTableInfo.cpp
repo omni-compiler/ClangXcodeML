@@ -134,6 +134,15 @@ makeClassNnsNode(const clang::MangleContext &,
 }
 
 xmlNodePtr
+makeNamespaceNnsNode(const clang::DeclContext &DC) {
+  const auto ND = llvm::cast<clang::NamespaceDecl>(DC);
+  const auto node = xmlNewNode(nullptr, BAD_CAST "namespaceNNS");
+  const auto name = ND.getDeclName().getAsString();
+  xmlNodeAddContent(node, BAD_CAST(name.c_str()));
+  return node;
+}
+
+xmlNodePtr
 nnsNewNode(const clang::MangleContext &MC,
     NnsTableInfoImpl &info,
     TypeTableInfo &TTI,
@@ -141,6 +150,7 @@ nnsNewNode(const clang::MangleContext &MC,
   using namespace clang;
   switch (DC.getDeclKind()) {
   case Decl::CXXRecord: return makeClassNnsNode(MC, info, TTI, DC);
+  case Decl::Namespace: return makeNamespaceNnsNode(DC);
   default: return xmlNewNode(nullptr, BAD_CAST "otherNNS");
   }
 }
