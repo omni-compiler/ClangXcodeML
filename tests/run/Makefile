@@ -10,7 +10,7 @@ CXXTOXCODEML = $(ROOTDIR)/scripts/CXXtoXcodeML
 XCODEMLTOCXX = $(XCODEMLTOCXXDIR)/XcodeMLtoCXX
 
 # C tests
-# .src.c -> .c.xcodeml -> .dst.c -> .c.out -> .c.out
+# .src.c -> .c.xcodeml -> .dst.c -> .c.out -> .c.txt
 
 CC = /usr/local/bin/clang
 CFLAGS = -pedantic -fsyntax-only
@@ -36,7 +36,7 @@ CTESTOUTPUTTEXTS = $(CTESTCASES:.src.c=.c.txt)
 
 
 # C++ tests
-# .src.cpp -> .cpp.xcodeml -> .dst.cpp -> .cpp.out -> .cpp.out
+# .src.cpp -> .cpp.xcodeml -> .dst.cpp -> .cpp.out -> .cpp.txt
 
 CXX = /usr/local/bin/clang++
 CXXFLAGS = -pedantic -fsyntax-only
