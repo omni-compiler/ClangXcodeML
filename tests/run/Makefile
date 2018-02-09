@@ -6,26 +6,18 @@ all: check
 
 ROOTDIR = ../..
 XCODEMLTOCXXDIR = $(ROOTDIR)/XcodeMLtoCXX
-CC = /usr/local/bin/clang
-CFLAGS = -pedantic -fsyntax-only
-CXX = /usr/local/bin/clang++
-CXXFLAGS = -pedantic -fsyntax-only
 CTOXCODEML = $(ROOTDIR)/scripts/CXXtoXcodeML
 CXXTOXCODEML = $(ROOTDIR)/scripts/CXXtoXcodeML
-CTOXCODEMLFLAGS = --
-CXXTOXCODEMLFLAGS = -- -I.
-CTOXMLFLAGS = --
-CXXTOXMLFLAGS = --
 XCODEMLTOCXX = $(XCODEMLTOCXXDIR)/XcodeMLtoCXX
+
+# C tests
+
+CC = /usr/local/bin/clang
+CFLAGS = -pedantic -fsyntax-only
+CTOXCODEMLFLAGS = --
+
 CTESTCASES = $(wildcard *.src.c)
 CTESTOBJECTS = $(CTESTCASES:.src.c=.dst.c)
-
-# .src.cpp -> .cpp.xcodeml -> .dst.cpp -> .cpp.out -> .cpp.out
-CXXTESTCASES = $(wildcard *.src.cpp)
-CXXTESTOBJECTS = $(CXXTESTCASES:.src.cpp=.dst.cpp)
-CXXTESTEXECUTABLES = $(CXXTESTCASES:.src.cpp=.cpp.out)
-CXXTESTOUTPUTTEXTS = $(CXXTESTCASES:.src.cpp=.cpp.txt)
-CLANGXMLOBJECTS = $(CTESTCASES:.src.c=.c.xml) $(CXXTESTCASES:.src.cpp=.cpp.xml)
 
 %.c.xcodeml: %.src.c
 	$(CTOXCODEML) $< $(CTOXCODEMLFLAGS) \
@@ -33,6 +25,19 @@ CLANGXMLOBJECTS = $(CTESTCASES:.src.c=.c.xml) $(CXXTESTCASES:.src.cpp=.cpp.xml)
 
 %.dst.c: %.c.xcodeml
 	$(XCODEMLTOCXX) $< > $@
+
+
+# C++ tests
+# .src.cpp -> .cpp.xcodeml -> .dst.cpp -> .cpp.out -> .cpp.out
+
+CXX = /usr/local/bin/clang++
+CXXFLAGS = -pedantic -fsyntax-only
+CXXTOXCODEMLFLAGS = -- -I.
+
+CXXTESTCASES = $(wildcard *.src.cpp)
+CXXTESTOBJECTS = $(CXXTESTCASES:.src.cpp=.dst.cpp)
+CXXTESTEXECUTABLES = $(CXXTESTCASES:.src.cpp=.cpp.out)
+CXXTESTOUTPUTTEXTS = $(CXXTESTCASES:.src.cpp=.cpp.txt)
 
 %.cpp.xcodeml: %.src.cpp
 	$(CXXTOXCODEML) $< $(CXXTOXCODEMLFLAGS) \
@@ -47,11 +52,6 @@ CLANGXMLOBJECTS = $(CTESTCASES:.src.c=.c.xml) $(CXXTESTCASES:.src.cpp=.cpp.xml)
 %.cpp.txt: %.cpp.out
 	./$< > $@
 
-%.c.xml: %.src.c
-	../../CXXtoXML/src/CXXtoXML $< $(CTOXMLFLAGS) > $@
-
-%.cpp.xml: %.src.cpp
-	../../CXXtoXML/src/CXXtoXML $< $(CXXTOXMLFLAGS) > $@
 
 check: $(CXXTESTOUTPUTTEXTS)
 	set -e; \
@@ -59,7 +59,17 @@ check: $(CXXTESTOUTPUTTEXTS)
 		diff -u $$file $${file%.txt}.sample; \
 	done
 
-clangxml: $(CLANGXMLOBJECTS)
-
 clean:
 	rm -f *.dst.c *.dst.cpp *.out *.txt *.xcodeml *.xml
+
+CLANGXMLOBJECTS = $(CTESTCASES:.src.c=.c.xml) $(CXXTESTCASES:.src.cpp=.cpp.xml)
+CTOXMLFLAGS = --
+CXXTOXMLFLAGS = --
+
+%.c.xml: %.src.c
+	../../CXXtoXML/src/CXXtoXML $< $(CTOXMLFLAGS) > $@
+
+%.cpp.xml: %.src.cpp
+	../../CXXtoXML/src/CXXtoXML $< $(CXXTOXMLFLAGS) > $@
+
+clangxml: $(CLANGXMLOBJECTS)
