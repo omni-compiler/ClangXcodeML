@@ -1,6 +1,6 @@
 .PHONY: clean check
 
-TESTDIRS = compiler run CCTest
+TESTDIRS = compile run CCTest
 
 check:
 	set -e; \
