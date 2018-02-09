@@ -10,13 +10,16 @@ CXXTOXCODEML = $(ROOTDIR)/scripts/CXXtoXcodeML
 XCODEMLTOCXX = $(XCODEMLTOCXXDIR)/XcodeMLtoCXX
 
 # C tests
+# .src.c -> .c.xcodeml -> .dst.c -> .c.out -> .c.out
 
 CC = /usr/local/bin/clang
 CFLAGS = -pedantic -fsyntax-only
-CTOXCODEMLFLAGS = --
+CTOXCODEMLFLAGS = -- -I.
 
 CTESTCASES = $(wildcard *.src.c)
 CTESTOBJECTS = $(CTESTCASES:.src.c=.dst.c)
+CTESTEXECUTABLES = $(CTESTCASES:.src.c=.c.out)
+CTESTOUTPUTTEXTS = $(CTESTCASES:.src.c=.c.txt)
 
 %.c.xcodeml: %.src.c
 	$(CXXTOXCODEML) $< $(CTOXCODEMLFLAGS) \
@@ -24,6 +27,12 @@ CTESTOBJECTS = $(CTESTCASES:.src.c=.dst.c)
 
 %.dst.c: %.c.xcodeml
 	$(XCODEMLTOCXX) $< > $@
+
+%.c.out: %.dst.c
+	$(CC) $< -o $@
+
+%.c.txt: %.c.out
+	./$< > $@
 
 
 # C++ tests
@@ -52,7 +61,7 @@ CXXTESTOUTPUTTEXTS = $(CXXTESTCASES:.src.cpp=.cpp.txt)
 	./$< > $@
 
 
-check: $(CXXTESTOUTPUTTEXTS)
+check: $(CXXTESTOUTPUTTEXTS) $(CTESTOUTPUTTEXTS)
 	set -e; \
 	for file in *.txt; do \
 		diff -u $$file $${file%.txt}.sample; \
