@@ -62,4 +62,4 @@ check: $(CXXTESTOUTPUTTEXTS)
 clangxml: $(CLANGXMLOBJECTS)
 
 clean:
-	rm -f *.dst.c *.dst.cpp *.xcodeml *.xml
+	rm -f *.dst.c *.dst.cpp *.out *.txt *.xcodeml *.xml
