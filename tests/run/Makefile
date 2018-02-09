@@ -6,7 +6,6 @@ all: check
 
 ROOTDIR = ../..
 XCODEMLTOCXXDIR = $(ROOTDIR)/XcodeMLtoCXX
-CTOXCODEML = $(ROOTDIR)/scripts/CXXtoXcodeML
 CXXTOXCODEML = $(ROOTDIR)/scripts/CXXtoXcodeML
 XCODEMLTOCXX = $(XCODEMLTOCXXDIR)/XcodeMLtoCXX
 
@@ -20,7 +19,7 @@ CTESTCASES = $(wildcard *.src.c)
 CTESTOBJECTS = $(CTESTCASES:.src.c=.dst.c)
 
 %.c.xcodeml: %.src.c
-	$(CTOXCODEML) $< $(CTOXCODEMLFLAGS) \
+	$(CXXTOXCODEML) $< $(CTOXCODEMLFLAGS) \
 		> $@
 
 %.dst.c: %.c.xcodeml
