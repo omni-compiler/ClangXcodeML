@@ -19,3 +19,4 @@ script:
   - docker-compose run workspace make -j4 -C /worktree/XcodeMLtoCXX
   - docker-compose run workspace make -C /worktree/XcodeMLtoCXX check
   - docker-compose run workspace make -C /worktree/tests/compile check
+  - docker-compose run workspace make -C /worktree/tests/run check
