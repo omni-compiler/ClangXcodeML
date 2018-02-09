@@ -13,14 +13,18 @@ CXXFLAGS = -pedantic -fsyntax-only
 CTOXCODEML = $(ROOTDIR)/scripts/CXXtoXcodeML
 CXXTOXCODEML = $(ROOTDIR)/scripts/CXXtoXcodeML
 CTOXCODEMLFLAGS = --
-CXXTOXCODEMLFLAGS = --
+CXXTOXCODEMLFLAGS = -- -I.
 CTOXMLFLAGS = --
 CXXTOXMLFLAGS = --
 XCODEMLTOCXX = $(XCODEMLTOCXXDIR)/XcodeMLtoCXX
 CTESTCASES = $(wildcard *.src.c)
 CTESTOBJECTS = $(CTESTCASES:.src.c=.dst.c)
+
+# .src.cpp -> .cpp.xcodeml -> .dst.cpp -> .cpp.out -> .cpp.out
 CXXTESTCASES = $(wildcard *.src.cpp)
 CXXTESTOBJECTS = $(CXXTESTCASES:.src.cpp=.dst.cpp)
+CXXTESTEXECUTABLES = $(CXXTESTCASES:.src.cpp=.cpp.out)
+CXXTESTOUTPUTTEXTS = $(CXXTESTCASES:.src.cpp=.cpp.txt)
 CLANGXMLOBJECTS = $(CTESTCASES:.src.c=.c.xml) $(CXXTESTCASES:.src.cpp=.cpp.xml)
 
 %.c.xcodeml: %.src.c
@@ -37,20 +41,22 @@ CLANGXMLOBJECTS = $(CTESTCASES:.src.c=.c.xml) $(CXXTESTCASES:.src.cpp=.cpp.xml)
 %.dst.cpp: %.cpp.xcodeml
 	$(XCODEMLTOCXX) $< > $@
 
+%.cpp.out: %.dst.cpp
+	$(CXX) $< -o $@
+
+%.cpp.txt: %.cpp.out
+	./$< > $@
+
 %.c.xml: %.src.c
 	../../CXXtoXML/src/CXXtoXML $< $(CTOXMLFLAGS) > $@
 
 %.cpp.xml: %.src.cpp
 	../../CXXtoXML/src/CXXtoXML $< $(CXXTOXMLFLAGS) > $@
 
-check: $(CXXTESTOBJECTS) $(CTESTOBJECTS)
+check: $(CXXTESTOUTPUTTEXTS)
 	set -e; \
-	for testobj in $(CXXTESTOBJECTS); do  \
-		$(CXX) $(CXXFLAGS) $$testobj; \
-	done
-	set -e; \
-	for testobj in $(CTESTOBJECTS); do  \
-		$(CC) $(CFLAGS) $$testobj; \
+	for file in *.txt; do \
+		diff -u $$file $${file%.txt}.sample; \
 	done
 
 clangxml: $(CLANGXMLOBJECTS)
