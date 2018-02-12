@@ -495,6 +495,8 @@ TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
       rawname = registerOtherType(T);
       // XXX: temporary implementation
       Node = createNode(T, "otherType", nullptr);
+      xmlNewProp(
+          Node, BAD_CAST "clang_type_class", BAD_CAST(T->getTypeClassName()));
       pushType(T, Node);
       break;
 
@@ -586,6 +588,8 @@ TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
       rawname = registerOtherType(T);
       // XXX: temporary implementation
       Node = createNode(T, "otherType", nullptr);
+      xmlNewProp(
+          Node, BAD_CAST "clang_type_class", BAD_CAST(T->getTypeClassName()));
       pushType(T, Node);
       break;
     }
