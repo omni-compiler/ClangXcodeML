@@ -598,13 +598,20 @@ TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
       pushType(T, Node);
       break;
     }
+    case Type::InjectedClassName: {
+      // The injected class name of a class template
+      // or class template partial specialization
+      rawname = registerInjectedClassNameType(T);
+      Node = createNode(T, "injectedClassNameType", nullptr);
+      pushType(T, Node);
+      break;
+    }
     case Type::Elaborated:
     case Type::Attributed:
     case Type::SubstTemplateTypeParm:
     case Type::SubstTemplateTypeParmPack:
     case Type::TemplateSpecialization:
     case Type::Auto:
-    case Type::InjectedClassName:
     case Type::DependentName:
     case Type::DependentTemplateSpecialization:
     case Type::PackExpansion:
