@@ -25,6 +25,7 @@ class TypeTableInfo {
   int seqForEnumType;
   int seqForClassType;
   int seqForTemplateTypeParmType;
+  int seqForInjectedClassNameType;
   int seqForOtherType;
 
   std::unordered_map<clang::QualType, xmlNodePtr> TypeElements;
@@ -40,6 +41,7 @@ class TypeTableInfo {
   std::string registerRecordType(clang::QualType T); // "S*", "U*", or "C*"
   std::string registerEnumType(clang::QualType T); // "E*"
   std::string registerTemplateTypeParmType(clang::QualType T);
+  std::string registerInjectedClassNameType(clang::QualType T);
   std::string registerOtherType(clang::QualType T); // "O*"
   void pushType(const clang::QualType &, xmlNodePtr);
 
