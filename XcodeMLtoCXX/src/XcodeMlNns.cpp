@@ -50,7 +50,7 @@ Nns::getParent() const {
   return parent;
 }
 
-GlobalNns::GlobalNns() : Nns(NnsKind::Global, NnsRef(), "global") {
+GlobalNns::GlobalNns() : Nns(NnsKind::Global, "global") {
 }
 
 Nns *
