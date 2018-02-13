@@ -803,6 +803,8 @@ const CodeBuilder ClassDefinitionBuilder("ClassDefinitionBuilder",
         std::make_tuple("clangDecl", clangDeclProc),
     });
 
+namespace {
+
 void
 readXcodeProgram(
     xmlNodePtr rootNode, xmlXPathContextPtr ctxt, std::stringstream &ss) {
@@ -843,6 +845,8 @@ readClangAST(
 
   ss << out.str();
 }
+
+} // namespace
 
 /*!
  * \brief Traverse an XcodeML document and generate C++ source code.
