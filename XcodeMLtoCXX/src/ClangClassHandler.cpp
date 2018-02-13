@@ -49,6 +49,15 @@ DEFINE_CCH(callExprProc) {
   return (w["functionCall"])(w, node, src);
 }
 
+DEFINE_CCH(CompoundStmtProc) {
+  const auto stmtNodes = findNodes(node, "clangStmt", src.ctxt);
+  std::vector<CXXCodeGen::StringTreeRef> stmts;
+  for (auto &&stmtNode : stmtNodes) {
+    stmts.push_back(w.walk(stmtNode, src) + makeTokenNode(";"));
+  }
+  return insertNewLines(stmts);
+}
+
 DEFINE_CCH(CXXCtorExprProc) {
   return makeTokenNode("(") + cxxgen::join(", ", w.walkChildren(node, src))
       + makeTokenNode(")");
@@ -229,6 +238,7 @@ const ClangClassHandler ClangStmtHandler("class",
         std::make_tuple("BreakStmt", BreakStmtProc),
         std::make_tuple("CallExpr", callExprProc),
         std::make_tuple("CharacterLiteral", emitTokenAttrValue),
+        std::make_tuple("CompoundStmt", CompoundStmtProc),
         std::make_tuple("CXXConstructExpr", CXXCtorExprProc),
         std::make_tuple("CXXDeleteExpr", CXXDeleteExprProc),
         std::make_tuple("CXXTemporaryObjectExpr", CXXTemporaryObjectExprProc),
