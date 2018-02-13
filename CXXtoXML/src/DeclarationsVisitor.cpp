@@ -463,6 +463,24 @@ DeclarationsVisitor::PreVisitDeclarationNameInfo(DeclarationNameInfo NI) {
   return true;
 }
 
+namespace {
+
+std::string
+SpecifierKindToString(clang::NestedNameSpecifier::SpecifierKind kind) {
+  switch (kind) {
+  case NestedNameSpecifier::Identifier: return "identifier";
+  case NestedNameSpecifier::Namespace: return "namespace";
+  case NestedNameSpecifier::NamespaceAlias: return "namespace_alias";
+  case NestedNameSpecifier::TypeSpec: return "type_specifier";
+  case NestedNameSpecifier::TypeSpecWithTemplate:
+    return "type_specifier_with_template";
+  case NestedNameSpecifier::Global: return "global";
+  case NestedNameSpecifier::Super: return "MS_super";
+  }
+}
+
+} // namespace
+
 bool
 DeclarationsVisitor::PreVisitNestedNameSpecifierLoc(NestedNameSpecifierLoc N) {
   return true;
