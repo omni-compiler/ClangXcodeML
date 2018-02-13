@@ -316,6 +316,19 @@ DEFINE_CCH(TypedefProc) {
       + makeTokenNode(";");
 }
 
+DEFINE_CCH(VarProc) {
+  const auto nameNode = findFirst(node, "name", src.ctxt);
+  const auto name = getQualifiedNameFromNameNode(nameNode, src)
+                        .toString(src.typeTable, src.nnsTable);
+  const auto dtident = getProp(node, "xcodemlType");
+  const auto T = src.typeTable.at(dtident);
+  if (const auto stmtNode = findFirst(node, "clangStmt", src.ctxt)) {
+    const auto init = w.walk(stmtNode, src);
+    return makeDecl(T, name, src.typeTable) + makeTokenNode("=") + init;
+  }
+  return makeDecl(T, name, src.typeTable);
+}
+
 const ClangClassHandler ClangDeclHandler("class",
     cxxgen::makeInnerNode,
     callCodeBuilder,
@@ -327,6 +340,7 @@ const ClangClassHandler ClangDeclHandler("class",
         std::make_tuple("TemplateTypeParm", TemplateTypeParmProc),
         std::make_tuple("TranslationUnit", TranslationUnitProc),
         std::make_tuple("Typedef", TypedefProc),
+        std::make_tuple("Var", VarProc),
     });
 
 DEFINE_CCH(BuiltinTypeProc) {
