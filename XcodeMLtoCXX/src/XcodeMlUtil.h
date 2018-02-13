@@ -2,6 +2,7 @@
 #define XCODEMLUTIL_H
 
 namespace XcodeMl {
+class Function;
 class UnqualId;
 }
 
@@ -25,6 +26,20 @@ struct XcodeMlPwdType {
 };
 
 XcodeMlPwdType getXcodeMlPath(xmlNodePtr);
+
+std::vector<XcodeMl::CodeFragment> getParamNames(
+    xmlNodePtr fnNode, const SourceInfo &src);
+
+XcodeMl::CodeFragment makeFunctionDeclHead(XcodeMl::Function *func,
+    const XcodeMl::Name &name,
+    const std::vector<XcodeMl::CodeFragment> &paramNames,
+    const SourceInfo &src,
+    bool emitNameSpec = false);
+
+XcodeMl::CodeFragment makeFunctionDeclHead(xmlNodePtr node,
+    const std::vector<XcodeMl::CodeFragment> paramNames,
+    const SourceInfo &src,
+    bool emitNameSpec = false);
 
 std::ostream &operator<<(std::ostream &, const XcodeMlPwdType &);
 

@@ -203,64 +203,6 @@ handleIndentation(const CodeBuilder::Procedure mainProc) {
 const CodeBuilder::Procedure handleScope = handleBracketsLn(
     "{", "}", handleIndentation(walkChildrenWithInsertingNewLines));
 
-std::vector<XcodeMl::CodeFragment>
-getParamNames(xmlNodePtr fnNode, const SourceInfo &src) {
-  std::vector<XcodeMl::CodeFragment> vec;
-  const auto params = findNodes(
-      fnNode, "clangTypeLoc/clangDecl[@class='ParmVar']/name", src.ctxt);
-  for (auto p : params) {
-    XMLString name = xmlNodeGetContent(p);
-    vec.push_back(makeTokenNode(name));
-  }
-  return vec;
-}
-
-XcodeMl::CodeFragment
-makeFunctionDeclHead(XcodeMl::Function *func,
-    const XcodeMl::Name &name,
-    const std::vector<XcodeMl::CodeFragment> &paramNames,
-    const SourceInfo &src,
-    bool emitNameSpec = false) {
-  const auto pUnqualId = name.getUnqualId();
-  const auto nameSpelling = emitNameSpec
-      ? name.toString(src.typeTable, src.nnsTable)
-      : pUnqualId->toString(src.typeTable);
-  if (llvm::isa<XcodeMl::CtorName>(pUnqualId.get())
-      || llvm::isa<XcodeMl::DtorName>(pUnqualId.get())
-      || llvm::isa<XcodeMl::ConvFuncId>(pUnqualId.get())) {
-    /* Do not emit return type
-     *    void A::A();
-     *    void A::~A();
-     *    int A::operator int();
-     */
-    return func->makeDeclarationWithoutReturnType(
-        nameSpelling, paramNames, src.typeTable);
-  } else {
-    return func->makeDeclaration(nameSpelling, paramNames, src.typeTable);
-  }
-}
-
-XcodeMl::CodeFragment
-makeFunctionDeclHead(xmlNodePtr node,
-    const std::vector<XcodeMl::CodeFragment> paramNames,
-    const SourceInfo &src,
-    bool emitNameSpec = false) {
-  const auto nameNode = findFirst(node, "name", src.ctxt);
-  const auto name = getQualifiedNameFromNameNode(nameNode, src);
-
-  const auto dtident = getProp(node, "type");
-  const auto T = src.typeTable[dtident];
-  const auto fnType = llvm::cast<XcodeMl::Function>(T.get());
-
-  auto acc = makeVoidNode();
-  acc = acc + makeFunctionDeclHead(fnType,
-                  name,
-                  paramNames,
-                  src,
-                  emitNameSpec && xmlHasProp(node, BAD_CAST "parent_class"));
-  return acc;
-}
-
 DEFINE_CB(functionDefinitionProc) {
   const auto paramNames = getParamNames(node, src);
   auto acc = makeFunctionDeclHead(node, paramNames, src, true);
