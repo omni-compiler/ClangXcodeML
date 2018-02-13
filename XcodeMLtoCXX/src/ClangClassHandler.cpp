@@ -265,6 +265,26 @@ DEFINE_CCH(FriendDeclProc) {
   return makeTokenNode("friend") + callCodeBuilder(node, w, src);
 }
 
+DEFINE_CCH(FunctionProc) {
+  const auto type = getProp(node, "xcodemlType");
+  const auto paramNames = getParamNames(node, src);
+  auto acc = makeFunctionDeclHead(node, paramNames, src, true);
+
+  if (const auto ctorInitList =
+          findFirst(node, "constructorInitializerList", src.ctxt)) {
+    acc = acc + w.walk(ctorInitList, src);
+  }
+
+  if (const auto bodyNode = findFirst(node, "clangStmt", src.ctxt)) {
+    const auto body = w.walk(bodyNode, src);
+    acc = acc + wrapWithBrace(body);
+  } else {
+    acc = acc + makeTokenNode(";");
+  }
+
+  return wrapWithLangLink(acc, node, src);
+}
+
 DEFINE_CCH(TypedefProc) {
   if (isTrueProp(node, "is_implicit", 0)) {
     return cxxgen::makeVoidNode();
@@ -286,6 +306,7 @@ const ClangClassHandler ClangDeclHandler("class",
     {
         std::make_tuple("CXXRecord", CXXRecordProc),
         std::make_tuple("Friend", FriendDeclProc),
+        std::make_tuple("Function", FunctionProc),
         std::make_tuple("FunctionTemplate", FunctionTemplateProc),
         std::make_tuple("TemplateTypeParm", TemplateTypeParmProc),
         std::make_tuple("Typedef", TypedefProc),
