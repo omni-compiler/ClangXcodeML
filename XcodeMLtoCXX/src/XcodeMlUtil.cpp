@@ -158,6 +158,20 @@ makeFunctionDeclHead(XcodeMl::Function *func,
   }
 }
 
+namespace {
+
+std::string
+getType(xmlNodePtr node) {
+  const auto type = getPropOrNull(node, "xcodemlType");
+  if (type.hasValue()) {
+    return *type;
+  }
+
+  return getProp(node, "type");
+}
+
+} // namespace
+
 XcodeMl::CodeFragment
 makeFunctionDeclHead(xmlNodePtr node,
     const std::vector<XcodeMl::CodeFragment> paramNames,
@@ -166,7 +180,7 @@ makeFunctionDeclHead(xmlNodePtr node,
   const auto nameNode = findFirst(node, "name", src.ctxt);
   const auto name = getQualifiedNameFromNameNode(nameNode, src);
 
-  const auto dtident = getProp(node, "type");
+  const auto dtident = getType(node);
   const auto T = src.typeTable[dtident];
   const auto fnType = llvm::cast<XcodeMl::Function>(T.get());
 
