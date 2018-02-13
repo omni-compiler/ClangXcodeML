@@ -19,12 +19,6 @@ namespace XcodeMl {
 Nns::Nns(NnsKind k, const NnsIdent &ni) : parent(), kind(k), ident(ni) {
 }
 
-Nns::Nns(NnsKind k, const NnsRef &nr, const NnsIdent &ni)
-    : parent(nr ? nr->getParent() : llvm::Optional<NnsIdent>()),
-      kind(k),
-      ident(ni) {
-}
-
 Nns::Nns(NnsKind k, const NnsIdent &par, const NnsIdent &ident)
     : parent(par), kind(k), ident(ident) {
 }
