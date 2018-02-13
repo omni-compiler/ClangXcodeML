@@ -483,6 +483,11 @@ SpecifierKindToString(clang::NestedNameSpecifier::SpecifierKind kind) {
 
 bool
 DeclarationsVisitor::PreVisitNestedNameSpecifierLoc(NestedNameSpecifierLoc N) {
+  if (const auto Spec = N.getNestedNameSpecifier()) {
+    newChild("clangNestedNameSpecifier");
+    const auto kind = SpecifierKindToString(Spec->getKind());
+    newProp("clang_nested_name_specifier_kind", kind.c_str());
+  }
   return true;
 }
 
