@@ -41,6 +41,10 @@ XcodeMl::CodeFragment makeFunctionDeclHead(xmlNodePtr node,
     const SourceInfo &src,
     bool emitNameSpec = false);
 
+XcodeMl::CodeFragment wrapWithLangLink(const XcodeMl::CodeFragment &content,
+    xmlNodePtr node,
+    const SourceInfo &src);
+
 std::ostream &operator<<(std::ostream &, const XcodeMlPwdType &);
 
 #endif /* !XCODEMLUTIL_H */

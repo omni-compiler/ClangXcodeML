@@ -44,22 +44,6 @@ using XcodeMl::makeOpNode;
 namespace {
 
 XcodeMl::CodeFragment
-wrapWithLangLink(const XcodeMl::CodeFragment &content,
-    xmlNodePtr node,
-    const SourceInfo &src) {
-  if (src.language != Language::CPlusPlus) {
-    return content;
-  }
-  const auto lang = getPropOrNull(node, "language_linkage");
-  if (!lang.hasValue() || *lang == "C++") {
-    return content;
-  } else {
-    return makeTokenNode("extern") + makeTokenNode("\"" + *lang + "\"")
-        + makeTokenNode("{") + content + makeTokenNode("}");
-  }
-}
-
-XcodeMl::CodeFragment
 makeNestedNameSpec(const XcodeMl::NnsRef &nns, const SourceInfo &src) {
   return nns->makeDeclaration(src.typeTable, src.nnsTable);
 }

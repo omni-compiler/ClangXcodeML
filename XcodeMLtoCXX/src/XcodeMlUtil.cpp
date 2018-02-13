@@ -179,6 +179,23 @@ makeFunctionDeclHead(xmlNodePtr node,
   return acc;
 }
 
+XcodeMl::CodeFragment
+wrapWithLangLink(const XcodeMl::CodeFragment &content,
+    xmlNodePtr node,
+    const SourceInfo &src) {
+  using namespace CXXCodeGen;
+  if (src.language != Language::CPlusPlus) {
+    return content;
+  }
+  const auto lang = getPropOrNull(node, "language_linkage");
+  if (!lang.hasValue() || *lang == "C++") {
+    return content;
+  } else {
+    return makeTokenNode("extern") + makeTokenNode("\"" + *lang + "\"")
+        + makeTokenNode("{") + content + makeTokenNode("}");
+  }
+}
+
 std::ostream &operator<<(std::ostream &os, const XcodeMlPwdType &x) {
   xcodeMlPwd(x.node, os);
   return os;
