@@ -45,7 +45,8 @@ DEFINE_NA(otherNnsProc) {
 DEFINE_NA(namespaceNnsProc) {
   const auto nident = getProp(node, "nns");
   const auto namespaceName = getContent(node);
-  map[nident] = XcodeMl::makeNamespaceNns(nident, namespaceName);
+  const auto parent = getProp(node, "parent");
+  map[nident] = XcodeMl::makeNamespaceNns(nident, parent, namespaceName);
 }
 
 const XcodeMl::NnsMap initialNnsMap = {
