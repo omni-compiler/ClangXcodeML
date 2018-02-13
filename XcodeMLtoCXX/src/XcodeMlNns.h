@@ -142,12 +142,12 @@ NnsRef makeGlobalNns();
  * \brief Make and return an `XcodeMl::ClassNns` object.
  *
  * \param nident the NNS identifier
- * \param prefix the prefix (or parent) NNS
  * \param classType the data type identifier of the corresponding class
+ * \param prefix the prefix (or parent) NNS
  */
 NnsRef makeClassNns(const NnsIdent &nident,
-    const NnsRef &prefix,
-    const DataTypeIdent &classType);
+    const DataTypeIdent &classType,
+    const NnsIdent &prefix);
 
 /*!
  * \brief Make and return an `XcodeMl::ClassNns` object that does not have

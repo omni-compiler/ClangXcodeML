@@ -157,9 +157,9 @@ makeGlobalNns() {
 
 NnsRef
 makeClassNns(const NnsIdent &ident,
-    const NnsRef &parent,
-    const DataTypeIdent &classType) {
-  return std::make_shared<ClassNns>(ident, parent, classType);
+    const DataTypeIdent &classType,
+    const NnsIdent &parent) {
+  return std::make_shared<ClassNns>(ident, classType, parent);
 }
 
 NnsRef
