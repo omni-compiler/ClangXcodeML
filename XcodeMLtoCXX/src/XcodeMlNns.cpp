@@ -74,6 +74,15 @@ GlobalNns::getParent() const {
   return llvm::Optional<NnsIdent>();
 }
 
+ClassNns::ClassNns(const NnsIdent &ni, const DataTypeIdent &di)
+    : Nns(NnsKind::Class, ni), dtident(di) {
+}
+
+ClassNns::ClassNns(
+    const NnsIdent &ni, const DataTypeIdent &di, const NnsIdent &parent)
+    : Nns(NnsKind::Class, ni, parent), dtident(di) {
+}
+
 Nns *
 ClassNns::clone() const {
   ClassNns *copy = new ClassNns(*this);
