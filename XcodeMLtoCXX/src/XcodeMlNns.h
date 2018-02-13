@@ -40,7 +40,7 @@ enum class NnsKind {
 class Nns {
 public:
   Nns(NnsKind kind, const NnsIdent &ident);
-  Nns(NnsKind kind, const NnsIdent &parent, const NnsIdent &ident);
+  Nns(NnsKind kind, const NnsIdent &ident, const NnsIdent &parent);
   virtual ~Nns() = 0;
   virtual Nns *clone() const = 0;
   NnsKind getKind() const;
