@@ -285,6 +285,22 @@ DEFINE_CCH(FunctionProc) {
   return wrapWithLangLink(acc, node, src);
 }
 
+DEFINE_CCH(TranslationUnitProc) {
+  if (const auto typeTableNode =
+          findFirst(node, "xcodemlTypeTable", src.ctxt)) {
+    src.typeTable = expandEnvironment(src.typeTable, typeTableNode, src.ctxt);
+  }
+  if (const auto nnsTableNode = findFirst(node, "xcodemlNnsTable", src.ctxt)) {
+    src.nnsTable = expandNnsMap(src.nnsTable, nnsTableNode, src.ctxt);
+  }
+  const auto declNodes = findNodes(node, "clangDecl", src.ctxt);
+  std::vector<CXXCodeGen::StringTreeRef> decls;
+  for (auto &&declNode : declNodes) {
+    decls.push_back(w.walk(declNode, src));
+  }
+  return separateByBlankLines(decls);
+}
+
 DEFINE_CCH(TypedefProc) {
   if (isTrueProp(node, "is_implicit", 0)) {
     return cxxgen::makeVoidNode();
@@ -309,6 +325,7 @@ const ClangClassHandler ClangDeclHandler("class",
         std::make_tuple("Function", FunctionProc),
         std::make_tuple("FunctionTemplate", FunctionTemplateProc),
         std::make_tuple("TemplateTypeParm", TemplateTypeParmProc),
+        std::make_tuple("TranslationUnit", TranslationUnitProc),
         std::make_tuple("Typedef", TypedefProc),
     });
 
