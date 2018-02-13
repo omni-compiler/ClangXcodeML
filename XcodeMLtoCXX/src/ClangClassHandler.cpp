@@ -85,6 +85,11 @@ DEFINE_CCH(DeclRefExprProc) {
   return name.toString(src.typeTable, src.nnsTable);
 }
 
+DEFINE_CCH(DeclStmtProc) {
+  const auto declNode = findFirst(node, "clangDecl", src.ctxt);
+  return w.walk(declNode, src);
+}
+
 DEFINE_CCH(emitTokenAttrValue) {
   const auto token = getProp(node, "token");
   return makeTokenNode(token);
@@ -242,6 +247,7 @@ const ClangClassHandler ClangStmtHandler("class",
         std::make_tuple("CXXConstructExpr", CXXCtorExprProc),
         std::make_tuple("CXXDeleteExpr", CXXDeleteExprProc),
         std::make_tuple("CXXTemporaryObjectExpr", CXXTemporaryObjectExprProc),
+        std::make_tuple("DeclStmt", DeclStmtProc),
         std::make_tuple("DeclRefExpr", DeclRefExprProc),
         std::make_tuple("FloatingLiteral", emitTokenAttrValue),
         std::make_tuple("IntegerLiteral", emitTokenAttrValue),
