@@ -803,13 +803,8 @@ const CodeBuilder ClassDefinitionBuilder("ClassDefinitionBuilder",
         std::make_tuple("clangDecl", clangDeclProc),
     });
 
-/*!
- * \brief Traverse an XcodeML document and generate C++ source code.
- * \param[in] doc XcodeML document.
- * \param[out] ss Stringstream to flush C++ source code.
- */
 void
-buildCode(
+readXcodeProgram(
     xmlNodePtr rootNode, xmlXPathContextPtr ctxt, std::stringstream &ss) {
   xmlNodePtr typeTableNode =
       findFirst(rootNode, "/XcodeProgram/typeTable", ctxt);
@@ -847,4 +842,24 @@ readClangAST(
   program->flush(out);
 
   ss << out.str();
+}
+
+/*!
+ * \brief Traverse an XcodeML document and generate C++ source code.
+ * \param[in] doc XcodeML document.
+ * \param[out] ss Stringstream to flush C++ source code.
+ */
+void
+buildCode(
+    xmlNodePtr rootNode, xmlXPathContextPtr ctxt, std::stringstream &ss) {
+  const auto docType = getName(rootNode);
+  if (std::equal(docType.cbegin(), docType.cend(), "XcodeProgram")) {
+    readXcodeProgram(rootNode, ctxt, ss);
+    return;
+  } else if (std::equal(docType.cbegin(), docType.cend(), "clangAST")) {
+    readClangAST(rootNode, ctxt, ss);
+  } else {
+    std::cerr << "error: unknown document type" << std::endl;
+    std::abort();
+  }
 }
