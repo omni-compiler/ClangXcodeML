@@ -44,6 +44,7 @@ public:
   virtual ~Nns() = 0;
   virtual Nns *clone() const = 0;
   NnsKind getKind() const;
+  NnsIdent getIdent() const;
   CodeFragment makeDeclaration(const Environment &, const NnsMap &) const;
 
 protected:

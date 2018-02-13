@@ -30,6 +30,11 @@ Nns::getKind() const {
   return kind;
 }
 
+NnsIdent
+Nns::getIdent() const {
+  return ident;
+}
+
 CodeFragment
 Nns::makeDeclaration(const Environment &env, const NnsMap &nnss) const {
   const auto par = getParent();
