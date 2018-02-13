@@ -88,7 +88,6 @@ protected:
  */
 class ClassNns : public Nns {
 public:
-  ClassNns(const NnsIdent &, const NnsRef &, const DataTypeIdent &);
   ~ClassNns() override = default;
   Nns *clone() const override;
   static bool classof(const Nns *);
