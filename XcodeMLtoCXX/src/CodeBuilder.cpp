@@ -828,3 +828,23 @@ buildCode(
 
   ss << out.str();
 }
+
+void
+readClangAST(
+    xmlNodePtr rootNode, xmlXPathContextPtr ctxt, std::stringstream &ss) {
+  xmlNodePtr typeTableNode =
+      findFirst(rootNode, "/clangAST/clangDecl/xcodemlTypeTable", ctxt);
+  xmlNodePtr nnsTableNode =
+      findFirst(rootNode, "/clangAST/clangDecl/xcodemlNnsTable", ctxt);
+  SourceInfo src(ctxt,
+      parseTypeTable(typeTableNode, ctxt, ss),
+      analyzeNnsTable(nnsTableNode, ctxt),
+      getSourceLanguage(rootNode, ctxt));
+
+  cxxgen::Stream out;
+  xmlNodePtr decl = findFirst(rootNode, "/clangAST/clangDecl", src.ctxt);
+  const auto program = ClangDeclHandler.walk(decl, ProgramBuilder, src);
+  program->flush(out);
+
+  ss << out.str();
+}
