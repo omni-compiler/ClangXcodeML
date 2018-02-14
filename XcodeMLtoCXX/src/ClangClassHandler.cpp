@@ -62,7 +62,16 @@ DEFINE_CCH(BreakStmtProc) {
 }
 
 DEFINE_CCH(callExprProc) {
-  return (w["functionCall"])(w, node, src);
+  const auto funcNode = findFirst(node, "clangStmt", src.ctxt);
+  const auto func = w.walk(funcNode, src);
+
+  const auto argNodes = findNodes(node, "clangStmt[position() > 1]", src.ctxt);
+  std::vector<XcodeMl::CodeFragment> args;
+  for (auto &&argNode : argNodes) {
+    args.push_back(w.walk(argNode, src));
+  }
+
+  return func + wrapWithParen(join(",", args));
 }
 
 DEFINE_CCH(CompoundStmtProc) {
