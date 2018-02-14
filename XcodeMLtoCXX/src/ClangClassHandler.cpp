@@ -17,6 +17,7 @@
 #include "XcodeMlName.h"
 #include "XcodeMlType.h"
 #include "XcodeMlEnvironment.h"
+#include "XcodeMlOperator.h"
 #include "SourceInfo.h"
 #include "TypeAnalyzer.h"
 #include "NnsAnalyzer.h"
@@ -39,6 +40,21 @@ using XcodeMl::CodeFragment;
 
 DEFINE_CCH(callCodeBuilder) {
   return makeInnerNode(ProgramBuilder.walkChildren(node, src));
+}
+
+DEFINE_CCH(BinaryOperatorProc) {
+  const auto lhsNode = findFirst(node, "clangStmt[1]", src.ctxt);
+  const auto lhs = w.walk(lhsNode, src);
+  const auto rhsNode = findFirst(node, "clangStmt[2]", src.ctxt);
+  const auto rhs = w.walk(rhsNode, src);
+
+  const auto opName = getProp(node, "binOpName");
+  const auto opSpelling = XcodeMl::OperatorNameToSpelling(opName);
+  if (!opSpelling.hasValue()) {
+    std::cerr << "Unknown operator name: '" << opName << "'" << std::endl;
+    std::abort();
+  }
+  return lhs + makeTokenNode(*opSpelling) + rhs;
 }
 
 DEFINE_CCH(BreakStmtProc) {
@@ -240,6 +256,7 @@ const ClangClassHandler ClangStmtHandler("class",
     cxxgen::makeInnerNode,
     callCodeBuilder,
     {
+        std::make_tuple("BinaryOperator", BinaryOperatorProc),
         std::make_tuple("BreakStmt", BreakStmtProc),
         std::make_tuple("CallExpr", callExprProc),
         std::make_tuple("CharacterLiteral", emitTokenAttrValue),
