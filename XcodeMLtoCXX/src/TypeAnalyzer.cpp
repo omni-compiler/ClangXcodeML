@@ -170,6 +170,11 @@ DEFINE_TA(classTypeProc) {
   }
 }
 
+DEFINE_TA(injectedClassNameTypeProc) {
+  const auto dtident = getProp(node, "type");
+  map[dtident] = XcodeMl::makeClassType(dtident, {}, {});
+}
+
 DEFINE_TA(enumTypeProc) {
   XMLString dtident = xmlGetProp(node, BAD_CAST "type");
   map[dtident] = XcodeMl::makeEnumType(dtident);
@@ -236,6 +241,7 @@ const TypeAnalyzer XcodeMLTypeAnalyzer("TypeAnalyzer",
         std::make_tuple("classType", classTypeProc),
         std::make_tuple("enumType", enumTypeProc),
         std::make_tuple("TemplateTypeParmType", TemplateTypeParmTypeProc),
+        std::make_tuple("injectedClassNameType", injectedClassNameTypeProc),
     });
 
 /*!
