@@ -663,6 +663,10 @@ DEFINE_CB(clangDeclProc) {
   return ClangDeclHandler.walk(node, w, src);
 }
 
+DEFINE_CB(classScopeClangDeclProc) {
+  return ClassDefinitionDeclHandler.walk(node, w, src);
+}
+
 DEFINE_CB(clangTypeLocProc) {
   return ClangTypeLocHandler.walk(node, w, src);
 }
@@ -800,7 +804,7 @@ const CodeBuilder ClassDefinitionBuilder("ClassDefinitionBuilder",
         std::make_tuple("varDecl", emitDataMemberDecl),
 
         /* for elements defined by clang */
-        std::make_tuple("clangDecl", clangDeclProc),
+        std::make_tuple("clangDecl", classScopeClangDeclProc),
     });
 
 namespace {
