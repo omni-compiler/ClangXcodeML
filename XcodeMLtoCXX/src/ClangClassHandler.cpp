@@ -137,7 +137,7 @@ DEFINE_CCH(CompoundStmtProc) {
   for (auto &&stmtNode : stmtNodes) {
     stmts.push_back(w.walk(stmtNode, src) + makeTokenNode(";"));
   }
-  return insertNewLines(stmts);
+  return wrapWithBrace(insertNewLines(stmts));
 }
 
 DEFINE_CCH(CXXCtorExprProc) {
