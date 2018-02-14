@@ -242,10 +242,10 @@ emitClassDefinition(xmlNodePtr node,
     return cxxgen::makeVoidNode();
   }
 
+  const auto memberNodes =
+      findNodes(node, "clangDecl[position() > 1]", src.ctxt);
   std::vector<XcodeMl::CodeFragment> decls;
-
-  for (xmlNodePtr memberNode = xmlFirstElementChild(node); memberNode;
-       memberNode = xmlNextElementSibling(memberNode)) {
+  for (auto &&memberNode : memberNodes) {
     /* Traverse `memberNode` regardless of whether `CodeBuilder` prints it. */
     const auto decl = w.walk(memberNode, src);
 
