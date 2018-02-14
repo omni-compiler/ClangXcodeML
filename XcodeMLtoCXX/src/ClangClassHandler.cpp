@@ -361,6 +361,9 @@ DEFINE_CCH(FriendDeclProc) {
 }
 
 DEFINE_CCH(FunctionProc) {
+  if (isTrueProp(node, "is_implicit", 0)) {
+    return cxxgen::makeVoidNode();
+  }
   const auto type = getProp(node, "xcodemlType");
   const auto paramNames = getParamNames(node, src);
   auto acc = makeFunctionDeclHead(node, paramNames, src, true);
