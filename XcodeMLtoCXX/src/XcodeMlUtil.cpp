@@ -158,8 +158,6 @@ makeFunctionDeclHead(XcodeMl::Function *func,
   }
 }
 
-namespace {
-
 std::string
 getType(xmlNodePtr node) {
   const auto type = getPropOrNull(node, "xcodemlType");
@@ -169,8 +167,6 @@ getType(xmlNodePtr node) {
 
   return getProp(node, "type");
 }
-
-} // namespace
 
 XcodeMl::CodeFragment
 makeFunctionDeclHead(xmlNodePtr node,

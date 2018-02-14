@@ -121,7 +121,7 @@ DEFINE_CCH(TemplateTypeParmProc) {
   const auto name = getQualifiedNameFromNameNode(nameNode, src);
   const auto nameSpelling = name.toString(src.typeTable, src.nnsTable);
 
-  const auto dtident = getProp(node, "type");
+  const auto dtident = getType(node);
   auto T = src.typeTable.at(dtident);
   auto TTPT = llvm::cast<XcodeMl::TemplateTypeParm>(T.get());
   assert(TTPT);
@@ -206,7 +206,7 @@ DEFINE_CCH(CXXRecordProc) {
     return cxxgen::makeVoidNode();
   }
 
-  const auto T = src.typeTable.at(getProp(node, "type"));
+  const auto T = src.typeTable.at(getType(node));
   auto classT = llvm::dyn_cast<XcodeMl::ClassType>(T.get());
   assert(classT);
 
@@ -223,7 +223,7 @@ DEFINE_CCH(CXXRecordProc) {
 }
 
 DEFINE_CCH(CXXTemporaryObjectExprProc) {
-  const auto resultT = src.typeTable.at(getProp(node, "type"));
+  const auto resultT = src.typeTable.at(getType(node));
   const auto name = llvm::cast<XcodeMl::ClassType>(resultT.get())->name();
   assert(name.hasValue());
   auto children = findNodes(node, "*[position() > 1]", src.ctxt);
@@ -256,7 +256,7 @@ const ClangClassHandler ClangStmtHandler("class",
 DEFINE_CCH(FriendDeclProc) {
   if (auto TL = findFirst(node, "clangTypeLoc", src.ctxt)) {
     /* friend class declaration */
-    const auto dtident = getProp(TL, "type");
+    const auto dtident = getType(TL);
     const auto T = src.typeTable.at(dtident);
     return makeTokenNode("friend")
         + makeDecl(T, cxxgen::makeVoidNode(), src.typeTable)
@@ -344,7 +344,7 @@ const ClangClassHandler ClangDeclHandler("class",
     });
 
 DEFINE_CCH(BuiltinTypeProc) {
-  const auto dtident = getProp(node, "type");
+  const auto dtident = getType(node);
   return makeDecl(
       src.typeTable.at(dtident), cxxgen::makeVoidNode(), src.typeTable);
 }
