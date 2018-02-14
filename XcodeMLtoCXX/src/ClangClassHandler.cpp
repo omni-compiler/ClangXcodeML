@@ -74,6 +74,16 @@ DEFINE_CCH(callExprProc) {
   return func + wrapWithParen(join(",", args));
 }
 
+DEFINE_CCH(CaseStmtProc) {
+  const auto labelNode = findFirst(node, "clangStmt[1]", src.ctxt);
+  const auto label = w.walk(labelNode, src);
+
+  const auto bodyNode = findFirst(node, "clangStmt[2]", src.ctxt);
+  const auto body = w.walk(bodyNode, src);
+
+  return makeTokenNode("case") + label + makeTokenNode(":") + body;
+}
+
 DEFINE_CCH(CompoundStmtProc) {
   const auto stmtNodes = findNodes(node, "clangStmt", src.ctxt);
   std::vector<CXXCodeGen::StringTreeRef> stmts;
@@ -268,6 +278,7 @@ const ClangClassHandler ClangStmtHandler("class",
         std::make_tuple("BinaryOperator", BinaryOperatorProc),
         std::make_tuple("BreakStmt", BreakStmtProc),
         std::make_tuple("CallExpr", callExprProc),
+        std::make_tuple("CaseStmt", CaseStmtProc),
         std::make_tuple("CharacterLiteral", emitTokenAttrValue),
         std::make_tuple("CompoundStmt", CompoundStmtProc),
         std::make_tuple("CXXConstructExpr", CXXCtorExprProc),
