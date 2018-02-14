@@ -81,6 +81,14 @@ DEFINE_CCH(FieldDeclProc) {
   return makeDecl(T, name, src.typeTable) + makeTokenNode(";");
 }
 
+const ClangClassHandler ClassDefinitionDeclHandler("class",
+    CXXCodeGen::makeInnerNode,
+    callCodeBuilder,
+    {
+        std::make_tuple("CXXMethod", emitInlineMemberFunction),
+        std::make_tuple("Field", FieldDeclProc),
+    });
+
 DEFINE_CCH(BinaryOperatorProc) {
   const auto lhsNode = findFirst(node, "clangStmt[1]", src.ctxt);
   const auto lhs = w.walk(lhsNode, src);
