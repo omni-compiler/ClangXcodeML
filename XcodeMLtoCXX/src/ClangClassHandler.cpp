@@ -71,6 +71,16 @@ DEFINE_CCH(emitInlineMemberFunction) {
   return acc;
 }
 
+DEFINE_CCH(FieldDeclProc) {
+  const auto nameNode = findFirst(node, "name", src.ctxt);
+  const auto name = getUnqualIdFromNameNode(nameNode)->toString(src.typeTable);
+
+  const auto dtident = getType(node);
+  const auto T = src.typeTable.at(dtident);
+
+  return makeDecl(T, name, src.typeTable) + makeTokenNode(";");
+}
+
 DEFINE_CCH(BinaryOperatorProc) {
   const auto lhsNode = findFirst(node, "clangStmt[1]", src.ctxt);
   const auto lhs = w.walk(lhsNode, src);
