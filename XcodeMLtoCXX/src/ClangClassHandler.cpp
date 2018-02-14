@@ -42,6 +42,35 @@ DEFINE_CCH(callCodeBuilder) {
   return makeInnerNode(ProgramBuilder.walkChildren(node, src));
 }
 
+DEFINE_CCH(emitInlineMemberFunction) {
+  if (isTrueProp(node, "is_implicit", 0)) {
+    return CXXCodeGen::makeVoidNode();
+  }
+
+  auto acc = CXXCodeGen::makeVoidNode();
+  if (isTrueProp(node, "is_virtual", false)) {
+    acc = acc + makeTokenNode("virtual");
+  }
+  if (isTrueProp(node, "is_static", false)) {
+    acc = acc + makeTokenNode("static");
+  }
+  const auto paramNames = getParamNames(node, src);
+  acc = acc + makeFunctionDeclHead(node, paramNames, src);
+
+  if (const auto ctorInitList =
+          findFirst(node, "constructorInitializerList", src.ctxt)) {
+    acc = acc + ProgramBuilder.walk(ctorInitList, src);
+  }
+
+  if (const auto bodyNode = findFirst(node, "clangStmt", src.ctxt)) {
+    const auto body = ProgramBuilder.walk(bodyNode, src);
+    return acc + body;
+  } else {
+    acc + makeTokenNode(";");
+  }
+  return acc;
+}
+
 DEFINE_CCH(BinaryOperatorProc) {
   const auto lhsNode = findFirst(node, "clangStmt[1]", src.ctxt);
   const auto lhs = w.walk(lhsNode, src);
