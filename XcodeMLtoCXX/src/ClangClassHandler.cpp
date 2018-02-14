@@ -271,6 +271,16 @@ DEFINE_CCH(CXXTemporaryObjectExprProc) {
   return *name + makeTokenNode("(") + join(",", args) + makeTokenNode(")");
 }
 
+DEFINE_CCH(SwitchStmtProc) {
+  const auto exprNode = findFirst(node, "clangStmt[1]", src.ctxt);
+  const auto expr = w.walk(exprNode, src);
+
+  const auto bodyNode = findFirst(node, "clangStmt[2]", src.ctxt);
+  const auto body = w.walk(bodyNode, src);
+
+  return makeTokenNode("switch") + wrapWithParen(expr) + body;
+}
+
 const ClangClassHandler ClangStmtHandler("class",
     cxxgen::makeInnerNode,
     callCodeBuilder,
@@ -288,6 +298,7 @@ const ClangClassHandler ClangStmtHandler("class",
         std::make_tuple("DeclRefExpr", DeclRefExprProc),
         std::make_tuple("FloatingLiteral", emitTokenAttrValue),
         std::make_tuple("IntegerLiteral", emitTokenAttrValue),
+        std::make_tuple("SwitchStmt", SwitchStmtProc),
     });
 
 DEFINE_CCH(FriendDeclProc) {
