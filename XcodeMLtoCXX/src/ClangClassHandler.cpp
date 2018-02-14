@@ -187,7 +187,7 @@ DEFINE_CCH(FunctionTemplateProc) {
   }
   const auto paramNodes =
       findNodes(node, "clangDecl[@class='TemplateTypeParm']", src.ctxt);
-  const auto body = findFirst(node, "functionDefinition", src.ctxt);
+  const auto body = findFirst(node, "clangDecl", src.ctxt);
 
   std::vector<CXXCodeGen::StringTreeRef> params;
   for (auto &&paramNode : paramNodes) {
