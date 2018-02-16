@@ -38,6 +38,19 @@ using cxxgen::makeInnerNode;
 using cxxgen::makeTokenNode;
 using XcodeMl::CodeFragment;
 
+namespace {
+
+CodeFragment
+createNode(xmlNodePtr node,
+    const char *xpath,
+    const CodeBuilder &w,
+    SourceInfo &src) {
+  const auto targetNode = findFirst(node, xpath, src.ctxt);
+  return w.walk(targetNode, src);
+}
+
+} // namespace
+
 DEFINE_CCH(callCodeBuilder) {
   return makeInnerNode(ProgramBuilder.walkChildren(node, src));
 }
