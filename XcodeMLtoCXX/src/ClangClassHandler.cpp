@@ -456,15 +456,24 @@ DEFINE_CCH(TypedefProc) {
 
 DEFINE_CCH(VarProc) {
   const auto nameNode = findFirst(node, "name", src.ctxt);
-  const auto name = getQualifiedNameFromNameNode(nameNode, src)
-                        .toString(src.typeTable, src.nnsTable);
+  const auto name = getUnqualIdFromNameNode(nameNode)->toString(src.typeTable);
   const auto dtident = getProp(node, "xcodemlType");
   const auto T = src.typeTable.at(dtident);
-  if (const auto stmtNode = findFirst(node, "clangStmt", src.ctxt)) {
-    const auto init = w.walk(stmtNode, src);
-    return makeDecl(T, name, src.typeTable) + makeTokenNode("=") + init;
+
+  const auto decl = makeDecl(T, name, src.typeTable);
+  const auto initializerNode = findFirst(node, "clangStmt", src.ctxt);
+  if (!initializerNode) {
+    // does not have initalizer: `int x;`
+    return makeDecl(T, name, src.typeTable) + makeTokenNode(";");
   }
-  return makeDecl(T, name, src.typeTable);
+  const auto astClass = getProp(initializerNode, "class");
+  if (std::equal(astClass.begin(), astClass.end(), "CXXConstructExpr")) {
+    // has initalizer and the variable is of class type
+    const auto init = declareClassTypeInit(w, initializerNode, src);
+    return wrapWithLangLink(decl + init + makeTokenNode(";"), node, src);
+  }
+  const auto init = w.walk(initializerNode, src);
+  return decl + makeTokenNode("=") + init + makeTokenNode(";");
 }
 
 const ClangClassHandler ClangDeclHandler("class",
