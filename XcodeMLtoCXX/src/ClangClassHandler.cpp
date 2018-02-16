@@ -88,6 +88,7 @@ const ClangClassHandler ClassDefinitionDeclHandler("class",
     callCodeBuilder,
     {
         std::make_tuple("CXXMethod", emitInlineMemberFunction),
+        std::make_tuple("CXXConstructor", emitInlineMemberFunction),
         std::make_tuple("CXXRecord", CXXRecordProc),
         std::make_tuple("Field", FieldDeclProc),
     });
