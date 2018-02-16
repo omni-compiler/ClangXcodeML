@@ -471,6 +471,7 @@ const ClangClassHandler ClangDeclHandler("class",
     cxxgen::makeInnerNode,
     callCodeBuilder,
     {
+        std::make_tuple("CXXConstructor", FunctionProc),
         std::make_tuple("CXXRecord", CXXRecordProc),
         std::make_tuple("Friend", FriendDeclProc),
         std::make_tuple("Function", FunctionProc),
