@@ -345,6 +345,21 @@ DEFINE_CCH(SwitchStmtProc) {
   return makeTokenNode("switch") + wrapWithParen(expr) + body;
 }
 
+DEFINE_CCH(UnaryOperatorProc) {
+  const auto expr = createNode(node, "clangStmt", w, src);
+
+  const auto opName = getProp(node, "unaryOpName");
+  const auto opSpelling = XcodeMl::OperatorNameToSpelling(opName);
+  if (!opSpelling.hasValue()) {
+    std::cerr << "Unknown operator name: '" << opName << "'" << std::endl;
+    std::abort();
+  }
+  const auto op = makeTokenNode(*opSpelling);
+  const auto postfix = std::equal(opName.begin(), opName.end(), "postDecrExpr")
+      || std::equal(opName.begin(), opName.end(), "postIncrExpr");
+  return wrapWithParen(postfix ? expr + op : op + expr);
+}
+
 DEFINE_CCH(WhileStmtProc) {
   const auto cond = createNode(node, "clangStmt[1]", w, src);
   const auto body = createNode(node, "clangStmt[2]", w, src);
@@ -369,6 +384,7 @@ const ClangClassHandler ClangStmtHandler("class",
         std::make_tuple("FloatingLiteral", emitTokenAttrValue),
         std::make_tuple("IntegerLiteral", emitTokenAttrValue),
         std::make_tuple("SwitchStmt", SwitchStmtProc),
+        std::make_tuple("UnaryOperator", UnaryOperatorProc),
         std::make_tuple("WhileStmt", WhileStmtProc),
     });
 
