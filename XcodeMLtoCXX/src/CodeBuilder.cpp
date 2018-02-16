@@ -514,6 +514,8 @@ DEFINE_CB(addrOfExprProc) {
   return wrap(w, node, src);
 }
 
+} // namespace
+
 XcodeMl::CodeFragment
 declareClassTypeInit(
     const CodeBuilder &w, xmlNodePtr ctorExpr, SourceInfo &src) {
@@ -534,6 +536,8 @@ declareClassTypeInit(
   return args.empty() ? makeVoidNode()
                       : wrapWithParen(cxxgen::join(",", args));
 }
+
+namespace {
 
 DEFINE_CB(varDeclProc) {
   const auto nameNode = findFirst(node, "name", src.ctxt);
