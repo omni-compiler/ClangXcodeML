@@ -345,6 +345,12 @@ DEFINE_CCH(SwitchStmtProc) {
   return makeTokenNode("switch") + wrapWithParen(expr) + body;
 }
 
+DEFINE_CCH(WhileStmtProc) {
+  const auto cond = createNode(node, "clangStmt[1]", w, src);
+  const auto body = createNode(node, "clangStmt[2]", w, src);
+  return makeTokenNode("while") + wrapWithParen(cond) + body;
+}
+
 const ClangClassHandler ClangStmtHandler("class",
     cxxgen::makeInnerNode,
     callCodeBuilder,
@@ -363,6 +369,7 @@ const ClangClassHandler ClangStmtHandler("class",
         std::make_tuple("FloatingLiteral", emitTokenAttrValue),
         std::make_tuple("IntegerLiteral", emitTokenAttrValue),
         std::make_tuple("SwitchStmt", SwitchStmtProc),
+        std::make_tuple("WhileStmt", WhileStmtProc),
     });
 
 DEFINE_CCH(FriendDeclProc) {
