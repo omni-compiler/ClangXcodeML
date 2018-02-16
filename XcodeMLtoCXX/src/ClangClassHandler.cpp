@@ -66,7 +66,7 @@ DEFINE_CCH(emitInlineMemberFunction) {
     const auto body = ProgramBuilder.walk(bodyNode, src);
     return acc + body;
   } else {
-    acc + makeTokenNode(";");
+    return acc + makeTokenNode(";");
   }
   return acc;
 }
