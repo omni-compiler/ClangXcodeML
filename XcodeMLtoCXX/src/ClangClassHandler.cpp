@@ -126,6 +126,7 @@ DEFINE_CCH(FieldDeclProc) {
 
 DEFINE_CCH(emitTokenAttrValue);
 DEFINE_CCH(CXXRecordProc);
+DEFINE_CCH(VarProc);
 
 const ClangClassHandler ClassDefinitionDeclHandler("class",
     CXXCodeGen::makeInnerNode,
@@ -139,6 +140,7 @@ const ClangClassHandler ClassDefinitionDeclHandler("class",
         std::make_tuple("FloatingLiteral", emitTokenAttrValue),
         std::make_tuple("Field", FieldDeclProc),
         std::make_tuple("IntegerLiteral", emitTokenAttrValue),
+        std::make_tuple("Var", VarProc),
     });
 
 DEFINE_CCH(BinaryOperatorProc) {
