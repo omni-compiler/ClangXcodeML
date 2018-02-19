@@ -809,6 +809,7 @@ const CodeBuilder ClassDefinitionBuilder("ClassDefinitionBuilder",
 
         /* for elements defined by clang */
         std::make_tuple("clangDecl", classScopeClangDeclProc),
+        std::make_tuple("clangStmt", clangStmtProc),
     });
 
 namespace {
