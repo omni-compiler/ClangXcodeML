@@ -555,6 +555,18 @@ DEFINE_CCH(FunctionProc) {
   return wrapWithLangLink(acc, node, src);
 }
 
+void
+setStructName(XcodeMl::Struct &s, xmlNodePtr node, SourceInfo &src) {
+  const auto nameNode = findFirst(node, "name", src.ctxt);
+  if (!nameNode || isEmpty(nameNode)) {
+    s.setTagName(makeTokenNode(src.getUniqueName()));
+    return;
+  }
+  const auto name = getUnqualIdFromNameNode(nameNode);
+  const auto nameSpelling = name->toString(src.typeTable);
+  s.setTagName(nameSpelling);
+}
+
 DEFINE_CCH(TranslationUnitProc) {
   if (const auto typeTableNode =
           findFirst(node, "xcodemlTypeTable", src.ctxt)) {
