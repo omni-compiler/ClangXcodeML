@@ -779,7 +779,7 @@ namespace {
 
 Language
 getSourceLanguage(xmlNodePtr rootNode, xmlXPathContextPtr ctxt) {
-  const auto topNode = findFirst(rootNode, "/XcodeProgram", ctxt);
+  const auto topNode = findFirst(rootNode, "/*", ctxt);
 
   const auto lang = getPropOrNull(topNode, "language");
   if (!lang.hasValue()) {
