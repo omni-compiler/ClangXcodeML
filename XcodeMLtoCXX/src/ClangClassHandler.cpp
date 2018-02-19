@@ -569,13 +569,33 @@ DEFINE_CCH(TypedefProc) {
       + makeTokenNode(";");
 }
 
+CodeFragment
+makeSpecifier(xmlNodePtr node) {
+  const std::vector<std::tuple<std::string, std::string>> specifiers = {
+      std::make_tuple("is_extern", "extern"),
+      std::make_tuple("is_register", "register"),
+      std::make_tuple("is_static", "static"),
+      std::make_tuple("is_static_data_member", "static"),
+      std::make_tuple("is_thread_local", "thread_local"),
+  };
+  auto code = CXXCodeGen::makeVoidNode();
+  for (auto &&tuple : specifiers) {
+    std::string attr, specifier;
+    std::tie(attr, specifier) = tuple;
+    if (isTrueProp(node, attr.c_str(), false)) {
+      code = code + makeTokenNode(specifier);
+    }
+  }
+  return code;
+}
+
 DEFINE_CCH(VarProc) {
   const auto nameNode = findFirst(node, "name", src.ctxt);
   const auto name = getUnqualIdFromNameNode(nameNode)->toString(src.typeTable);
   const auto dtident = getProp(node, "xcodemlType");
   const auto T = src.typeTable.at(dtident);
 
-  const auto decl = makeDecl(T, name, src.typeTable);
+  const auto decl = makeSpecifier(node) + makeDecl(T, name, src.typeTable);
   const auto initializerNode = findFirst(node, "clangStmt", src.ctxt);
   if (!initializerNode) {
     // does not have initalizer: `int x;`
