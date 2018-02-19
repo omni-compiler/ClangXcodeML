@@ -404,6 +404,18 @@ DEFINE_CCH(CXXTemporaryObjectExprProc) {
   return *name + makeTokenNode("(") + join(",", args) + makeTokenNode(")");
 }
 
+DEFINE_CCH(CXXOperatorCallExprProc) {
+  const auto callee = createNode(node, "clangStmt[1]", w, src);
+  if (isTrueProp(node, "is_member_function", false)) {
+    const auto lhs = createNode(node, "clangStmt[2]", w, src);
+    const auto args = createNodes(node, "clangStmt[position() > 2]", w, src);
+    return lhs + makeTokenNode(".") + callee + wrapWithParen(join(",", args));
+  } else {
+    const auto args = createNodes(node, "clangStmt[position() > 1]", w, src);
+    return callee + wrapWithParen(join(",", args));
+  }
+}
+
 DEFINE_CCH(ForStmtProc) {
   const auto cond = createNodeOrNull(node, "clangStmt[@class='cond']", w, src);
   const auto iter = createNodeOrNull(node, "clangStmt[@class='iter']", w, src);
@@ -490,6 +502,7 @@ const ClangClassHandler ClangStmtHandler("class",
         std::make_tuple("CXXConstructExpr", CXXCtorExprProc),
         std::make_tuple("CXXDeleteExpr", CXXDeleteExprProc),
         std::make_tuple("CXXNewExpr", CXXNewExprProc),
+        std::make_tuple("CXXOperatorCallExpr", CXXOperatorCallExprProc),
         std::make_tuple("CXXTemporaryObjectExpr", CXXTemporaryObjectExprProc),
         std::make_tuple("CXXThisExpr", ThisExprProc),
         std::make_tuple("DeclStmt", DeclStmtProc),
