@@ -252,8 +252,8 @@ DEFINE_CCH(DeclRefExprProc) {
 }
 
 DEFINE_CCH(DeclStmtProc) {
-  const auto declNode = findFirst(node, "clangDecl", src.ctxt);
-  return w.walk(declNode, src);
+  const auto declNodes = createNodes(node, "clangDecl", w, src);
+  return insertNewLines(declNodes);
 }
 
 DEFINE_CCH(emitTokenAttrValue) {
