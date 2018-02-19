@@ -425,6 +425,14 @@ DEFINE_CCH(MemberExprProc) {
   return expr + makeTokenNode(".") + member;
 }
 
+DEFINE_CCH(ReturnStmtProc) {
+  if (const auto exprNode = findFirst(node, "clangStmt", src.ctxt)) {
+    const auto expr = w.walk(exprNode, src);
+    return makeTokenNode("return") + expr + makeTokenNode(";");
+  }
+  return makeTokenNode("return");
+}
+
 DEFINE_CCH(SwitchStmtProc) {
   const auto exprNode = findFirst(node, "clangStmt[1]", src.ctxt);
   const auto expr = w.walk(exprNode, src);
@@ -479,6 +487,7 @@ const ClangClassHandler ClangStmtHandler("class",
         std::make_tuple("InitListExpr", InitListExprProc),
         std::make_tuple("IntegerLiteral", emitTokenAttrValue),
         std::make_tuple("MemberExpr", MemberExprProc),
+        std::make_tuple("ReturnStmt", ReturnStmtProc),
         std::make_tuple("SwitchStmt", SwitchStmtProc),
         std::make_tuple("UnaryOperator", UnaryOperatorProc),
         std::make_tuple("WhileStmt", WhileStmtProc),
