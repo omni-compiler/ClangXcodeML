@@ -429,7 +429,8 @@ DEFINE_CCH(MemberExprProc) {
   const auto nameNode = findFirst(node, "name", src.ctxt);
   const auto member =
       getUnqualIdFromNameNode(nameNode)->toString(src.typeTable);
-  return expr + makeTokenNode(".") + member;
+  const auto isArrow = isTrueProp(node, "is_arrow", false);
+  return expr + makeTokenNode(isArrow ? "->" : ".") + member;
 }
 
 DEFINE_CCH(ReturnStmtProc) {
