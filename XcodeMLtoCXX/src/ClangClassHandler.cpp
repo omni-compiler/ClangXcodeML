@@ -124,16 +124,20 @@ DEFINE_CCH(FieldDeclProc) {
   return makeDecl(T, name, src.typeTable) + makeTokenNode(";");
 }
 
+DEFINE_CCH(emitTokenAttrValue);
 DEFINE_CCH(CXXRecordProc);
 
 const ClangClassHandler ClassDefinitionDeclHandler("class",
     CXXCodeGen::makeInnerNode,
     callCodeBuilder,
     {
+        std::make_tuple("CharacterLiteral", emitTokenAttrValue),
         std::make_tuple("CXXMethod", emitInlineMemberFunction),
         std::make_tuple("CXXConstructor", emitInlineMemberFunction),
         std::make_tuple("CXXRecord", CXXRecordProc),
+        std::make_tuple("FloatingLiteral", emitTokenAttrValue),
         std::make_tuple("Field", FieldDeclProc),
+        std::make_tuple("IntegerLiteral", emitTokenAttrValue),
     });
 
 DEFINE_CCH(BinaryOperatorProc) {
