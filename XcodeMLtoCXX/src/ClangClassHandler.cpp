@@ -406,6 +406,12 @@ DEFINE_CCH(ForStmtProc) {
       + body;
 }
 
+DEFINE_CCH(IfStmtProc) {
+  const auto cond = createNode(node, "clangStmt[1]", w, src);
+  const auto body = createNode(node, "clangStmt[2]", w, src);
+  return makeTokenNode("if") + wrapWithParen(cond) + body;
+}
+
 DEFINE_CCH(MemberExprProc) {
   const auto expr = createNode(node, "clangStmt", w, src);
   const auto nameNode = findFirst(node, "name", src.ctxt);
@@ -464,6 +470,7 @@ const ClangClassHandler ClangStmtHandler("class",
         std::make_tuple("DeclRefExpr", DeclRefExprProc),
         std::make_tuple("FloatingLiteral", emitTokenAttrValue),
         std::make_tuple("ForStmt", ForStmtProc),
+        std::make_tuple("IfStmt", IfStmtProc),
         std::make_tuple("IntegerLiteral", emitTokenAttrValue),
         std::make_tuple("MemberExpr", MemberExprProc),
         std::make_tuple("SwitchStmt", SwitchStmtProc),
