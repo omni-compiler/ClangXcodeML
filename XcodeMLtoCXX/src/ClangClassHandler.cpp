@@ -567,6 +567,21 @@ setStructName(XcodeMl::Struct &s, xmlNodePtr node, SourceInfo &src) {
   s.setTagName(nameSpelling);
 }
 
+DEFINE_CCH(RecordProc) {
+  if (isTrueProp(node, "is_implicit", false)) {
+    return cxxgen::makeVoidNode();
+  }
+  const auto T = src.typeTable.at(getType(node));
+  auto structT = llvm::dyn_cast<XcodeMl::Struct>(T.get());
+  assert(structT);
+  setStructName(*structT, node, src);
+  const auto tagName = structT->tagName();
+
+  const auto decls = createNodes(node, "clangDecl", w, src);
+  return makeTokenNode("struct") + tagName
+      + wrapWithBrace(insertNewLines(decls)) + makeTokenNode(";");
+}
+
 DEFINE_CCH(TranslationUnitProc) {
   if (const auto typeTableNode =
           findFirst(node, "xcodemlTypeTable", src.ctxt)) {
@@ -650,6 +665,7 @@ const ClangClassHandler ClangDeclHandler("class",
         std::make_tuple("Friend", FriendDeclProc),
         std::make_tuple("Function", FunctionProc),
         std::make_tuple("FunctionTemplate", FunctionTemplateProc),
+        std::make_tuple("Record", RecordProc),
         std::make_tuple("TemplateTypeParm", TemplateTypeParmProc),
         std::make_tuple("TranslationUnit", TranslationUnitProc),
         std::make_tuple("Typedef", TypedefProc),
