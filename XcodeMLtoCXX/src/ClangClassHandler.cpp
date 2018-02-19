@@ -54,6 +54,19 @@ createNode(xmlNodePtr node,
   return w.walk(targetNode, src);
 }
 
+std::vector<CodeFragment>
+createNodes(xmlNodePtr node,
+    const char *xpath,
+    const CodeBuilder &w,
+    SourceInfo &src) {
+  std::vector<CodeFragment> vec;
+  const auto targetNodes = findNodes(node, xpath, src.ctxt);
+  for (auto &&targetNode : targetNodes) {
+    vec.push_back(w.walk(targetNode, src));
+  }
+  return vec;
+}
+
 } // namespace
 
 DEFINE_CCH(callCodeBuilder) {
