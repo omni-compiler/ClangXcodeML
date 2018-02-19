@@ -187,6 +187,13 @@ DEFINE_CCH(CompoundStmtProc) {
   return wrapWithBrace(insertNewLines(stmts));
 }
 
+DEFINE_CCH(ConditionalOperatorProc) {
+  const auto cond = createNode(node, "clangStmt[1]", w, src);
+  const auto yes = createNode(node, "clangStmt[2]", w, src);
+  const auto no = createNode(node, "clangStmt[3]", w, src);
+  return cond + makeTokenNode("?") + yes + makeTokenNode(":") + no;
+}
+
 DEFINE_CCH(CXXCtorExprProc) {
   return makeTokenNode("(") + cxxgen::join(", ", w.walkChildren(node, src))
       + makeTokenNode(")");
@@ -414,6 +421,7 @@ const ClangClassHandler ClangStmtHandler("class",
         std::make_tuple("BreakStmt", BreakStmtProc),
         std::make_tuple("CallExpr", callExprProc),
         std::make_tuple("CaseStmt", CaseStmtProc),
+        std::make_tuple("ConditionalOperator", ConditionalOperatorProc),
         std::make_tuple("CharacterLiteral", emitTokenAttrValue),
         std::make_tuple("CompoundStmt", CompoundStmtProc),
         std::make_tuple("CXXConstructExpr", CXXCtorExprProc),
