@@ -54,6 +54,8 @@ const std::map<std::string, std::string> opMap = {
     {"newArrayExpr", "new[]"},
     {"deleteExpr", "delete"},
     {"deleteArrayExpr", "delete[]"},
+    {"AddrOfExpr", "&"},
+    {"pointerRef", "*"},
 };
 
 namespace XcodeMl {
