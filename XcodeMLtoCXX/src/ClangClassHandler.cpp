@@ -397,6 +397,15 @@ DEFINE_CCH(CXXTemporaryObjectExprProc) {
   return *name + makeTokenNode("(") + join(",", args) + makeTokenNode(")");
 }
 
+DEFINE_CCH(ForStmtProc) {
+  const auto cond = createNodeOrNull(node, "clangStmt[@class='cond']", w, src);
+  const auto iter = createNodeOrNull(node, "clangStmt[@class='iter']", w, src);
+  const auto body = createNodeOrNull(node, "clangStmt[@class='body']", w, src);
+  return makeTokenNode("for")
+      + wrapWithParen(makeTokenNode(";") + cond + makeTokenNode(";") + iter)
+      + body;
+}
+
 DEFINE_CCH(MemberExprProc) {
   const auto expr = createNode(node, "clangStmt", w, src);
   const auto nameNode = findFirst(node, "name", src.ctxt);
@@ -454,6 +463,7 @@ const ClangClassHandler ClangStmtHandler("class",
         std::make_tuple("DeclStmt", DeclStmtProc),
         std::make_tuple("DeclRefExpr", DeclRefExprProc),
         std::make_tuple("FloatingLiteral", emitTokenAttrValue),
+        std::make_tuple("ForStmt", ForStmtProc),
         std::make_tuple("IntegerLiteral", emitTokenAttrValue),
         std::make_tuple("MemberExpr", MemberExprProc),
         std::make_tuple("SwitchStmt", SwitchStmtProc),
