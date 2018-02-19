@@ -204,6 +204,29 @@ DEFINE_CCH(CXXDeleteExprProc) {
   return makeTokenNode("delete") + w.walk(allocated, src);
 }
 
+DEFINE_CCH(CXXNewExprProc) {
+  const auto T = src.typeTable.at(getType(node));
+  // FIXME: Support scalar type
+  const auto pointeeT =
+      llvm::cast<XcodeMl::Pointer>(T.get())->getPointee(src.typeTable);
+  const auto NewTypeId =
+      pointeeT->makeDeclaration(CXXCodeGen::makeVoidNode(), src.typeTable);
+  /* Ref: [new.expr]/4
+   * new int(*[10])();   // error
+   * new (int(*[10])()); // OK
+   * new int;            // OK
+   * new (int);          // OK
+   * new ((int));        // error
+   */
+  const auto init = findFirst(node, "clangStmt", src.ctxt);
+
+  return makeTokenNode("new")
+      + (hasParen(pointeeT, src.typeTable) ? wrapWithParen(NewTypeId)
+                                           : NewTypeId)
+      + (init ? wrapWithParen(join(",", w.walkChildren(init, src)))
+              : CXXCodeGen::makeVoidNode());
+}
+
 DEFINE_CCH(DeclRefExprProc) {
   const auto nameNode = findFirst(node, "name", src.ctxt);
   const auto name = getQualifiedNameFromNameNode(nameNode, src);
@@ -426,6 +449,7 @@ const ClangClassHandler ClangStmtHandler("class",
         std::make_tuple("CompoundStmt", CompoundStmtProc),
         std::make_tuple("CXXConstructExpr", CXXCtorExprProc),
         std::make_tuple("CXXDeleteExpr", CXXDeleteExprProc),
+        std::make_tuple("CXXNewExpr", CXXNewExprProc),
         std::make_tuple("CXXTemporaryObjectExpr", CXXTemporaryObjectExprProc),
         std::make_tuple("DeclStmt", DeclStmtProc),
         std::make_tuple("DeclRefExpr", DeclRefExprProc),
