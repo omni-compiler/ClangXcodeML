@@ -9,8 +9,12 @@ XCODEMLTOCXXDIR = $(ROOTDIR)/XcodeMLtoCXX
 CXXTOXCODEML = $(ROOTDIR)/scripts/CXXtoXcodeML
 XCODEMLTOCXX = $(XCODEMLTOCXXDIR)/XcodeMLtoCXX
 
+%.txt: %.out
+	./$< > $@
+
 # C tests
-# .src.c -> .c.xcodeml -> .dst.c -> .c.out -> .c.txt
+# .src.c -> .src.out -> .src.txt
+# .src.c -> .c.xcodeml -> .dst.c -> .dst.out -> .dst.txt
 
 CC = /usr/local/bin/clang
 CFLAGS = -pedantic -fsyntax-only
@@ -18,8 +22,8 @@ CTOXCODEMLFLAGS = -- -I.
 
 CTESTCASES = $(wildcard *.src.c)
 CTESTOBJECTS = $(CTESTCASES:.src.c=.dst.c)
-CTESTEXECUTABLES = $(CTESTCASES:.src.c=.c.out)
-CTESTOUTPUTTEXTS = $(CTESTCASES:.src.c=.c.txt)
+CTESTANSWERS = $(CTESTCASES:.src.c=.src.txt)
+CTESTOUTPUTTEXTS = $(CTESTCASES:.src.c=.dst.txt)
 
 %.c.xcodeml: %.src.c
 	$(CXXTOXCODEML) $< $(CTOXCODEMLFLAGS) \
@@ -28,15 +32,13 @@ CTESTOUTPUTTEXTS = $(CTESTCASES:.src.c=.c.txt)
 %.dst.c: %.c.xcodeml
 	$(XCODEMLTOCXX) $< > $@
 
-%.c.out: %.dst.c
+%.out: %.c
 	$(CC) $< -o $@
-
-%.c.txt: %.c.out
-	./$< > $@
 
 
 # C++ tests
-# .src.cpp -> .cpp.xcodeml -> .dst.cpp -> .cpp.out -> .cpp.txt
+# .src.cpp -> .src.out -> .src.txt
+# .src.cpp -> .cpp.xcodeml -> .dst.cpp -> .dst.out -> .dst.txt
 
 CXX = /usr/local/bin/clang++
 CXXFLAGS = -pedantic -fsyntax-only
@@ -44,8 +46,8 @@ CXXTOXCODEMLFLAGS = -- -I.
 
 CXXTESTCASES = $(wildcard *.src.cpp)
 CXXTESTOBJECTS = $(CXXTESTCASES:.src.cpp=.dst.cpp)
-CXXTESTEXECUTABLES = $(CXXTESTCASES:.src.cpp=.cpp.out)
-CXXTESTOUTPUTTEXTS = $(CXXTESTCASES:.src.cpp=.cpp.txt)
+CXXTESTANSWERS = $(CXXTESTCASES:.src.cpp=.src.txt)
+CXXTESTOUTPUTTEXTS = $(CXXTESTCASES:.src.cpp=.dst.txt)
 
 %.cpp.xcodeml: %.src.cpp
 	$(CXXTOXCODEML) $< $(CXXTOXCODEMLFLAGS) \
@@ -54,17 +56,14 @@ CXXTESTOUTPUTTEXTS = $(CXXTESTCASES:.src.cpp=.cpp.txt)
 %.dst.cpp: %.cpp.xcodeml
 	$(XCODEMLTOCXX) $< > $@
 
-%.cpp.out: %.dst.cpp
+%.out: %.cpp
 	$(CXX) $< -o $@
 
-%.cpp.txt: %.cpp.out
-	./$< > $@
 
-
-check: $(CXXTESTOUTPUTTEXTS) $(CTESTOUTPUTTEXTS)
+check: $(CXXTESTOUTPUTTEXTS) $(CTESTOUTPUTTEXTS) $(CXXTESTANSWERS) $(CTESTANSWERS)
 	set -e; \
-	for file in *.txt; do \
-		diff -u $$file $${file%.txt}.sample; \
+	for file in *.dst.txt; do \
+		diff -u $$file $${file%.dst.txt}.src.txt; \
 	done
 
 clean:
