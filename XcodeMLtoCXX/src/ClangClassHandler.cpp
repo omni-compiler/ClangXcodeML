@@ -443,6 +443,10 @@ DEFINE_CCH(SwitchStmtProc) {
   return makeTokenNode("switch") + wrapWithParen(expr) + body;
 }
 
+DEFINE_CCH(ThisExprProc) {
+  return makeTokenNode("this");
+}
+
 DEFINE_CCH(UnaryOperatorProc) {
   const auto expr = createNode(node, "clangStmt", w, src);
 
@@ -479,6 +483,7 @@ const ClangClassHandler ClangStmtHandler("class",
         std::make_tuple("CXXDeleteExpr", CXXDeleteExprProc),
         std::make_tuple("CXXNewExpr", CXXNewExprProc),
         std::make_tuple("CXXTemporaryObjectExpr", CXXTemporaryObjectExprProc),
+        std::make_tuple("CXXThisExpr", ThisExprProc),
         std::make_tuple("DeclStmt", DeclStmtProc),
         std::make_tuple("DeclRefExpr", DeclRefExprProc),
         std::make_tuple("FloatingLiteral", emitTokenAttrValue),
