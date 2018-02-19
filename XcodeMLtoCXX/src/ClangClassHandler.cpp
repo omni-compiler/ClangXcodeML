@@ -453,6 +453,11 @@ DEFINE_CCH(ReturnStmtProc) {
   return makeTokenNode("return");
 }
 
+DEFINE_CCH(StringLiteralProc) {
+  const auto string = makeTokenNode(getProp(node, "stringLiteral"));
+  return makeTokenNode("\"") + string + makeTokenNode("\"");
+}
+
 DEFINE_CCH(SwitchStmtProc) {
   const auto exprNode = findFirst(node, "clangStmt[1]", src.ctxt);
   const auto expr = w.walk(exprNode, src);
@@ -515,6 +520,7 @@ const ClangClassHandler ClangStmtHandler("class",
         std::make_tuple("IntegerLiteral", emitTokenAttrValue),
         std::make_tuple("MemberExpr", MemberExprProc),
         std::make_tuple("ReturnStmt", ReturnStmtProc),
+        std::make_tuple("StringLiteral", StringLiteralProc),
         std::make_tuple("SwitchStmt", SwitchStmtProc),
         std::make_tuple("UnaryOperator", UnaryOperatorProc),
         std::make_tuple("WhileStmt", WhileStmtProc),
