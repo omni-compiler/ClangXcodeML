@@ -417,8 +417,9 @@ DEFINE_CCH(CXXOperatorCallExprProc) {
 }
 
 DEFINE_CCH(ForStmtProc) {
-  const auto init =
-      createNodeOrNull(node, "clangStmt[@for_stmt_kind='init']", w, src);
+  const auto initNode =
+      findFirst(node, "clangStmt[@for_stmt_kind='init']", src.ctxt);
+  const auto init = initNode ? w.walk(initNode, src) : makeTokenNode(";");
   const auto cond =
       createNodeOrNull(node, "clangStmt[@for_stmt_kind='cond']", w, src);
   const auto iter =
