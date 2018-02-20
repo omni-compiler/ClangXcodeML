@@ -8,9 +8,10 @@ ROOTDIR = ../..
 XCODEMLTOCXXDIR = $(ROOTDIR)/XcodeMLtoCXX
 CXXTOXCODEML = $(ROOTDIR)/scripts/CXXtoXcodeML
 XCODEMLTOCXX = $(XCODEMLTOCXXDIR)/XcodeMLtoCXX
+DURATION = 5s
 
 %.txt: %.out
-	./$< > $@
+	timeout $(DURATION) ./$< > $@
 
 # C tests
 # .src.c -> .src.out -> .src.txt
