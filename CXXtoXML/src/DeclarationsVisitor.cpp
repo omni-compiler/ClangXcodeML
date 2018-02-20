@@ -110,6 +110,8 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
   if (auto OCE = dyn_cast<clang::CXXOperatorCallExpr>(S)) {
     newProp("xcodeml_operator_kind",
         OverloadedOperatorKindToString(OCE->getOperator(), OCE->getNumArgs()));
+    const auto is_member = isa<clang::CXXMethodDecl>(OCE->getDirectCallee());
+    newProp("is_member_function", (is_member ? "true" : "false"));
   }
 
   if (auto NL = dyn_cast<CXXNewExpr>(S)) {
