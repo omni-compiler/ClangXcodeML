@@ -417,9 +417,12 @@ DEFINE_CCH(CXXOperatorCallExprProc) {
 }
 
 DEFINE_CCH(ForStmtProc) {
-  const auto cond = createNodeOrNull(node, "clangStmt[@class='cond']", w, src);
-  const auto iter = createNodeOrNull(node, "clangStmt[@class='iter']", w, src);
-  const auto body = createNodeOrNull(node, "clangStmt[@class='body']", w, src);
+  const auto cond =
+      createNodeOrNull(node, "clangStmt[@for_stmt_kind='cond']", w, src);
+  const auto iter =
+      createNodeOrNull(node, "clangStmt[@for_stmt_kind='iter']", w, src);
+  const auto body =
+      createNodeOrNull(node, "clangStmt[@for_stmt_kind='body']", w, src);
   return makeTokenNode("for")
       + wrapWithParen(makeTokenNode(";") + cond + makeTokenNode(";") + iter)
       + body;
