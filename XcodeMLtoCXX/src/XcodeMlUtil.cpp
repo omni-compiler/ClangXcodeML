@@ -74,8 +74,7 @@ getQualifiedName(xmlNodePtr node, const SourceInfo &src) {
   if (!nameSpecNode) {
     return XcodeMl::Name(unqualId);
   }
-  const auto nameSpec =
-      ClangNestedNameSpecHandler.walk(nameSpecNode, ProgramBuilder, src);
+  const auto nameSpec = ClangNestedNameSpecHandler.walk(nameSpecNode, src);
   return XcodeMl::Name(nameSpec, unqualId);
 }
 
