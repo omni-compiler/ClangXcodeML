@@ -223,8 +223,9 @@ DEFINE_CCH(ClassTemplateProc) {
     params.push_back(w.walk(paramNode, src));
   }
 
+  const auto body = w.walk(bodyNode, src);
   return makeTokenNode("template") + makeTokenNode("<") + join(",", params)
-      + makeTokenNode(">") + w.walk(bodyNode, src);
+      + makeTokenNode(">") + body;
 }
 
 DEFINE_CCH(CXXCtorExprProc) {
