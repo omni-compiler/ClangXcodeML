@@ -656,6 +656,10 @@ DEFINE_CB(clangTypeLocProc) {
   return ClangTypeLocHandler.walk(node, w, src);
 }
 
+DEFINE_CB(clangNestedNameSpecProc) {
+  return ClangNestedNameSpecHandler.walk(node, src);
+}
+
 } // namespace
 
 const CodeBuilder ProgramBuilder("ProgramBuilder",
@@ -748,6 +752,7 @@ const CodeBuilder ProgramBuilder("ProgramBuilder",
         std::make_tuple("clangStmt", clangStmtProc),
         std::make_tuple("clangDecl", clangDeclProc),
         std::make_tuple("clangTypeLoc", clangTypeLocProc),
+        std::make_tuple("clangNestedNameSpecifier", clangNestedNameSpecProc),
 
         /* for CtoXcodeML */
         std::make_tuple("Decl_Record", NullProc),
