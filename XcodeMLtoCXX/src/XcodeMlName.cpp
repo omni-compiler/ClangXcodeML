@@ -19,6 +19,10 @@ using CXXCodeGen::makeVoidNode;
 
 namespace XcodeMl {
 
+Name::Name(const CodeFragment &spec, const std::shared_ptr<UnqualId> &id_)
+    : nestedNameSpec(spec), id(id_) {
+}
+
 Name::Name(const std::shared_ptr<UnqualId> &id_) : nestedNameSpec(), id(id_) {
 }
 

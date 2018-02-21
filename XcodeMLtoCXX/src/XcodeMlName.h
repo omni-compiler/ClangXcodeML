@@ -53,6 +53,7 @@ private:
  */
 class Name {
 public:
+  explicit Name(const CodeFragment &, const std::shared_ptr<UnqualId> &);
   explicit Name(const std::shared_ptr<UnqualId> &);
   CodeFragment toString(const Environment &, const NnsMap &) const;
   std::shared_ptr<UnqualId> getUnqualId() const;
