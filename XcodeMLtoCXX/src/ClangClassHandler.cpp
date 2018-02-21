@@ -417,12 +417,17 @@ DEFINE_CCH(CXXOperatorCallExprProc) {
 }
 
 DEFINE_CCH(ForStmtProc) {
-  const auto cond = createNodeOrNull(node, "clangStmt[@class='cond']", w, src);
-  const auto iter = createNodeOrNull(node, "clangStmt[@class='iter']", w, src);
-  const auto body = createNodeOrNull(node, "clangStmt[@class='body']", w, src);
+  const auto initNode =
+      findFirst(node, "clangStmt[@for_stmt_kind='init']", src.ctxt);
+  const auto init = initNode ? w.walk(initNode, src) : makeTokenNode(";");
+  const auto cond =
+      createNodeOrNull(node, "clangStmt[@for_stmt_kind='cond']", w, src);
+  const auto iter =
+      createNodeOrNull(node, "clangStmt[@for_stmt_kind='iter']", w, src);
+  const auto body =
+      createNodeOrNull(node, "clangStmt[@for_stmt_kind='body']", w, src);
   return makeTokenNode("for")
-      + wrapWithParen(makeTokenNode(";") + cond + makeTokenNode(";") + iter)
-      + body;
+      + wrapWithParen(init + cond + makeTokenNode(";") + iter) + body;
 }
 
 DEFINE_CCH(IfStmtProc) {
@@ -503,6 +508,7 @@ const ClangClassHandler ClangStmtHandler("class",
         std::make_tuple("CaseStmt", CaseStmtProc),
         std::make_tuple("ConditionalOperator", ConditionalOperatorProc),
         std::make_tuple("CharacterLiteral", emitTokenAttrValue),
+        std::make_tuple("CompoundAssignOperator", BinaryOperatorProc),
         std::make_tuple("CompoundStmt", CompoundStmtProc),
         std::make_tuple("CXXConstructExpr", CXXCtorExprProc),
         std::make_tuple("CXXDeleteExpr", CXXDeleteExprProc),
