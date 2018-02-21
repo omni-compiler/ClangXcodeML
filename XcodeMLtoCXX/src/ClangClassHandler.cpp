@@ -251,6 +251,13 @@ DEFINE_CCH(DeclRefExprProc) {
   return name.toString(src.typeTable, src.nnsTable);
 }
 
+DEFINE_CCH(DoStmtProc) {
+  const auto body = createNode(node, "clangStmt[1]", w, src);
+  const auto cond = createNode(node, "clangStmt[2]", w, src);
+  return makeTokenNode("do") + body + makeTokenNode("while")
+      + wrapWithParen(cond) + makeTokenNode(";");
+}
+
 DEFINE_CCH(DeclStmtProc) {
   const auto declNodes = createNodes(node, "clangDecl", w, src);
   return insertNewLines(declNodes);
@@ -519,6 +526,7 @@ const ClangClassHandler ClangStmtHandler("class",
         std::make_tuple("CXXThisExpr", ThisExprProc),
         std::make_tuple("DeclStmt", DeclStmtProc),
         std::make_tuple("DeclRefExpr", DeclRefExprProc),
+        std::make_tuple("DoStmt", DoStmtProc),
         std::make_tuple("FloatingLiteral", emitTokenAttrValue),
         std::make_tuple("ForStmt", ForStmtProc),
         std::make_tuple("IfStmt", IfStmtProc),
