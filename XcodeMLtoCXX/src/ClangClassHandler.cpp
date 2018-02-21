@@ -213,7 +213,7 @@ DEFINE_CCH(ClassTemplateProc) {
       findNodes(node, "clangDecl[@class='TemplateTypeParm']", src.ctxt);
   const auto bodyNode = findFirst(node, "clangDecl[@class='CXXRecord']", src.ctxt);
   const auto nameNode = findFirst(bodyNode, "name", src.ctxt);
-  const auto dtident = getProp(bodyNode, "type");
+  const auto dtident = getType(bodyNode);
   const auto T = src.typeTable[dtident];
   const auto classT = llvm::cast<XcodeMl::ClassType>(T.get());
   classT->setName(getContent(nameNode));
