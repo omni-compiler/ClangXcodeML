@@ -110,6 +110,8 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
   if (auto OCE = dyn_cast<clang::CXXOperatorCallExpr>(S)) {
     newProp("xcodeml_operator_kind",
         OverloadedOperatorKindToString(OCE->getOperator(), OCE->getNumArgs()));
+    const auto is_member = isa<clang::CXXMethodDecl>(OCE->getDirectCallee());
+    newProp("is_member_function", (is_member ? "true" : "false"));
   }
 
   if (auto NL = dyn_cast<CXXNewExpr>(S)) {
@@ -463,8 +465,31 @@ DeclarationsVisitor::PreVisitDeclarationNameInfo(DeclarationNameInfo NI) {
   return true;
 }
 
+namespace {
+
+std::string
+SpecifierKindToString(clang::NestedNameSpecifier::SpecifierKind kind) {
+  switch (kind) {
+  case NestedNameSpecifier::Identifier: return "identifier";
+  case NestedNameSpecifier::Namespace: return "namespace";
+  case NestedNameSpecifier::NamespaceAlias: return "namespace_alias";
+  case NestedNameSpecifier::TypeSpec: return "type_specifier";
+  case NestedNameSpecifier::TypeSpecWithTemplate:
+    return "type_specifier_with_template";
+  case NestedNameSpecifier::Global: return "global";
+  case NestedNameSpecifier::Super: return "MS_super";
+  }
+}
+
+} // namespace
+
 bool
 DeclarationsVisitor::PreVisitNestedNameSpecifierLoc(NestedNameSpecifierLoc N) {
+  if (const auto Spec = N.getNestedNameSpecifier()) {
+    newChild("clangNestedNameSpecifier");
+    const auto kind = SpecifierKindToString(Spec->getKind());
+    newProp("clang_nested_name_specifier_kind", kind.c_str());
+  }
   return true;
 }
 

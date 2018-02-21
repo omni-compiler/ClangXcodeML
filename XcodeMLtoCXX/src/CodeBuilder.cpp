@@ -44,22 +44,6 @@ using XcodeMl::makeOpNode;
 namespace {
 
 XcodeMl::CodeFragment
-wrapWithLangLink(const XcodeMl::CodeFragment &content,
-    xmlNodePtr node,
-    const SourceInfo &src) {
-  if (src.language != Language::CPlusPlus) {
-    return content;
-  }
-  const auto lang = getPropOrNull(node, "language_linkage");
-  if (!lang.hasValue() || *lang == "C++") {
-    return content;
-  } else {
-    return makeTokenNode("extern") + makeTokenNode("\"" + *lang + "\"")
-        + makeTokenNode("{") + content + makeTokenNode("}");
-  }
-}
-
-XcodeMl::CodeFragment
 makeNestedNameSpec(const XcodeMl::NnsRef &nns, const SourceInfo &src) {
   return nns->makeDeclaration(src.typeTable, src.nnsTable);
 }
@@ -203,64 +187,6 @@ handleIndentation(const CodeBuilder::Procedure mainProc) {
 const CodeBuilder::Procedure handleScope = handleBracketsLn(
     "{", "}", handleIndentation(walkChildrenWithInsertingNewLines));
 
-std::vector<XcodeMl::CodeFragment>
-getParamNames(xmlNodePtr fnNode, const SourceInfo &src) {
-  std::vector<XcodeMl::CodeFragment> vec;
-  const auto params = findNodes(
-      fnNode, "clangTypeLoc/clangDecl[@class='ParmVar']/name", src.ctxt);
-  for (auto p : params) {
-    XMLString name = xmlNodeGetContent(p);
-    vec.push_back(makeTokenNode(name));
-  }
-  return vec;
-}
-
-XcodeMl::CodeFragment
-makeFunctionDeclHead(XcodeMl::Function *func,
-    const XcodeMl::Name &name,
-    const std::vector<XcodeMl::CodeFragment> &paramNames,
-    const SourceInfo &src,
-    bool emitNameSpec = false) {
-  const auto pUnqualId = name.getUnqualId();
-  const auto nameSpelling = emitNameSpec
-      ? name.toString(src.typeTable, src.nnsTable)
-      : pUnqualId->toString(src.typeTable);
-  if (llvm::isa<XcodeMl::CtorName>(pUnqualId.get())
-      || llvm::isa<XcodeMl::DtorName>(pUnqualId.get())
-      || llvm::isa<XcodeMl::ConvFuncId>(pUnqualId.get())) {
-    /* Do not emit return type
-     *    void A::A();
-     *    void A::~A();
-     *    int A::operator int();
-     */
-    return func->makeDeclarationWithoutReturnType(
-        nameSpelling, paramNames, src.typeTable);
-  } else {
-    return func->makeDeclaration(nameSpelling, paramNames, src.typeTable);
-  }
-}
-
-XcodeMl::CodeFragment
-makeFunctionDeclHead(xmlNodePtr node,
-    const std::vector<XcodeMl::CodeFragment> paramNames,
-    const SourceInfo &src,
-    bool emitNameSpec = false) {
-  const auto nameNode = findFirst(node, "name", src.ctxt);
-  const auto name = getQualifiedNameFromNameNode(nameNode, src);
-
-  const auto dtident = getProp(node, "type");
-  const auto T = src.typeTable[dtident];
-  const auto fnType = llvm::cast<XcodeMl::Function>(T.get());
-
-  auto acc = makeVoidNode();
-  acc = acc + makeFunctionDeclHead(fnType,
-                  name,
-                  paramNames,
-                  src,
-                  emitNameSpec && xmlHasProp(node, BAD_CAST "parent_class"));
-  return acc;
-}
-
 DEFINE_CB(functionDefinitionProc) {
   const auto paramNames = getParamNames(node, src);
   auto acc = makeFunctionDeclHead(node, paramNames, src, true);
@@ -339,21 +265,13 @@ DEFINE_CB(emitMemberFunctionDecl) {
   return wrapWithLangLink(decl, node, src);
 }
 
-DEFINE_CB(memberExprProc) {
-  const auto expr = findFirst(node, "*", src.ctxt);
-  const auto name =
-      getQualifiedNameFromNameNode(findFirst(node, "*[2]", src.ctxt), src);
-  return w.walk(expr, src) + makeTokenNode(".")
-      + name.toString(src.typeTable, src.nnsTable);
-}
-
 XcodeMl::CodeFragment
 getNameFromMemberRefNode(xmlNodePtr node, const SourceInfo &src) {
   /* If the <memberRef> element has two children, use the second child. */
   const auto memberName = findFirst(node, "name", src.ctxt);
   if (memberName) {
-    const auto name = getQualifiedNameFromNameNode(memberName, src);
-    return name.toString(src.typeTable, src.nnsTable);
+    const auto name = getUnqualIdFromNameNode(memberName);
+    return name->toString(src.typeTable);
   }
   /* Otherwise, it must have `member` attribute. */
   const auto name = getProp(node, "member");
@@ -588,6 +506,8 @@ DEFINE_CB(addrOfExprProc) {
   return wrap(w, node, src);
 }
 
+} // namespace
+
 XcodeMl::CodeFragment
 declareClassTypeInit(
     const CodeBuilder &w, xmlNodePtr ctorExpr, SourceInfo &src) {
@@ -608,6 +528,8 @@ declareClassTypeInit(
   return args.empty() ? makeVoidNode()
                       : wrapWithParen(cxxgen::join(",", args));
 }
+
+namespace {
 
 DEFINE_CB(varDeclProc) {
   const auto nameNode = findFirst(node, "name", src.ctxt);
@@ -633,17 +555,6 @@ DEFINE_CB(varDeclProc) {
 
   acc = acc + makeTokenNode("=") + w.walk(valueElem, src) + makeTokenNode(";");
   return wrapWithLangLink(acc, node, src);
-}
-
-DEFINE_CB(usingDeclProc) {
-  const auto nameNode = findFirst(node, "name", src.ctxt);
-  const auto name = getQualifiedNameFromNameNode(nameNode, src);
-  // FIXME: using declaration of base constructor
-  const auto head = isTrueProp(node, "is_access_declaration", false)
-      ? makeVoidNode()
-      : makeTokenNode("using");
-  return head + name.toString(src.typeTable, src.nnsTable)
-      + makeTokenNode(";");
 }
 
 DEFINE_CB(emitDataMemberDecl) {
@@ -737,8 +648,16 @@ DEFINE_CB(clangDeclProc) {
   return ClangDeclHandler.walk(node, w, src);
 }
 
+DEFINE_CB(classScopeClangDeclProc) {
+  return ClassDefinitionDeclHandler.walk(node, w, src);
+}
+
 DEFINE_CB(clangTypeLocProc) {
   return ClangTypeLocHandler.walk(node, w, src);
+}
+
+DEFINE_CB(clangNestedNameSpecProc) {
+  return ClangNestedNameSpecHandler.walk(node, src);
 }
 
 } // namespace
@@ -758,7 +677,6 @@ const CodeBuilder ProgramBuilder("ProgramBuilder",
         std::make_tuple("Var", varProc),
         std::make_tuple("varAddr", showNodeContent("(&", ")")),
         std::make_tuple("pointerRef", showUnaryOp("*")),
-        std::make_tuple("memberExpr", memberExprProc),
         std::make_tuple("memberRef", memberRefProc),
         std::make_tuple("memberAddr", memberAddrProc),
         std::make_tuple("memberPointerRef", memberPointerRefProc),
@@ -823,7 +741,6 @@ const CodeBuilder ProgramBuilder("ProgramBuilder",
         std::make_tuple("returnStatement", returnStatementProc),
         std::make_tuple("varDecl", varDeclProc),
         std::make_tuple("value", valueProc),
-        std::make_tuple("usingDecl", usingDeclProc),
 
         /* out of specification */
         std::make_tuple("constructorInitializer", ctorInitProc),
@@ -835,6 +752,7 @@ const CodeBuilder ProgramBuilder("ProgramBuilder",
         std::make_tuple("clangStmt", clangStmtProc),
         std::make_tuple("clangDecl", clangDeclProc),
         std::make_tuple("clangTypeLoc", clangTypeLocProc),
+        std::make_tuple("clangNestedNameSpecifier", clangNestedNameSpecProc),
 
         /* for CtoXcodeML */
         std::make_tuple("Decl_Record", NullProc),
@@ -845,7 +763,7 @@ namespace {
 
 Language
 getSourceLanguage(xmlNodePtr rootNode, xmlXPathContextPtr ctxt) {
-  const auto topNode = findFirst(rootNode, "/XcodeProgram", ctxt);
+  const auto topNode = findFirst(rootNode, "/*", ctxt);
 
   const auto lang = getPropOrNull(topNode, "language");
   if (!lang.hasValue()) {
@@ -870,20 +788,17 @@ const CodeBuilder ClassDefinitionBuilder("ClassDefinitionBuilder",
         std::make_tuple("functionDecl", emitMemberFunctionDecl),
         std::make_tuple(
             "functionDefinition", emitInlineMemberFunctionDefinition),
-        std::make_tuple("usingDecl", usingDeclProc),
         std::make_tuple("varDecl", emitDataMemberDecl),
 
         /* for elements defined by clang */
-        std::make_tuple("clangDecl", clangDeclProc),
+        std::make_tuple("clangDecl", classScopeClangDeclProc),
+        std::make_tuple("clangStmt", clangStmtProc),
     });
 
-/*!
- * \brief Traverse an XcodeML document and generate C++ source code.
- * \param[in] doc XcodeML document.
- * \param[out] ss Stringstream to flush C++ source code.
- */
+namespace {
+
 void
-buildCode(
+readXcodeProgram(
     xmlNodePtr rootNode, xmlXPathContextPtr ctxt, std::stringstream &ss) {
   xmlNodePtr typeTableNode =
       findFirst(rootNode, "/XcodeProgram/typeTable", ctxt);
@@ -901,4 +816,46 @@ buildCode(
       ->flush(out);
 
   ss << out.str();
+}
+
+void
+readClangAST(
+    xmlNodePtr rootNode, xmlXPathContextPtr ctxt, std::stringstream &ss) {
+  xmlNodePtr typeTableNode =
+      findFirst(rootNode, "/clangAST/clangDecl/xcodemlTypeTable", ctxt);
+  xmlNodePtr nnsTableNode =
+      findFirst(rootNode, "/clangAST/clangDecl/xcodemlNnsTable", ctxt);
+  SourceInfo src(ctxt,
+      parseTypeTable(typeTableNode, ctxt, ss),
+      analyzeNnsTable(nnsTableNode, ctxt),
+      getSourceLanguage(rootNode, ctxt));
+
+  cxxgen::Stream out;
+  xmlNodePtr decl = findFirst(rootNode, "/clangAST/clangDecl", src.ctxt);
+  const auto program = ClangDeclHandler.walk(decl, ProgramBuilder, src);
+  program->flush(out);
+
+  ss << out.str();
+}
+
+} // namespace
+
+/*!
+ * \brief Traverse an XcodeML document and generate C++ source code.
+ * \param[in] doc XcodeML document.
+ * \param[out] ss Stringstream to flush C++ source code.
+ */
+void
+buildCode(
+    xmlNodePtr rootNode, xmlXPathContextPtr ctxt, std::stringstream &ss) {
+  const auto docType = getName(rootNode);
+  if (std::equal(docType.cbegin(), docType.cend(), "XcodeProgram")) {
+    readXcodeProgram(rootNode, ctxt, ss);
+    return;
+  } else if (std::equal(docType.cbegin(), docType.cend(), "clangAST")) {
+    readClangAST(rootNode, ctxt, ss);
+  } else {
+    std::cerr << "error: unknown document type" << std::endl;
+    std::abort();
+  }
 }
