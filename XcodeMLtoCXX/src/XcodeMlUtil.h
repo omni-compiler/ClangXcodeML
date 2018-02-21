@@ -13,13 +13,9 @@ std::shared_ptr<XcodeMl::UnqualId> getUnqualIdFromNameNode(xmlNodePtr idNode);
 std::shared_ptr<XcodeMl::UnqualId> getUnqualIdFromIdNode(
     xmlNodePtr nameNode, xmlXPathContextPtr ctxt);
 
-std::shared_ptr<XcodeMl::Nns> getNns(
-    const XcodeMl::NnsMap &nnsTable, xmlNodePtr nameNode);
+XcodeMl::Name getQualifiedName(xmlNodePtr node, const SourceInfo &);
 
 std::string getType(xmlNodePtr node);
-
-XcodeMl::Name getQualifiedNameFromNameNode(
-    xmlNodePtr nameNode, const SourceInfo &);
 
 void xcodeMlPwd(xmlNodePtr, std::ostream &);
 

@@ -1,3 +1,4 @@
+#include <functional>
 #include <iostream>
 #include <map>
 #include <memory>
@@ -18,6 +19,10 @@
 #include "XcodeMlOperator.h"
 #include "XMLString.h"
 #include "SourceInfo.h"
+#include "AttrProc.h"
+#include "XMLWalker.h"
+#include "CodeBuilder.h"
+#include "ClangClassHandler.h"
 
 #include "XcodeMlUtil.h"
 
@@ -58,32 +63,19 @@ getUnqualIdFromIdNode(xmlNodePtr idNode, xmlXPathContextPtr ctxt) {
   return getUnqualIdFromNameNode(nameNode);
 }
 
-std::shared_ptr<XcodeMl::Nns>
-getNns(const XcodeMl::NnsMap &nnsTable, xmlNodePtr nameNode) {
-  const auto ident = getPropOrNull(nameNode, "nns");
-  if (!ident.hasValue()) {
-    return std::shared_ptr<XcodeMl::Nns>();
-  }
-  const auto nns = getOrNull(nnsTable, *ident);
-  if (!nns.hasValue()) {
-    const auto lineno = xmlGetLineNo(nameNode);
-    assert(lineno >= 0);
-    std::cerr << "Undefined NNS: '" << *ident << "'" << std::endl
-              << "lineno: " << lineno << std::endl;
-    xmlDebugDumpNode(stderr, nameNode, 0);
-    std::abort();
-  }
-  return *nns;
-}
-
 XcodeMl::Name
-getQualifiedNameFromNameNode(xmlNodePtr nameNode, const SourceInfo &src) {
-  const auto id = getUnqualIdFromNameNode(nameNode);
-  if (src.language == Language::C) {
-    return XcodeMl::Name(id);
+getQualifiedName(xmlNodePtr node, const SourceInfo &src) {
+  const auto nameNode = findFirst(node, "name", src.ctxt);
+  assert(nameNode);
+  const auto unqualId = getUnqualIdFromNameNode(nameNode);
+
+  const auto nameSpecNode =
+      findFirst(node, "clangNestedNameSpecifier", src.ctxt);
+  if (!nameSpecNode) {
+    return XcodeMl::Name(unqualId);
   }
-  const auto nns = getNns(src.nnsTable, nameNode);
-  return XcodeMl::Name(id, nns);
+  const auto nameSpec = ClangNestedNameSpecHandler.walk(nameSpecNode, src);
+  return XcodeMl::Name(nameSpec, unqualId);
 }
 
 void
@@ -173,8 +165,7 @@ makeFunctionDeclHead(xmlNodePtr node,
     const std::vector<XcodeMl::CodeFragment> paramNames,
     const SourceInfo &src,
     bool emitNameSpec) {
-  const auto nameNode = findFirst(node, "name", src.ctxt);
-  const auto name = getQualifiedNameFromNameNode(nameNode, src);
+  const auto name = getQualifiedName(node, src);
 
   const auto dtident = getType(node);
   const auto T = src.typeTable[dtident];

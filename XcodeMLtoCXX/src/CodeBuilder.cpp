@@ -265,21 +265,13 @@ DEFINE_CB(emitMemberFunctionDecl) {
   return wrapWithLangLink(decl, node, src);
 }
 
-DEFINE_CB(memberExprProc) {
-  const auto expr = findFirst(node, "*", src.ctxt);
-  const auto name =
-      getQualifiedNameFromNameNode(findFirst(node, "*[2]", src.ctxt), src);
-  return w.walk(expr, src) + makeTokenNode(".")
-      + name.toString(src.typeTable, src.nnsTable);
-}
-
 XcodeMl::CodeFragment
 getNameFromMemberRefNode(xmlNodePtr node, const SourceInfo &src) {
   /* If the <memberRef> element has two children, use the second child. */
   const auto memberName = findFirst(node, "name", src.ctxt);
   if (memberName) {
-    const auto name = getQualifiedNameFromNameNode(memberName, src);
-    return name.toString(src.typeTable, src.nnsTable);
+    const auto name = getUnqualIdFromNameNode(memberName);
+    return name->toString(src.typeTable);
   }
   /* Otherwise, it must have `member` attribute. */
   const auto name = getProp(node, "member");
@@ -565,17 +557,6 @@ DEFINE_CB(varDeclProc) {
   return wrapWithLangLink(acc, node, src);
 }
 
-DEFINE_CB(usingDeclProc) {
-  const auto nameNode = findFirst(node, "name", src.ctxt);
-  const auto name = getQualifiedNameFromNameNode(nameNode, src);
-  // FIXME: using declaration of base constructor
-  const auto head = isTrueProp(node, "is_access_declaration", false)
-      ? makeVoidNode()
-      : makeTokenNode("using");
-  return head + name.toString(src.typeTable, src.nnsTable)
-      + makeTokenNode(";");
-}
-
 DEFINE_CB(emitDataMemberDecl) {
   const auto nameNode = findFirst(node, "name", src.ctxt);
   const auto name = getUnqualIdFromNameNode(nameNode);
@@ -675,6 +656,10 @@ DEFINE_CB(clangTypeLocProc) {
   return ClangTypeLocHandler.walk(node, w, src);
 }
 
+DEFINE_CB(clangNestedNameSpecProc) {
+  return ClangNestedNameSpecHandler.walk(node, src);
+}
+
 } // namespace
 
 const CodeBuilder ProgramBuilder("ProgramBuilder",
@@ -692,7 +677,6 @@ const CodeBuilder ProgramBuilder("ProgramBuilder",
         std::make_tuple("Var", varProc),
         std::make_tuple("varAddr", showNodeContent("(&", ")")),
         std::make_tuple("pointerRef", showUnaryOp("*")),
-        std::make_tuple("memberExpr", memberExprProc),
         std::make_tuple("memberRef", memberRefProc),
         std::make_tuple("memberAddr", memberAddrProc),
         std::make_tuple("memberPointerRef", memberPointerRefProc),
@@ -757,7 +741,6 @@ const CodeBuilder ProgramBuilder("ProgramBuilder",
         std::make_tuple("returnStatement", returnStatementProc),
         std::make_tuple("varDecl", varDeclProc),
         std::make_tuple("value", valueProc),
-        std::make_tuple("usingDecl", usingDeclProc),
 
         /* out of specification */
         std::make_tuple("constructorInitializer", ctorInitProc),
@@ -769,6 +752,7 @@ const CodeBuilder ProgramBuilder("ProgramBuilder",
         std::make_tuple("clangStmt", clangStmtProc),
         std::make_tuple("clangDecl", clangDeclProc),
         std::make_tuple("clangTypeLoc", clangTypeLocProc),
+        std::make_tuple("clangNestedNameSpecifier", clangNestedNameSpecProc),
 
         /* for CtoXcodeML */
         std::make_tuple("Decl_Record", NullProc),
@@ -804,7 +788,6 @@ const CodeBuilder ClassDefinitionBuilder("ClassDefinitionBuilder",
         std::make_tuple("functionDecl", emitMemberFunctionDecl),
         std::make_tuple(
             "functionDefinition", emitInlineMemberFunctionDefinition),
-        std::make_tuple("usingDecl", usingDeclProc),
         std::make_tuple("varDecl", emitDataMemberDecl),
 
         /* for elements defined by clang */

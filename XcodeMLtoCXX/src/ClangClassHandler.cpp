@@ -235,8 +235,7 @@ DEFINE_CCH(CXXNewExprProc) {
 }
 
 DEFINE_CCH(DeclRefExprProc) {
-  const auto nameNode = findFirst(node, "name", src.ctxt);
-  const auto name = getQualifiedNameFromNameNode(nameNode, src);
+  const auto name = getQualifiedName(node, src);
 
   if (const auto TAL = findFirst(node, "TemplateArgumentLoc", src.ctxt)) {
     const auto templArgNodes = findNodes(TAL, "*", src.ctxt);
@@ -290,8 +289,7 @@ DEFINE_CCH(FunctionTemplateProc) {
 }
 
 DEFINE_CCH(TemplateTypeParmProc) {
-  const auto nameNode = findFirst(node, "name", src.ctxt);
-  const auto name = getQualifiedNameFromNameNode(nameNode, src);
+  const auto name = getQualifiedName(node, src);
   const auto nameSpelling = name.toString(src.typeTable, src.nnsTable);
 
   const auto dtident = getType(node);
@@ -450,9 +448,8 @@ DEFINE_CCH(InitListExprProc) {
 
 DEFINE_CCH(MemberExprProc) {
   const auto expr = createNode(node, "clangStmt", w, src);
-  const auto nameNode = findFirst(node, "name", src.ctxt);
   const auto member =
-      getUnqualIdFromNameNode(nameNode)->toString(src.typeTable);
+      getQualifiedName(node, src).toString(src.typeTable, src.nnsTable);
   const auto isArrow = isTrueProp(node, "is_arrow", false);
   return expr + makeTokenNode(isArrow ? "->" : ".") + member;
 }
@@ -704,4 +701,34 @@ const ClangClassHandler ClangTypeLocHandler("class",
     callCodeBuilder,
     {
         std::make_tuple("Builtin", BuiltinTypeProc),
+    });
+
+#define CCCH_ARGS                                                             \
+  xmlNodePtr node __attribute__((unused)),                                    \
+      const SourceInfo &src __attribute__((unused))
+
+#define DEFINE_CCCH(name) static XcodeMl::CodeFragment name(CCCH_ARGS)
+
+DEFINE_CCCH(doNothing) {
+  return CXXCodeGen::makeVoidNode();
+}
+
+DEFINE_CCCH(TypeSpecifierProc) {
+  const auto typeNode = findFirst(node, "clangTypeLoc", src.ctxt);
+  const auto T = src.typeTable.at(getType(typeNode));
+  if (llvm::isa<XcodeMl::ClassType>(T.get())) {
+    const auto classT = llvm::cast<XcodeMl::ClassType>(T.get());
+    assert(classT->name().hasValue());
+    return *(classT->name()) + makeTokenNode("::");
+  }
+  return makeDecl(T, CXXCodeGen::makeVoidNode(), src.typeTable)
+      + makeTokenNode("::");
+}
+
+const ConstClangClassHandler ClangNestedNameSpecHandler(
+    "clang_nested_name_specifier_kind",
+    cxxgen::makeInnerNode,
+    doNothing,
+    {
+        std::make_tuple("type_specifier", TypeSpecifierProc),
     });
