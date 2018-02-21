@@ -699,7 +699,7 @@ DEFINE_CCCH(doNothing) {
   return CXXCodeGen::makeVoidNode();
 }
 
-DEFINE_CCH(TypeSpecifierProc) {
+DEFINE_CCCH(TypeSpecifierProc) {
   const auto typeNode = findFirst(node, "clangTypeLoc", src.ctxt);
   const auto T = src.typeTable.at(getType(typeNode));
   if (llvm::isa<XcodeMl::ClassType>(T.get())) {
@@ -711,10 +711,10 @@ DEFINE_CCH(TypeSpecifierProc) {
       + makeTokenNode("::");
 }
 
-const ClangClassHandler ClangNestedNameSpecHandler(
+const ConstClangClassHandler ClangNestedNameSpecHandler(
     "clang_nested_name_specifier_kind",
     cxxgen::makeInnerNode,
-    callCodeBuilder,
+    doNothing,
     {
         std::make_tuple("type_specifier", TypeSpecifierProc),
     });
