@@ -1,3 +1,4 @@
+#include <functional>
 #include <iostream>
 #include <map>
 #include <memory>
@@ -18,6 +19,10 @@
 #include "XcodeMlOperator.h"
 #include "XMLString.h"
 #include "SourceInfo.h"
+#include "AttrProc.h"
+#include "XMLWalker.h"
+#include "CodeBuilder.h"
+#include "ClangClassHandler.h"
 
 #include "XcodeMlUtil.h"
 
@@ -56,6 +61,22 @@ getUnqualIdFromIdNode(xmlNodePtr idNode, xmlXPathContextPtr ctxt) {
     throw std::domain_error("name node not found");
   }
   return getUnqualIdFromNameNode(nameNode);
+}
+
+XcodeMl::Name
+getQualifiedName(xmlNodePtr node, SourceInfo &src) {
+  const auto nameNode = findFirst(node, "name", src.ctxt);
+  assert(nameNode);
+  const auto unqualId = getUnqualIdFromNameNode(nameNode);
+
+  const auto nameSpecNode =
+      findFirst(node, "clangNestedNameSpecifier", src.ctxt);
+  if (!nameSpecNode) {
+    return XcodeMl::Name(unqualId);
+  }
+  const auto nameSpec =
+      ClangNestedNameSpecHandler.walk(nameSpecNode, ProgramBuilder, src);
+  return XcodeMl::Name(nameSpec, unqualId);
 }
 
 XcodeMl::Name
