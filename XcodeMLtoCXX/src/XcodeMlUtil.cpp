@@ -79,15 +79,6 @@ getQualifiedName(xmlNodePtr node, SourceInfo &src) {
   return XcodeMl::Name(nameSpec, unqualId);
 }
 
-XcodeMl::Name
-getQualifiedNameFromNameNode(xmlNodePtr nameNode, const SourceInfo &src) {
-  const auto id = getUnqualIdFromNameNode(nameNode);
-  if (src.language == Language::C) {
-    return XcodeMl::Name(id);
-  }
-  return XcodeMl::Name(id);
-}
-
 void
 xcodeMlPwd(xmlNodePtr node, std::ostream &os) {
   assert(node);

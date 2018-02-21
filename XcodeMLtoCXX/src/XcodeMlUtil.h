@@ -17,9 +17,6 @@ XcodeMl::Name getQualifiedName(xmlNodePtr node, SourceInfo &);
 
 std::string getType(xmlNodePtr node);
 
-XcodeMl::Name getQualifiedNameFromNameNode(
-    xmlNodePtr nameNode, const SourceInfo &);
-
 void xcodeMlPwd(xmlNodePtr, std::ostream &);
 
 struct XcodeMlPwdType {
