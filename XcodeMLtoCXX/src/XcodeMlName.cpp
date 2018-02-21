@@ -29,6 +29,9 @@ Name::Name(const std::shared_ptr<UnqualId> &id_) : nestedNameSpec(), id(id_) {
 CodeFragment
 Name::toString(const Environment &typeTable, const NnsMap &) const {
   assert(id);
+  if (nestedNameSpec) {
+    return nestedNameSpec + id->toString(typeTable);
+  }
   return id->toString(typeTable);
 }
 
