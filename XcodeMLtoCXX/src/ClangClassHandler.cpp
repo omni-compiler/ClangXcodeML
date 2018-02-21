@@ -691,3 +691,10 @@ const ClangClassHandler ClangTypeLocHandler("class",
     {
         std::make_tuple("Builtin", BuiltinTypeProc),
     });
+
+const ClangClassHandler ClangNestedNameSpecHandler(
+    "clang_nested_name_specifier_kind",
+    cxxgen::makeInnerNode,
+    callCodeBuilder,
+    {
+    });

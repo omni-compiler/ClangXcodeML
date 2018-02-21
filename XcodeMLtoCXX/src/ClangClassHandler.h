@@ -8,5 +8,6 @@ extern const ClangClassHandler ClangStmtHandler;
 extern const ClangClassHandler ClangDeclHandler;
 extern const ClangClassHandler ClassDefinitionDeclHandler;
 extern const ClangClassHandler ClangTypeLocHandler;
+extern const ClangClassHandler ClangNestedNameSpecHandler;
 
 #endif /* !CLANGCLASSHANDLER_H */
