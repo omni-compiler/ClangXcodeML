@@ -58,6 +58,7 @@ public:
   std::shared_ptr<UnqualId> getUnqualId() const;
 
 private:
+  CodeFragment nestedNameSpec;
   std::shared_ptr<UnqualId> id;
 };
 
