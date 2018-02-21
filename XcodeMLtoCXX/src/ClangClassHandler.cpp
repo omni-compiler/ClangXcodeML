@@ -689,6 +689,16 @@ const ClangClassHandler ClangTypeLocHandler("class",
         std::make_tuple("Builtin", BuiltinTypeProc),
     });
 
+#define CCCH_ARGS                                                             \
+  xmlNodePtr node __attribute__((unused)),                                    \
+      const SourceInfo &src __attribute__((unused))
+
+#define DEFINE_CCCH(name) static XcodeMl::CodeFragment name(CCCH_ARGS)
+
+DEFINE_CCCH(doNothing) {
+  return CXXCodeGen::makeVoidNode();
+}
+
 DEFINE_CCH(TypeSpecifierProc) {
   const auto typeNode = findFirst(node, "clangTypeLoc", src.ctxt);
   const auto T = src.typeTable.at(getType(typeNode));
