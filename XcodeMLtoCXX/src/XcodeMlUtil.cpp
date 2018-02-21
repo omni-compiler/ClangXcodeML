@@ -64,7 +64,7 @@ getUnqualIdFromIdNode(xmlNodePtr idNode, xmlXPathContextPtr ctxt) {
 }
 
 XcodeMl::Name
-getQualifiedName(xmlNodePtr node, SourceInfo &src) {
+getQualifiedName(xmlNodePtr node, const SourceInfo &src) {
   const auto nameNode = findFirst(node, "name", src.ctxt);
   assert(nameNode);
   const auto unqualId = getUnqualIdFromNameNode(nameNode);
