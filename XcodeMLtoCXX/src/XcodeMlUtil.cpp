@@ -166,8 +166,7 @@ makeFunctionDeclHead(xmlNodePtr node,
     const std::vector<XcodeMl::CodeFragment> paramNames,
     const SourceInfo &src,
     bool emitNameSpec) {
-  const auto nameNode = findFirst(node, "name", src.ctxt);
-  const auto name = getQualifiedNameFromNameNode(nameNode, src);
+  const auto name = getQualifiedName(node, src);
 
   const auto dtident = getType(node);
   const auto T = src.typeTable[dtident];

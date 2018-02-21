@@ -278,8 +278,8 @@ getNameFromMemberRefNode(xmlNodePtr node, const SourceInfo &src) {
   /* If the <memberRef> element has two children, use the second child. */
   const auto memberName = findFirst(node, "name", src.ctxt);
   if (memberName) {
-    const auto name = getQualifiedNameFromNameNode(memberName, src);
-    return name.toString(src.typeTable, src.nnsTable);
+    const auto name = getUnqualIdFromNameNode(memberName);
+    return name->toString(src.typeTable);
   }
   /* Otherwise, it must have `member` attribute. */
   const auto name = getProp(node, "member");
