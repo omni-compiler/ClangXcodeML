@@ -19,13 +19,7 @@ namespace XcodeMl {
 Nns::Nns(NnsKind k, const NnsIdent &ni) : parent(), kind(k), ident(ni) {
 }
 
-Nns::Nns(NnsKind k, const NnsRef &nr, const NnsIdent &ni)
-    : parent(nr ? nr->getParent() : llvm::Optional<NnsIdent>()),
-      kind(k),
-      ident(ni) {
-}
-
-Nns::Nns(NnsKind k, const NnsIdent &par, const NnsIdent &ident)
+Nns::Nns(NnsKind k, const NnsIdent &ident, const NnsIdent &par)
     : parent(par), kind(k), ident(ident) {
 }
 
@@ -34,6 +28,11 @@ Nns::~Nns() = default;
 NnsKind
 Nns::getKind() const {
   return kind;
+}
+
+NnsIdent
+Nns::getIdent() const {
+  return ident;
 }
 
 CodeFragment
@@ -56,7 +55,7 @@ Nns::getParent() const {
   return parent;
 }
 
-GlobalNns::GlobalNns() : Nns(NnsKind::Global, NnsRef(), "global") {
+GlobalNns::GlobalNns() : Nns(NnsKind::Global, "global") {
 }
 
 Nns *
@@ -80,9 +79,13 @@ GlobalNns::getParent() const {
   return llvm::Optional<NnsIdent>();
 }
 
+ClassNns::ClassNns(const NnsIdent &ni, const DataTypeIdent &di)
+    : Nns(NnsKind::Class, ni), dtident(di) {
+}
+
 ClassNns::ClassNns(
-    const NnsIdent &ni, const NnsRef &parent, const DataTypeIdent &di)
-    : Nns(NnsKind::Class, parent, ni), dtident(di) {
+    const NnsIdent &ni, const DataTypeIdent &di, const NnsIdent &parent)
+    : Nns(NnsKind::Class, ni, parent), dtident(di) {
 }
 
 Nns *
@@ -159,19 +162,25 @@ makeGlobalNns() {
 
 NnsRef
 makeClassNns(const NnsIdent &ident,
-    const NnsRef &parent,
-    const DataTypeIdent &classType) {
-  return std::make_shared<ClassNns>(ident, parent, classType);
+    const DataTypeIdent &classType,
+    const NnsIdent &parent) {
+  return std::make_shared<ClassNns>(ident, classType, parent);
 }
 
 NnsRef
 makeClassNns(const NnsIdent &ident, const DataTypeIdent &classType) {
-  return std::make_shared<ClassNns>(ident, nullptr, classType);
+  return std::make_shared<ClassNns>(ident, classType);
 }
 
 NnsRef
 makeNamespaceNns(const NnsIdent &nident, const std::string &name) {
   return std::make_shared<NamespaceNns>(nident, name);
+}
+
+NnsRef
+makeNamespaceNns(
+    const NnsIdent &nident, const std::string &name, const NnsIdent &parent) {
+  return std::make_shared<NamespaceNns>(nident, name, parent);
 }
 
 NnsRef

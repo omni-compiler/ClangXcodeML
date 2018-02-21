@@ -40,11 +40,11 @@ enum class NnsKind {
 class Nns {
 public:
   Nns(NnsKind kind, const NnsIdent &ident);
-  Nns(NnsKind kind, const NnsRef &parent, const NnsIdent &ident);
-  Nns(NnsKind kind, const NnsIdent &parent, const NnsIdent &ident);
+  Nns(NnsKind kind, const NnsIdent &ident, const NnsIdent &parent);
   virtual ~Nns() = 0;
   virtual Nns *clone() const = 0;
   NnsKind getKind() const;
+  NnsIdent getIdent() const;
   CodeFragment makeDeclaration(const Environment &, const NnsMap &) const;
 
 protected:
@@ -89,7 +89,8 @@ protected:
  */
 class ClassNns : public Nns {
 public:
-  ClassNns(const NnsIdent &, const NnsRef &, const DataTypeIdent &);
+  ClassNns(const NnsIdent &, const DataTypeIdent &);
+  ClassNns(const NnsIdent &, const DataTypeIdent &, const NnsIdent &);
   ~ClassNns() override = default;
   Nns *clone() const override;
   static bool classof(const Nns *);
@@ -142,12 +143,12 @@ NnsRef makeGlobalNns();
  * \brief Make and return an `XcodeMl::ClassNns` object.
  *
  * \param nident the NNS identifier
- * \param prefix the prefix (or parent) NNS
  * \param classType the data type identifier of the corresponding class
+ * \param prefix the prefix (or parent) NNS
  */
 NnsRef makeClassNns(const NnsIdent &nident,
-    const NnsRef &prefix,
-    const DataTypeIdent &classType);
+    const DataTypeIdent &classType,
+    const NnsIdent &prefix);
 
 /*!
  * \brief Make and return an `XcodeMl::ClassNns` object that does not have
@@ -159,6 +160,9 @@ NnsRef makeClassNns(const NnsIdent &nident,
 NnsRef makeClassNns(const NnsIdent &nident, const DataTypeIdent &classType);
 
 NnsRef makeNamespaceNns(const NnsIdent &nident, const std::string &name);
+
+NnsRef makeNamespaceNns(
+    const NnsIdent &nident, const std::string &name, const NnsIdent &parent);
 
 NnsRef makeOtherNns(const NnsIdent &nident);
 
