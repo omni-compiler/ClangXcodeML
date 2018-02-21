@@ -692,9 +692,22 @@ const ClangClassHandler ClangTypeLocHandler("class",
         std::make_tuple("Builtin", BuiltinTypeProc),
     });
 
+DEFINE_CCH(TypeSpecifierProc) {
+  const auto typeNode = findFirst(node, "clangTypeLoc", src.ctxt);
+  const auto T = src.typeTable.at(getType(typeNode));
+  if (llvm::isa<XcodeMl::ClassType>(T.get())) {
+    const auto classT = llvm::cast<XcodeMl::ClassType>(T.get());
+    assert(classT->name().hasValue());
+    return *(classT->name()) + makeTokenNode("::");
+  }
+  return makeDecl(T, CXXCodeGen::makeVoidNode(), src.typeTable)
+      + makeTokenNode("::");
+}
+
 const ClangClassHandler ClangNestedNameSpecHandler(
     "clang_nested_name_specifier_kind",
     cxxgen::makeInnerNode,
     callCodeBuilder,
     {
+        std::make_tuple("type_specifier", TypeSpecifierProc),
     });
