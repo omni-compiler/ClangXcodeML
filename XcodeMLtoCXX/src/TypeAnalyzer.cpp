@@ -153,6 +153,9 @@ getBases(xmlNodePtr node, xmlXPathContextPtr ctxt) {
 
 DEFINE_TA(classTypeProc) {
   XMLString elemName = xmlGetProp(node, BAD_CAST "type");
+  const auto nameSpelling = getContent(findFirst(node, "name", ctxt));
+  const auto className = nameSpelling.empty() ? XcodeMl::ClassType::ClassName()
+                                              : makeTokenNode(nameSpelling);
   const auto bases = getBases(node, ctxt);
   XcodeMl::ClassType::Symbols symbols;
   const auto ids = findNodes(node, "symbols/id", ctxt);
@@ -164,9 +167,11 @@ DEFINE_TA(classTypeProc) {
 
   const auto classKind = getProp(node, "cxx_class_kind");
   if (classKind == "union") {
-    map[elemName] = XcodeMl::makeCXXUnionType(elemName, bases, symbols);
+    map[elemName] =
+        XcodeMl::makeCXXUnionType(elemName, className, bases, symbols);
   } else {
-    map[elemName] = XcodeMl::makeClassType(elemName, bases, symbols);
+    map[elemName] =
+        XcodeMl::makeClassType(elemName, className, bases, symbols);
   }
 }
 

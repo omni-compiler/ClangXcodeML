@@ -536,7 +536,8 @@ TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
           }
           xmlAddChild(Node, templArgs);
         }
-
+        const auto className = RD->getName();
+        xmlNewChild(Node, nullptr, BAD_CAST "name", BAD_CAST className.data());
         xmlAddChild(Node, makeInheritanceNode(*this, RD));
         pushType(T, Node);
       } else if (T->isStructureType()) {
