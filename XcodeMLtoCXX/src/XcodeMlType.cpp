@@ -607,7 +607,8 @@ ClassType::ClassType(const DataTypeIdent &ident,
       classKind_(CXXClassKind::Class),
       name_(className),
       bases_(),
-      classScopeSymbols(symbols) {
+      classScopeSymbols(symbols),
+      templateArgs() {
 }
 
 ClassType::ClassType(const DataTypeIdent &ident,
@@ -630,7 +631,8 @@ ClassType::ClassType(
       classKind_(CXXClassKind::Class),
       name_(),
       bases_(),
-      classScopeSymbols(symbols) {
+      classScopeSymbols(symbols),
+      templateArgs() {
 }
 
 ClassType::ClassType(const DataTypeIdent &ident,
@@ -641,7 +643,8 @@ ClassType::ClassType(const DataTypeIdent &ident,
       classKind_(kind),
       name_(),
       bases_(b),
-      classScopeSymbols(symbols) {
+      classScopeSymbols(symbols),
+      templateArgs() {
 }
 
 std::string
