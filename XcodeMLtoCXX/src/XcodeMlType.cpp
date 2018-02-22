@@ -895,6 +895,20 @@ makeCXXUnionType(const DataTypeIdent &ident,
 }
 
 TypeRef
+makeCXXUnionType(const DataTypeIdent &ident,
+    const llvm::Optional<CodeFragment> &unionName,
+    const std::vector<ClassType::BaseClass> &bases,
+    const ClassType::Symbols &members) {
+  if (unionName.hasValue()) {
+    return std::make_shared<ClassType>(
+        ident, CXXClassKind::Union, *unionName, bases, members);
+  } else {
+    return std::make_shared<ClassType>(
+        ident, CXXClassKind::Union, bases, members);
+  }
+}
+
+TypeRef
 makeTemplateTypeParm(const DataTypeIdent &dtident) {
   return std::make_shared<TemplateTypeParm>(dtident);
 }
