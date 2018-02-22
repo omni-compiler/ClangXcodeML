@@ -890,10 +890,11 @@ TypeRef
 makeClassType(const DataTypeIdent &dtident,
     const llvm::Optional<CodeFragment> &className,
     const std::vector<ClassType::BaseClass> &bases,
-    const ClassType::Symbols &members) {
+    const ClassType::Symbols &members,
+    const llvm::Optional<ClassType::TemplateArgList> &targs) {
   if (className.hasValue()) {
     return std::make_shared<ClassType>(
-        dtident, CXXClassKind::Class, *className, bases, members);
+        dtident, CXXClassKind::Class, *className, bases, members, targs);
   } else {
     return std::make_shared<ClassType>(
         dtident, CXXClassKind::Class, bases, members);

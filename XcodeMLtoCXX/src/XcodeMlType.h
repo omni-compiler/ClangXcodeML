@@ -480,7 +480,8 @@ TypeRef makeClassType(const DataTypeIdent &,
 TypeRef makeClassType(const DataTypeIdent &dtident,
     const llvm::Optional<CodeFragment> &className,
     const std::vector<ClassType::BaseClass> &bases,
-    const ClassType::Symbols &members);
+    const ClassType::Symbols &members,
+    const llvm::Optional<ClassType::TemplateArgList> &templateArgs);
 TypeRef makeCXXUnionType(const DataTypeIdent &ident,
     const std::vector<ClassType::BaseClass> &bases,
     const ClassType::Symbols &members);
