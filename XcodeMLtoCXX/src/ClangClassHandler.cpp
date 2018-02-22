@@ -360,18 +360,14 @@ emitClassDefinition(xmlNodePtr node,
 
 void
 setClassName(XcodeMl::ClassType &classType, xmlNodePtr node, SourceInfo &src) {
-  const auto nameNode = findFirst(node, "name", src.ctxt);
-  if (!nameNode || isEmpty(nameNode)) {
-    /* `classType` is unnamed.
-     * Unnamed classes are problematic, so give a name to `classType`
-     * such as `__xcodeml_1`.
-     */
-    classType.setName(src.getUniqueName());
+  if (classType.name().hasValue()) {
     return;
   }
-  const auto className = getUnqualIdFromNameNode(nameNode);
-  const auto nameSpelling = className->toString(src.typeTable);
-  classType.setName(nameSpelling);
+  /* `classType` is unnamed.
+   * Unnamed classes are problematic, so give a name to `classType`
+   * such as `__xcodeml_1`.
+   */
+  classType.setName(src.getUniqueName());
 }
 
 DEFINE_CCH(CXXRecordProc) {
