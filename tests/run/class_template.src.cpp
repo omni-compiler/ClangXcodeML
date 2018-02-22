@@ -6,8 +6,6 @@ public:
   ClassA(T x) {
     data = x;
   }
-
-public:
   T
   get() {
     return data;
