@@ -151,12 +151,28 @@ getBases(xmlNodePtr node, xmlXPathContextPtr ctxt) {
   return result;
 }
 
+llvm::Optional<XcodeMl::ClassType::TemplateArgList>
+getTemplateArgs(xmlNodePtr node, xmlXPathContextPtr ctxt) {
+  using namespace XcodeMl;
+  using MaybeList = llvm::Optional<ClassType::TemplateArgList>;
+  const auto targsNode = findFirst(node, "templateArguments", ctxt);
+  if (!targsNode) {
+    return MaybeList();
+  }
+  ClassType::TemplateArgList targs;
+  for (auto &&targNode : findNodes(targsNode, "typeName", ctxt)) {
+    targs.push_back(getProp(targNode, "ref"));
+  }
+  return MaybeList(targs);
+}
+
 DEFINE_TA(classTypeProc) {
   XMLString elemName = xmlGetProp(node, BAD_CAST "type");
   const auto nameSpelling = getContent(findFirst(node, "name", ctxt));
   const auto className = nameSpelling.empty() ? XcodeMl::ClassType::ClassName()
                                               : makeTokenNode(nameSpelling);
   const auto bases = getBases(node, ctxt);
+  const auto targs = getTemplateArgs(node, ctxt);
   XcodeMl::ClassType::Symbols symbols;
   const auto ids = findNodes(node, "symbols/id", ctxt);
   for (auto &idElem : ids) {
@@ -168,11 +184,16 @@ DEFINE_TA(classTypeProc) {
   const auto classKind = getProp(node, "cxx_class_kind");
   if (classKind == "union") {
     map[elemName] =
-        XcodeMl::makeCXXUnionType(elemName, className, bases, symbols);
+        XcodeMl::makeCXXUnionType(elemName, className, bases, symbols, targs);
   } else {
     map[elemName] =
-        XcodeMl::makeClassType(elemName, className, bases, symbols);
+        XcodeMl::makeClassType(elemName, className, bases, symbols, targs);
   }
+}
+
+DEFINE_TA(injectedClassNameTypeProc) {
+  const auto dtident = getProp(node, "type");
+  map[dtident] = XcodeMl::makeClassType(dtident, {}, {});
 }
 
 DEFINE_TA(enumTypeProc) {
@@ -241,6 +262,7 @@ const TypeAnalyzer XcodeMLTypeAnalyzer("TypeAnalyzer",
         std::make_tuple("classType", classTypeProc),
         std::make_tuple("enumType", enumTypeProc),
         std::make_tuple("TemplateTypeParmType", TemplateTypeParmTypeProc),
+        std::make_tuple("injectedClassNameType", injectedClassNameTypeProc),
     });
 
 /*!

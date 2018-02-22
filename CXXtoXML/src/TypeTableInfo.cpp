@@ -157,6 +157,17 @@ TypeTableInfo::registerTemplateTypeParmType(QualType T) {
 }
 
 std::string
+TypeTableInfo::registerInjectedClassNameType(QualType T) {
+  assert(T->getTypeClass() == Type::InjectedClassName);
+  std::string name = mapFromQualTypeToName[T];
+  assert(name.empty());
+
+  raw_string_ostream OS(name);
+  OS << "InjectedClassName" << seqForInjectedClassNameType++;
+  return mapFromQualTypeToName[T] = OS.str();
+}
+
+std::string
 TypeTableInfo::registerOtherType(QualType T) {
   std::string name = mapFromQualTypeToName[T];
   assert(name.empty());
@@ -495,6 +506,8 @@ TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
       rawname = registerOtherType(T);
       // XXX: temporary implementation
       Node = createNode(T, "otherType", nullptr);
+      xmlNewProp(
+          Node, BAD_CAST "clang_type_class", BAD_CAST(T->getTypeClassName()));
       pushType(T, Node);
       break;
 
@@ -508,6 +521,21 @@ TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
         xmlNewProp(Node,
             BAD_CAST "is_anonymous",
             BAD_CAST(RD->isAnonymousStructOrUnion() ? "true" : "false"));
+
+        if (auto CTS = dyn_cast<ClassTemplateSpecializationDecl>(RD)) {
+          xmlNewProp(
+              Node, BAD_CAST "is_template_instantiation", BAD_CAST "true");
+          const auto templArgs =
+              xmlNewNode(nullptr, BAD_CAST "templateArguments");
+          for (auto &&arg : CTS->getTemplateArgs().asArray()) {
+            const auto typeNode = xmlNewNode(nullptr, BAD_CAST "typeName");
+            xmlNewProp(typeNode,
+                BAD_CAST "ref",
+                BAD_CAST getTypeName(arg.getAsType()).c_str());
+            xmlAddChild(templArgs, typeNode);
+          }
+          xmlAddChild(Node, templArgs);
+        }
         const auto className = RD->getName();
         xmlNewChild(Node, nullptr, BAD_CAST "name", BAD_CAST className.data());
         xmlAddChild(Node, makeInheritanceNode(*this, RD));
@@ -571,13 +599,20 @@ TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
       pushType(T, Node);
       break;
     }
+    case Type::InjectedClassName: {
+      // The injected class name of a class template
+      // or class template partial specialization
+      rawname = registerInjectedClassNameType(T);
+      Node = createNode(T, "injectedClassNameType", nullptr);
+      pushType(T, Node);
+      break;
+    }
     case Type::Elaborated:
     case Type::Attributed:
     case Type::SubstTemplateTypeParm:
     case Type::SubstTemplateTypeParmPack:
     case Type::TemplateSpecialization:
     case Type::Auto:
-    case Type::InjectedClassName:
     case Type::DependentName:
     case Type::DependentTemplateSpecialization:
     case Type::PackExpansion:
@@ -588,6 +623,8 @@ TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
       rawname = registerOtherType(T);
       // XXX: temporary implementation
       Node = createNode(T, "otherType", nullptr);
+      xmlNewProp(
+          Node, BAD_CAST "clang_type_class", BAD_CAST(T->getTypeClassName()));
       pushType(T, Node);
       break;
     }

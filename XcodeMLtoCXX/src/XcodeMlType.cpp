@@ -607,19 +607,22 @@ ClassType::ClassType(const DataTypeIdent &ident,
       classKind_(CXXClassKind::Class),
       name_(className),
       bases_(),
-      classScopeSymbols(symbols) {
+      classScopeSymbols(symbols),
+      templateArgs() {
 }
 
 ClassType::ClassType(const DataTypeIdent &ident,
     CXXClassKind kind,
     const CodeFragment &className,
     const std::vector<BaseClass> &b,
-    const ClassType::Symbols &symbols)
+    const ClassType::Symbols &symbols,
+    const llvm::Optional<TemplateArgList> &argList)
     : Type(TypeKind::Class, ident),
       classKind_(kind),
       name_(className),
       bases_(b),
-      classScopeSymbols(symbols) {
+      classScopeSymbols(symbols),
+      templateArgs(argList) {
 }
 
 ClassType::ClassType(
@@ -628,7 +631,8 @@ ClassType::ClassType(
       classKind_(CXXClassKind::Class),
       name_(),
       bases_(),
-      classScopeSymbols(symbols) {
+      classScopeSymbols(symbols),
+      templateArgs() {
 }
 
 ClassType::ClassType(const DataTypeIdent &ident,
@@ -639,7 +643,8 @@ ClassType::ClassType(const DataTypeIdent &ident,
       classKind_(kind),
       name_(),
       bases_(b),
-      classScopeSymbols(symbols) {
+      classScopeSymbols(symbols),
+      templateArgs() {
 }
 
 std::string
@@ -652,8 +657,17 @@ getClassKey(CXXClassKind kind) {
 }
 
 CodeFragment
-ClassType::makeDeclaration(CodeFragment var, const Environment &) {
+ClassType::makeDeclaration(CodeFragment var, const Environment &typeTable) {
   assert(name_);
+  if (templateArgs.hasValue()) {
+    std::vector<CodeFragment> targs;
+    for (auto &&dtident : *templateArgs) {
+      const auto T = typeTable.at(dtident);
+      targs.push_back(makeDecl(T, makeVoidNode(), typeTable));
+    }
+    return makeTokenNode(getClassKey(classKind())) + *name_
+        + makeTokenNode("<") + join(",", targs) + makeTokenNode(">") + var;
+  }
   return makeTokenNode(getClassKey(classKind())) + *name_ + var;
 }
 
@@ -876,10 +890,11 @@ TypeRef
 makeClassType(const DataTypeIdent &dtident,
     const llvm::Optional<CodeFragment> &className,
     const std::vector<ClassType::BaseClass> &bases,
-    const ClassType::Symbols &members) {
+    const ClassType::Symbols &members,
+    const llvm::Optional<ClassType::TemplateArgList> &targs) {
   if (className.hasValue()) {
     return std::make_shared<ClassType>(
-        dtident, CXXClassKind::Class, *className, bases, members);
+        dtident, CXXClassKind::Class, *className, bases, members, targs);
   } else {
     return std::make_shared<ClassType>(
         dtident, CXXClassKind::Class, bases, members);
@@ -898,10 +913,11 @@ TypeRef
 makeCXXUnionType(const DataTypeIdent &ident,
     const llvm::Optional<CodeFragment> &unionName,
     const std::vector<ClassType::BaseClass> &bases,
-    const ClassType::Symbols &members) {
+    const ClassType::Symbols &members,
+    const llvm::Optional<ClassType::TemplateArgList> &targs) {
   if (unionName.hasValue()) {
     return std::make_shared<ClassType>(
-        ident, CXXClassKind::Union, *unionName, bases, members);
+        ident, CXXClassKind::Union, *unionName, bases, members, targs);
   } else {
     return std::make_shared<ClassType>(
         ident, CXXClassKind::Union, bases, members);

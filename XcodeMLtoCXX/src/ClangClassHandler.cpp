@@ -201,6 +201,33 @@ DEFINE_CCH(ConditionalOperatorProc) {
   return cond + makeTokenNode("?") + yes + makeTokenNode(":") + no;
 }
 
+DEFINE_CCH(ClassTemplateProc) {
+  if (const auto typeTableNode =
+          findFirst(node, "xcodemlTypeTable", src.ctxt)) {
+    src.typeTable = expandEnvironment(src.typeTable, typeTableNode, src.ctxt);
+  }
+  if (const auto nnsTableNode = findFirst(node, "xcodemlNnsTable", src.ctxt)) {
+    src.nnsTable = expandNnsMap(src.nnsTable, nnsTableNode, src.ctxt);
+  }
+  const auto paramNodes =
+      findNodes(node, "clangDecl[@class='TemplateTypeParm']", src.ctxt);
+  const auto bodyNode = findFirst(node, "clangDecl[@class='CXXRecord']", src.ctxt);
+  const auto nameNode = findFirst(bodyNode, "name", src.ctxt);
+  const auto dtident = getType(bodyNode);
+  const auto T = src.typeTable[dtident];
+  const auto classT = llvm::cast<XcodeMl::ClassType>(T.get());
+  classT->setName(getContent(nameNode));
+
+  std::vector<CXXCodeGen::StringTreeRef> params;
+  for (auto &&paramNode : paramNodes) {
+    params.push_back(w.walk(paramNode, src));
+  }
+
+  const auto body = w.walk(bodyNode, src);
+  return makeTokenNode("template") + makeTokenNode("<") + join(",", params)
+      + makeTokenNode(">") + body;
+}
+
 DEFINE_CCH(CXXCtorExprProc) {
   return makeTokenNode("(") + cxxgen::join(", ", w.walkChildren(node, src))
       + makeTokenNode(")");
@@ -672,6 +699,7 @@ const ClangClassHandler ClangDeclHandler("class",
     cxxgen::makeInnerNode,
     callCodeBuilder,
     {
+        std::make_tuple("ClassTemplate", ClassTemplateProc),
         std::make_tuple("CXXConstructor", FunctionProc),
         std::make_tuple("CXXMethod", FunctionProc),
         std::make_tuple("CXXRecord", CXXRecordProc),

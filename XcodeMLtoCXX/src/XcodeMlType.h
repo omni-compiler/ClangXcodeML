@@ -394,12 +394,15 @@ public:
   using MemberName = std::shared_ptr<UnqualId>;
   using Symbols = std::vector<std::tuple<MemberName, DataTypeIdent>>;
   using BaseClass = std::tuple<std::string, DataTypeIdent, bool>;
+  using TemplateArg = DataTypeIdent;
+  using TemplateArgList = std::vector<TemplateArg>;
   ClassType(const DataTypeIdent &, const CodeFragment &, const Symbols &);
   ClassType(const DataTypeIdent &,
       CXXClassKind,
       const CodeFragment &,
       const std::vector<BaseClass> &,
-      const Symbols &);
+      const Symbols &,
+      const llvm::Optional<TemplateArgList> &);
   ClassType(const DataTypeIdent &, const Symbols &);
   ClassType(const DataTypeIdent &,
       CXXClassKind,
@@ -424,6 +427,7 @@ private:
   ClassName name_;
   std::vector<BaseClass> bases_;
   Symbols classScopeSymbols;
+  llvm::Optional<TemplateArgList> templateArgs;
 };
 
 class TemplateTypeParm : public Type {
@@ -476,14 +480,16 @@ TypeRef makeClassType(const DataTypeIdent &,
 TypeRef makeClassType(const DataTypeIdent &dtident,
     const llvm::Optional<CodeFragment> &className,
     const std::vector<ClassType::BaseClass> &bases,
-    const ClassType::Symbols &members);
+    const ClassType::Symbols &members,
+    const llvm::Optional<ClassType::TemplateArgList> &templateArgs);
 TypeRef makeCXXUnionType(const DataTypeIdent &ident,
     const std::vector<ClassType::BaseClass> &bases,
     const ClassType::Symbols &members);
 TypeRef makeCXXUnionType(const DataTypeIdent &ident,
     const llvm::Optional<CodeFragment> &unionName,
     const std::vector<ClassType::BaseClass> &bases,
-    const ClassType::Symbols &members);
+    const ClassType::Symbols &members,
+    const llvm::Optional<ClassType::TemplateArgList> &templateArgs);
 TypeRef makeFunctionType(const DataTypeIdent &ident,
     const DataTypeIdent &returnType,
     const std::vector<DataTypeIdent> &paramTypes);
