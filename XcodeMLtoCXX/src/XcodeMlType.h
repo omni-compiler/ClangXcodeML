@@ -394,6 +394,8 @@ public:
   using MemberName = std::shared_ptr<UnqualId>;
   using Symbols = std::vector<std::tuple<MemberName, DataTypeIdent>>;
   using BaseClass = std::tuple<std::string, DataTypeIdent, bool>;
+  using TemplateArg = DataTypeIdent;
+  using TemplateArgList = std::vector<TemplateArg>;
   ClassType(const DataTypeIdent &, const CodeFragment &, const Symbols &);
   ClassType(const DataTypeIdent &,
       CXXClassKind,
