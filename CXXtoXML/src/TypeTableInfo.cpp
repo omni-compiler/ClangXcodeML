@@ -508,6 +508,8 @@ TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
         xmlNewProp(Node,
             BAD_CAST "is_anonymous",
             BAD_CAST(RD->isAnonymousStructOrUnion() ? "true" : "false"));
+        const auto className = RD->getName();
+        xmlNewChild(Node, nullptr, BAD_CAST "name", BAD_CAST className.data());
         xmlAddChild(Node, makeInheritanceNode(*this, RD));
         pushType(T, Node);
       } else if (T->isStructureType()) {
