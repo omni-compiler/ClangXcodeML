@@ -401,7 +401,8 @@ public:
       CXXClassKind,
       const CodeFragment &,
       const std::vector<BaseClass> &,
-      const Symbols &);
+      const Symbols &,
+      const llvm::Optional<TemplateArgList> &);
   ClassType(const DataTypeIdent &, const Symbols &);
   ClassType(const DataTypeIdent &,
       CXXClassKind,

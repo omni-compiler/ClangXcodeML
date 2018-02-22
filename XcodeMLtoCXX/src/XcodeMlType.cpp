@@ -614,12 +614,14 @@ ClassType::ClassType(const DataTypeIdent &ident,
     CXXClassKind kind,
     const CodeFragment &className,
     const std::vector<BaseClass> &b,
-    const ClassType::Symbols &symbols)
+    const ClassType::Symbols &symbols,
+    const llvm::Optional<TemplateArgList> &argList)
     : Type(TypeKind::Class, ident),
       classKind_(kind),
       name_(className),
       bases_(b),
-      classScopeSymbols(symbols) {
+      classScopeSymbols(symbols),
+      templateArgs(argList) {
 }
 
 ClassType::ClassType(
