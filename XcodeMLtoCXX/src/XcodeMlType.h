@@ -426,6 +426,7 @@ private:
   ClassName name_;
   std::vector<BaseClass> bases_;
   Symbols classScopeSymbols;
+  llvm::Optional<TemplateArgList> templateArgs;
 };
 
 class TemplateTypeParm : public Type {
