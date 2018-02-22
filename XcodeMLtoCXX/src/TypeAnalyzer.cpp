@@ -172,6 +172,7 @@ DEFINE_TA(classTypeProc) {
   const auto className = nameSpelling.empty() ? XcodeMl::ClassType::ClassName()
                                               : makeTokenNode(nameSpelling);
   const auto bases = getBases(node, ctxt);
+  const auto targs = getTemplateArgs(node, ctxt);
   XcodeMl::ClassType::Symbols symbols;
   const auto ids = findNodes(node, "symbols/id", ctxt);
   for (auto &idElem : ids) {
@@ -183,10 +184,10 @@ DEFINE_TA(classTypeProc) {
   const auto classKind = getProp(node, "cxx_class_kind");
   if (classKind == "union") {
     map[elemName] =
-        XcodeMl::makeCXXUnionType(elemName, className, bases, symbols);
+        XcodeMl::makeCXXUnionType(elemName, className, bases, symbols, targs);
   } else {
     map[elemName] =
-        XcodeMl::makeClassType(elemName, className, bases, symbols);
+        XcodeMl::makeClassType(elemName, className, bases, symbols, targs);
   }
 }
 
