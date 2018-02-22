@@ -151,6 +151,21 @@ getBases(xmlNodePtr node, xmlXPathContextPtr ctxt) {
   return result;
 }
 
+llvm::Optional<XcodeMl::ClassType::TemplateArgList>
+getTemplateArgs(xmlNodePtr node, xmlXPathContextPtr ctxt) {
+  using namespace XcodeMl;
+  using MaybeList = llvm::Optional<ClassType::TemplateArgList>;
+  const auto targsNode = findFirst(node, "templateArguments", ctxt);
+  if (!targsNode) {
+    return MaybeList();
+  }
+  ClassType::TemplateArgList targs;
+  for (auto &&targNode : findNodes(targsNode, "typeName", ctxt)) {
+    targs.push_back(getProp(targNode, "ref"));
+  }
+  return MaybeList(targs);
+}
+
 DEFINE_TA(classTypeProc) {
   XMLString elemName = xmlGetProp(node, BAD_CAST "type");
   const auto nameSpelling = getContent(findFirst(node, "name", ctxt));
