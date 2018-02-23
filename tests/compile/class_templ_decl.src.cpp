@@ -1,4 +1,4 @@
-tempalte<typename T> class ClassA {
+template<typename T> class ClassA {
 public:
   int
   get() {
