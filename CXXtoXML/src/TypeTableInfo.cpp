@@ -370,11 +370,11 @@ TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
     case Type::Pointer:
     case Type::BlockPointer:
     case Type::MemberPointer: {
+      rawname = registerPointerType(T);
       const PointerType *PT = dyn_cast<const PointerType>(T.getTypePtr());
       if (PT) {
         registerType(PT->getPointeeType(), nullptr, nullptr);
       }
-      rawname = registerPointerType(T);
       Node = createNode(T, "pointerType", nullptr);
       if (PT) {
         xmlNewProp(Node,
