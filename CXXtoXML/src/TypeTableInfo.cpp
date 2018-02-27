@@ -384,14 +384,13 @@ TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
 
     case Type::LValueReference:
     case Type::RValueReference: {
-      const auto RT = dyn_cast<ReferenceType>(T.getTypePtr());
       rawname = registerPointerType(T);
       Node = createNode(T, "pointerType", nullptr);
       xmlNewProp(Node,
           BAD_CAST "reference",
           T->getTypeClass() == Type::LValueReference ? BAD_CAST "lvalue"
                                                      : BAD_CAST "rvalue");
-      if (RT) {
+      if (const auto RT = dyn_cast<ReferenceType>(T.getTypePtr())) {
         const auto Pointee = RT->getPointeeType();
         registerType(Pointee, nullptr, nullptr);
         xmlNewProp(
