@@ -370,13 +370,11 @@ TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
     case Type::Pointer:
     case Type::BlockPointer:
     case Type::MemberPointer: {
-      const PointerType *PT = dyn_cast<const PointerType>(T.getTypePtr());
-      if (PT) {
-        registerType(PT->getPointeeType(), nullptr, nullptr);
-      }
       rawname = registerPointerType(T);
       Node = createNode(T, "pointerType", nullptr);
-      if (PT) {
+      if (const PointerType *PT =
+              dyn_cast<const PointerType>(T.getTypePtr())) {
+        registerType(PT->getPointeeType(), nullptr, nullptr);
         xmlNewProp(Node,
             BAD_CAST "ref",
             BAD_CAST getTypeName(PT->getPointeeType()).c_str());
@@ -386,18 +384,15 @@ TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
 
     case Type::LValueReference:
     case Type::RValueReference: {
-      const auto RT = dyn_cast<ReferenceType>(T.getTypePtr());
-      const auto Pointee = RT->getPointeeType();
-      if (RT) {
-        registerType(Pointee, nullptr, nullptr);
-      }
       rawname = registerPointerType(T);
       Node = createNode(T, "pointerType", nullptr);
       xmlNewProp(Node,
           BAD_CAST "reference",
           T->getTypeClass() == Type::LValueReference ? BAD_CAST "lvalue"
                                                      : BAD_CAST "rvalue");
-      if (RT) {
+      if (const auto RT = dyn_cast<ReferenceType>(T.getTypePtr())) {
+        const auto Pointee = RT->getPointeeType();
+        registerType(Pointee, nullptr, nullptr);
         xmlNewProp(
             Node, BAD_CAST "ref", BAD_CAST getTypeName(Pointee).c_str());
       }
