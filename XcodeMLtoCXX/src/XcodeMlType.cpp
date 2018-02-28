@@ -706,6 +706,11 @@ ClassType::getBases() const {
   return bases_;
 }
 
+bool
+ClassType::isClassTemplateSpecialization() const {
+  return templateArgs.hasValue();
+}
+
 llvm::Optional<CodeFragment>
 ClassType::getAsTemplateId(const Environment &typeTable) const {
   using MaybeCodeFragment = llvm::Optional<CodeFragment>;
