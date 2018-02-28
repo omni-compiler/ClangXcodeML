@@ -659,14 +659,8 @@ getClassKey(CXXClassKind kind) {
 CodeFragment
 ClassType::makeDeclaration(CodeFragment var, const Environment &typeTable) {
   assert(name_);
-  if (templateArgs.hasValue()) {
-    std::vector<CodeFragment> targs;
-    for (auto &&dtident : *templateArgs) {
-      const auto T = typeTable.at(dtident);
-      targs.push_back(makeDecl(T, makeVoidNode(), typeTable));
-    }
-    return makeTokenNode(getClassKey(classKind())) + *name_
-        + makeTokenNode("<") + join(",", targs) + makeTokenNode(">") + var;
+  if (const auto tid = getAsTemplateId(typeTable)) {
+    return makeTokenNode(getClassKey(classKind())) + *tid + var;
   }
   return makeTokenNode(getClassKey(classKind())) + *name_ + var;
 }
@@ -704,6 +698,26 @@ ClassType::getSymbols() const {
 std::vector<ClassType::BaseClass>
 ClassType::getBases() const {
   return bases_;
+}
+
+bool
+ClassType::isClassTemplateSpecialization() const {
+  return templateArgs.hasValue();
+}
+
+llvm::Optional<CodeFragment>
+ClassType::getAsTemplateId(const Environment &typeTable) const {
+  using MaybeCodeFragment = llvm::Optional<CodeFragment>;
+  if (!templateArgs.hasValue()) {
+    return MaybeCodeFragment();
+  }
+  std::vector<CodeFragment> targs;
+  for (auto &&dtident : *templateArgs) {
+    const auto T = typeTable.at(dtident);
+    targs.push_back(makeDecl(T, makeVoidNode(), typeTable));
+  }
+  const auto list = makeTokenNode("<") + join(",", targs) + makeTokenNode(">");
+  return MaybeCodeFragment(*name_ + list);
 }
 
 bool
