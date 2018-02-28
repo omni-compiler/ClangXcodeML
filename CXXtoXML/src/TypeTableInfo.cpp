@@ -742,7 +742,7 @@ TypeTableInfo::popTypeTableStack() {
       xmlAddChild(typeTableNode, TypeElements[T]);
       TypeElements.erase(T);
     }
-    const auto name = mapFromQualTypeToName[T];
+    const auto name = mapFromQualTypeToName.at(T);
     mapFromNameToQualType.erase(name);
     mapFromQualTypeToName.erase(T);
   }
