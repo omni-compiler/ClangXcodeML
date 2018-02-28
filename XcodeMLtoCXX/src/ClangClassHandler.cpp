@@ -201,6 +201,22 @@ DEFINE_CCH(ConditionalOperatorProc) {
   return cond + makeTokenNode("?") + yes + makeTokenNode(":") + no;
 }
 
+namespace {
+
+CodeFragment
+makeTemplateHead(xmlNodePtr node, const CodeBuilder &w, SourceInfo &src) {
+  const auto paramNodes =
+      findNodes(node, "clangDecl[@class='TemplateTypeParm']", src.ctxt);
+  std::vector<CXXCodeGen::StringTreeRef> params;
+  for (auto &&paramNode : paramNodes) {
+    params.push_back(w.walk(paramNode, src));
+  }
+  return makeTokenNode("template") + makeTokenNode("<") + join(",", params)
+      + makeTokenNode(">");
+}
+
+} // namespace
+
 DEFINE_CCH(ClassTemplateProc) {
   if (const auto typeTableNode =
           findFirst(node, "xcodemlTypeTable", src.ctxt)) {
