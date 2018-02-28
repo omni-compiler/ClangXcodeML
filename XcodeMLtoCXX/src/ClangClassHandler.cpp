@@ -225,8 +225,6 @@ DEFINE_CCH(ClassTemplateProc) {
   if (const auto nnsTableNode = findFirst(node, "xcodemlNnsTable", src.ctxt)) {
     src.nnsTable = expandNnsMap(src.nnsTable, nnsTableNode, src.ctxt);
   }
-  const auto paramNodes =
-      findNodes(node, "clangDecl[@class='TemplateTypeParm']", src.ctxt);
   const auto bodyNode = findFirst(node, "clangDecl[@class='CXXRecord']", src.ctxt);
   const auto nameNode = findFirst(bodyNode, "name", src.ctxt);
   const auto dtident = getType(bodyNode);
@@ -234,14 +232,9 @@ DEFINE_CCH(ClassTemplateProc) {
   const auto classT = llvm::cast<XcodeMl::ClassType>(T.get());
   classT->setName(getContent(nameNode));
 
-  std::vector<CXXCodeGen::StringTreeRef> params;
-  for (auto &&paramNode : paramNodes) {
-    params.push_back(w.walk(paramNode, src));
-  }
-
+  const auto head = makeTemplateHead(node, w, src);
   const auto body = w.walk(bodyNode, src);
-  return makeTokenNode("template") + makeTokenNode("<") + join(",", params)
-      + makeTokenNode(">") + body;
+  return head + body;
 }
 
 DEFINE_CCH(CXXCtorExprProc) {
