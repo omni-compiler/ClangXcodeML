@@ -417,6 +417,8 @@ public:
   void setName(const CodeFragment &);
   Symbols getSymbols() const;
   std::vector<BaseClass> getBases() const;
+  llvm::Optional<CodeFragment> getAsTemplateId(
+      const Environment &typeTable) const;
   static bool classof(const Type *);
 
 protected:

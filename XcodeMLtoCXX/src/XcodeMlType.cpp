@@ -706,6 +706,21 @@ ClassType::getBases() const {
   return bases_;
 }
 
+llvm::Optional<CodeFragment>
+ClassType::getAsTemplateId(const Environment &typeTable) const {
+  using MaybeCodeFragment = llvm::Optional<CodeFragment>;
+  if (!templateArgs.hasValue()) {
+    return MaybeCodeFragment();
+  }
+  std::vector<CodeFragment> targs;
+  for (auto &&dtident : *templateArgs) {
+    const auto T = typeTable.at(dtident);
+    targs.push_back(makeDecl(T, makeVoidNode(), typeTable));
+  }
+  return MaybeCodeFragment(
+      *name_ + makeTokenNode("<") + join(",", targs) + makeTokenNode(">"));
+}
+
 bool
 ClassType::classof(const Type *T) {
   return T->getKind() == TypeKind::Class;
