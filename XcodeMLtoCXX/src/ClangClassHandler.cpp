@@ -562,6 +562,25 @@ const ClangClassHandler ClangStmtHandler("class",
         std::make_tuple("WhileStmt", WhileStmtProc),
     });
 
+DEFINE_CCH(ClassTemplateSpecializationProc) {
+  const auto T = src.typeTable.at(getType(node));
+  const auto classT = llvm::dyn_cast<XcodeMl::ClassType>(T.get());
+  assert(classT && classT->name().hasValue());
+  const auto nameSpelling = classT->name().getValue();
+
+  const auto head =
+      makeTokenNode("template") + makeTokenNode("<") + makeTokenNode(">");
+
+  if (isTrueProp(node, "is_this_declaration_a_definition", false)) {
+    return head
+        + emitClassDefinition(node, ClassDefinitionBuilder, src, *classT);
+  }
+
+  /* forward declaration */
+  const auto classKey = getClassKey(classT->classKind());
+  return head + makeTokenNode(classKey) + nameSpelling + makeTokenNode(";");
+}
+
 DEFINE_CCH(FriendDeclProc) {
   if (auto TL = findFirst(node, "clangTypeLoc", src.ctxt)) {
     /* friend class declaration */
@@ -702,6 +721,8 @@ const ClangClassHandler ClangDeclHandler("class",
     callCodeBuilder,
     {
         std::make_tuple("ClassTemplate", ClassTemplateProc),
+        std::make_tuple(
+            "ClassTemplateSpecialization", ClassTemplateSpecializationProc),
         std::make_tuple("CXXConstructor", FunctionProc),
         std::make_tuple("CXXMethod", FunctionProc),
         std::make_tuple("CXXRecord", CXXRecordProc),
