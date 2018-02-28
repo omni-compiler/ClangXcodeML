@@ -732,8 +732,6 @@ TypeTableInfo::popTypeTableStack() {
   const auto typeTableNode = std::get<0>(typeTableStack.top());
   const auto latestTypes = std::get<1>(typeTableStack.top());
   for (auto T : latestTypes) {
-    mapFromQualTypeToName.erase(T);
-
     if (TypeElements.find(T) != TypeElements.end()) {
       /*
        * If data type definition element exists,
@@ -744,9 +742,9 @@ TypeTableInfo::popTypeTableStack() {
       xmlAddChild(typeTableNode, TypeElements[T]);
       TypeElements.erase(T);
     }
-
     const auto name = mapFromQualTypeToName[T];
     mapFromNameToQualType.erase(name);
+    mapFromQualTypeToName.erase(T);
   }
   typeTableStack.pop();
 }
