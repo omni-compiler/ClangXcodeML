@@ -378,7 +378,9 @@ emitClassDefinition(xmlNodePtr node,
   }
 
   const auto classKey = makeTokenNode(getClassKey(classType.classKind()));
-  const auto name = classType.name().getValueOr(cxxgen::makeVoidNode());
+  const auto name = classType.isClassTemplateSpecialization()
+      ? classType.getAsTemplateId(src.typeTable).getValue()
+      : classType.name().getValue();
 
   return classKey + name + makeBases(classType, src) + makeTokenNode("{")
       + separateByBlankLines(decls) + makeTokenNode("}") + makeTokenNode(";")
