@@ -9,7 +9,7 @@ struct ClassA {
 };
 
 template <typename T>
-struct ClassA<T*> {
+struct ClassA<T *> {
   int x;
   int y;
   int
@@ -23,7 +23,7 @@ main() {
   ClassA<double> a;
   printf("%d\n", a.func());
 
-  ClassA<int*> b;
+  ClassA<int *> b;
   b.x = 100;
   b.y = 100;
   printf("%d\n", b.func());
