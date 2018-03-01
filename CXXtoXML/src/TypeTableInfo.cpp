@@ -599,6 +599,31 @@ TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
       // or class template partial specialization
       rawname = registerInjectedClassNameType(T);
       Node = createNode(T, "injectedClassNameType", nullptr);
+      // TODO: DON'T COPY AND PASTE
+      const auto ICN = cast<InjectedClassNameType>(T);
+      if (const auto RD = ICN->getDecl()) {
+        xmlNewProp(Node,
+            BAD_CAST "cxx_class_kind",
+            BAD_CAST getTagKindAsString(RD->getTagKind()));
+
+        const auto className = RD->getName();
+        xmlNewChild(Node, nullptr, BAD_CAST "name", BAD_CAST className.data());
+
+        if (auto CTS = dyn_cast<ClassTemplateSpecializationDecl>(RD)) {
+          xmlNewProp(
+              Node, BAD_CAST "is_template_instantiation", BAD_CAST "true");
+          const auto templArgs =
+              xmlNewNode(nullptr, BAD_CAST "templateArguments");
+          for (auto &&arg : CTS->getTemplateArgs().asArray()) {
+            const auto typeNode = xmlNewNode(nullptr, BAD_CAST "typeName");
+            xmlNewProp(typeNode,
+                BAD_CAST "ref",
+                BAD_CAST getTypeName(arg.getAsType()).c_str());
+            xmlAddChild(templArgs, typeNode);
+          }
+          xmlAddChild(Node, templArgs);
+        }
+      }
       pushType(T, Node);
       break;
     }
