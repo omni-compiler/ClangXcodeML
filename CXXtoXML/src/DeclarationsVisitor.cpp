@@ -427,7 +427,7 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
     }
   }
 
-  if (isa<TemplateDecl>(D)) {
+  if (isa<TemplateDecl>(D) || isa<ClassTemplatePartialSpecializationDecl>(D)) {
     auto typetable = addChild("xcodemlTypeTable");
     typetableinfo->pushTypeTableStack(typetable);
     auto nnsTable = addChild("xcodemlNnsTable");
@@ -441,7 +441,8 @@ DeclarationsVisitor::PostVisitDecl(Decl *D) {
   if (!D) {
     return true;
   }
-  if (isa<TemplateDecl>(D) || isa<TranslationUnitDecl>(D)) {
+  if (isa<TemplateDecl>(D) || isa<ClassTemplatePartialSpecializationDecl>(D)
+      || isa<TranslationUnitDecl>(D)) {
     typetableinfo->popTypeTableStack();
     nnstableinfo->popNnsTableStack();
   }
