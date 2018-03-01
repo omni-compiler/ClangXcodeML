@@ -1,20 +1,23 @@
 #include <stdio.h>
 
+void
+func() {
+  printf("A\n");
+}
+
 namespace NS1 {
 
 void
 func() {
-  printf("OK\n");
+  ::func();
+  printf("B\n");
 }
 
 } // namespace NS1
 
-void
-func() {
-  printf("NG\n");
-}
-
 int
 main() {
+  func();
+  ::func();
   NS1::func();
 }
