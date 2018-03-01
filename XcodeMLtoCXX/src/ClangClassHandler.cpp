@@ -798,6 +798,12 @@ DEFINE_CCCH(doNothing) {
   return CXXCodeGen::makeVoidNode();
 }
 
+DEFINE_CCCH(NamespaceSpecProc) {
+  const auto nameNode = findFirst(node, "name", src.ctxt);
+  const auto name = getUnqualIdFromNameNode(nameNode)->toString(src.typeTable);
+  return name + makeTokenNode("::");
+}
+
 DEFINE_CCCH(TypeSpecifierProc) {
   const auto typeNode = findFirst(node, "clangTypeLoc", src.ctxt);
   const auto T = src.typeTable.at(getType(typeNode));
@@ -815,5 +821,6 @@ const ConstClangClassHandler ClangNestedNameSpecHandler(
     cxxgen::makeInnerNode,
     doNothing,
     {
+        std::make_tuple("namespace", NamespaceSpecProc),
         std::make_tuple("type_specifier", TypeSpecifierProc),
     });
