@@ -409,6 +409,8 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
     if (ll != NoLanguageLinkage) {
       newProp("language_linkage", stringifyLanguageLinkage(ll));
     }
+    newBoolProp("is_function_template_specialization",
+        FD->isFunctionTemplateSpecialization());
     newBoolProp("is_defaulted", FD->isDefaulted());
     newBoolProp("is_deleted", FD->isDeletedAsWritten());
     newBoolProp("is_pure", FD->isPure());
