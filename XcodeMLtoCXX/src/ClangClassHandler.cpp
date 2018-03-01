@@ -189,9 +189,9 @@ DEFINE_CCH(CompoundStmtProc) {
   const auto stmtNodes = findNodes(node, "clangStmt", src.ctxt);
   std::vector<CXXCodeGen::StringTreeRef> stmts;
   for (auto &&stmtNode : stmtNodes) {
-    stmts.push_back(w.walk(stmtNode, src) + makeTokenNode(";"));
+    stmts.push_back(w.walk(stmtNode, src));
   }
-  return wrapWithBrace(insertNewLines(stmts));
+  return wrapWithBrace(foldWithSemicolon(stmts));
 }
 
 DEFINE_CCH(ConditionalOperatorProc) {
@@ -290,7 +290,7 @@ DEFINE_CCH(DoStmtProc) {
 
 DEFINE_CCH(DeclStmtProc) {
   const auto declNodes = createNodes(node, "clangDecl", w, src);
-  return insertNewLines(declNodes);
+  return join(";", declNodes);
 }
 
 DEFINE_CCH(emitTokenAttrValue) {
@@ -387,7 +387,7 @@ emitClassDefinition(xmlNodePtr node,
       : classType.name().getValue();
 
   return classKey + name + makeBases(classType, src) + makeTokenNode("{")
-      + separateByBlankLines(decls) + makeTokenNode("}")
+      + foldWithSemicolon(decls) + makeTokenNode("}")
       + cxxgen::makeNewLineNode();
 }
 
@@ -461,8 +461,8 @@ DEFINE_CCH(ForStmtProc) {
       createNodeOrNull(node, "clangStmt[@for_stmt_kind='iter']", w, src);
   const auto body =
       createNodeOrNull(node, "clangStmt[@for_stmt_kind='body']", w, src);
-  return makeTokenNode("for")
-      + wrapWithParen(init + cond + makeTokenNode(";") + iter) + body;
+  const auto head = init + makeTokenNode(";") + cond + makeTokenNode(";") + iter;
+  return makeTokenNode("for") + wrapWithParen(head) + body;
 }
 
 DEFINE_CCH(IfStmtProc) {
@@ -665,7 +665,7 @@ DEFINE_CCH(RecordProc) {
 
   const auto decls = createNodes(node, "clangDecl", w, src);
   return makeTokenNode("struct") + tagName
-      + wrapWithBrace(insertNewLines(decls));
+      + wrapWithBrace(foldWithSemicolon(decls));
 }
 
 DEFINE_CCH(TranslationUnitProc) {
@@ -681,7 +681,7 @@ DEFINE_CCH(TranslationUnitProc) {
   for (auto &&declNode : declNodes) {
     decls.push_back(w.walk(declNode, src));
   }
-  return separateByBlankLines(decls);
+  return foldWithSemicolon(decls);
 }
 
 DEFINE_CCH(TypedefProc) {
