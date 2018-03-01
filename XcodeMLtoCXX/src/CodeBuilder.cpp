@@ -36,6 +36,7 @@ using cxxgen::makeTokenNode;
 using cxxgen::makeInnerNode;
 using cxxgen::makeNewLineNode;
 using cxxgen::makeVoidNode;
+using cxxgen::makeSourcePosNode;
 
 using cxxgen::insertNewLines;
 using cxxgen::separateByBlankLines;
@@ -641,11 +642,21 @@ DEFINE_CB(accessToAnonRecordExprProc) {
 }
 
 DEFINE_CB(clangStmtProc) {
-  return ClangStmtHandler.walk(node, w, src);
+  const auto filename = getPropOrNull(node, "filename");
+  const auto lineno = getPropOrNull(node, "lineno");
+  return ((filename.hasValue() && lineno.hasValue())
+          ? makeSourcePosNode(*filename, stoull(*lineno))
+          : makeVoidNode())
+      + ClangStmtHandler.walk(node, w, src);
 }
 
 DEFINE_CB(clangDeclProc) {
-  return ClangDeclHandler.walk(node, w, src);
+  const auto filename = getPropOrNull(node, "filename");
+  const auto lineno = getPropOrNull(node, "lineno");
+  return ((filename.hasValue() && lineno.hasValue())
+          ? makeSourcePosNode(*filename, stoull(*lineno))
+          : makeVoidNode())
+      + ClangDeclHandler.walk(node, w, src);
 }
 
 DEFINE_CB(classScopeClangDeclProc) {

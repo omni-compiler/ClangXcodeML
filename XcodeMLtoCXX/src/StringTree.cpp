@@ -157,6 +157,11 @@ makeNewLineNode() {
 }
 
 StringTreeRef
+makeSourcePosNode(const std::string &filename, size_t lineno) {
+  return std::make_shared<SourcePosNode>(filename, lineno);
+}
+
+StringTreeRef
 makeTokenNode(const std::string &s) {
   return std::make_shared<TokenNode>(s);
 }

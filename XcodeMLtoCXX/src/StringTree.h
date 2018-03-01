@@ -145,6 +145,11 @@ StringTreeRef makeVoidNode();
 StringTreeRef makeNewLineNode();
 
 /*!
+ * \brief Make and return a node which holts a source position info.
+ */
+StringTreeRef makeSourcePosNode(const std::string &, size_t);
+
+/*!
  * \brief Make and return a `CXXCodeGen::InnerNode` object containing
  * `nodes` as children.
  */
