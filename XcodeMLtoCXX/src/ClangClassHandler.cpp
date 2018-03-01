@@ -798,6 +798,10 @@ DEFINE_CCCH(doNothing) {
   return CXXCodeGen::makeVoidNode();
 }
 
+DEFINE_CCCH(globalSpecProc) {
+  return makeTokenNode("::");
+}
+
 DEFINE_CCCH(NamespaceSpecProc) {
   const auto nameNode = findFirst(node, "name", src.ctxt);
   const auto name = getUnqualIdFromNameNode(nameNode)->toString(src.typeTable);
@@ -821,6 +825,7 @@ const ConstClangClassHandler ClangNestedNameSpecHandler(
     cxxgen::makeInnerNode,
     doNothing,
     {
+        std::make_tuple("global", globalSpecProc),
         std::make_tuple("namespace", NamespaceSpecProc),
         std::make_tuple("type_specifier", TypeSpecifierProc),
     });
