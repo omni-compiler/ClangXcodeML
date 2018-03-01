@@ -204,6 +204,15 @@ separateByBlankLines(const std::vector<StringTreeRef> &strs) {
 }
 
 StringTreeRef
+foldWithSemicolon(const std::vector<StringTreeRef> &stmts) {
+  auto node = makeVoidNode();
+  for (auto &stmt : stmts) {
+    node = node + stmt + makeTokenNode(";") + makeNewLineNode();
+  }
+  return node;
+}
+
+StringTreeRef
 join(const std::string &delim, const std::vector<StringTreeRef> &strs) {
   auto acc = makeVoidNode();
   bool alreadyPrinted = false;

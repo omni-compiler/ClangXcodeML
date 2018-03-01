@@ -80,15 +80,6 @@ DEFINE_CB(EmptyProc) {
   return makeInnerNode(w.walkChildren(node, src));
 }
 
-cxxgen::StringTreeRef
-foldWithSemicolon(const std::vector<StringTreeRef> &stmts) {
-  auto node = makeVoidNode();
-  for (auto &stmt : stmts) {
-    node = node + stmt + makeTokenNode(";") + makeNewLineNode();
-  }
-  return node;
-}
-
 DEFINE_CB(walkChildrenWithInsertingNewLines) {
   return foldWithSemicolon(w.walkChildren(node, src));
 }
