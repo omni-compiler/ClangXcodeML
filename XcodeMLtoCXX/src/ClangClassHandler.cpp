@@ -109,7 +109,7 @@ DEFINE_CCH(emitInlineMemberFunction) {
     const auto body = ProgramBuilder.walk(bodyNode, src);
     return acc + body;
   } else {
-    return acc + makeTokenNode(";");
+    return acc;
   }
   return acc;
 }
@@ -121,7 +121,7 @@ DEFINE_CCH(FieldDeclProc) {
   const auto dtident = getType(node);
   const auto T = src.typeTable.at(dtident);
 
-  return makeDecl(T, name, src.typeTable) + makeTokenNode(";");
+  return makeDecl(T, name, src.typeTable);
 }
 
 DEFINE_CCH(emitTokenAttrValue);
@@ -285,7 +285,7 @@ DEFINE_CCH(DoStmtProc) {
   const auto body = createNode(node, "clangStmt[1]", w, src);
   const auto cond = createNode(node, "clangStmt[2]", w, src);
   return makeTokenNode("do") + body + makeTokenNode("while")
-      + wrapWithParen(cond) + makeTokenNode(";");
+      + wrapWithParen(cond);
 }
 
 DEFINE_CCH(DeclStmtProc) {
@@ -387,7 +387,7 @@ emitClassDefinition(xmlNodePtr node,
       : classType.name().getValue();
 
   return classKey + name + makeBases(classType, src) + makeTokenNode("{")
-      + separateByBlankLines(decls) + makeTokenNode("}") + makeTokenNode(";")
+      + separateByBlankLines(decls) + makeTokenNode("}")
       + cxxgen::makeNewLineNode();
 }
 
@@ -421,7 +421,7 @@ DEFINE_CCH(CXXRecordProc) {
 
   /* forward declaration */
   const auto classKey = getClassKey(classT->classKind());
-  return makeTokenNode(classKey) + nameSpelling + makeTokenNode(";");
+  return makeTokenNode(classKey) + nameSpelling;
 }
 
 DEFINE_CCH(CXXTemporaryObjectExprProc) {
@@ -453,7 +453,8 @@ DEFINE_CCH(CXXOperatorCallExprProc) {
 DEFINE_CCH(ForStmtProc) {
   const auto initNode =
       findFirst(node, "clangStmt[@for_stmt_kind='init']", src.ctxt);
-  const auto init = initNode ? w.walk(initNode, src) : makeTokenNode(";");
+  const auto init =
+      initNode ? w.walk(initNode, src) : CXXCodeGen::makeVoidNode();
   const auto cond =
       createNodeOrNull(node, "clangStmt[@for_stmt_kind='cond']", w, src);
   const auto iter =
@@ -486,7 +487,7 @@ DEFINE_CCH(MemberExprProc) {
 DEFINE_CCH(ReturnStmtProc) {
   if (const auto exprNode = findFirst(node, "clangStmt", src.ctxt)) {
     const auto expr = w.walk(exprNode, src);
-    return makeTokenNode("return") + expr + makeTokenNode(";");
+    return makeTokenNode("return") + expr;
   }
   return makeTokenNode("return");
 }
@@ -582,7 +583,7 @@ DEFINE_CCH(ClassTemplateSpecializationProc) {
 
   /* forward declaration */
   const auto classKey = getClassKey(classT->classKind());
-  return head + makeTokenNode(classKey) + nameSpelling + makeTokenNode(";");
+  return head + makeTokenNode(classKey) + nameSpelling;
 }
 
 DEFINE_CCH(ClassTemplatePartialSpecializationProc) {
@@ -605,7 +606,7 @@ DEFINE_CCH(ClassTemplatePartialSpecializationProc) {
   /* forward declaration */
   const auto classKey = getClassKey(classT->classKind());
   const auto nameSpelling = classT->name().getValue();
-  return head + makeTokenNode(classKey) + nameSpelling + makeTokenNode(";");
+  return head + makeTokenNode(classKey) + nameSpelling;
 }
 
 DEFINE_CCH(FriendDeclProc) {
@@ -614,8 +615,7 @@ DEFINE_CCH(FriendDeclProc) {
     const auto dtident = getType(TL);
     const auto T = src.typeTable.at(dtident);
     return makeTokenNode("friend")
-        + makeDecl(T, cxxgen::makeVoidNode(), src.typeTable)
-        + makeTokenNode(";");
+        + makeDecl(T, cxxgen::makeVoidNode(), src.typeTable);
   }
   return makeTokenNode("friend") + callCodeBuilder(node, w, src);
 }
@@ -636,8 +636,6 @@ DEFINE_CCH(FunctionProc) {
   if (const auto bodyNode = findFirst(node, "clangStmt", src.ctxt)) {
     const auto body = w.walk(bodyNode, src);
     acc = acc + body;
-  } else {
-    acc = acc + makeTokenNode(";");
   }
 
   return wrapWithLangLink(acc, node, src);
@@ -667,7 +665,7 @@ DEFINE_CCH(RecordProc) {
 
   const auto decls = createNodes(node, "clangDecl", w, src);
   return makeTokenNode("struct") + tagName
-      + wrapWithBrace(insertNewLines(decls)) + makeTokenNode(";");
+      + wrapWithBrace(insertNewLines(decls));
 }
 
 DEFINE_CCH(TranslationUnitProc) {
@@ -697,8 +695,7 @@ DEFINE_CCH(TypedefProc) {
   const auto typedefName =
       getUnqualIdFromNameNode(nameNode)->toString(src.typeTable);
 
-  return makeTokenNode("typedef") + makeDecl(T, typedefName, src.typeTable)
-      + makeTokenNode(";");
+  return makeTokenNode("typedef") + makeDecl(T, typedefName, src.typeTable);
 }
 
 CodeFragment
@@ -731,16 +728,16 @@ DEFINE_CCH(VarProc) {
   const auto initializerNode = findFirst(node, "clangStmt", src.ctxt);
   if (!initializerNode) {
     // does not have initalizer: `int x;`
-    return makeDecl(T, name, src.typeTable) + makeTokenNode(";");
+    return makeDecl(T, name, src.typeTable);
   }
   const auto astClass = getProp(initializerNode, "class");
   if (std::equal(astClass.begin(), astClass.end(), "CXXConstructExpr")) {
     // has initalizer and the variable is of class type
     const auto init = declareClassTypeInit(w, initializerNode, src);
-    return wrapWithLangLink(decl + init + makeTokenNode(";"), node, src);
+    return wrapWithLangLink(decl + init, node, src);
   }
   const auto init = w.walk(initializerNode, src);
-  return decl + makeTokenNode("=") + init + makeTokenNode(";");
+  return decl + makeTokenNode("=") + init;
 }
 
 const ClangClassHandler ClangDeclHandler("class",
