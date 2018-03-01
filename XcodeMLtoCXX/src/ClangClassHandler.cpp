@@ -226,11 +226,6 @@ DEFINE_CCH(ClassTemplateProc) {
     src.nnsTable = expandNnsMap(src.nnsTable, nnsTableNode, src.ctxt);
   }
   const auto bodyNode = findFirst(node, "clangDecl[@class='CXXRecord']", src.ctxt);
-  const auto nameNode = findFirst(bodyNode, "name", src.ctxt);
-  const auto dtident = getType(bodyNode);
-  const auto T = src.typeTable[dtident];
-  const auto classT = llvm::cast<XcodeMl::ClassType>(T.get());
-  classT->setName(getContent(nameNode));
 
   const auto head = makeTemplateHead(node, w, src);
   const auto body = w.walk(bodyNode, src);
