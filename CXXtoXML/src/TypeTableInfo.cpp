@@ -285,6 +285,37 @@ makeInheritanceNode(TypeTableInfo &TTI, const CXXRecordDecl *RD) {
   return inheritanceNode;
 }
 
+namespace {
+
+void
+commonSetUpForRecordDecl(xmlNodePtr node, const RecordDecl *RD, TypeTableInfo &TTI) {
+  assert(RD);
+  xmlNewProp(node,
+      BAD_CAST "cxx_class_kind",
+      BAD_CAST getTagKindAsString(RD->getTagKind()));
+  xmlNewProp(node,
+      BAD_CAST "is_anonymous",
+      BAD_CAST(RD->isAnonymousStructOrUnion() ? "true" : "false"));
+
+  const auto className = RD->getName();
+  xmlNewChild(node, nullptr, BAD_CAST "name", BAD_CAST className.data());
+
+  if (const auto CTS = dyn_cast<ClassTemplateSpecializationDecl>(RD)) {
+    xmlNewProp(node, BAD_CAST "is_template_instantiation", BAD_CAST "true");
+    const auto templArgs = xmlNewNode(nullptr, BAD_CAST "templateArguments");
+    for (auto &&arg : CTS->getTemplateArgs().asArray()) {
+      const auto typeNode = xmlNewNode(nullptr, BAD_CAST "typeName");
+      xmlNewProp(typeNode,
+          BAD_CAST "ref",
+          BAD_CAST TTI.getTypeName(arg.getAsType()).c_str());
+      xmlAddChild(templArgs, typeNode);
+    }
+    xmlAddChild(node, templArgs);
+  }
+}
+
+} // namespace
+
 void
 TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
   bool isQualified = false;
@@ -510,29 +541,7 @@ TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
       rawname = registerRecordType(T);
       if (auto RD = T->getAsCXXRecordDecl()) {
         Node = createNode(T, "classType", nullptr);
-        xmlNewProp(Node,
-            BAD_CAST "cxx_class_kind",
-            BAD_CAST getTagKindAsString(RD->getTagKind()));
-        xmlNewProp(Node,
-            BAD_CAST "is_anonymous",
-            BAD_CAST(RD->isAnonymousStructOrUnion() ? "true" : "false"));
-
-        if (auto CTS = dyn_cast<ClassTemplateSpecializationDecl>(RD)) {
-          xmlNewProp(
-              Node, BAD_CAST "is_template_instantiation", BAD_CAST "true");
-          const auto templArgs =
-              xmlNewNode(nullptr, BAD_CAST "templateArguments");
-          for (auto &&arg : CTS->getTemplateArgs().asArray()) {
-            const auto typeNode = xmlNewNode(nullptr, BAD_CAST "typeName");
-            xmlNewProp(typeNode,
-                BAD_CAST "ref",
-                BAD_CAST getTypeName(arg.getAsType()).c_str());
-            xmlAddChild(templArgs, typeNode);
-          }
-          xmlAddChild(Node, templArgs);
-        }
-        const auto className = RD->getName();
-        xmlNewChild(Node, nullptr, BAD_CAST "name", BAD_CAST className.data());
+        commonSetUpForRecordDecl(Node, RD, *this);
         xmlAddChild(Node, makeInheritanceNode(*this, RD));
         pushType(T, Node);
       } else if (T->isStructureType()) {
@@ -599,30 +608,9 @@ TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
       // or class template partial specialization
       rawname = registerInjectedClassNameType(T);
       Node = createNode(T, "injectedClassNameType", nullptr);
-      // TODO: DON'T COPY AND PASTE
       const auto ICN = cast<InjectedClassNameType>(T);
       if (const auto RD = ICN->getDecl()) {
-        xmlNewProp(Node,
-            BAD_CAST "cxx_class_kind",
-            BAD_CAST getTagKindAsString(RD->getTagKind()));
-
-        const auto className = RD->getName();
-        xmlNewChild(Node, nullptr, BAD_CAST "name", BAD_CAST className.data());
-
-        if (auto CTS = dyn_cast<ClassTemplateSpecializationDecl>(RD)) {
-          xmlNewProp(
-              Node, BAD_CAST "is_template_instantiation", BAD_CAST "true");
-          const auto templArgs =
-              xmlNewNode(nullptr, BAD_CAST "templateArguments");
-          for (auto &&arg : CTS->getTemplateArgs().asArray()) {
-            const auto typeNode = xmlNewNode(nullptr, BAD_CAST "typeName");
-            xmlNewProp(typeNode,
-                BAD_CAST "ref",
-                BAD_CAST getTypeName(arg.getAsType()).c_str());
-            xmlAddChild(templArgs, typeNode);
-          }
-          xmlAddChild(Node, templArgs);
-        }
+        commonSetUpForRecordDecl(Node, RD, *this);
       }
       pushType(T, Node);
       break;
