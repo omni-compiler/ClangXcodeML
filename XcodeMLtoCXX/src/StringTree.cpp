@@ -120,6 +120,32 @@ NewLineNode::getsingleton() {
   return singletonptr;
 }
 
+bool
+SourcePosNode::classof(const StringTree *node) {
+  return node->getKind() == StringTreeKind::SourcePos;
+}
+
+SourcePosNode::SourcePosNode(std::string f, size_t l)
+  : StringTree(StringTreeKind::SourcePos), filename(f), lineno(l) {
+};
+
+StringTree *
+SourcePosNode::clone() const {
+  return (StringTree *)this;
+}
+
+void
+SourcePosNode::flush(Stream &ss) const {
+  ss.setLineInfo(filename, lineno);
+}
+
+InnerNode *
+SourcePosNode::lift() const {
+  std::vector<StringTreeRef> v({std::make_shared<SourcePosNode>(filename, lineno)});
+  InnerNode *node = new InnerNode(v);
+  return node;
+}
+
 StringTreeRef
 makeInnerNode(const std::vector<StringTreeRef> &v) {
   return std::make_shared<InnerNode>(v);

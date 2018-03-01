@@ -118,7 +118,7 @@ Stream::insertNewLine() {
     std::tie(filename, lineno) = *(pimpl->currline);
 
     const auto directive =
-        std::string("#line ") + filename + " " + std::to_string(lineno);
+      std::string("#line ") + std::to_string(lineno) + "\"" + filename + "\"";
     emit(*pimpl, std::string("\n") + directive + "\n");
     pimpl->nextline = StreamImpl::LineInfo(filename, lineno + 1);
   } else {

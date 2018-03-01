@@ -10,6 +10,8 @@ enum class StringTreeKind {
   Token,
   /*! leaf node which represents a "\n" */
   NewLine,
+  /*! leaf node which represents a source position */
+  SourcePos,
 };
 
 class InnerNode;
@@ -94,6 +96,23 @@ protected:
 };
 
 extern const NewLineNode newlinenode;
+
+class SourcePosNode : public StringTree {
+public:
+  static bool classof(const StringTree *);
+  explicit SourcePosNode(std::string, size_t);
+  ~SourcePosNode() = default;
+  StringTree *clone() const override;
+  void flush(Stream &) const override;
+  InnerNode *lift() const override;
+
+protected:
+  SourcePosNode(const SourcePosNode &) = default;
+
+private:
+  std::string filename;
+  size_t lineno;
+};
 
 class LineInfoNode : public StringTree {
 public:
