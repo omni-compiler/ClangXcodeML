@@ -288,7 +288,8 @@ makeInheritanceNode(TypeTableInfo &TTI, const CXXRecordDecl *RD) {
 namespace {
 
 void
-commonSetUpForRecordDecl(xmlNodePtr node, const RecordDecl *RD, TypeTableInfo &TTI) {
+commonSetUpForRecordDecl(
+    xmlNodePtr node, const RecordDecl *RD, TypeTableInfo &TTI) {
   assert(RD);
   xmlNewProp(node,
       BAD_CAST "cxx_class_kind",
