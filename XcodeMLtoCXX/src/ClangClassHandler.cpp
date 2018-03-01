@@ -466,8 +466,14 @@ DEFINE_CCH(ForStmtProc) {
 
 DEFINE_CCH(IfStmtProc) {
   const auto cond = createNode(node, "clangStmt[1]", w, src);
-  const auto body = createNode(node, "clangStmt[2]", w, src);
-  return makeTokenNode("if") + wrapWithParen(cond) + body;
+  const auto then = createNode(node, "clangStmt[2]", w, src);
+  const auto head = makeTokenNode("if") + wrapWithParen(cond) + then;
+
+  if (const auto elseNode = findFirst(node, "clangStmt[3]", src.ctxt)) {
+    const auto Else = w.walk(elseNode, src);
+    return head + makeTokenNode("else") + Else;
+  }
+  return head;
 }
 
 DEFINE_CCH(InitListExprProc) {
