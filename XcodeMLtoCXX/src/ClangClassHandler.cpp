@@ -590,6 +590,29 @@ DEFINE_CCH(ClassTemplateSpecializationProc) {
   return head + makeTokenNode(classKey) + nameSpelling + makeTokenNode(";");
 }
 
+DEFINE_CCH(ClassTemplatePartialSpecializationProc) {
+  if (const auto typeTableNode =
+          findFirst(node, "xcodemlTypeTable", src.ctxt)) {
+    src.typeTable = expandEnvironment(src.typeTable, typeTableNode, src.ctxt);
+  }
+  if (const auto nnsTableNode = findFirst(node, "xcodemlNnsTable", src.ctxt)) {
+    src.nnsTable = expandNnsMap(src.nnsTable, nnsTableNode, src.ctxt);
+  }
+
+  const auto T = src.typeTable.at(getType(node));
+  const auto classT = llvm::cast<XcodeMl::ClassType>(T.get());
+  const auto head = makeTemplateHead(node, w, src);
+  if (isTrueProp(node, "is_this_declaration_a_definition", false)) {
+    const auto def =
+        emitClassDefinition(node, ClassDefinitionBuilder, src, *classT);
+    return head + def;
+  }
+  /* forward declaration */
+  const auto classKey = getClassKey(classT->classKind());
+  const auto nameSpelling = classT->name().getValue();
+  return head + makeTokenNode(classKey) + nameSpelling + makeTokenNode(";");
+}
+
 DEFINE_CCH(FriendDeclProc) {
   if (auto TL = findFirst(node, "clangTypeLoc", src.ctxt)) {
     /* friend class declaration */
@@ -732,6 +755,8 @@ const ClangClassHandler ClangDeclHandler("class",
         std::make_tuple("ClassTemplate", ClassTemplateProc),
         std::make_tuple(
             "ClassTemplateSpecialization", ClassTemplateSpecializationProc),
+        std::make_tuple("ClassTemplatePartialSpecialization",
+            ClassTemplatePartialSpecializationProc),
         std::make_tuple("CXXConstructor", FunctionProc),
         std::make_tuple("CXXMethod", FunctionProc),
         std::make_tuple("CXXRecord", CXXRecordProc),
