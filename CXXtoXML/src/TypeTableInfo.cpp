@@ -313,6 +313,9 @@ commonSetUpForRecordDecl(
     }
     xmlAddChild(node, templArgs);
   }
+  if (const auto CRD = dyn_cast<CXXRecordDecl>(RD)) {
+    xmlAddChild(node, makeInheritanceNode(TTI, CRD));
+  }
 }
 
 } // namespace
@@ -543,7 +546,6 @@ TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
       if (auto RD = T->getAsCXXRecordDecl()) {
         Node = createNode(T, "classType", nullptr);
         commonSetUpForRecordDecl(Node, RD, *this);
-        xmlAddChild(Node, makeInheritanceNode(*this, RD));
         pushType(T, Node);
       } else if (T->isStructureType()) {
         Node = createNode(T, "structType", nullptr);
