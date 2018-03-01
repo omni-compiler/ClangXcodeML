@@ -171,7 +171,9 @@ makeFunctionDeclHead(xmlNodePtr node,
   const auto T = src.typeTable[dtident];
   const auto fnType = llvm::cast<XcodeMl::Function>(T.get());
 
-  auto acc = CXXCodeGen::makeVoidNode();
+  auto acc = isTrueProp(node, "is_function_template_specialization", false)
+      ? CXXCodeGen::makeTokenNode("template <>")
+      : CXXCodeGen::makeVoidNode();
   acc = acc + makeFunctionDeclHead(fnType,
                   name,
                   paramNames,
