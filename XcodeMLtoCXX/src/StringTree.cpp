@@ -122,7 +122,7 @@ NewLineNode::getsingleton() {
 
 bool
 SourcePosNode::classof(const StringTree *node) {
-  return node->getKind() == StringTreeKind::SourcePosNode;
+  return node->getKind() == StringTreeKind::SourcePos;
 }
 
 SourcePosNode::SourcePosNode(std::string f, size_t l)
