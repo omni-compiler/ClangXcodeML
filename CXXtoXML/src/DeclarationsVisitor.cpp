@@ -495,6 +495,13 @@ DeclarationsVisitor::PreVisitNestedNameSpecifierLoc(NestedNameSpecifierLoc N) {
   newChild("clangNestedNameSpecifier");
   const auto kind = SpecifierKindToString(Spec->getKind());
   newProp("clang_nested_name_specifier_kind", kind.c_str());
+
+  if (const auto ND = Spec->getAsNamespace()) {
+    const auto nameNode = makeNameNode(*typetableinfo, ND);
+    xmlAddChild(curNode, nameNode);
+    return true;
+  }
+
   return true;
 }
 
