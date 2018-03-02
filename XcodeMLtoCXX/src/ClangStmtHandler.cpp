@@ -254,14 +254,15 @@ DEFINE_STMTHANDLER(ForStmtProc) {
   const auto initNode =
       findFirst(node, "clangStmt[@for_stmt_kind='init']", src.ctxt);
   const auto init =
-    initNode ? w.walk(initNode, src) : CXXCodeGen::makeVoidNode();
+      initNode ? w.walk(initNode, src) : CXXCodeGen::makeVoidNode();
   const auto cond =
       createNodeOrNull(node, "clangStmt[@for_stmt_kind='cond']", w, src);
   const auto iter =
       createNodeOrNull(node, "clangStmt[@for_stmt_kind='iter']", w, src);
   const auto body =
       createNodeOrNull(node, "clangStmt[@for_stmt_kind='body']", w, src);
-  const auto head = init + makeTokenNode(";") + cond + makeTokenNode(";") + iter;
+  const auto head =
+      init + makeTokenNode(";") + cond + makeTokenNode(";") + iter;
   return makeTokenNode("for") + wrapWithParen(head) + body;
 }
 
