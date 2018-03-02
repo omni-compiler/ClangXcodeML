@@ -798,7 +798,7 @@ const ClangClassHandler ClangTypeLocHandler("class",
   xmlNodePtr node __attribute__((unused)),                                    \
       const SourceInfo &src __attribute__((unused))
 
-#define DEFINE_CCCH(name) static XcodeMl::CodeFragment name(CCCH_ARGS)
+#define DEFINE_CCCH(name) XcodeMl::CodeFragment name(CCCH_ARGS)
 
 DEFINE_CCCH(doNothing) {
   return CXXCodeGen::makeVoidNode();
