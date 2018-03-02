@@ -318,7 +318,7 @@ DEFINE_DECLHANDLER(LinkageSpecProc) {
   // We emit linkage specification by `wrapWithLangLink`
   // not here
   const auto decls = createNodes(node, "clangDecl", w, src);
-  return insertNewLines(decls);
+  return foldWithSemicolon(decls);
 }
 
 DEFINE_DECLHANDLER(NamespaceProc) {
@@ -326,7 +326,7 @@ DEFINE_DECLHANDLER(NamespaceProc) {
   const auto name = getUnqualIdFromNameNode(nameNode)->toString(src.typeTable);
   const auto head = makeTokenNode("namespace") + name;
   const auto decls = createNodes(node, "clangDecl", w, src);
-  return head + wrapWithBrace(insertNewLines(decls));
+  return head + wrapWithBrace(foldWithSemicolon(decls));
 }
 
 void
