@@ -32,7 +32,7 @@ namespace cxxgen = CXXCodeGen;
       const CodeBuilder &w __attribute__((unused)),                           \
       SourceInfo &src __attribute__((unused))
 
-#define DEFINE_CCH(name) static XcodeMl::CodeFragment name(CCH_ARGS)
+#define DEFINE_CCH(name) XcodeMl::CodeFragment name(CCH_ARGS)
 
 using cxxgen::makeInnerNode;
 using cxxgen::makeTokenNode;
