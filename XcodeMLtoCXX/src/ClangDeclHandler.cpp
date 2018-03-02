@@ -41,32 +41,6 @@ using CXXCodeGen::makeTokenNode;
 
 namespace {
 
-CodeFragment
-createNode(xmlNodePtr node,
-    const char *xpath,
-    const CodeBuilder &w,
-    SourceInfo &src) {
-  const auto targetNode = findFirst(node, xpath, src.ctxt);
-  if (!targetNode) {
-    std::cerr << "In createNode" << std::endl
-              << "not found: '" << xpath << "'" << std::endl;
-    std::abort();
-  }
-  return w.walk(targetNode, src);
-}
-
-CodeFragment
-createNodeOrNull(xmlNodePtr node,
-    const char *xpath,
-    const CodeBuilder &w,
-    SourceInfo &src) {
-  const auto targetNode = findFirst(node, xpath, src.ctxt);
-  if (!targetNode) {
-    return CXXCodeGen::makeVoidNode();
-  }
-  return w.walk(targetNode, src);
-}
-
 std::vector<CodeFragment>
 createNodes(xmlNodePtr node,
     const char *xpath,
