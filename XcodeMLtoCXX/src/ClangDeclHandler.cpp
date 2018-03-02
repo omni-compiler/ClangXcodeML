@@ -188,7 +188,7 @@ DEFINE_DECLHANDLER(ClassTemplateSpecializationProc) {
 }
 
 void
-setClassName(XcodeMl::ClassType &classType, xmlNodePtr node, SourceInfo &src) {
+setClassName(XcodeMl::ClassType &classType, SourceInfo &src) {
   if (classType.name().hasValue()) {
     return;
   }
@@ -208,7 +208,7 @@ DEFINE_DECLHANDLER(CXXRecordProc) {
   auto classT = llvm::dyn_cast<XcodeMl::ClassType>(T.get());
   assert(classT);
 
-  setClassName(*classT, node, src);
+  setClassName(*classT, src);
   const auto nameSpelling = *(classT->name()); // now class name must exist
 
   if (isTrueProp(node, "is_this_declaration_a_definition", false)) {
