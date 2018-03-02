@@ -81,6 +81,13 @@ createNodes(xmlNodePtr node,
 
 } // namespace
 
+#define DECLHANDLER_ARGS                                                      \
+  xmlNodePtr node __attribute__((unused)),                                    \
+      const CodeBuilder &w __attribute__((unused)),                           \
+      SourceInfo &src __attribute__((unused))
+
+#define DEFINE_DECLHANDLER(name) XcodeMl::CodeFragment name(DECLHANDLER_ARGS)
+
 DEFINE_CCH(callCodeBuilder) {
   return makeInnerNode(ProgramBuilder.walkChildren(node, src));
 }
