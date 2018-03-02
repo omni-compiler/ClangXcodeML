@@ -81,6 +81,9 @@ createNodes(xmlNodePtr node,
 
 } // namespace
 
+DEFINE_STMTHANDLER(callCodeBuilder) {
+  return makeInnerNode(ProgramBuilder.walkChildren(node, src));
+}
 
 DEFINE_STMTHANDLER(BinaryOperatorProc) {
   const auto lhsNode = findFirst(node, "clangStmt[1]", src.ctxt);
