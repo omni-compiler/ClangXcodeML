@@ -47,6 +47,11 @@ DEFINE_NAMESPECHANDLER(globalSpecProc) {
 DEFINE_NAMESPECHANDLER(NamespaceSpecProc) {
   const auto nameNode = findFirst(node, "name", src.ctxt);
   const auto name = getUnqualIdFromNameNode(nameNode)->toString(src.typeTable);
+  if (const auto parent =
+          findFirst(node, "clangNestedNameSpecifier", src.ctxt)) {
+    const auto prefix = ClangNestedNameSpecHandler.walk(parent, src);
+    return prefix + name + makeTokenNode("::");
+  }
   return name + makeTokenNode("::");
 }
 
