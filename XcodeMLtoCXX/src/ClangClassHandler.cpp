@@ -781,7 +781,7 @@ const ClangClassHandler ClangDeclHandler("class",
 #define DEFINE_TYPELOCHANDLER(name)                                           \
   XcodeMl::CodeFragment name(TYPELOCHANDLER_ARGS)
 
-DEFINE_CCH(BuiltinTypeProc) {
+DEFINE_TYPELOCHANDLER(BuiltinTypeProc) {
   const auto dtident = getType(node);
   return makeDecl(
       src.typeTable.at(dtident), cxxgen::makeVoidNode(), src.typeTable);
