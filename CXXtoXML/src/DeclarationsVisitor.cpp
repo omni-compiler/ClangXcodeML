@@ -518,6 +518,12 @@ DeclarationsVisitor::PreVisitNestedNameSpecifierLoc(NestedNameSpecifierLoc N) {
   newProp("clang_nested_name_specifier_kind", kind.c_str());
 
   switch (Spec->getKind()) {
+  case NestedNameSpecifier::Identifier: {
+    const auto Ident = Spec->getAsIdentifier();
+    assert(Ident);
+    newProp("token", Ident->getNameStart());
+    break;
+  }
   case NestedNameSpecifier::Namespace: {
     const auto ND = Spec->getAsNamespace();
     assert(ND);
