@@ -460,14 +460,11 @@ const ClangDeclHandlerType ClassDefinitionDeclHandler("class",
     CXXCodeGen::makeInnerNode,
     callCodeBuilder,
     {
-        // std::make_tuple("CharacterLiteral", emitTokenAttrValue),
         std::make_tuple("CXXMethod", emitInlineMemberFunction),
         std::make_tuple("CXXConstructor", emitInlineMemberFunction),
         std::make_tuple("CXXDestructor", emitInlineMemberFunction),
         std::make_tuple("CXXRecord", CXXRecordProc),
-        // std::make_tuple("FloatingLiteral", emitTokenAttrValue),
         std::make_tuple("Field", FieldDeclProc),
-        // std::make_tuple("IntegerLiteral", emitTokenAttrValue),
         std::make_tuple("Var", VarProc),
     });
 
