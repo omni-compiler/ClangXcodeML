@@ -1,5 +1,10 @@
 .PHONY: check clean clangxml
-.PRECIOUS: %.cpp.xcodeml %.c.xcodeml %.cpp.xml %.c.xml
+.PRECIOUS: \
+	%.c.xcodeml \
+	%.c.xml \
+	%.cpp.xml \
+	%.cpp.xcodeml \
+	%.dst.cpp
 .DELETE_ON_ERROR:
 
 all: check
