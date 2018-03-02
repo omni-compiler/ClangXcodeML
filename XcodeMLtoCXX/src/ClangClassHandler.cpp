@@ -773,6 +773,14 @@ const ClangClassHandler ClangDeclHandler("class",
         std::make_tuple("Var", VarProc),
     });
 
+#define TYPELOCHANDLER_ARGS                                                   \
+  xmlNodePtr node __attribute__((unused)),                                    \
+      const CodeBuilder &w __attribute__((unused)),                           \
+      SourceInfo &src __attribute__((unused))
+
+#define DEFINE_TYPELOCHANDLER(name)                                           \
+  XcodeMl::CodeFragment name(TYPELOCHANDLER_ARGS)
+
 DEFINE_CCH(BuiltinTypeProc) {
   const auto dtident = getType(node);
   return makeDecl(
