@@ -141,6 +141,16 @@ DEFINE_STMTHANDLER(ConditionalOperatorProc) {
   return cond + makeTokenNode("?") + yes + makeTokenNode(":") + no;
 }
 
+DEFINE_STMTHANDLER(CXXCatchStmtProc) {
+  const auto body = createNode(node, "clangStmt", w, src);
+  if (const auto declNode = findFirst(node, "clangDecl", src.ctxt)) {
+    const auto var = w.walk(declNode, src);
+    return makeTokenNode("catch") + wrapWithParen(var) + body;
+  } else {
+    return makeTokenNode("catch(...)") + body;
+  }
+}
+
 DEFINE_STMTHANDLER(CXXCtorExprProc) {
   return makeTokenNode("(") + cxxgen::join(", ", w.walkChildren(node, src))
       + makeTokenNode(")");
@@ -336,6 +346,7 @@ const ClangStmtHandlerType ClangStmtHandler("class",
         std::make_tuple("CharacterLiteral", emitTokenAttrValue),
         std::make_tuple("CompoundAssignOperator", BinaryOperatorProc),
         std::make_tuple("CompoundStmt", CompoundStmtProc),
+        std::make_tuple("CXXCatchStmt", CXXCatchStmtProc),
         std::make_tuple("CXXConstructExpr", CXXCtorExprProc),
         std::make_tuple("CXXDeleteExpr", CXXDeleteExprProc),
         std::make_tuple("CXXMemberCallExpr", callExprProc),
