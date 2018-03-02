@@ -525,6 +525,13 @@ DeclarationsVisitor::PreVisitNestedNameSpecifierLoc(NestedNameSpecifierLoc N) {
     xmlAddChild(curNode, nameNode);
     break;
   }
+  case NestedNameSpecifier::TypeSpec: {
+    const auto T = Spec->getAsType();
+    assert(T);
+    const auto dtident = typetableinfo->getTypeName(QualType(T, 0));
+    newProp("xcodemlType", dtident.c_str());
+    break;
+  }
   default: break;
   }
   return true;
