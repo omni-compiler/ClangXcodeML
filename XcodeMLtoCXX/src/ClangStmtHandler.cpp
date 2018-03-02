@@ -199,7 +199,7 @@ DEFINE_STMTHANDLER(DoStmtProc) {
 
 DEFINE_STMTHANDLER(DeclStmtProc) {
   const auto declNodes = createNodes(node, "clangDecl", w, src);
-  return join(",", declNodes);
+  return join(";", declNodes);
 }
 
 DEFINE_STMTHANDLER(emitTokenAttrValue) {
