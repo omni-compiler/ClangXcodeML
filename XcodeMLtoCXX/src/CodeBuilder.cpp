@@ -27,6 +27,7 @@
 #include "SourceInfo.h"
 #include "CodeBuilder.h"
 #include "ClangClassHandler.h"
+#include "ClangNestedNameSpecHandler.h"
 #include "ClangTypeLocHandler.h"
 #include "LibXMLUtil.h"
 

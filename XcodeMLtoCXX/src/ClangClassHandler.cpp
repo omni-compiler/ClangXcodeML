@@ -772,34 +772,3 @@ const ClangClassHandler ClangDeclHandler("class",
         std::make_tuple("Typedef", TypedefProc),
         std::make_tuple("Var", VarProc),
     });
-
-#define NAMESPECHANDLER_ARGS                                                  \
-  xmlNodePtr node __attribute__((unused)),                                    \
-      const SourceInfo &src __attribute__((unused))
-
-#define DEFINE_NAMESPECHANDLER(name)                                          \
-  XcodeMl::CodeFragment name(NAMESPECHANDLER_ARGS)
-
-DEFINE_NAMESPECHANDLER(doNothing) {
-  return CXXCodeGen::makeVoidNode();
-}
-
-DEFINE_NAMESPECHANDLER(TypeSpecifierProc) {
-  const auto typeNode = findFirst(node, "clangTypeLoc", src.ctxt);
-  const auto T = src.typeTable.at(getType(typeNode));
-  if (llvm::isa<XcodeMl::ClassType>(T.get())) {
-    const auto classT = llvm::cast<XcodeMl::ClassType>(T.get());
-    assert(classT->name().hasValue());
-    return *(classT->name()) + makeTokenNode("::");
-  }
-  return makeDecl(T, CXXCodeGen::makeVoidNode(), src.typeTable)
-      + makeTokenNode("::");
-}
-
-const ConstClangClassHandler ClangNestedNameSpecHandler(
-    "clang_nested_name_specifier_kind",
-    cxxgen::makeInnerNode,
-    doNothing,
-    {
-        std::make_tuple("type_specifier", TypeSpecifierProc),
-    });
