@@ -315,6 +315,13 @@ DEFINE_DECLHANDLER(FunctionTemplateProc) {
       + makeTokenNode(">") + w.walk(body, src);
 }
 
+DEFINE_DECLHANDLER(LinkageSpecProc) {
+  // We emit linkage specification by `wrapWithLangLink`
+  // not here
+  const auto decls = createNodes(node, "clangDecl", w, src);
+  return insertNewLines(decls);
+}
+
 DEFINE_DECLHANDLER(NamespaceProc) {
   const auto nameNode = findFirst(node, "name", src.ctxt);
   const auto name = getUnqualIdFromNameNode(nameNode)->toString(src.typeTable);
@@ -466,6 +473,7 @@ const ClangDeclHandlerType ClangDeclHandler("class",
         std::make_tuple("Friend", FriendDeclProc),
         std::make_tuple("Function", FunctionProc),
         std::make_tuple("FunctionTemplate", FunctionTemplateProc),
+        std::make_tuple("LinkageSpec", LinkageSpecProc),
         std::make_tuple("Namespace", NamespaceProc),
         std::make_tuple("Record", RecordProc),
         std::make_tuple("TemplateTypeParm", TemplateTypeParmProc),
