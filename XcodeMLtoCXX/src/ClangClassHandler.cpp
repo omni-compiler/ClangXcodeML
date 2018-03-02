@@ -88,11 +88,11 @@ createNodes(xmlNodePtr node,
 
 #define DEFINE_DECLHANDLER(name) XcodeMl::CodeFragment name(DECLHANDLER_ARGS)
 
-DEFINE_CCH(callCodeBuilder) {
+DEFINE_DECLHANDLER(callCodeBuilder) {
   return makeInnerNode(ProgramBuilder.walkChildren(node, src));
 }
 
-DEFINE_CCH(emitInlineMemberFunction) {
+DEFINE_DECLHANDLER(emitInlineMemberFunction) {
   if (isTrueProp(node, "is_implicit", 0)) {
     return CXXCodeGen::makeVoidNode();
   }
@@ -121,7 +121,7 @@ DEFINE_CCH(emitInlineMemberFunction) {
   return acc;
 }
 
-DEFINE_CCH(FieldDeclProc) {
+DEFINE_DECLHANDLER(FieldDeclProc) {
   const auto nameNode = findFirst(node, "name", src.ctxt);
   const auto name = getUnqualIdFromNameNode(nameNode)->toString(src.typeTable);
 
@@ -131,9 +131,9 @@ DEFINE_CCH(FieldDeclProc) {
   return makeDecl(T, name, src.typeTable) + makeTokenNode(";");
 }
 
-DEFINE_CCH(emitTokenAttrValue);
-DEFINE_CCH(CXXRecordProc);
-DEFINE_CCH(VarProc);
+DEFINE_DECLHANDLER(emitTokenAttrValue);
+DEFINE_DECLHANDLER(CXXRecordProc);
+DEFINE_DECLHANDLER(VarProc);
 
 const ClangClassHandler ClassDefinitionDeclHandler("class",
     CXXCodeGen::makeInnerNode,
@@ -224,7 +224,7 @@ makeTemplateHead(xmlNodePtr node, const CodeBuilder &w, SourceInfo &src) {
 
 } // namespace
 
-DEFINE_CCH(ClassTemplateProc) {
+DEFINE_DECLHANDLER(ClassTemplateProc) {
   if (const auto typeTableNode =
           findFirst(node, "xcodemlTypeTable", src.ctxt)) {
     src.typeTable = expandEnvironment(src.typeTable, typeTableNode, src.ctxt);
@@ -305,7 +305,7 @@ DEFINE_CCH(emitTokenAttrValue) {
   return makeTokenNode(token);
 }
 
-DEFINE_CCH(FunctionTemplateProc) {
+DEFINE_DECLHANDLER(FunctionTemplateProc) {
   if (const auto typeTableNode =
           findFirst(node, "xcodemlTypeTable", src.ctxt)) {
     src.typeTable = expandEnvironment(src.typeTable, typeTableNode, src.ctxt);
@@ -326,7 +326,7 @@ DEFINE_CCH(FunctionTemplateProc) {
       + makeTokenNode(">") + w.walk(body, src);
 }
 
-DEFINE_CCH(TemplateTypeParmProc) {
+DEFINE_DECLHANDLER(TemplateTypeParmProc) {
   const auto name = getQualifiedName(node, src);
   const auto nameSpelling = name.toString(src.typeTable, src.nnsTable);
 
@@ -410,7 +410,7 @@ setClassName(XcodeMl::ClassType &classType, xmlNodePtr node, SourceInfo &src) {
   classType.setName(src.getUniqueName());
 }
 
-DEFINE_CCH(CXXRecordProc) {
+DEFINE_DECLHANDLER(CXXRecordProc) {
   if (isTrueProp(node, "is_implicit", false)) {
     return cxxgen::makeVoidNode();
   }
@@ -573,7 +573,7 @@ const ClangClassHandler ClangStmtHandler("class",
         std::make_tuple("WhileStmt", WhileStmtProc),
     });
 
-DEFINE_CCH(ClassTemplateSpecializationProc) {
+DEFINE_DECLHANDLER(ClassTemplateSpecializationProc) {
   const auto T = src.typeTable.at(getType(node));
   const auto classT = llvm::dyn_cast<XcodeMl::ClassType>(T.get());
   assert(classT && classT->name().hasValue());
@@ -592,7 +592,7 @@ DEFINE_CCH(ClassTemplateSpecializationProc) {
   return head + makeTokenNode(classKey) + nameSpelling + makeTokenNode(";");
 }
 
-DEFINE_CCH(ClassTemplatePartialSpecializationProc) {
+DEFINE_DECLHANDLER(ClassTemplatePartialSpecializationProc) {
   if (const auto typeTableNode =
           findFirst(node, "xcodemlTypeTable", src.ctxt)) {
     src.typeTable = expandEnvironment(src.typeTable, typeTableNode, src.ctxt);
@@ -615,7 +615,7 @@ DEFINE_CCH(ClassTemplatePartialSpecializationProc) {
   return head + makeTokenNode(classKey) + nameSpelling + makeTokenNode(";");
 }
 
-DEFINE_CCH(FriendDeclProc) {
+DEFINE_DECLHANDLER(FriendDeclProc) {
   if (auto TL = findFirst(node, "clangTypeLoc", src.ctxt)) {
     /* friend class declaration */
     const auto dtident = getType(TL);
@@ -627,7 +627,7 @@ DEFINE_CCH(FriendDeclProc) {
   return makeTokenNode("friend") + callCodeBuilder(node, w, src);
 }
 
-DEFINE_CCH(FunctionProc) {
+DEFINE_DECLHANDLER(FunctionProc) {
   if (isTrueProp(node, "is_implicit", 0)) {
     return cxxgen::makeVoidNode();
   }
@@ -662,7 +662,7 @@ setStructName(XcodeMl::Struct &s, xmlNodePtr node, SourceInfo &src) {
   s.setTagName(nameSpelling);
 }
 
-DEFINE_CCH(RecordProc) {
+DEFINE_DECLHANDLER(RecordProc) {
   if (isTrueProp(node, "is_implicit", false)) {
     return cxxgen::makeVoidNode();
   }
@@ -677,7 +677,7 @@ DEFINE_CCH(RecordProc) {
       + wrapWithBrace(insertNewLines(decls)) + makeTokenNode(";");
 }
 
-DEFINE_CCH(TranslationUnitProc) {
+DEFINE_DECLHANDLER(TranslationUnitProc) {
   if (const auto typeTableNode =
           findFirst(node, "xcodemlTypeTable", src.ctxt)) {
     src.typeTable = expandEnvironment(src.typeTable, typeTableNode, src.ctxt);
@@ -693,7 +693,7 @@ DEFINE_CCH(TranslationUnitProc) {
   return separateByBlankLines(decls);
 }
 
-DEFINE_CCH(TypedefProc) {
+DEFINE_DECLHANDLER(TypedefProc) {
   if (isTrueProp(node, "is_implicit", 0)) {
     return cxxgen::makeVoidNode();
   }
@@ -728,7 +728,7 @@ makeSpecifier(xmlNodePtr node) {
   return code;
 }
 
-DEFINE_CCH(VarProc) {
+DEFINE_DECLHANDLER(VarProc) {
   const auto nameNode = findFirst(node, "name", src.ctxt);
   const auto name = getUnqualIdFromNameNode(nameNode)->toString(src.typeTable);
   const auto dtident = getProp(node, "xcodemlType");
