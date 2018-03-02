@@ -22,7 +22,7 @@
 #include "TypeAnalyzer.h"
 #include "NnsAnalyzer.h"
 #include "CodeBuilder.h"
-#include "ClangClassHandler.h"
+#include "ClangStmtHandler.h"
 #include "XcodeMlUtil.h"
 
 namespace cxxgen = CXXCodeGen;

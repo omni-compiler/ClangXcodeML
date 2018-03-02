@@ -26,9 +26,9 @@
 #include "TypeAnalyzer.h"
 #include "SourceInfo.h"
 #include "CodeBuilder.h"
-#include "ClangClassHandler.h"
 #include "ClangDeclHandler.h"
 #include "ClangNestedNameSpecHandler.h"
+#include "ClangStmtHandler.h"
 #include "ClangTypeLocHandler.h"
 #include "LibXMLUtil.h"
 
