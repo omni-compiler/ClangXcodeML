@@ -21,8 +21,7 @@
 #include "SourceInfo.h"
 #include "AttrProc.h"
 #include "XMLWalker.h"
-#include "CodeBuilder.h"
-#include "ClangClassHandler.h"
+#include "ClangNestedNameSpecHandler.h"
 
 #include "XcodeMlUtil.h"
 

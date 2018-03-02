@@ -25,7 +25,10 @@ OBJS = XcodeMlType.o \
 	XcodeMlEnvironment.o \
 	SourceInfo.o \
 	StringTree.o \
-	ClangClassHandler.o \
+	ClangDeclHandler.o \
+	ClangNestedNameSpecHandler.o \
+	ClangStmtHandler.o \
+	ClangTypeLocHandler.o \
 	XcodeMlName.o \
 	XcodeMlNns.o \
 	XcodeMlOperator.o \
