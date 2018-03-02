@@ -798,13 +798,14 @@ const ClangClassHandler ClangTypeLocHandler("class",
   xmlNodePtr node __attribute__((unused)),                                    \
       const SourceInfo &src __attribute__((unused))
 
-#define DEFINE_CCCH(name) XcodeMl::CodeFragment name(NAMESPECHANDLER_ARGS)
+#define DEFINE_NAMESPECHANDLER(name)                                          \
+  XcodeMl::CodeFragment name(NAMESPECHANDLER_ARGS)
 
-DEFINE_CCCH(doNothing) {
+DEFINE_NAMESPECHANDLER(doNothing) {
   return CXXCodeGen::makeVoidNode();
 }
 
-DEFINE_CCCH(TypeSpecifierProc) {
+DEFINE_NAMESPECHANDLER(TypeSpecifierProc) {
   const auto typeNode = findFirst(node, "clangTypeLoc", src.ctxt);
   const auto T = src.typeTable.at(getType(typeNode));
   if (llvm::isa<XcodeMl::ClassType>(T.get())) {
