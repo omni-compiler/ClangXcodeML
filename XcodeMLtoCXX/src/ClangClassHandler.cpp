@@ -32,7 +32,7 @@ namespace cxxgen = CXXCodeGen;
       const CodeBuilder &w __attribute__((unused)),                           \
       SourceInfo &src __attribute__((unused))
 
-#define DEFINE_CCH(name) XcodeMl::CodeFragment name(STMTHANDLER_ARGS)
+#define DEFINE_STMTHANDLER(name) XcodeMl::CodeFragment name(STMTHANDLER_ARGS)
 
 using cxxgen::makeInnerNode;
 using cxxgen::makeTokenNode;
@@ -150,7 +150,7 @@ const ClangClassHandler ClassDefinitionDeclHandler("class",
         std::make_tuple("Var", VarProc),
     });
 
-DEFINE_CCH(BinaryOperatorProc) {
+DEFINE_STMTHANDLER(BinaryOperatorProc) {
   const auto lhsNode = findFirst(node, "clangStmt[1]", src.ctxt);
   const auto lhs = w.walk(lhsNode, src);
   const auto rhsNode = findFirst(node, "clangStmt[2]", src.ctxt);
@@ -165,11 +165,11 @@ DEFINE_CCH(BinaryOperatorProc) {
   return lhs + makeTokenNode(*opSpelling) + rhs;
 }
 
-DEFINE_CCH(BreakStmtProc) {
+DEFINE_STMTHANDLER(BreakStmtProc) {
   return makeTokenNode("break");
 }
 
-DEFINE_CCH(callExprProc) {
+DEFINE_STMTHANDLER(callExprProc) {
   const auto funcNode = findFirst(node, "clangStmt", src.ctxt);
   const auto func = w.walk(funcNode, src);
 
@@ -182,7 +182,7 @@ DEFINE_CCH(callExprProc) {
   return func + wrapWithParen(join(",", args));
 }
 
-DEFINE_CCH(CaseStmtProc) {
+DEFINE_STMTHANDLER(CaseStmtProc) {
   const auto labelNode = findFirst(node, "clangStmt[1]", src.ctxt);
   const auto label = w.walk(labelNode, src);
 
@@ -192,7 +192,7 @@ DEFINE_CCH(CaseStmtProc) {
   return makeTokenNode("case") + label + makeTokenNode(":") + body;
 }
 
-DEFINE_CCH(CompoundStmtProc) {
+DEFINE_STMTHANDLER(CompoundStmtProc) {
   const auto stmtNodes = findNodes(node, "clangStmt", src.ctxt);
   std::vector<CXXCodeGen::StringTreeRef> stmts;
   for (auto &&stmtNode : stmtNodes) {
@@ -201,7 +201,7 @@ DEFINE_CCH(CompoundStmtProc) {
   return wrapWithBrace(insertNewLines(stmts));
 }
 
-DEFINE_CCH(ConditionalOperatorProc) {
+DEFINE_STMTHANDLER(ConditionalOperatorProc) {
   const auto cond = createNode(node, "clangStmt[1]", w, src);
   const auto yes = createNode(node, "clangStmt[2]", w, src);
   const auto no = createNode(node, "clangStmt[3]", w, src);
@@ -239,17 +239,17 @@ DEFINE_DECLHANDLER(ClassTemplateProc) {
   return head + body;
 }
 
-DEFINE_CCH(CXXCtorExprProc) {
+DEFINE_STMTHANDLER(CXXCtorExprProc) {
   return makeTokenNode("(") + cxxgen::join(", ", w.walkChildren(node, src))
       + makeTokenNode(")");
 }
 
-DEFINE_CCH(CXXDeleteExprProc) {
+DEFINE_STMTHANDLER(CXXDeleteExprProc) {
   const auto allocated = findFirst(node, "*", src.ctxt);
   return makeTokenNode("delete") + w.walk(allocated, src);
 }
 
-DEFINE_CCH(CXXNewExprProc) {
+DEFINE_STMTHANDLER(CXXNewExprProc) {
   const auto T = src.typeTable.at(getType(node));
   // FIXME: Support scalar type
   const auto pointeeT =
@@ -272,7 +272,7 @@ DEFINE_CCH(CXXNewExprProc) {
               : CXXCodeGen::makeVoidNode());
 }
 
-DEFINE_CCH(DeclRefExprProc) {
+DEFINE_STMTHANDLER(DeclRefExprProc) {
   const auto name = getQualifiedName(node, src);
 
   if (const auto TAL = findFirst(node, "TemplateArgumentLoc", src.ctxt)) {
@@ -288,19 +288,19 @@ DEFINE_CCH(DeclRefExprProc) {
   return name.toString(src.typeTable, src.nnsTable);
 }
 
-DEFINE_CCH(DoStmtProc) {
+DEFINE_STMTHANDLER(DoStmtProc) {
   const auto body = createNode(node, "clangStmt[1]", w, src);
   const auto cond = createNode(node, "clangStmt[2]", w, src);
   return makeTokenNode("do") + body + makeTokenNode("while")
       + wrapWithParen(cond) + makeTokenNode(";");
 }
 
-DEFINE_CCH(DeclStmtProc) {
+DEFINE_STMTHANDLER(DeclStmtProc) {
   const auto declNodes = createNodes(node, "clangDecl", w, src);
   return insertNewLines(declNodes);
 }
 
-DEFINE_CCH(emitTokenAttrValue) {
+DEFINE_STMTHANDLER(emitTokenAttrValue) {
   const auto token = getProp(node, "token");
   return makeTokenNode(token);
 }
@@ -431,7 +431,7 @@ DEFINE_DECLHANDLER(CXXRecordProc) {
   return makeTokenNode(classKey) + nameSpelling + makeTokenNode(";");
 }
 
-DEFINE_CCH(CXXTemporaryObjectExprProc) {
+DEFINE_STMTHANDLER(CXXTemporaryObjectExprProc) {
   const auto resultT = src.typeTable.at(getType(node));
   const auto name = llvm::cast<XcodeMl::ClassType>(resultT.get())->name();
   assert(name.hasValue());
@@ -445,7 +445,7 @@ DEFINE_CCH(CXXTemporaryObjectExprProc) {
   return *name + makeTokenNode("(") + join(",", args) + makeTokenNode(")");
 }
 
-DEFINE_CCH(CXXOperatorCallExprProc) {
+DEFINE_STMTHANDLER(CXXOperatorCallExprProc) {
   const auto callee = createNode(node, "clangStmt[1]", w, src);
   if (isTrueProp(node, "is_member_function", false)) {
     const auto lhs = createNode(node, "clangStmt[2]", w, src);
@@ -457,7 +457,7 @@ DEFINE_CCH(CXXOperatorCallExprProc) {
   }
 }
 
-DEFINE_CCH(ForStmtProc) {
+DEFINE_STMTHANDLER(ForStmtProc) {
   const auto initNode =
       findFirst(node, "clangStmt[@for_stmt_kind='init']", src.ctxt);
   const auto init = initNode ? w.walk(initNode, src) : makeTokenNode(";");
@@ -471,18 +471,18 @@ DEFINE_CCH(ForStmtProc) {
       + wrapWithParen(init + cond + makeTokenNode(";") + iter) + body;
 }
 
-DEFINE_CCH(IfStmtProc) {
+DEFINE_STMTHANDLER(IfStmtProc) {
   const auto cond = createNode(node, "clangStmt[1]", w, src);
   const auto body = createNode(node, "clangStmt[2]", w, src);
   return makeTokenNode("if") + wrapWithParen(cond) + body;
 }
 
-DEFINE_CCH(InitListExprProc) {
+DEFINE_STMTHANDLER(InitListExprProc) {
   const auto members = createNodes(node, "clangStmt", w, src);
   return wrapWithBrace(join(",", members));
 }
 
-DEFINE_CCH(MemberExprProc) {
+DEFINE_STMTHANDLER(MemberExprProc) {
   const auto expr = createNode(node, "clangStmt", w, src);
   const auto member =
       getQualifiedName(node, src).toString(src.typeTable, src.nnsTable);
@@ -490,7 +490,7 @@ DEFINE_CCH(MemberExprProc) {
   return expr + makeTokenNode(isArrow ? "->" : ".") + member;
 }
 
-DEFINE_CCH(ReturnStmtProc) {
+DEFINE_STMTHANDLER(ReturnStmtProc) {
   if (const auto exprNode = findFirst(node, "clangStmt", src.ctxt)) {
     const auto expr = w.walk(exprNode, src);
     return makeTokenNode("return") + expr + makeTokenNode(";");
@@ -498,12 +498,12 @@ DEFINE_CCH(ReturnStmtProc) {
   return makeTokenNode("return");
 }
 
-DEFINE_CCH(StringLiteralProc) {
+DEFINE_STMTHANDLER(StringLiteralProc) {
   const auto string = makeTokenNode(getProp(node, "stringLiteral"));
   return makeTokenNode("\"") + string + makeTokenNode("\"");
 }
 
-DEFINE_CCH(SwitchStmtProc) {
+DEFINE_STMTHANDLER(SwitchStmtProc) {
   const auto exprNode = findFirst(node, "clangStmt[1]", src.ctxt);
   const auto expr = w.walk(exprNode, src);
 
@@ -513,11 +513,11 @@ DEFINE_CCH(SwitchStmtProc) {
   return makeTokenNode("switch") + wrapWithParen(expr) + body;
 }
 
-DEFINE_CCH(ThisExprProc) {
+DEFINE_STMTHANDLER(ThisExprProc) {
   return makeTokenNode("this");
 }
 
-DEFINE_CCH(UnaryOperatorProc) {
+DEFINE_STMTHANDLER(UnaryOperatorProc) {
   const auto expr = createNode(node, "clangStmt", w, src);
 
   const auto opName = getProp(node, "unaryOpName");
@@ -532,7 +532,7 @@ DEFINE_CCH(UnaryOperatorProc) {
   return wrapWithParen(postfix ? expr + op : op + expr);
 }
 
-DEFINE_CCH(WhileStmtProc) {
+DEFINE_STMTHANDLER(WhileStmtProc) {
   const auto cond = createNode(node, "clangStmt[1]", w, src);
   const auto body = createNode(node, "clangStmt[2]", w, src);
   return makeTokenNode("while") + wrapWithParen(cond) + body;
