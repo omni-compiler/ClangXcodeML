@@ -26,6 +26,7 @@ OBJS = XcodeMlType.o \
 	SourceInfo.o \
 	StringTree.o \
 	ClangClassHandler.o \
+	ClangTypeLocHandler.o \
 	XcodeMlName.o \
 	XcodeMlNns.o \
 	XcodeMlOperator.o \

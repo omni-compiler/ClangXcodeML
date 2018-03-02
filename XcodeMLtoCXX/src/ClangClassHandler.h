@@ -10,7 +10,6 @@ using ConstClangClassHandler =
 extern const ClangClassHandler ClangStmtHandler;
 extern const ClangClassHandler ClangDeclHandler;
 extern const ClangClassHandler ClassDefinitionDeclHandler;
-extern const ClangClassHandler ClangTypeLocHandler;
 extern const ConstClangClassHandler ClangNestedNameSpecHandler;
 
 #endif /* !CLANGCLASSHANDLER_H */
