@@ -1,9 +1,9 @@
 #ifndef CLANGCLASSHANDLER_H
 #define CLANGCLASSHANDLER_H
 
-using ClangClassHandler =
+using ClangStmtHandlerType =
     AttrProc<XcodeMl::CodeFragment, const CodeBuilder &, SourceInfo &>;
 
-extern const ClangClassHandler ClangStmtHandler;
+extern const ClangStmtHandlerType ClangStmtHandler;
 
 #endif /* !CLANGCLASSHANDLER_H */

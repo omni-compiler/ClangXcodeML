@@ -316,7 +316,7 @@ DEFINE_STMTHANDLER(WhileStmtProc) {
 
 } // namespace
 
-const ClangClassHandler ClangStmtHandler("class",
+const ClangStmtHandlerType ClangStmtHandler("class",
     cxxgen::makeInnerNode,
     callCodeBuilder,
     {
