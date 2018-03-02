@@ -79,8 +79,6 @@ createNodes(xmlNodePtr node,
   return vec;
 }
 
-} // namespace
-
 DEFINE_STMTHANDLER(callCodeBuilder) {
   return makeInnerNode(ProgramBuilder.walkChildren(node, src));
 }
@@ -315,6 +313,8 @@ DEFINE_STMTHANDLER(WhileStmtProc) {
   const auto body = createNode(node, "clangStmt[2]", w, src);
   return makeTokenNode("while") + wrapWithParen(cond) + body;
 }
+
+} // namespace
 
 const ClangClassHandler ClangStmtHandler("class",
     cxxgen::makeInnerNode,
