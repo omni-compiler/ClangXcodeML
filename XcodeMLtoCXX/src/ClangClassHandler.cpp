@@ -794,11 +794,11 @@ const ClangClassHandler ClangTypeLocHandler("class",
         std::make_tuple("Builtin", BuiltinTypeProc),
     });
 
-#define CCCH_ARGS                                                             \
+#define NAMESPECHANDLER_ARGS                                                  \
   xmlNodePtr node __attribute__((unused)),                                    \
       const SourceInfo &src __attribute__((unused))
 
-#define DEFINE_CCCH(name) XcodeMl::CodeFragment name(CCCH_ARGS)
+#define DEFINE_CCCH(name) XcodeMl::CodeFragment name(NAMESPECHANDLER_ARGS)
 
 DEFINE_CCCH(doNothing) {
   return CXXCodeGen::makeVoidNode();
