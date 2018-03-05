@@ -643,7 +643,7 @@ DEFINE_CB(clangDeclProc) {
 }
 
 DEFINE_CB(classScopeClangDeclProc) {
-  return ClassDefinitionDeclHandler.walk(node, w, src);
+  return ClangDeclHandlerInClass.walk(node, w, src);
 }
 
 DEFINE_CB(clangTypeLocProc) {

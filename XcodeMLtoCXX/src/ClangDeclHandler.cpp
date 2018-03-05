@@ -454,7 +454,7 @@ DEFINE_DECLHANDLER(VarProc) {
 
 } // namespace
 
-const ClangDeclHandlerType ClassDefinitionDeclHandler("class",
+const ClangDeclHandlerType ClangDeclHandlerInClass("class",
     CXXCodeGen::makeInnerNode,
     callCodeBuilder,
     {
@@ -464,6 +464,7 @@ const ClangDeclHandlerType ClassDefinitionDeclHandler("class",
         std::make_tuple("CXXDestructor", emitInlineMemberFunction),
         std::make_tuple("CXXRecord", CXXRecordProc),
         std::make_tuple("Field", FieldDeclProc),
+        std::make_tuple("Friend", FriendDeclProc),
         std::make_tuple("Var", VarProc),
     });
 
@@ -482,7 +483,6 @@ const ClangDeclHandlerType ClangDeclHandler("class",
         std::make_tuple("CXXMethod", FunctionProc),
         std::make_tuple("CXXRecord", CXXRecordProc),
         std::make_tuple("Field", FieldDeclProc),
-        std::make_tuple("Friend", FriendDeclProc),
         std::make_tuple("Function", FunctionProc),
         std::make_tuple("FunctionTemplate", FunctionTemplateProc),
         std::make_tuple("LinkageSpec", LinkageSpecProc),

@@ -5,6 +5,6 @@ using ClangDeclHandlerType =
     AttrProc<XcodeMl::CodeFragment, const CodeBuilder &, SourceInfo &>;
 
 extern const ClangDeclHandlerType ClangDeclHandler;
-extern const ClangDeclHandlerType ClassDefinitionDeclHandler;
+extern const ClangDeclHandlerType ClangDeclHandlerInClass;
 
 #endif /* !CLANGDECLHANDLER_H */
