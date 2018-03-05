@@ -336,16 +336,15 @@ DEFINE_DECLHANDLER(FunctionTemplateProc) {
 DEFINE_DECLHANDLER(LinkageSpecProc) {
   // We emit linkage specification by `wrapWithLangLink`
   // not here
-  const auto decls = createNodes(node, "clangDecl", w, src);
-  return foldWithSemicolon(decls);
+  return foldDecls(node, w, src);
 }
 
 DEFINE_DECLHANDLER(NamespaceProc) {
   const auto nameNode = findFirst(node, "name", src.ctxt);
   const auto name = getUnqualIdFromNameNode(nameNode)->toString(src.typeTable);
   const auto head = makeTokenNode("namespace") + name;
-  const auto decls = createNodes(node, "clangDecl", w, src);
-  return head + wrapWithBrace(foldWithSemicolon(decls));
+  const auto decls = foldDecls(node, w, src);
+  return head + wrapWithBrace(decls);
 }
 
 void
@@ -396,12 +395,7 @@ DEFINE_DECLHANDLER(TranslationUnitProc) {
   if (const auto nnsTableNode = findFirst(node, "xcodemlNnsTable", src.ctxt)) {
     src.nnsTable = expandNnsMap(src.nnsTable, nnsTableNode, src.ctxt);
   }
-  const auto declNodes = findNodes(node, "clangDecl", src.ctxt);
-  std::vector<CXXCodeGen::StringTreeRef> decls;
-  for (auto &&declNode : declNodes) {
-    decls.push_back(w.walk(declNode, src));
-  }
-  return foldWithSemicolon(decls);
+  return foldDecls(node, w, src);
 }
 
 DEFINE_DECLHANDLER(TypedefProc) {
