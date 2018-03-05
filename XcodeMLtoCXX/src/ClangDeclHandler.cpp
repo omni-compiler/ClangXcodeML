@@ -307,8 +307,6 @@ DEFINE_DECLHANDLER(FunctionProc) {
   if (const auto bodyNode = findFirst(node, "clangStmt", src.ctxt)) {
     const auto body = w.walk(bodyNode, src);
     acc = acc + body;
-  } else {
-    acc = acc + makeTokenNode(";");
   }
 
   return wrapWithLangLink(acc, node, src);
