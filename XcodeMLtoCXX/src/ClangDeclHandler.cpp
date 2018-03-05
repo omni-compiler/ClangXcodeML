@@ -264,8 +264,6 @@ DEFINE_DECLHANDLER(emitInlineMemberFunction) {
   if (const auto bodyNode = findFirst(node, "clangStmt", src.ctxt)) {
     const auto body = ProgramBuilder.walk(bodyNode, src);
     return acc + body;
-  } else {
-    return acc;
   }
   return acc;
 }
