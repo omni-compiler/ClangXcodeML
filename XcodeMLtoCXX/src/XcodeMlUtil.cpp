@@ -228,7 +228,9 @@ wrapWithLangLink(const XcodeMl::CodeFragment &content,
     return content;
   } else {
     return makeTokenNode("extern") + makeTokenNode("\"" + *lang + "\"")
-        + makeTokenNode("{") + content + (requiresSemicolon(node, src) ? makeTokenNode(";") : makeVoidNode()) + makeTokenNode("}");
+        + wrapWithBrace(
+               content + (requiresSemicolon(node, src) ? makeTokenNode(";")
+                                                       : makeVoidNode()));
   }
 }
 

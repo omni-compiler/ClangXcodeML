@@ -161,8 +161,8 @@ emitClassDefinition(xmlNodePtr node,
       ? classType.getAsTemplateId(src.typeTable).getValue()
       : classType.name().getValue();
 
-  return classKey + name + makeBases(classType, src) + makeTokenNode("{")
-      + insertNewLines(decls) + makeTokenNode("}")
+  return classKey + name + makeBases(classType, src)
+      + wrapWithBrace(insertNewLines(decls))
       + CXXCodeGen::makeNewLineNode();
 }
 
