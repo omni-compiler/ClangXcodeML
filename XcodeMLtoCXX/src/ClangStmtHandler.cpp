@@ -269,11 +269,15 @@ DEFINE_STMTHANDLER(ForStmtProc) {
 DEFINE_STMTHANDLER(IfStmtProc) {
   const auto cond = createNode(node, "clangStmt[1]", w, src);
   const auto then = createNode(node, "clangStmt[2]", w, src);
-  const auto head = makeTokenNode("if") + wrapWithParen(cond) + then;
+  // `then` does not end with a semicolon
+  const auto head = makeTokenNode("if") + wrapWithParen(cond)
+      + wrapWithBrace(then + makeTokenNode(";"));
 
   if (const auto elseNode = findFirst(node, "clangStmt[3]", src.ctxt)) {
     const auto Else = w.walk(elseNode, src);
-    return head + makeTokenNode("else") + Else;
+    // `Else` does not end with a semicolon
+    return head + makeTokenNode("else")
+        + wrapWithBrace(Else + makeTokenNode(";"));
   }
   return head;
 }
