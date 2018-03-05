@@ -278,21 +278,18 @@ DEFINE_STMTHANDLER(ForStmtProc) {
       createNodeOrNull(node, "clangStmt[@for_stmt_kind='body']", w, src);
   const auto head = makeTokenNode("for")
       + wrapWithParen(makeTokenNode(";") + cond + makeTokenNode(";") + iter);
-  return wrapWithBrace(init + head + wrapWithBrace(body + makeTokenNode(";")));
+  return wrapWithBrace(init + head + makeCompoundStmt(body));
 }
 
 DEFINE_STMTHANDLER(IfStmtProc) {
   const auto cond = createNode(node, "clangStmt[1]", w, src);
   const auto then = createNode(node, "clangStmt[2]", w, src);
-  // `then` does not end with a semicolon
-  const auto head = makeTokenNode("if") + wrapWithParen(cond)
-      + wrapWithBrace(then + makeTokenNode(";"));
+  const auto head =
+      makeTokenNode("if") + wrapWithParen(cond) + makeCompoundStmt(then);
 
   if (const auto elseNode = findFirst(node, "clangStmt[3]", src.ctxt)) {
     const auto Else = w.walk(elseNode, src);
-    // `Else` does not end with a semicolon
-    return head + makeTokenNode("else")
-        + wrapWithBrace(Else + makeTokenNode(";"));
+    return head + makeTokenNode("else") + makeCompoundStmt(Else);
   }
   return head;
 }
