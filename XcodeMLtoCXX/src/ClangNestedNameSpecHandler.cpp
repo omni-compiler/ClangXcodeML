@@ -40,6 +40,21 @@ DEFINE_NAMESPECHANDLER(doNothing) {
   return CXXCodeGen::makeVoidNode();
 }
 
+DEFINE_NAMESPECHANDLER(globalSpecProc) {
+  return makeTokenNode("::");
+}
+
+DEFINE_NAMESPECHANDLER(NamespaceSpecProc) {
+  const auto nameNode = findFirst(node, "name", src.ctxt);
+  const auto name = getUnqualIdFromNameNode(nameNode)->toString(src.typeTable);
+  if (const auto parent =
+          findFirst(node, "clangNestedNameSpecifier", src.ctxt)) {
+    const auto prefix = ClangNestedNameSpecHandler.walk(parent, src);
+    return prefix + name + makeTokenNode("::");
+  }
+  return name + makeTokenNode("::");
+}
+
 DEFINE_NAMESPECHANDLER(TypeSpecifierProc) {
   const auto typeNode = findFirst(node, "clangTypeLoc", src.ctxt);
   const auto T = src.typeTable.at(getType(typeNode));
@@ -59,5 +74,7 @@ const ClangNestedNameSpecHandlerType ClangNestedNameSpecHandler(
     CXXCodeGen::makeInnerNode,
     doNothing,
     {
+        std::make_tuple("global", globalSpecProc),
+        std::make_tuple("namespace", NamespaceSpecProc),
         std::make_tuple("type_specifier", TypeSpecifierProc),
     });

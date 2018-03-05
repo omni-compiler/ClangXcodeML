@@ -488,11 +488,20 @@ SpecifierKindToString(clang::NestedNameSpecifier::SpecifierKind kind) {
 
 bool
 DeclarationsVisitor::PreVisitNestedNameSpecifierLoc(NestedNameSpecifierLoc N) {
-  if (const auto Spec = N.getNestedNameSpecifier()) {
-    newChild("clangNestedNameSpecifier");
-    const auto kind = SpecifierKindToString(Spec->getKind());
-    newProp("clang_nested_name_specifier_kind", kind.c_str());
+  const auto Spec = N.getNestedNameSpecifier();
+  if (!Spec) {
+    return true;
   }
+  newChild("clangNestedNameSpecifier");
+  const auto kind = SpecifierKindToString(Spec->getKind());
+  newProp("clang_nested_name_specifier_kind", kind.c_str());
+
+  if (const auto ND = Spec->getAsNamespace()) {
+    const auto nameNode = makeNameNode(*typetableinfo, ND);
+    xmlAddChild(curNode, nameNode);
+    return true;
+  }
+
   return true;
 }
 
