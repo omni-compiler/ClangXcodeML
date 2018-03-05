@@ -352,7 +352,7 @@ DEFINE_STMTHANDLER(UnaryOperatorProc) {
 DEFINE_STMTHANDLER(WhileStmtProc) {
   const auto cond = createNode(node, "clangStmt[1]", w, src);
   const auto body = createNode(node, "clangStmt[2]", w, src);
-  return makeTokenNode("while") + wrapWithParen(cond) + body;
+  return makeTokenNode("while") + wrapWithParen(cond) + makeCompoundStmt(body);
 }
 
 } // namespace
