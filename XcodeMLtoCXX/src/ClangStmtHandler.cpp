@@ -129,9 +129,9 @@ DEFINE_STMTHANDLER(CompoundStmtProc) {
   const auto stmtNodes = findNodes(node, "clangStmt", src.ctxt);
   std::vector<CXXCodeGen::StringTreeRef> stmts;
   for (auto &&stmtNode : stmtNodes) {
-    stmts.push_back(w.walk(stmtNode, src) + makeTokenNode(";"));
+    stmts.push_back(w.walk(stmtNode, src));
   }
-  return wrapWithBrace(insertNewLines(stmts));
+  return wrapWithBrace(foldWithSemicolon(stmts));
 }
 
 DEFINE_STMTHANDLER(ConditionalOperatorProc) {
@@ -139,6 +139,16 @@ DEFINE_STMTHANDLER(ConditionalOperatorProc) {
   const auto yes = createNode(node, "clangStmt[2]", w, src);
   const auto no = createNode(node, "clangStmt[3]", w, src);
   return cond + makeTokenNode("?") + yes + makeTokenNode(":") + no;
+}
+
+DEFINE_STMTHANDLER(CXXCatchStmtProc) {
+  const auto body = createNode(node, "clangStmt", w, src);
+  if (const auto declNode = findFirst(node, "clangDecl", src.ctxt)) {
+    const auto var = w.walk(declNode, src);
+    return makeTokenNode("catch") + wrapWithParen(var) + body;
+  } else {
+    return makeTokenNode("catch(...)") + body;
+  }
 }
 
 DEFINE_STMTHANDLER(CXXCtorExprProc) {
@@ -174,6 +184,13 @@ DEFINE_STMTHANDLER(CXXNewExprProc) {
               : CXXCodeGen::makeVoidNode());
 }
 
+DEFINE_STMTHANDLER(CXXTryStmtProc) {
+  const auto body = createNode(node, "clangStmt[1]", w, src);
+  const auto catchClauses =
+      createNodes(node, "clangStmt[@class='CXXCatchStmt']", w, src);
+  return makeTokenNode("try") + body + insertNewLines(catchClauses);
+}
+
 DEFINE_STMTHANDLER(DeclRefExprProc) {
   const auto name = getQualifiedName(node, src);
 
@@ -194,12 +211,12 @@ DEFINE_STMTHANDLER(DoStmtProc) {
   const auto body = createNode(node, "clangStmt[1]", w, src);
   const auto cond = createNode(node, "clangStmt[2]", w, src);
   return makeTokenNode("do") + body + makeTokenNode("while")
-      + wrapWithParen(cond) + makeTokenNode(";");
+      + wrapWithParen(cond);
 }
 
 DEFINE_STMTHANDLER(DeclStmtProc) {
   const auto declNodes = createNodes(node, "clangDecl", w, src);
-  return insertNewLines(declNodes);
+  return join(";", declNodes);
 }
 
 DEFINE_STMTHANDLER(emitTokenAttrValue) {
@@ -236,15 +253,17 @@ DEFINE_STMTHANDLER(CXXOperatorCallExprProc) {
 DEFINE_STMTHANDLER(ForStmtProc) {
   const auto initNode =
       findFirst(node, "clangStmt[@for_stmt_kind='init']", src.ctxt);
-  const auto init = initNode ? w.walk(initNode, src) : makeTokenNode(";");
+  const auto init =
+      initNode ? w.walk(initNode, src) : CXXCodeGen::makeVoidNode();
   const auto cond =
       createNodeOrNull(node, "clangStmt[@for_stmt_kind='cond']", w, src);
   const auto iter =
       createNodeOrNull(node, "clangStmt[@for_stmt_kind='iter']", w, src);
   const auto body =
       createNodeOrNull(node, "clangStmt[@for_stmt_kind='body']", w, src);
-  return makeTokenNode("for")
-      + wrapWithParen(init + cond + makeTokenNode(";") + iter) + body;
+  const auto head =
+      init + makeTokenNode(";") + cond + makeTokenNode(";") + iter;
+  return makeTokenNode("for") + wrapWithParen(head) + body;
 }
 
 DEFINE_STMTHANDLER(IfStmtProc) {
@@ -269,7 +288,7 @@ DEFINE_STMTHANDLER(MemberExprProc) {
 DEFINE_STMTHANDLER(ReturnStmtProc) {
   if (const auto exprNode = findFirst(node, "clangStmt", src.ctxt)) {
     const auto expr = w.walk(exprNode, src);
-    return makeTokenNode("return") + expr + makeTokenNode(";");
+    return makeTokenNode("return") + expr;
   }
   return makeTokenNode("return");
 }
@@ -328,12 +347,14 @@ const ClangStmtHandlerType ClangStmtHandler("class",
         std::make_tuple("CharacterLiteral", emitTokenAttrValue),
         std::make_tuple("CompoundAssignOperator", BinaryOperatorProc),
         std::make_tuple("CompoundStmt", CompoundStmtProc),
+        std::make_tuple("CXXCatchStmt", CXXCatchStmtProc),
         std::make_tuple("CXXConstructExpr", CXXCtorExprProc),
         std::make_tuple("CXXDeleteExpr", CXXDeleteExprProc),
         std::make_tuple("CXXMemberCallExpr", callExprProc),
         std::make_tuple("CXXNewExpr", CXXNewExprProc),
         std::make_tuple("CXXOperatorCallExpr", CXXOperatorCallExprProc),
         std::make_tuple("CXXTemporaryObjectExpr", CXXTemporaryObjectExprProc),
+        std::make_tuple("CXXTryStmt", CXXTryStmtProc),
         std::make_tuple("CXXThisExpr", ThisExprProc),
         std::make_tuple("DeclStmt", DeclStmtProc),
         std::make_tuple("DeclRefExpr", DeclRefExprProc),

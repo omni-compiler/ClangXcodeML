@@ -54,6 +54,25 @@ createNodes(xmlNodePtr node,
   return vec;
 }
 
+CodeFragment
+foldDecls(xmlNodePtr node, const CodeBuilder &w, SourceInfo &src) {
+  const auto declNodes = findNodes(node, "clangDecl", src.ctxt);
+  std::vector<CodeFragment> decls;
+  for (auto &&declNode : declNodes) {
+    if (isTrueProp(declNode, "is_implicit", false)) {
+      continue;
+    }
+    const auto decl = w.walk(declNode, src);
+
+    if (requiresSemicolon(declNode, src)) {
+      decls.push_back(decl + makeTokenNode(";"));
+    } else {
+      decls.push_back(decl);
+    }
+  }
+  return insertNewLines(decls);
+}
+
 DEFINE_DECLHANDLER(callCodeBuilder) {
   return makeInnerNode(ProgramBuilder.walkChildren(node, src));
 }
@@ -123,7 +142,9 @@ emitClassDefinition(xmlNodePtr node,
       continue;
     }
     /* Traverse `memberNode` regardless of whether `CodeBuilder` prints it. */
-    const auto decl = w.walk(memberNode, src);
+    const auto decl = w.walk(memberNode, src)
+        + (requiresSemicolon(memberNode, src) ? makeTokenNode(";")
+                                              : CXXCodeGen::makeVoidNode());
 
     const auto accessProp = getPropOrNull(memberNode, "access");
     if (accessProp.hasValue()) {
@@ -140,8 +161,8 @@ emitClassDefinition(xmlNodePtr node,
       ? classType.getAsTemplateId(src.typeTable).getValue()
       : classType.name().getValue();
 
-  return classKey + name + makeBases(classType, src) + makeTokenNode("{")
-      + separateByBlankLines(decls) + makeTokenNode("}") + makeTokenNode(";")
+  return classKey + name + makeBases(classType, src)
+      + wrapWithBrace(insertNewLines(decls))
       + CXXCodeGen::makeNewLineNode();
 }
 
@@ -165,7 +186,7 @@ DEFINE_DECLHANDLER(ClassTemplatePartialSpecializationProc) {
   /* forward declaration */
   const auto classKey = getClassKey(classT->classKind());
   const auto nameSpelling = classT->name().getValue();
-  return head + makeTokenNode(classKey) + nameSpelling + makeTokenNode(";");
+  return head + makeTokenNode(classKey) + nameSpelling;
 }
 
 DEFINE_DECLHANDLER(ClassTemplateSpecializationProc) {
@@ -184,7 +205,7 @@ DEFINE_DECLHANDLER(ClassTemplateSpecializationProc) {
 
   /* forward declaration */
   const auto classKey = getClassKey(classT->classKind());
-  return head + makeTokenNode(classKey) + nameSpelling + makeTokenNode(";");
+  return head + makeTokenNode(classKey) + nameSpelling;
 }
 
 void
@@ -217,7 +238,7 @@ DEFINE_DECLHANDLER(CXXRecordProc) {
 
   /* forward declaration */
   const auto classKey = getClassKey(classT->classKind());
-  return makeTokenNode(classKey) + nameSpelling + makeTokenNode(";");
+  return makeTokenNode(classKey) + nameSpelling;
 }
 
 DEFINE_DECLHANDLER(emitInlineMemberFunction) {
@@ -243,8 +264,6 @@ DEFINE_DECLHANDLER(emitInlineMemberFunction) {
   if (const auto bodyNode = findFirst(node, "clangStmt", src.ctxt)) {
     const auto body = ProgramBuilder.walk(bodyNode, src);
     return acc + body;
-  } else {
-    return acc + makeTokenNode(";");
   }
   return acc;
 }
@@ -256,7 +275,7 @@ DEFINE_DECLHANDLER(FieldDeclProc) {
   const auto dtident = getType(node);
   const auto T = src.typeTable.at(dtident);
 
-  return makeDecl(T, name, src.typeTable) + makeTokenNode(";");
+  return makeDecl(T, name, src.typeTable);
 }
 
 DEFINE_DECLHANDLER(FriendDeclProc) {
@@ -265,8 +284,7 @@ DEFINE_DECLHANDLER(FriendDeclProc) {
     const auto dtident = getType(TL);
     const auto T = src.typeTable.at(dtident);
     return makeTokenNode("friend")
-        + makeDecl(T, CXXCodeGen::makeVoidNode(), src.typeTable)
-        + makeTokenNode(";");
+        + makeDecl(T, CXXCodeGen::makeVoidNode(), src.typeTable);
   }
   return makeTokenNode("friend") + callCodeBuilder(node, w, src);
 }
@@ -287,8 +305,6 @@ DEFINE_DECLHANDLER(FunctionProc) {
   if (const auto bodyNode = findFirst(node, "clangStmt", src.ctxt)) {
     const auto body = w.walk(bodyNode, src);
     acc = acc + body;
-  } else {
-    acc = acc + makeTokenNode(";");
   }
 
   return wrapWithLangLink(acc, node, src);
@@ -318,16 +334,15 @@ DEFINE_DECLHANDLER(FunctionTemplateProc) {
 DEFINE_DECLHANDLER(LinkageSpecProc) {
   // We emit linkage specification by `wrapWithLangLink`
   // not here
-  const auto decls = createNodes(node, "clangDecl", w, src);
-  return insertNewLines(decls);
+  return foldDecls(node, w, src);
 }
 
 DEFINE_DECLHANDLER(NamespaceProc) {
   const auto nameNode = findFirst(node, "name", src.ctxt);
   const auto name = getUnqualIdFromNameNode(nameNode)->toString(src.typeTable);
   const auto head = makeTokenNode("namespace") + name;
-  const auto decls = createNodes(node, "clangDecl", w, src);
-  return head + wrapWithBrace(insertNewLines(decls));
+  const auto decls = foldDecls(node, w, src);
+  return head + wrapWithBrace(decls);
 }
 
 void
@@ -354,7 +369,7 @@ DEFINE_DECLHANDLER(RecordProc) {
 
   const auto decls = createNodes(node, "clangDecl", w, src);
   return makeTokenNode("struct") + tagName
-      + wrapWithBrace(insertNewLines(decls)) + makeTokenNode(";");
+      + wrapWithBrace(foldWithSemicolon(decls));
 }
 
 DEFINE_DECLHANDLER(TemplateTypeParmProc) {
@@ -378,12 +393,7 @@ DEFINE_DECLHANDLER(TranslationUnitProc) {
   if (const auto nnsTableNode = findFirst(node, "xcodemlNnsTable", src.ctxt)) {
     src.nnsTable = expandNnsMap(src.nnsTable, nnsTableNode, src.ctxt);
   }
-  const auto declNodes = findNodes(node, "clangDecl", src.ctxt);
-  std::vector<CXXCodeGen::StringTreeRef> decls;
-  for (auto &&declNode : declNodes) {
-    decls.push_back(w.walk(declNode, src));
-  }
-  return separateByBlankLines(decls);
+  return foldDecls(node, w, src);
 }
 
 DEFINE_DECLHANDLER(TypedefProc) {
@@ -397,8 +407,7 @@ DEFINE_DECLHANDLER(TypedefProc) {
   const auto typedefName =
       getUnqualIdFromNameNode(nameNode)->toString(src.typeTable);
 
-  return makeTokenNode("typedef") + makeDecl(T, typedefName, src.typeTable)
-      + makeTokenNode(";");
+  return makeTokenNode("typedef") + makeDecl(T, typedefName, src.typeTable);
 }
 
 CodeFragment
@@ -431,16 +440,16 @@ DEFINE_DECLHANDLER(VarProc) {
   const auto initializerNode = findFirst(node, "clangStmt", src.ctxt);
   if (!initializerNode) {
     // does not have initalizer: `int x;`
-    return makeDecl(T, name, src.typeTable) + makeTokenNode(";");
+    return makeDecl(T, name, src.typeTable);
   }
   const auto astClass = getProp(initializerNode, "class");
   if (std::equal(astClass.begin(), astClass.end(), "CXXConstructExpr")) {
     // has initalizer and the variable is of class type
     const auto init = declareClassTypeInit(w, initializerNode, src);
-    return wrapWithLangLink(decl + init + makeTokenNode(";"), node, src);
+    return wrapWithLangLink(decl + init, node, src);
   }
   const auto init = w.walk(initializerNode, src);
-  return decl + makeTokenNode("=") + init + makeTokenNode(";");
+  return decl + makeTokenNode("=") + init;
 }
 
 } // namespace
@@ -451,6 +460,7 @@ const ClangDeclHandlerType ClassDefinitionDeclHandler("class",
     {
         std::make_tuple("CXXMethod", emitInlineMemberFunction),
         std::make_tuple("CXXConstructor", emitInlineMemberFunction),
+        std::make_tuple("CXXConversion", emitInlineMemberFunction),
         std::make_tuple("CXXDestructor", emitInlineMemberFunction),
         std::make_tuple("CXXRecord", CXXRecordProc),
         std::make_tuple("Field", FieldDeclProc),
@@ -467,6 +477,8 @@ const ClangDeclHandlerType ClangDeclHandler("class",
         std::make_tuple("ClassTemplatePartialSpecialization",
             ClassTemplatePartialSpecializationProc),
         std::make_tuple("CXXConstructor", FunctionProc),
+        std::make_tuple("CXXConversion", FunctionProc),
+        std::make_tuple("CXXDestructor", FunctionProc),
         std::make_tuple("CXXMethod", FunctionProc),
         std::make_tuple("CXXRecord", CXXRecordProc),
         std::make_tuple("Field", FieldDeclProc),
