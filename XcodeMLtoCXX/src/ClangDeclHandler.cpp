@@ -54,6 +54,25 @@ createNodes(xmlNodePtr node,
   return vec;
 }
 
+CodeFragment
+foldDecls(xmlNodePtr node, const CodeBuilder &w, SourceInfo &src) {
+  const auto declNodes = findNodes(node, "clangDecl", src.ctxt);
+  std::vector<CodeFragment> decls;
+  for (auto &&declNode : declNodes) {
+    if (isTrueProp(declNode, "is_implicit", false)) {
+      continue;
+    }
+    const auto decl = w.walk(declNode, src);
+
+    if (requiresSemicolon(declNode, src)) {
+      decls.push_back(decl + makeTokenNode(";"));
+    } else {
+      decls.push_back(decl);
+    }
+  }
+  return insertNewLines(decls);
+}
+
 DEFINE_DECLHANDLER(callCodeBuilder) {
   return makeInnerNode(ProgramBuilder.walkChildren(node, src));
 }
