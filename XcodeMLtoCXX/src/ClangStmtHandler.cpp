@@ -216,7 +216,7 @@ DEFINE_STMTHANDLER(DeclRefExprProc) {
 DEFINE_STMTHANDLER(DoStmtProc) {
   const auto body = createNode(node, "clangStmt[1]", w, src);
   const auto cond = createNode(node, "clangStmt[2]", w, src);
-  return makeTokenNode("do") + body + makeTokenNode("while")
+  return makeTokenNode("do") + makeCompoundStmt(body) + makeTokenNode("while")
       + wrapWithParen(cond);
 }
 
