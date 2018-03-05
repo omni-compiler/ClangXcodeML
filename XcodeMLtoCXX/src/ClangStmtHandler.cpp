@@ -79,6 +79,12 @@ createNodes(xmlNodePtr node,
   return vec;
 }
 
+CodeFragment
+makeCompoundStmt(const CodeFragment &stmt) {
+  // no STMTHANDLER returns a code fragment that ends with a semicolon.
+  return wrapWithBrace(stmt + makeTokenNode(";"));
+}
+
 DEFINE_STMTHANDLER(callCodeBuilder) {
   return makeInnerNode(ProgramBuilder.walkChildren(node, src));
 }
