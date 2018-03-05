@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <functional>
 #include <iostream>
 #include <map>
@@ -179,6 +180,39 @@ makeFunctionDeclHead(xmlNodePtr node,
                   src,
                   emitNameSpec && xmlHasProp(node, BAD_CAST "parent_class"));
   return acc;
+}
+
+bool
+requiresSemicolon(xmlNodePtr node, const SourceInfo &src) {
+  const auto declClass = getProp(node, "class");
+
+  const std::vector<std::string> fnDecls = {
+      "Function",
+      "CXXConstructor",
+      "CXXConversion",
+      "CXXDestructor",
+      "CXXMethod",
+  };
+  if (std::find(fnDecls.begin(), fnDecls.end(), declClass) != fnDecls.end()) {
+    /*
+     * A function (or member function) declaration ends with a semicolon
+     * if it is not a definition.
+     */
+    return !findFirst(node, "clangStmt", src.ctxt);
+  }
+
+  const std::vector<std::string> Decls = {
+      "AccessSpec",
+      "FunctionTemplate",
+      /*
+       * `clangStmt[@class='FunctionTemplate']` itself doesn't require
+       * semicolons. `clangStmt[@class='FunctionTemplate'] /
+       * clangStmt[@class='Function']` does.
+       */
+      "LinkageSpec",
+      "Namespace",
+  };
+  return std::find(Decls.begin(), Decls.end(), declClass) == Decls.end();
 }
 
 XcodeMl::CodeFragment
