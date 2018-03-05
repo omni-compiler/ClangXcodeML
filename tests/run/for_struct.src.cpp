@@ -12,4 +12,10 @@ main() {
        ++x.num) {
     x.func();
   }
+  for (int i = 0; i < 10; ++i)
+    struct ForBody {
+      ForBody(int x) {
+        printf("ForBody%d\n", x);
+      }
+    } body(i);
 }
