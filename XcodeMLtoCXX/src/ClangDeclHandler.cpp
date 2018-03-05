@@ -142,7 +142,9 @@ emitClassDefinition(xmlNodePtr node,
       continue;
     }
     /* Traverse `memberNode` regardless of whether `CodeBuilder` prints it. */
-    const auto decl = w.walk(memberNode, src);
+    const auto decl = w.walk(memberNode, src)
+        + (requiresSemicolon(memberNode, src) ? makeTokenNode(";")
+                                              : CXXCodeGen::makeVoidNode());
 
     const auto accessProp = getPropOrNull(memberNode, "access");
     if (accessProp.hasValue()) {
@@ -160,7 +162,7 @@ emitClassDefinition(xmlNodePtr node,
       : classType.name().getValue();
 
   return classKey + name + makeBases(classType, src) + makeTokenNode("{")
-      + foldWithSemicolon(decls) + makeTokenNode("}")
+      + insertNewLines(decls) + makeTokenNode("}")
       + CXXCodeGen::makeNewLineNode();
 }
 
