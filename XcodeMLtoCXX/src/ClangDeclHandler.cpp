@@ -445,7 +445,7 @@ DEFINE_DECLHANDLER(VarProc) {
 
 } // namespace
 
-const ClangDeclHandlerType ClassDefinitionDeclHandler("class",
+const ClangDeclHandlerType ClangDeclHandlerInClass("class",
     CXXCodeGen::makeInnerNode,
     callCodeBuilder,
     {
