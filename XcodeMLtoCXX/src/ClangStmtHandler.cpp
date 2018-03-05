@@ -95,7 +95,7 @@ DEFINE_STMTHANDLER(BinaryOperatorProc) {
     std::cerr << "Unknown operator name: '" << opName << "'" << std::endl;
     std::abort();
   }
-  return lhs + makeTokenNode(*opSpelling) + rhs;
+  return wrapWithParen(lhs + makeTokenNode(*opSpelling) + rhs);
 }
 
 DEFINE_STMTHANDLER(BreakStmtProc) {
