@@ -2,11 +2,11 @@
 
 int main() {
   for (int i = 0; i < 10; ++i) {
-    if (i % 2) {
+    if (i % 2)
       printf("then\n");
-    } else {
+    else
       printf("else\n");
-    }
+
   }
   return 0;
 }
