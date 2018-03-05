@@ -251,19 +251,28 @@ DEFINE_STMTHANDLER(CXXOperatorCallExprProc) {
 }
 
 DEFINE_STMTHANDLER(ForStmtProc) {
+  /*
+   * {
+   *   _init-statement(s)_
+   *   for ( ; _condition-opt_ ; _iteration-expression-opt_ ) {
+   *     _body-statement_
+   *   }
+   * }
+   */
   const auto initNode =
       findFirst(node, "clangStmt[@for_stmt_kind='init']", src.ctxt);
   const auto init =
-      initNode ? w.walk(initNode, src) : CXXCodeGen::makeVoidNode();
+      (initNode ? w.walk(initNode, src) : CXXCodeGen::makeVoidNode())
+      + makeTokenNode(";");
   const auto cond =
       createNodeOrNull(node, "clangStmt[@for_stmt_kind='cond']", w, src);
   const auto iter =
       createNodeOrNull(node, "clangStmt[@for_stmt_kind='iter']", w, src);
   const auto body =
       createNodeOrNull(node, "clangStmt[@for_stmt_kind='body']", w, src);
-  const auto head =
-      init + makeTokenNode(";") + cond + makeTokenNode(";") + iter;
-  return makeTokenNode("for") + wrapWithParen(head) + body;
+  const auto head = makeTokenNode("for")
+      + wrapWithParen(makeTokenNode(";") + cond + makeTokenNode(";") + iter);
+  return wrapWithBrace(init + head + wrapWithBrace(body + makeTokenNode(";")));
 }
 
 DEFINE_STMTHANDLER(IfStmtProc) {
