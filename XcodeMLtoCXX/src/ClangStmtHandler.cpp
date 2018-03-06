@@ -215,6 +215,11 @@ DEFINE_STMTHANDLER(DeclRefExprProc) {
   return name.toString(src.typeTable, src.nnsTable);
 }
 
+DEFINE_STMTHANDLER(DefaultStmtProc) {
+  const auto body = createNode(node, "clangStmt", w, src);
+  return makeTokenNode("default:") + body;
+}
+
 DEFINE_STMTHANDLER(DoStmtProc) {
   const auto body = createNode(node, "clangStmt[1]", w, src);
   const auto cond = createNode(node, "clangStmt[2]", w, src);
@@ -368,6 +373,7 @@ const ClangStmtHandlerType ClangStmtHandler("class",
         std::make_tuple("CXXThisExpr", ThisExprProc),
         std::make_tuple("DeclStmt", DeclStmtProc),
         std::make_tuple("DeclRefExpr", DeclRefExprProc),
+        std::make_tuple("DefaultStmt", DefaultStmtProc),
         std::make_tuple("DoStmt", DoStmtProc),
         std::make_tuple("FloatingLiteral", emitTokenAttrValue),
         std::make_tuple("ForStmt", ForStmtProc),
