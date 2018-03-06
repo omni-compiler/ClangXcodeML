@@ -215,6 +215,7 @@ const std::vector<std::string> identicalFndDataTypeIdents = {
     "char32_t",
     "bool",
     "__int128",
+    "nullptr_t",
 };
 
 const std::vector<std::tuple<std::string, std::string>>
