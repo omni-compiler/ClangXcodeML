@@ -188,6 +188,10 @@ DEFINE_STMTHANDLER(CXXNewExprProc) {
               : CXXCodeGen::makeVoidNode());
 }
 
+DEFINE_STMTHANDLER(CXXNullPtrLiteralExprProc) {
+  return makeTokenNode("nullptr");
+}
+
 DEFINE_STMTHANDLER(CXXTryStmtProc) {
   const auto body = createNode(node, "clangStmt[1]", w, src);
   const auto catchClauses =
@@ -357,6 +361,7 @@ const ClangStmtHandlerType ClangStmtHandler("class",
         std::make_tuple("CXXDeleteExpr", CXXDeleteExprProc),
         std::make_tuple("CXXMemberCallExpr", callExprProc),
         std::make_tuple("CXXNewExpr", CXXNewExprProc),
+        std::make_tuple("CXXNullPtrLiteralExpr", CXXNullPtrLiteralExprProc),
         std::make_tuple("CXXOperatorCallExpr", CXXOperatorCallExprProc),
         std::make_tuple("CXXTemporaryObjectExpr", CXXTemporaryObjectExprProc),
         std::make_tuple("CXXTryStmt", CXXTryStmtProc),
