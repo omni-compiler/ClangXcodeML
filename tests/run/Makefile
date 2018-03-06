@@ -47,7 +47,7 @@ CTESTOUTPUTTEXTS = $(CTESTCASES:.src.c=.dst.txt)
 # .src.cpp -> .cpp.xcodeml -> .dst.cpp -> .dst.out -> .dst.txt
 
 CXX = /usr/local/bin/clang++
-CXXFLAGS = -pedantic
+CXXFLAGS = -pedantic -std=c++11
 CXXTOXCODEMLFLAGS = -- -I. $(CXXFLAGS)
 
 CXXTESTCASES = $(wildcard *.src.cpp)
