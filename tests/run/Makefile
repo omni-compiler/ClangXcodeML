@@ -48,7 +48,7 @@ CTESTOUTPUTTEXTS = $(CTESTCASES:.src.c=.dst.txt)
 
 CXX = /usr/local/bin/clang++
 CXXFLAGS = -pedantic
-CXXTOXCODEMLFLAGS = -- -I.
+CXXTOXCODEMLFLAGS = -- -I. $(CXXFLAGS)
 
 CXXTESTCASES = $(wildcard *.src.cpp)
 CXXTESTOBJECTS = $(CXXTESTCASES:.src.cpp=.dst.cpp)
@@ -63,7 +63,7 @@ CXXTESTOUTPUTTEXTS = $(CXXTESTCASES:.src.cpp=.dst.txt)
 	$(XCODEMLTOCXX) $< > $@
 
 %.out: %.cpp
-	$(CXX) $< -o $@
+	$(CXX) $(CXXFLAGS) $< -o $@
 
 
 check: $(CXXTESTOUTPUTTEXTS) $(CTESTOUTPUTTEXTS) $(CXXTESTANSWERS) $(CTESTANSWERS)
