@@ -83,6 +83,12 @@ DEFINE_STMTHANDLER(callCodeBuilder) {
   return makeInnerNode(ProgramBuilder.walkChildren(node, src));
 }
 
+DEFINE_STMTHANDLER(ArraySubscriptExprProc) {
+  const auto array = createNode(node, "clangStmt[1]", w, src);
+  const auto index = createNode(node, "clangStmt[2]", w, src);
+  return wrapWithParen(array) + wrapWithSquareBracket(index);
+}
+
 DEFINE_STMTHANDLER(BinaryOperatorProc) {
   const auto lhsNode = findFirst(node, "clangStmt[1]", src.ctxt);
   const auto lhs = w.walk(lhsNode, src);
@@ -352,6 +358,7 @@ const ClangStmtHandlerType ClangStmtHandler("class",
     cxxgen::makeInnerNode,
     callCodeBuilder,
     {
+        std::make_tuple("ArraySubscriptExpr", ArraySubscriptExprProc),
         std::make_tuple("BinaryOperator", BinaryOperatorProc),
         std::make_tuple("BreakStmt", BreakStmtProc),
         std::make_tuple("CallExpr", callExprProc),
