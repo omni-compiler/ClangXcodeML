@@ -348,6 +348,11 @@ DEFINE_STMTHANDLER(ForStmtProc) {
   return wrapWithBrace(init + head + makeCompoundStmt(body));
 }
 
+DEFINE_STMTHANDLER(GotoStmtProc) {
+  const auto label = getProp(node, "label_name");
+  return makeTokenNode("goto") + makeTokenNode(label);
+}
+
 DEFINE_STMTHANDLER(IfStmtProc) {
   const auto cond = createNode(node, "clangStmt[1]", w, src);
   const auto then = createNode(node, "clangStmt[2]", w, src);
@@ -468,6 +473,7 @@ const ClangStmtHandlerType ClangStmtHandler("class",
         std::make_tuple("DoStmt", DoStmtProc),
         std::make_tuple("FloatingLiteral", emitTokenAttrValue),
         std::make_tuple("ForStmt", ForStmtProc),
+        std::make_tuple("GotoStmt", GotoStmtProc),
         std::make_tuple("IfStmt", IfStmtProc),
         std::make_tuple("InitListExpr", InitListExprProc),
         std::make_tuple("IntegerLiteral", emitTokenAttrValue),
