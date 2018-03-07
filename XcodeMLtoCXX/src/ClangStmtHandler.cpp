@@ -189,6 +189,15 @@ DEFINE_STMTHANDLER(CXXCatchStmtProc) {
   }
 }
 
+DEFINE_STMTHANDLER(CXXConstCastExprProc) {
+  const auto T = src.typeTable.at(getType(node));
+  const auto type =
+      T->makeDeclaration(CXXCodeGen::makeVoidNode(), src.typeTable);
+  const auto expr = createNode(node, "clangStmt", w, src);
+  return makeTokenNode("const_cast") + makeTokenNode("<") + type
+      + makeTokenNode(">") + wrapWithParen(expr);
+}
+
 DEFINE_STMTHANDLER(CXXCtorExprProc) {
   return makeTokenNode("(") + cxxgen::join(", ", w.walkChildren(node, src))
       + makeTokenNode(")");
@@ -435,6 +444,7 @@ const ClangStmtHandlerType ClangStmtHandler("class",
         std::make_tuple("CStyleCastExpr", CStyleCastExprProc),
         std::make_tuple("CXXBoolLiteralExpr", CXXBoolLiteralExprProc),
         std::make_tuple("CXXCatchStmt", CXXCatchStmtProc),
+        std::make_tuple("CXXConstCastExpr", CXXConstCastExprProc),
         std::make_tuple("CXXConstructExpr", CXXCtorExprProc),
         std::make_tuple("CXXDeleteExpr", CXXDeleteExprProc),
         std::make_tuple("CXXDynamicCastExpr", CXXDynamicCastExprProc),
