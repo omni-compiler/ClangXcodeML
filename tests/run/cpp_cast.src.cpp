@@ -45,6 +45,12 @@ print_const(const ClassC &rcc) {
   const_cast<ClassC &>(rcc).print();
 }
 
+void
+print_reinterpret_cast(short *ps) {
+  int *pi = reinterpret_cast<int *>(ps);
+  printf("%d\n", *pi);
+}
+
 int
 main() {
   ClassC obj;
@@ -55,4 +61,6 @@ main() {
   static_cast<ClassB>(obj).print();
   print_as_c(&obj);
   print_const(obj);
+  int i = 100;
+  print_reinterpret_cast(reinterpret_cast<short *>(&i));
 }
