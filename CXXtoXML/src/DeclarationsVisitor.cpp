@@ -261,6 +261,14 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
     newProp("label_name", LS->getName());
   }
 
+  if (const auto GS = dyn_cast<GotoStmt>(S)) {
+    const auto LD = GS->getLabel();
+    assert(LD);
+    const auto LS = LD->getStmt();
+    assert(LS);
+    newProp("label_name", LS->getName());
+  }
+
   return true;
 }
 
