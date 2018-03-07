@@ -164,10 +164,8 @@ DEFINE_STMTHANDLER(ContinueStmtProc) {
 }
 
 DEFINE_STMTHANDLER(CStyleCastExprProc) {
+  const auto type = createNode(node, "clangTypeLoc", w, src);
   const auto expr = createNode(node, "clangStmt", w, src);
-  const auto T = src.typeTable.at(getType(node));
-  const auto type =
-      T->makeDeclaration(CXXCodeGen::makeVoidNode(), src.typeTable);
   return wrapWithParen(wrapWithParen(type) + expr);
 }
 
@@ -190,9 +188,7 @@ DEFINE_STMTHANDLER(CXXCatchStmtProc) {
 }
 
 DEFINE_STMTHANDLER(CXXConstCastExprProc) {
-  const auto T = src.typeTable.at(getType(node));
-  const auto type =
-      T->makeDeclaration(CXXCodeGen::makeVoidNode(), src.typeTable);
+  const auto type = createNode(node, "clangTypeLoc", w, src);
   const auto expr = createNode(node, "clangStmt", w, src);
   return makeTokenNode("const_cast") + makeTokenNode("<") + type
       + makeTokenNode(">") + wrapWithParen(expr);
@@ -209,9 +205,7 @@ DEFINE_STMTHANDLER(CXXDeleteExprProc) {
 }
 
 DEFINE_STMTHANDLER(CXXDynamicCastExprProc) {
-  const auto T = src.typeTable.at(getType(node));
-  const auto type =
-      T->makeDeclaration(CXXCodeGen::makeVoidNode(), src.typeTable);
+  const auto type = createNode(node, "clangTypeLoc", w, src);
   const auto expr = createNode(node, "clangStmt", w, src);
   return makeTokenNode("dynamic_cast") + makeTokenNode("<") + type
       + makeTokenNode(">") + wrapWithParen(expr);
@@ -245,9 +239,7 @@ DEFINE_STMTHANDLER(CXXNullPtrLiteralExprProc) {
 }
 
 DEFINE_STMTHANDLER(CXXStaticCastExprProc) {
-  const auto T = src.typeTable.at(getType(node));
-  const auto type =
-      T->makeDeclaration(CXXCodeGen::makeVoidNode(), src.typeTable);
+  const auto type = createNode(node, "clangTypeLoc", w, src);
   const auto expr = createNode(node, "clangStmt", w, src);
   return makeTokenNode("static_cast") + makeTokenNode("<") + type
       + makeTokenNode(">") + wrapWithParen(expr);
