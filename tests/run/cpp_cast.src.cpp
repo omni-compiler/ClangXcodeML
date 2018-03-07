@@ -40,6 +40,11 @@ print_as_c(ClassA *pa) {
   }
 }
 
+void
+print_const(const ClassC &rcc) {
+  const_cast<ClassC &>(rcc).print();
+}
+
 int
 main() {
   ClassC obj;
@@ -49,4 +54,5 @@ main() {
   static_cast<ClassA>(obj).print();
   static_cast<ClassB>(obj).print();
   print_as_c(&obj);
+  print_const(obj);
 }
