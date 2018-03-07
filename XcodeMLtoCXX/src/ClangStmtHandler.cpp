@@ -79,6 +79,12 @@ createNodes(xmlNodePtr node,
   return vec;
 }
 
+CodeFragment
+makeCompoundStmt(const CodeFragment &stmt) {
+  // no STMTHANDLER returns a code fragment that ends with a semicolon.
+  return wrapWithBrace(stmt + makeTokenNode(";"));
+}
+
 DEFINE_STMTHANDLER(callCodeBuilder) {
   return makeInnerNode(ProgramBuilder.walkChildren(node, src));
 }
@@ -236,7 +242,7 @@ DEFINE_STMTHANDLER(DefaultStmtProc) {
 DEFINE_STMTHANDLER(DoStmtProc) {
   const auto body = createNode(node, "clangStmt[1]", w, src);
   const auto cond = createNode(node, "clangStmt[2]", w, src);
-  return makeTokenNode("do") + body + makeTokenNode("while")
+  return makeTokenNode("do") + makeCompoundStmt(body) + makeTokenNode("while")
       + wrapWithParen(cond);
 }
 
@@ -277,25 +283,41 @@ DEFINE_STMTHANDLER(CXXOperatorCallExprProc) {
 }
 
 DEFINE_STMTHANDLER(ForStmtProc) {
+  /*
+   * {
+   *   _init-statement(s)_
+   *   for ( ; _condition-opt_ ; _iteration-expression-opt_ ) {
+   *     _body-statement_
+   *   }
+   * }
+   */
   const auto initNode =
       findFirst(node, "clangStmt[@for_stmt_kind='init']", src.ctxt);
   const auto init =
-      initNode ? w.walk(initNode, src) : CXXCodeGen::makeVoidNode();
+      (initNode ? w.walk(initNode, src) : CXXCodeGen::makeVoidNode())
+      + makeTokenNode(";");
   const auto cond =
       createNodeOrNull(node, "clangStmt[@for_stmt_kind='cond']", w, src);
   const auto iter =
       createNodeOrNull(node, "clangStmt[@for_stmt_kind='iter']", w, src);
   const auto body =
       createNodeOrNull(node, "clangStmt[@for_stmt_kind='body']", w, src);
-  const auto head =
-      init + makeTokenNode(";") + cond + makeTokenNode(";") + iter;
-  return makeTokenNode("for") + wrapWithParen(head) + body;
+  const auto head = makeTokenNode("for")
+      + wrapWithParen(makeTokenNode(";") + cond + makeTokenNode(";") + iter);
+  return wrapWithBrace(init + head + makeCompoundStmt(body));
 }
 
 DEFINE_STMTHANDLER(IfStmtProc) {
   const auto cond = createNode(node, "clangStmt[1]", w, src);
-  const auto body = createNode(node, "clangStmt[2]", w, src);
-  return makeTokenNode("if") + wrapWithParen(cond) + body;
+  const auto then = createNode(node, "clangStmt[2]", w, src);
+  const auto head =
+      makeTokenNode("if") + wrapWithParen(cond) + makeCompoundStmt(then);
+
+  if (const auto elseNode = findFirst(node, "clangStmt[3]", src.ctxt)) {
+    const auto Else = w.walk(elseNode, src);
+    return head + makeTokenNode("else") + makeCompoundStmt(Else);
+  }
+  return head;
 }
 
 DEFINE_STMTHANDLER(InitListExprProc) {
@@ -356,7 +378,7 @@ DEFINE_STMTHANDLER(UnaryOperatorProc) {
 DEFINE_STMTHANDLER(WhileStmtProc) {
   const auto cond = createNode(node, "clangStmt[1]", w, src);
   const auto body = createNode(node, "clangStmt[2]", w, src);
-  return makeTokenNode("while") + wrapWithParen(cond) + body;
+  return makeTokenNode("while") + wrapWithParen(cond) + makeCompoundStmt(body);
 }
 
 } // namespace
