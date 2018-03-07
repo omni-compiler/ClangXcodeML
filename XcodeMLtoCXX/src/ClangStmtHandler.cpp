@@ -160,7 +160,8 @@ DEFINE_STMTHANDLER(ContinueStmtProc) {
 DEFINE_STMTHANDLER(CStyleCastExprProc) {
   const auto expr = createNode(node, "clangStmt", w, src);
   const auto T = src.typeTable.at(getType(node));
-  const auto type = T->makeDeclaration(CXXCodeGen::makeVoidNode(), src.typeTable);
+  const auto type =
+      T->makeDeclaration(CXXCodeGen::makeVoidNode(), src.typeTable);
   return wrapWithParen(wrapWithParen(type) + expr);
 }
 
