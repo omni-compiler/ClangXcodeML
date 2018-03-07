@@ -95,6 +95,12 @@ DEFINE_STMTHANDLER(ArraySubscriptExprProc) {
   return wrapWithParen(array) + wrapWithSquareBracket(index);
 }
 
+DEFINE_STMTHANDLER(BinaryConditionalOperatorProc) {
+  const auto lhs = createNode(node, "clangStmt[1]", w, src);
+  const auto rhs = createNode(node, "clangStmt[4]", w, src);
+  return wrapWithParen(lhs + makeTokenNode("?:") + rhs);
+}
+
 DEFINE_STMTHANDLER(BinaryOperatorProc) {
   const auto lhsNode = findFirst(node, "clangStmt[1]", src.ctxt);
   const auto lhs = w.walk(lhsNode, src);
@@ -397,6 +403,8 @@ const ClangStmtHandlerType ClangStmtHandler("class",
     callCodeBuilder,
     {
         std::make_tuple("ArraySubscriptExpr", ArraySubscriptExprProc),
+        std::make_tuple(
+            "BinaryConditionalOperator", BinaryConditionalOperatorProc),
         std::make_tuple("BinaryOperator", BinaryOperatorProc),
         std::make_tuple("BreakStmt", BreakStmtProc),
         std::make_tuple("CallExpr", callExprProc),
