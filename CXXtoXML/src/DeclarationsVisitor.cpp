@@ -257,6 +257,10 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
     }
   }
 
+  if (const auto LS = dyn_cast<LabelStmt>(S)) {
+    newProp("label_name", LS->getName());
+  }
+
   return true;
 }
 
