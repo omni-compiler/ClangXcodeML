@@ -366,6 +366,12 @@ DEFINE_STMTHANDLER(InitListExprProc) {
   return wrapWithBrace(join(",", members));
 }
 
+DEFINE_STMTHANDLER(LabelStmtProc) {
+  const auto label = getProp(node, "label_name");
+  const auto body = createNode(node, "clangStmt[1]", w, src);
+  return makeTokenNode(label) + makeTokenNode(":") + body;
+}
+
 DEFINE_STMTHANDLER(MemberExprProc) {
   const auto expr = createNode(node, "clangStmt", w, src);
   const auto member =
@@ -465,6 +471,7 @@ const ClangStmtHandlerType ClangStmtHandler("class",
         std::make_tuple("IfStmt", IfStmtProc),
         std::make_tuple("InitListExpr", InitListExprProc),
         std::make_tuple("IntegerLiteral", emitTokenAttrValue),
+        std::make_tuple("LabelStmt", LabelStmtProc),
         std::make_tuple("MemberExpr", MemberExprProc),
         std::make_tuple("ReturnStmt", ReturnStmtProc),
         std::make_tuple("StringLiteral", StringLiteralProc),
