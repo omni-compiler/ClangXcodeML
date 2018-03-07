@@ -107,6 +107,10 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
     newProp("clangCastKind", CE->getCastKindName());
   }
 
+  if (const auto BE = dyn_cast<CXXBoolLiteralExpr>(S)) {
+    newBoolProp("bool_value", BE->getValue());
+  }
+
   if (auto OCE = dyn_cast<clang::CXXOperatorCallExpr>(S)) {
     newProp("xcodeml_operator_kind",
         OverloadedOperatorKindToString(OCE->getOperator(), OCE->getNumArgs()));
