@@ -164,6 +164,14 @@ DEFINE_STMTHANDLER(CStyleCastExprProc) {
   return wrapWithParen(wrapWithParen(type) + expr);
 }
 
+DEFINE_STMTHANDLER(CXXBoolLiteralExprProc) {
+  if (isTrueProp(node, "bool_value", false)) {
+    return makeTokenNode("true");
+  } else {
+    return makeTokenNode("false");
+  }
+}
+
 DEFINE_STMTHANDLER(CXXCatchStmtProc) {
   const auto body = createNode(node, "clangStmt", w, src);
   if (const auto declNode = findFirst(node, "clangDecl", src.ctxt)) {
@@ -398,6 +406,7 @@ const ClangStmtHandlerType ClangStmtHandler("class",
         std::make_tuple("CompoundStmt", CompoundStmtProc),
         std::make_tuple("ContinueStmt", ContinueStmtProc),
         std::make_tuple("CStyleCastExpr", CStyleCastExprProc),
+        std::make_tuple("CXXBoolLiteralExpr", CXXBoolLiteralExprProc),
         std::make_tuple("CXXCatchStmt", CXXCatchStmtProc),
         std::make_tuple("CXXConstructExpr", CXXCtorExprProc),
         std::make_tuple("CXXDeleteExpr", CXXDeleteExprProc),
