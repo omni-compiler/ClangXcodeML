@@ -89,6 +89,18 @@ DEFINE_STMTHANDLER(callCodeBuilder) {
   return makeInnerNode(ProgramBuilder.walkChildren(node, src));
 }
 
+DEFINE_STMTHANDLER(ArraySubscriptExprProc) {
+  const auto array = createNode(node, "clangStmt[1]", w, src);
+  const auto index = createNode(node, "clangStmt[2]", w, src);
+  return wrapWithParen(array) + wrapWithSquareBracket(index);
+}
+
+DEFINE_STMTHANDLER(BinaryConditionalOperatorProc) {
+  const auto lhs = createNode(node, "clangStmt[1]", w, src);
+  const auto rhs = createNode(node, "clangStmt[4]", w, src);
+  return wrapWithParen(lhs + makeTokenNode("?:") + rhs);
+}
+
 DEFINE_STMTHANDLER(BinaryOperatorProc) {
   const auto lhsNode = findFirst(node, "clangStmt[1]", src.ctxt);
   const auto lhs = w.walk(lhsNode, src);
@@ -147,6 +159,24 @@ DEFINE_STMTHANDLER(ConditionalOperatorProc) {
   return cond + makeTokenNode("?") + yes + makeTokenNode(":") + no;
 }
 
+DEFINE_STMTHANDLER(ContinueStmtProc) {
+  return makeTokenNode("continue");
+}
+
+DEFINE_STMTHANDLER(CStyleCastExprProc) {
+  const auto type = createNode(node, "clangTypeLoc", w, src);
+  const auto expr = createNode(node, "clangStmt", w, src);
+  return wrapWithParen(wrapWithParen(type) + expr);
+}
+
+DEFINE_STMTHANDLER(CXXBoolLiteralExprProc) {
+  if (isTrueProp(node, "bool_value", false)) {
+    return makeTokenNode("true");
+  } else {
+    return makeTokenNode("false");
+  }
+}
+
 DEFINE_STMTHANDLER(CXXCatchStmtProc) {
   const auto body = createNode(node, "clangStmt", w, src);
   if (const auto declNode = findFirst(node, "clangDecl", src.ctxt)) {
@@ -157,6 +187,13 @@ DEFINE_STMTHANDLER(CXXCatchStmtProc) {
   }
 }
 
+DEFINE_STMTHANDLER(CXXConstCastExprProc) {
+  const auto type = createNode(node, "clangTypeLoc", w, src);
+  const auto expr = createNode(node, "clangStmt", w, src);
+  return makeTokenNode("const_cast") + makeTokenNode("<") + type
+      + makeTokenNode(">") + wrapWithParen(expr);
+}
+
 DEFINE_STMTHANDLER(CXXCtorExprProc) {
   return makeTokenNode("(") + cxxgen::join(", ", w.walkChildren(node, src))
       + makeTokenNode(")");
@@ -165,6 +202,13 @@ DEFINE_STMTHANDLER(CXXCtorExprProc) {
 DEFINE_STMTHANDLER(CXXDeleteExprProc) {
   const auto allocated = findFirst(node, "*", src.ctxt);
   return makeTokenNode("delete") + w.walk(allocated, src);
+}
+
+DEFINE_STMTHANDLER(CXXDynamicCastExprProc) {
+  const auto type = createNode(node, "clangTypeLoc", w, src);
+  const auto expr = createNode(node, "clangStmt", w, src);
+  return makeTokenNode("dynamic_cast") + makeTokenNode("<") + type
+      + makeTokenNode(">") + wrapWithParen(expr);
 }
 
 DEFINE_STMTHANDLER(CXXNewExprProc) {
@@ -190,6 +234,24 @@ DEFINE_STMTHANDLER(CXXNewExprProc) {
               : CXXCodeGen::makeVoidNode());
 }
 
+DEFINE_STMTHANDLER(CXXNullPtrLiteralExprProc) {
+  return makeTokenNode("nullptr");
+}
+
+DEFINE_STMTHANDLER(CXXReinterpretCastExprProc) {
+  const auto type = createNode(node, "clangTypeLoc", w, src);
+  const auto expr = createNode(node, "clangStmt", w, src);
+  return makeTokenNode("reinterpret_cast") + makeTokenNode("<") + type
+      + makeTokenNode(">") + wrapWithParen(expr);
+}
+
+DEFINE_STMTHANDLER(CXXStaticCastExprProc) {
+  const auto type = createNode(node, "clangTypeLoc", w, src);
+  const auto expr = createNode(node, "clangStmt", w, src);
+  return makeTokenNode("static_cast") + makeTokenNode("<") + type
+      + makeTokenNode(">") + wrapWithParen(expr);
+}
+
 DEFINE_STMTHANDLER(CXXTryStmtProc) {
   const auto body = createNode(node, "clangStmt[1]", w, src);
   const auto catchClauses =
@@ -211,6 +273,11 @@ DEFINE_STMTHANDLER(DeclRefExprProc) {
   }
 
   return name.toString(src.typeTable, src.nnsTable);
+}
+
+DEFINE_STMTHANDLER(DefaultStmtProc) {
+  const auto body = createNode(node, "clangStmt", w, src);
+  return makeTokenNode("default:") + body;
 }
 
 DEFINE_STMTHANDLER(DoStmtProc) {
@@ -281,6 +348,11 @@ DEFINE_STMTHANDLER(ForStmtProc) {
   return wrapWithBrace(init + head + makeCompoundStmt(body));
 }
 
+DEFINE_STMTHANDLER(GotoStmtProc) {
+  const auto label = getProp(node, "label_name");
+  return makeTokenNode("goto") + makeTokenNode(label);
+}
+
 DEFINE_STMTHANDLER(IfStmtProc) {
   const auto cond = createNode(node, "clangStmt[1]", w, src);
   const auto then = createNode(node, "clangStmt[2]", w, src);
@@ -297,6 +369,12 @@ DEFINE_STMTHANDLER(IfStmtProc) {
 DEFINE_STMTHANDLER(InitListExprProc) {
   const auto members = createNodes(node, "clangStmt", w, src);
   return wrapWithBrace(join(",", members));
+}
+
+DEFINE_STMTHANDLER(LabelStmtProc) {
+  const auto label = getProp(node, "label_name");
+  const auto body = createNode(node, "clangStmt[1]", w, src);
+  return makeTokenNode(label) + makeTokenNode(":") + body;
 }
 
 DEFINE_STMTHANDLER(MemberExprProc) {
@@ -361,6 +439,9 @@ const ClangStmtHandlerType ClangStmtHandler("class",
     cxxgen::makeInnerNode,
     callCodeBuilder,
     {
+        std::make_tuple("ArraySubscriptExpr", ArraySubscriptExprProc),
+        std::make_tuple(
+            "BinaryConditionalOperator", BinaryConditionalOperatorProc),
         std::make_tuple("BinaryOperator", BinaryOperatorProc),
         std::make_tuple("BreakStmt", BreakStmtProc),
         std::make_tuple("CallExpr", callExprProc),
@@ -369,23 +450,34 @@ const ClangStmtHandlerType ClangStmtHandler("class",
         std::make_tuple("CharacterLiteral", emitTokenAttrValue),
         std::make_tuple("CompoundAssignOperator", BinaryOperatorProc),
         std::make_tuple("CompoundStmt", CompoundStmtProc),
+        std::make_tuple("ContinueStmt", ContinueStmtProc),
+        std::make_tuple("CStyleCastExpr", CStyleCastExprProc),
+        std::make_tuple("CXXBoolLiteralExpr", CXXBoolLiteralExprProc),
         std::make_tuple("CXXCatchStmt", CXXCatchStmtProc),
+        std::make_tuple("CXXConstCastExpr", CXXConstCastExprProc),
         std::make_tuple("CXXConstructExpr", CXXCtorExprProc),
         std::make_tuple("CXXDeleteExpr", CXXDeleteExprProc),
+        std::make_tuple("CXXDynamicCastExpr", CXXDynamicCastExprProc),
         std::make_tuple("CXXMemberCallExpr", callExprProc),
         std::make_tuple("CXXNewExpr", CXXNewExprProc),
+        std::make_tuple("CXXNullPtrLiteralExpr", CXXNullPtrLiteralExprProc),
         std::make_tuple("CXXOperatorCallExpr", CXXOperatorCallExprProc),
+        std::make_tuple("CXXReinterpretCastExpr", CXXReinterpretCastExprProc),
+        std::make_tuple("CXXStaticCastExpr", CXXStaticCastExprProc),
         std::make_tuple("CXXTemporaryObjectExpr", CXXTemporaryObjectExprProc),
         std::make_tuple("CXXTryStmt", CXXTryStmtProc),
         std::make_tuple("CXXThisExpr", ThisExprProc),
         std::make_tuple("DeclStmt", DeclStmtProc),
         std::make_tuple("DeclRefExpr", DeclRefExprProc),
+        std::make_tuple("DefaultStmt", DefaultStmtProc),
         std::make_tuple("DoStmt", DoStmtProc),
         std::make_tuple("FloatingLiteral", emitTokenAttrValue),
         std::make_tuple("ForStmt", ForStmtProc),
+        std::make_tuple("GotoStmt", GotoStmtProc),
         std::make_tuple("IfStmt", IfStmtProc),
         std::make_tuple("InitListExpr", InitListExprProc),
         std::make_tuple("IntegerLiteral", emitTokenAttrValue),
+        std::make_tuple("LabelStmt", LabelStmtProc),
         std::make_tuple("MemberExpr", MemberExprProc),
         std::make_tuple("ReturnStmt", ReturnStmtProc),
         std::make_tuple("StringLiteral", StringLiteralProc),

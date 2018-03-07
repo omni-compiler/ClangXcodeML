@@ -57,6 +57,7 @@ const std::map<std::string, std::string> opMap = {
     {"AddrOfExpr", "&"},
     {"pointerRef", "*"},
     {"unaryMinusExpr", "-"},
+    {"logNotExpr", "!"},
 };
 
 namespace XcodeMl {

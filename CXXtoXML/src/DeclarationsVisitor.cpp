@@ -107,6 +107,10 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
     newProp("clangCastKind", CE->getCastKindName());
   }
 
+  if (const auto BE = dyn_cast<CXXBoolLiteralExpr>(S)) {
+    newBoolProp("bool_value", BE->getValue());
+  }
+
   if (auto OCE = dyn_cast<clang::CXXOperatorCallExpr>(S)) {
     newProp("xcodeml_operator_kind",
         OverloadedOperatorKindToString(OCE->getOperator(), OCE->getNumArgs()));
@@ -251,6 +255,18 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
       // case UETT_OpenMPRequiredSimdAlign:
       //  NStmt("UnaryExprOrTypeTraitExpr(UETT_OpenMPRequiredSimdAlign");
     }
+  }
+
+  if (const auto LS = dyn_cast<LabelStmt>(S)) {
+    newProp("label_name", LS->getName());
+  }
+
+  if (const auto GS = dyn_cast<GotoStmt>(S)) {
+    const auto LD = GS->getLabel();
+    assert(LD);
+    const auto LS = LD->getStmt();
+    assert(LS);
+    newProp("label_name", LS->getName());
   }
 
   return true;

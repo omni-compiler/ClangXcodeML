@@ -647,7 +647,8 @@ DEFINE_CB(classScopeClangDeclProc) {
 }
 
 DEFINE_CB(clangTypeLocProc) {
-  return ClangTypeLocHandler.walk(node, w, src);
+  const auto T = src.typeTable.at(getType(node));
+  return T->makeDeclaration(CXXCodeGen::makeVoidNode(), src.typeTable);
 }
 
 DEFINE_CB(clangNestedNameSpecProc) {
