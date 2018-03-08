@@ -26,7 +26,7 @@ main() {
   int i = 42;
   print_as_pint(PtrT(&i));
 
-  printf("%d\n", unsigned(-1));
+  printf("%u\n", unsigned(-1));
 
   ClassA obj = ClassA(1, 2);
   obj = ClassA(10, 20);
