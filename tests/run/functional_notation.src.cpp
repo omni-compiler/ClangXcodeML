@@ -2,6 +2,9 @@
 
 class ClassA {
 public:
+  ClassA() {
+    x = 42;
+  }
   ClassA(int i, int j) {
     x = i * j;
   }
@@ -30,5 +33,8 @@ main() {
   printf("%d\n", obj.x);
 
   obj = ClassA(100);
+  printf("%d\n", obj.x);
+
+  obj = ClassA();
   printf("%d\n", obj.x);
 }
