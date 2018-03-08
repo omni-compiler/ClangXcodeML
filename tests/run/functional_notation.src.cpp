@@ -28,7 +28,8 @@ main() {
 
   printf("%d\n", unsigned(-1));
 
-  ClassA obj = ClassA(10, 20);
+  ClassA obj = ClassA(1, 2);
+  obj = ClassA(10, 20);
   printf("%d\n", obj.x);
 
   obj = ClassA(100);
