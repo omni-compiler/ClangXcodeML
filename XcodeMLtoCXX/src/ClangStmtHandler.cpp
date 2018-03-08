@@ -130,7 +130,7 @@ DEFINE_STMTHANDLER(callExprProc) {
     args.push_back(w.walk(argNode, src));
   }
 
-  return func + wrapWithParen(join(",", args));
+  return wrapWithParen(func + wrapWithParen(join(",", args)));
 }
 
 DEFINE_STMTHANDLER(CaseStmtProc) {
