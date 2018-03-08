@@ -11,6 +11,9 @@ public:
   ClassA(int y) {
     x = y;
   }
+  operator char() {
+    return 'A';
+  }
   int x;
 };
 
@@ -29,6 +32,8 @@ main() {
   printf("%u\n", unsigned(-1));
 
   ClassA obj = ClassA(1, 2);
+  printf("%c\n", char(obj));
+
   obj = ClassA(10, 20);
   printf("%d\n", obj.x);
 
