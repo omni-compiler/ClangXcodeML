@@ -24,7 +24,6 @@ print_as_pint(PtrT p) {
 int
 main() {
   int i = 42;
-  ;
   print_as_pint(PtrT(&i));
 
   printf("%d\n", unsigned(-1));
