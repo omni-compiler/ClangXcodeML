@@ -130,7 +130,7 @@ DEFINE_STMTHANDLER(callExprProc) {
     args.push_back(w.walk(argNode, src));
   }
 
-  return func + wrapWithParen(join(",", args));
+  return wrapWithParen(func + wrapWithParen(join(",", args)));
 }
 
 DEFINE_STMTHANDLER(CaseStmtProc) {
@@ -458,6 +458,7 @@ const ClangStmtHandlerType ClangStmtHandler("class",
         std::make_tuple("CXXConstructExpr", CXXCtorExprProc),
         std::make_tuple("CXXDeleteExpr", CXXDeleteExprProc),
         std::make_tuple("CXXDynamicCastExpr", CXXDynamicCastExprProc),
+        std::make_tuple("CXXFunctionalCastExpr", CStyleCastExprProc),
         std::make_tuple("CXXMemberCallExpr", callExprProc),
         std::make_tuple("CXXNewExpr", CXXNewExprProc),
         std::make_tuple("CXXNullPtrLiteralExpr", CXXNullPtrLiteralExprProc),
