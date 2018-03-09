@@ -73,6 +73,26 @@ foldDecls(xmlNodePtr node, const CodeBuilder &w, SourceInfo &src) {
   return insertNewLines(decls);
 }
 
+CodeFragment
+makeMemberInitList(xmlNodePtr node, SourceInfo &src) {
+  const auto initNodes = findNodes(node, "clangConstructorInitializer", src.ctxt);
+  if (initNodes.empty()) {
+    return CXXCodeGen::makeVoidNode();
+  }
+
+  bool first = true;
+  std::vector<CodeFragment> inits;
+  for (auto &&initNode : initNodes) {
+    if (!isTrueProp(initNode, "is_written", 0)) {
+      continue;
+    }
+    inits.push_back(ProgramBuilder.walk(initNode, src));
+    first = false;
+  }
+
+  return makeTokenNode(":") + join(",", inits);
+}
+
 DEFINE_DECLHANDLER(callCodeBuilder) {
   return makeInnerNode(ProgramBuilder.walkChildren(node, src));
 }
@@ -255,19 +275,7 @@ DEFINE_DECLHANDLER(emitInlineMemberFunction) {
   }
   const auto paramNames = getParamNames(node, src);
   acc = acc + makeFunctionDeclHead(node, paramNames, src);
-
-  const auto initNodes = findNodes(node, "clangConstructorInitializer", src.ctxt);
-  if (!initNodes.empty()) {
-    bool first = true;
-    for (auto &&initNode : initNodes) {
-      if (!isTrueProp(initNode, "is_written", 0)) {
-        continue;
-      }
-      const auto init = ProgramBuilder.walk(initNode, src);
-      acc = acc + makeTokenNode(first ? ":" : ",") + init;
-      first = false;
-    }
-  }
+  acc = acc + makeMemberInitList(node, src);
 
   if (const auto bodyNode = findFirst(node, "clangStmt", src.ctxt)) {
     const auto body = ProgramBuilder.walk(bodyNode, src);
@@ -304,19 +312,7 @@ DEFINE_DECLHANDLER(FunctionProc) {
   const auto type = getProp(node, "xcodemlType");
   const auto paramNames = getParamNames(node, src);
   auto acc = makeFunctionDeclHead(node, paramNames, src, true);
-
-  const auto initNodes = findNodes(node, "clangConstructorInitializer", src.ctxt);
-  if (!initNodes.empty()) {
-    bool first = true;
-    for (auto &&initNode : initNodes) {
-      if (!isTrueProp(initNode, "is_written", 0)) {
-        continue;
-      }
-      const auto init = ProgramBuilder.walk(initNode, src);
-      acc = acc + makeTokenNode(first ? ":" : ",") + init;
-      first = false;
-    }
-  }
+  acc = acc + makeMemberInitList(node, src);
 
   if (const auto bodyNode = findFirst(node, "clangStmt", src.ctxt)) {
     const auto body = w.walk(bodyNode, src);
