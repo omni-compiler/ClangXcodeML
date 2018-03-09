@@ -84,9 +84,6 @@ makeMemberInitList(xmlNodePtr node, SourceInfo &src) {
   bool first = true;
   std::vector<CodeFragment> inits;
   for (auto &&initNode : initNodes) {
-    if (!isTrueProp(initNode, "is_written", 0)) {
-      continue;
-    }
     inits.push_back(ProgramBuilder.walk(initNode, src));
     first = false;
   }
