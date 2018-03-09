@@ -75,7 +75,8 @@ foldDecls(xmlNodePtr node, const CodeBuilder &w, SourceInfo &src) {
 
 CodeFragment
 makeMemberInitList(xmlNodePtr node, SourceInfo &src) {
-  const auto initNodes = findNodes(node, "clangConstructorInitializer", src.ctxt);
+  const auto initNodes =
+      findNodes(node, "clangConstructorInitializer", src.ctxt);
   if (initNodes.empty()) {
     return CXXCodeGen::makeVoidNode();
   }
@@ -182,8 +183,7 @@ emitClassDefinition(xmlNodePtr node,
       : classType.name().getValue();
 
   return classKey + name + makeBases(classType, src)
-      + wrapWithBrace(insertNewLines(decls))
-      + CXXCodeGen::makeNewLineNode();
+      + wrapWithBrace(insertNewLines(decls)) + CXXCodeGen::makeNewLineNode();
 }
 
 DEFINE_DECLHANDLER(ClassTemplatePartialSpecializationProc) {
