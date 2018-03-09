@@ -587,7 +587,7 @@ getCtorInitName(xmlNodePtr node, const XcodeMl::Environment &env) {
   if (dataMember.hasValue()) {
     return makeTokenNode(*dataMember);
   }
-  const auto base = getPropOrNull(node, "type");
+  const auto base = getType(node);
   if (base.hasValue()) {
     const auto T = env[*base];
     const auto classT = llvm::cast<XcodeMl::ClassType>(T.get());
