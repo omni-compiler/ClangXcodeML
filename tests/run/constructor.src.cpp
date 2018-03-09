@@ -24,6 +24,12 @@ public:
   int bnum;
 };
 
+class ClassC : public ClassA {
+public:
+  ClassC() {
+  }
+};
+
 int
 main() {
   ClassA a1(10, 20);
@@ -34,4 +40,6 @@ main() {
   printf("%d\n", b1.bnum);
   ClassB b2(100);
   printf("%d\n", b2.bnum);
+  ClassC c1 = ClassC();
+  printf("%d\n", c1.num);
 }
