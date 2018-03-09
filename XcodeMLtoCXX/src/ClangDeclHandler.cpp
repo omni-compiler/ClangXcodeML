@@ -256,9 +256,14 @@ DEFINE_DECLHANDLER(emitInlineMemberFunction) {
   const auto paramNames = getParamNames(node, src);
   acc = acc + makeFunctionDeclHead(node, paramNames, src);
 
-  if (const auto ctorInitList =
-          findFirst(node, "constructorInitializerList", src.ctxt)) {
-    acc = acc + ProgramBuilder.walk(ctorInitList, src);
+  const auto initNodes = findNodes(node, "clangConstructorInitializer", src.ctxt);
+  if (!initNodes.empty()) {
+    bool first = true;
+    for (auto &&initNode : initNodes) {
+      const auto init = ProgramBuilder.walk(initNode, src);
+      acc = acc + makeTokenNode(first ? ":" : ",") + init;
+      first = false;
+    }
   }
 
   if (const auto bodyNode = findFirst(node, "clangStmt", src.ctxt)) {
