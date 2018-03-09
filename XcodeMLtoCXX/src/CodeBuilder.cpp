@@ -581,21 +581,6 @@ DEFINE_CB(emitDataMemberDecl) {
   return wrapWithLangLink(acc, node, src);
 }
 
-DEFINE_CB(ctorInitListProc) {
-  auto inits = findNodes(node, "constructorInitializer", src.ctxt);
-  if (inits.empty()) {
-    return makeVoidNode();
-  }
-  auto decl = makeVoidNode();
-  bool alreadyPrinted = false;
-  for (auto init : inits) {
-    decl =
-        decl + makeTokenNode(alreadyPrinted ? "," : ":") + w.walk(init, src);
-    alreadyPrinted = true;
-  }
-  return decl;
-}
-
 XcodeMl::CodeFragment
 getCtorInitName(xmlNodePtr node, const XcodeMl::Environment &env) {
   const auto dataMember = getPropOrNull(node, "member");
@@ -738,7 +723,6 @@ const CodeBuilder ProgramBuilder("ProgramBuilder",
         std::make_tuple("value", valueProc),
 
         /* out of specification */
-        std::make_tuple("constructorInitializerList", ctorInitListProc),
         std::make_tuple(
             "xcodemlAccessToAnonRecordExpr", accessToAnonRecordExprProc),
 
