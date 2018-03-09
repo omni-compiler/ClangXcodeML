@@ -260,6 +260,9 @@ DEFINE_DECLHANDLER(emitInlineMemberFunction) {
   if (!initNodes.empty()) {
     bool first = true;
     for (auto &&initNode : initNodes) {
+      if (!isTrueProp(initNode, "is_written", 0)) {
+        continue;
+      }
       const auto init = ProgramBuilder.walk(initNode, src);
       acc = acc + makeTokenNode(first ? ":" : ",") + init;
       first = false;
@@ -306,6 +309,9 @@ DEFINE_DECLHANDLER(FunctionProc) {
   if (!initNodes.empty()) {
     bool first = true;
     for (auto &&initNode : initNodes) {
+      if (!isTrueProp(initNode, "is_written", 0)) {
+        continue;
+      }
       const auto init = ProgramBuilder.walk(initNode, src);
       acc = acc + makeTokenNode(first ? ":" : ",") + init;
       first = false;
