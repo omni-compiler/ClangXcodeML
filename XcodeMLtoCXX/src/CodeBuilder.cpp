@@ -738,7 +738,6 @@ const CodeBuilder ProgramBuilder("ProgramBuilder",
         std::make_tuple("value", valueProc),
 
         /* out of specification */
-        std::make_tuple("constructorInitializer", ctorInitProc),
         std::make_tuple("constructorInitializerList", ctorInitListProc),
         std::make_tuple(
             "xcodemlAccessToAnonRecordExpr", accessToAnonRecordExprProc),
@@ -748,6 +747,7 @@ const CodeBuilder ProgramBuilder("ProgramBuilder",
         std::make_tuple("clangDecl", clangDeclProc),
         std::make_tuple("clangTypeLoc", clangTypeLocProc),
         std::make_tuple("clangNestedNameSpecifier", clangNestedNameSpecProc),
+        std::make_tuple("clangConstructorInitializer", ctorInitProc),
 
         /* for CtoXcodeML */
         std::make_tuple("Decl_Record", NullProc),
