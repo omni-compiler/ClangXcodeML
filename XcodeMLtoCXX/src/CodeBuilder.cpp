@@ -598,7 +598,9 @@ getCtorInitName(xmlNodePtr node, const XcodeMl::Environment &env) {
 DEFINE_CB(ctorInitProc) {
   const auto member = getCtorInitName(node, src.typeTable);
   const auto expr = findFirst(node, "clangStmt[1]", src.ctxt);
-  assert(expr);
+  if (!expr) {
+    return member + wrapWithParen(makeVoidNode());
+  }
   const auto astClass = getPropOrNull(expr, "class");
   if (astClass.hasValue() && (*astClass == "CXXConstructExpr")) {
     return member + w.walk(expr, src);
