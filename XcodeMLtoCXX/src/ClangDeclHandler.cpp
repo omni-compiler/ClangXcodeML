@@ -410,6 +410,15 @@ DEFINE_DECLHANDLER(TypedefProc) {
   return makeTokenNode("typedef") + makeDecl(T, typedefName, src.typeTable);
 }
 
+DEFINE_DECLHANDLER(UsingProc) {
+  const auto name =
+      getQualifiedName(node, src).toString(src.typeTable, src.nnsTable);
+  if (isTrueProp(node, "is_access_declaration", false)) {
+    return name;
+  }
+  return makeTokenNode("using") + name;
+}
+
 CodeFragment
 makeSpecifier(xmlNodePtr node) {
   const std::vector<std::tuple<std::string, std::string>> specifiers = {
@@ -465,6 +474,7 @@ const ClangDeclHandlerType ClangDeclHandlerInClass("class",
         std::make_tuple("CXXRecord", CXXRecordProc),
         std::make_tuple("Field", FieldDeclProc),
         std::make_tuple("Friend", FriendDeclProc),
+        std::make_tuple("Using", UsingProc),
         std::make_tuple("Var", VarProc),
     });
 
