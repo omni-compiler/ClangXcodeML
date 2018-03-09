@@ -302,9 +302,14 @@ DEFINE_DECLHANDLER(FunctionProc) {
   const auto paramNames = getParamNames(node, src);
   auto acc = makeFunctionDeclHead(node, paramNames, src, true);
 
-  if (const auto ctorInitList =
-          findFirst(node, "constructorInitializerList", src.ctxt)) {
-    acc = acc + w.walk(ctorInitList, src);
+  const auto initNodes = findNodes(node, "clangConstructorInitializer", src.ctxt);
+  if (!initNodes.empty()) {
+    bool first = true;
+    for (auto &&initNode : initNodes) {
+      const auto init = ProgramBuilder.walk(initNode, src);
+      acc = acc + makeTokenNode(first ? ":" : ",") + init;
+      first = false;
+    }
   }
 
   if (const auto bodyNode = findFirst(node, "clangStmt", src.ctxt)) {
