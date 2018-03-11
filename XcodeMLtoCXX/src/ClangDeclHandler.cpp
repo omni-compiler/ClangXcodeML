@@ -73,6 +73,24 @@ foldDecls(xmlNodePtr node, const CodeBuilder &w, SourceInfo &src) {
   return insertNewLines(decls);
 }
 
+CodeFragment
+makeMemberInitList(xmlNodePtr node, SourceInfo &src) {
+  const auto initNodes =
+      findNodes(node, "clangConstructorInitializer", src.ctxt);
+  if (initNodes.empty()) {
+    return CXXCodeGen::makeVoidNode();
+  }
+
+  bool first = true;
+  std::vector<CodeFragment> inits;
+  for (auto &&initNode : initNodes) {
+    inits.push_back(ProgramBuilder.walk(initNode, src));
+    first = false;
+  }
+
+  return makeTokenNode(":") + join(",", inits);
+}
+
 DEFINE_DECLHANDLER(callCodeBuilder) {
   return makeInnerNode(ProgramBuilder.walkChildren(node, src));
 }
@@ -162,8 +180,7 @@ emitClassDefinition(xmlNodePtr node,
       : classType.name().getValue();
 
   return classKey + name + makeBases(classType, src)
-      + wrapWithBrace(insertNewLines(decls))
-      + CXXCodeGen::makeNewLineNode();
+      + wrapWithBrace(insertNewLines(decls)) + CXXCodeGen::makeNewLineNode();
 }
 
 DEFINE_DECLHANDLER(ClassTemplatePartialSpecializationProc) {
@@ -255,11 +272,7 @@ DEFINE_DECLHANDLER(emitInlineMemberFunction) {
   }
   const auto paramNames = getParamNames(node, src);
   acc = acc + makeFunctionDeclHead(node, paramNames, src);
-
-  if (const auto ctorInitList =
-          findFirst(node, "constructorInitializerList", src.ctxt)) {
-    acc = acc + ProgramBuilder.walk(ctorInitList, src);
-  }
+  acc = acc + makeMemberInitList(node, src);
 
   if (const auto bodyNode = findFirst(node, "clangStmt", src.ctxt)) {
     const auto body = ProgramBuilder.walk(bodyNode, src);
@@ -296,11 +309,7 @@ DEFINE_DECLHANDLER(FunctionProc) {
   const auto type = getProp(node, "xcodemlType");
   const auto paramNames = getParamNames(node, src);
   auto acc = makeFunctionDeclHead(node, paramNames, src, true);
-
-  if (const auto ctorInitList =
-          findFirst(node, "constructorInitializerList", src.ctxt)) {
-    acc = acc + w.walk(ctorInitList, src);
-  }
+  acc = acc + makeMemberInitList(node, src);
 
   if (const auto bodyNode = findFirst(node, "clangStmt", src.ctxt)) {
     const auto body = w.walk(bodyNode, src);
