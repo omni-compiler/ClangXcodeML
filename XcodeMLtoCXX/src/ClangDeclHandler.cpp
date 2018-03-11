@@ -499,6 +499,8 @@ const ClangDeclHandlerType ClangDeclHandlerInClass("class",
         std::make_tuple("Field", FieldDeclProc),
         std::make_tuple("Friend", FriendDeclProc),
         std::make_tuple("Using", UsingProc),
+        std::make_tuple("TypeAlias", TypeAliasProc),
+        std::make_tuple("Typedef", TypedefProc),
         std::make_tuple("Var", VarProc),
     });
 
