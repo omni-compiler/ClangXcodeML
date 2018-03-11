@@ -405,6 +405,15 @@ DEFINE_DECLHANDLER(TranslationUnitProc) {
   return foldDecls(node, w, src);
 }
 
+DEFINE_DECLHANDLER(TypeAliasProc) {
+  const auto dtident = getProp(node, "xcodemlTypedefType");
+  const auto T = src.typeTable.at(dtident);
+  const auto name = getUnqualIdFromIdNode(node, src.ctxt);
+  const auto nameSpelling = name->toString(src.typeTable);
+  return makeTokenNode("using") + nameSpelling + makeTokenNode("=")
+      + makeDecl(T, CXXCodeGen::makeVoidNode(), src.typeTable);
+}
+
 DEFINE_DECLHANDLER(TypedefProc) {
   if (isTrueProp(node, "is_implicit", 0)) {
     return CXXCodeGen::makeVoidNode();
@@ -509,6 +518,7 @@ const ClangDeclHandlerType ClangDeclHandler("class",
         std::make_tuple("Record", RecordProc),
         std::make_tuple("TemplateTypeParm", TemplateTypeParmProc),
         std::make_tuple("TranslationUnit", TranslationUnitProc),
+        std::make_tuple("TypeAlias", TypeAliasProc),
         std::make_tuple("Typedef", TypedefProc),
         std::make_tuple("Var", VarProc),
     });
