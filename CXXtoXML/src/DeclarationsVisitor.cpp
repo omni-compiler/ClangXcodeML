@@ -420,6 +420,11 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
       newBoolProp("is_first_declared", ND->isOriginalNamespace());
     }
   }
+  if (const auto UDD = dyn_cast<UsingDirectiveDecl>(D)) {
+    const auto ND = UDD->getNominatedNamespaceAsWritten();
+    const auto nameNode = makeNameNode(*typetableinfo, ND);
+    xmlAddChild(curNode, nameNode);
+  }
   if (auto FD = dyn_cast<FunctionDecl>(D)) {
     const auto ll = FD->getLanguageLinkage();
     if (ll != NoLanguageLinkage) {
