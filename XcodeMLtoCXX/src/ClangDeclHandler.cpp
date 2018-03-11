@@ -437,6 +437,12 @@ DEFINE_DECLHANDLER(UsingProc) {
   return makeTokenNode("using") + name;
 }
 
+DEFINE_DECLHANDLER(UsingDirectiveProc) {
+  const auto name =
+      getQualifiedName(node, src).toString(src.typeTable, src.nnsTable);
+  return makeTokenNode("using") + makeTokenNode("namespace") + name;
+}
+
 CodeFragment
 makeSpecifier(xmlNodePtr node) {
   const std::vector<std::tuple<std::string, std::string>> specifiers = {
@@ -520,5 +526,6 @@ const ClangDeclHandlerType ClangDeclHandler("class",
         std::make_tuple("TranslationUnit", TranslationUnitProc),
         std::make_tuple("TypeAlias", TypeAliasProc),
         std::make_tuple("Typedef", TypedefProc),
+        std::make_tuple("UsingDirective", UsingDirectiveProc),
         std::make_tuple("Var", VarProc),
     });
