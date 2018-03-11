@@ -363,7 +363,7 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
   }
 
   NamedDecl *ND = dyn_cast<NamedDecl>(D);
-  if (ND) {
+  if (ND && !isa<UsingDirectiveDecl>(ND)) {
     auto nameNode = makeNameNode(*typetableinfo, ND);
 
     /* experimental */
