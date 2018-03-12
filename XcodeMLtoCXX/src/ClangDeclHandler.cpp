@@ -405,6 +405,15 @@ DEFINE_DECLHANDLER(TranslationUnitProc) {
   return foldDecls(node, w, src);
 }
 
+DEFINE_DECLHANDLER(TypeAliasProc) {
+  const auto dtident = getProp(node, "xcodemlTypedefType");
+  const auto T = src.typeTable.at(dtident);
+  const auto name = getUnqualIdFromIdNode(node, src.ctxt);
+  const auto nameSpelling = name->toString(src.typeTable);
+  return makeTokenNode("using") + nameSpelling + makeTokenNode("=")
+      + makeDecl(T, CXXCodeGen::makeVoidNode(), src.typeTable);
+}
+
 DEFINE_DECLHANDLER(TypedefProc) {
   if (isTrueProp(node, "is_implicit", 0)) {
     return CXXCodeGen::makeVoidNode();
@@ -417,6 +426,21 @@ DEFINE_DECLHANDLER(TypedefProc) {
       getUnqualIdFromNameNode(nameNode)->toString(src.typeTable);
 
   return makeTokenNode("typedef") + makeDecl(T, typedefName, src.typeTable);
+}
+
+DEFINE_DECLHANDLER(UsingProc) {
+  const auto name =
+      getQualifiedName(node, src).toString(src.typeTable, src.nnsTable);
+  if (isTrueProp(node, "is_access_declaration", false)) {
+    return name;
+  }
+  return makeTokenNode("using") + name;
+}
+
+DEFINE_DECLHANDLER(UsingDirectiveProc) {
+  const auto name =
+      getQualifiedName(node, src).toString(src.typeTable, src.nnsTable);
+  return makeTokenNode("using") + makeTokenNode("namespace") + name;
 }
 
 CodeFragment
@@ -474,6 +498,9 @@ const ClangDeclHandlerType ClangDeclHandlerInClass("class",
         std::make_tuple("CXXRecord", CXXRecordProc),
         std::make_tuple("Field", FieldDeclProc),
         std::make_tuple("Friend", FriendDeclProc),
+        std::make_tuple("Using", UsingProc),
+        std::make_tuple("TypeAlias", TypeAliasProc),
+        std::make_tuple("Typedef", TypedefProc),
         std::make_tuple("Var", VarProc),
     });
 
@@ -499,6 +526,8 @@ const ClangDeclHandlerType ClangDeclHandler("class",
         std::make_tuple("Record", RecordProc),
         std::make_tuple("TemplateTypeParm", TemplateTypeParmProc),
         std::make_tuple("TranslationUnit", TranslationUnitProc),
+        std::make_tuple("TypeAlias", TypeAliasProc),
         std::make_tuple("Typedef", TypedefProc),
+        std::make_tuple("UsingDirective", UsingDirectiveProc),
         std::make_tuple("Var", VarProc),
     });

@@ -363,7 +363,7 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
   }
 
   NamedDecl *ND = dyn_cast<NamedDecl>(D);
-  if (ND) {
+  if (ND && !isa<UsingDirectiveDecl>(ND)) {
     auto nameNode = makeNameNode(*typetableinfo, ND);
 
     /* experimental */
@@ -419,6 +419,11 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
     if (!ND->isAnonymousNamespace()) {
       newBoolProp("is_first_declared", ND->isOriginalNamespace());
     }
+  }
+  if (const auto UDD = dyn_cast<UsingDirectiveDecl>(D)) {
+    const auto ND = UDD->getNominatedNamespaceAsWritten();
+    const auto nameNode = makeNameNode(*typetableinfo, ND);
+    xmlAddChild(curNode, nameNode);
   }
   if (auto FD = dyn_cast<FunctionDecl>(D)) {
     const auto ll = FD->getLanguageLinkage();

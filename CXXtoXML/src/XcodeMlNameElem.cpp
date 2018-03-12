@@ -24,6 +24,7 @@ getNameKind(const NamedDecl *ND) {
   case NK::CXXConversionFunctionName: return "conversion";
   case NK::CXXConstructorName: return "constructor";
   case NK::CXXDestructorName: return "destructor";
+  case NK::CXXUsingDirective: return "using_directive";
   default: assert(false && "not supported");
   }
 }
