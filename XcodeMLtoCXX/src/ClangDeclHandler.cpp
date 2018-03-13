@@ -382,14 +382,10 @@ DEFINE_DECLHANDLER(RecordProc) {
 }
 
 DEFINE_DECLHANDLER(TemplateTypeParmProc) {
-  const auto name = getQualifiedName(node, src);
-  const auto nameSpelling = name.toString(src.typeTable, src.nnsTable);
-
   const auto dtident = getType(node);
   auto T = src.typeTable.at(dtident);
   auto TTPT = llvm::cast<XcodeMl::TemplateTypeParm>(T.get());
-  assert(TTPT);
-  TTPT->setSpelling(nameSpelling);
+  const auto nameSpelling = TTPT->getSpelling().getValue();
 
   return makeTokenNode("typename") + nameSpelling;
 }
