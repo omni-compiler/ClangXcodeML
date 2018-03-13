@@ -733,7 +733,7 @@ ClassType::ClassType(const ClassType &other)
 }
 
 TemplateTypeParm::TemplateTypeParm(DataTypeIdent dtident)
-    : Type(TypeKind::TemplateTypeParm, dtident) {
+    : Type(TypeKind::TemplateTypeParm, dtident), pSpelling() {
 }
 
 TemplateTypeParm::TemplateTypeParm(
