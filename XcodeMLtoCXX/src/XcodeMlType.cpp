@@ -736,6 +736,11 @@ TemplateTypeParm::TemplateTypeParm(DataTypeIdent dtident)
     : Type(TypeKind::TemplateTypeParm, dtident) {
 }
 
+TemplateTypeParm::TemplateTypeParm(
+    const DataTypeIdent &dtident, const CodeFragment &name)
+    : Type(TypeKind::TemplateTypeParm, dtident), pSpelling(name) {
+}
+
 CodeFragment
 TemplateTypeParm::makeDeclaration(CodeFragment var, const Environment &) {
   assert(pSpelling.hasValue());
