@@ -603,6 +603,8 @@ TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
       xmlNewProp(Node,
           BAD_CAST "clang_index",
           BAD_CAST std::to_string(TTP->getIndex()).c_str());
+      const auto nameNode = makeNameNode(*this, TTP);
+      xmlAddChild(Node, nameNode);
       pushType(T, Node);
       break;
     }
