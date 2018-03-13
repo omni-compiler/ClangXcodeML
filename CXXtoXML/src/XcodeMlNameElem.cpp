@@ -156,6 +156,18 @@ makeNameNode(TypeTableInfo &TTI, const DeclRefExpr *DRE) {
 }
 
 xmlNodePtr
+makeNameNode(TypeTableInfo &, const TemplateTypeParmType *TTP) {
+  assert(TTP);
+  const auto nameNode = xmlNewNode(nullptr, BAD_CAST "name");
+  const auto depth = TTP->getDepth();
+  const auto index = TTP->getIndex();
+  const auto name = "__xcodeml_template_type_" + std::to_string(depth) + "_"
+      + std::to_string(index);
+  xmlNodeAddContent(nameNode, BAD_CAST name.c_str());
+  return nameNode;
+}
+
+xmlNodePtr
 makeIdNodeForCXXMethodDecl(TypeTableInfo &TTI, const CXXMethodDecl *method) {
   auto idNode = xmlNewNode(nullptr, BAD_CAST "id");
   xmlNewProp(idNode,
