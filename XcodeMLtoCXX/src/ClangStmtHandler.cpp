@@ -252,6 +252,11 @@ DEFINE_STMTHANDLER(CXXStaticCastExprProc) {
       + makeTokenNode(">") + wrapWithParen(expr);
 }
 
+DEFINE_STMTHANDLER(CXXThrowExprProc) {
+  const auto expr = createNode(node, "clangStmt[1]", w, src);
+  return makeTokenNode("throw") + expr;
+}
+
 DEFINE_STMTHANDLER(CXXTryStmtProc) {
   const auto body = createNode(node, "clangStmt[1]", w, src);
   const auto catchClauses =
@@ -466,6 +471,7 @@ const ClangStmtHandlerType ClangStmtHandler("class",
         std::make_tuple("CXXReinterpretCastExpr", CXXReinterpretCastExprProc),
         std::make_tuple("CXXStaticCastExpr", CXXStaticCastExprProc),
         std::make_tuple("CXXTemporaryObjectExpr", CXXTemporaryObjectExprProc),
+        std::make_tuple("CXXThrowExpr", CXXThrowExprProc),
         std::make_tuple("CXXTryStmt", CXXTryStmtProc),
         std::make_tuple("CXXThisExpr", ThisExprProc),
         std::make_tuple("DeclStmt", DeclStmtProc),
