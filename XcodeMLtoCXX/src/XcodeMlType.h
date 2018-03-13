@@ -504,6 +504,7 @@ TypeRef makeFunctionType(const DataTypeIdent &ident,
 TypeRef makeStructType(
     const DataTypeIdent &, const CodeFragment &, const Struct::MemberList &);
 TypeRef makeTemplateTypeParm(const DataTypeIdent &);
+TypeRef makeTemplateTypeParm(const DataTypeIdent &, const CodeFragment &);
 TypeRef makeVariadicFunctionType(const DataTypeIdent &ident,
     const DataTypeIdent &returnType,
     const std::vector<DataTypeIdent> &paramTypes);

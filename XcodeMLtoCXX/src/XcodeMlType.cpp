@@ -958,6 +958,11 @@ makeTemplateTypeParm(const DataTypeIdent &dtident) {
 }
 
 TypeRef
+makeTemplateTypeParm(const DataTypeIdent &dtident, const CodeFragment &name) {
+  return std::make_shared<TemplateTypeParm>(dtident, name);
+}
+
+TypeRef
 makeOtherType(const DataTypeIdent &ident) {
   return std::make_shared<OtherType>(ident);
 }
