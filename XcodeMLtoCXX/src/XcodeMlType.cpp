@@ -767,6 +767,15 @@ TemplateTypeParm::setSpelling(CodeFragment T) {
   pSpelling = T;
 }
 
+llvm::Optional<CodeFragment>
+TemplateTypeParm::getSpelling() const {
+  using MaybeName = llvm::Optional<CodeFragment>;
+  if (!pSpelling) {
+    return MaybeName();
+  }
+  return pSpelling;
+}
+
 OtherType::OtherType(const DataTypeIdent &ident)
     : Type(TypeKind::Other, ident) {
 }

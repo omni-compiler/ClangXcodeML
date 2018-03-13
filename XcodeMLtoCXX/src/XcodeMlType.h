@@ -442,6 +442,7 @@ public:
   Type *clone() const override;
   static bool classof(const Type *);
   void setSpelling(CodeFragment);
+  llvm::Optional<CodeFragment> getSpelling() const;
 
 protected:
   TemplateTypeParm(const TemplateTypeParm &);
