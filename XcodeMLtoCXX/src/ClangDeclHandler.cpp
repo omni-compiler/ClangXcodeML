@@ -487,6 +487,7 @@ const ClangDeclHandlerType ClangDeclHandlerInClass("class",
     CXXCodeGen::makeInnerNode,
     callCodeBuilder,
     {
+        std::make_tuple("ClassTemplate", ClassTemplateProc),
         std::make_tuple("CXXMethod", emitInlineMemberFunction),
         std::make_tuple("CXXConstructor", emitInlineMemberFunction),
         std::make_tuple("CXXConversion", emitInlineMemberFunction),
