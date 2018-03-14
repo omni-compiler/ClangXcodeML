@@ -159,6 +159,14 @@ emitClassDefinition(xmlNodePtr node,
     if (isTrueProp(memberNode, "is_implicit", false)) {
       continue;
     }
+    const auto kind = getProp(memberNode, "class");
+    if (std::equal(kind.begin(), kind.end(), "TemplateTypeParm")
+        || std::equal(
+               kind.begin(), kind.end(), "NonTypeTemplateTypeParm")
+        || std::equal(
+               kind.begin(), kind.end(), "TemplateTemplateTypeParm")) {
+      continue;
+    }
     /* Traverse `memberNode` regardless of whether `CodeBuilder` prints it. */
     const auto decl = w.walk(memberNode, src)
         + (requiresSemicolon(memberNode, src) ? makeTokenNode(";")
