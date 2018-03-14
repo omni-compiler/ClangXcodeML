@@ -168,10 +168,8 @@ emitClassDefinition(xmlNodePtr node,
   const auto memberNodes = findNodes(node, "clangDecl", src.ctxt);
   std::vector<XcodeMl::CodeFragment> decls;
   for (auto &&memberNode : memberNodes) {
-    if (isTrueProp(memberNode, "is_implicit", false)) {
-      continue;
-    }
-    if (isTemplateParam(memberNode)) {
+    if (isTrueProp(memberNode, "is_implicit", false)
+        || isTemplateParam(memberNode)) {
       continue;
     }
     /* Traverse `memberNode` regardless of whether `CodeBuilder` prints it. */
