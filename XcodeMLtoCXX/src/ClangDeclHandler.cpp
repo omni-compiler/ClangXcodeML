@@ -144,6 +144,14 @@ makeBases(const XcodeMl::ClassType &T, SourceInfo &src) {
                        : makeTokenNode(":") + CXXCodeGen::join(",", decls);
 }
 
+bool
+isTemplateParam(xmlNodePtr node) {
+  const auto kind = getProp(node, "class");
+  return std::equal(kind.begin(), kind.end(), "TemplateTypeParm")
+      || std::equal(kind.begin(), kind.end(), "NonTypeTemplateTypeParm")
+      || std::equal(kind.begin(), kind.end(), "TemplateTemplateTypeParm");
+}
+
 CodeFragment
 emitClassDefinition(xmlNodePtr node,
     const CodeBuilder &w,
@@ -159,12 +167,7 @@ emitClassDefinition(xmlNodePtr node,
     if (isTrueProp(memberNode, "is_implicit", false)) {
       continue;
     }
-    const auto kind = getProp(memberNode, "class");
-    if (std::equal(kind.begin(), kind.end(), "TemplateTypeParm")
-        || std::equal(
-               kind.begin(), kind.end(), "NonTypeTemplateTypeParm")
-        || std::equal(
-               kind.begin(), kind.end(), "TemplateTemplateTypeParm")) {
+    if (isTemplateParam(memberNode)) {
       continue;
     }
     /* Traverse `memberNode` regardless of whether `CodeBuilder` prints it. */
