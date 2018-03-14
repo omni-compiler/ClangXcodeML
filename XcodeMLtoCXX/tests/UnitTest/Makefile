@@ -8,6 +8,7 @@ LLVM_CONFIG = /usr/local/bin/llvm-config
 CXX = /usr/local/bin/clang++
 CXXFLAGS = -O2 -std=c++11 \
 	$(PKG_CFLAGS) \
+	-I $(shell $(LLVM_CONFIG) --includedir) \
 	-I$(XCODEMLTOCXXSRCDIR) \
 	-D__STDC_LIMIT_MACROS -D__STDC_CONSTANT_MACROS $(PCHFLAGS)
 
