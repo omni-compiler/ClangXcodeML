@@ -732,8 +732,9 @@ ClassType::ClassType(const ClassType &other)
       classScopeSymbols(other.classScopeSymbols) {
 }
 
-TemplateTypeParm::TemplateTypeParm(DataTypeIdent dtident)
-    : Type(TypeKind::TemplateTypeParm, dtident) {
+TemplateTypeParm::TemplateTypeParm(
+    const DataTypeIdent &dtident, const CodeFragment &name)
+    : Type(TypeKind::TemplateTypeParm, dtident), pSpelling(name) {
 }
 
 CodeFragment
@@ -760,6 +761,15 @@ TemplateTypeParm::classof(const Type *T) {
 void
 TemplateTypeParm::setSpelling(CodeFragment T) {
   pSpelling = T;
+}
+
+llvm::Optional<CodeFragment>
+TemplateTypeParm::getSpelling() const {
+  using MaybeName = llvm::Optional<CodeFragment>;
+  if (!pSpelling) {
+    return MaybeName();
+  }
+  return pSpelling;
 }
 
 OtherType::OtherType(const DataTypeIdent &ident)
@@ -939,8 +949,8 @@ makeCXXUnionType(const DataTypeIdent &ident,
 }
 
 TypeRef
-makeTemplateTypeParm(const DataTypeIdent &dtident) {
-  return std::make_shared<TemplateTypeParm>(dtident);
+makeTemplateTypeParm(const DataTypeIdent &dtident, const CodeFragment &name) {
+  return std::make_shared<TemplateTypeParm>(dtident, name);
 }
 
 TypeRef

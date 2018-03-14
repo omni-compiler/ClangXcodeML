@@ -435,12 +435,13 @@ private:
 
 class TemplateTypeParm : public Type {
 public:
-  TemplateTypeParm(DataTypeIdent);
+  TemplateTypeParm(const DataTypeIdent &dtident, const CodeFragment &name);
   ~TemplateTypeParm() override = default;
   CodeFragment makeDeclaration(CodeFragment, const Environment &) override;
   Type *clone() const override;
   static bool classof(const Type *);
   void setSpelling(CodeFragment);
+  llvm::Optional<CodeFragment> getSpelling() const;
 
 protected:
   TemplateTypeParm(const TemplateTypeParm &);
@@ -501,7 +502,7 @@ TypeRef makeFunctionType(const DataTypeIdent &ident,
     const std::vector<DataTypeIdent> &paramTypes);
 TypeRef makeStructType(
     const DataTypeIdent &, const CodeFragment &, const Struct::MemberList &);
-TypeRef makeTemplateTypeParm(const DataTypeIdent &);
+TypeRef makeTemplateTypeParm(const DataTypeIdent &, const CodeFragment &);
 TypeRef makeVariadicFunctionType(const DataTypeIdent &ident,
     const DataTypeIdent &returnType,
     const std::vector<DataTypeIdent> &paramTypes);

@@ -198,7 +198,8 @@ DEFINE_TA(enumTypeProc) {
 
 DEFINE_TA(TemplateTypeParmTypeProc) {
   const auto dtident = getProp(node, "type");
-  map[dtident] = XcodeMl::makeTemplateTypeParm(dtident);
+  const auto name = getContent(findFirst(node, "name", ctxt));
+  map[dtident] = XcodeMl::makeTemplateTypeParm(dtident, makeTokenNode(name));
 }
 
 const std::vector<std::string> identicalFndDataTypeIdents = {
