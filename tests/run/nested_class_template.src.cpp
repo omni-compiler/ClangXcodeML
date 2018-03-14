@@ -22,6 +22,6 @@ public:
 
 int
 main() {
-  // ClassA<int>::ClassB<char> obj;
-  // obj.func_b(1);
+  ClassA<int>::ClassB<char> obj;
+  obj.func_b(1);
 }
