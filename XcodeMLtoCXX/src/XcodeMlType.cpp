@@ -732,10 +732,6 @@ ClassType::ClassType(const ClassType &other)
       classScopeSymbols(other.classScopeSymbols) {
 }
 
-TemplateTypeParm::TemplateTypeParm(DataTypeIdent dtident)
-    : Type(TypeKind::TemplateTypeParm, dtident), pSpelling() {
-}
-
 TemplateTypeParm::TemplateTypeParm(
     const DataTypeIdent &dtident, const CodeFragment &name)
     : Type(TypeKind::TemplateTypeParm, dtident), pSpelling(name) {

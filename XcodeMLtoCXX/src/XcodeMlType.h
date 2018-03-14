@@ -435,7 +435,6 @@ private:
 
 class TemplateTypeParm : public Type {
 public:
-  TemplateTypeParm(DataTypeIdent);
   TemplateTypeParm(const DataTypeIdent &dtident, const CodeFragment &name);
   ~TemplateTypeParm() override = default;
   CodeFragment makeDeclaration(CodeFragment, const Environment &) override;
