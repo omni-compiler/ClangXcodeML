@@ -953,11 +953,6 @@ makeCXXUnionType(const DataTypeIdent &ident,
 }
 
 TypeRef
-makeTemplateTypeParm(const DataTypeIdent &dtident) {
-  return std::make_shared<TemplateTypeParm>(dtident);
-}
-
-TypeRef
 makeTemplateTypeParm(const DataTypeIdent &dtident, const CodeFragment &name) {
   return std::make_shared<TemplateTypeParm>(dtident, name);
 }
