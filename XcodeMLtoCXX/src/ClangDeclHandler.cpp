@@ -152,8 +152,8 @@ isTemplateParam(xmlNodePtr node) {
   }
   const auto kind = getProp(node, "class");
   return std::equal(kind.begin(), kind.end(), "TemplateTypeParm")
-      || std::equal(kind.begin(), kind.end(), "NonTypeTemplateTypeParm")
-      || std::equal(kind.begin(), kind.end(), "TemplateTemplateTypeParm");
+      || std::equal(kind.begin(), kind.end(), "NonTypeTemplateParm")
+      || std::equal(kind.begin(), kind.end(), "TemplateTemplateParm");
 }
 
 CodeFragment
