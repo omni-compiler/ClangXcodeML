@@ -146,6 +146,10 @@ makeBases(const XcodeMl::ClassType &T, SourceInfo &src) {
 
 bool
 isTemplateParam(xmlNodePtr node) {
+  const auto name = getName(node);
+  if (!std::equal(name.begin(), name.end(), "clangDecl")) {
+    return false;
+  }
   const auto kind = getProp(node, "class");
   return std::equal(kind.begin(), kind.end(), "TemplateTypeParm")
       || std::equal(kind.begin(), kind.end(), "NonTypeTemplateTypeParm")
