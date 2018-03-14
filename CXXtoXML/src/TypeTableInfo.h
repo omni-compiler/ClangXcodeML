@@ -6,8 +6,11 @@
 #include <tuple>
 #include <unordered_map>
 
+class NnsTableInfo;
+
 class TypeTableInfo {
   clang::MangleContext *mangleContext;
+  NnsTableInfo *nnstableinfo;
   std::unordered_map<std::string, clang::QualType> mapFromNameToQualType;
   std::unordered_map<clang::QualType, std::string> mapFromQualTypeToName;
   std::unordered_map<clang::QualType, xmlNodePtr> mapFromQualTypeToXmlNodePtr;
