@@ -23,5 +23,5 @@ public:
 int
 main() {
   ClassA<int>::ClassB<char> obj;
-  obj.func_b(1);
+  printf("%d\n", obj.func_b(1));
 }
