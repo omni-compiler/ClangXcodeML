@@ -10,11 +10,11 @@ class NnsTableInfo;
 
 class TypeTableInfo {
   clang::MangleContext *mangleContext;
+  InheritanceInfo *inheritanceinfo;
   NnsTableInfo *nnstableinfo;
   std::unordered_map<std::string, clang::QualType> mapFromNameToQualType;
   std::unordered_map<clang::QualType, std::string> mapFromQualTypeToName;
   std::unordered_map<clang::QualType, xmlNodePtr> mapFromQualTypeToXmlNodePtr;
-  InheritanceInfo *inheritanceinfo;
   std::unordered_map<clang::QualType, bool> normalizability;
   std::stack<std::tuple<xmlNodePtr, std::vector<clang::QualType>>>
       typeTableStack;
