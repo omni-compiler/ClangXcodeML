@@ -55,8 +55,9 @@ public:
   TypeTableInfo &operator=(const TypeTableInfo &) = delete;
   TypeTableInfo &operator=(const TypeTableInfo &&) = delete;
 
-  explicit TypeTableInfo(
-      clang::MangleContext *MC, InheritanceInfo *II); // default constructor
+  explicit TypeTableInfo(clang::MangleContext *MC,
+      InheritanceInfo *II,
+      NnsTableInfo *NTI); // default constructor
 
   void registerType(
       clang::QualType T, xmlNodePtr *retNode, xmlNodePtr traversingNode);
