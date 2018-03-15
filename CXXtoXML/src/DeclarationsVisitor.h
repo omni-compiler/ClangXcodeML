@@ -18,6 +18,17 @@ public:
   bool PreVisitConstructorInitializer(clang::CXXCtorInitializer *);
 };
 
+class InheritanceInfo;
+
+class DeclarationsVisitorContext {
+public:
+  DeclarationsVisitorContext(clang::MangleContext *MC, InheritanceInfo *II)
+      : typetableinfo(MC, II), nnstableinfo(MC, &typetableinfo) {
+  }
+  TypeTableInfo typetableinfo;
+  NnsTableInfo nnstableinfo;
+};
+
 #endif /* !DECLARATIONSVISITOR_H */
 
 ///
