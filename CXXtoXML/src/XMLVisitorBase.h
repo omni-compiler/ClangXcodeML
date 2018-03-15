@@ -20,8 +20,6 @@ class XMLVisitorBaseImpl : public XMLRAVpool {
 protected:
   clang::MangleContext *mangleContext;
   xmlNodePtr curNode; // a candidate of the new chlid.
-  TypeTableInfo *typetableinfo;
-  NnsTableInfo *nnstableinfo;
 
 public:
   XMLVisitorBaseImpl() = delete;
