@@ -57,21 +57,15 @@ public:
   XMLVisitorBase &operator=(const XMLVisitorBase &) = delete;
   XMLVisitorBase &operator=(XMLVisitorBase &&) = delete;
 
-  explicit XMLVisitorBase(clang::MangleContext *MC,
-      xmlNodePtr Parent,
-      const char *ChildName,
-      TypeTableInfo *TTI = nullptr,
-      NnsTableInfo *NTI = nullptr)
+  explicit XMLVisitorBase(
+      clang::MangleContext *MC, xmlNodePtr Parent, const char *ChildName)
       : XMLVisitorBaseImpl(MC,
             (ChildName ? xmlNewTextChild(
                              Parent, nullptr, BAD_CAST ChildName, nullptr)
-                       : Parent),
-            TTI,
-            NTI),
+                       : Parent)),
         optContext(){};
   explicit XMLVisitorBase(XMLVisitorBase *p)
-      : XMLVisitorBaseImpl(
-            p->mangleContext, p->curNode, p->typetableinfo, p->nnstableinfo),
+      : XMLVisitorBaseImpl(p->mangleContext, p->curNode),
         optContext(p->optContext){};
 
   Derived &
