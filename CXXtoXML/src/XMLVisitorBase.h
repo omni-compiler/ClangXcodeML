@@ -28,10 +28,7 @@ public:
   XMLVisitorBaseImpl &operator=(const XMLVisitorBaseImpl &) = delete;
   XMLVisitorBaseImpl &operator=(XMLVisitorBaseImpl &&) = delete;
 
-  explicit XMLVisitorBaseImpl(clang::MangleContext *MC,
-      xmlNodePtr CurNode,
-      TypeTableInfo *TTI,
-      NnsTableInfo *NTI);
+  explicit XMLVisitorBaseImpl(clang::MangleContext *MC, xmlNodePtr CurNode);
 
   xmlNodePtr addChild(const char *Name, const char *Content = nullptr);
   void newChild(const char *Name, const char *Content = nullptr);
