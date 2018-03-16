@@ -1,7 +1,8 @@
 #include "XMLVisitorBase.h"
+#include "TypeTableInfo.h"
+#include "NnsTableInfo.h"
 #include "DeclarationsVisitor.h"
 #include "ClangOperator.h"
-#include "TypeTableInfo.h"
 #include "XcodeMlNameElem.h"
 
 #include <iostream>

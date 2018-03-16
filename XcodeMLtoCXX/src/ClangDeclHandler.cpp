@@ -144,6 +144,18 @@ makeBases(const XcodeMl::ClassType &T, SourceInfo &src) {
                        : makeTokenNode(":") + CXXCodeGen::join(",", decls);
 }
 
+bool
+isTemplateParam(xmlNodePtr node) {
+  const auto name = getName(node);
+  if (!std::equal(name.begin(), name.end(), "clangDecl")) {
+    return false;
+  }
+  const auto kind = getProp(node, "class");
+  return std::equal(kind.begin(), kind.end(), "TemplateTypeParm")
+      || std::equal(kind.begin(), kind.end(), "NonTypeTemplateParm")
+      || std::equal(kind.begin(), kind.end(), "TemplateTemplateParm");
+}
+
 CodeFragment
 emitClassDefinition(xmlNodePtr node,
     const CodeBuilder &w,
@@ -156,7 +168,8 @@ emitClassDefinition(xmlNodePtr node,
   const auto memberNodes = findNodes(node, "clangDecl", src.ctxt);
   std::vector<XcodeMl::CodeFragment> decls;
   for (auto &&memberNode : memberNodes) {
-    if (isTrueProp(memberNode, "is_implicit", false)) {
+    if (isTrueProp(memberNode, "is_implicit", false)
+        || isTemplateParam(memberNode)) {
       continue;
     }
     /* Traverse `memberNode` regardless of whether `CodeBuilder` prints it. */
@@ -487,6 +500,7 @@ const ClangDeclHandlerType ClangDeclHandlerInClass("class",
     CXXCodeGen::makeInnerNode,
     callCodeBuilder,
     {
+        std::make_tuple("ClassTemplate", ClassTemplateProc),
         std::make_tuple("CXXMethod", emitInlineMemberFunction),
         std::make_tuple("CXXConstructor", emitInlineMemberFunction),
         std::make_tuple("CXXConversion", emitInlineMemberFunction),
@@ -495,6 +509,7 @@ const ClangDeclHandlerType ClangDeclHandlerInClass("class",
         std::make_tuple("Field", FieldDeclProc),
         std::make_tuple("Friend", FriendDeclProc),
         std::make_tuple("Using", UsingProc),
+        std::make_tuple("TemplateTypeParm", TemplateTypeParmProc),
         std::make_tuple("TypeAlias", TypeAliasProc),
         std::make_tuple("Typedef", TypedefProc),
         std::make_tuple("Var", VarProc),
