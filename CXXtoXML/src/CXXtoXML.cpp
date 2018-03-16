@@ -53,11 +53,8 @@ public:
     MangleContext *MC = CXT.createMangleContext();
     InheritanceInfo inheritanceinfo;
     InheritanceInfo *II = &inheritanceinfo;
-    TypeTableInfo typetableinfo(MC, II);
-    TypeTableInfo *TTI = &typetableinfo;
-    NnsTableInfo nnstableinfo(MC, TTI);
-    NnsTableInfo *NTI = &nnstableinfo;
-    DeclarationsVisitor DV(MC, rootNode, nullptr, TTI, NTI);
+    DeclarationsVisitorContext DVC(MC, II);
+    DeclarationsVisitor DV(MC, rootNode, nullptr, &DVC);
     Decl *D = CXT.getTranslationUnitDecl();
 
     DV.TraverseDecl(D);

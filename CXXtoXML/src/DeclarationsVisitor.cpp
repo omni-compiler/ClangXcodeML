@@ -1,8 +1,8 @@
 #include "XMLVisitorBase.h"
+#include "NnsTableInfo.h"
 #include "TypeTableInfo.h"
 #include "DeclarationsVisitor.h"
 #include "InheritanceInfo.h"
-#include "NnsTableInfo.h"
 #include "XcodeMlNameElem.h"
 #include "clang/Basic/Builtins.h"
 #include "clang/Lex/Lexer.h"
@@ -100,7 +100,7 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
     newProp("valueCategory",
         E->isXValue() ? "xvalue" : E->isRValue() ? "prvalue" : "lvalue");
     auto T = E->getType();
-    newProp("xcodemlType", typetableinfo->getTypeName(T).c_str());
+    newProp("xcodemlType", optContext->typetableinfo.getTypeName(T).c_str());
   }
 
   if (auto CE = dyn_cast<clang::CastExpr>(S)) {
@@ -126,7 +126,7 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
     newBoolProp("is_arrow", ME->isArrow());
 
     const auto MD = ME->getMemberDecl();
-    auto memberName = makeNameNode(*typetableinfo, MD);
+    auto memberName = makeNameNode(optContext->typetableinfo, MD);
     xmlAddChild(curNode, memberName);
 
     if (const auto DRE = dyn_cast<clang::DeclRefExpr>(ME->getBase())) {
@@ -138,13 +138,13 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
   if (auto DRE = dyn_cast<DeclRefExpr>(S)) {
     const auto kind = DRE->getDecl()->getDeclKindName();
     newProp("declkind", kind);
-    auto nameNode = makeNameNode(*typetableinfo, DRE);
+    auto nameNode = makeNameNode(optContext->typetableinfo, DRE);
 
     const auto parent = DRE->getFoundDecl()->getDeclContext();
     assert(parent);
     xmlNewProp(nameNode,
         BAD_CAST "nns",
-        BAD_CAST(nnstableinfo->getNnsName(parent).c_str()));
+        BAD_CAST(optContext->nnstableinfo.getNnsName(parent).c_str()));
 
     xmlAddChild(curNode, nameNode);
   }
@@ -278,7 +278,7 @@ DeclarationsVisitor::PreVisitType(QualType T) {
     newComment("Type:NULL");
     return true;
   }
-  newProp("type", typetableinfo->getTypeName(T).c_str());
+  newProp("type", optContext->typetableinfo.getTypeName(T).c_str());
   return false;
 }
 
@@ -287,7 +287,7 @@ DeclarationsVisitor::PreVisitTypeLoc(TypeLoc TL) {
   newChild("clangTypeLoc");
   newProp("class", NameForTypeLoc(TL));
   const auto T = TL.getType();
-  newProp("type", typetableinfo->getTypeName(T).c_str());
+  newProp("type", optContext->typetableinfo.getTypeName(T).c_str());
   return true;
 }
 
@@ -353,9 +353,9 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
 
   if (isa<TranslationUnitDecl>(D)) {
     auto typetable = addChild("xcodemlTypeTable");
-    typetableinfo->pushTypeTableStack(typetable);
+    optContext->typetableinfo.pushTypeTableStack(typetable);
     auto nnsTable = addChild("xcodemlNnsTable");
-    nnstableinfo->pushNnsTableStack(nnsTable);
+    optContext->nnstableinfo.pushNnsTableStack(nnsTable);
   }
 
   if (const auto LSD = dyn_cast<LinkageSpecDecl>(D)) {
@@ -364,7 +364,7 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
 
   NamedDecl *ND = dyn_cast<NamedDecl>(D);
   if (ND && !isa<UsingDirectiveDecl>(ND)) {
-    auto nameNode = makeNameNode(*typetableinfo, ND);
+    auto nameNode = makeNameNode(optContext->typetableinfo, ND);
 
     /* experimental */
     const auto parent = ND->getDeclContext();
@@ -374,7 +374,7 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
         BAD_CAST(parent->getDeclKindName()));
     xmlNewProp(nameNode,
         BAD_CAST "nns",
-        BAD_CAST(nnstableinfo->getNnsName(parent).c_str()));
+        BAD_CAST(optContext->nnstableinfo.getNnsName(parent).c_str()));
 
     xmlAddChild(curNode, nameNode);
   }
@@ -385,17 +385,18 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
 
   if (auto VD = dyn_cast<ValueDecl>(D)) {
     const auto T = VD->getType();
-    newProp("xcodemlType", typetableinfo->getTypeName(T).c_str());
+    newProp("xcodemlType", optContext->typetableinfo.getTypeName(T).c_str());
   }
 
   if (auto TD = dyn_cast<TypeDecl>(D)) {
     const auto T = QualType(TD->getTypeForDecl(), 0);
-    newProp("xcodemlType", typetableinfo->getTypeName(T).c_str());
+    newProp("xcodemlType", optContext->typetableinfo.getTypeName(T).c_str());
   }
 
   if (auto TND = dyn_cast<TypedefNameDecl>(D)) {
     const auto T = TND->getUnderlyingType();
-    newProp("xcodemlTypedefType", typetableinfo->getTypeName(T).c_str());
+    newProp("xcodemlTypedefType",
+        optContext->typetableinfo.getTypeName(T).c_str());
   }
 
   if (const auto RD = dyn_cast<RecordDecl>(D)) {
@@ -422,7 +423,7 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
   }
   if (const auto UDD = dyn_cast<UsingDirectiveDecl>(D)) {
     const auto ND = UDD->getNominatedNamespaceAsWritten();
-    const auto nameNode = makeNameNode(*typetableinfo, ND);
+    const auto nameNode = makeNameNode(optContext->typetableinfo, ND);
     xmlAddChild(curNode, nameNode);
   }
   if (auto FD = dyn_cast<FunctionDecl>(D)) {
@@ -444,7 +445,8 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
     if (auto RD = MD->getParent()) {
       assert(mangleContext);
       const auto T = mangleContext->getASTContext().getRecordType(RD);
-      newProp("parent_class", typetableinfo->getTypeName(T).c_str());
+      newProp(
+          "parent_class", optContext->typetableinfo.getTypeName(T).c_str());
     } else {
       newBoolProp("clang_parent_class_not_found", true);
     }
@@ -452,9 +454,9 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
 
   if (isa<TemplateDecl>(D) || isa<ClassTemplatePartialSpecializationDecl>(D)) {
     auto typetable = addChild("xcodemlTypeTable");
-    typetableinfo->pushTypeTableStack(typetable);
+    optContext->typetableinfo.pushTypeTableStack(typetable);
     auto nnsTable = addChild("xcodemlNnsTable");
-    nnstableinfo->pushNnsTableStack(nnsTable);
+    optContext->nnstableinfo.pushNnsTableStack(nnsTable);
   }
   return true;
 }
@@ -466,8 +468,8 @@ DeclarationsVisitor::PostVisitDecl(Decl *D) {
   }
   if (isa<TemplateDecl>(D) || isa<ClassTemplatePartialSpecializationDecl>(D)
       || isa<TranslationUnitDecl>(D)) {
-    typetableinfo->popTypeTableStack();
-    nnstableinfo->popNnsTableStack();
+    optContext->typetableinfo.popTypeTableStack();
+    optContext->nnstableinfo.popNnsTableStack();
   }
   return true;
 }
@@ -484,7 +486,8 @@ DeclarationsVisitor::PreVisitDeclarationNameInfo(DeclarationNameInfo NI) {
   // FIXME: not MECE
   const auto T = DN.getCXXNameType();
   if (!T.isNull()) {
-    newProp("clang_name_type", typetableinfo->getTypeName(T).c_str());
+    newProp(
+        "clang_name_type", optContext->typetableinfo.getTypeName(T).c_str());
   }
   return true;
 }
@@ -518,7 +521,7 @@ DeclarationsVisitor::PreVisitNestedNameSpecifierLoc(NestedNameSpecifierLoc N) {
   newProp("clang_nested_name_specifier_kind", kind.c_str());
 
   if (const auto ND = Spec->getAsNamespace()) {
-    const auto nameNode = makeNameNode(*typetableinfo, ND);
+    const auto nameNode = makeNameNode(optContext->typetableinfo, ND);
     xmlAddChild(curNode, nameNode);
     return true;
   }
@@ -540,7 +543,7 @@ DeclarationsVisitor::PreVisitConstructorInitializer(CXXCtorInitializer *CI) {
     newProp("member", member->getNameAsString().c_str());
   } else if (auto base = CI->getBaseClass()) {
     const auto T = QualType(base, 0);
-    newProp("xcodemlType", typetableinfo->getTypeName(T).c_str());
+    newProp("xcodemlType", optContext->typetableinfo.getTypeName(T).c_str());
   } else {
     newBoolProp("clang_unknown_ctor_init", true);
   }

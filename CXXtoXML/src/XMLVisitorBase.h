@@ -20,8 +20,6 @@ class XMLVisitorBaseImpl : public XMLRAVpool {
 protected:
   clang::MangleContext *mangleContext;
   xmlNodePtr curNode; // a candidate of the new chlid.
-  TypeTableInfo *typetableinfo;
-  NnsTableInfo *nnstableinfo;
 
 public:
   XMLVisitorBaseImpl() = delete;
@@ -30,10 +28,7 @@ public:
   XMLVisitorBaseImpl &operator=(const XMLVisitorBaseImpl &) = delete;
   XMLVisitorBaseImpl &operator=(XMLVisitorBaseImpl &&) = delete;
 
-  explicit XMLVisitorBaseImpl(clang::MangleContext *MC,
-      xmlNodePtr CurNode,
-      TypeTableInfo *TTI,
-      NnsTableInfo *NTI);
+  explicit XMLVisitorBaseImpl(clang::MangleContext *MC, xmlNodePtr CurNode);
 
   xmlNodePtr addChild(const char *Name, const char *Content = nullptr);
   void newChild(const char *Name, const char *Content = nullptr);
@@ -65,18 +60,14 @@ public:
   explicit XMLVisitorBase(clang::MangleContext *MC,
       xmlNodePtr Parent,
       const char *ChildName,
-      TypeTableInfo *TTI = nullptr,
-      NnsTableInfo *NTI = nullptr)
+      const OptContext &OC)
       : XMLVisitorBaseImpl(MC,
             (ChildName ? xmlNewTextChild(
                              Parent, nullptr, BAD_CAST ChildName, nullptr)
-                       : Parent),
-            TTI,
-            NTI),
-        optContext(){};
+                       : Parent)),
+        optContext(OC){};
   explicit XMLVisitorBase(XMLVisitorBase *p)
-      : XMLVisitorBaseImpl(
-            p->mangleContext, p->curNode, p->typetableinfo, p->nnstableinfo),
+      : XMLVisitorBaseImpl(p->mangleContext, p->curNode),
         optContext(p->optContext){};
 
   Derived &

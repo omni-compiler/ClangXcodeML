@@ -1,7 +1,19 @@
 #ifndef DECLARATIONSVISITOR_H
 #define DECLARATIONSVISITOR_H
 
-class DeclarationsVisitor : public XMLVisitorBase<DeclarationsVisitor> {
+class DeclarationsVisitorContext;
+
+class DeclarationsVisitor : public XMLVisitorBase<DeclarationsVisitor,
+                                DeclarationsVisitorContext *> {
+  /* OptContext := DeclarationsVisitorContext *
+   *
+   * The optContext data member is frequently copied since
+   * XMLVisitorBase::Traverse##NAME (where NAME = Stmt, Type, ...)
+   * call the copy constructor of DeclarationsVisitor.
+   * optContext should be a pointer to DeclarationsVisitorContext rather than
+   * DeclarationsVisitorContext itself.
+   */
+
 public:
   // use base constructors
   using XMLVisitorBase::XMLVisitorBase;
@@ -16,6 +28,17 @@ public:
   bool PreVisitDeclarationNameInfo(clang::DeclarationNameInfo);
   bool PreVisitNestedNameSpecifierLoc(clang::NestedNameSpecifierLoc);
   bool PreVisitConstructorInitializer(clang::CXXCtorInitializer *);
+};
+
+class InheritanceInfo;
+
+class DeclarationsVisitorContext {
+public:
+  DeclarationsVisitorContext(clang::MangleContext *MC, InheritanceInfo *II)
+      : typetableinfo(MC, II), nnstableinfo(MC, &typetableinfo) {
+  }
+  TypeTableInfo typetableinfo;
+  NnsTableInfo nnstableinfo;
 };
 
 #endif /* !DECLARATIONSVISITOR_H */
