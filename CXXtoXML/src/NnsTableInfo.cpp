@@ -158,6 +158,8 @@ nnsNewNode(const clang::MangleContext &MC,
     const clang::DeclContext &DC) {
   using namespace clang;
   switch (DC.getDeclKind()) {
+  case Decl::ClassTemplateSpecialization:
+    return makeClassTemplateSpecializationNode(TTI, DC);
   case Decl::CXXRecord: return makeClassNnsNode(TTI, DC);
   case Decl::Namespace: return makeNamespaceNnsNode(DC);
   default: return xmlNewNode(nullptr, BAD_CAST "otherNNS");
