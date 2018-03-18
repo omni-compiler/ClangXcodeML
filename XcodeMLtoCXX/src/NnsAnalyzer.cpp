@@ -49,6 +49,7 @@ const XcodeMl::NnsMap initialNnsMap = {
 const NnsAnalyzer XcodeMLNNSAnalyzer("NnsAnalyzer",
     {
         std::make_tuple("classNNS", classNnsProc),
+        std::make_tuple("classTemplateSpecializationNNS", classNnsProc),
         std::make_tuple("namespaceNNS", namespaceNnsProc),
         std::make_tuple("otherNNS", otherNnsProc),
     });
