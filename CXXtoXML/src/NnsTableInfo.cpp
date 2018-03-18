@@ -8,6 +8,7 @@
 #include "clang/AST/ASTContext.h"
 #include "clang/AST/DeclBase.h"
 #include "clang/AST/DeclCXX.h"
+#include "clang/AST/DeclTemplate.h"
 #include "TypeTableInfo.h"
 
 #include "NnsTableInfo.h"
@@ -122,6 +123,20 @@ makeClassNnsNode(TypeTableInfo &TTI, const clang::DeclContext &DC) {
 
   const auto dtident =
       TTI.getTypeName(clang::QualType(CRD.getTypeForDecl(), 0));
+  xmlNewProp(node, BAD_CAST "type", BAD_CAST(dtident.c_str()));
+
+  return node;
+}
+
+xmlNodePtr
+makeClassTemplateSpecializationNode(
+    TypeTableInfo &TTI, const clang::DeclContext &DC) {
+  const auto CTSD = llvm::cast<clang::ClassTemplateSpecializationDecl>(DC);
+  const auto node =
+      xmlNewNode(nullptr, BAD_CAST "classTemplateSpecializationNNS");
+
+  const auto dtident =
+      TTI.getTypeName(clang::QualType(CTSD.getTypeForDecl(), 0));
   xmlNewProp(node, BAD_CAST "type", BAD_CAST(dtident.c_str()));
 
   return node;
