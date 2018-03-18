@@ -520,12 +520,29 @@ DeclarationsVisitor::PreVisitNestedNameSpecifierLoc(NestedNameSpecifierLoc N) {
   const auto kind = SpecifierKindToString(Spec->getKind());
   newProp("clang_nested_name_specifier_kind", kind.c_str());
 
-  if (const auto ND = Spec->getAsNamespace()) {
+  switch (Spec->getKind()) {
+  case NestedNameSpecifier::Identifier: {
+    const auto Ident = Spec->getAsIdentifier();
+    assert(Ident);
+    newProp("token", Ident->getNameStart());
+    break;
+  }
+  case NestedNameSpecifier::Namespace: {
+    const auto ND = Spec->getAsNamespace();
+    assert(ND);
     const auto nameNode = makeNameNode(optContext->typetableinfo, ND);
     xmlAddChild(curNode, nameNode);
-    return true;
+    break;
   }
-
+  case NestedNameSpecifier::TypeSpec: {
+    const auto T = Spec->getAsType();
+    assert(T);
+    const auto dtident = optContext->typetableinfo.getTypeName(QualType(T, 0));
+    newProp("xcodemlType", dtident.c_str());
+    break;
+  }
+  default: break;
+  }
   return true;
 }
 
