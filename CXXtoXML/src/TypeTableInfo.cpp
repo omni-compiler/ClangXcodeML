@@ -548,6 +548,10 @@ TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
       if (auto RD = T->getAsCXXRecordDecl()) {
         Node = createNode(T, "classType", nullptr);
         commonSetUpForRecordDecl(Node, RD, *this);
+        const auto DC = RD->getDeclContext();
+        assert(DC);
+        const auto nns = nnstableinfo->getNnsName(DC);
+        xmlNewProp(Node, BAD_CAST "nns", BAD_CAST(nns.c_str()));
         pushType(T, Node);
       } else if (T->isStructureType()) {
         Node = createNode(T, "structType", nullptr);
