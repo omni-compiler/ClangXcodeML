@@ -915,13 +915,14 @@ makeClassType(const DataTypeIdent &ident, const ClassType::Symbols &symbols) {
 
 TypeRef
 makeClassType(const DataTypeIdent &dtident,
+    const llvm::Optional<std::string> nnsident,
     const CodeFragment &className,
     const std::vector<ClassType::BaseClass> &bases,
     const ClassType::Symbols &members,
     const llvm::Optional<ClassType::TemplateArgList> &targs) {
   return std::make_shared<ClassType>(dtident,
       CXXClassKind::Class,
-      llvm::Optional<std::string>(),
+      nnsident,
       className,
       bases,
       members,
