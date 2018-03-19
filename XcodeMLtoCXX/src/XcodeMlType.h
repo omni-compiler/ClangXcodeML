@@ -399,6 +399,7 @@ public:
   ClassType(const DataTypeIdent &, const CodeFragment &, const Symbols &);
   ClassType(const DataTypeIdent &,
       CXXClassKind,
+      const llvm::Optional<std::string> &nns,
       const CodeFragment &,
       const std::vector<BaseClass> &,
       const Symbols &,
@@ -423,6 +424,7 @@ protected:
 
 private:
   CXXClassKind classKind_;
+  llvm::Optional<std::string> nnsident;
   ClassName name_;
   std::vector<BaseClass> bases_;
   Symbols classScopeSymbols;

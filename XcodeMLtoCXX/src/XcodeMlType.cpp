@@ -613,12 +613,14 @@ ClassType::ClassType(const DataTypeIdent &ident,
 
 ClassType::ClassType(const DataTypeIdent &ident,
     CXXClassKind kind,
+    const llvm::Optional<std::string> &nns,
     const CodeFragment &className,
     const std::vector<BaseClass> &b,
     const ClassType::Symbols &symbols,
     const llvm::Optional<TemplateArgList> &argList)
     : Type(TypeKind::Class, ident),
       classKind_(kind),
+      nnsident(nns),
       name_(className),
       bases_(b),
       classScopeSymbols(symbols),
@@ -896,8 +898,13 @@ makeClassType(const DataTypeIdent &dtident,
     const std::vector<ClassType::BaseClass> &bases,
     const ClassType::Symbols &members,
     const llvm::Optional<ClassType::TemplateArgList> &targs) {
-  return std::make_shared<ClassType>(
-      dtident, CXXClassKind::Class, className, bases, members, targs);
+  return std::make_shared<ClassType>(dtident,
+      CXXClassKind::Class,
+      llvm::Optional<std::string>(),
+      className,
+      bases,
+      members,
+      targs);
 }
 
 TypeRef
@@ -907,6 +914,7 @@ makeCXXUnionType(const DataTypeIdent &ident,
     const ClassType::Symbols &members) {
   return std::make_shared<ClassType>(ident,
       CXXClassKind::Union,
+      llvm::Optional<std::string>(),
       unionName,
       bases,
       members,
@@ -919,8 +927,13 @@ makeCXXUnionType(const DataTypeIdent &ident,
     const std::vector<ClassType::BaseClass> &bases,
     const ClassType::Symbols &members,
     const llvm::Optional<ClassType::TemplateArgList> &targs) {
-  return std::make_shared<ClassType>(
-      ident, CXXClassKind::Union, unionName, bases, members, targs);
+  return std::make_shared<ClassType>(ident,
+      CXXClassKind::Union,
+      llvm::Optional<std::string>(),
+      unionName,
+      bases,
+      members,
+      targs);
 }
 
 TypeRef
