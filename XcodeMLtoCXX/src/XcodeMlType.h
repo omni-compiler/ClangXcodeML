@@ -77,6 +77,8 @@ public:
   virtual ~Type() = 0;
   virtual Type *clone() const = 0;
   virtual CodeFragment makeDeclaration(CodeFragment, const Environment &) = 0;
+  virtual CodeFragment makeDeclarationWithNnsMap(
+      const CodeFragment &, const Environment &, const NnsMap &);
 
   /*!
    * \brief Return a code fragment string created by adding the `const`

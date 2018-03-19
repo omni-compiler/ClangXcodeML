@@ -6,8 +6,8 @@
 #include <libxml/tree.h>
 #include "llvm/ADT/Optional.h"
 #include "StringTree.h"
-#include "XcodeMlType.h"
 #include "XcodeMlNns.h"
+#include "XcodeMlType.h"
 #include "XcodeMlName.h"
 #include "XcodeMlEnvironment.h"
 #include "llvm/Support/Casting.h"
@@ -56,6 +56,12 @@ Type::Type(TypeKind k, DataTypeIdent id, bool c, bool v)
 }
 
 Type::~Type() {
+}
+
+CodeFragment
+Type::makeDeclarationWithNnsMap(
+    const CodeFragment &var, const Environment &typeTable, const NnsMap &) {
+  return makeDeclaration(var, typeTable);
 }
 
 CodeFragment

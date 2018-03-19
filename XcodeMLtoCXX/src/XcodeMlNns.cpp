@@ -7,10 +7,9 @@
 #include "llvm/Support/Casting.h"
 #include "StringTree.h"
 #include "Util.h"
+#include "XcodeMlNns.h"
 #include "XcodeMlType.h"
 #include "XcodeMlEnvironment.h"
-
-#include "XcodeMlNns.h"
 
 using CXXCodeGen::makeTokenNode;
 
