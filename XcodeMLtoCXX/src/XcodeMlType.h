@@ -390,7 +390,7 @@ std::string getClassKey(CXXClassKind kind);
 /*! \brief Represents (C++-style) class. */
 class ClassType : public Type {
 public:
-  using ClassName = llvm::Optional<CodeFragment>;
+  using ClassName = CodeFragment;
   using MemberName = std::shared_ptr<UnqualId>;
   using Symbols = std::vector<std::tuple<MemberName, DataTypeIdent>>;
   using BaseClass = std::tuple<std::string, DataTypeIdent, bool>;
