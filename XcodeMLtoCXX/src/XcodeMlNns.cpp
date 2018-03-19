@@ -97,8 +97,7 @@ ClassNns::makeNestedNameSpec(const Environment &env, const NnsMap &) const {
   const auto classT = llvm::cast<XcodeMl::ClassType>(T.get());
   assert(classT);
   const auto name = classT->name();
-  assert(name.hasValue());
-  return (*name) + makeTokenNode("::");
+  return name + makeTokenNode("::");
 }
 
 bool

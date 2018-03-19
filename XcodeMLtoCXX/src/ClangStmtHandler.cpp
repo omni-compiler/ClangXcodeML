@@ -305,7 +305,6 @@ DEFINE_STMTHANDLER(emitTokenAttrValue) {
 DEFINE_STMTHANDLER(CXXTemporaryObjectExprProc) {
   const auto resultT = src.typeTable.at(getType(node));
   const auto name = llvm::cast<XcodeMl::ClassType>(resultT.get())->name();
-  assert(name.hasValue());
   auto children = findNodes(node, "*[position() > 1]", src.ctxt);
   // ignore first child, which represents the result (class) type of
   // the clang::CXXTemporaryObjectExpr
@@ -313,7 +312,7 @@ DEFINE_STMTHANDLER(CXXTemporaryObjectExprProc) {
   for (auto child : children) {
     args.push_back(w.walk(child, src));
   }
-  return *name + makeTokenNode("(") + join(",", args) + makeTokenNode(")");
+  return name + makeTokenNode("(") + join(",", args) + makeTokenNode(")");
 }
 
 DEFINE_STMTHANDLER(CXXOperatorCallExprProc) {

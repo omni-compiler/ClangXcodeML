@@ -591,8 +591,7 @@ getCtorInitName(xmlNodePtr node, const XcodeMl::Environment &env) {
   const auto T = env[base];
   const auto classT = llvm::cast<XcodeMl::ClassType>(T.get());
   const auto name = classT->name();
-  assert(name.hasValue());
-  return *name;
+  return name;
 }
 
 DEFINE_CB(ctorInitProc) {

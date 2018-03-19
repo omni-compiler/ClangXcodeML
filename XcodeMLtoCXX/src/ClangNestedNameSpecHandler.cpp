@@ -60,8 +60,7 @@ DEFINE_NAMESPECHANDLER(TypeSpecifierProc) {
   const auto T = src.typeTable.at(getType(typeNode));
   if (llvm::isa<XcodeMl::ClassType>(T.get())) {
     const auto classT = llvm::cast<XcodeMl::ClassType>(T.get());
-    assert(classT->name().hasValue());
-    return *(classT->name()) + makeTokenNode("::");
+    return classT->name() + makeTokenNode("::");
   }
   return makeDecl(T, CXXCodeGen::makeVoidNode(), src.typeTable)
       + makeTokenNode("::");

@@ -129,8 +129,7 @@ CtorName::toString(const Environment &env) const {
   const auto T = env.at(dtident);
   const auto ClassT = llvm::cast<XcodeMl::ClassType>(T.get());
   const auto name = ClassT->name();
-  assert(name.hasValue() && *name);
-  return *name;
+  return name;
 }
 
 bool
@@ -153,8 +152,7 @@ DtorName::toString(const Environment &env) const {
   const auto T = env.at(dtident);
   const auto ClassT = llvm::cast<XcodeMl::ClassType>(T.get());
   const auto name = ClassT->name();
-  assert(name.hasValue() && *name);
-  return makeTokenNode("~") + (*name);
+  return makeTokenNode("~") + name;
 }
 
 bool

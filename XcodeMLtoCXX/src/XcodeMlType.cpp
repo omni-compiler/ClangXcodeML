@@ -662,7 +662,7 @@ ClassType::makeDeclaration(CodeFragment var, const Environment &typeTable) {
   if (const auto tid = getAsTemplateId(typeTable)) {
     return makeTokenNode(getClassKey(classKind())) + *tid + var;
   }
-  return makeTokenNode(getClassKey(classKind())) + *name_ + var;
+  return makeTokenNode(getClassKey(classKind())) + name_ + var;
 }
 
 Type *
@@ -717,7 +717,7 @@ ClassType::getAsTemplateId(const Environment &typeTable) const {
     targs.push_back(makeDecl(T, makeVoidNode(), typeTable));
   }
   const auto list = makeTokenNode("<") + join(",", targs) + makeTokenNode(">");
-  return MaybeCodeFragment(*name_ + list);
+  return MaybeCodeFragment(name_ + list);
 }
 
 bool

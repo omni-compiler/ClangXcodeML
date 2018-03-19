@@ -135,10 +135,9 @@ makeBases(const XcodeMl::ClassType &T, SourceInfo &src) {
         const auto T = src.typeTable.at(std::get<1>(base));
         const auto classT = llvm::cast<ClassType>(T.get());
         assert(classT);
-        assert(classT->name().hasValue());
         return makeTokenNode(std::get<0>(base))
             + makeTokenNode(std::get<2>(base) ? "virtual" : "")
-            + *(classT->name());
+            + (classT->name());
       });
   return decls.empty() ? CXXCodeGen::makeVoidNode()
                        : makeTokenNode(":") + CXXCodeGen::join(",", decls);
@@ -190,7 +189,7 @@ emitClassDefinition(xmlNodePtr node,
   const auto classKey = makeTokenNode(getClassKey(classType.classKind()));
   const auto name = classType.isClassTemplateSpecialization()
       ? classType.getAsTemplateId(src.typeTable).getValue()
-      : classType.name().getValue();
+      : classType.name();
 
   return classKey + name + makeBases(classType, src)
       + wrapWithBrace(insertNewLines(decls)) + CXXCodeGen::makeNewLineNode();
@@ -215,15 +214,14 @@ DEFINE_DECLHANDLER(ClassTemplatePartialSpecializationProc) {
   }
   /* forward declaration */
   const auto classKey = getClassKey(classT->classKind());
-  const auto nameSpelling = classT->name().getValue();
+  const auto nameSpelling = classT->name();
   return head + makeTokenNode(classKey) + nameSpelling;
 }
 
 DEFINE_DECLHANDLER(ClassTemplateSpecializationProc) {
   const auto T = src.typeTable.at(getType(node));
   const auto classT = llvm::dyn_cast<XcodeMl::ClassType>(T.get());
-  assert(classT && classT->name().hasValue());
-  const auto nameSpelling = classT->name().getValue();
+  const auto nameSpelling = classT->name();
 
   const auto head =
       makeTokenNode("template") + makeTokenNode("<") + makeTokenNode(">");
@@ -240,7 +238,7 @@ DEFINE_DECLHANDLER(ClassTemplateSpecializationProc) {
 
 void
 setClassName(XcodeMl::ClassType &classType, SourceInfo &src) {
-  if (classType.name().hasValue()) {
+  if (classType.name()) {
     return;
   }
   /* `classType` is unnamed.
@@ -260,7 +258,7 @@ DEFINE_DECLHANDLER(CXXRecordProc) {
   assert(classT);
 
   setClassName(*classT, src);
-  const auto nameSpelling = *(classT->name()); // now class name must exist
+  const auto nameSpelling = classT->name(); // now class name must exist
 
   if (isTrueProp(node, "is_this_declaration_a_definition", false)) {
     return emitClassDefinition(node, ClassDefinitionBuilder, src, *classT);
