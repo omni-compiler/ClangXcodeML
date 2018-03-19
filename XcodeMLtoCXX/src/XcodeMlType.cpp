@@ -666,7 +666,7 @@ ClassType::makeDeclarationWithNnsMap(const CodeFragment &var,
     const Environment &typeTable,
     const NnsMap &nnsTable) {
   if (!nnsident.hasValue()) {
-    makeDeclaration(var, typeTable);
+    return makeDeclaration(var, typeTable);
   }
   const auto nns = nnsTable.at(*nnsident);
   const auto spec = nns->makeDeclaration(typeTable, nnsTable);
