@@ -476,7 +476,8 @@ DEFINE_DECLHANDLER(VarProc) {
   const auto dtident = getProp(node, "xcodemlType");
   const auto T = src.typeTable.at(dtident);
 
-  const auto decl = makeSpecifier(node) + makeDecl(T, name, src.typeTable);
+  const auto decl = makeSpecifier(node)
+      + T->makeDeclarationWithNnsMap(name, src.typeTable, src.nnsTable);
   const auto initializerNode = findFirst(node, "clangStmt", src.ctxt);
   if (!initializerNode) {
     // does not have initalizer: `int x;`
