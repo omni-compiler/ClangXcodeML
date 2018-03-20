@@ -477,13 +477,18 @@ makeSpecifier(xmlNodePtr node, bool is_in_class_scope) {
   return code;
 }
 
-DEFINE_DECLHANDLER(VarProc) {
+CodeFragment
+emitVarDecl(xmlNodePtr node,
+    const CodeBuilder &w,
+    SourceInfo &src,
+    bool is_in_class_scope) {
   const auto nameNode = findFirst(node, "name", src.ctxt);
   const auto name = getUnqualIdFromNameNode(nameNode)->toString(src.typeTable);
   const auto dtident = getProp(node, "xcodemlType");
   const auto T = src.typeTable.at(dtident);
 
-  const auto decl = makeSpecifier(node) + makeDecl(T, name, src.typeTable);
+  const auto decl = makeSpecifier(node, is_in_class_scope)
+      + makeDecl(T, name, src.typeTable);
   const auto initializerNode = findFirst(node, "clangStmt", src.ctxt);
   if (!initializerNode) {
     // does not have initalizer: `int x;`
@@ -497,6 +502,10 @@ DEFINE_DECLHANDLER(VarProc) {
   }
   const auto init = w.walk(initializerNode, src);
   return decl + makeTokenNode("=") + init;
+}
+
+DEFINE_DECLHANDLER(VarProc) {
+  return emitVarDecl(node, w, src, false);
 }
 
 } // namespace
