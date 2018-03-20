@@ -492,7 +492,7 @@ emitVarDecl(xmlNodePtr node,
   const auto initializerNode = findFirst(node, "clangStmt", src.ctxt);
   if (!initializerNode) {
     // does not have initalizer: `int x;`
-    return makeDecl(T, name, src.typeTable);
+    return decl;
   }
   const auto astClass = getProp(initializerNode, "class");
   if (std::equal(astClass.begin(), astClass.end(), "CXXConstructExpr")) {
