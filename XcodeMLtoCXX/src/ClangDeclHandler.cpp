@@ -482,8 +482,8 @@ emitVarDecl(xmlNodePtr node,
     const CodeBuilder &w,
     SourceInfo &src,
     bool is_in_class_scope) {
-  const auto nameNode = findFirst(node, "name", src.ctxt);
-  const auto name = getUnqualIdFromNameNode(nameNode)->toString(src.typeTable);
+  const auto name =
+      getQualifiedName(node, src).toString(src.typeTable, src.nnsTable);
   const auto dtident = getProp(node, "xcodemlType");
   const auto T = src.typeTable.at(dtident);
 
