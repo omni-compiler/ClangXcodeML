@@ -24,6 +24,7 @@ const std::map<std::string, std::string> opMap = {
     {"bitAndExpr", "&"},
     {"bitOrExpr", "|"},
     {"bitXorExpr", "^"},
+    {"commaExpr", ","},
 
     {"preIncrExpr", "++"},
     {"preDecrExpr", "--"},
