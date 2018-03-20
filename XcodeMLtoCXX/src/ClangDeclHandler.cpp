@@ -508,6 +508,10 @@ DEFINE_DECLHANDLER(VarProc) {
   return emitVarDecl(node, w, src, false);
 }
 
+DEFINE_DECLHANDLER(VarProcInClass) {
+  return emitVarDecl(node, w, src, true);
+}
+
 } // namespace
 
 const ClangDeclHandlerType ClangDeclHandlerInClass("class",
@@ -526,7 +530,7 @@ const ClangDeclHandlerType ClangDeclHandlerInClass("class",
         std::make_tuple("TemplateTypeParm", TemplateTypeParmProc),
         std::make_tuple("TypeAlias", TypeAliasProc),
         std::make_tuple("Typedef", TypedefProc),
-        std::make_tuple("Var", VarProc),
+        std::make_tuple("Var", VarProcInClass),
     });
 
 const ClangDeclHandlerType ClangDeclHandler("class",
