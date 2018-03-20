@@ -453,12 +453,11 @@ DEFINE_DECLHANDLER(UsingDirectiveProc) {
 }
 
 CodeFragment
-makeSpecifier(xmlNodePtr node) {
+makeSpecifier(xmlNodePtr node, bool is_in_class_scope) {
   const std::vector<std::tuple<std::string, std::string>> specifiers = {
       std::make_tuple("is_extern", "extern"),
       std::make_tuple("is_register", "register"),
       std::make_tuple("is_static", "static"),
-      std::make_tuple("is_static_data_member", "static"),
       std::make_tuple("is_thread_local", "thread_local"),
   };
   auto code = CXXCodeGen::makeVoidNode();
@@ -468,6 +467,12 @@ makeSpecifier(xmlNodePtr node) {
     if (isTrueProp(node, attr.c_str(), false)) {
       code = code + makeTokenNode(specifier);
     }
+  }
+  if (!is_in_class_scope) {
+    return code;
+  }
+  if (isTrueProp(node, "is_static_data_member", false)) {
+    code = code + makeTokenNode("static");
   }
   return code;
 }
