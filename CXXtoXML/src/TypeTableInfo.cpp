@@ -344,16 +344,16 @@ TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
     return;
   }
 
-  if (T.isConstQualified()) {
-    if (!isa<const ArrayType>(T.getTypePtr())) {
+  if (!isa<const ArrayType>(T.getTypePtr())) {
+    if (T.isConstQualified()) {
       isQualified = true;
     }
-  }
-  if (T.isVolatileQualified()) {
-    isQualified = true;
-  }
-  if (T.isRestrictQualified()) {
-    isQualified = true;
+    if (T.isVolatileQualified()) {
+      isQualified = true;
+    }
+    if (T.isRestrictQualified()) {
+      isQualified = true;
+    }
   }
 
   if (isQualified) {
@@ -437,6 +437,9 @@ TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
       pushType(T, Node);
     } break;
 
+    case Type::IncompleteArray:
+    case Type::VariableArray:
+    case Type::DependentSizedArray:
     case Type::ConstantArray: {
       ASTContext &CXT = mangleContext->getASTContext();
       const ArrayType *AT = CXT.getAsArrayType(T);
@@ -454,23 +457,6 @@ TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
           xmlNewProp(Node,
                      BAD_CAST "array_size",
                      BAD_CAST CAT->getSize().toString(10, false).c_str());
-      }
-      pushType(T, Node);
-    } break;
-
-    case Type::IncompleteArray:
-    case Type::VariableArray:
-    case Type::DependentSizedArray: {
-      const ArrayType *AT = dyn_cast<const ArrayType>(T.getTypePtr());
-      if (AT) {
-        registerType(AT->getElementType(), nullptr, nullptr);
-      }
-      rawname = registerArrayType(T);
-      Node = createNode(T, "arrayType", nullptr);
-      if (AT) {
-        xmlNewProp(Node,
-            BAD_CAST "element_type",
-            BAD_CAST getTypeName(AT->getElementType()).c_str());
       }
       pushType(T, Node);
     } break;
