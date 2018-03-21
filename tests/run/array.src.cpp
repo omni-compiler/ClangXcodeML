@@ -18,4 +18,9 @@ main() {
       printf("%d\n", i);
     }
   }
+
+  const int array10_ci[10] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+  for (int i = 0; i < 10; ++i) {
+    printf("%d\n", array10_ci[i]);
+  }
 }
