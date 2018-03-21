@@ -387,6 +387,8 @@ Array::makeDeclaration(CodeFragment var, const Environment &env) {
       ? makeTokenNode(std::to_string(size.size))
       : makeTokenNode("*");
   const CodeFragment declarator = makeTokenNode("[")
+      + (isConst() ? makeTokenNode("const") : makeVoidNode())
+      + (isVolatile() ? makeTokenNode("volatile") : makeVoidNode())
       + size_expression + makeTokenNode("]");
   return makeDecl(elementType, var + declarator, env);
 }
@@ -406,6 +408,18 @@ Array::classof(const Type *T) {
 
 Array::Array(const Array &other)
     : Type(other), element(other.element), size(other.size) {
+}
+
+CodeFragment
+Array::addConstQualifier(CodeFragment var) const {
+  // add cv-qualifiers in Array::makeDeclaration, not here
+  return var;
+}
+
+CodeFragment
+Array::addVolatileQualifier(CodeFragment var) const {
+  // add cv-qualifiers in Array::makeDeclaration, not here
+  return var;
 }
 
 TypeRef
