@@ -344,14 +344,16 @@ TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
     return;
   }
 
-  if (T.isConstQualified()) {
-    isQualified = true;
-  }
-  if (T.isVolatileQualified()) {
-    isQualified = true;
-  }
-  if (T.isRestrictQualified()) {
-    isQualified = true;
+  if (!isa<const ArrayType>(T.getTypePtr())) {
+    if (T.isConstQualified()) {
+      isQualified = true;
+    }
+    if (T.isVolatileQualified()) {
+      isQualified = true;
+    }
+    if (T.isRestrictQualified()) {
+      isQualified = true;
+    }
   }
 
   if (isQualified) {
@@ -435,29 +437,12 @@ TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
       pushType(T, Node);
     } break;
 
-    case Type::ConstantArray: {
-      const ConstantArrayType *CAT =
-          dyn_cast<const ConstantArrayType>(T.getTypePtr());
-      if (CAT) {
-        registerType(CAT->getElementType(), nullptr, nullptr);
-      }
-      rawname = registerArrayType(T);
-      Node = createNode(T, "arrayType", nullptr);
-      if (CAT) {
-        xmlNewProp(Node,
-            BAD_CAST "element_type",
-            BAD_CAST getTypeName(CAT->getElementType()).c_str());
-        xmlNewProp(Node,
-            BAD_CAST "array_size",
-            BAD_CAST CAT->getSize().toString(10, false).c_str());
-      }
-      pushType(T, Node);
-    } break;
-
     case Type::IncompleteArray:
     case Type::VariableArray:
-    case Type::DependentSizedArray: {
-      const ArrayType *AT = dyn_cast<const ArrayType>(T.getTypePtr());
+    case Type::DependentSizedArray:
+    case Type::ConstantArray: {
+      ASTContext &CXT = mangleContext->getASTContext();
+      const ArrayType *AT = CXT.getAsArrayType(T);
       if (AT) {
         registerType(AT->getElementType(), nullptr, nullptr);
       }
@@ -467,6 +452,11 @@ TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
         xmlNewProp(Node,
             BAD_CAST "element_type",
             BAD_CAST getTypeName(AT->getElementType()).c_str());
+        const ConstantArrayType *CAT = dyn_cast<const ConstantArrayType>(AT);
+        if (CAT)
+          xmlNewProp(Node,
+                     BAD_CAST "array_size",
+                     BAD_CAST CAT->getSize().toString(10, false).c_str());
       }
       pushType(T, Node);
     } break;
