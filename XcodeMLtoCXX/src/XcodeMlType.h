@@ -287,8 +287,6 @@ public:
   CodeFragment makeDeclaration(CodeFragment, const Environment &) override;
   ~Array() override;
   Type *clone() const override;
-  CodeFragment addConstQualifier(CodeFragment) const override;
-  CodeFragment addVolatileQualifier(CodeFragment) const override;
   static bool classof(const Type *);
   /*! Returns the element type as `XcodeMl::TypeRef`. */
   TypeRef getElemType(const Environment &) const;
