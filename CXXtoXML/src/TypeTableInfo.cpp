@@ -345,7 +345,9 @@ TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
   }
 
   if (T.isConstQualified()) {
-    isQualified = true;
+    if (!isa<const ArrayType>(T.getTypePtr())) {
+      isQualified = true;
+    }
   }
   if (T.isVolatileQualified()) {
     isQualified = true;
@@ -436,20 +438,22 @@ TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
     } break;
 
     case Type::ConstantArray: {
-      const ConstantArrayType *CAT =
-          dyn_cast<const ConstantArrayType>(T.getTypePtr());
-      if (CAT) {
-        registerType(CAT->getElementType(), nullptr, nullptr);
+      ASTContext &CXT = mangleContext->getASTContext();
+      const ArrayType *AT = CXT.getAsArrayType(T);
+      if (AT) {
+        registerType(AT->getElementType(), nullptr, nullptr);
       }
       rawname = registerArrayType(T);
       Node = createNode(T, "arrayType", nullptr);
-      if (CAT) {
+      if (AT) {
         xmlNewProp(Node,
             BAD_CAST "element_type",
-            BAD_CAST getTypeName(CAT->getElementType()).c_str());
-        xmlNewProp(Node,
-            BAD_CAST "array_size",
-            BAD_CAST CAT->getSize().toString(10, false).c_str());
+            BAD_CAST getTypeName(AT->getElementType()).c_str());
+        const ConstantArrayType *CAT = dyn_cast<const ConstantArrayType>(AT);
+        if (CAT)
+          xmlNewProp(Node,
+                     BAD_CAST "array_size",
+                     BAD_CAST CAT->getSize().toString(10, false).c_str());
       }
       pushType(T, Node);
     } break;
