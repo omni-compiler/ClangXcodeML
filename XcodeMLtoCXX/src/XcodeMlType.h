@@ -87,7 +87,7 @@ public:
    * given
    * string (`x` -> `const x`). Some derived classes use different ways. For
    * example,
-   * `XcodeMl::Function::addConstQualifier` returns a string identical to the
+   * `XcodeMl::Array::addConstQualifier` returns a string identical to the
    * parameter.
    */
   virtual CodeFragment addConstQualifier(CodeFragment) const;
@@ -100,7 +100,7 @@ public:
    * the
    * given string (`x` -> `volatile x`). Some derived classes use different
    * ways.
-   * For example, `XcodeMl::Function::addVolatileQualifier` returns a string
+   * For example, `XcodeMl::Array::addVolatileQualifier` returns a string
    * identical to the parameter.
    */
   virtual CodeFragment addVolatileQualifier(CodeFragment) const;
