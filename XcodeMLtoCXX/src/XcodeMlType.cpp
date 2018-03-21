@@ -388,7 +388,7 @@ Array::makeDeclaration(CodeFragment var, const Environment &env) {
       : makeTokenNode("*");
   const CodeFragment declarator = makeTokenNode("[")
       + (isConst() ? makeTokenNode("const") : makeVoidNode())
-      + (isConst() ? makeTokenNode("volatile") : makeVoidNode())
+      + (isVolatile() ? makeTokenNode("volatile") : makeVoidNode())
       + size_expression + makeTokenNode("]");
   return makeDecl(elementType, var + declarator, env);
 }
