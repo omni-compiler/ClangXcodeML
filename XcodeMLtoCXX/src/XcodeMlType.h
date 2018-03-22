@@ -404,10 +404,6 @@ public:
       const Symbols &,
       const llvm::Optional<TemplateArgList> &);
   ClassType(const DataTypeIdent &, const Symbols &);
-  ClassType(const DataTypeIdent &,
-      CXXClassKind,
-      const std::vector<BaseClass> &,
-      const Symbols &);
   CodeFragment makeDeclaration(CodeFragment, const Environment &) override;
   ~ClassType() override = default;
   Type *clone() const override;
