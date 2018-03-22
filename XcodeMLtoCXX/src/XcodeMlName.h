@@ -22,6 +22,8 @@ enum class UnqualIdKind {
   Ctor,
   /*! Destructor name */
   Dtor,
+  /*! template-id */
+  TemplateId,
 };
 
 /*!
