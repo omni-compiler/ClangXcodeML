@@ -89,7 +89,8 @@ protected:
  */
 class ClassNns : public Nns {
 public:
-  ClassNns(const NnsIdent &, const NnsRef &, const DataTypeIdent &);
+  ClassNns(const NnsIdent &, const NnsIdent &, const DataTypeIdent &);
+  ClassNns(const NnsIdent &, const DataTypeIdent &);
   ~ClassNns() override = default;
   Nns *clone() const override;
   static bool classof(const Nns *);
@@ -146,7 +147,7 @@ NnsRef makeGlobalNns();
  * \param classType the data type identifier of the corresponding class
  */
 NnsRef makeClassNns(const NnsIdent &nident,
-    const NnsRef &prefix,
+    const NnsIdent &prefix,
     const DataTypeIdent &classType);
 
 /*!
@@ -159,6 +160,9 @@ NnsRef makeClassNns(const NnsIdent &nident,
 NnsRef makeClassNns(const NnsIdent &nident, const DataTypeIdent &classType);
 
 NnsRef makeNamespaceNns(const NnsIdent &nident, const std::string &name);
+
+NnsRef makeNamespaceNns(
+    const NnsIdent &nident, const NnsIdent &parent, const std::string &name);
 
 NnsRef makeOtherNns(const NnsIdent &nident);
 

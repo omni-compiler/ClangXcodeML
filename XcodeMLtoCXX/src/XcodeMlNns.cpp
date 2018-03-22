@@ -80,8 +80,13 @@ GlobalNns::getParent() const {
 }
 
 ClassNns::ClassNns(
-    const NnsIdent &ni, const NnsRef &parent, const DataTypeIdent &di)
+    const NnsIdent &ni, const NnsIdent &parent, const DataTypeIdent &di)
     : Nns(NnsKind::Class, parent, ni), dtident(di) {
+}
+
+ClassNns::ClassNns(
+    const NnsIdent &ni, const DataTypeIdent &di)
+    : Nns(NnsKind::Class, ni), dtident(di) {
 }
 
 Nns *
@@ -160,19 +165,25 @@ makeGlobalNns() {
 
 NnsRef
 makeClassNns(const NnsIdent &ident,
-    const NnsRef &parent,
+    const NnsIdent &parent,
     const DataTypeIdent &classType) {
   return std::make_shared<ClassNns>(ident, parent, classType);
 }
 
 NnsRef
 makeClassNns(const NnsIdent &ident, const DataTypeIdent &classType) {
-  return std::make_shared<ClassNns>(ident, nullptr, classType);
+  return std::make_shared<ClassNns>(ident, classType);
 }
 
 NnsRef
 makeNamespaceNns(const NnsIdent &nident, const std::string &name) {
   return std::make_shared<NamespaceNns>(nident, name);
+}
+
+NnsRef
+makeNamespaceNns(
+    const NnsIdent &nident, const NnsIdent &parent, const std::string &name) {
+  return std::make_shared<NamespaceNns>(nident, name, parent);
 }
 
 NnsRef
