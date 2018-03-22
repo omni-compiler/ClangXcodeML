@@ -253,8 +253,11 @@ DEFINE_STMTHANDLER(CXXStaticCastExprProc) {
 }
 
 DEFINE_STMTHANDLER(CXXThrowExprProc) {
-  const auto expr = createNode(node, "clangStmt[1]", w, src);
-  return makeTokenNode("throw") + expr;
+  if (auto throwExpr = findFirst(node, "clangStmt[1]", src.ctxt)) {
+    return makeTokenNode("throw") + w.walk(throwExpr, src);
+  } else {
+    return makeTokenNode("throw");
+  }
 }
 
 DEFINE_STMTHANDLER(CXXTryStmtProc) {
