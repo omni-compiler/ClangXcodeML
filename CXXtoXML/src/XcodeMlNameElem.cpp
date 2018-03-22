@@ -139,6 +139,8 @@ makeNameNode(TypeTableInfo &TTI, const NamedDecl *ND) {
   xmlNewProp(node,
       BAD_CAST "fullName",
       BAD_CAST ND->getQualifiedNameAsString().c_str());
+  const auto DN = ND->getDeclName();
+  xmlNewProp(node, BAD_CAST "is_empty", BAD_CAST(DN.isEmpty() ? "true" : "false"));
   if (ND->isLinkageValid()) {
     const auto FL = ND->getFormalLinkage(), LI = ND->getLinkageInternal();
     xmlNewProp(node, BAD_CAST "linkage", BAD_CAST stringifyLinkage(FL));
