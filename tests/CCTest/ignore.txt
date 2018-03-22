@@ -7,3 +7,7 @@ templ05
 templ06
 throw02d
 member046
+class049
+no_name_union
+union03_mod
+union04_mod
