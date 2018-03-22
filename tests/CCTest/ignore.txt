@@ -5,10 +5,5 @@ templ03
 templ04
 templ05
 templ06
-exsp04_mod
-exsp05_mod
-exsp06_mod
-exsp07_mod
-exsp08_mod
-exsp09_mod
+throw02d
 member046
