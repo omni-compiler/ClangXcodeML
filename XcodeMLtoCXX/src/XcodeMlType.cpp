@@ -891,14 +891,6 @@ makeClassType(const DataTypeIdent &ident, const ClassType::Symbols &symbols) {
 }
 
 TypeRef
-makeClassType(const DataTypeIdent &ident,
-    const std::vector<ClassType::BaseClass> &bases,
-    const ClassType::Symbols &symbols) {
-  return std::make_shared<ClassType>(
-      ident, CXXClassKind::Class, bases, symbols);
-}
-
-TypeRef
 makeClassType(const DataTypeIdent &dtident,
     const llvm::Optional<CodeFragment> &className,
     const std::vector<ClassType::BaseClass> &bases,
