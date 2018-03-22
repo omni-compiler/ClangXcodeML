@@ -899,11 +899,6 @@ makeStructType(const DataTypeIdent &ident,
 }
 
 TypeRef
-makeClassType(const DataTypeIdent &ident, const ClassType::Symbols &symbols) {
-  return std::make_shared<ClassType>(ident, symbols);
-}
-
-TypeRef
 makeClassType(const DataTypeIdent &dtident,
     const llvm::Optional<std::string> nnsident,
     const CodeFragment &className,
