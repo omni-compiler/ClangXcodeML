@@ -902,10 +902,15 @@ makeClassType(const DataTypeIdent &dtident,
 
 TypeRef
 makeCXXUnionType(const DataTypeIdent &ident,
+    const CodeFragment &className,
     const std::vector<ClassType::BaseClass> &bases,
     const ClassType::Symbols &members) {
-  return std::make_shared<ClassType>(
-      ident, CXXClassKind::Union, bases, members);
+  return std::make_shared<ClassType>(ident,
+      CXXClassKind::Union,
+      className,
+      bases,
+      members,
+      llvm::Optional<ClassType::TemplateArgList>());
 }
 
 TypeRef
