@@ -403,6 +403,7 @@ public:
   ClassType(const DataTypeIdent &,
       CXXClassKind,
       const llvm::Optional<std::string> &nns,
+      bool isAnonymousUnion,
       const CodeFragment &,
       const std::vector<BaseClass> &,
       const Symbols &,
@@ -429,6 +430,7 @@ protected:
 private:
   CXXClassKind classKind_;
   llvm::Optional<std::string> nnsident;
+  bool isAnonymousUnion;
   ClassName name_;
   std::vector<BaseClass> bases_;
   Symbols classScopeSymbols;
