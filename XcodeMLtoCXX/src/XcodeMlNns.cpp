@@ -84,6 +84,11 @@ ClassNns::ClassNns(
     : Nns(NnsKind::Class, parent, ni), dtident(di) {
 }
 
+ClassNns::ClassNns(
+    const NnsIdent &ni, const DataTypeIdent &di)
+    : Nns(NnsKind::Class, ni), dtident(di) {
+}
+
 Nns *
 ClassNns::clone() const {
   ClassNns *copy = new ClassNns(*this);
