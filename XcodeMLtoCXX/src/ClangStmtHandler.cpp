@@ -381,8 +381,18 @@ DEFINE_STMTHANDLER(LabelStmtProc) {
   return makeTokenNode(label) + makeTokenNode(":") + body;
 }
 
+bool
+isRhsAnonymousStructureObject(
+    xmlNodePtr memberExprNode, const SourceInfo &src) {
+  const auto nameNode = findFirst(memberExprNode, "name", src.ctxt);
+  return isTrueProp(nameNode, "is_empty", false);
+}
+
 DEFINE_STMTHANDLER(MemberExprProc) {
   const auto expr = createNode(node, "clangStmt", w, src);
+  if (isRhsAnonymousStructureObject(node, src)) {
+    return expr;
+  }
   const auto member =
       getQualifiedName(node, src).toString(src.typeTable, src.nnsTable);
   const auto isArrow = isTrueProp(node, "is_arrow", false);
