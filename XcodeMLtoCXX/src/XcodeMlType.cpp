@@ -526,6 +526,11 @@ EnumType::classof(const Type *T) {
   return T->getKind() == TypeKind::Enum;
 }
 
+EnumType::EnumName
+EnumType::name() const {
+  return name_;
+}
+
 void
 EnumType::setName(const std::string &enum_name) {
   assert(!name_);
@@ -897,8 +902,8 @@ makeVariadicFunctionType(const DataTypeIdent &ident,
 }
 
 TypeRef
-makeEnumType(const DataTypeIdent &ident) {
-  return std::make_shared<EnumType>(ident, EnumType::EnumName());
+makeEnumType(const DataTypeIdent &ident, const CodeFragment &tagname) {
+  return std::make_shared<EnumType>(ident, tagname);
 }
 
 TypeRef
