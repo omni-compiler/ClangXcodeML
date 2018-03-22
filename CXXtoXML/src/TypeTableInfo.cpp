@@ -595,6 +595,8 @@ TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
       if (!ED) {
         break;
       }
+      const auto nameNode = makeNameNode(*this, ED);
+      xmlAddChild(Node, nameNode);
       auto def = ED->getDefinition();
       if (!def) {
         /* Forward declaration of enum is available in C++11
