@@ -156,7 +156,7 @@ DEFINE_STMTHANDLER(ConditionalOperatorProc) {
   const auto cond = createNode(node, "clangStmt[1]", w, src);
   const auto yes = createNode(node, "clangStmt[2]", w, src);
   const auto no = createNode(node, "clangStmt[3]", w, src);
-  return cond + makeTokenNode("?") + yes + makeTokenNode(":") + no;
+  return wrapWithParen(cond + makeTokenNode("?") + yes + makeTokenNode(":") + no);
 }
 
 DEFINE_STMTHANDLER(ContinueStmtProc) {
