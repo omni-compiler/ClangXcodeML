@@ -394,7 +394,8 @@ class ClassType : public Type {
 public:
   using ClassName = CodeFragment;
   using MemberName = std::shared_ptr<UnqualId>;
-  using Symbols = std::vector<std::tuple<MemberName, DataTypeIdent>>;
+  using Symbol = std::tuple<llvm::Optional<MemberName>, DataTypeIdent>;
+  using Symbols = std::vector<Symbol>;
   using BaseClass = std::tuple<std::string, DataTypeIdent, bool>;
   using TemplateArg = DataTypeIdent;
   using TemplateArgList = std::vector<TemplateArg>;
