@@ -451,12 +451,11 @@ DEFINE_DECLHANDLER(UsingDirectiveProc) {
 }
 
 CodeFragment
-makeSpecifier(xmlNodePtr node) {
+makeSpecifier(xmlNodePtr node, bool is_in_class_scope) {
   const std::vector<std::tuple<std::string, std::string>> specifiers = {
       std::make_tuple("is_extern", "extern"),
       std::make_tuple("is_register", "register"),
       std::make_tuple("is_static", "static"),
-      std::make_tuple("is_static_data_member", "static"),
       std::make_tuple("is_thread_local", "thread_local"),
   };
   auto code = CXXCodeGen::makeVoidNode();
@@ -467,21 +466,31 @@ makeSpecifier(xmlNodePtr node) {
       code = code + makeTokenNode(specifier);
     }
   }
+  if (!is_in_class_scope) {
+    return code;
+  }
+  if (isTrueProp(node, "is_static_data_member", false)) {
+    code = code + makeTokenNode("static");
+  }
   return code;
 }
 
-DEFINE_DECLHANDLER(VarProc) {
-  const auto nameNode = findFirst(node, "name", src.ctxt);
-  const auto name = getUnqualIdFromNameNode(nameNode)->toString(src.typeTable);
+CodeFragment
+emitVarDecl(xmlNodePtr node,
+    const CodeBuilder &w,
+    SourceInfo &src,
+    bool is_in_class_scope) {
+  const auto name =
+      getQualifiedName(node, src).toString(src.typeTable, src.nnsTable);
   const auto dtident = getProp(node, "xcodemlType");
   const auto T = src.typeTable.at(dtident);
 
-  const auto decl = makeSpecifier(node)
+  const auto decl = makeSpecifier(node, is_in_class_scope)
       + T->makeDeclarationWithNnsMap(name, src.typeTable, src.nnsTable);
   const auto initializerNode = findFirst(node, "clangStmt", src.ctxt);
   if (!initializerNode) {
     // does not have initalizer: `int x;`
-    return makeDecl(T, name, src.typeTable);
+    return decl;
   }
   const auto astClass = getProp(initializerNode, "class");
   if (std::equal(astClass.begin(), astClass.end(), "CXXConstructExpr")) {
@@ -491,6 +500,14 @@ DEFINE_DECLHANDLER(VarProc) {
   }
   const auto init = w.walk(initializerNode, src);
   return decl + makeTokenNode("=") + init;
+}
+
+DEFINE_DECLHANDLER(VarProc) {
+  return emitVarDecl(node, w, src, false);
+}
+
+DEFINE_DECLHANDLER(VarProcInClass) {
+  return emitVarDecl(node, w, src, true);
 }
 
 } // namespace
@@ -511,7 +528,7 @@ const ClangDeclHandlerType ClangDeclHandlerInClass("class",
         std::make_tuple("TemplateTypeParm", TemplateTypeParmProc),
         std::make_tuple("TypeAlias", TypeAliasProc),
         std::make_tuple("Typedef", TypedefProc),
-        std::make_tuple("Var", VarProc),
+        std::make_tuple("Var", VarProcInClass),
     });
 
 const ClangDeclHandlerType ClangDeclHandler("class",
