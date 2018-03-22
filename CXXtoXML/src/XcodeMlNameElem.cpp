@@ -121,8 +121,13 @@ makeNameNode(TypeTableInfo &TTI, const NamedDecl *ND) {
   if (ND->getDeclName().getNameKind() == NK::CXXOperatorName) {
     // An overloaded operator can be a member function
     // or a non-member function (= CXXMethod).
-    const auto FD = cast<FunctionDecl>(ND);
-    node = makeNameNodeForCXXOperator(TTI, FD);
+    if (const auto FD = dyn_cast<FunctionDecl>(ND)) {
+      node = makeNameNodeForCXXOperator(TTI, FD);
+    } else if (const auto FTD = dyn_cast<FunctionTemplateDecl>(ND)) {
+      node = makeNameNodeForCXXOperator(TTI, FTD->getTemplatedDecl());
+    } else {
+      assert(!"a DeclName with CXXOperatorName is not FunctionDecl or FunctionTemplateDecl");
+    }
   } else if (auto MD = dyn_cast<CXXMethodDecl>(ND)) {
     node = makeNameNodeForCXXMethodDecl(TTI, MD);
   } else {

@@ -306,11 +306,40 @@ commonSetUpForRecordDecl(
     xmlNewProp(node, BAD_CAST "is_template_instantiation", BAD_CAST "true");
     const auto templArgs = xmlNewNode(nullptr, BAD_CAST "templateArguments");
     for (auto &&arg : CTS->getTemplateArgs().asArray()) {
-      const auto typeNode = xmlNewNode(nullptr, BAD_CAST "typeName");
-      xmlNewProp(typeNode,
-          BAD_CAST "ref",
-          BAD_CAST TTI.getTypeName(arg.getAsType()).c_str());
-      xmlAddChild(templArgs, typeNode);
+      switch (arg.getKind()) {
+      case TemplateArgument::Null:
+        xmlAddChild(templArgs, xmlNewNode(nullptr, BAD_CAST "null"));
+        break;
+      case TemplateArgument::Type: {
+        const auto typeNode = xmlNewNode(nullptr, BAD_CAST "typeName");
+        xmlNewProp(typeNode,
+                   BAD_CAST "ref",
+                   BAD_CAST TTI.getTypeName(arg.getAsType()).c_str());
+        xmlAddChild(templArgs, typeNode);
+        break;
+      }
+      case TemplateArgument::Declaration:
+        xmlAddChild(templArgs, xmlNewNode(nullptr, BAD_CAST "declaration"));
+        break;
+      case TemplateArgument::NullPtr:
+        xmlAddChild(templArgs, xmlNewNode(nullptr, BAD_CAST "nullptr"));
+        break;
+      case TemplateArgument::Integral:
+        xmlAddChild(templArgs, xmlNewNode(nullptr, BAD_CAST "integral"));
+        break;
+      case TemplateArgument::Template:
+        xmlAddChild(templArgs, xmlNewNode(nullptr, BAD_CAST "template"));
+        break;
+      case TemplateArgument::TemplateExpansion:
+        xmlAddChild(templArgs, xmlNewNode(nullptr, BAD_CAST "template_expansion"));
+        break;
+      case TemplateArgument::Expression:
+        xmlAddChild(templArgs, xmlNewNode(nullptr, BAD_CAST "expression"));
+        break;
+      case TemplateArgument::Pack:
+        xmlAddChild(templArgs, xmlNewNode(nullptr, BAD_CAST "pack"));
+        break;
+      }
     }
     xmlAddChild(node, templArgs);
   }
