@@ -137,7 +137,8 @@ makeBases(const XcodeMl::ClassType &T, SourceInfo &src) {
         assert(classT);
         return makeTokenNode(std::get<0>(base))
             + makeTokenNode(std::get<2>(base) ? "virtual" : "")
-            + (classT->name());
+            + classT->getAsTemplateId(src.typeTable)
+                  .getValueOr(classT->name());
       });
   return decls.empty() ? CXXCodeGen::makeVoidNode()
                        : makeTokenNode(":") + CXXCodeGen::join(",", decls);
