@@ -493,6 +493,7 @@ TypeRef makeCXXUnionType(const DataTypeIdent &ident,
     const std::vector<ClassType::BaseClass> &bases,
     const ClassType::Symbols &members);
 TypeRef makeCXXUnionType(const DataTypeIdent &ident,
+    bool isAnonymousUnion,
     const CodeFragment &unionName,
     const std::vector<ClassType::BaseClass> &bases,
     const ClassType::Symbols &members,
