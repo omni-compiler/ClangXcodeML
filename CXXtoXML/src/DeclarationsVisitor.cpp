@@ -122,7 +122,7 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
     newBoolProp("is_new_array", NL->isArray());
   }
 
-  if (auto ME = dyn_cast<clang::MemberExpr>(S)) {
+  if (const auto ME = dyn_cast<clang::MemberExpr>(S)) {
     newBoolProp("is_arrow", ME->isArrow());
 
     const auto MD = ME->getMemberDecl();
