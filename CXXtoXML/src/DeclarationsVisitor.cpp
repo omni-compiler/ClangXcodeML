@@ -231,10 +231,11 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
       if (UEOTTE->isArgumentType()) {
         newChild("typeName");
         TraverseType(UEOTTE->getArgumentType());
+        return true;
       } else {
         TraverseStmt(UEOTTE->getArgumentExpr());
+        return false; // already traversed
       }
-      return true;
     }
     case UETT_AlignOf: {
       newChild("gccAlignOfExpr");
