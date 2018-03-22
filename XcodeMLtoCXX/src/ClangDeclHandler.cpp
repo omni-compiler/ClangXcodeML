@@ -294,6 +294,18 @@ DEFINE_DECLHANDLER(emitInlineMemberFunction) {
   return acc;
 }
 
+DEFINE_DECLHANDLER(EnumConstantProc) {
+  const auto nameNode = findFirst(node, "name", src.ctxt);
+  const auto name = getUnqualIdFromNameNode(nameNode)->toString(src.typeTable);
+
+  const auto exprNode = findFirst(node, "clangStmt", src.ctxt);
+  if (!exprNode) {
+    return name;
+  }
+  const auto expr = ProgramBuilder.walk(exprNode, src);
+  return name + makeTokenNode("=") + expr;
+}
+
 DEFINE_DECLHANDLER(FieldDeclProc) {
   const auto nameNode = findFirst(node, "name", src.ctxt);
   const auto name = getUnqualIdFromNameNode(nameNode)->toString(src.typeTable);
@@ -547,6 +559,7 @@ const ClangDeclHandlerType ClangDeclHandler("class",
         std::make_tuple("CXXDestructor", FunctionProc),
         std::make_tuple("CXXMethod", FunctionProc),
         std::make_tuple("CXXRecord", CXXRecordProc),
+        std::make_tuple("EnumConstant", EnumConstantProc),
         std::make_tuple("Field", FieldDeclProc),
         std::make_tuple("Function", FunctionProc),
         std::make_tuple("FunctionTemplate", FunctionTemplateProc),
