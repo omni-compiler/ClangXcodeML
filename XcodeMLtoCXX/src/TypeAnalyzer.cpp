@@ -177,8 +177,12 @@ DEFINE_TA(classTypeProc) {
   const auto ids = findNodes(node, "symbols/id", ctxt);
   for (auto &idElem : ids) {
     const auto dtident = getProp(idElem, "type");
-    const auto pName = getUnqualIdFromIdNode(idElem, ctxt);
-    symbols.emplace_back(pName, dtident);
+    if (findFirst(idElem, "name", ctxt)) {
+      const auto name = getUnqualIdFromIdNode(idElem, ctxt);
+      symbols.emplace_back(name, dtident);
+    } else {
+      symbols.emplace_back(llvm::None, dtident);
+    }
   }
   const auto nnsident = getPropOrNull(node, "nns");
 
