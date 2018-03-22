@@ -43,6 +43,11 @@ const std::map<std::string, std::string> opMap = {
     {"asgBitOrExpr", "|="},
     {"asgBitXorExpr", "^="},
 
+    {"arrowExpr", "->"},
+    {"arrowStarExpr", "->*"},
+    {"callExpr", "()"},
+    {"subScriptExpr", "[]"},
+
     {"logEQExpr", "=="},
     {"logNEQExpr", "!="},
     {"logGEExpr", ">="},
@@ -57,8 +62,10 @@ const std::map<std::string, std::string> opMap = {
     {"deleteArrayExpr", "delete[]"},
     {"AddrOfExpr", "&"},
     {"pointerRef", "*"},
+    {"unaryPlusExpr", "+"},
     {"unaryMinusExpr", "-"},
     {"logNotExpr", "!"},
+    {"bitNotExpr", "~"},
 };
 
 namespace XcodeMl {
