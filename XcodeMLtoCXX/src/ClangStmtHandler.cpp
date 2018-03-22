@@ -305,6 +305,18 @@ DEFINE_STMTHANDLER(emitTokenAttrValue) {
   return makeTokenNode(token);
 }
 
+DEFINE_STMTHANDLER(emitIntegerLiteral) {
+  const auto token = getProp(node, "token");
+  if (token.size() > 0) {
+    return makeTokenNode(token);
+  } else {
+    // overloaded postIncrExpr & postDecrExpr has a dummy argument:
+    //  <clangStmt class="IntegerLiteral" token="" decimalNotation="0"/>
+    // we must handle this special case.
+    return makeTokenNode(getProp(node, "decimalNotation"));
+  }
+}
+
 DEFINE_STMTHANDLER(CXXTemporaryObjectExprProc) {
   const auto resultT = src.typeTable.at(getType(node));
   const auto name = llvm::cast<XcodeMl::ClassType>(resultT.get())->name();
@@ -485,7 +497,7 @@ const ClangStmtHandlerType ClangStmtHandler("class",
         std::make_tuple("GotoStmt", GotoStmtProc),
         std::make_tuple("IfStmt", IfStmtProc),
         std::make_tuple("InitListExpr", InitListExprProc),
-        std::make_tuple("IntegerLiteral", emitTokenAttrValue),
+        std::make_tuple("IntegerLiteral", emitIntegerLiteral),
         std::make_tuple("LabelStmt", LabelStmtProc),
         std::make_tuple("MemberExpr", MemberExprProc),
         std::make_tuple("ReturnStmt", ReturnStmtProc),
