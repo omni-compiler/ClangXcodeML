@@ -505,6 +505,13 @@ emitVarDecl(xmlNodePtr node,
 }
 
 DEFINE_DECLHANDLER(VarProc) {
+  const auto dtident = getType(node);
+  const auto T = src.typeTable.at(dtident);
+  if (const auto classT = llvm::dyn_cast<XcodeMl::ClassType>(T.get())) {
+    if (classT->isAnonymous()) {
+      return makeClassTypeDefinition(*classT, src);
+    }
+  }
   return emitVarDecl(node, w, src, false);
 }
 
