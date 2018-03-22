@@ -182,6 +182,28 @@ makeFunctionDeclHead(xmlNodePtr node,
   return acc;
 }
 
+XcodeMl::CodeFragment
+makeClassTypeDefinition(
+    const XcodeMl::ClassType &classT, const SourceInfo &src) {
+  const auto symbols = classT.getSymbols();
+  std::vector<XcodeMl::CodeFragment> decls;
+  for (auto &&symbol : symbols) {
+    const auto name = std::get<0>(symbol);
+    if (!name.hasValue()) {
+      continue;
+    }
+    const auto dtident = std::get<1>(symbol);
+    const auto T = src.typeTable.at(dtident);
+    decls.push_back(
+        makeDecl(T, (*name)->toString(src.typeTable), src.typeTable));
+  }
+  const auto classKey =
+      CXXCodeGen::makeTokenNode(getClassKey(classT.classKind()));
+  const auto className =
+      classT.isAnonymous() ? CXXCodeGen::makeVoidNode() : classT.name();
+  return classKey + className + wrapWithBrace(foldWithSemicolon(decls));
+}
+
 bool
 requiresSemicolon(xmlNodePtr node, const SourceInfo &src) {
   const auto declClass = getProp(node, "class");
