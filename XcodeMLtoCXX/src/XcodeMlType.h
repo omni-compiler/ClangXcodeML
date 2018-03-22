@@ -77,6 +77,8 @@ public:
   virtual ~Type() = 0;
   virtual Type *clone() const = 0;
   virtual CodeFragment makeDeclaration(CodeFragment, const Environment &) = 0;
+  virtual CodeFragment makeDeclarationWithNnsMap(
+      const CodeFragment &, const Environment &, const NnsMap &);
 
   /*!
    * \brief Return a code fragment string created by adding the `const`
@@ -390,7 +392,7 @@ std::string getClassKey(CXXClassKind kind);
 /*! \brief Represents (C++-style) class. */
 class ClassType : public Type {
 public:
-  using ClassName = llvm::Optional<CodeFragment>;
+  using ClassName = CodeFragment;
   using MemberName = std::shared_ptr<UnqualId>;
   using Symbols = std::vector<std::tuple<MemberName, DataTypeIdent>>;
   using BaseClass = std::tuple<std::string, DataTypeIdent, bool>;
@@ -399,16 +401,15 @@ public:
   ClassType(const DataTypeIdent &, const CodeFragment &, const Symbols &);
   ClassType(const DataTypeIdent &,
       CXXClassKind,
+      const llvm::Optional<std::string> &nns,
       const CodeFragment &,
       const std::vector<BaseClass> &,
       const Symbols &,
       const llvm::Optional<TemplateArgList> &);
   ClassType(const DataTypeIdent &, const Symbols &);
-  ClassType(const DataTypeIdent &,
-      CXXClassKind,
-      const std::vector<BaseClass> &,
-      const Symbols &);
   CodeFragment makeDeclaration(CodeFragment, const Environment &) override;
+  CodeFragment makeDeclarationWithNnsMap(
+      const CodeFragment &, const Environment &, const NnsMap &) override;
   ~ClassType() override = default;
   Type *clone() const override;
   CXXClassKind classKind() const;
@@ -427,6 +428,7 @@ protected:
 
 private:
   CXXClassKind classKind_;
+  llvm::Optional<std::string> nnsident;
   ClassName name_;
   std::vector<BaseClass> bases_;
   Symbols classScopeSymbols;
@@ -478,19 +480,18 @@ TypeRef makeArrayType(DataTypeIdent, DataTypeIdent, Array::Size);
 TypeRef makeArrayType(DataTypeIdent, DataTypeIdent, size_t);
 TypeRef makeEnumType(const DataTypeIdent &);
 TypeRef makeClassType(const DataTypeIdent &, const ClassType::Symbols &);
-TypeRef makeClassType(const DataTypeIdent &,
-    const std::vector<ClassType::BaseClass> &,
-    const ClassType::Symbols &);
 TypeRef makeClassType(const DataTypeIdent &dtident,
-    const llvm::Optional<CodeFragment> &className,
+    const llvm::Optional<std::string> nnsident,
+    const CodeFragment &className,
     const std::vector<ClassType::BaseClass> &bases,
     const ClassType::Symbols &members,
     const llvm::Optional<ClassType::TemplateArgList> &templateArgs);
 TypeRef makeCXXUnionType(const DataTypeIdent &ident,
+    const CodeFragment &unionName,
     const std::vector<ClassType::BaseClass> &bases,
     const ClassType::Symbols &members);
 TypeRef makeCXXUnionType(const DataTypeIdent &ident,
-    const llvm::Optional<CodeFragment> &unionName,
+    const CodeFragment &unionName,
     const std::vector<ClassType::BaseClass> &bases,
     const ClassType::Symbols &members,
     const llvm::Optional<ClassType::TemplateArgList> &templateArgs);

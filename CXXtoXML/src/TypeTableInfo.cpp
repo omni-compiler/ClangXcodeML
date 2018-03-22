@@ -36,8 +36,9 @@ static std::ifstream mapfile;
 static bool map_is_already_set = false;
 static std::map<std::string, std::string> typenamemap;
 
-TypeTableInfo::TypeTableInfo(MangleContext *MC, InheritanceInfo *II)
-    : mangleContext(MC), inheritanceinfo(II) {
+TypeTableInfo::TypeTableInfo(
+    MangleContext *MC, InheritanceInfo *II, NnsTableInfo *NTI)
+    : mangleContext(MC), inheritanceinfo(II), nnstableinfo(NTI) {
   mapFromNameToQualType.clear();
   mapFromQualTypeToName.clear();
   mapFromQualTypeToXmlNodePtr.clear();
@@ -566,6 +567,10 @@ TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
       if (auto RD = T->getAsCXXRecordDecl()) {
         Node = createNode(T, "classType", nullptr);
         commonSetUpForRecordDecl(Node, RD, *this);
+        const auto DC = RD->getDeclContext();
+        assert(DC);
+        const auto nns = nnstableinfo->getNnsName(DC);
+        xmlNewProp(Node, BAD_CAST "nns", BAD_CAST(nns.c_str()));
         pushType(T, Node);
       } else if (T->isStructureType()) {
         Node = createNode(T, "structType", nullptr);

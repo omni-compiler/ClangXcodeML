@@ -32,6 +32,7 @@ OBJNAMES = XcodeMlType.o \
 	TypeAnalyzer.o \
 	XMLString.o \
 	XcodeMlEnvironment.o \
+	XcodeMlNns.o \
 	SymbolAnalyzer.o \
 	SymbolBuilder.o
 
@@ -44,6 +45,7 @@ XcodeMlType: \
 	$(XCODEMLTOCXXSRCDIR)/Stream.o \
 	$(XCODEMLTOCXXSRCDIR)/StringTree.o \
 	$(XCODEMLTOCXXSRCDIR)/XcodeMlEnvironment.o \
+	$(XCODEMLTOCXXSRCDIR)/XcodeMlNns.o \
 	$(XCODEMLTOCXXSRCDIR)/XcodeMlType.o
 
 CXXCodeGenStream: \

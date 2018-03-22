@@ -180,14 +180,15 @@ DEFINE_TA(classTypeProc) {
     const auto pName = getUnqualIdFromIdNode(idElem, ctxt);
     symbols.emplace_back(pName, dtident);
   }
+  const auto nnsident = getPropOrNull(node, "nns");
 
   const auto classKind = getProp(node, "cxx_class_kind");
   if (classKind == "union") {
     map[elemName] =
         XcodeMl::makeCXXUnionType(elemName, className, bases, symbols, targs);
   } else {
-    map[elemName] =
-        XcodeMl::makeClassType(elemName, className, bases, symbols, targs);
+    map[elemName] = XcodeMl::makeClassType(
+        elemName, nnsident, className, bases, symbols, targs);
   }
 }
 
