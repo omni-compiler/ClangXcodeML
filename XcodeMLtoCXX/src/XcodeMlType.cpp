@@ -915,17 +915,12 @@ makeCXXUnionType(const DataTypeIdent &ident,
 
 TypeRef
 makeCXXUnionType(const DataTypeIdent &ident,
-    const llvm::Optional<CodeFragment> &unionName,
+    const CodeFragment &unionName,
     const std::vector<ClassType::BaseClass> &bases,
     const ClassType::Symbols &members,
     const llvm::Optional<ClassType::TemplateArgList> &targs) {
-  if (unionName.hasValue()) {
-    return std::make_shared<ClassType>(
-        ident, CXXClassKind::Union, *unionName, bases, members, targs);
-  } else {
-    return std::make_shared<ClassType>(
-        ident, CXXClassKind::Union, bases, members);
-  }
+  return std::make_shared<ClassType>(
+      ident, CXXClassKind::Union, unionName, bases, members, targs);
 }
 
 TypeRef
