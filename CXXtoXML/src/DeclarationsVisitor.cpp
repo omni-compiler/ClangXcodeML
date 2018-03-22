@@ -69,8 +69,10 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
       Stmt *stmt;
       std::tie(kind, stmt) = child;
       TraverseStmt(stmt);
-      xmlNewProp(
-          xmlGetLastChild(curNode), BAD_CAST "for_stmt_kind", BAD_CAST kind);
+      if (stmt) {
+        xmlNewProp(xmlGetLastChild(curNode),
+                   BAD_CAST "for_stmt_kind", BAD_CAST kind);
+      }
     }
     return false; // already traversed
   }
