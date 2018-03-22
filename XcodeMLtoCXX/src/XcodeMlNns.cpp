@@ -80,7 +80,7 @@ GlobalNns::getParent() const {
 }
 
 ClassNns::ClassNns(
-    const NnsIdent &ni, const NnsRef &parent, const DataTypeIdent &di)
+    const NnsIdent &ni, const NnsIdent &parent, const DataTypeIdent &di)
     : Nns(NnsKind::Class, parent, ni), dtident(di) {
 }
 
@@ -160,7 +160,7 @@ makeGlobalNns() {
 
 NnsRef
 makeClassNns(const NnsIdent &ident,
-    const NnsRef &parent,
+    const NnsIdent &parent,
     const DataTypeIdent &classType) {
   return std::make_shared<ClassNns>(ident, parent, classType);
 }
