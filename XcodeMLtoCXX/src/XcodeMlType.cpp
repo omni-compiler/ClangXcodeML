@@ -705,6 +705,11 @@ ClassType::getBases() const {
 }
 
 bool
+ClassType::isAnonymous() const {
+  return isAnonymousUnion;
+}
+
+bool
 ClassType::isClassTemplateSpecialization() const {
   return templateArgs.hasValue();
 }

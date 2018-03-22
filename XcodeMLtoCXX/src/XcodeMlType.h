@@ -419,6 +419,7 @@ public:
   void setName(const CodeFragment &);
   Symbols getSymbols() const;
   std::vector<BaseClass> getBases() const;
+  bool isAnonymous() const;
   bool isClassTemplateSpecialization() const;
   llvm::Optional<CodeFragment> getAsTemplateId(
       const Environment &typeTable) const;
