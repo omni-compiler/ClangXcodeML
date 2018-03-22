@@ -475,7 +475,7 @@ TypeRef makeArrayType(DataTypeIdent, DataTypeIdent, size_t);
 TypeRef makeEnumType(const DataTypeIdent &);
 TypeRef makeClassType(const DataTypeIdent &, const ClassType::Symbols &);
 TypeRef makeClassType(const DataTypeIdent &dtident,
-    const llvm::Optional<CodeFragment> &className,
+    const CodeFragment &className,
     const std::vector<ClassType::BaseClass> &bases,
     const ClassType::Symbols &members,
     const llvm::Optional<ClassType::TemplateArgList> &templateArgs);
