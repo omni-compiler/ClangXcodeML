@@ -279,7 +279,9 @@ DeclarationsVisitor::PreVisitType(QualType T) {
     newComment("Type:NULL");
     return true;
   }
-  newProp("type", optContext->typetableinfo.getTypeName(T).c_str());
+  if (!xmlHasProp(curNode, BAD_CAST "type")) {
+    newProp("type", optContext->typetableinfo.getTypeName(T).c_str());
+  }
   return false;
 }
 
