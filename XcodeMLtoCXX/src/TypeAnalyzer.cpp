@@ -193,8 +193,10 @@ DEFINE_TA(classTypeProc) {
 }
 
 DEFINE_TA(enumTypeProc) {
-  XMLString dtident = xmlGetProp(node, BAD_CAST "type");
-  map[dtident] = XcodeMl::makeEnumType(dtident);
+  const auto dtident = getType(node);
+  const auto name = getUnqualIdFromIdNode(node, ctxt);
+  const auto nameSpelling = name->toString(map);
+  map[dtident] = XcodeMl::makeEnumType(dtident, nameSpelling);
 }
 
 DEFINE_TA(TemplateTypeParmTypeProc) {
