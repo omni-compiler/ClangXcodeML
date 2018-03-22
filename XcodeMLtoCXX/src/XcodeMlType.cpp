@@ -633,16 +633,6 @@ ClassType::ClassType(const DataTypeIdent &ident,
       templateArgs(argList) {
 }
 
-ClassType::ClassType(
-    const DataTypeIdent &ident, const ClassType::Symbols &symbols)
-    : Type(TypeKind::Class, ident),
-      classKind_(CXXClassKind::Class),
-      name_(),
-      bases_(),
-      classScopeSymbols(symbols),
-      templateArgs() {
-}
-
 std::string
 getClassKey(CXXClassKind kind) {
   switch (kind) {

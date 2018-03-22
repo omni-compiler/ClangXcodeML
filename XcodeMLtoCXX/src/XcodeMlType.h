@@ -407,7 +407,6 @@ public:
       const std::vector<BaseClass> &,
       const Symbols &,
       const llvm::Optional<TemplateArgList> &);
-  ClassType(const DataTypeIdent &, const Symbols &);
   CodeFragment makeDeclaration(CodeFragment, const Environment &) override;
   CodeFragment makeDeclarationWithNnsMap(
       const CodeFragment &, const Environment &, const NnsMap &) override;
