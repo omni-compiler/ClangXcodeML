@@ -37,6 +37,8 @@ enum class TypeKind {
   Qualified,
   /*! Pointer type (3.5 <pointerType> element) */
   Pointer,
+  /*! Pointer to member */
+  MemberPointer,
   /*! Lvalue reference type */
   LValueReference,
   /*! Rvalue reference type */
@@ -185,6 +187,31 @@ protected:
 
 private:
   DataTypeIdent ref;
+};
+
+class MemberPointer : public Type {
+public:
+  MemberPointer(DataTypeIdent dtident, DataTypeIdent p, DataTypeIdent r)
+      : Type(TypeKind::MemberPointer, dtident), pointee(p), record(r) {
+  }
+  CodeFragment makeDeclaration(CodeFragment, const TypeTable &) override;
+  ~MemberPointer() override = default;
+  Type *
+  clone() const override {
+    MemberPointer *copy = new MemberPointer(*this);
+    return copy;
+  }
+  static bool
+  classof(const Type *T) {
+    return T->getKind() == TypeKind::MemberPointer;
+  }
+
+protected:
+  MemberPointer(const MemberPointer &) = default;
+
+private:
+  DataTypeIdent pointee;
+  DataTypeIdent record;
 };
 
 /*! \brief Represents an lvalue or rvalue reference type. */
