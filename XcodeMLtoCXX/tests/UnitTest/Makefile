@@ -31,7 +31,7 @@ OBJNAMES = XcodeMlType.o \
 	StringTree.o \
 	TypeAnalyzer.o \
 	XMLString.o \
-	XcodeMlEnvironment.o \
+	XcodeMlTypeTable.o \
 	XcodeMlNns.o \
 	SymbolAnalyzer.o \
 	SymbolBuilder.o
@@ -44,7 +44,7 @@ $(OBJS):
 XcodeMlType: \
 	$(XCODEMLTOCXXSRCDIR)/Stream.o \
 	$(XCODEMLTOCXXSRCDIR)/StringTree.o \
-	$(XCODEMLTOCXXSRCDIR)/XcodeMlEnvironment.o \
+	$(XCODEMLTOCXXSRCDIR)/XcodeMlTypeTable.o \
 	$(XCODEMLTOCXXSRCDIR)/XcodeMlNns.o \
 	$(XCODEMLTOCXXSRCDIR)/XcodeMlType.o
 
