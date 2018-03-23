@@ -222,6 +222,16 @@ Pointer::getPointee(const TypeTable &env) const {
 Pointer::Pointer(const Pointer &other) : Type(other), ref(other.ref) {
 }
 
+CodeFragment
+MemberPointer::makeDeclaration(CodeFragment var, const TypeTable &typeTable) {
+  const auto recT = typeTable.at(record);
+  const auto classT = llvm::cast<ClassType>(recT.get());
+  const auto innerDecl = classT->name() + makeTokenNode("::*") + var;
+
+  const auto pointeeT = typeTable.at(pointee);
+  return makeDecl(pointeeT, innerDecl, typeTable);
+}
+
 ReferenceType::ReferenceType(
     const DataTypeIdent &ident, TypeKind kind, const DataTypeIdent &r)
     : Type(kind, ident), ref(r) {
