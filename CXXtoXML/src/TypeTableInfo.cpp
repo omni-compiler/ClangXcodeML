@@ -447,8 +447,7 @@ TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
       break;
 
     case Type::Pointer:
-    case Type::BlockPointer:
-    case Type::MemberPointer: {
+    case Type::BlockPointer: {
       rawname = registerPointerType(T);
       Node = createNode(T, "pointerType", nullptr);
       if (const PointerType *PT =
@@ -460,7 +459,12 @@ TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
       }
       pushType(T, Node);
     } break;
-
+    case Type::MemberPointer: {
+      rawname = registerMemberPointerType(T);
+      Node = createNode(T, "memberPointerType", nullptr);
+      pushType(T, Node);
+      break;
+    }
     case Type::LValueReference:
     case Type::RValueReference: {
       rawname = registerPointerType(T);
