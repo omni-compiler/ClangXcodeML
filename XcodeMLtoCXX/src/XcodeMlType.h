@@ -342,7 +342,8 @@ public:
   EnumType(const DataTypeIdent &, const EnumName &);
   EnumType(const DataTypeIdent &, const EnumName &, const CodeFragment &);
   ~EnumType() override = default;
-  CodeFragment makeDeclaration(CodeFragment, const TypeTable &) override;
+  CodeFragment makeDeclaration(
+      CodeFragment, const TypeTable &, const NnsTable &) override;
   Type *clone() const override;
   static bool classof(const Type *);
   EnumName name() const;

@@ -515,7 +515,8 @@ EnumType::EnumType(const DataTypeIdent &ident,
 }
 
 CodeFragment
-EnumType::makeDeclaration(CodeFragment var, const TypeTable &) {
+EnumType::makeDeclaration(
+    CodeFragment var, const TypeTable &, const NnsTable &) {
   return makeTokenNode("enum") + (name_ ? (*name_) : makeVoidNode()) + declBody
       + var;
 }
