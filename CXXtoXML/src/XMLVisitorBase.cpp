@@ -58,7 +58,8 @@ XMLVisitorBaseImpl::newProp(const char *Name, const char *Val, xmlNodePtr N) {
 
 void
 XMLVisitorBaseImpl::newBoolProp(const char *Name, bool Val, xmlNodePtr N) {
-  newProp(Name, Val ? "1" : "0", N);
+  if (Val)
+    newProp(Name, "1", N);
 }
 
 void
