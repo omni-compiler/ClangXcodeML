@@ -45,9 +45,10 @@ MemberDecl::MemberDecl(const DataTypeIdent &d, const CodeFragment &c, size_t s)
 }
 
 CodeFragment
-MemberDecl::makeDeclaration(const TypeTable &env) const {
+MemberDecl::makeDeclaration(
+    const TypeTable &env, const NnsTable &nnsTable) const {
   auto type = env.at(dtident);
-  return makeDecl(type, name, env)
+  return makeDecl(type, name, env, nnsTable)
       + (bitfield ? makeTokenNode(std::to_string(*bitfield)) : makeVoidNode());
 }
 

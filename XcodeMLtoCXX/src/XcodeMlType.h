@@ -22,7 +22,7 @@ class MemberDecl {
 public:
   MemberDecl(const DataTypeIdent &, const CodeFragment &);
   MemberDecl(const DataTypeIdent &, const CodeFragment &, size_t);
-  CodeFragment makeDeclaration(const TypeTable &) const;
+  CodeFragment makeDeclaration(const TypeTable &, const NnsTable &) const;
 
 private:
   DataTypeIdent dtident;
