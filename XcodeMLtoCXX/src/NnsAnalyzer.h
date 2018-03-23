@@ -3,9 +3,9 @@
 
 class SourceInfo;
 
-XcodeMl::NnsMap analyzeNnsTable(xmlNodePtr, xmlXPathContextPtr);
+XcodeMl::NnsTable analyzeNnsTable(xmlNodePtr, xmlXPathContextPtr);
 
-XcodeMl::NnsMap expandNnsMap(const XcodeMl::NnsMap &table,
+XcodeMl::NnsTable expandNnsTable(const XcodeMl::NnsTable &table,
     xmlNodePtr nnsTableNode,
     xmlXPathContextPtr ctxt);
 

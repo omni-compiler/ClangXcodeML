@@ -15,7 +15,7 @@
 
 SourceInfo::SourceInfo(xmlXPathContextPtr c,
     const XcodeMl::TypeTable &e,
-    const XcodeMl::NnsMap &n,
+    const XcodeMl::NnsTable &n,
     Language l)
     : ctxt(c), typeTable(e), nnsTable(n), language(l), uniqueNameIndex(0) {
 }

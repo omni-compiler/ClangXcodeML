@@ -36,7 +36,7 @@ Nns::getKind() const {
 }
 
 CodeFragment
-Nns::makeDeclaration(const TypeTable &env, const NnsMap &nnss) const {
+Nns::makeDeclaration(const TypeTable &env, const NnsTable &nnss) const {
   const auto par = getParent();
   if (!par.hasValue()) {
     return makeNestedNameSpec(env, nnss);
@@ -70,7 +70,7 @@ GlobalNns::classof(const Nns *N) {
 }
 
 CodeFragment
-GlobalNns::makeNestedNameSpec(const TypeTable &, const NnsMap &) const {
+GlobalNns::makeNestedNameSpec(const TypeTable &, const NnsTable &) const {
   return makeTokenNode("::");
 }
 
@@ -96,7 +96,7 @@ ClassNns::clone() const {
 }
 
 CodeFragment
-ClassNns::makeNestedNameSpec(const TypeTable &env, const NnsMap &) const {
+ClassNns::makeNestedNameSpec(const TypeTable &env, const NnsTable &) const {
   const auto T = env.at(dtident);
   const auto classT = llvm::cast<XcodeMl::ClassType>(T.get());
   assert(classT);
@@ -135,7 +135,7 @@ NamespaceNns::classof(const Nns *N) {
 }
 
 CodeFragment
-NamespaceNns::makeNestedNameSpec(const TypeTable &, const NnsMap &) const {
+NamespaceNns::makeNestedNameSpec(const TypeTable &, const NnsTable &) const {
   return makeTokenNode(name) + makeTokenNode("::");
 }
 
@@ -154,7 +154,7 @@ OtherNns::classof(const Nns *N) {
 }
 
 CodeFragment
-OtherNns::makeNestedNameSpec(const TypeTable &, const NnsMap &) const {
+OtherNns::makeNestedNameSpec(const TypeTable &, const NnsTable &) const {
   return CXXCodeGen::makeVoidNode();
 }
 

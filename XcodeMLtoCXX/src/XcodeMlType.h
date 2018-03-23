@@ -78,7 +78,7 @@ public:
   virtual ~Type() = 0;
   virtual Type *clone() const = 0;
   virtual CodeFragment makeDeclaration(
-      CodeFragment, const TypeTable &, const NnsMap &) = 0;
+      CodeFragment, const TypeTable &, const NnsTable &) = 0;
 
   /*!
    * \brief Return a code fragment string created by adding the `const`
@@ -410,8 +410,8 @@ public:
       const llvm::Optional<TemplateArgList> &);
   ClassType(const DataTypeIdent &, const Symbols &);
   CodeFragment makeDeclaration(CodeFragment, const TypeTable &) override;
-  CodeFragment makeDeclarationWithNnsMap(
-      const CodeFragment &, const TypeTable &, const NnsMap &) override;
+  CodeFragment makeDeclarationWithNnsTable(
+      const CodeFragment &, const TypeTable &, const NnsTable &) override;
   ~ClassType() override = default;
   Type *clone() const override;
   CXXClassKind classKind() const;

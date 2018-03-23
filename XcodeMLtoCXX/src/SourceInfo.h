@@ -19,13 +19,13 @@ class SourceInfo {
 public:
   explicit SourceInfo(xmlXPathContextPtr c,
       const XcodeMl::TypeTable &e,
-      const XcodeMl::NnsMap &n,
+      const XcodeMl::NnsTable &n,
       Language l);
   std::string getUniqueName();
 
   xmlXPathContextPtr ctxt;
   XcodeMl::TypeTable typeTable;
-  XcodeMl::NnsMap nnsTable;
+  XcodeMl::NnsTable nnsTable;
   Language language;
 
 private:
