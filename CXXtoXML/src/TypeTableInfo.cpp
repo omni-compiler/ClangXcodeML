@@ -462,6 +462,12 @@ TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
     case Type::MemberPointer: {
       rawname = registerMemberPointerType(T);
       Node = createNode(T, "memberPointerType", nullptr);
+      const auto MPT = T.getTypePtr()->getAs<MemberPointerType>();
+      assert(MPT);
+      registerType(MPT->getPointeeType(), nullptr, nullptr);
+      xmlNewProp(Node,
+          BAD_CAST "ref",
+          BAD_CAST getTypeName(MPT->getPointeeType()).c_str());
       pushType(T, Node);
       break;
     }
