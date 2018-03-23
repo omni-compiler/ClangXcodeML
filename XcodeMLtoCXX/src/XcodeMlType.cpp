@@ -815,9 +815,12 @@ typeKind(TypeRef type) {
 }
 
 CodeFragment
-makeDecl(TypeRef type, CodeFragment var, const TypeTable &env) {
+makeDecl(TypeRef type,
+    CodeFragment var,
+    const TypeTable &env,
+    const NnsMap &nnsTable) {
   if (type) {
-    return type->makeDeclaration(cv_qualify(type, var), env);
+    return type->makeDeclaration(cv_qualify(type, var), env, nnsTable);
   } else {
     return makeTokenNode("UNKNOWN_TYPE");
   }

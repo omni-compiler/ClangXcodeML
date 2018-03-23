@@ -60,7 +60,8 @@ enum class TypeKind {
 };
 
 TypeKind typeKind(TypeRef);
-CodeFragment makeDecl(TypeRef, CodeFragment, const TypeTable &);
+CodeFragment makeDecl(
+    TypeRef, CodeFragment, const TypeTable &, const NnsMap &);
 
 /*!
  * \brief Returns a code fragment string that represents the given data type
