@@ -28,7 +28,13 @@ using NnsAnalyzer = XMLWalker<void, xmlXPathContextPtr, XcodeMl::NnsMap &>;
 DEFINE_NA(classNnsProc) {
   const auto name = getProp(node, "nns");
   const auto type = getProp(node, "type");
-  map[name] = XcodeMl::makeClassNns(name, type);
+  const auto parent = getPropOrNull(node, "parent");
+  if (parent.hasValue()) {
+    map[name] = XcodeMl::makeClassNns(name, *parent, type);
+  } else {
+    // local classes
+    map[name] = XcodeMl::makeClassNns(name, type);
+  }
 }
 
 DEFINE_NA(otherNnsProc) {
@@ -39,7 +45,8 @@ DEFINE_NA(otherNnsProc) {
 DEFINE_NA(namespaceNnsProc) {
   const auto nident = getProp(node, "nns");
   const auto namespaceName = getContent(node);
-  map[nident] = XcodeMl::makeNamespaceNns(nident, namespaceName);
+  const auto parent = getProp(node, "parent");
+  map[nident] = XcodeMl::makeNamespaceNns(nident, parent, namespaceName);
 }
 
 const XcodeMl::NnsMap initialNnsMap = {
