@@ -420,7 +420,8 @@ public:
       const Symbols &,
       const llvm::Optional<TemplateArgList> &);
   ClassType(const DataTypeIdent &, const Symbols &);
-  CodeFragment makeDeclaration(CodeFragment, const TypeTable &) override;
+  CodeFragment makeDeclaration(
+      CodeFragment, const TypeTable &, const NnsTable &) override;
   CodeFragment makeDeclarationWithNnsTable(
       const CodeFragment &, const TypeTable &, const NnsTable &) override;
   ~ClassType() override = default;

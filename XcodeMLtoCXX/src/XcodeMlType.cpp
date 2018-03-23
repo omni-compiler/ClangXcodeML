@@ -665,12 +665,21 @@ getClassKey(CXXClassKind kind) {
 }
 
 CodeFragment
-ClassType::makeDeclaration(CodeFragment var, const TypeTable &typeTable) {
-  assert(name_);
-  if (const auto tid = getAsTemplateId(typeTable)) {
-    return makeTokenNode(getClassKey(classKind())) + *tid + var;
+ClassType::makeDeclaration(
+    CodeFragment var, const TypeTable &typeTable, const NnsTable &nnsTable) {
+  if (!nnsident.hasValue()) {
+    assert(name_);
+    if (const auto tid = getAsTemplateId(typeTable)) {
+      return makeTokenNode(getClassKey(classKind())) + *tid + var;
+    }
+    return makeTokenNode(getClassKey(classKind())) + name_ + var;
   }
-  return makeTokenNode(getClassKey(classKind())) + name_ + var;
+  const auto nns = nnsTable.at(*nnsident);
+  const auto spec = nns->makeDeclaration(typeTable, nnsTable);
+  if (const auto tid = getAsTemplateId(typeTable)) {
+    return makeTokenNode(getClassKey(classKind())) + spec + *tid + var;
+  }
+  return makeTokenNode(getClassKey(classKind())) + spec + name_ + var;
 }
 
 CodeFragment
