@@ -354,7 +354,6 @@ protected:
 
 private:
   EnumName name_;
-  CodeFragment declBody;
 };
 
 class UnionType : public Type {

@@ -507,7 +507,7 @@ Struct::tagName() const {
 }
 
 EnumType::EnumType(const DataTypeIdent &ident, const EnumType::EnumName &name)
-    : Type(TypeKind::Enum, ident), name_(name), declBody(makeVoidNode()) {
+    : Type(TypeKind::Enum, ident), name_(name) {
 }
 
 CodeFragment
@@ -539,8 +539,7 @@ EnumType::setName(const std::string &enum_name) {
   name_ = makeTokenNode(enum_name);
 }
 
-EnumType::EnumType(const EnumType &other)
-    : Type(other), name_(other.name_), declBody(other.declBody) {
+EnumType::EnumType(const EnumType &other) : Type(other), name_(other.name_) {
 }
 
 UnionType::UnionType(
