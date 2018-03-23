@@ -350,6 +350,11 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
   if (D->isImplicit()) {
     newBoolProp("is_implicit", true);
   }
+  if (D->isFirstDecl()) {
+    newBoolProp("is_first_decl", true);
+  }  if (D->isCanonicalDecl()) {
+    newBoolProp("is_canonical_decl", true);
+  }
   if (D->getAccess() != AS_none) {
     newProp("access", AccessSpec(D->getAccess()).c_str());
   } else {
