@@ -240,8 +240,8 @@ LValueReferenceType::LValueReferenceType(
 
 CodeFragment
 LValueReferenceType::makeDeclaration(
-    CodeFragment var, const TypeTable &env) {
-  return makeDecl(env.at(ref), makeTokenNode("&") + var, env);
+    CodeFragment var, const TypeTable &env, const NnsTable &nnsTable) {
+  return makeDecl(env.at(ref), makeTokenNode("&") + var, env, nnsTable);
 }
 
 Type *

@@ -196,7 +196,8 @@ public:
   ReferenceType(const DataTypeIdent &dtident,
       TypeKind kind,
       const DataTypeIdent &pointee);
-  CodeFragment makeDeclaration(CodeFragment, const TypeTable &) override = 0;
+  CodeFragment makeDeclaration(
+      CodeFragment, const TypeTable &, const NnsTable &) override = 0;
   ~ReferenceType() override = 0;
   Type *clone() const override = 0;
   TypeRef getPointee(const TypeTable &) const;
@@ -210,7 +211,8 @@ class LValueReferenceType : public ReferenceType {
 public:
   LValueReferenceType(
       const DataTypeIdent &dtident, const DataTypeIdent &pointee);
-  CodeFragment makeDeclaration(CodeFragment, const TypeTable &) override;
+  CodeFragment makeDeclaration(
+      CodeFragment, const TypeTable &, const NnsTable &) override;
   ~LValueReferenceType() override = default;
   Type *clone() const override;
   static bool classof(const Type *);
