@@ -320,7 +320,7 @@ public:
   Struct(const DataTypeIdent &, const CodeFragment &, const MemberList &);
   CodeFragment makeDeclaration(
       CodeFragment, const TypeTable &, const NnsTable &) override;
-  CodeFragment makeStructDefinition(const TypeTable &) const;
+  CodeFragment makeStructDefinition(const TypeTable &, const NnsTable &) const;
   ~Struct() override;
   Type *clone() const override;
   void setTagName(const CodeFragment &);

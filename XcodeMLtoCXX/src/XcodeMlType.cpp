@@ -464,10 +464,11 @@ Struct::makeDeclaration(
 }
 
 CodeFragment
-Struct::makeStructDefinition(const TypeTable &env) const {
+Struct::makeStructDefinition(
+    const TypeTable &env, const NnsTable &nnsTable) const {
   auto body = makeVoidNode();
   for (auto &field : fields) {
-    body = body + field.makeDeclaration(env);
+    body = body + field.makeDeclaration(env, nnsTable);
   }
   return makeTokenNode("struct") + makeTokenNode("{") + body
       + makeTokenNode("}") + makeTokenNode(";");
