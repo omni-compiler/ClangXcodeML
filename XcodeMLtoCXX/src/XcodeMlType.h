@@ -78,8 +78,6 @@ public:
   virtual Type *clone() const = 0;
   virtual CodeFragment makeDeclaration(
       CodeFragment, const TypeTable &, const NnsMap &) = 0;
-  virtual CodeFragment makeDeclarationWithNnsMap(
-      const CodeFragment &, const TypeTable &, const NnsMap &);
 
   /*!
    * \brief Return a code fragment string created by adding the `const`
