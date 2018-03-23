@@ -84,7 +84,7 @@ OpFuncId::clone() const {
 }
 
 CodeFragment
-OpFuncId::toString(const TypeTable &) const {
+OpFuncId::toString(const TypeTable &, const NnsTable &) const {
   return makeTokenNode("operator") + makeTokenNode(opSpelling);
 }
 
