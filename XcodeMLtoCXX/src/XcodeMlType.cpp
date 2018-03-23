@@ -983,8 +983,8 @@ makeOtherType(const DataTypeIdent &ident) {
 }
 
 CodeFragment
-TypeRefToString(TypeRef type, const TypeTable &env) {
-  return makeDecl(type, makeTokenNode(""), env);
+TypeRefToString(TypeRef type, const TypeTable &env, const NnsTable &nnsTable) {
+  return makeDecl(type, makeTokenNode(""), env, nnsTable);
 }
 
 namespace {

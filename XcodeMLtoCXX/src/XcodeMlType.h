@@ -67,7 +67,8 @@ CodeFragment makeDecl(
  * \brief Returns a code fragment string that represents the given data type
  * e.g. `int (*)(const double&)`.
  */
-CodeFragment TypeRefToString(TypeRef, const TypeTable &env);
+CodeFragment TypeRefToString(
+    TypeRef, const TypeTable &env, const NnsTable &nnsTable);
 
 /*!
  * \brief A class that represents data types in XcodeML.
