@@ -306,9 +306,13 @@ DEFINE_DECLHANDLER(EnumProc) {
   const auto dtident = getType(node);
   const auto T = src.typeTable.at(dtident);
   const auto enumT = llvm::cast<XcodeMl::EnumType>(T.get());
-  const auto tagname = enumT->name().getValueOr(CXXCodeGen::makeVoidNode());
+  const auto tagname = enumT->name();
+  const auto nameSpelling = tagname
+      ? tagname->toString(src.typeTable, src.nnsTable)
+      : CXXCodeGen::makeVoidNode();
 
-  return makeTokenNode("enum") + tagname + wrapWithBrace(join(",", decls));
+  return makeTokenNode("enum") + nameSpelling
+      + wrapWithBrace(join(",", decls));
 }
 
 DEFINE_DECLHANDLER(EnumConstantProc) {
