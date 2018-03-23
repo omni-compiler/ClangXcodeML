@@ -422,8 +422,6 @@ public:
   ClassType(const DataTypeIdent &, const Symbols &);
   CodeFragment makeDeclaration(
       CodeFragment, const TypeTable &, const NnsTable &) override;
-  CodeFragment makeDeclarationWithNnsTable(
-      const CodeFragment &, const TypeTable &, const NnsTable &) override;
   ~ClassType() override = default;
   Type *clone() const override;
   CXXClassKind classKind() const;

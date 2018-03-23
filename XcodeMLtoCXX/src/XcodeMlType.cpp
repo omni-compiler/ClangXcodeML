@@ -682,21 +682,6 @@ ClassType::makeDeclaration(
   return makeTokenNode(getClassKey(classKind())) + spec + name_ + var;
 }
 
-CodeFragment
-ClassType::makeDeclarationWithNnsTable(const CodeFragment &var,
-    const TypeTable &typeTable,
-    const NnsTable &nnsTable) {
-  if (!nnsident.hasValue()) {
-    return makeDeclaration(var, typeTable);
-  }
-  const auto nns = nnsTable.at(*nnsident);
-  const auto spec = nns->makeDeclaration(typeTable, nnsTable);
-  if (const auto tid = getAsTemplateId(typeTable)) {
-    return makeTokenNode(getClassKey(classKind())) + spec + *tid + var;
-  }
-  return makeTokenNode(getClassKey(classKind())) + spec + name_ + var;
-}
-
 Type *
 ClassType::clone() const {
   ClassType *copy = new ClassType(*this);
