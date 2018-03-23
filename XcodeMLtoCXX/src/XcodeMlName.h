@@ -55,7 +55,7 @@ class Name {
 public:
   explicit Name(const CodeFragment &, const std::shared_ptr<UnqualId> &);
   explicit Name(const std::shared_ptr<UnqualId> &);
-  CodeFragment toString(const TypeTable &, const NnsMap &) const;
+  CodeFragment toString(const TypeTable &, const NnsTable &) const;
   std::shared_ptr<UnqualId> getUnqualId() const;
 
 private:

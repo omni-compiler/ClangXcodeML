@@ -113,7 +113,7 @@ DEFINE_DECLHANDLER(ClassTemplateProc) {
     src.typeTable = expandTypeTable(src.typeTable, typeTableNode, src.ctxt);
   }
   if (const auto nnsTableNode = findFirst(node, "xcodemlNnsTable", src.ctxt)) {
-    src.nnsTable = expandNnsMap(src.nnsTable, nnsTableNode, src.ctxt);
+    src.nnsTable = expandNnsTable(src.nnsTable, nnsTableNode, src.ctxt);
   }
   const auto bodyNode =
       findFirst(node, "clangDecl[@class='CXXRecord']", src.ctxt);
@@ -202,7 +202,7 @@ DEFINE_DECLHANDLER(ClassTemplatePartialSpecializationProc) {
     src.typeTable = expandTypeTable(src.typeTable, typeTableNode, src.ctxt);
   }
   if (const auto nnsTableNode = findFirst(node, "xcodemlNnsTable", src.ctxt)) {
-    src.nnsTable = expandNnsMap(src.nnsTable, nnsTableNode, src.ctxt);
+    src.nnsTable = expandNnsTable(src.nnsTable, nnsTableNode, src.ctxt);
   }
 
   const auto T = src.typeTable.at(getType(node));
@@ -367,7 +367,7 @@ DEFINE_DECLHANDLER(FunctionTemplateProc) {
     src.typeTable = expandTypeTable(src.typeTable, typeTableNode, src.ctxt);
   }
   if (const auto nnsTableNode = findFirst(node, "xcodemlNnsTable", src.ctxt)) {
-    src.nnsTable = expandNnsMap(src.nnsTable, nnsTableNode, src.ctxt);
+    src.nnsTable = expandNnsTable(src.nnsTable, nnsTableNode, src.ctxt);
   }
   const auto paramNodes =
       findNodes(node, "clangDecl[@class='TemplateTypeParm']", src.ctxt);
@@ -438,7 +438,7 @@ DEFINE_DECLHANDLER(TranslationUnitProc) {
     src.typeTable = expandTypeTable(src.typeTable, typeTableNode, src.ctxt);
   }
   if (const auto nnsTableNode = findFirst(node, "xcodemlNnsTable", src.ctxt)) {
-    src.nnsTable = expandNnsMap(src.nnsTable, nnsTableNode, src.ctxt);
+    src.nnsTable = expandNnsTable(src.nnsTable, nnsTableNode, src.ctxt);
   }
   return foldDecls(node, w, src);
 }
@@ -517,7 +517,7 @@ emitVarDecl(xmlNodePtr node,
   const auto T = src.typeTable.at(dtident);
 
   const auto decl = makeSpecifier(node, is_in_class_scope)
-      + T->makeDeclarationWithNnsMap(name, src.typeTable, src.nnsTable);
+      + T->makeDeclarationWithNnsTable(name, src.typeTable, src.nnsTable);
   const auto initializerNode = findFirst(node, "clangStmt", src.ctxt);
   if (!initializerNode) {
     // does not have initalizer: `int x;`

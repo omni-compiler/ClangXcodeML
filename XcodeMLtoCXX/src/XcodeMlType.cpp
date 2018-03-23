@@ -59,8 +59,8 @@ Type::~Type() {
 }
 
 CodeFragment
-Type::makeDeclarationWithNnsMap(
-    const CodeFragment &var, const TypeTable &typeTable, const NnsMap &) {
+Type::makeDeclarationWithNnsTable(
+    const CodeFragment &var, const TypeTable &typeTable, const NnsTable &) {
   return makeDeclaration(var, typeTable);
 }
 
@@ -667,9 +667,9 @@ ClassType::makeDeclaration(CodeFragment var, const TypeTable &typeTable) {
 }
 
 CodeFragment
-ClassType::makeDeclarationWithNnsMap(const CodeFragment &var,
+ClassType::makeDeclarationWithNnsTable(const CodeFragment &var,
     const TypeTable &typeTable,
-    const NnsMap &nnsTable) {
+    const NnsTable &nnsTable) {
   if (!nnsident.hasValue()) {
     return makeDeclaration(var, typeTable);
   }
