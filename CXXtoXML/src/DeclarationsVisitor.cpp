@@ -113,6 +113,12 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
     newProp("bool_value", (BE->getValue() ? "true" : "false"));
   }
 
+  if (const auto CDAE = dyn_cast<CXXDefaultArgExpr>(S)) {
+    const auto E = CDAE->getExpr();
+    TraverseStmt(E);
+    return false;
+  }
+
   if (auto OCE = dyn_cast<clang::CXXOperatorCallExpr>(S)) {
     newProp("xcodeml_operator_kind",
         OverloadedOperatorKindToString(OCE->getOperator(), OCE->getNumArgs()));
