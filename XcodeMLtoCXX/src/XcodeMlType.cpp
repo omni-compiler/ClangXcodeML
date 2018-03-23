@@ -671,14 +671,14 @@ ClassType::makeDeclaration(
     CodeFragment var, const TypeTable &typeTable, const NnsTable &nnsTable) {
   if (!nnsident.hasValue()) {
     assert(name_);
-    if (const auto tid = getAsTemplateId(typeTable)) {
+    if (const auto tid = getAsTemplateId(typeTable, nnsTable)) {
       return makeTokenNode(getClassKey(classKind())) + *tid + var;
     }
     return makeTokenNode(getClassKey(classKind())) + name_ + var;
   }
   const auto nns = nnsTable.at(*nnsident);
   const auto spec = nns->makeDeclaration(typeTable, nnsTable);
-  if (const auto tid = getAsTemplateId(typeTable)) {
+  if (const auto tid = getAsTemplateId(typeTable, nnsTable)) {
     return makeTokenNode(getClassKey(classKind())) + spec + *tid + var;
   }
   return makeTokenNode(getClassKey(classKind())) + spec + name_ + var;
@@ -725,7 +725,8 @@ ClassType::isClassTemplateSpecialization() const {
 }
 
 llvm::Optional<CodeFragment>
-ClassType::getAsTemplateId(const TypeTable &typeTable) const {
+ClassType::getAsTemplateId(
+    const TypeTable &typeTable, const NnsTable &nnsTable) const {
   using MaybeCodeFragment = llvm::Optional<CodeFragment>;
   if (!templateArgs.hasValue()) {
     return MaybeCodeFragment();
@@ -733,7 +734,7 @@ ClassType::getAsTemplateId(const TypeTable &typeTable) const {
   std::vector<CodeFragment> targs;
   for (auto &&dtident : *templateArgs) {
     const auto T = typeTable.at(dtident);
-    targs.push_back(makeDecl(T, makeVoidNode(), typeTable));
+    targs.push_back(makeDecl(T, makeVoidNode(), typeTable, nnsTable));
   }
   const auto list = makeTokenNode("<") + join(",", targs) + makeTokenNode(">");
   return MaybeCodeFragment(name_ + list);

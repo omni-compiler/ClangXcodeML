@@ -432,7 +432,7 @@ public:
   std::vector<BaseClass> getBases() const;
   bool isClassTemplateSpecialization() const;
   llvm::Optional<CodeFragment> getAsTemplateId(
-      const TypeTable &typeTable) const;
+      const TypeTable &typeTable, const NnsTable &nnsTable) const;
   static bool classof(const Type *);
 
 protected:
