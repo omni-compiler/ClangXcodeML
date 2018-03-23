@@ -318,7 +318,8 @@ public:
 
 public:
   Struct(const DataTypeIdent &, const CodeFragment &, const MemberList &);
-  CodeFragment makeDeclaration(CodeFragment, const TypeTable &) override;
+  CodeFragment makeDeclaration(
+      CodeFragment, const TypeTable &, const NnsTable &) override;
   CodeFragment makeStructDefinition(const TypeTable &) const;
   ~Struct() override;
   Type *clone() const override;

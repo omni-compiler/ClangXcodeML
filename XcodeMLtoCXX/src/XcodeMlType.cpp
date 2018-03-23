@@ -457,7 +457,8 @@ Struct::Struct(const DataTypeIdent &ident,
 }
 
 CodeFragment
-Struct::makeDeclaration(CodeFragment var, const TypeTable &) {
+Struct::makeDeclaration(
+    CodeFragment var, const TypeTable &, const NnsTable &) {
   return makeTokenNode("struct") + tag + var;
 }
 
