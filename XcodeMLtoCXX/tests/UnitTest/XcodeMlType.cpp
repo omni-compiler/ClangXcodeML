@@ -9,7 +9,7 @@
 #include "StringTree.h"
 #include "XcodeMlNns.h"
 #include "XcodeMlType.h"
-#include "XcodeMlEnvironment.h"
+#include "XcodeMlTypeTable.h"
 
 BOOST_AUTO_TEST_SUITE(xcodeml_type)
 

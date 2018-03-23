@@ -23,7 +23,7 @@ OBJS = XcodeMlType.o \
 	NnsAnalyzer.o \
 	TypeAnalyzer.o \
 	XMLString.o \
-	XcodeMlEnvironment.o \
+	XcodeMlTypeTable.o \
 	SourceInfo.o \
 	StringTree.o \
 	ClangDeclHandler.o \
@@ -45,7 +45,7 @@ CodeBuilder.o: \
 	XMLString.h \
 	LibXMLUtil.h \
 	XcodeMlType.h \
-	XcodeMlEnvironment.h \
+	XcodeMlTypeTable.h \
 	NnsAnalyzer.o \
 	TypeAnalyzer.h \
 	CodeBuilder.h \
@@ -56,17 +56,17 @@ TypeAnalyzer.o: \
 	XMLString.h \
 	LibXMLUtil.h \
 	XcodeMlType.h \
-	XcodeMlEnvironment.h \
+	XcodeMlTypeTable.h \
 	TypeAnalyzer.h \
 	XMLWalker.h
 XcodeMlNns.o: \
 	StringTree.h \
-	XcodeMlEnvironment.h \
+	XcodeMlTypeTable.h \
 	XcodeMlNns.h \
 	XcodeMlType.h
 XcodeMlType.o: \
 	TypeAnalyzer.h \
-	XcodeMlEnvironment.h
+	XcodeMlTypeTable.h
 
 XcodeMlUtil.o: \
 	XcodeMlUtil.h

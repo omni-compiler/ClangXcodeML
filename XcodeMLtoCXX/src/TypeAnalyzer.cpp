@@ -20,11 +20,11 @@
 #include "XcodeMlName.h"
 #include "XcodeMlType.h"
 #include "XcodeMlUtil.h"
-#include "XcodeMlEnvironment.h"
+#include "XcodeMlTypeTable.h"
 #include "TypeAnalyzer.h"
 
 using TypeAnalyzer =
-    XMLWalker<void, xmlXPathContextPtr, XcodeMl::Environment &>;
+    XMLWalker<void, xmlXPathContextPtr, XcodeMl::TypeTable &>;
 
 using CXXCodeGen::makeTokenNode;
 using CXXCodeGen::makeVoidNode;
@@ -36,7 +36,7 @@ using CXXCodeGen::makeVoidNode;
   const TypeAnalyzer &w __attribute__((unused)),                              \
       xmlNodePtr node __attribute__((unused)),                                \
       xmlXPathContextPtr ctxt __attribute__((unused)),                        \
-      XcodeMl::Environment &map __attribute__((unused))
+      XcodeMl::TypeTable &map __attribute__((unused))
 /*!
  * \brief Define new TypeAnalyzer::Procedure named \c name.
  */
@@ -239,8 +239,8 @@ const std::vector<std::tuple<std::string, std::string>>
 /*!
  * \brief Mapping from Data type identifiers to basic data types.
  */
-const XcodeMl::Environment FundamentalDataTypeIdentMap = []() {
-  XcodeMl::Environment map;
+const XcodeMl::TypeTable FundamentalDataTypeIdentMap = []() {
+  XcodeMl::TypeTable map;
   for (std::string key : identicalFndDataTypeIdents) {
     map[key] = XcodeMl::makeReservedType(key, makeTokenNode(key));
   }
@@ -269,15 +269,15 @@ const TypeAnalyzer XcodeMLTypeAnalyzer("TypeAnalyzer",
  * \brief Traverse an XcodeML document and make mapping from data
  * type identifiers to data types defined in it.
  */
-XcodeMl::Environment
+XcodeMl::TypeTable
 parseTypeTable(xmlNodePtr, xmlXPathContextPtr xpathCtx, std::stringstream &) {
   xmlXPathObjectPtr xpathObj =
       xmlXPathEvalExpression(BAD_CAST "/XcodeProgram/typeTable/*", xpathCtx);
   if (xpathObj == nullptr) {
-    return XcodeMl::Environment();
+    return XcodeMl::TypeTable();
   }
   const size_t len = length(xpathObj);
-  XcodeMl::Environment map(FundamentalDataTypeIdentMap);
+  XcodeMl::TypeTable map(FundamentalDataTypeIdentMap);
   for (size_t i = 0; i < len; ++i) {
     xmlNodePtr node = nth(xpathObj, i);
     XcodeMLTypeAnalyzer.walk(node, xpathCtx, map);
@@ -286,8 +286,8 @@ parseTypeTable(xmlNodePtr, xmlXPathContextPtr xpathCtx, std::stringstream &) {
   return map;
 }
 
-XcodeMl::Environment
-expandEnvironment(const XcodeMl::Environment &env,
+XcodeMl::TypeTable
+expandTypeTable(const XcodeMl::TypeTable &env,
     xmlNodePtr typeTable,
     xmlXPathContextPtr ctxt) {
   auto newEnv = env;

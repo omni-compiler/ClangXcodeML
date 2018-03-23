@@ -10,7 +10,7 @@ using CodeFragment = CXXCodeGen::StringTreeRef;
 
 using DataTypeIdent = std::string;
 
-class Environment;
+class TypeTable;
 
 using NnsIdent = std::string;
 
@@ -45,7 +45,7 @@ public:
   virtual ~Nns() = 0;
   virtual Nns *clone() const = 0;
   NnsKind getKind() const;
-  CodeFragment makeDeclaration(const Environment &, const NnsMap &) const;
+  CodeFragment makeDeclaration(const TypeTable &, const NnsMap &) const;
 
 protected:
   Nns(const Nns &) = default;
@@ -54,7 +54,7 @@ protected:
    * like `::`, `::A::B::`, or `::std::vector<int>::`.
    */
   virtual CodeFragment makeNestedNameSpec(
-      const Environment &, const NnsMap &) const = 0;
+      const TypeTable &, const NnsMap &) const = 0;
   /*! \brief Returns the prefix of this XcodeML NNS. */
   virtual llvm::Optional<NnsIdent> getParent() const;
 
@@ -77,7 +77,7 @@ public:
 protected:
   GlobalNns(const GlobalNns &) = default;
   CodeFragment makeNestedNameSpec(
-      const Environment &, const NnsMap &) const override;
+      const TypeTable &, const NnsMap &) const override;
   llvm::Optional<NnsIdent> getParent() const override;
 };
 
@@ -98,7 +98,7 @@ public:
 protected:
   ClassNns(const ClassNns &) = default;
   virtual CodeFragment makeNestedNameSpec(
-      const Environment &, const NnsMap &) const override;
+      const TypeTable &, const NnsMap &) const override;
 
 private:
   /*! XcodeML data type identifier of the class */
@@ -117,7 +117,7 @@ public:
 protected:
   NamespaceNns(const NamespaceNns &) = default;
   virtual CodeFragment makeNestedNameSpec(
-      const Environment &, const NnsMap &) const override;
+      const TypeTable &, const NnsMap &) const override;
 
 private:
   std::string name;
@@ -133,7 +133,7 @@ public:
 protected:
   OtherNns(const OtherNns &) = default;
   virtual CodeFragment makeNestedNameSpec(
-      const Environment &, const NnsMap &) const override;
+      const TypeTable &, const NnsMap &) const override;
 };
 
 /*! \brief Make and return the XcodeML globalNNS. */

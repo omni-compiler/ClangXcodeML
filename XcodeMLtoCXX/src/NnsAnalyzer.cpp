@@ -11,7 +11,7 @@
 #include "StringTree.h"
 #include "XcodeMlNns.h"
 #include "XcodeMlType.h"
-#include "XcodeMlEnvironment.h"
+#include "XcodeMlTypeTable.h"
 #include "XMLString.h"
 #include "XMLWalker.h"
 
