@@ -365,7 +365,8 @@ public:
       const UnionName &,
       const std::vector<MemberDecl> &);
   ~UnionType() override = default;
-  CodeFragment makeDeclaration(CodeFragment, const TypeTable &) override;
+  CodeFragment makeDeclaration(
+      CodeFragment, const TypeTable &, const NnsTable &) override;
   Type *clone() const override;
   static bool classof(const Type *);
   void setName(const std::string &);

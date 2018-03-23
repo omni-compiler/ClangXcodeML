@@ -559,10 +559,11 @@ UnionType::UnionType(const DataTypeIdent &ident,
 }
 
 CodeFragment
-UnionType::makeDeclaration(CodeFragment var, const TypeTable &env) {
+UnionType::makeDeclaration(
+    CodeFragment var, const TypeTable &env, const NnsTable &nnsTable) {
   auto memberDecls = makeVoidNode();
   for (auto &member : members) {
-    memberDecls = memberDecls + member.makeDeclaration(env);
+    memberDecls = memberDecls + member.makeDeclaration(env, nnsTable);
   }
   return makeTokenNode("union") + (name_ ? (*name_) : makeVoidNode())
       + memberDecls + var;
