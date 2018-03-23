@@ -275,12 +275,13 @@ ParamList::isEmpty() const {
 
 CodeFragment
 ParamList::makeDeclaration(const std::vector<CodeFragment> &paramNames,
-    const TypeTable &typeTable) const {
+    const TypeTable &typeTable,
+    const NnsTable &nnsTable) const {
   assert(dtidents.size() == paramNames.size());
   std::vector<CodeFragment> decls;
   for (int i = 0, len = dtidents.size(); i < len; ++i) {
     const auto ithType = typeTable.at(dtidents[i]);
-    decls.push_back(makeDecl(ithType, paramNames[i], typeTable));
+    decls.push_back(makeDecl(ithType, paramNames[i], typeTable, nnsTable));
   }
   return CXXCodeGen::join(",", decls)
       + (isVariadic() ? makeTokenNode(",") + makeTokenNode("...")

@@ -229,7 +229,8 @@ public:
   bool isVariadic() const;
   bool isEmpty() const;
   CodeFragment makeDeclaration(const std::vector<CodeFragment> &paramNames,
-      const TypeTable &typeTable) const;
+      const TypeTable &typeTable,
+      const NnsTable &nnsTable) const;
 
 private:
   std::vector<DataTypeIdent> dtidents;
