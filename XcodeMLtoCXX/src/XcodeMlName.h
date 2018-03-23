@@ -22,6 +22,8 @@ enum class UnqualIdKind {
   Ctor,
   /*! Destructor name */
   Dtor,
+  /*! unnamed (bit field) */
+  Unnamed,
 };
 
 /*!
@@ -141,6 +143,19 @@ protected:
 
 private:
   DataTypeIdent dtident;
+};
+
+/*! \brief Represents "unnamed" id (such as unnamed bit field) . */
+class UnnamedId : public UnqualId {
+public:
+  UnnamedId();
+  ~UnnamedId() override = default;
+  UnqualId *clone() const override;
+  CodeFragment toString(const TypeTable &) const override;
+  static bool classof(const UnqualId *);
+
+protected:
+  UnnamedId(const UnnamedId &) = default;
 };
 
 } // namespace XcodeMl

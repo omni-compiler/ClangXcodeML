@@ -179,7 +179,7 @@ public:
       try {
         (iter->second)(*this, node, args...);
       } catch (const std::exception &e) {
-        std::cerr << "In " << name << std::endl << e.what() << std::endl;
+        std::cerr << "In " << name << ": walk(" << elemName << ")" << std::endl << e.what() << std::endl;
         xmlDebugDumpNode(stderr, node, 0);
         abort();
       }

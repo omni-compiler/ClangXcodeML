@@ -58,7 +58,8 @@ getUnqualIdFromIdNode(xmlNodePtr idNode, xmlXPathContextPtr ctxt) {
   }
   xmlNodePtr nameNode = findFirst(idNode, "name", ctxt);
   if (!nameNode) {
-    throw std::domain_error("name node not found");
+    return std::make_shared<XcodeMl::UnnamedId>();
+    //throw std::domain_error("name node not found");
   }
   return getUnqualIdFromNameNode(nameNode);
 }
