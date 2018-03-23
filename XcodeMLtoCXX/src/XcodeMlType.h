@@ -339,7 +339,7 @@ private:
 
 class EnumType : public Type {
 public:
-  using EnumName = llvm::Optional<CodeFragment>;
+  using EnumName = std::shared_ptr<UnqualId>; // nullable
   EnumType(const DataTypeIdent &, const EnumName &);
   ~EnumType() override = default;
   CodeFragment makeDeclaration(
@@ -491,7 +491,8 @@ TypeRef makeArrayType(DataTypeIdent, TypeRef, size_t);
 TypeRef makeArrayType(DataTypeIdent, TypeRef, Array::Size);
 TypeRef makeArrayType(DataTypeIdent, DataTypeIdent, Array::Size);
 TypeRef makeArrayType(DataTypeIdent, DataTypeIdent, size_t);
-TypeRef makeEnumType(const DataTypeIdent &, const CodeFragment &tagname);
+TypeRef makeEnumType(
+    const DataTypeIdent &, const std::shared_ptr<XcodeMl::UnqualId> tagname);
 TypeRef makeClassType(const DataTypeIdent &, const ClassType::Symbols &);
 TypeRef makeClassType(const DataTypeIdent &dtident,
     const llvm::Optional<std::string> nnsident,

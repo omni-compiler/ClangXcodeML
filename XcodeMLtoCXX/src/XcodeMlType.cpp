@@ -512,9 +512,10 @@ EnumType::EnumType(const DataTypeIdent &ident, const EnumType::EnumName &name)
 
 CodeFragment
 EnumType::makeDeclaration(
-    CodeFragment var, const TypeTable &, const NnsTable &) {
-  return makeTokenNode("enum") + (name_ ? (*name_) : makeVoidNode()) + declBody
-      + var;
+    CodeFragment var, const TypeTable &typeTable, const NnsTable &nnsTable) {
+  const auto nameSpelling =
+      name_ ? name_->toString(typeTable, nnsTable) : makeVoidNode();
+  return makeTokenNode("enum") + nameSpelling + var;
 }
 
 Type *
@@ -536,7 +537,7 @@ EnumType::name() const {
 void
 EnumType::setName(const std::string &enum_name) {
   assert(!name_);
-  name_ = makeTokenNode(enum_name);
+  name_ = std::make_shared<UIDIdent>(enum_name);
 }
 
 EnumType::EnumType(const EnumType &other) : Type(other), name_(other.name_) {
@@ -904,8 +905,10 @@ makeVariadicFunctionType(const DataTypeIdent &ident,
 }
 
 TypeRef
-makeEnumType(const DataTypeIdent &ident, const CodeFragment &tagname) {
-  return std::make_shared<EnumType>(ident, tagname);
+makeEnumType(
+    const DataTypeIdent &ident, const std::shared_ptr<UnqualId> tagname) {
+  const auto name = static_cast<EnumType::EnumName>(tagname->clone());
+  return std::make_shared<EnumType>(ident, name);
 }
 
 TypeRef
