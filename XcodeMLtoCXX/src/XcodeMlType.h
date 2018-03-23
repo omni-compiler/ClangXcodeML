@@ -176,7 +176,8 @@ class Pointer : public Type {
 public:
   Pointer(DataTypeIdent dtident, TypeRef pointee);
   Pointer(DataTypeIdent dtident, DataTypeIdent pointee);
-  CodeFragment makeDeclaration(CodeFragment, const TypeTable &) override;
+  CodeFragment makeDeclaration(
+      CodeFragment, const TypeTable &, const NnsTable &) override;
   ~Pointer() override;
   Type *clone() const override;
   static bool classof(const Type *);

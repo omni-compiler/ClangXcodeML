@@ -184,16 +184,19 @@ Pointer::Pointer(DataTypeIdent ident, DataTypeIdent signified)
 }
 
 CodeFragment
-Pointer::makeDeclaration(CodeFragment var, const TypeTable &env) {
+Pointer::makeDeclaration(
+    CodeFragment var, const TypeTable &env, const NnsTable &nnsTable) {
   auto refType = env[ref];
   if (!refType) {
     return makeTokenNode("INCOMPLETE_TYPE *") + var;
   }
   switch (typeKind(refType)) {
   case TypeKind::Function:
-    return makeDecl(
-        refType, makeTokenNode("(*") + var + makeTokenNode(")"), env);
-  default: return makeDecl(refType, makeTokenNode("*") + var, env);
+    return makeDecl(refType,
+        makeTokenNode("(*") + var + makeTokenNode(")"),
+        env,
+        nnsTable);
+  default: return makeDecl(refType, makeTokenNode("*") + var, env, nnsTable);
   }
 }
 
