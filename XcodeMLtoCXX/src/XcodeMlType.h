@@ -500,6 +500,8 @@ TypeRef makeQualifiedType(const DataTypeIdent &ident,
     bool isVolatile);
 TypeRef makePointerType(DataTypeIdent, TypeRef);
 TypeRef makePointerType(DataTypeIdent, DataTypeIdent);
+TypeRef makeMemberPointerType(
+    DataTypeIdent dtident, DataTypeIdent pointee, DataTypeIdent record);
 TypeRef makeLValueReferenceType(const DataTypeIdent &, const DataTypeIdent &);
 TypeRef makeArrayType(DataTypeIdent, TypeRef, size_t);
 TypeRef makeArrayType(DataTypeIdent, TypeRef, size_t);

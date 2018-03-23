@@ -860,6 +860,12 @@ makePointerType(DataTypeIdent ident, TypeRef ref) {
 }
 
 TypeRef
+makeMemberPointerType(
+    DataTypeIdent ident, DataTypeIdent pointee, DataTypeIdent record) {
+  return std::make_shared<MemberPointer>(ident, pointee, record);
+}
+
+TypeRef
 makePointerType(DataTypeIdent ident, DataTypeIdent ref) {
   return std::make_shared<Pointer>(ident, ref);
 }
