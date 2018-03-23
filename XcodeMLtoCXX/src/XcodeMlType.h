@@ -294,7 +294,8 @@ public:
 public:
   Array(DataTypeIdent dtident, DataTypeIdent element, Size size);
   Array(DataTypeIdent dtident, DataTypeIdent element, size_t size);
-  CodeFragment makeDeclaration(CodeFragment, const TypeTable &) override;
+  CodeFragment makeDeclaration(
+      CodeFragment, const TypeTable &, const NnsTable &) override;
   ~Array() override;
   Type *clone() const override;
   CodeFragment addConstQualifier(CodeFragment) const override;

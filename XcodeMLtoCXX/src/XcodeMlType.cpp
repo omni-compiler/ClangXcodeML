@@ -387,7 +387,8 @@ Array::Array(DataTypeIdent ident, DataTypeIdent elem, size_t s)
 }
 
 CodeFragment
-Array::makeDeclaration(CodeFragment var, const TypeTable &env) {
+Array::makeDeclaration(
+    CodeFragment var, const TypeTable &env, const NnsTable &nnsTable) {
   auto elementType(env[element]);
   if (!elementType) {
     return makeTokenNode("INCOMPLETE_TYPE *") + var;
@@ -399,7 +400,7 @@ Array::makeDeclaration(CodeFragment var, const TypeTable &env) {
       + (isConst() ? makeTokenNode("const") : makeVoidNode())
       + (isVolatile() ? makeTokenNode("volatile") : makeVoidNode())
       + size_expression + makeTokenNode("]");
-  return makeDecl(elementType, var + declarator, env);
+  return makeDecl(elementType, var + declarator, env, nnsTable);
 }
 
 Array::~Array() = default;
