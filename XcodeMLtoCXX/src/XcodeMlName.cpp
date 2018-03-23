@@ -126,7 +126,7 @@ CtorName::clone() const {
 }
 
 CodeFragment
-CtorName::toString(const TypeTable &env) const {
+CtorName::toString(const TypeTable &env, const NnsTable &) const {
   const auto T = env.at(dtident);
   const auto ClassT = llvm::cast<XcodeMl::ClassType>(T.get());
   const auto name = ClassT->name();
