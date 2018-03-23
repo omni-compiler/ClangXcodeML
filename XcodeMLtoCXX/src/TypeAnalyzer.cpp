@@ -195,8 +195,7 @@ DEFINE_TA(classTypeProc) {
 DEFINE_TA(enumTypeProc) {
   const auto dtident = getType(node);
   const auto name = getUnqualIdFromIdNode(node, ctxt);
-  const auto nameSpelling = name->toString(map);
-  map[dtident] = XcodeMl::makeEnumType(dtident, nameSpelling);
+  map[dtident] = XcodeMl::makeEnumType(dtident, name);
 }
 
 DEFINE_TA(TemplateTypeParmTypeProc) {
