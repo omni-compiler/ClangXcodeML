@@ -193,12 +193,8 @@ Pointer::makeDeclaration(CodeFragment var, const TypeTable &env) {
   if (!refType) {
     return makeTokenNode("INCOMPLETE_TYPE *") + var;
   }
-  switch (typeKind(refType)) {
-  case TypeKind::Function:
-    return makeDecl(
+  return makeDecl(
         refType, makeTokenNode("(*") + var + makeTokenNode(")"), env);
-  default: return makeDecl(refType, makeTokenNode("*") + var, env);
-  }
 }
 
 Pointer::~Pointer() = default;
