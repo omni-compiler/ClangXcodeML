@@ -110,14 +110,14 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
   }
 
   if (const auto BE = dyn_cast<CXXBoolLiteralExpr>(S)) {
-    newBoolProp("bool_value", BE->getValue());
+    newProp("bool_value", (BE->getValue() ? "true" : "false"));
   }
 
   if (auto OCE = dyn_cast<clang::CXXOperatorCallExpr>(S)) {
     newProp("xcodeml_operator_kind",
         OverloadedOperatorKindToString(OCE->getOperator(), OCE->getNumArgs()));
     const auto is_member = isa<clang::CXXMethodDecl>(OCE->getDirectCallee());
-    newProp("is_member_function", (is_member ? "true" : "false"));
+    newBoolProp("is_member_function", is_member);
   }
 
   if (auto NL = dyn_cast<CXXNewExpr>(S)) {
@@ -417,6 +417,11 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
     newBoolProp("has_init", VD->hasInit());
     newBoolProp("is_static_data_member", VD->isStaticDataMember());
     newBoolProp("is_out_of_line", VD->isOutOfLine());
+  }
+
+  if (auto FD = dyn_cast<FieldDecl>(D)) {
+    newBoolProp("is_bit_field", FD->isBitField());
+    newBoolProp("is_unnnamed_bit_field", FD->isUnnamedBitfield());
   }
 
   if (auto ND = dyn_cast<NamespaceDecl>(D)) {
