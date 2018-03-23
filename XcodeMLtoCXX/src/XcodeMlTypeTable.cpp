@@ -9,16 +9,16 @@
 #include "StringTree.h"
 #include "XcodeMlNns.h"
 #include "XcodeMlType.h"
-#include "XcodeMlEnvironment.h"
+#include "XcodeMlTypeTable.h"
 
 namespace XcodeMl {
 
-const TypeRef &Environment::operator[](
+const TypeRef &TypeTable::operator[](
     const std::string &dataTypeIdent) const {
   return at_or_throw(map, dataTypeIdent, "Data type");
 }
 
-TypeRef &Environment::operator[](const std::string &dataTypeIdent) {
+TypeRef &TypeTable::operator[](const std::string &dataTypeIdent) {
   if (map.find(dataTypeIdent) == map.end()) {
     keys.push_back(dataTypeIdent);
   }
@@ -26,56 +26,56 @@ TypeRef &Environment::operator[](const std::string &dataTypeIdent) {
 }
 
 const TypeRef &
-Environment::at(const std::string &dataTypeIdent) const {
+TypeTable::at(const std::string &dataTypeIdent) const {
   return at_or_throw(map, dataTypeIdent, "Data type");
 }
 
 TypeRef &
-Environment::at(const std::string &dataTypeIdent) {
+TypeTable::at(const std::string &dataTypeIdent) {
   return at_or_throw(map, dataTypeIdent, "Data type");
 }
 
 const TypeRef &
-Environment::getReturnType(const std::string &dataTypeIdent) const {
+TypeTable::getReturnType(const std::string &dataTypeIdent) const {
   return at_or_throw(returnMap, dataTypeIdent, "Return type of");
 }
 
 void
-Environment::setReturnType(
+TypeTable::setReturnType(
     const std::string &dataTypeIdent, const TypeRef &type) {
   returnMap[dataTypeIdent] = type;
 }
 
 bool
-Environment::exists(const std::string &dataTypeIdent) const {
+TypeTable::exists(const std::string &dataTypeIdent) const {
   return map.find(dataTypeIdent) != map.end();
 }
 
 const std::vector<std::string> &
-Environment::getKeys(void) const {
+TypeTable::getKeys(void) const {
   return keys;
 }
 
 TypeRef &
-Environment::at_or_throw(Environment::TypeMap &map,
+TypeTable::at_or_throw(TypeTable::TypeMap &map,
     const std::string &key,
     const std::string &name) const {
   try {
     return map.at(key);
   } catch (const std::out_of_range &e) {
-    const auto msg = name + " '" + key + "' not found in XcodeMl::Environment";
+    const auto msg = name + " '" + key + "' not found in XcodeMl::TypeTable";
     throw std::out_of_range(msg);
   }
 }
 
 const TypeRef &
-Environment::at_or_throw(const Environment::TypeMap &map,
+TypeTable::at_or_throw(const TypeTable::TypeMap &map,
     const std::string &key,
     const std::string &name) const {
   try {
     return map.at(key);
   } catch (const std::out_of_range &e) {
-    const auto msg = name + " '" + key + "' not found in XcodeMl::Environment";
+    const auto msg = name + " '" + key + "' not found in XcodeMl::TypeTable";
     throw std::out_of_range(msg);
   }
 }

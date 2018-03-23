@@ -7,7 +7,7 @@ namespace XcodeMl {
  * \brief A mapping from data type identifiers
  * to actual data types.
  */
-class Environment {
+class TypeTable {
 public:
   using ReturnType = TypeRef;
 

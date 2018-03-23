@@ -2,7 +2,7 @@
 #define SOURCEINFO_H
 
 namespace XcodeMl {
-class Environment;
+class TypeTable;
 } // namespace XcodeMl
 
 enum class Language {
@@ -18,13 +18,13 @@ enum class Language {
 class SourceInfo {
 public:
   explicit SourceInfo(xmlXPathContextPtr c,
-      const XcodeMl::Environment &e,
+      const XcodeMl::TypeTable &e,
       const XcodeMl::NnsMap &n,
       Language l);
   std::string getUniqueName();
 
   xmlXPathContextPtr ctxt;
-  XcodeMl::Environment typeTable;
+  XcodeMl::TypeTable typeTable;
   XcodeMl::NnsMap nnsTable;
   Language language;
 

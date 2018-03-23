@@ -17,7 +17,7 @@
 
 #include "XcodeMlType.h"
 #include "XcodeMlUtil.h"
-#include "XcodeMlEnvironment.h"
+#include "XcodeMlTypeTable.h"
 
 #include "AttrProc.h"
 #include "SourceInfo.h"

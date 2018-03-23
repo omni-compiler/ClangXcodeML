@@ -15,7 +15,7 @@
 #include "XMLString.h"
 #include "XcodeMlNns.h"
 #include "XcodeMlType.h"
-#include "XcodeMlEnvironment.h"
+#include "XcodeMlTypeTable.h"
 #include "XMLWalker.h"
 #include "TypeAnalyzer.h"
 #include "SourceInfo.h"

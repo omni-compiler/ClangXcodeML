@@ -15,7 +15,7 @@
 #include "Util.h"
 #include "XcodeMlNns.h"
 #include "XcodeMlType.h"
-#include "XcodeMlEnvironment.h"
+#include "XcodeMlTypeTable.h"
 #include "XcodeMlName.h"
 #include "XcodeMlOperator.h"
 #include "XMLString.h"

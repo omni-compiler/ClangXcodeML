@@ -3,7 +3,7 @@
 
 namespace XcodeMl {
 
-class Environment;
+class TypeTable;
 class Nns;
 
 /*!
@@ -38,7 +38,7 @@ public:
    * \brief Returns the source-code representation,
    * like `abc`, `~A`, or `operator+`.
    */
-  virtual CodeFragment toString(const Environment &) const = 0;
+  virtual CodeFragment toString(const TypeTable &) const = 0;
   UnqualIdKind getKind() const;
 
 protected:
@@ -55,7 +55,7 @@ class Name {
 public:
   explicit Name(const CodeFragment &, const std::shared_ptr<UnqualId> &);
   explicit Name(const std::shared_ptr<UnqualId> &);
-  CodeFragment toString(const Environment &, const NnsMap &) const;
+  CodeFragment toString(const TypeTable &, const NnsMap &) const;
   std::shared_ptr<UnqualId> getUnqualId() const;
 
 private:
@@ -69,7 +69,7 @@ public:
   UIDIdent(const std::string &);
   ~UIDIdent() override = default;
   UnqualId *clone() const override;
-  CodeFragment toString(const Environment &) const override;
+  CodeFragment toString(const TypeTable &) const override;
   static bool classof(const UnqualId *);
 
 protected:
@@ -85,7 +85,7 @@ public:
   OpFuncId(const std::string &);
   ~OpFuncId() override = default;
   UnqualId *clone() const override;
-  CodeFragment toString(const Environment &) const override;
+  CodeFragment toString(const TypeTable &) const override;
   static bool classof(const UnqualId *);
 
 protected:
@@ -101,7 +101,7 @@ public:
   ConvFuncId(const DataTypeIdent &);
   ~ConvFuncId() override = default;
   UnqualId *clone() const override;
-  CodeFragment toString(const Environment &) const override;
+  CodeFragment toString(const TypeTable &) const override;
   static bool classof(const UnqualId *);
 
 protected:
@@ -117,7 +117,7 @@ public:
   CtorName(const DataTypeIdent &);
   ~CtorName() override = default;
   UnqualId *clone() const override;
-  CodeFragment toString(const Environment &) const override;
+  CodeFragment toString(const TypeTable &) const override;
   static bool classof(const UnqualId *);
 
 protected:
@@ -133,7 +133,7 @@ public:
   DtorName(const DataTypeIdent &);
   ~DtorName() override = default;
   UnqualId *clone() const override;
-  CodeFragment toString(const Environment &) const override;
+  CodeFragment toString(const TypeTable &) const override;
   static bool classof(const UnqualId *);
 
 protected:

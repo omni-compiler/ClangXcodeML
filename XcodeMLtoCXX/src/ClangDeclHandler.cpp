@@ -17,7 +17,7 @@
 
 #include "XcodeMlType.h"
 #include "XcodeMlUtil.h"
-#include "XcodeMlEnvironment.h"
+#include "XcodeMlTypeTable.h"
 
 #include "AttrProc.h"
 #include "NnsAnalyzer.h"
@@ -110,7 +110,7 @@ makeTemplateHead(xmlNodePtr node, const CodeBuilder &w, SourceInfo &src) {
 DEFINE_DECLHANDLER(ClassTemplateProc) {
   if (const auto typeTableNode =
           findFirst(node, "xcodemlTypeTable", src.ctxt)) {
-    src.typeTable = expandEnvironment(src.typeTable, typeTableNode, src.ctxt);
+    src.typeTable = expandTypeTable(src.typeTable, typeTableNode, src.ctxt);
   }
   if (const auto nnsTableNode = findFirst(node, "xcodemlNnsTable", src.ctxt)) {
     src.nnsTable = expandNnsMap(src.nnsTable, nnsTableNode, src.ctxt);
@@ -199,7 +199,7 @@ emitClassDefinition(xmlNodePtr node,
 DEFINE_DECLHANDLER(ClassTemplatePartialSpecializationProc) {
   if (const auto typeTableNode =
           findFirst(node, "xcodemlTypeTable", src.ctxt)) {
-    src.typeTable = expandEnvironment(src.typeTable, typeTableNode, src.ctxt);
+    src.typeTable = expandTypeTable(src.typeTable, typeTableNode, src.ctxt);
   }
   if (const auto nnsTableNode = findFirst(node, "xcodemlNnsTable", src.ctxt)) {
     src.nnsTable = expandNnsMap(src.nnsTable, nnsTableNode, src.ctxt);
@@ -364,7 +364,7 @@ DEFINE_DECLHANDLER(FunctionProc) {
 DEFINE_DECLHANDLER(FunctionTemplateProc) {
   if (const auto typeTableNode =
           findFirst(node, "xcodemlTypeTable", src.ctxt)) {
-    src.typeTable = expandEnvironment(src.typeTable, typeTableNode, src.ctxt);
+    src.typeTable = expandTypeTable(src.typeTable, typeTableNode, src.ctxt);
   }
   if (const auto nnsTableNode = findFirst(node, "xcodemlNnsTable", src.ctxt)) {
     src.nnsTable = expandNnsMap(src.nnsTable, nnsTableNode, src.ctxt);
@@ -435,7 +435,7 @@ DEFINE_DECLHANDLER(TemplateTypeParmProc) {
 DEFINE_DECLHANDLER(TranslationUnitProc) {
   if (const auto typeTableNode =
           findFirst(node, "xcodemlTypeTable", src.ctxt)) {
-    src.typeTable = expandEnvironment(src.typeTable, typeTableNode, src.ctxt);
+    src.typeTable = expandTypeTable(src.typeTable, typeTableNode, src.ctxt);
   }
   if (const auto nnsTableNode = findFirst(node, "xcodemlNnsTable", src.ctxt)) {
     src.nnsTable = expandNnsMap(src.nnsTable, nnsTableNode, src.ctxt);

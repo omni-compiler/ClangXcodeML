@@ -1,10 +1,10 @@
 #ifndef TYPEANALYZER_H
 #define TYPEANALYZER_H
 
-XcodeMl::Environment parseTypeTable(
+XcodeMl::TypeTable parseTypeTable(
     xmlNodePtr, xmlXPathContextPtr, std::stringstream &);
 
-XcodeMl::Environment expandEnvironment(const XcodeMl::Environment &env,
+XcodeMl::TypeTable expandTypeTable(const XcodeMl::TypeTable &env,
     xmlNodePtr typeTable,
     xmlXPathContextPtr ctxt);
 
