@@ -296,15 +296,14 @@ commonSetUpForRecordDecl(
   xmlNewProp(node,
       BAD_CAST "cxx_class_kind",
       BAD_CAST getTagKindAsString(RD->getTagKind()));
-  xmlNewProp(node,
-      BAD_CAST "is_anonymous",
-      BAD_CAST(RD->isAnonymousStructOrUnion() ? "true" : "false"));
+  if (RD->isAnonymousStructOrUnion())
+    xmlNewProp(node, BAD_CAST "is_anonymous", BAD_CAST "1");
 
   const auto className = RD->getName();
   xmlNewChild(node, nullptr, BAD_CAST "name", BAD_CAST className.data());
 
   if (const auto CTS = dyn_cast<ClassTemplateSpecializationDecl>(RD)) {
-    xmlNewProp(node, BAD_CAST "is_template_instantiation", BAD_CAST "true");
+    xmlNewProp(node, BAD_CAST "is_template_instantiation", BAD_CAST "1");
     const auto templArgs = xmlNewNode(nullptr, BAD_CAST "templateArguments");
     for (auto &&arg : CTS->getTemplateArgs().asArray()) {
       switch (arg.getKind()) {

@@ -40,7 +40,8 @@ makeIdNode(TypeTableInfo &TTI, const ValueDecl *VD) {
 
 void
 xmlNewBoolProp(xmlNodePtr node, const std::string &name, bool value) {
-  xmlNewProp(node, BAD_CAST(name.c_str()), BAD_CAST(value ? "true" : "false"));
+  if (value)
+    xmlNewProp(node, BAD_CAST(name.c_str()), BAD_CAST "1");
 }
 
 xmlNodePtr
