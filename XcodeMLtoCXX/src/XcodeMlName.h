@@ -101,7 +101,7 @@ public:
   ConvFuncId(const DataTypeIdent &);
   ~ConvFuncId() override = default;
   UnqualId *clone() const override;
-  CodeFragment toString(const TypeTable &) const override;
+  CodeFragment toString(const TypeTable &, const NnsTable &) const override;
   static bool classof(const UnqualId *);
 
 protected:

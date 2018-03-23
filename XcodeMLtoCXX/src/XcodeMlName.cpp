@@ -104,9 +104,10 @@ ConvFuncId::clone() const {
 }
 
 CodeFragment
-ConvFuncId::toString(const TypeTable &env) const {
+ConvFuncId::toString(const TypeTable &env, const NnsTable &nnsTable) const {
   const auto T = env.at(dtident);
-  return makeTokenNode("operator") + T->makeDeclaration(makeVoidNode(), env);
+  return makeTokenNode("operator")
+      + T->makeDeclaration(makeVoidNode(), env, nnsTable);
 }
 
 bool
