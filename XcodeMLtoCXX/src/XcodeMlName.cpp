@@ -64,7 +64,7 @@ UIDIdent::clone() const {
 }
 
 CodeFragment
-UIDIdent::toString(const TypeTable &) const {
+UIDIdent::toString(const TypeTable &, const NnsTable &) const {
   return makeTokenNode(ident);
 }
 
