@@ -76,7 +76,8 @@ public:
   Type(TypeKind, DataTypeIdent, bool = false, bool = false);
   virtual ~Type() = 0;
   virtual Type *clone() const = 0;
-  virtual CodeFragment makeDeclaration(CodeFragment, const TypeTable &) = 0;
+  virtual CodeFragment makeDeclaration(
+      CodeFragment, const TypeTable &, const NnsMap &) = 0;
   virtual CodeFragment makeDeclarationWithNnsMap(
       const CodeFragment &, const TypeTable &, const NnsMap &);
 
