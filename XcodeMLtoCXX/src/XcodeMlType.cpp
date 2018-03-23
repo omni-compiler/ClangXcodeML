@@ -301,9 +301,10 @@ Function::Function(DataTypeIdent ident,
 CodeFragment
 Function::makeDeclarationWithoutReturnType(CodeFragment var,
     const std::vector<CodeFragment> &args,
-    const TypeTable &env) {
+    const TypeTable &env,
+    const NnsTable &nnsTable) {
   auto decl = var + makeTokenNode("(");
-  decl = decl + params.makeDeclaration(args, env);
+  decl = decl + params.makeDeclaration(args, env, nnsTable);
   decl = decl + makeTokenNode(")");
   if (isConst()) {
     decl = decl + makeTokenNode("const");
@@ -316,22 +317,24 @@ Function::makeDeclarationWithoutReturnType(CodeFragment var,
 
 CodeFragment
 Function::makeDeclarationWithoutReturnType(
-    CodeFragment var, const TypeTable &env) {
-  return makeDeclarationWithoutReturnType(var, defaultArgs, env);
+    CodeFragment var, const TypeTable &env, const NnsTable &nnsTable) {
+  return makeDeclarationWithoutReturnType(var, defaultArgs, env, nnsTable);
 }
 
 CodeFragment
 Function::makeDeclaration(CodeFragment var,
     const std::vector<CodeFragment> &args,
-    const TypeTable &env) {
+    const TypeTable &env,
+    const NnsTable &nnsTable) {
   auto returnType = env.at(returnValue);
-  auto decl = makeDeclarationWithoutReturnType(var, args, env);
-  return makeDecl(returnType, decl, env);
+  auto decl = makeDeclarationWithoutReturnType(var, args, env, nnsTable);
+  return makeDecl(returnType, decl, env, nnsTable);
 }
 
 CodeFragment
-Function::makeDeclaration(CodeFragment var, const TypeTable &env) {
-  return makeDeclaration(var, defaultArgs, env);
+Function::makeDeclaration(
+    CodeFragment var, const TypeTable &env, const NnsTable &nnsTable) {
+  return makeDeclaration(var, defaultArgs, env, nnsTable);
 }
 
 std::vector<CodeFragment>

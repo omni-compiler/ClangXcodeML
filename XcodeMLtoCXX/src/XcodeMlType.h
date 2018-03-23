@@ -245,14 +245,16 @@ public:
       bool isVariadic = false);
   CodeFragment makeDeclarationWithoutReturnType(CodeFragment funcName,
       const std::vector<CodeFragment> &argNames,
-      const TypeTable &env);
+      const TypeTable &env,
+      const NnsTable &nnsTable);
   CodeFragment makeDeclarationWithoutReturnType(
-      CodeFragment funcName, const TypeTable &env);
+      CodeFragment funcName, const TypeTable &env, const NnsTable &nnsTable);
   CodeFragment makeDeclaration(
-      CodeFragment funcName, const TypeTable &env) override;
+      CodeFragment funcName, const TypeTable &env, const NnsTable &) override;
   CodeFragment makeDeclaration(CodeFragment funcName,
       const std::vector<CodeFragment> &argNames,
-      const TypeTable &env);
+      const TypeTable &env,
+      const NnsTable &nnsTable);
   virtual CodeFragment addConstQualifier(CodeFragment) const override;
   virtual CodeFragment addVolatileQualifier(CodeFragment) const override;
   std::vector<CodeFragment> argNames() const;
