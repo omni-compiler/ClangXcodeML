@@ -110,7 +110,8 @@ Reserved::Reserved(DataTypeIdent ident, CodeFragment dataType)
 }
 
 CodeFragment
-Reserved::makeDeclaration(CodeFragment var, const TypeTable &) {
+Reserved::makeDeclaration(
+    CodeFragment var, const TypeTable &, const NnsMap &) {
   return name + var;
 }
 

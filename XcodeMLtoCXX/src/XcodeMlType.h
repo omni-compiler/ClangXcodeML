@@ -131,7 +131,8 @@ private:
 class Reserved : public Type {
 public:
   Reserved(DataTypeIdent, CodeFragment);
-  CodeFragment makeDeclaration(CodeFragment, const TypeTable &) override;
+  CodeFragment makeDeclaration(
+      CodeFragment, const TypeTable &, const NnsMap &) override;
   ~Reserved() override;
   Type *clone() const override;
   static bool classof(const Type *);
