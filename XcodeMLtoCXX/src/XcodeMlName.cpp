@@ -8,7 +8,7 @@
 #include "StringTree.h"
 #include "XcodeMlNns.h"
 #include "XcodeMlType.h"
-#include "XcodeMlEnvironment.h"
+#include "XcodeMlTypeTable.h"
 #include "XcodeMlOperator.h"
 
 #include "XcodeMlName.h"
@@ -27,7 +27,7 @@ Name::Name(const std::shared_ptr<UnqualId> &id_) : nestedNameSpec(), id(id_) {
 }
 
 CodeFragment
-Name::toString(const Environment &typeTable, const NnsMap &) const {
+Name::toString(const TypeTable &typeTable, const NnsMap &) const {
   assert(id);
   if (nestedNameSpec) {
     return nestedNameSpec + id->toString(typeTable);
@@ -64,7 +64,7 @@ UIDIdent::clone() const {
 }
 
 CodeFragment
-UIDIdent::toString(const Environment &) const {
+UIDIdent::toString(const TypeTable &) const {
   return makeTokenNode(ident);
 }
 
@@ -84,7 +84,7 @@ OpFuncId::clone() const {
 }
 
 CodeFragment
-OpFuncId::toString(const Environment &) const {
+OpFuncId::toString(const TypeTable &) const {
   return makeTokenNode("operator") + makeTokenNode(opSpelling);
 }
 
@@ -104,7 +104,7 @@ ConvFuncId::clone() const {
 }
 
 CodeFragment
-ConvFuncId::toString(const Environment &env) const {
+ConvFuncId::toString(const TypeTable &env) const {
   const auto T = env.at(dtident);
   return makeTokenNode("operator") + T->makeDeclaration(makeVoidNode(), env);
 }
@@ -125,7 +125,7 @@ CtorName::clone() const {
 }
 
 CodeFragment
-CtorName::toString(const Environment &env) const {
+CtorName::toString(const TypeTable &env) const {
   const auto T = env.at(dtident);
   const auto ClassT = llvm::cast<XcodeMl::ClassType>(T.get());
   const auto name = ClassT->name();
@@ -148,7 +148,7 @@ DtorName::clone() const {
 }
 
 CodeFragment
-DtorName::toString(const Environment &env) const {
+DtorName::toString(const TypeTable &env) const {
   const auto T = env.at(dtident);
   const auto ClassT = llvm::cast<XcodeMl::ClassType>(T.get());
   const auto name = ClassT->name();

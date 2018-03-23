@@ -9,12 +9,12 @@
 #include "StringTree.h"
 #include "XcodeMlNns.h"
 #include "XcodeMlType.h"
-#include "XcodeMlEnvironment.h"
+#include "XcodeMlTypeTable.h"
 
 #include "SourceInfo.h"
 
 SourceInfo::SourceInfo(xmlXPathContextPtr c,
-    const XcodeMl::Environment &e,
+    const XcodeMl::TypeTable &e,
     const XcodeMl::NnsMap &n,
     Language l)
     : ctxt(c), typeTable(e), nnsTable(n), language(l), uniqueNameIndex(0) {

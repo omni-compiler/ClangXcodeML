@@ -20,7 +20,7 @@
 #include "XcodeMlName.h"
 #include "XcodeMlOperator.h"
 #include "XcodeMlType.h"
-#include "XcodeMlEnvironment.h"
+#include "XcodeMlTypeTable.h"
 #include "XcodeMlUtil.h"
 #include "NnsAnalyzer.h"
 #include "TypeAnalyzer.h"
@@ -582,7 +582,7 @@ DEFINE_CB(emitDataMemberDecl) {
 }
 
 XcodeMl::CodeFragment
-getCtorInitName(xmlNodePtr node, const XcodeMl::Environment &env) {
+getCtorInitName(xmlNodePtr node, const XcodeMl::TypeTable &env) {
   const auto dataMember = getPropOrNull(node, "member");
   if (dataMember.hasValue()) {
     return makeTokenNode(*dataMember);

@@ -16,7 +16,7 @@
 #include "XcodeMlNns.h"
 #include "XcodeMlName.h"
 #include "XcodeMlType.h"
-#include "XcodeMlEnvironment.h"
+#include "XcodeMlTypeTable.h"
 #include "XcodeMlOperator.h"
 #include "SourceInfo.h"
 #include "TypeAnalyzer.h"
