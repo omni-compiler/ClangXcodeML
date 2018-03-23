@@ -180,25 +180,29 @@ DEFINE_TA(classTypeProc) {
     const auto pName = getUnqualIdFromIdNode(idElem, ctxt);
     symbols.emplace_back(pName, dtident);
   }
+  const auto nnsident = getPropOrNull(node, "nns");
 
   const auto classKind = getProp(node, "cxx_class_kind");
   if (classKind == "union") {
     map[elemName] =
         XcodeMl::makeCXXUnionType(elemName, className, bases, symbols, targs);
   } else {
-    map[elemName] =
-        XcodeMl::makeClassType(elemName, className, bases, symbols, targs);
+    map[elemName] = XcodeMl::makeClassType(
+        elemName, nnsident, className, bases, symbols, targs);
   }
 }
 
 DEFINE_TA(enumTypeProc) {
-  XMLString dtident = xmlGetProp(node, BAD_CAST "type");
-  map[dtident] = XcodeMl::makeEnumType(dtident);
+  const auto dtident = getType(node);
+  const auto name = getUnqualIdFromIdNode(node, ctxt);
+  const auto nameSpelling = name->toString(map);
+  map[dtident] = XcodeMl::makeEnumType(dtident, nameSpelling);
 }
 
 DEFINE_TA(TemplateTypeParmTypeProc) {
   const auto dtident = getProp(node, "type");
-  map[dtident] = XcodeMl::makeTemplateTypeParm(dtident);
+  const auto name = getContent(findFirst(node, "name", ctxt));
+  map[dtident] = XcodeMl::makeTemplateTypeParm(dtident, makeTokenNode(name));
 }
 
 const std::vector<std::string> identicalFndDataTypeIdents = {

@@ -1,6 +1,7 @@
 LLVM_CONFIG = /usr/local/bin/llvm-config
 CXX = /usr/local/bin/clang++
 CXXFLAGS = $(OPTIMIZERFLAGS) -g -Wall -Wextra -fno-rtti -std=c++11 -pedantic \
+	-I $(shell $(LLVM_CONFIG) --includedir) \
 	$(PKG_CFLAGS) \
 	-D__STDC_LIMIT_MACROS -D__STDC_CONSTANT_MACROS $(PCHFLAGS)
 

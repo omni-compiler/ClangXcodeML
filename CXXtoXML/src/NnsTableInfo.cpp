@@ -8,6 +8,7 @@
 #include "clang/AST/ASTContext.h"
 #include "clang/AST/DeclBase.h"
 #include "clang/AST/DeclCXX.h"
+#include "clang/AST/DeclTemplate.h"
 #include "TypeTableInfo.h"
 
 #include "NnsTableInfo.h"
@@ -128,6 +129,20 @@ makeClassNnsNode(TypeTableInfo &TTI, const clang::DeclContext &DC) {
 }
 
 xmlNodePtr
+makeClassTemplateSpecializationNode(
+    TypeTableInfo &TTI, const clang::DeclContext &DC) {
+  const auto CTSD = llvm::cast<clang::ClassTemplateSpecializationDecl>(DC);
+  const auto node =
+      xmlNewNode(nullptr, BAD_CAST "classTemplateSpecializationNNS");
+
+  const auto dtident =
+      TTI.getTypeName(clang::QualType(CTSD.getTypeForDecl(), 0));
+  xmlNewProp(node, BAD_CAST "type", BAD_CAST(dtident.c_str()));
+
+  return node;
+}
+
+xmlNodePtr
 makeNamespaceNnsNode(const clang::DeclContext &DC) {
   const auto ND = llvm::cast<clang::NamespaceDecl>(DC);
   const auto node = xmlNewNode(nullptr, BAD_CAST "namespaceNNS");
@@ -143,6 +158,8 @@ nnsNewNode(const clang::MangleContext &MC,
     const clang::DeclContext &DC) {
   using namespace clang;
   switch (DC.getDeclKind()) {
+  case Decl::ClassTemplateSpecialization:
+    return makeClassTemplateSpecializationNode(TTI, DC);
   case Decl::CXXRecord: return makeClassNnsNode(TTI, DC);
   case Decl::Namespace: return makeNamespaceNnsNode(DC);
   default: return xmlNewNode(nullptr, BAD_CAST "otherNNS");

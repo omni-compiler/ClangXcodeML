@@ -77,6 +77,8 @@ public:
   virtual ~Type() = 0;
   virtual Type *clone() const = 0;
   virtual CodeFragment makeDeclaration(CodeFragment, const Environment &) = 0;
+  virtual CodeFragment makeDeclarationWithNnsMap(
+      const CodeFragment &, const Environment &, const NnsMap &);
 
   /*!
    * \brief Return a code fragment string created by adding the `const`
@@ -333,6 +335,7 @@ public:
   CodeFragment makeDeclaration(CodeFragment, const Environment &) override;
   Type *clone() const override;
   static bool classof(const Type *);
+  EnumName name() const;
   void setName(const std::string &);
 
 protected:
@@ -390,7 +393,7 @@ std::string getClassKey(CXXClassKind kind);
 /*! \brief Represents (C++-style) class. */
 class ClassType : public Type {
 public:
-  using ClassName = llvm::Optional<CodeFragment>;
+  using ClassName = CodeFragment;
   using MemberName = std::shared_ptr<UnqualId>;
   using Symbols = std::vector<std::tuple<MemberName, DataTypeIdent>>;
   using BaseClass = std::tuple<std::string, DataTypeIdent, bool>;
@@ -399,16 +402,15 @@ public:
   ClassType(const DataTypeIdent &, const CodeFragment &, const Symbols &);
   ClassType(const DataTypeIdent &,
       CXXClassKind,
+      const llvm::Optional<std::string> &nns,
       const CodeFragment &,
       const std::vector<BaseClass> &,
       const Symbols &,
       const llvm::Optional<TemplateArgList> &);
   ClassType(const DataTypeIdent &, const Symbols &);
-  ClassType(const DataTypeIdent &,
-      CXXClassKind,
-      const std::vector<BaseClass> &,
-      const Symbols &);
   CodeFragment makeDeclaration(CodeFragment, const Environment &) override;
+  CodeFragment makeDeclarationWithNnsMap(
+      const CodeFragment &, const Environment &, const NnsMap &) override;
   ~ClassType() override = default;
   Type *clone() const override;
   CXXClassKind classKind() const;
@@ -427,6 +429,7 @@ protected:
 
 private:
   CXXClassKind classKind_;
+  llvm::Optional<std::string> nnsident;
   ClassName name_;
   std::vector<BaseClass> bases_;
   Symbols classScopeSymbols;
@@ -435,12 +438,13 @@ private:
 
 class TemplateTypeParm : public Type {
 public:
-  TemplateTypeParm(DataTypeIdent);
+  TemplateTypeParm(const DataTypeIdent &dtident, const CodeFragment &name);
   ~TemplateTypeParm() override = default;
   CodeFragment makeDeclaration(CodeFragment, const Environment &) override;
   Type *clone() const override;
   static bool classof(const Type *);
   void setSpelling(CodeFragment);
+  llvm::Optional<CodeFragment> getSpelling() const;
 
 protected:
   TemplateTypeParm(const TemplateTypeParm &);
@@ -475,21 +479,20 @@ TypeRef makeArrayType(DataTypeIdent, TypeRef, size_t);
 TypeRef makeArrayType(DataTypeIdent, TypeRef, Array::Size);
 TypeRef makeArrayType(DataTypeIdent, DataTypeIdent, Array::Size);
 TypeRef makeArrayType(DataTypeIdent, DataTypeIdent, size_t);
-TypeRef makeEnumType(const DataTypeIdent &);
+TypeRef makeEnumType(const DataTypeIdent &, const CodeFragment &tagname);
 TypeRef makeClassType(const DataTypeIdent &, const ClassType::Symbols &);
-TypeRef makeClassType(const DataTypeIdent &,
-    const std::vector<ClassType::BaseClass> &,
-    const ClassType::Symbols &);
 TypeRef makeClassType(const DataTypeIdent &dtident,
-    const llvm::Optional<CodeFragment> &className,
+    const llvm::Optional<std::string> nnsident,
+    const CodeFragment &className,
     const std::vector<ClassType::BaseClass> &bases,
     const ClassType::Symbols &members,
     const llvm::Optional<ClassType::TemplateArgList> &templateArgs);
 TypeRef makeCXXUnionType(const DataTypeIdent &ident,
+    const CodeFragment &unionName,
     const std::vector<ClassType::BaseClass> &bases,
     const ClassType::Symbols &members);
 TypeRef makeCXXUnionType(const DataTypeIdent &ident,
-    const llvm::Optional<CodeFragment> &unionName,
+    const CodeFragment &unionName,
     const std::vector<ClassType::BaseClass> &bases,
     const ClassType::Symbols &members,
     const llvm::Optional<ClassType::TemplateArgList> &templateArgs);
@@ -501,7 +504,7 @@ TypeRef makeFunctionType(const DataTypeIdent &ident,
     const std::vector<DataTypeIdent> &paramTypes);
 TypeRef makeStructType(
     const DataTypeIdent &, const CodeFragment &, const Struct::MemberList &);
-TypeRef makeTemplateTypeParm(const DataTypeIdent &);
+TypeRef makeTemplateTypeParm(const DataTypeIdent &, const CodeFragment &);
 TypeRef makeVariadicFunctionType(const DataTypeIdent &ident,
     const DataTypeIdent &returnType,
     const std::vector<DataTypeIdent> &paramTypes);

@@ -6,12 +6,15 @@
 #include <tuple>
 #include <unordered_map>
 
+class NnsTableInfo;
+
 class TypeTableInfo {
   clang::MangleContext *mangleContext;
+  InheritanceInfo *inheritanceinfo;
+  NnsTableInfo *nnstableinfo;
   std::unordered_map<std::string, clang::QualType> mapFromNameToQualType;
   std::unordered_map<clang::QualType, std::string> mapFromQualTypeToName;
   std::unordered_map<clang::QualType, xmlNodePtr> mapFromQualTypeToXmlNodePtr;
-  InheritanceInfo *inheritanceinfo;
   std::unordered_map<clang::QualType, bool> normalizability;
   std::stack<std::tuple<xmlNodePtr, std::vector<clang::QualType>>>
       typeTableStack;
@@ -52,8 +55,9 @@ public:
   TypeTableInfo &operator=(const TypeTableInfo &) = delete;
   TypeTableInfo &operator=(const TypeTableInfo &&) = delete;
 
-  explicit TypeTableInfo(
-      clang::MangleContext *MC, InheritanceInfo *II); // default constructor
+  explicit TypeTableInfo(clang::MangleContext *MC,
+      InheritanceInfo *II,
+      NnsTableInfo *NTI); // default constructor
 
   void registerType(
       clang::QualType T, xmlNodePtr *retNode, xmlNodePtr traversingNode);

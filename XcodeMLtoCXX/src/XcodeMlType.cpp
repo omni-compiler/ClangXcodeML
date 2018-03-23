@@ -6,8 +6,8 @@
 #include <libxml/tree.h>
 #include "llvm/ADT/Optional.h"
 #include "StringTree.h"
-#include "XcodeMlType.h"
 #include "XcodeMlNns.h"
+#include "XcodeMlType.h"
 #include "XcodeMlName.h"
 #include "XcodeMlEnvironment.h"
 #include "llvm/Support/Casting.h"
@@ -56,6 +56,12 @@ Type::Type(TypeKind k, DataTypeIdent id, bool c, bool v)
 }
 
 Type::~Type() {
+}
+
+CodeFragment
+Type::makeDeclarationWithNnsMap(
+    const CodeFragment &var, const Environment &typeTable, const NnsMap &) {
+  return makeDeclaration(var, typeTable);
 }
 
 CodeFragment
@@ -388,7 +394,7 @@ Array::makeDeclaration(CodeFragment var, const Environment &env) {
       : makeTokenNode("*");
   const CodeFragment declarator = makeTokenNode("[")
       + (isConst() ? makeTokenNode("const") : makeVoidNode())
-      + (isConst() ? makeTokenNode("volatile") : makeVoidNode())
+      + (isVolatile() ? makeTokenNode("volatile") : makeVoidNode())
       + size_expression + makeTokenNode("]");
   return makeDecl(elementType, var + declarator, env);
 }
@@ -520,6 +526,11 @@ EnumType::classof(const Type *T) {
   return T->getKind() == TypeKind::Enum;
 }
 
+EnumType::EnumName
+EnumType::name() const {
+  return name_;
+}
+
 void
 EnumType::setName(const std::string &enum_name) {
   assert(!name_);
@@ -613,12 +624,14 @@ ClassType::ClassType(const DataTypeIdent &ident,
 
 ClassType::ClassType(const DataTypeIdent &ident,
     CXXClassKind kind,
+    const llvm::Optional<std::string> &nns,
     const CodeFragment &className,
     const std::vector<BaseClass> &b,
     const ClassType::Symbols &symbols,
     const llvm::Optional<TemplateArgList> &argList)
     : Type(TypeKind::Class, ident),
       classKind_(kind),
+      nnsident(nns),
       name_(className),
       bases_(b),
       classScopeSymbols(symbols),
@@ -631,18 +644,6 @@ ClassType::ClassType(
       classKind_(CXXClassKind::Class),
       name_(),
       bases_(),
-      classScopeSymbols(symbols),
-      templateArgs() {
-}
-
-ClassType::ClassType(const DataTypeIdent &ident,
-    CXXClassKind kind,
-    const std::vector<BaseClass> &b,
-    const ClassType::Symbols &symbols)
-    : Type(TypeKind::Class, ident),
-      classKind_(kind),
-      name_(),
-      bases_(b),
       classScopeSymbols(symbols),
       templateArgs() {
 }
@@ -662,7 +663,22 @@ ClassType::makeDeclaration(CodeFragment var, const Environment &typeTable) {
   if (const auto tid = getAsTemplateId(typeTable)) {
     return makeTokenNode(getClassKey(classKind())) + *tid + var;
   }
-  return makeTokenNode(getClassKey(classKind())) + *name_ + var;
+  return makeTokenNode(getClassKey(classKind())) + name_ + var;
+}
+
+CodeFragment
+ClassType::makeDeclarationWithNnsMap(const CodeFragment &var,
+    const Environment &typeTable,
+    const NnsMap &nnsTable) {
+  if (!nnsident.hasValue()) {
+    return makeDeclaration(var, typeTable);
+  }
+  const auto nns = nnsTable.at(*nnsident);
+  const auto spec = nns->makeDeclaration(typeTable, nnsTable);
+  if (const auto tid = getAsTemplateId(typeTable)) {
+    return makeTokenNode(getClassKey(classKind())) + spec + *tid + var;
+  }
+  return makeTokenNode(getClassKey(classKind())) + spec + name_ + var;
 }
 
 Type *
@@ -717,7 +733,7 @@ ClassType::getAsTemplateId(const Environment &typeTable) const {
     targs.push_back(makeDecl(T, makeVoidNode(), typeTable));
   }
   const auto list = makeTokenNode("<") + join(",", targs) + makeTokenNode(">");
-  return MaybeCodeFragment(*name_ + list);
+  return MaybeCodeFragment(name_ + list);
 }
 
 bool
@@ -732,8 +748,9 @@ ClassType::ClassType(const ClassType &other)
       classScopeSymbols(other.classScopeSymbols) {
 }
 
-TemplateTypeParm::TemplateTypeParm(DataTypeIdent dtident)
-    : Type(TypeKind::TemplateTypeParm, dtident) {
+TemplateTypeParm::TemplateTypeParm(
+    const DataTypeIdent &dtident, const CodeFragment &name)
+    : Type(TypeKind::TemplateTypeParm, dtident), pSpelling(name) {
 }
 
 CodeFragment
@@ -760,6 +777,15 @@ TemplateTypeParm::classof(const Type *T) {
 void
 TemplateTypeParm::setSpelling(CodeFragment T) {
   pSpelling = T;
+}
+
+llvm::Optional<CodeFragment>
+TemplateTypeParm::getSpelling() const {
+  using MaybeName = llvm::Optional<CodeFragment>;
+  if (!pSpelling) {
+    return MaybeName();
+  }
+  return pSpelling;
 }
 
 OtherType::OtherType(const DataTypeIdent &ident)
@@ -876,8 +902,8 @@ makeVariadicFunctionType(const DataTypeIdent &ident,
 }
 
 TypeRef
-makeEnumType(const DataTypeIdent &ident) {
-  return std::make_shared<EnumType>(ident, EnumType::EnumName());
+makeEnumType(const DataTypeIdent &ident, const CodeFragment &tagname) {
+  return std::make_shared<EnumType>(ident, tagname);
 }
 
 TypeRef
@@ -893,54 +919,53 @@ makeClassType(const DataTypeIdent &ident, const ClassType::Symbols &symbols) {
 }
 
 TypeRef
-makeClassType(const DataTypeIdent &ident,
-    const std::vector<ClassType::BaseClass> &bases,
-    const ClassType::Symbols &symbols) {
-  return std::make_shared<ClassType>(
-      ident, CXXClassKind::Class, bases, symbols);
-}
-
-TypeRef
 makeClassType(const DataTypeIdent &dtident,
-    const llvm::Optional<CodeFragment> &className,
+    const llvm::Optional<std::string> nnsident,
+    const CodeFragment &className,
     const std::vector<ClassType::BaseClass> &bases,
     const ClassType::Symbols &members,
     const llvm::Optional<ClassType::TemplateArgList> &targs) {
-  if (className.hasValue()) {
-    return std::make_shared<ClassType>(
-        dtident, CXXClassKind::Class, *className, bases, members, targs);
-  } else {
-    return std::make_shared<ClassType>(
-        dtident, CXXClassKind::Class, bases, members);
-  }
+  return std::make_shared<ClassType>(dtident,
+      CXXClassKind::Class,
+      nnsident,
+      className,
+      bases,
+      members,
+      targs);
 }
 
 TypeRef
 makeCXXUnionType(const DataTypeIdent &ident,
+    const CodeFragment &unionName,
     const std::vector<ClassType::BaseClass> &bases,
     const ClassType::Symbols &members) {
-  return std::make_shared<ClassType>(
-      ident, CXXClassKind::Union, bases, members);
+  return std::make_shared<ClassType>(ident,
+      CXXClassKind::Union,
+      llvm::Optional<std::string>(),
+      unionName,
+      bases,
+      members,
+      llvm::Optional<ClassType::TemplateArgList>());
 }
 
 TypeRef
 makeCXXUnionType(const DataTypeIdent &ident,
-    const llvm::Optional<CodeFragment> &unionName,
+    const CodeFragment &unionName,
     const std::vector<ClassType::BaseClass> &bases,
     const ClassType::Symbols &members,
     const llvm::Optional<ClassType::TemplateArgList> &targs) {
-  if (unionName.hasValue()) {
-    return std::make_shared<ClassType>(
-        ident, CXXClassKind::Union, *unionName, bases, members, targs);
-  } else {
-    return std::make_shared<ClassType>(
-        ident, CXXClassKind::Union, bases, members);
-  }
+  return std::make_shared<ClassType>(ident,
+      CXXClassKind::Union,
+      llvm::Optional<std::string>(),
+      unionName,
+      bases,
+      members,
+      targs);
 }
 
 TypeRef
-makeTemplateTypeParm(const DataTypeIdent &dtident) {
-  return std::make_shared<TemplateTypeParm>(dtident);
+makeTemplateTypeParm(const DataTypeIdent &dtident, const CodeFragment &name) {
+  return std::make_shared<TemplateTypeParm>(dtident, name);
 }
 
 TypeRef

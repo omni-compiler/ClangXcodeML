@@ -156,7 +156,7 @@ DEFINE_STMTHANDLER(ConditionalOperatorProc) {
   const auto cond = createNode(node, "clangStmt[1]", w, src);
   const auto yes = createNode(node, "clangStmt[2]", w, src);
   const auto no = createNode(node, "clangStmt[3]", w, src);
-  return cond + makeTokenNode("?") + yes + makeTokenNode(":") + no;
+  return wrapWithParen(cond + makeTokenNode("?") + yes + makeTokenNode(":") + no);
 }
 
 DEFINE_STMTHANDLER(ContinueStmtProc) {
@@ -252,6 +252,14 @@ DEFINE_STMTHANDLER(CXXStaticCastExprProc) {
       + makeTokenNode(">") + wrapWithParen(expr);
 }
 
+DEFINE_STMTHANDLER(CXXThrowExprProc) {
+  if (auto throwExpr = findFirst(node, "clangStmt[1]", src.ctxt)) {
+    return makeTokenNode("throw") + w.walk(throwExpr, src);
+  } else {
+    return makeTokenNode("throw");
+  }
+}
+
 DEFINE_STMTHANDLER(CXXTryStmtProc) {
   const auto body = createNode(node, "clangStmt[1]", w, src);
   const auto catchClauses =
@@ -300,7 +308,6 @@ DEFINE_STMTHANDLER(emitTokenAttrValue) {
 DEFINE_STMTHANDLER(CXXTemporaryObjectExprProc) {
   const auto resultT = src.typeTable.at(getType(node));
   const auto name = llvm::cast<XcodeMl::ClassType>(resultT.get())->name();
-  assert(name.hasValue());
   auto children = findNodes(node, "*[position() > 1]", src.ctxt);
   // ignore first child, which represents the result (class) type of
   // the clang::CXXTemporaryObjectExpr
@@ -308,7 +315,7 @@ DEFINE_STMTHANDLER(CXXTemporaryObjectExprProc) {
   for (auto child : children) {
     args.push_back(w.walk(child, src));
   }
-  return *name + makeTokenNode("(") + join(",", args) + makeTokenNode(")");
+  return name + makeTokenNode("(") + join(",", args) + makeTokenNode(")");
 }
 
 DEFINE_STMTHANDLER(CXXOperatorCallExprProc) {
@@ -466,6 +473,7 @@ const ClangStmtHandlerType ClangStmtHandler("class",
         std::make_tuple("CXXReinterpretCastExpr", CXXReinterpretCastExprProc),
         std::make_tuple("CXXStaticCastExpr", CXXStaticCastExprProc),
         std::make_tuple("CXXTemporaryObjectExpr", CXXTemporaryObjectExprProc),
+        std::make_tuple("CXXThrowExpr", CXXThrowExprProc),
         std::make_tuple("CXXTryStmt", CXXTryStmtProc),
         std::make_tuple("CXXThisExpr", ThisExprProc),
         std::make_tuple("DeclStmt", DeclStmtProc),

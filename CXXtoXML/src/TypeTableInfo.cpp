@@ -1,7 +1,8 @@
 #include "XMLVisitorBase.h"
+#include "TypeTableInfo.h"
+#include "NnsTableInfo.h"
 #include "DeclarationsVisitor.h"
 #include "ClangOperator.h"
-#include "TypeTableInfo.h"
 #include "XcodeMlNameElem.h"
 
 #include <iostream>
@@ -35,8 +36,9 @@ static std::ifstream mapfile;
 static bool map_is_already_set = false;
 static std::map<std::string, std::string> typenamemap;
 
-TypeTableInfo::TypeTableInfo(MangleContext *MC, InheritanceInfo *II)
-    : mangleContext(MC), inheritanceinfo(II) {
+TypeTableInfo::TypeTableInfo(
+    MangleContext *MC, InheritanceInfo *II, NnsTableInfo *NTI)
+    : mangleContext(MC), inheritanceinfo(II), nnstableinfo(NTI) {
   mapFromNameToQualType.clear();
   mapFromQualTypeToName.clear();
   mapFromQualTypeToXmlNodePtr.clear();
@@ -305,11 +307,40 @@ commonSetUpForRecordDecl(
     xmlNewProp(node, BAD_CAST "is_template_instantiation", BAD_CAST "true");
     const auto templArgs = xmlNewNode(nullptr, BAD_CAST "templateArguments");
     for (auto &&arg : CTS->getTemplateArgs().asArray()) {
-      const auto typeNode = xmlNewNode(nullptr, BAD_CAST "typeName");
-      xmlNewProp(typeNode,
-          BAD_CAST "ref",
-          BAD_CAST TTI.getTypeName(arg.getAsType()).c_str());
-      xmlAddChild(templArgs, typeNode);
+      switch (arg.getKind()) {
+      case TemplateArgument::Null:
+        xmlAddChild(templArgs, xmlNewNode(nullptr, BAD_CAST "null"));
+        break;
+      case TemplateArgument::Type: {
+        const auto typeNode = xmlNewNode(nullptr, BAD_CAST "typeName");
+        xmlNewProp(typeNode,
+                   BAD_CAST "ref",
+                   BAD_CAST TTI.getTypeName(arg.getAsType()).c_str());
+        xmlAddChild(templArgs, typeNode);
+        break;
+      }
+      case TemplateArgument::Declaration:
+        xmlAddChild(templArgs, xmlNewNode(nullptr, BAD_CAST "declaration"));
+        break;
+      case TemplateArgument::NullPtr:
+        xmlAddChild(templArgs, xmlNewNode(nullptr, BAD_CAST "nullptr"));
+        break;
+      case TemplateArgument::Integral:
+        xmlAddChild(templArgs, xmlNewNode(nullptr, BAD_CAST "integral"));
+        break;
+      case TemplateArgument::Template:
+        xmlAddChild(templArgs, xmlNewNode(nullptr, BAD_CAST "template"));
+        break;
+      case TemplateArgument::TemplateExpansion:
+        xmlAddChild(templArgs, xmlNewNode(nullptr, BAD_CAST "template_expansion"));
+        break;
+      case TemplateArgument::Expression:
+        xmlAddChild(templArgs, xmlNewNode(nullptr, BAD_CAST "expression"));
+        break;
+      case TemplateArgument::Pack:
+        xmlAddChild(templArgs, xmlNewNode(nullptr, BAD_CAST "pack"));
+        break;
+      }
     }
     xmlAddChild(node, templArgs);
   }
@@ -343,14 +374,16 @@ TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
     return;
   }
 
-  if (T.isConstQualified()) {
-    isQualified = true;
-  }
-  if (T.isVolatileQualified()) {
-    isQualified = true;
-  }
-  if (T.isRestrictQualified()) {
-    isQualified = true;
+  if (!isa<const ArrayType>(T.getTypePtr())) {
+    if (T.isConstQualified()) {
+      isQualified = true;
+    }
+    if (T.isVolatileQualified()) {
+      isQualified = true;
+    }
+    if (T.isRestrictQualified()) {
+      isQualified = true;
+    }
   }
 
   if (isQualified) {
@@ -434,29 +467,12 @@ TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
       pushType(T, Node);
     } break;
 
-    case Type::ConstantArray: {
-      const ConstantArrayType *CAT =
-          dyn_cast<const ConstantArrayType>(T.getTypePtr());
-      if (CAT) {
-        registerType(CAT->getElementType(), nullptr, nullptr);
-      }
-      rawname = registerArrayType(T);
-      Node = createNode(T, "arrayType", nullptr);
-      if (CAT) {
-        xmlNewProp(Node,
-            BAD_CAST "element_type",
-            BAD_CAST getTypeName(CAT->getElementType()).c_str());
-        xmlNewProp(Node,
-            BAD_CAST "array_size",
-            BAD_CAST CAT->getSize().toString(10, false).c_str());
-      }
-      pushType(T, Node);
-    } break;
-
     case Type::IncompleteArray:
     case Type::VariableArray:
-    case Type::DependentSizedArray: {
-      const ArrayType *AT = dyn_cast<const ArrayType>(T.getTypePtr());
+    case Type::DependentSizedArray:
+    case Type::ConstantArray: {
+      ASTContext &CXT = mangleContext->getASTContext();
+      const ArrayType *AT = CXT.getAsArrayType(T);
       if (AT) {
         registerType(AT->getElementType(), nullptr, nullptr);
       }
@@ -466,6 +482,11 @@ TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
         xmlNewProp(Node,
             BAD_CAST "element_type",
             BAD_CAST getTypeName(AT->getElementType()).c_str());
+        const ConstantArrayType *CAT = dyn_cast<const ConstantArrayType>(AT);
+        if (CAT)
+          xmlNewProp(Node,
+                     BAD_CAST "array_size",
+                     BAD_CAST CAT->getSize().toString(10, false).c_str());
       }
       pushType(T, Node);
     } break;
@@ -546,6 +567,10 @@ TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
       if (auto RD = T->getAsCXXRecordDecl()) {
         Node = createNode(T, "classType", nullptr);
         commonSetUpForRecordDecl(Node, RD, *this);
+        const auto DC = RD->getDeclContext();
+        assert(DC);
+        const auto nns = nnstableinfo->getNnsName(DC);
+        xmlNewProp(Node, BAD_CAST "nns", BAD_CAST(nns.c_str()));
         pushType(T, Node);
       } else if (T->isStructureType()) {
         Node = createNode(T, "structType", nullptr);
@@ -570,6 +595,8 @@ TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
       if (!ED) {
         break;
       }
+      const auto nameNode = makeNameNode(*this, ED);
+      xmlAddChild(Node, nameNode);
       auto def = ED->getDefinition();
       if (!def) {
         /* Forward declaration of enum is available in C++11
@@ -603,6 +630,8 @@ TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
       xmlNewProp(Node,
           BAD_CAST "clang_index",
           BAD_CAST std::to_string(TTP->getIndex()).c_str());
+      const auto nameNode = makeNameNode(*this, TTP);
+      xmlAddChild(Node, nameNode);
       pushType(T, Node);
       break;
     }

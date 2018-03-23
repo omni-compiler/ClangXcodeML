@@ -7,10 +7,9 @@
 #include "llvm/Support/Casting.h"
 #include "StringTree.h"
 #include "Util.h"
+#include "XcodeMlNns.h"
 #include "XcodeMlType.h"
 #include "XcodeMlEnvironment.h"
-
-#include "XcodeMlNns.h"
 
 using CXXCodeGen::makeTokenNode;
 
@@ -96,9 +95,11 @@ ClassNns::makeNestedNameSpec(const Environment &env, const NnsMap &) const {
   const auto T = env.at(dtident);
   const auto classT = llvm::cast<XcodeMl::ClassType>(T.get());
   assert(classT);
+  if (const auto tid = classT->getAsTemplateId(env)) {
+    return *tid + makeTokenNode("::");
+  }
   const auto name = classT->name();
-  assert(name.hasValue());
-  return (*name) + makeTokenNode("::");
+  return name + makeTokenNode("::");
 }
 
 bool

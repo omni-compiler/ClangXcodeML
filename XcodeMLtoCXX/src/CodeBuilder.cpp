@@ -581,44 +581,25 @@ DEFINE_CB(emitDataMemberDecl) {
   return wrapWithLangLink(acc, node, src);
 }
 
-DEFINE_CB(ctorInitListProc) {
-  auto inits = findNodes(node, "constructorInitializer", src.ctxt);
-  if (inits.empty()) {
-    return makeVoidNode();
-  }
-  auto decl = makeVoidNode();
-  bool alreadyPrinted = false;
-  for (auto init : inits) {
-    decl =
-        decl + makeTokenNode(alreadyPrinted ? "," : ":") + w.walk(init, src);
-    alreadyPrinted = true;
-  }
-  return decl;
-}
-
 XcodeMl::CodeFragment
 getCtorInitName(xmlNodePtr node, const XcodeMl::Environment &env) {
   const auto dataMember = getPropOrNull(node, "member");
   if (dataMember.hasValue()) {
     return makeTokenNode(*dataMember);
   }
-  const auto base = getPropOrNull(node, "type");
-  if (base.hasValue()) {
-    const auto T = env[*base];
-    const auto classT = llvm::cast<XcodeMl::ClassType>(T.get());
-    const auto name = classT->name();
-    assert(name.hasValue());
-    return *name;
-  }
-
-  xmlDebugDumpNode(stderr, node, 0);
-  assert(false);
+  const auto base = getType(node);
+  const auto T = env[base];
+  const auto classT = llvm::cast<XcodeMl::ClassType>(T.get());
+  const auto name = classT->name();
+  return name;
 }
 
 DEFINE_CB(ctorInitProc) {
   const auto member = getCtorInitName(node, src.typeTable);
-  auto expr = findFirst(node, "*[1]", src.ctxt);
-  assert(expr);
+  const auto expr = findFirst(node, "clangStmt[1]", src.ctxt);
+  if (!expr) {
+    return member + wrapWithParen(makeVoidNode());
+  }
   const auto astClass = getPropOrNull(expr, "class");
   if (astClass.hasValue() && (*astClass == "CXXConstructExpr")) {
     return member + w.walk(expr, src);
@@ -738,8 +719,6 @@ const CodeBuilder ProgramBuilder("ProgramBuilder",
         std::make_tuple("value", valueProc),
 
         /* out of specification */
-        std::make_tuple("constructorInitializer", ctorInitProc),
-        std::make_tuple("constructorInitializerList", ctorInitListProc),
         std::make_tuple(
             "xcodemlAccessToAnonRecordExpr", accessToAnonRecordExprProc),
 
@@ -748,6 +727,7 @@ const CodeBuilder ProgramBuilder("ProgramBuilder",
         std::make_tuple("clangDecl", clangDeclProc),
         std::make_tuple("clangTypeLoc", clangTypeLocProc),
         std::make_tuple("clangNestedNameSpecifier", clangNestedNameSpecProc),
+        std::make_tuple("clangConstructorInitializer", ctorInitProc),
 
         /* for CtoXcodeML */
         std::make_tuple("Decl_Record", NullProc),
