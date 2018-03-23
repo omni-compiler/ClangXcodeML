@@ -341,7 +341,6 @@ class EnumType : public Type {
 public:
   using EnumName = llvm::Optional<CodeFragment>;
   EnumType(const DataTypeIdent &, const EnumName &);
-  EnumType(const DataTypeIdent &, const EnumName &, const CodeFragment &);
   ~EnumType() override = default;
   CodeFragment makeDeclaration(
       CodeFragment, const TypeTable &, const NnsTable &) override;

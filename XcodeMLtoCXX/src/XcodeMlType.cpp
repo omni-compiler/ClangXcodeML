@@ -510,12 +510,6 @@ EnumType::EnumType(const DataTypeIdent &ident, const EnumType::EnumName &name)
     : Type(TypeKind::Enum, ident), name_(name), declBody(makeVoidNode()) {
 }
 
-EnumType::EnumType(const DataTypeIdent &ident,
-    const EnumType::EnumName &name,
-    const CodeFragment &d)
-    : Type(TypeKind::Enum, ident), name_(name), declBody(d) {
-}
-
 CodeFragment
 EnumType::makeDeclaration(
     CodeFragment var, const TypeTable &, const NnsTable &) {
