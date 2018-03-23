@@ -468,6 +468,10 @@ TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
       xmlNewProp(Node,
           BAD_CAST "ref",
           BAD_CAST getTypeName(MPT->getPointeeType()).c_str());
+      const auto parent = QualType(MPT->getClass(), 0);
+      registerType(parent, nullptr, nullptr);
+      xmlNewProp(
+          Node, BAD_CAST "record", BAD_CAST getTypeName(parent).c_str());
       pushType(T, Node);
       break;
     }
