@@ -38,7 +38,7 @@ public:
    * \brief Returns the source-code representation,
    * like `abc`, `~A`, or `operator+`.
    */
-  virtual CodeFragment toString(const TypeTable &) const = 0;
+  virtual CodeFragment toString(const TypeTable &, const NnsTable &) const = 0;
   UnqualIdKind getKind() const;
 
 protected:
