@@ -79,8 +79,7 @@ TypeTableInfo::registerPointerType(QualType T) {
   case Type::Pointer:
   case Type::BlockPointer:
   case Type::LValueReference:
-  case Type::RValueReference:
-  case Type::MemberPointer: OS << "Pointer" << seqForPointerType++; break;
+  case Type::RValueReference: OS << "Pointer" << seqForPointerType++; break;
   default: abort();
   }
   return mapFromQualTypeToName[T] = OS.str();
@@ -168,6 +167,17 @@ TypeTableInfo::registerInjectedClassNameType(QualType T) {
 
   raw_string_ostream OS(name);
   OS << "InjectedClassName" << seqForInjectedClassNameType++;
+  return mapFromQualTypeToName[T] = OS.str();
+}
+
+std::string
+TypeTableInfo::registerMemberPointerType(QualType T) {
+  assert(T->getTypeClass() == Type::MemberPointer);
+  std::string name = mapFromQualTypeToName[T];
+  assert(name.empty());
+
+  raw_string_ostream OS(name);
+  OS << "MemberPointer" << seqForMemberPointerType++;
   return mapFromQualTypeToName[T] = OS.str();
 }
 
