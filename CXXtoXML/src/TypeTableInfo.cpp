@@ -51,6 +51,7 @@ TypeTableInfo::TypeTableInfo(
   seqForEnumType = 0;
   seqForClassType = 0;
   seqForTemplateTypeParmType = 0;
+  seqForInjectedClassNameType = 0;
   seqForMemberPointerType = 0;
   seqForOtherType = 0;
 
