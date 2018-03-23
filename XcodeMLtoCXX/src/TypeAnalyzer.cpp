@@ -23,8 +23,7 @@
 #include "XcodeMlTypeTable.h"
 #include "TypeAnalyzer.h"
 
-using TypeAnalyzer =
-    XMLWalker<void, xmlXPathContextPtr, XcodeMl::TypeTable &>;
+using TypeAnalyzer = XMLWalker<void, xmlXPathContextPtr, XcodeMl::TypeTable &>;
 
 using CXXCodeGen::makeTokenNode;
 using CXXCodeGen::makeVoidNode;

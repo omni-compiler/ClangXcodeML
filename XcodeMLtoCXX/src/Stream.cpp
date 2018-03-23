@@ -25,8 +25,12 @@ const newline_t newline = {};
 
 struct StreamImpl {
   StreamImpl()
-      : ss(), curIndent(0), alreadyIndented(false), lastChar('\n'),
-	currline(), nextline() {
+      : ss(),
+        curIndent(0),
+        alreadyIndented(false),
+        lastChar('\n'),
+        currline(),
+        nextline() {
   }
 
   using LineInfo = std::tuple<std::string, size_t>;
@@ -39,8 +43,8 @@ struct StreamImpl {
   llvm::Optional<LineInfo> nextline;
 };
 
-bool operator ==(const llvm::Optional<StreamImpl::LineInfo> &x,
-                 const llvm::Optional<StreamImpl::LineInfo> &y) {
+bool operator==(const llvm::Optional<StreamImpl::LineInfo> &x,
+    const llvm::Optional<StreamImpl::LineInfo> &y) {
   if (!x && !y) {
     return true;
   }
@@ -49,9 +53,9 @@ bool operator ==(const llvm::Optional<StreamImpl::LineInfo> &x,
   }
   return *x == *y;
 }
-bool operator !=(const llvm::Optional<StreamImpl::LineInfo> &x,
-                 const llvm::Optional<StreamImpl::LineInfo> &y) {
-  return ! (x == y);
+bool operator!=(const llvm::Optional<StreamImpl::LineInfo> &x,
+    const llvm::Optional<StreamImpl::LineInfo> &y) {
+  return !(x == y);
 }
 
 namespace {
@@ -117,8 +121,8 @@ Stream::insertNewLine() {
     size_t lineno;
     std::tie(filename, lineno) = *(pimpl->currline);
 
-    const auto directive =
-      std::string("#line ") + std::to_string(lineno) + "\"" + filename + "\"";
+    const auto directive = std::string("#line ") + std::to_string(lineno)
+        + "\"" + filename + "\"";
     emit(*pimpl, std::string("\n") + directive + "\n");
     pimpl->nextline = StreamImpl::LineInfo(filename, lineno + 1);
   } else {
