@@ -157,7 +157,8 @@ public:
       DataTypeIdent underlyingType,
       bool isConst,
       bool isVolatile);
-  CodeFragment makeDeclaration(CodeFragment, const TypeTable &) override;
+  CodeFragment makeDeclaration(
+      CodeFragment, const TypeTable &, const NnsTable &) override;
   ~QualifiedType() override;
   Type *clone() const override;
   static bool classof(const Type *);

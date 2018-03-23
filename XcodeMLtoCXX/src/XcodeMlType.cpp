@@ -142,7 +142,8 @@ QualifiedType::QualifiedType(DataTypeIdent ident,
 }
 
 CodeFragment
-QualifiedType::makeDeclaration(CodeFragment var, const TypeTable &env) {
+QualifiedType::makeDeclaration(
+    CodeFragment var, const TypeTable &env, const NnsTable &nnsTable) {
   const auto T = env[underlying];
   TypeRef QT(T->clone());
   if (isConst) {
@@ -151,7 +152,7 @@ QualifiedType::makeDeclaration(CodeFragment var, const TypeTable &env) {
   if (isVolatile) {
     QT->setVolatile(true);
   }
-  return makeDecl(QT, var, env);
+  return makeDecl(QT, var, env, nnsTable);
 }
 
 QualifiedType::~QualifiedType() = default;
