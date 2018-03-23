@@ -59,12 +59,6 @@ Type::~Type() {
 }
 
 CodeFragment
-Type::makeDeclarationWithNnsMap(
-    const CodeFragment &var, const TypeTable &typeTable, const NnsMap &) {
-  return makeDeclaration(var, typeTable);
-}
-
-CodeFragment
 Type::addConstQualifier(CodeFragment var) const {
   return makeTokenNode("const") + var;
 }
