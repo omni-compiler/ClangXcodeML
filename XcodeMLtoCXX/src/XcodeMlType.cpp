@@ -755,7 +755,8 @@ TemplateTypeParm::TemplateTypeParm(
 }
 
 CodeFragment
-TemplateTypeParm::makeDeclaration(CodeFragment var, const TypeTable &) {
+TemplateTypeParm::makeDeclaration(
+    CodeFragment var, const TypeTable &, const NnsTable &) {
   assert(pSpelling.hasValue());
   return (*pSpelling) + var;
 }

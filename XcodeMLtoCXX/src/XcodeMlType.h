@@ -451,7 +451,8 @@ class TemplateTypeParm : public Type {
 public:
   TemplateTypeParm(const DataTypeIdent &dtident, const CodeFragment &name);
   ~TemplateTypeParm() override = default;
-  CodeFragment makeDeclaration(CodeFragment, const TypeTable &) override;
+  CodeFragment makeDeclaration(
+      CodeFragment, const TypeTable &, const NnsTable &) override;
   Type *clone() const override;
   static bool classof(const Type *);
   void setSpelling(CodeFragment);
