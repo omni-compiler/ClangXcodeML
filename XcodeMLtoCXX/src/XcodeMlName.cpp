@@ -160,4 +160,23 @@ DtorName::classof(const UnqualId *id) {
   return id->getKind() == UnqualIdKind::Dtor;
 }
 
+
+UnnamedId::UnnamedId() : UnqualId(UnqualIdKind::Unnamed) {
+}
+
+UnqualId *
+UnnamedId::clone() const {
+  return new UnnamedId();
+}
+
+CodeFragment
+UnnamedId::toString(const TypeTable &env) const {
+  return makeTokenNode("");
+}
+
+bool
+UnnamedId::classof(const UnqualId *id) {
+  return id->getKind() == UnqualIdKind::Unnamed;
+}
+
 } // namespace XcodeMl
