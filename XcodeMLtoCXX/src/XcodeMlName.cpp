@@ -27,12 +27,12 @@ Name::Name(const std::shared_ptr<UnqualId> &id_) : nestedNameSpec(), id(id_) {
 }
 
 CodeFragment
-Name::toString(const TypeTable &typeTable, const NnsTable &) const {
+Name::toString(const TypeTable &typeTable, const NnsTable &nnsTable) const {
   assert(id);
   if (nestedNameSpec) {
-    return nestedNameSpec + id->toString(typeTable);
+    return nestedNameSpec + id->toString(typeTable, nnsTable);
   }
-  return id->toString(typeTable);
+  return id->toString(typeTable, nnsTable);
 }
 
 std::shared_ptr<UnqualId>

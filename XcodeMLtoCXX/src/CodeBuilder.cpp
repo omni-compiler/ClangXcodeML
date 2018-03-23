@@ -533,9 +533,10 @@ DEFINE_CB(varDeclProc) {
   const auto type = src.typeTable.at(dtident);
 
   auto acc = makeVoidNode();
-  acc = acc
-      + makeDecl(
-            type, name->toString(src.typeTable, src.nnsTable), src.typeTable, src.nnsTable);
+  acc = acc + makeDecl(type,
+                  name->toString(src.typeTable, src.nnsTable),
+                  src.typeTable,
+                  src.nnsTable);
   xmlNodePtr valueElem = findFirst(node, "value", src.ctxt);
   if (!valueElem) {
     return wrapWithLangLink(acc + makeTokenNode(";"), node, src);
@@ -564,9 +565,10 @@ DEFINE_CB(emitDataMemberDecl) {
   if (isTrueProp(node, "is_static_data_member", false)) {
     acc = acc + makeTokenNode("static");
   }
-  acc = acc
-      + makeDecl(
-            type, name->toString(src.typeTable, src.nnsTable), src.typeTable, src.nnsTable);
+  acc = acc + makeDecl(type,
+                  name->toString(src.typeTable, src.nnsTable),
+                  src.typeTable,
+                  src.nnsTable);
   xmlNodePtr valueElem = findFirst(node, "value", src.ctxt);
   if (!valueElem) {
     return wrapWithLangLink(acc + makeTokenNode(";"), node, src);

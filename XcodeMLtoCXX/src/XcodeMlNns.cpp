@@ -96,11 +96,12 @@ ClassNns::clone() const {
 }
 
 CodeFragment
-ClassNns::makeNestedNameSpec(const TypeTable &env, const NnsTable &) const {
+ClassNns::makeNestedNameSpec(
+    const TypeTable &env, const NnsTable &nnsTable) const {
   const auto T = env.at(dtident);
   const auto classT = llvm::cast<XcodeMl::ClassType>(T.get());
   assert(classT);
-  if (const auto tid = classT->getAsTemplateId(env)) {
+  if (const auto tid = classT->getAsTemplateId(env, nnsTable)) {
     return *tid + makeTokenNode("::");
   }
   const auto name = classT->name();

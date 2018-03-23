@@ -134,7 +134,7 @@ makeFunctionDeclHead(XcodeMl::Function *func,
   const auto pUnqualId = name.getUnqualId();
   const auto nameSpelling = emitNameSpec
       ? name.toString(src.typeTable, src.nnsTable)
-      : pUnqualId->toString(src.typeTable);
+      : pUnqualId->toString(src.typeTable, src.nnsTable);
   if (llvm::isa<XcodeMl::CtorName>(pUnqualId.get())
       || llvm::isa<XcodeMl::DtorName>(pUnqualId.get())
       || llvm::isa<XcodeMl::ConvFuncId>(pUnqualId.get())) {
@@ -144,9 +144,10 @@ makeFunctionDeclHead(XcodeMl::Function *func,
      *    int A::operator int();
      */
     return func->makeDeclarationWithoutReturnType(
-        nameSpelling, paramNames, src.typeTable);
+        nameSpelling, paramNames, src.typeTable, src.nnsTable);
   } else {
-    return func->makeDeclaration(nameSpelling, paramNames, src.typeTable);
+    return func->makeDeclaration(
+        nameSpelling, paramNames, src.typeTable, src.nnsTable);
   }
 }
 
