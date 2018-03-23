@@ -62,7 +62,7 @@ DEFINE_NAMESPECHANDLER(TypeSpecifierProc) {
     const auto classT = llvm::cast<XcodeMl::ClassType>(T.get());
     return classT->name() + makeTokenNode("::");
   }
-  return makeDecl(T, CXXCodeGen::makeVoidNode(), src.typeTable)
+  return makeDecl(T, CXXCodeGen::makeVoidNode(), src.typeTable, src.nnsTable)
       + makeTokenNode("::");
 }
 

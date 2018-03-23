@@ -137,7 +137,7 @@ makeBases(const XcodeMl::ClassType &T, SourceInfo &src) {
         assert(classT);
         return makeTokenNode(std::get<0>(base))
             + makeTokenNode(std::get<2>(base) ? "virtual" : "")
-            + classT->getAsTemplateId(src.typeTable)
+            + classT->getAsTemplateId(src.typeTable, src.nnsTable)
                   .getValueOr(classT->name());
       });
   return decls.empty() ? CXXCodeGen::makeVoidNode()
@@ -189,7 +189,7 @@ emitClassDefinition(xmlNodePtr node,
 
   const auto classKey = makeTokenNode(getClassKey(classType.classKind()));
   const auto name = classType.isClassTemplateSpecialization()
-      ? classType.getAsTemplateId(src.typeTable).getValue()
+      ? classType.getAsTemplateId(src.typeTable, src.nnsTable).getValue()
       : classType.name();
 
   return classKey + name + makeBases(classType, src)
@@ -330,7 +330,7 @@ DEFINE_DECLHANDLER(FieldDeclProc) {
   const auto dtident = getType(node);
   const auto T = src.typeTable.at(dtident);
 
-  return makeDecl(T, name, src.typeTable);
+  return makeDecl(T, name, src.typeTable, src.nnsTable);
 }
 
 DEFINE_DECLHANDLER(FriendDeclProc) {
@@ -339,7 +339,7 @@ DEFINE_DECLHANDLER(FriendDeclProc) {
     const auto dtident = getType(TL);
     const auto T = src.typeTable.at(dtident);
     return makeTokenNode("friend")
-        + makeDecl(T, CXXCodeGen::makeVoidNode(), src.typeTable);
+        + makeDecl(T, CXXCodeGen::makeVoidNode(), src.typeTable, src.nnsTable);
   }
   return makeTokenNode("friend") + callCodeBuilder(node, w, src);
 }
@@ -449,7 +449,7 @@ DEFINE_DECLHANDLER(TypeAliasProc) {
   const auto name = getUnqualIdFromIdNode(node, src.ctxt);
   const auto nameSpelling = name->toString(src.typeTable);
   return makeTokenNode("using") + nameSpelling + makeTokenNode("=")
-      + makeDecl(T, CXXCodeGen::makeVoidNode(), src.typeTable);
+      + makeDecl(T, CXXCodeGen::makeVoidNode(), src.typeTable, src.nnsTable);
 }
 
 DEFINE_DECLHANDLER(TypedefProc) {
@@ -463,7 +463,8 @@ DEFINE_DECLHANDLER(TypedefProc) {
   const auto typedefName =
       getUnqualIdFromNameNode(nameNode)->toString(src.typeTable);
 
-  return makeTokenNode("typedef") + makeDecl(T, typedefName, src.typeTable);
+  return makeTokenNode("typedef")
+      + makeDecl(T, typedefName, src.typeTable, src.nnsTable);
 }
 
 DEFINE_DECLHANDLER(UsingProc) {
@@ -517,7 +518,7 @@ emitVarDecl(xmlNodePtr node,
   const auto T = src.typeTable.at(dtident);
 
   const auto decl = makeSpecifier(node, is_in_class_scope)
-      + T->makeDeclarationWithNnsTable(name, src.typeTable, src.nnsTable);
+      + T->makeDeclaration(name, src.typeTable, src.nnsTable);
   const auto initializerNode = findFirst(node, "clangStmt", src.ctxt);
   if (!initializerNode) {
     // does not have initalizer: `int x;`
