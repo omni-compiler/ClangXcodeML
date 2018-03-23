@@ -111,7 +111,7 @@ Reserved::Reserved(DataTypeIdent ident, CodeFragment dataType)
 
 CodeFragment
 Reserved::makeDeclaration(
-    CodeFragment var, const TypeTable &, const NnsMap &) {
+    CodeFragment var, const TypeTable &, const NnsTable &) {
   return name + var;
 }
 
@@ -818,7 +818,7 @@ CodeFragment
 makeDecl(TypeRef type,
     CodeFragment var,
     const TypeTable &env,
-    const NnsMap &nnsTable) {
+    const NnsTable &nnsTable) {
   if (type) {
     return type->makeDeclaration(cv_qualify(type, var), env, nnsTable);
   } else {

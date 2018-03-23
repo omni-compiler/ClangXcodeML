@@ -61,7 +61,7 @@ enum class TypeKind {
 
 TypeKind typeKind(TypeRef);
 CodeFragment makeDecl(
-    TypeRef, CodeFragment, const TypeTable &, const NnsMap &);
+    TypeRef, CodeFragment, const TypeTable &, const NnsTable &);
 
 /*!
  * \brief Returns a code fragment string that represents the given data type
@@ -133,7 +133,7 @@ class Reserved : public Type {
 public:
   Reserved(DataTypeIdent, CodeFragment);
   CodeFragment makeDeclaration(
-      CodeFragment, const TypeTable &, const NnsMap &) override;
+      CodeFragment, const TypeTable &, const NnsTable &) override;
   ~Reserved() override;
   Type *clone() const override;
   static bool classof(const Type *);
