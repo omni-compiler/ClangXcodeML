@@ -469,7 +469,8 @@ class OtherType : public Type {
 public:
   OtherType(const DataTypeIdent &);
   ~OtherType() override = default;
-  CodeFragment makeDeclaration(CodeFragment, const TypeTable &) override;
+  CodeFragment makeDeclaration(
+      CodeFragment, const TypeTable &, const NnsTable &) override;
   Type *clone() const override;
   static bool classof(const Type *);
 

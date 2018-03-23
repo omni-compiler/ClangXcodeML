@@ -795,7 +795,8 @@ OtherType::OtherType(const DataTypeIdent &ident)
 }
 
 CodeFragment
-OtherType::makeDeclaration(CodeFragment var, const TypeTable &) {
+OtherType::makeDeclaration(
+    CodeFragment var, const TypeTable &, const NnsTable &) {
   return makeTokenNode("/*") + var + makeTokenNode("*/");
 }
 
