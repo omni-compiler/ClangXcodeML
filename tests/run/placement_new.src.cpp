@@ -12,7 +12,7 @@ void *operator new(size_t size, int i, char c) {
 
 int
 main() {
-  ClassA *pv = (ClassA *)(new (100, 'c') ClassA);
+  ClassA *pv = new (100, 'c') ClassA;
   printf("%d\n", pv->member_i);
-  delete pv;
+  pv->~ClassA();
 }
