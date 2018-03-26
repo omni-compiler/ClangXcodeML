@@ -194,8 +194,8 @@ DEFINE_TA(classTypeProc) {
 
   const auto classKind = getProp(node, "cxx_class_kind");
   if (classKind == "union") {
-    map[elemName] =
-        XcodeMl::makeCXXUnionType(elemName, className, bases, symbols, targs);
+    map[elemName] = XcodeMl::makeCXXUnionType(
+        elemName, nnsident, className, bases, symbols, targs);
   } else {
     map[elemName] = XcodeMl::makeClassType(
         elemName, nnsident, className, bases, symbols, targs);
