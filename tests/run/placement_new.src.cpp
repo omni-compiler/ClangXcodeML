@@ -2,7 +2,8 @@
 #include <stdio.h>
 
 struct ClassA {
-  ClassA() : member_i(4) {}
+  ClassA() : member_i(4) {
+  }
   int member_i;
 };
 
@@ -15,4 +16,5 @@ main() {
   ClassA *pv = new (100, 'c') ClassA;
   printf("%d\n", pv->member_i);
   pv->~ClassA();
+  operator delete(pv);
 }
