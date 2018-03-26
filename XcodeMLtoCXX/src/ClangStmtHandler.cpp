@@ -196,6 +196,17 @@ DEFINE_STMTHANDLER(CXXConstCastExprProc) {
 }
 
 DEFINE_STMTHANDLER(CXXCtorExprProc) {
+  auto materializeExpr = findFirst(
+      node, "clangStmt[@class='MaterializeTemporaryExpr']", src.ctxt);
+  if (materializeExpr) {
+    return w.walk(materializeExpr, src);
+  }
+  auto child = findFirst(node, "clangStmt", src.ctxt);
+  if (getType(child) == getType(node)
+      && !findFirst(node, "clangStmt[position() > 1]", src.ctxt)) {
+    // this is a copy (or move) constructor: omit this
+    return w.walk(child, src);
+  }
   const auto T = makeDecl(src.typeTable.at(getType(node)),
       CXXCodeGen::makeVoidNode(),
       src.typeTable,
