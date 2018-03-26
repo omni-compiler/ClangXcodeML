@@ -233,9 +233,7 @@ DEFINE_STMTHANDLER(CXXNewExprProc) {
    */
   const auto init = findFirst(node, "clangStmt", src.ctxt);
 
-  return makeTokenNode("new")
-      + (hasParen(pointeeT, src.typeTable) ? wrapWithParen(NewTypeId)
-                                           : NewTypeId)
+  return makeTokenNode("new") + wrapWithXcodeMlIdentity(NewTypeId)
       + (init ? wrapWithParen(join(",", w.walkChildren(init, src)))
               : CXXCodeGen::makeVoidNode());
 }
