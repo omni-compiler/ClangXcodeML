@@ -320,11 +320,7 @@ DEFINE_STMTHANDLER(CXXTemporaryObjectExprProc) {
   const auto resultT = src.typeTable.at(getType(node));
   const auto name = makeDecl(
       resultT, CXXCodeGen::makeVoidNode(), src.typeTable, src.nnsTable);
-  const auto children = findNodes(node, "clangStmt", src.ctxt);
-  std::vector<CodeFragment> args;
-  for (auto child : children) {
-    args.push_back(w.walk(child, src));
-  }
+  const auto args = createNodes(node, "clangStmt", w, src);
   return wrapWithXcodeMlIdentity(name) + wrapWithParen(join(",", args));
 }
 
