@@ -37,6 +37,8 @@ enum class TypeKind {
   Qualified,
   /*! Pointer type (3.5 <pointerType> element) */
   Pointer,
+  /*! Pointer to member */
+  MemberPointer,
   /*! Lvalue reference type */
   LValueReference,
   /*! Rvalue reference type */
@@ -189,6 +191,24 @@ protected:
 
 private:
   DataTypeIdent ref;
+};
+
+class MemberPointer : public Type {
+public:
+  MemberPointer(
+      DataTypeIdent dtident, DataTypeIdent pointee, DataTypeIdent record);
+  CodeFragment makeDeclaration(
+      CodeFragment, const TypeTable &, const NnsTable &) override;
+  ~MemberPointer() override = default;
+  Type *clone() const override;
+  static bool classof(const Type *T);
+
+protected:
+  MemberPointer(const MemberPointer &) = default;
+
+private:
+  DataTypeIdent pointee;
+  DataTypeIdent record;
 };
 
 /*! \brief Represents an lvalue or rvalue reference type. */
@@ -485,6 +505,8 @@ TypeRef makeQualifiedType(const DataTypeIdent &ident,
     bool isVolatile);
 TypeRef makePointerType(DataTypeIdent, TypeRef);
 TypeRef makePointerType(DataTypeIdent, DataTypeIdent);
+TypeRef makeMemberPointerType(
+    DataTypeIdent dtident, DataTypeIdent pointee, DataTypeIdent record);
 TypeRef makeLValueReferenceType(const DataTypeIdent &, const DataTypeIdent &);
 TypeRef makeArrayType(DataTypeIdent, TypeRef, size_t);
 TypeRef makeArrayType(DataTypeIdent, TypeRef, size_t);

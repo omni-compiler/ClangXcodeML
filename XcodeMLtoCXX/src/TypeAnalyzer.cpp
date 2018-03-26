@@ -67,6 +67,17 @@ DEFINE_TA(pointerTypeProc) {
   map[name] = pointer;
 }
 
+DEFINE_TA(memberPointerTypeProc) {
+  const auto dtident = getType(node);
+  const auto ref = getProp(node, "ref");
+  const auto record = getProp(node, "record");
+
+  auto pointer = XcodeMl::makeMemberPointerType(dtident, ref, record);
+  pointer->setConst(isTrueProp(node, "is_const", false));
+  pointer->setVolatile(isTrueProp(node, "is_volatile", false));
+  map[dtident] = pointer;
+}
+
 DEFINE_TA(functionTypeProc) {
   const auto returnDTI = getProp(node, "return_type");
   const auto returnType = map[returnDTI];
@@ -254,6 +265,7 @@ const TypeAnalyzer XcodeMLTypeAnalyzer("TypeAnalyzer",
     {
         std::make_tuple("basicType", basicTypeProc),
         std::make_tuple("pointerType", pointerTypeProc),
+        std::make_tuple("memberPointerType", memberPointerTypeProc),
         std::make_tuple("functionType", functionTypeProc),
         std::make_tuple("arrayType", arrayTypeProc),
         std::make_tuple("structType", structTypeProc),

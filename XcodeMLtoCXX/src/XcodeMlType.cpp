@@ -216,6 +216,34 @@ Pointer::getPointee(const TypeTable &env) const {
 Pointer::Pointer(const Pointer &other) : Type(other), ref(other.ref) {
 }
 
+MemberPointer::MemberPointer(
+    DataTypeIdent dtident, DataTypeIdent p, DataTypeIdent r)
+    : Type(TypeKind::MemberPointer, dtident), pointee(p), record(r) {
+}
+
+Type *
+MemberPointer::clone() const {
+  MemberPointer *copy = new MemberPointer(*this);
+  return copy;
+}
+
+bool
+MemberPointer::classof(const Type *T) {
+  return T->getKind() == TypeKind::MemberPointer;
+}
+
+CodeFragment
+MemberPointer::makeDeclaration(
+    CodeFragment var, const TypeTable &typeTable, const NnsTable &nnsTable) {
+  const auto classTypeName = makeDecl(
+      typeTable.at(record), CXXCodeGen::makeVoidNode(), typeTable, nnsTable);
+  const auto innerDecl =
+      wrapWithXcodeMlIdentity(classTypeName) + makeTokenNode("::*") + var;
+
+  const auto pointeeT = typeTable.at(pointee);
+  return makeDecl(pointeeT, innerDecl, typeTable, nnsTable);
+}
+
 ReferenceType::ReferenceType(
     const DataTypeIdent &ident, TypeKind kind, const DataTypeIdent &r)
     : Type(kind, ident), ref(r) {
@@ -844,6 +872,12 @@ makeQualifiedType(const DataTypeIdent &ident,
 TypeRef
 makePointerType(DataTypeIdent ident, TypeRef ref) {
   return std::make_shared<Pointer>(ident, ref);
+}
+
+TypeRef
+makeMemberPointerType(
+    DataTypeIdent ident, DataTypeIdent pointee, DataTypeIdent record) {
+  return std::make_shared<MemberPointer>(ident, pointee, record);
 }
 
 TypeRef

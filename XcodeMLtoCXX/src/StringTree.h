@@ -190,7 +190,10 @@ StringTreeRef wrapWithSquareBracket(const StringTreeRef &);
  * the given string.
  */
 StringTreeRef wrapWithBrace(const StringTreeRef &);
-}
+
+StringTreeRef wrapWithXcodeMlIdentity(const StringTreeRef &type);
+
+} // namespace CXXCodeGen
 
 CXXCodeGen::StringTreeRef operator+(
     const CXXCodeGen::StringTreeRef &, const CXXCodeGen::StringTreeRef &);

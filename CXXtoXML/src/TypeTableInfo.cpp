@@ -51,6 +51,8 @@ TypeTableInfo::TypeTableInfo(
   seqForEnumType = 0;
   seqForClassType = 0;
   seqForTemplateTypeParmType = 0;
+  seqForInjectedClassNameType = 0;
+  seqForMemberPointerType = 0;
   seqForOtherType = 0;
 
   TypeElements.clear();
@@ -77,8 +79,7 @@ TypeTableInfo::registerPointerType(QualType T) {
   case Type::Pointer:
   case Type::BlockPointer:
   case Type::LValueReference:
-  case Type::RValueReference:
-  case Type::MemberPointer: OS << "Pointer" << seqForPointerType++; break;
+  case Type::RValueReference: OS << "Pointer" << seqForPointerType++; break;
   default: abort();
   }
   return mapFromQualTypeToName[T] = OS.str();
@@ -166,6 +167,17 @@ TypeTableInfo::registerInjectedClassNameType(QualType T) {
 
   raw_string_ostream OS(name);
   OS << "InjectedClassName" << seqForInjectedClassNameType++;
+  return mapFromQualTypeToName[T] = OS.str();
+}
+
+std::string
+TypeTableInfo::registerMemberPointerType(QualType T) {
+  assert(T->getTypeClass() == Type::MemberPointer);
+  std::string name = mapFromQualTypeToName[T];
+  assert(name.empty());
+
+  raw_string_ostream OS(name);
+  OS << "MemberPointer" << seqForMemberPointerType++;
   return mapFromQualTypeToName[T] = OS.str();
 }
 
@@ -435,8 +447,7 @@ TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
       break;
 
     case Type::Pointer:
-    case Type::BlockPointer:
-    case Type::MemberPointer: {
+    case Type::BlockPointer: {
       rawname = registerPointerType(T);
       Node = createNode(T, "pointerType", nullptr);
       if (const PointerType *PT =
@@ -448,7 +459,22 @@ TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
       }
       pushType(T, Node);
     } break;
-
+    case Type::MemberPointer: {
+      rawname = registerMemberPointerType(T);
+      Node = createNode(T, "memberPointerType", nullptr);
+      const auto MPT = T.getTypePtr()->getAs<MemberPointerType>();
+      assert(MPT);
+      registerType(MPT->getPointeeType(), nullptr, nullptr);
+      xmlNewProp(Node,
+          BAD_CAST "ref",
+          BAD_CAST getTypeName(MPT->getPointeeType()).c_str());
+      const auto parent = QualType(MPT->getClass(), 0);
+      registerType(parent, nullptr, nullptr);
+      xmlNewProp(
+          Node, BAD_CAST "record", BAD_CAST getTypeName(parent).c_str());
+      pushType(T, Node);
+      break;
+    }
     case Type::LValueReference:
     case Type::RValueReference: {
       rawname = registerPointerType(T);
