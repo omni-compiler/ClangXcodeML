@@ -340,7 +340,8 @@ DEFINE_DECLHANDLER(FieldDeclProc) {
   }
   if (!isTrueProp(node, "is_unnamed_bit_field", false)) {
     const auto nameNode = findFirst(node, "name", src.ctxt);
-    name = getUnqualIdFromNameNode(nameNode)->toString(src.typeTable);
+    name = getUnqualIdFromNameNode(nameNode)->toString(
+        src.typeTable, src.nnsTable);
   }
   return makeDecl(T, name, src.typeTable, src.nnsTable) + bits;
 }
