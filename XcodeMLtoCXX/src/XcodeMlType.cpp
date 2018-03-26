@@ -937,20 +937,6 @@ TypeRef
 makeCXXUnionType(const DataTypeIdent &ident,
     const CodeFragment &unionName,
     const std::vector<ClassType::BaseClass> &bases,
-    const ClassType::Symbols &members) {
-  return std::make_shared<ClassType>(ident,
-      CXXClassKind::Union,
-      llvm::Optional<std::string>(),
-      unionName,
-      bases,
-      members,
-      llvm::Optional<ClassType::TemplateArgList>());
-}
-
-TypeRef
-makeCXXUnionType(const DataTypeIdent &ident,
-    const CodeFragment &unionName,
-    const std::vector<ClassType::BaseClass> &bases,
     const ClassType::Symbols &members,
     const llvm::Optional<ClassType::TemplateArgList> &targs) {
   return std::make_shared<ClassType>(ident,
