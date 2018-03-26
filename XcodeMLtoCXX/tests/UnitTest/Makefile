@@ -45,6 +45,7 @@ XcodeMlType: \
 	$(XCODEMLTOCXXSRCDIR)/Stream.o \
 	$(XCODEMLTOCXXSRCDIR)/StringTree.o \
 	$(XCODEMLTOCXXSRCDIR)/XcodeMlTypeTable.o \
+	$(XCODEMLTOCXXSRCDIR)/XcodeMlName.o \
 	$(XCODEMLTOCXXSRCDIR)/XcodeMlNns.o \
 	$(XCODEMLTOCXXSRCDIR)/XcodeMlType.o
 

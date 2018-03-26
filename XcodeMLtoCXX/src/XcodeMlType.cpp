@@ -45,9 +45,10 @@ MemberDecl::MemberDecl(const DataTypeIdent &d, const CodeFragment &c, size_t s)
 }
 
 CodeFragment
-MemberDecl::makeDeclaration(const TypeTable &env) const {
+MemberDecl::makeDeclaration(
+    const TypeTable &env, const NnsTable &nnsTable) const {
   auto type = env.at(dtident);
-  return makeDecl(type, name, env)
+  return makeDecl(type, name, env, nnsTable)
       + (bitfield ? makeTokenNode(std::to_string(*bitfield)) : makeVoidNode());
 }
 
@@ -56,12 +57,6 @@ Type::Type(TypeKind k, DataTypeIdent id, bool c, bool v)
 }
 
 Type::~Type() {
-}
-
-CodeFragment
-Type::makeDeclarationWithNnsTable(
-    const CodeFragment &var, const TypeTable &typeTable, const NnsTable &) {
-  return makeDeclaration(var, typeTable);
 }
 
 CodeFragment
@@ -116,7 +111,8 @@ Reserved::Reserved(DataTypeIdent ident, CodeFragment dataType)
 }
 
 CodeFragment
-Reserved::makeDeclaration(CodeFragment var, const TypeTable &) {
+Reserved::makeDeclaration(
+    CodeFragment var, const TypeTable &, const NnsTable &) {
   return name + var;
 }
 
@@ -147,7 +143,8 @@ QualifiedType::QualifiedType(DataTypeIdent ident,
 }
 
 CodeFragment
-QualifiedType::makeDeclaration(CodeFragment var, const TypeTable &env) {
+QualifiedType::makeDeclaration(
+    CodeFragment var, const TypeTable &env, const NnsTable &nnsTable) {
   const auto T = env[underlying];
   TypeRef QT(T->clone());
   if (isConst) {
@@ -156,7 +153,7 @@ QualifiedType::makeDeclaration(CodeFragment var, const TypeTable &env) {
   if (isVolatile) {
     QT->setVolatile(true);
   }
-  return makeDecl(QT, var, env);
+  return makeDecl(QT, var, env, nnsTable);
 }
 
 QualifiedType::~QualifiedType() = default;
@@ -188,13 +185,14 @@ Pointer::Pointer(DataTypeIdent ident, DataTypeIdent signified)
 }
 
 CodeFragment
-Pointer::makeDeclaration(CodeFragment var, const TypeTable &env) {
+Pointer::makeDeclaration(
+    CodeFragment var, const TypeTable &env, const NnsTable &nnsTable) {
   auto refType = env[ref];
   if (!refType) {
     return makeTokenNode("INCOMPLETE_TYPE *") + var;
   }
   return makeDecl(
-        refType, makeTokenNode("(*") + var + makeTokenNode(")"), env);
+      refType, makeTokenNode("(*") + var + makeTokenNode(")"), env, nnsTable);
 }
 
 Pointer::~Pointer() = default;
@@ -237,8 +235,8 @@ LValueReferenceType::LValueReferenceType(
 
 CodeFragment
 LValueReferenceType::makeDeclaration(
-    CodeFragment var, const TypeTable &env) {
-  return makeDecl(env.at(ref), makeTokenNode("&") + var, env);
+    CodeFragment var, const TypeTable &env, const NnsTable &nnsTable) {
+  return makeDecl(env.at(ref), makeTokenNode("&") + var, env, nnsTable);
 }
 
 Type *
@@ -272,12 +270,13 @@ ParamList::isEmpty() const {
 
 CodeFragment
 ParamList::makeDeclaration(const std::vector<CodeFragment> &paramNames,
-    const TypeTable &typeTable) const {
+    const TypeTable &typeTable,
+    const NnsTable &nnsTable) const {
   assert(dtidents.size() == paramNames.size());
   std::vector<CodeFragment> decls;
   for (int i = 0, len = dtidents.size(); i < len; ++i) {
     const auto ithType = typeTable.at(dtidents[i]);
-    decls.push_back(makeDecl(ithType, paramNames[i], typeTable));
+    decls.push_back(makeDecl(ithType, paramNames[i], typeTable, nnsTable));
   }
   return CXXCodeGen::join(",", decls)
       + (isVariadic() ? makeTokenNode(",") + makeTokenNode("...")
@@ -297,9 +296,10 @@ Function::Function(DataTypeIdent ident,
 CodeFragment
 Function::makeDeclarationWithoutReturnType(CodeFragment var,
     const std::vector<CodeFragment> &args,
-    const TypeTable &env) {
+    const TypeTable &env,
+    const NnsTable &nnsTable) {
   auto decl = var + makeTokenNode("(");
-  decl = decl + params.makeDeclaration(args, env);
+  decl = decl + params.makeDeclaration(args, env, nnsTable);
   decl = decl + makeTokenNode(")");
   if (isConst()) {
     decl = decl + makeTokenNode("const");
@@ -312,22 +312,24 @@ Function::makeDeclarationWithoutReturnType(CodeFragment var,
 
 CodeFragment
 Function::makeDeclarationWithoutReturnType(
-    CodeFragment var, const TypeTable &env) {
-  return makeDeclarationWithoutReturnType(var, defaultArgs, env);
+    CodeFragment var, const TypeTable &env, const NnsTable &nnsTable) {
+  return makeDeclarationWithoutReturnType(var, defaultArgs, env, nnsTable);
 }
 
 CodeFragment
 Function::makeDeclaration(CodeFragment var,
     const std::vector<CodeFragment> &args,
-    const TypeTable &env) {
+    const TypeTable &env,
+    const NnsTable &nnsTable) {
   auto returnType = env.at(returnValue);
-  auto decl = makeDeclarationWithoutReturnType(var, args, env);
-  return makeDecl(returnType, decl, env);
+  auto decl = makeDeclarationWithoutReturnType(var, args, env, nnsTable);
+  return makeDecl(returnType, decl, env, nnsTable);
 }
 
 CodeFragment
-Function::makeDeclaration(CodeFragment var, const TypeTable &env) {
-  return makeDeclaration(var, defaultArgs, env);
+Function::makeDeclaration(
+    CodeFragment var, const TypeTable &env, const NnsTable &nnsTable) {
+  return makeDeclaration(var, defaultArgs, env, nnsTable);
 }
 
 std::vector<CodeFragment>
@@ -380,7 +382,8 @@ Array::Array(DataTypeIdent ident, DataTypeIdent elem, size_t s)
 }
 
 CodeFragment
-Array::makeDeclaration(CodeFragment var, const TypeTable &env) {
+Array::makeDeclaration(
+    CodeFragment var, const TypeTable &env, const NnsTable &nnsTable) {
   auto elementType(env[element]);
   if (!elementType) {
     return makeTokenNode("INCOMPLETE_TYPE *") + var;
@@ -392,7 +395,7 @@ Array::makeDeclaration(CodeFragment var, const TypeTable &env) {
       + (isConst() ? makeTokenNode("const") : makeVoidNode())
       + (isVolatile() ? makeTokenNode("volatile") : makeVoidNode())
       + size_expression + makeTokenNode("]");
-  return makeDecl(elementType, var + declarator, env);
+  return makeDecl(elementType, var + declarator, env, nnsTable);
 }
 
 Array::~Array() = default;
@@ -449,15 +452,17 @@ Struct::Struct(const DataTypeIdent &ident,
 }
 
 CodeFragment
-Struct::makeDeclaration(CodeFragment var, const TypeTable &) {
+Struct::makeDeclaration(
+    CodeFragment var, const TypeTable &, const NnsTable &) {
   return makeTokenNode("struct") + tag + var;
 }
 
 CodeFragment
-Struct::makeStructDefinition(const TypeTable &env) const {
+Struct::makeStructDefinition(
+    const TypeTable &env, const NnsTable &nnsTable) const {
   auto body = makeVoidNode();
   for (auto &field : fields) {
-    body = body + field.makeDeclaration(env);
+    body = body + field.makeDeclaration(env, nnsTable);
   }
   return makeTokenNode("struct") + makeTokenNode("{") + body
       + makeTokenNode("}") + makeTokenNode(";");
@@ -496,19 +501,15 @@ Struct::tagName() const {
 }
 
 EnumType::EnumType(const DataTypeIdent &ident, const EnumType::EnumName &name)
-    : Type(TypeKind::Enum, ident), name_(name), declBody(makeVoidNode()) {
-}
-
-EnumType::EnumType(const DataTypeIdent &ident,
-    const EnumType::EnumName &name,
-    const CodeFragment &d)
-    : Type(TypeKind::Enum, ident), name_(name), declBody(d) {
+    : Type(TypeKind::Enum, ident), name_(name) {
 }
 
 CodeFragment
-EnumType::makeDeclaration(CodeFragment var, const TypeTable &) {
-  return makeTokenNode("enum") + (name_ ? (*name_) : makeVoidNode()) + declBody
-      + var;
+EnumType::makeDeclaration(
+    CodeFragment var, const TypeTable &typeTable, const NnsTable &nnsTable) {
+  const auto nameSpelling =
+      name_ ? name_->toString(typeTable, nnsTable) : makeVoidNode();
+  return makeTokenNode("enum") + nameSpelling + var;
 }
 
 Type *
@@ -530,11 +531,10 @@ EnumType::name() const {
 void
 EnumType::setName(const std::string &enum_name) {
   assert(!name_);
-  name_ = makeTokenNode(enum_name);
+  name_ = std::make_shared<UIDIdent>(enum_name);
 }
 
-EnumType::EnumType(const EnumType &other)
-    : Type(other), name_(other.name_), declBody(other.declBody) {
+EnumType::EnumType(const EnumType &other) : Type(other), name_(other.name_) {
 }
 
 UnionType::UnionType(
@@ -549,10 +549,11 @@ UnionType::UnionType(const DataTypeIdent &ident,
 }
 
 CodeFragment
-UnionType::makeDeclaration(CodeFragment var, const TypeTable &env) {
+UnionType::makeDeclaration(
+    CodeFragment var, const TypeTable &env, const NnsTable &nnsTable) {
   auto memberDecls = makeVoidNode();
   for (auto &member : members) {
-    memberDecls = memberDecls + member.makeDeclaration(env);
+    memberDecls = memberDecls + member.makeDeclaration(env, nnsTable);
   }
   return makeTokenNode("union") + (name_ ? (*name_) : makeVoidNode())
       + memberDecls + var;
@@ -654,24 +655,18 @@ getClassKey(CXXClassKind kind) {
 }
 
 CodeFragment
-ClassType::makeDeclaration(CodeFragment var, const TypeTable &typeTable) {
-  assert(name_);
-  if (const auto tid = getAsTemplateId(typeTable)) {
-    return makeTokenNode(getClassKey(classKind())) + *tid + var;
-  }
-  return makeTokenNode(getClassKey(classKind())) + name_ + var;
-}
-
-CodeFragment
-ClassType::makeDeclarationWithNnsTable(const CodeFragment &var,
-    const TypeTable &typeTable,
-    const NnsTable &nnsTable) {
+ClassType::makeDeclaration(
+    CodeFragment var, const TypeTable &typeTable, const NnsTable &nnsTable) {
   if (!nnsident.hasValue()) {
-    return makeDeclaration(var, typeTable);
+    assert(name_);
+    if (const auto tid = getAsTemplateId(typeTable, nnsTable)) {
+      return makeTokenNode(getClassKey(classKind())) + *tid + var;
+    }
+    return makeTokenNode(getClassKey(classKind())) + name_ + var;
   }
   const auto nns = nnsTable.at(*nnsident);
   const auto spec = nns->makeDeclaration(typeTable, nnsTable);
-  if (const auto tid = getAsTemplateId(typeTable)) {
+  if (const auto tid = getAsTemplateId(typeTable, nnsTable)) {
     return makeTokenNode(getClassKey(classKind())) + spec + *tid + var;
   }
   return makeTokenNode(getClassKey(classKind())) + spec + name_ + var;
@@ -718,7 +713,8 @@ ClassType::isClassTemplateSpecialization() const {
 }
 
 llvm::Optional<CodeFragment>
-ClassType::getAsTemplateId(const TypeTable &typeTable) const {
+ClassType::getAsTemplateId(
+    const TypeTable &typeTable, const NnsTable &nnsTable) const {
   using MaybeCodeFragment = llvm::Optional<CodeFragment>;
   if (!templateArgs.hasValue()) {
     return MaybeCodeFragment();
@@ -726,7 +722,7 @@ ClassType::getAsTemplateId(const TypeTable &typeTable) const {
   std::vector<CodeFragment> targs;
   for (auto &&dtident : *templateArgs) {
     const auto T = typeTable.at(dtident);
-    targs.push_back(makeDecl(T, makeVoidNode(), typeTable));
+    targs.push_back(makeDecl(T, makeVoidNode(), typeTable, nnsTable));
   }
   const auto list = makeTokenNode("<") + join(",", targs) + makeTokenNode(">");
   return MaybeCodeFragment(name_ + list);
@@ -750,7 +746,8 @@ TemplateTypeParm::TemplateTypeParm(
 }
 
 CodeFragment
-TemplateTypeParm::makeDeclaration(CodeFragment var, const TypeTable &) {
+TemplateTypeParm::makeDeclaration(
+    CodeFragment var, const TypeTable &, const NnsTable &) {
   assert(pSpelling.hasValue());
   return (*pSpelling) + var;
 }
@@ -789,7 +786,8 @@ OtherType::OtherType(const DataTypeIdent &ident)
 }
 
 CodeFragment
-OtherType::makeDeclaration(CodeFragment var, const TypeTable &) {
+OtherType::makeDeclaration(
+    CodeFragment var, const TypeTable &, const NnsTable &) {
   return makeTokenNode("/*") + var + makeTokenNode("*/");
 }
 
@@ -816,9 +814,12 @@ typeKind(TypeRef type) {
 }
 
 CodeFragment
-makeDecl(TypeRef type, CodeFragment var, const TypeTable &env) {
+makeDecl(TypeRef type,
+    CodeFragment var,
+    const TypeTable &env,
+    const NnsTable &nnsTable) {
   if (type) {
-    return type->makeDeclaration(cv_qualify(type, var), env);
+    return type->makeDeclaration(cv_qualify(type, var), env, nnsTable);
   } else {
     return makeTokenNode("UNKNOWN_TYPE");
   }
@@ -898,8 +899,10 @@ makeVariadicFunctionType(const DataTypeIdent &ident,
 }
 
 TypeRef
-makeEnumType(const DataTypeIdent &ident, const CodeFragment &tagname) {
-  return std::make_shared<EnumType>(ident, tagname);
+makeEnumType(
+    const DataTypeIdent &ident, const std::shared_ptr<UnqualId> tagname) {
+  const auto name = static_cast<EnumType::EnumName>(tagname->clone());
+  return std::make_shared<EnumType>(ident, name);
 }
 
 TypeRef
@@ -970,8 +973,8 @@ makeOtherType(const DataTypeIdent &ident) {
 }
 
 CodeFragment
-TypeRefToString(TypeRef type, const TypeTable &env) {
-  return makeDecl(type, makeTokenNode(""), env);
+TypeRefToString(TypeRef type, const TypeTable &env, const NnsTable &nnsTable) {
+  return makeDecl(type, makeTokenNode(""), env, nnsTable);
 }
 
 namespace {

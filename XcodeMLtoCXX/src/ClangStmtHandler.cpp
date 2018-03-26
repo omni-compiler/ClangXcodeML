@@ -156,7 +156,8 @@ DEFINE_STMTHANDLER(ConditionalOperatorProc) {
   const auto cond = createNode(node, "clangStmt[1]", w, src);
   const auto yes = createNode(node, "clangStmt[2]", w, src);
   const auto no = createNode(node, "clangStmt[3]", w, src);
-  return wrapWithParen(cond + makeTokenNode("?") + yes + makeTokenNode(":") + no);
+  return wrapWithParen(
+      cond + makeTokenNode("?") + yes + makeTokenNode(":") + no);
 }
 
 DEFINE_STMTHANDLER(ContinueStmtProc) {
@@ -216,8 +217,8 @@ DEFINE_STMTHANDLER(CXXNewExprProc) {
   // FIXME: Support scalar type
   const auto pointeeT =
       llvm::cast<XcodeMl::Pointer>(T.get())->getPointee(src.typeTable);
-  const auto NewTypeId =
-      pointeeT->makeDeclaration(CXXCodeGen::makeVoidNode(), src.typeTable);
+  const auto NewTypeId = pointeeT->makeDeclaration(
+      CXXCodeGen::makeVoidNode(), src.typeTable, src.nnsTable);
   /* Ref: [new.expr]/4
    * new int(*[10])();   // error
    * new (int(*[10])()); // OK
