@@ -119,6 +119,10 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
     return false;
   }
 
+  if (const auto CDE = dyn_cast<CXXDeleteExpr>(S)) {
+    newBoolProp("is_array_form", CDE->isArrayForm());
+  }
+
   if (auto OCE = dyn_cast<clang::CXXOperatorCallExpr>(S)) {
     newProp("xcodeml_operator_kind",
         OverloadedOperatorKindToString(OCE->getOperator(), OCE->getNumArgs()));
