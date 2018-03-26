@@ -161,7 +161,6 @@ DtorName::classof(const UnqualId *id) {
   return id->getKind() == UnqualIdKind::Dtor;
 }
 
-
 UnnamedId::UnnamedId() : UnqualId(UnqualIdKind::Unnamed) {
 }
 
@@ -171,7 +170,7 @@ UnnamedId::clone() const {
 }
 
 CodeFragment
-UnnamedId::toString(const TypeTable &env) const {
+UnnamedId::toString(const TypeTable &env, const NnsTable &) const {
   return makeTokenNode("");
 }
 
