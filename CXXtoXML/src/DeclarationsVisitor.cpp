@@ -121,6 +121,7 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
 
   if (const auto CDE = dyn_cast<CXXDeleteExpr>(S)) {
     newBoolProp("is_array_form", CDE->isArrayForm());
+    newBoolProp("is_global_delete", CDE->isGlobalDelete());
   }
 
   if (auto OCE = dyn_cast<clang::CXXOperatorCallExpr>(S)) {
@@ -133,6 +134,8 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
   if (auto NL = dyn_cast<CXXNewExpr>(S)) {
     newBoolProp("is_new_array", NL->isArray());
     newBoolProp("has_initializer", NL->hasInitializer());
+    newBoolProp("is_global_new", NL->isGlobalNew());
+
   }
 
   if (auto ME = dyn_cast<clang::MemberExpr>(S)) {
