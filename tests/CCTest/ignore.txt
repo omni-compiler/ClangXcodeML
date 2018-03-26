@@ -5,7 +5,6 @@ templ03
 templ04
 templ05
 templ06
-throw02d
 class049
 no_name_union
 union03_mod
