@@ -325,7 +325,7 @@ DEFINE_STMTHANDLER(CXXTemporaryObjectExprProc) {
   for (auto child : children) {
     args.push_back(w.walk(child, src));
   }
-  return wrapWithXcodeMlIdentity(name) + makeTokenNode("(") + join(",", args) + makeTokenNode(")");
+  return wrapWithXcodeMlIdentity(name) + wrapWithParen(join(",", args));
 }
 
 DEFINE_STMTHANDLER(CXXOperatorCallExprProc) {
