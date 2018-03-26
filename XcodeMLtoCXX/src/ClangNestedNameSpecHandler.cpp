@@ -56,15 +56,37 @@ DEFINE_NAMESPECHANDLER(NamespaceSpecProc) {
   return name + makeTokenNode("::");
 }
 
+XcodeMl::CodeFragment
+makeTypeNameSpecifier(const XcodeMl::TypeRef &T, const SourceInfo &src) {
+  using namespace XcodeMl;
+  switch (T->getKind()) {
+  case TypeKind::Class: {
+    const auto classT = llvm::cast<ClassType>(T.get());
+    return classT->name() + makeTokenNode("::");
+  }
+  case TypeKind::TemplateTypeParm: {
+    const auto TTPT = llvm::cast<TemplateTypeParm>(T.get());
+    const auto name = TTPT->getSpelling().getValue();
+    return name + makeTokenNode("::");
+  }
+  default: {
+    const auto decl =
+        makeDecl(T, CXXCodeGen::makeVoidNode(), src.typeTable, src.nnsTable);
+    return decl + makeTokenNode("::");
+  }
+  }
+}
+
 DEFINE_NAMESPECHANDLER(TypeSpecifierProc) {
   const auto typeNode = findFirst(node, "clangTypeLoc", src.ctxt);
   const auto T = src.typeTable.at(getType(typeNode));
-  if (llvm::isa<XcodeMl::ClassType>(T.get())) {
-    const auto classT = llvm::cast<XcodeMl::ClassType>(T.get());
-    return classT->name() + makeTokenNode("::");
+  const auto spec = makeTypeNameSpecifier(T, src);
+  if (const auto parent =
+          findFirst(node, "clangNestedNameSpecifier", src.ctxt)) {
+    const auto prefix = ClangNestedNameSpecHandler.walk(parent, src);
+    return prefix + spec;
   }
-  return makeDecl(T, CXXCodeGen::makeVoidNode(), src.typeTable, src.nnsTable)
-      + makeTokenNode("::");
+  return spec;
 }
 
 } // namespace
