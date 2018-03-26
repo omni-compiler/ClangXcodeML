@@ -198,7 +198,8 @@ public:
   MemberPointer(DataTypeIdent dtident, DataTypeIdent p, DataTypeIdent r)
       : Type(TypeKind::MemberPointer, dtident), pointee(p), record(r) {
   }
-  CodeFragment makeDeclaration(CodeFragment, const TypeTable &) override;
+  CodeFragment makeDeclaration(
+      CodeFragment, const TypeTable &, const NnsTable &) override;
   ~MemberPointer() override = default;
   Type *
   clone() const override {
