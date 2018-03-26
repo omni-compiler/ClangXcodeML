@@ -329,14 +329,20 @@ DEFINE_DECLHANDLER(EnumConstantProc) {
 }
 
 DEFINE_DECLHANDLER(FieldDeclProc) {
-  const auto nameNode = findFirst(node, "name", src.ctxt);
-  const auto name =
-      getUnqualIdFromNameNode(nameNode)->toString(src.typeTable, src.nnsTable);
-
   const auto dtident = getType(node);
   const auto T = src.typeTable.at(dtident);
+  auto name = CXXCodeGen::makeVoidNode();
+  auto bits = CXXCodeGen::makeVoidNode();
 
-  return makeDecl(T, name, src.typeTable, src.nnsTable);
+  if (isTrueProp(node, "is_bit_field", false)) {
+    const auto bitsNode = findFirst(node, "clangStmt", src.ctxt);
+    bits = makeTokenNode(":") + w.walk(bitsNode, src);
+  }
+  if (!isTrueProp(node, "is_unnamed_bit_field", false)) {
+    const auto nameNode = findFirst(node, "name", src.ctxt);
+    name = getUnqualIdFromNameNode(nameNode)->toString(src.typeTable);
+  }
+  return makeDecl(T, name, src.typeTable, src.nnsTable) + bits;
 }
 
 DEFINE_DECLHANDLER(FriendDeclProc) {

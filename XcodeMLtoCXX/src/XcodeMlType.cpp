@@ -191,14 +191,8 @@ Pointer::makeDeclaration(
   if (!refType) {
     return makeTokenNode("INCOMPLETE_TYPE *") + var;
   }
-  switch (typeKind(refType)) {
-  case TypeKind::Function:
-    return makeDecl(refType,
-        makeTokenNode("(*") + var + makeTokenNode(")"),
-        env,
-        nnsTable);
-  default: return makeDecl(refType, makeTokenNode("*") + var, env, nnsTable);
-  }
+  return makeDecl(
+      refType, makeTokenNode("(*") + var + makeTokenNode(")"), env, nnsTable);
 }
 
 Pointer::~Pointer() = default;
