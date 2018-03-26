@@ -220,8 +220,7 @@ DEFINE_STMTHANDLER(emitNewArrayExpr) {
       llvm::cast<XcodeMl::Pointer>(T.get())->getPointee(src.typeTable);
   const auto NewTypeId = pointeeT->makeDeclaration(
       CXXCodeGen::makeVoidNode(), src.typeTable, src.nnsTable);
-  const auto type =
-      hasParen(pointeeT, src.typeTable) ? wrapWithParen(NewTypeId) : NewTypeId;
+  const auto type = wrapWithXcodeMlIdentity(NewTypeId);
 
   const auto size = createNode(node, "clangStmt[1]", w, src);
 
