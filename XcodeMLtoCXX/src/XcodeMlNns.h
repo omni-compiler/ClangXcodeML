@@ -127,19 +127,10 @@ private:
 
 class UnnamedNamespaceNns : public Nns {
 public:
-  UnnamedNamespaceNns(const NnsIdent &nident, const NnsIdent &parent)
-      : Nns(NnsKind::UnnamedNamespace, parent, nident) {
-  }
+  UnnamedNamespaceNns(const NnsIdent &nident, const NnsIdent &parent);
   ~UnnamedNamespaceNns() override = default;
-  Nns *
-  clone() const override {
-    UnnamedNamespaceNns *copy = new UnnamedNamespaceNns(*this);
-    return copy;
-  }
-  static bool
-  classof(const Nns *N) {
-    return N->getKind() == NnsKind::UnnamedNamespace;
-  }
+  Nns *clone() const override;
+  static bool classof(const Nns *);
 
 protected:
   UnnamedNamespaceNns(const UnnamedNamespaceNns &) = default;

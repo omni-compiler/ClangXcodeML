@@ -139,6 +139,22 @@ NamespaceNns::makeNestedNameSpec(const TypeTable &, const NnsTable &) const {
   return makeTokenNode(name) + makeTokenNode("::");
 }
 
+UnnamedNamespaceNns::UnnamedNamespaceNns(
+    const NnsIdent &nident, const NnsIdent &parent)
+    : Nns(NnsKind::UnnamedNamespace, parent, nident) {
+}
+
+Nns *
+UnnamedNamespaceNns::clone() const {
+  UnnamedNamespaceNns *copy = new UnnamedNamespaceNns(*this);
+  return copy;
+}
+
+bool
+UnnamedNamespaceNns::classof(const Nns *N) {
+  return N->getKind() == NnsKind::UnnamedNamespace;
+}
+
 CodeFragment
 UnnamedNamespaceNns::makeNestedNameSpec(
     const TypeTable &, const NnsTable &) const {
