@@ -184,12 +184,6 @@ makeFunctionDeclHead(xmlNodePtr node,
   return acc;
 }
 
-XcodeMl::CodeFragment
-wrapWithXcodeMlIdentity(const XcodeMl::CodeFragment &type) {
-  using CXXCodeGen::makeTokenNode;
-  return makeTokenNode("__xcodeml_identity<") + type + makeTokenNode(">::t");
-}
-
 bool
 requiresSemicolon(xmlNodePtr node, const SourceInfo &src) {
   const auto declClass = getProp(node, "class");

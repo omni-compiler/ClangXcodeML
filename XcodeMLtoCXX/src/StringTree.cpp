@@ -241,6 +241,11 @@ wrapWithBrace(const StringTreeRef &str) {
   return wrapWithStr("{", str, "}");
 }
 
+StringTreeRef
+wrapWithXcodeMlIdentity(const StringTreeRef &type) {
+  return makeTokenNode("__xcodeml_identity<") + type + makeTokenNode(">::t");
+}
+
 } // namespace CXXCodeGen
 
 CXXCodeGen::StringTreeRef operator+(const CXXCodeGen::StringTreeRef &lhs,
