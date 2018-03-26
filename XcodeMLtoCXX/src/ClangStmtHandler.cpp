@@ -196,8 +196,12 @@ DEFINE_STMTHANDLER(CXXConstCastExprProc) {
 }
 
 DEFINE_STMTHANDLER(CXXCtorExprProc) {
-  return makeTokenNode("(") + cxxgen::join(", ", w.walkChildren(node, src))
-      + makeTokenNode(")");
+  const auto T = makeDecl(src.typeTable.at(getType(node)),
+      CXXCodeGen::makeVoidNode(),
+      src.typeTable,
+      src.nnsTable);
+  const auto exprs = createNodes(node, "clangStmt", w, src);
+  return wrapWithXcodeMlIdentity(T) + wrapWithParen(join(",", exprs));
 }
 
 DEFINE_STMTHANDLER(CXXDeleteExprProc) {
