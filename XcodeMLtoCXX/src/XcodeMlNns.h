@@ -30,6 +30,8 @@ enum class NnsKind {
   Class,
   /*! namespaceNNS */
   Namespace,
+  /*! NamespaceNNS (unnamed) */
+  UnnamedNamespace,
 };
 
 /*!
@@ -123,6 +125,19 @@ private:
   std::string name;
 };
 
+class UnnamedNamespaceNns : public Nns {
+public:
+  UnnamedNamespaceNns(const NnsIdent &nident, const NnsIdent &parent);
+  ~UnnamedNamespaceNns() override = default;
+  Nns *clone() const override;
+  static bool classof(const Nns *);
+
+protected:
+  UnnamedNamespaceNns(const UnnamedNamespaceNns &) = default;
+  virtual CodeFragment makeNestedNameSpec(
+      const TypeTable &, const NnsTable &) const override;
+};
+
 class OtherNns : public Nns {
 public:
   OtherNns(const NnsIdent &);
@@ -163,6 +178,8 @@ NnsRef makeNamespaceNns(const NnsIdent &nident, const std::string &name);
 
 NnsRef makeNamespaceNns(
     const NnsIdent &nident, const NnsIdent &parent, const std::string &name);
+
+NnsRef makeUnnamedNamespaceNns(const NnsIdent &nident, const NnsIdent &parent);
 
 NnsRef makeOtherNns(const NnsIdent &nident);
 
