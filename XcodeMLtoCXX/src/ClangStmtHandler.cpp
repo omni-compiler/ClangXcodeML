@@ -181,7 +181,11 @@ DEFINE_STMTHANDLER(CXXBoolLiteralExprProc) {
 DEFINE_STMTHANDLER(CXXCatchStmtProc) {
   const auto body = createNode(node, "clangStmt", w, src);
   if (const auto declNode = findFirst(node, "clangDecl", src.ctxt)) {
-    const auto var = w.walk(declNode, src);
+    const auto name =
+        getQualifiedName(declNode, src).toString(src.typeTable, src.nnsTable);
+    const auto dtident = getProp(declNode, "xcodemlType");
+    const auto T = src.typeTable.at(dtident);
+    const auto var = makeDecl(T, name, src.typeTable, src.nnsTable);
     return makeTokenNode("catch") + wrapWithParen(var) + body;
   } else {
     return makeTokenNode("catch(...)") + body;
@@ -554,6 +558,7 @@ const ClangStmtHandlerType ClangStmtHandler("class",
         std::make_tuple("CXXThrowExpr", CXXThrowExprProc),
         std::make_tuple("CXXTryStmt", CXXTryStmtProc),
         std::make_tuple("CXXThisExpr", ThisExprProc),
+        std::make_tuple("CXXUnresolvedConstructExpr", CXXCtorExprProc),
         std::make_tuple("DeclStmt", DeclStmtProc),
         std::make_tuple("DeclRefExpr", DeclRefExprProc),
         std::make_tuple("DefaultStmt", DefaultStmtProc),
