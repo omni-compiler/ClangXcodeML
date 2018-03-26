@@ -27,12 +27,12 @@ Name::Name(const std::shared_ptr<UnqualId> &id_) : nestedNameSpec(), id(id_) {
 }
 
 CodeFragment
-Name::toString(const TypeTable &typeTable, const NnsTable &) const {
+Name::toString(const TypeTable &typeTable, const NnsTable &nnsTable) const {
   assert(id);
   if (nestedNameSpec) {
-    return nestedNameSpec + id->toString(typeTable);
+    return nestedNameSpec + id->toString(typeTable, nnsTable);
   }
-  return id->toString(typeTable);
+  return id->toString(typeTable, nnsTable);
 }
 
 std::shared_ptr<UnqualId>
@@ -64,7 +64,7 @@ UIDIdent::clone() const {
 }
 
 CodeFragment
-UIDIdent::toString(const TypeTable &) const {
+UIDIdent::toString(const TypeTable &, const NnsTable &) const {
   return makeTokenNode(ident);
 }
 
@@ -84,7 +84,7 @@ OpFuncId::clone() const {
 }
 
 CodeFragment
-OpFuncId::toString(const TypeTable &) const {
+OpFuncId::toString(const TypeTable &, const NnsTable &) const {
   return makeTokenNode("operator") + makeTokenNode(opSpelling);
 }
 
@@ -104,9 +104,10 @@ ConvFuncId::clone() const {
 }
 
 CodeFragment
-ConvFuncId::toString(const TypeTable &env) const {
+ConvFuncId::toString(const TypeTable &env, const NnsTable &nnsTable) const {
   const auto T = env.at(dtident);
-  return makeTokenNode("operator") + T->makeDeclaration(makeVoidNode(), env);
+  return makeTokenNode("operator")
+      + T->makeDeclaration(makeVoidNode(), env, nnsTable);
 }
 
 bool
@@ -125,7 +126,7 @@ CtorName::clone() const {
 }
 
 CodeFragment
-CtorName::toString(const TypeTable &env) const {
+CtorName::toString(const TypeTable &env, const NnsTable &) const {
   const auto T = env.at(dtident);
   const auto ClassT = llvm::cast<XcodeMl::ClassType>(T.get());
   const auto name = ClassT->name();
@@ -148,7 +149,7 @@ DtorName::clone() const {
 }
 
 CodeFragment
-DtorName::toString(const TypeTable &env) const {
+DtorName::toString(const TypeTable &env, const NnsTable &) const {
   const auto T = env.at(dtident);
   const auto ClassT = llvm::cast<XcodeMl::ClassType>(T.get());
   const auto name = ClassT->name();
@@ -160,7 +161,6 @@ DtorName::classof(const UnqualId *id) {
   return id->getKind() == UnqualIdKind::Dtor;
 }
 
-
 UnnamedId::UnnamedId() : UnqualId(UnqualIdKind::Unnamed) {
 }
 
@@ -170,7 +170,7 @@ UnnamedId::clone() const {
 }
 
 CodeFragment
-UnnamedId::toString(const TypeTable &env) const {
+UnnamedId::toString(const TypeTable &env, const NnsTable &) const {
   return makeTokenNode("");
 }
 

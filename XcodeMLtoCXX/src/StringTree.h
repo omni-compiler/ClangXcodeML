@@ -165,8 +165,7 @@ StringTreeRef insertNewLines(const std::vector<StringTreeRef> &);
  */
 StringTreeRef separateByBlankLines(const std::vector<StringTreeRef> &);
 
-StringTreeRef
-foldWithSemicolon(const std::vector<StringTreeRef> &stmts);
+StringTreeRef foldWithSemicolon(const std::vector<StringTreeRef> &stmts);
 
 /*!
  * \brief Returns a string-node created by concatenating the string-nodes,

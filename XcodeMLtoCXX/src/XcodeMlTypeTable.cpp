@@ -13,8 +13,7 @@
 
 namespace XcodeMl {
 
-const TypeRef &TypeTable::operator[](
-    const std::string &dataTypeIdent) const {
+const TypeRef &TypeTable::operator[](const std::string &dataTypeIdent) const {
   return at_or_throw(map, dataTypeIdent, "Data type");
 }
 

@@ -90,8 +90,7 @@ NewLineNode::classof(const StringTree *node) {
   return node->getKind() == StringTreeKind::NewLine;
 }
 
-NewLineNode::NewLineNode() : StringTree(StringTreeKind::NewLine) {
-};
+NewLineNode::NewLineNode() : StringTree(StringTreeKind::NewLine){};
 
 StringTree *
 NewLineNode::clone() const {
@@ -110,7 +109,8 @@ NewLineNode::lift() const {
   return node;
 }
 
-static void nop(void *) {
+static void
+nop(void *) {
 }
 
 StringTreeRef
@@ -126,8 +126,7 @@ SourcePosNode::classof(const StringTree *node) {
 }
 
 SourcePosNode::SourcePosNode(std::string f, size_t l)
-  : StringTree(StringTreeKind::SourcePos), filename(f), lineno(l) {
-};
+    : StringTree(StringTreeKind::SourcePos), filename(f), lineno(l){};
 
 StringTree *
 SourcePosNode::clone() const {
@@ -141,7 +140,8 @@ SourcePosNode::flush(Stream &ss) const {
 
 InnerNode *
 SourcePosNode::lift() const {
-  std::vector<StringTreeRef> v({std::make_shared<SourcePosNode>(filename, lineno)});
+  std::vector<StringTreeRef> v(
+      {std::make_shared<SourcePosNode>(filename, lineno)});
   InnerNode *node = new InnerNode(v);
   return node;
 }

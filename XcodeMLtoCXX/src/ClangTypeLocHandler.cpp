@@ -41,8 +41,10 @@ DEFINE_TYPELOCHANDLER(callCodeBuilder) {
 
 DEFINE_TYPELOCHANDLER(BuiltinTypeProc) {
   const auto dtident = getType(node);
-  return makeDecl(
-      src.typeTable.at(dtident), CXXCodeGen::makeVoidNode(), src.typeTable);
+  return makeDecl(src.typeTable.at(dtident),
+      CXXCodeGen::makeVoidNode(),
+      src.typeTable,
+      src.nnsTable);
 }
 
 } // namespace

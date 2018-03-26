@@ -22,7 +22,7 @@ class MemberDecl {
 public:
   MemberDecl(const DataTypeIdent &, const CodeFragment &);
   MemberDecl(const DataTypeIdent &, const CodeFragment &, size_t);
-  CodeFragment makeDeclaration(const TypeTable &) const;
+  CodeFragment makeDeclaration(const TypeTable &, const NnsTable &) const;
 
 private:
   DataTypeIdent dtident;
@@ -62,13 +62,15 @@ enum class TypeKind {
 };
 
 TypeKind typeKind(TypeRef);
-CodeFragment makeDecl(TypeRef, CodeFragment, const TypeTable &);
+CodeFragment makeDecl(
+    TypeRef, CodeFragment, const TypeTable &, const NnsTable &);
 
 /*!
  * \brief Returns a code fragment string that represents the given data type
  * e.g. `int (*)(const double&)`.
  */
-CodeFragment TypeRefToString(TypeRef, const TypeTable &env);
+CodeFragment TypeRefToString(
+    TypeRef, const TypeTable &env, const NnsTable &nnsTable);
 
 /*!
  * \brief A class that represents data types in XcodeML.
@@ -78,9 +80,8 @@ public:
   Type(TypeKind, DataTypeIdent, bool = false, bool = false);
   virtual ~Type() = 0;
   virtual Type *clone() const = 0;
-  virtual CodeFragment makeDeclaration(CodeFragment, const TypeTable &) = 0;
-  virtual CodeFragment makeDeclarationWithNnsTable(
-      const CodeFragment &, const TypeTable &, const NnsTable &);
+  virtual CodeFragment makeDeclaration(
+      CodeFragment, const TypeTable &, const NnsTable &) = 0;
 
   /*!
    * \brief Return a code fragment string created by adding the `const`
@@ -134,7 +135,8 @@ private:
 class Reserved : public Type {
 public:
   Reserved(DataTypeIdent, CodeFragment);
-  CodeFragment makeDeclaration(CodeFragment, const TypeTable &) override;
+  CodeFragment makeDeclaration(
+      CodeFragment, const TypeTable &, const NnsTable &) override;
   ~Reserved() override;
   Type *clone() const override;
   static bool classof(const Type *);
@@ -158,7 +160,8 @@ public:
       DataTypeIdent underlyingType,
       bool isConst,
       bool isVolatile);
-  CodeFragment makeDeclaration(CodeFragment, const TypeTable &) override;
+  CodeFragment makeDeclaration(
+      CodeFragment, const TypeTable &, const NnsTable &) override;
   ~QualifiedType() override;
   Type *clone() const override;
   static bool classof(const Type *);
@@ -176,7 +179,8 @@ class Pointer : public Type {
 public:
   Pointer(DataTypeIdent dtident, TypeRef pointee);
   Pointer(DataTypeIdent dtident, DataTypeIdent pointee);
-  CodeFragment makeDeclaration(CodeFragment, const TypeTable &) override;
+  CodeFragment makeDeclaration(
+      CodeFragment, const TypeTable &, const NnsTable &) override;
   ~Pointer() override;
   Type *clone() const override;
   static bool classof(const Type *);
@@ -220,7 +224,8 @@ public:
   ReferenceType(const DataTypeIdent &dtident,
       TypeKind kind,
       const DataTypeIdent &pointee);
-  CodeFragment makeDeclaration(CodeFragment, const TypeTable &) override = 0;
+  CodeFragment makeDeclaration(
+      CodeFragment, const TypeTable &, const NnsTable &) override = 0;
   ~ReferenceType() override = 0;
   Type *clone() const override = 0;
   TypeRef getPointee(const TypeTable &) const;
@@ -234,7 +239,8 @@ class LValueReferenceType : public ReferenceType {
 public:
   LValueReferenceType(
       const DataTypeIdent &dtident, const DataTypeIdent &pointee);
-  CodeFragment makeDeclaration(CodeFragment, const TypeTable &) override;
+  CodeFragment makeDeclaration(
+      CodeFragment, const TypeTable &, const NnsTable &) override;
   ~LValueReferenceType() override = default;
   Type *clone() const override;
   static bool classof(const Type *);
@@ -251,7 +257,8 @@ public:
   bool isVariadic() const;
   bool isEmpty() const;
   CodeFragment makeDeclaration(const std::vector<CodeFragment> &paramNames,
-      const TypeTable &typeTable) const;
+      const TypeTable &typeTable,
+      const NnsTable &nnsTable) const;
 
 private:
   std::vector<DataTypeIdent> dtidents;
@@ -266,14 +273,16 @@ public:
       bool isVariadic = false);
   CodeFragment makeDeclarationWithoutReturnType(CodeFragment funcName,
       const std::vector<CodeFragment> &argNames,
-      const TypeTable &env);
+      const TypeTable &env,
+      const NnsTable &nnsTable);
   CodeFragment makeDeclarationWithoutReturnType(
-      CodeFragment funcName, const TypeTable &env);
+      CodeFragment funcName, const TypeTable &env, const NnsTable &nnsTable);
   CodeFragment makeDeclaration(
-      CodeFragment funcName, const TypeTable &env) override;
+      CodeFragment funcName, const TypeTable &env, const NnsTable &) override;
   CodeFragment makeDeclaration(CodeFragment funcName,
       const std::vector<CodeFragment> &argNames,
-      const TypeTable &env);
+      const TypeTable &env,
+      const NnsTable &nnsTable);
   virtual CodeFragment addConstQualifier(CodeFragment) const override;
   virtual CodeFragment addVolatileQualifier(CodeFragment) const override;
   std::vector<CodeFragment> argNames() const;
@@ -313,7 +322,8 @@ public:
 public:
   Array(DataTypeIdent dtident, DataTypeIdent element, Size size);
   Array(DataTypeIdent dtident, DataTypeIdent element, size_t size);
-  CodeFragment makeDeclaration(CodeFragment, const TypeTable &) override;
+  CodeFragment makeDeclaration(
+      CodeFragment, const TypeTable &, const NnsTable &) override;
   ~Array() override;
   Type *clone() const override;
   CodeFragment addConstQualifier(CodeFragment) const override;
@@ -336,8 +346,9 @@ public:
 
 public:
   Struct(const DataTypeIdent &, const CodeFragment &, const MemberList &);
-  CodeFragment makeDeclaration(CodeFragment, const TypeTable &) override;
-  CodeFragment makeStructDefinition(const TypeTable &) const;
+  CodeFragment makeDeclaration(
+      CodeFragment, const TypeTable &, const NnsTable &) override;
+  CodeFragment makeStructDefinition(const TypeTable &, const NnsTable &) const;
   ~Struct() override;
   Type *clone() const override;
   void setTagName(const CodeFragment &);
@@ -355,11 +366,11 @@ private:
 
 class EnumType : public Type {
 public:
-  using EnumName = llvm::Optional<CodeFragment>;
+  using EnumName = std::shared_ptr<UnqualId>; // nullable
   EnumType(const DataTypeIdent &, const EnumName &);
-  EnumType(const DataTypeIdent &, const EnumName &, const CodeFragment &);
   ~EnumType() override = default;
-  CodeFragment makeDeclaration(CodeFragment, const TypeTable &) override;
+  CodeFragment makeDeclaration(
+      CodeFragment, const TypeTable &, const NnsTable &) override;
   Type *clone() const override;
   static bool classof(const Type *);
   EnumName name() const;
@@ -370,7 +381,6 @@ protected:
 
 private:
   EnumName name_;
-  CodeFragment declBody;
 };
 
 class UnionType : public Type {
@@ -381,7 +391,8 @@ public:
       const UnionName &,
       const std::vector<MemberDecl> &);
   ~UnionType() override = default;
-  CodeFragment makeDeclaration(CodeFragment, const TypeTable &) override;
+  CodeFragment makeDeclaration(
+      CodeFragment, const TypeTable &, const NnsTable &) override;
   Type *clone() const override;
   static bool classof(const Type *);
   void setName(const std::string &);
@@ -435,9 +446,8 @@ public:
       const Symbols &,
       const llvm::Optional<TemplateArgList> &);
   ClassType(const DataTypeIdent &, const Symbols &);
-  CodeFragment makeDeclaration(CodeFragment, const TypeTable &) override;
-  CodeFragment makeDeclarationWithNnsTable(
-      const CodeFragment &, const TypeTable &, const NnsTable &) override;
+  CodeFragment makeDeclaration(
+      CodeFragment, const TypeTable &, const NnsTable &) override;
   ~ClassType() override = default;
   Type *clone() const override;
   CXXClassKind classKind() const;
@@ -448,7 +458,7 @@ public:
   std::vector<BaseClass> getBases() const;
   bool isClassTemplateSpecialization() const;
   llvm::Optional<CodeFragment> getAsTemplateId(
-      const TypeTable &typeTable) const;
+      const TypeTable &typeTable, const NnsTable &nnsTable) const;
   static bool classof(const Type *);
 
 protected:
@@ -467,7 +477,8 @@ class TemplateTypeParm : public Type {
 public:
   TemplateTypeParm(const DataTypeIdent &dtident, const CodeFragment &name);
   ~TemplateTypeParm() override = default;
-  CodeFragment makeDeclaration(CodeFragment, const TypeTable &) override;
+  CodeFragment makeDeclaration(
+      CodeFragment, const TypeTable &, const NnsTable &) override;
   Type *clone() const override;
   static bool classof(const Type *);
   void setSpelling(CodeFragment);
@@ -484,7 +495,8 @@ class OtherType : public Type {
 public:
   OtherType(const DataTypeIdent &);
   ~OtherType() override = default;
-  CodeFragment makeDeclaration(CodeFragment, const TypeTable &) override;
+  CodeFragment makeDeclaration(
+      CodeFragment, const TypeTable &, const NnsTable &) override;
   Type *clone() const override;
   static bool classof(const Type *);
 
@@ -508,7 +520,8 @@ TypeRef makeArrayType(DataTypeIdent, TypeRef, size_t);
 TypeRef makeArrayType(DataTypeIdent, TypeRef, Array::Size);
 TypeRef makeArrayType(DataTypeIdent, DataTypeIdent, Array::Size);
 TypeRef makeArrayType(DataTypeIdent, DataTypeIdent, size_t);
-TypeRef makeEnumType(const DataTypeIdent &, const CodeFragment &tagname);
+TypeRef makeEnumType(
+    const DataTypeIdent &, const std::shared_ptr<XcodeMl::UnqualId> tagname);
 TypeRef makeClassType(const DataTypeIdent &, const ClassType::Symbols &);
 TypeRef makeClassType(const DataTypeIdent &dtident,
     const llvm::Optional<std::string> nnsident,

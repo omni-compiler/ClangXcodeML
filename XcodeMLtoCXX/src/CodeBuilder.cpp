@@ -167,8 +167,8 @@ DEFINE_CB(postDecrExprProc) {
 
 DEFINE_CB(castExprProc) {
   const auto dtident = getProp(node, "type");
-  const auto Tstr =
-      makeDecl(src.typeTable.at(dtident), makeVoidNode(), src.typeTable);
+  const auto Tstr = makeDecl(
+      src.typeTable.at(dtident), makeVoidNode(), src.typeTable, src.nnsTable);
   const auto child = makeInnerNode(w.walkChildren(node, src));
   return wrapWithParen(wrapWithParen(Tstr) + wrapWithParen(child));
 }
@@ -265,7 +265,7 @@ getNameFromMemberRefNode(xmlNodePtr node, const SourceInfo &src) {
   const auto memberName = findFirst(node, "name", src.ctxt);
   if (memberName) {
     const auto name = getUnqualIdFromNameNode(memberName);
-    return name->toString(src.typeTable);
+    return name->toString(src.typeTable, src.nnsTable);
   }
   /* Otherwise, it must have `member` attribute. */
   const auto name = getProp(node, "member");
@@ -432,7 +432,7 @@ DEFINE_CB(newExprProc) {
   const auto pointeeT =
       llvm::cast<XcodeMl::Pointer>(type.get())->getPointee(src.typeTable);
   const auto NewTypeId =
-      pointeeT->makeDeclaration(makeVoidNode(), src.typeTable);
+      pointeeT->makeDeclaration(makeVoidNode(), src.typeTable, src.nnsTable);
   /* Ref: [new.expr]/4
    * new int(*[10])();   // error
    * new (int(*[10])()); // OK
@@ -454,7 +454,7 @@ DEFINE_CB(newArrayExprProc) {
       llvm::cast<XcodeMl::Pointer>(type.get())->getPointee(src.typeTable);
   const auto size_expr = w.walk(findFirst(node, "size", src.ctxt), src);
   const auto decl = pointeeT->makeDeclaration(
-      wrapWithSquareBracket(size_expr), src.typeTable);
+      wrapWithSquareBracket(size_expr), src.typeTable, src.nnsTable);
   return makeTokenNode("new") + wrapWithParen(decl);
   /* new int(*[10])();   // error
    * new (int(*[10])()); // OK
@@ -533,7 +533,10 @@ DEFINE_CB(varDeclProc) {
   const auto type = src.typeTable.at(dtident);
 
   auto acc = makeVoidNode();
-  acc = acc + makeDecl(type, name->toString(src.typeTable), src.typeTable);
+  acc = acc + makeDecl(type,
+                  name->toString(src.typeTable, src.nnsTable),
+                  src.typeTable,
+                  src.nnsTable);
   xmlNodePtr valueElem = findFirst(node, "value", src.ctxt);
   if (!valueElem) {
     return wrapWithLangLink(acc + makeTokenNode(";"), node, src);
@@ -562,7 +565,10 @@ DEFINE_CB(emitDataMemberDecl) {
   if (isTrueProp(node, "is_static_data_member", false)) {
     acc = acc + makeTokenNode("static");
   }
-  acc = acc + makeDecl(type, name->toString(src.typeTable), src.typeTable);
+  acc = acc + makeDecl(type,
+                  name->toString(src.typeTable, src.nnsTable),
+                  src.typeTable,
+                  src.nnsTable);
   xmlNodePtr valueElem = findFirst(node, "value", src.ctxt);
   if (!valueElem) {
     return wrapWithLangLink(acc + makeTokenNode(";"), node, src);
@@ -629,7 +635,8 @@ DEFINE_CB(classScopeClangDeclProc) {
 
 DEFINE_CB(clangTypeLocProc) {
   const auto T = src.typeTable.at(getType(node));
-  return T->makeDeclaration(CXXCodeGen::makeVoidNode(), src.typeTable);
+  return T->makeDeclaration(
+      CXXCodeGen::makeVoidNode(), src.typeTable, src.nnsTable);
 }
 
 DEFINE_CB(clangNestedNameSpecProc) {

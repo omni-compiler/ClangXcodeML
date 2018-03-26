@@ -40,7 +40,7 @@ public:
    * \brief Returns the source-code representation,
    * like `abc`, `~A`, or `operator+`.
    */
-  virtual CodeFragment toString(const TypeTable &) const = 0;
+  virtual CodeFragment toString(const TypeTable &, const NnsTable &) const = 0;
   UnqualIdKind getKind() const;
 
 protected:
@@ -71,7 +71,7 @@ public:
   UIDIdent(const std::string &);
   ~UIDIdent() override = default;
   UnqualId *clone() const override;
-  CodeFragment toString(const TypeTable &) const override;
+  CodeFragment toString(const TypeTable &, const NnsTable &) const override;
   static bool classof(const UnqualId *);
 
 protected:
@@ -87,7 +87,7 @@ public:
   OpFuncId(const std::string &);
   ~OpFuncId() override = default;
   UnqualId *clone() const override;
-  CodeFragment toString(const TypeTable &) const override;
+  CodeFragment toString(const TypeTable &, const NnsTable &) const override;
   static bool classof(const UnqualId *);
 
 protected:
@@ -103,7 +103,7 @@ public:
   ConvFuncId(const DataTypeIdent &);
   ~ConvFuncId() override = default;
   UnqualId *clone() const override;
-  CodeFragment toString(const TypeTable &) const override;
+  CodeFragment toString(const TypeTable &, const NnsTable &) const override;
   static bool classof(const UnqualId *);
 
 protected:
@@ -119,7 +119,7 @@ public:
   CtorName(const DataTypeIdent &);
   ~CtorName() override = default;
   UnqualId *clone() const override;
-  CodeFragment toString(const TypeTable &) const override;
+  CodeFragment toString(const TypeTable &, const NnsTable &) const override;
   static bool classof(const UnqualId *);
 
 protected:
@@ -135,7 +135,7 @@ public:
   DtorName(const DataTypeIdent &);
   ~DtorName() override = default;
   UnqualId *clone() const override;
-  CodeFragment toString(const TypeTable &) const override;
+  CodeFragment toString(const TypeTable &, const NnsTable &) const override;
   static bool classof(const UnqualId *);
 
 protected:
@@ -151,7 +151,7 @@ public:
   UnnamedId();
   ~UnnamedId() override = default;
   UnqualId *clone() const override;
-  CodeFragment toString(const TypeTable &) const override;
+  CodeFragment toString(const TypeTable &, const NnsTable &) const override;
   static bool classof(const UnqualId *);
 
 protected:
