@@ -195,21 +195,13 @@ private:
 
 class MemberPointer : public Type {
 public:
-  MemberPointer(DataTypeIdent dtident, DataTypeIdent p, DataTypeIdent r)
-      : Type(TypeKind::MemberPointer, dtident), pointee(p), record(r) {
-  }
+  MemberPointer(
+      DataTypeIdent dtident, DataTypeIdent pointee, DataTypeIdent record);
   CodeFragment makeDeclaration(
       CodeFragment, const TypeTable &, const NnsTable &) override;
   ~MemberPointer() override = default;
-  Type *
-  clone() const override {
-    MemberPointer *copy = new MemberPointer(*this);
-    return copy;
-  }
-  static bool
-  classof(const Type *T) {
-    return T->getKind() == TypeKind::MemberPointer;
-  }
+  Type *clone() const override;
+  static bool classof(const Type *T);
 
 protected:
   MemberPointer(const MemberPointer &) = default;

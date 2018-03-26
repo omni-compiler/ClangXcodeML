@@ -216,6 +216,22 @@ Pointer::getPointee(const TypeTable &env) const {
 Pointer::Pointer(const Pointer &other) : Type(other), ref(other.ref) {
 }
 
+MemberPointer::MemberPointer(
+    DataTypeIdent dtident, DataTypeIdent p, DataTypeIdent r)
+    : Type(TypeKind::MemberPointer, dtident), pointee(p), record(r) {
+}
+
+Type *
+MemberPointer::clone() const {
+  MemberPointer *copy = new MemberPointer(*this);
+  return copy;
+}
+
+bool
+MemberPointer::classof(const Type *T) {
+  return T->getKind() == TypeKind::MemberPointer;
+}
+
 CodeFragment
 MemberPointer::makeDeclaration(
     CodeFragment var, const TypeTable &typeTable, const NnsTable &nnsTable) {
