@@ -25,7 +25,7 @@ target="$1"
 echo -n "${target}.cc,"
 
 
-if grep -sq ${target} ignore.txt ; then
+if grep -sq \^${target}\$ ignore.txt ; then
   echo
   exit 0
 fi
