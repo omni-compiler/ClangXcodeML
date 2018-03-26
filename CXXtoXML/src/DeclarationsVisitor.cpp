@@ -132,6 +132,7 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
 
   if (auto NL = dyn_cast<CXXNewExpr>(S)) {
     newBoolProp("is_new_array", NL->isArray());
+    newBoolProp("has_initializer", NL->hasInitializer());
   }
 
   if (auto ME = dyn_cast<clang::MemberExpr>(S)) {
