@@ -39,6 +39,9 @@ XcodeMl::CodeFragment makeFunctionDeclHead(xmlNodePtr node,
     const SourceInfo &src,
     bool emitNameSpec = false);
 
+XcodeMl::CodeFragment wrapWithXcodeMlIdentity(
+    const XcodeMl::CodeFragment &type);
+
 bool requiresSemicolon(xmlNodePtr node, const SourceInfo &src);
 
 XcodeMl::CodeFragment wrapWithLangLink(const XcodeMl::CodeFragment &content,
