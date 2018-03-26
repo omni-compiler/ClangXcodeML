@@ -146,6 +146,10 @@ xmlNodePtr
 makeNamespaceNnsNode(const clang::DeclContext &DC) {
   const auto ND = llvm::cast<clang::NamespaceDecl>(DC);
   const auto node = xmlNewNode(nullptr, BAD_CAST "namespaceNNS");
+  if (ND.isAnonymousNamespace()) {
+    xmlNewProp(node, BAD_CAST "is_anonymous", BAD_CAST "1");
+    return node;
+  }
   const auto name = ND.getDeclName().getAsString();
   xmlNodeAddContent(node, BAD_CAST(name.c_str()));
   return node;

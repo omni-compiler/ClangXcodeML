@@ -44,9 +44,13 @@ DEFINE_NA(otherNnsProc) {
 
 DEFINE_NA(namespaceNnsProc) {
   const auto nident = getProp(node, "nns");
-  const auto namespaceName = getContent(node);
   const auto parent = getProp(node, "parent");
-  map[nident] = XcodeMl::makeNamespaceNns(nident, parent, namespaceName);
+  if (isTrueProp(node, "is_anonymous", false)) {
+    map[nident] = XcodeMl::makeUnnamedNamespaceNns(nident, parent);
+  } else {
+    const auto namespaceName = getContent(node);
+    map[nident] = XcodeMl::makeNamespaceNns(nident, parent, namespaceName);
+  }
 }
 
 const XcodeMl::NnsTable initialNnsTable = {

@@ -139,6 +139,28 @@ NamespaceNns::makeNestedNameSpec(const TypeTable &, const NnsTable &) const {
   return makeTokenNode(name) + makeTokenNode("::");
 }
 
+UnnamedNamespaceNns::UnnamedNamespaceNns(
+    const NnsIdent &nident, const NnsIdent &parent)
+    : Nns(NnsKind::UnnamedNamespace, parent, nident) {
+}
+
+Nns *
+UnnamedNamespaceNns::clone() const {
+  UnnamedNamespaceNns *copy = new UnnamedNamespaceNns(*this);
+  return copy;
+}
+
+bool
+UnnamedNamespaceNns::classof(const Nns *N) {
+  return N->getKind() == NnsKind::UnnamedNamespace;
+}
+
+CodeFragment
+UnnamedNamespaceNns::makeNestedNameSpec(
+    const TypeTable &, const NnsTable &) const {
+  return CXXCodeGen::makeVoidNode();
+}
+
 OtherNns::OtherNns(const NnsIdent &ident) : Nns(NnsKind::Other, ident) {
 }
 
@@ -178,6 +200,11 @@ makeClassNns(const NnsIdent &ident, const DataTypeIdent &classType) {
 NnsRef
 makeNamespaceNns(const NnsIdent &nident, const std::string &name) {
   return std::make_shared<NamespaceNns>(nident, name);
+}
+
+NnsRef
+makeUnnamedNamespaceNns(const NnsIdent &nident, const NnsIdent &parent) {
+  return std::make_shared<UnnamedNamespaceNns>(nident, parent);
 }
 
 NnsRef
