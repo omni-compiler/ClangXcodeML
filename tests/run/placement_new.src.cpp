@@ -13,7 +13,9 @@ void *operator new(size_t, int i, char c) {
 
 int
 main() {
-  ClassA *pv = (ClassA *)(new (100, 'c') ClassA);
-  printf("%d\n", pv->member_i);
-  delete pv;
+  ClassA *pv1 = (ClassA *)(new (100, 'c') ClassA);
+  ClassA *pv2 = (ClassA *)(new (100, 'c') ClassA());
+  printf("%d %d\n", pv1->member_i, pv2->member_i);
+  delete pv1;
+  delete pv2;
 }
