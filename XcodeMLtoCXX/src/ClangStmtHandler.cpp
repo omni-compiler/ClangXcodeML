@@ -341,15 +341,10 @@ DEFINE_STMTHANDLER(emitIntegerLiteral) {
 
 DEFINE_STMTHANDLER(CXXTemporaryObjectExprProc) {
   const auto resultT = src.typeTable.at(getType(node));
-  const auto name = llvm::cast<XcodeMl::ClassType>(resultT.get())->name();
-  auto children = findNodes(node, "*[position() > 1]", src.ctxt);
-  // ignore first child, which represents the result (class) type of
-  // the clang::CXXTemporaryObjectExpr
-  std::vector<CodeFragment> args;
-  for (auto child : children) {
-    args.push_back(w.walk(child, src));
-  }
-  return name + makeTokenNode("(") + join(",", args) + makeTokenNode(")");
+  const auto name = makeDecl(
+      resultT, CXXCodeGen::makeVoidNode(), src.typeTable, src.nnsTable);
+  const auto args = createNodes(node, "clangStmt", w, src);
+  return wrapWithXcodeMlIdentity(name) + wrapWithParen(join(",", args));
 }
 
 DEFINE_STMTHANDLER(CXXOperatorCallExprProc) {
