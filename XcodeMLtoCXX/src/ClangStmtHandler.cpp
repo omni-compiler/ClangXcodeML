@@ -201,8 +201,10 @@ DEFINE_STMTHANDLER(CXXCtorExprProc) {
 }
 
 DEFINE_STMTHANDLER(CXXDeleteExprProc) {
+  const auto is_array = isTrueProp(node, "is_array_form", false);
   const auto allocated = findFirst(node, "*", src.ctxt);
-  return makeTokenNode("delete") + w.walk(allocated, src);
+  return makeTokenNode(is_array ? "delete[]" : "delete")
+      + w.walk(allocated, src);
 }
 
 DEFINE_STMTHANDLER(CXXDynamicCastExprProc) {
@@ -212,7 +214,28 @@ DEFINE_STMTHANDLER(CXXDynamicCastExprProc) {
       + makeTokenNode(">") + wrapWithParen(expr);
 }
 
+DEFINE_STMTHANDLER(emitNewArrayExpr) {
+  const auto T = src.typeTable.at(getType(node));
+  const auto pointeeT =
+      llvm::cast<XcodeMl::Pointer>(T.get())->getPointee(src.typeTable);
+  const auto NewTypeId = pointeeT->makeDeclaration(
+      CXXCodeGen::makeVoidNode(), src.typeTable, src.nnsTable);
+  const auto type = wrapWithXcodeMlIdentity(NewTypeId);
+
+  const auto size = createNode(node, "clangStmt[1]", w, src);
+
+  const auto initNode = findFirst(node, "clangStmt[2]", src.ctxt);
+  const auto init = initNode
+      ? wrapWithParen(join(",", w.walkChildren(initNode, src)))
+      : CXXCodeGen::makeVoidNode();
+
+  return makeTokenNode("new") + type + wrapWithSquareBracket(size) + init;
+}
+
 DEFINE_STMTHANDLER(CXXNewExprProc) {
+  if (isTrueProp(node, "is_new_array", false)) {
+    return emitNewArrayExpr(node, w, src);
+  }
   const auto T = src.typeTable.at(getType(node));
   // FIXME: Support scalar type
   const auto pointeeT =
