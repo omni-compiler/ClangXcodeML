@@ -80,6 +80,11 @@ createNodes(xmlNodePtr node,
 }
 
 CodeFragment
+wrapWithXcodeMlIdentity(const CodeFragment &type) {
+  return makeTokenNode("__xcodeml_identity<") + type + makeTokenNode(">::t");
+}
+
+CodeFragment
 makeCompoundStmt(const CodeFragment &stmt) {
   // no STMTHANDLER returns a code fragment that ends with a semicolon.
   return wrapWithBrace(stmt + makeTokenNode(";"));
