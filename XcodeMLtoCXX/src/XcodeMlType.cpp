@@ -4,12 +4,14 @@
 #include <string>
 #include <vector>
 #include <libxml/tree.h>
+#include <libxml/xpath.h>
 #include "llvm/ADT/Optional.h"
 #include "StringTree.h"
 #include "XcodeMlNns.h"
 #include "XcodeMlType.h"
 #include "XcodeMlName.h"
 #include "XcodeMlTypeTable.h"
+#include "XcodeMlUtil.h"
 #include "llvm/Support/Casting.h"
 
 #include <iostream>
@@ -235,9 +237,10 @@ MemberPointer::classof(const Type *T) {
 CodeFragment
 MemberPointer::makeDeclaration(
     CodeFragment var, const TypeTable &typeTable, const NnsTable &nnsTable) {
-  const auto recT = typeTable.at(record);
-  const auto classT = llvm::cast<ClassType>(recT.get());
-  const auto innerDecl = classT->name() + makeTokenNode("::*") + var;
+  const auto classTypeName = makeDecl(
+      typeTable.at(record), CXXCodeGen::makeVoidNode(), typeTable, nnsTable);
+  const auto innerDecl =
+      wrapWithXcodeMlIdentity(classTypeName) + makeTokenNode("::*") + var;
 
   const auto pointeeT = typeTable.at(pointee);
   return makeDecl(pointeeT, innerDecl, typeTable, nnsTable);
