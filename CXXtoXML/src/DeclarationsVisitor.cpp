@@ -429,6 +429,7 @@ DeclarationsVisitor::PreVisitDecl(Decl *D) {
     if (ll != NoLanguageLinkage) {
       newProp("language_linkage", stringifyLanguageLinkage(ll));
     }
+    newBoolProp("has_external_storage", VD->hasExternalStorage());
     newBoolProp("has_init", VD->hasInit());
     newBoolProp("is_static_local", VD->isStaticLocal());
     newBoolProp("is_static_data_member", VD->isStaticDataMember());
