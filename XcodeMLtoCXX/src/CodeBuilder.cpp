@@ -812,12 +812,12 @@ readClangAST(
       analyzeNnsTable(nnsTableNode, ctxt),
       getSourceLanguage(rootNode, ctxt));
 
-  if (src.language == Language::CPlusPlus) {
-    ss << "template<typename T>"
-          "struct __xcodeml_identity { typedef T t; };";
-  }
-
   cxxgen::Stream out;
+  if (src.language == Language::CPlusPlus) {
+    out << "template<typename T>"
+           "struct __xcodeml_identity { typedef T t; };"
+        << CXXCodeGen::newline;
+  }
   xmlNodePtr decl = findFirst(rootNode, "/clangAST/clangDecl", src.ctxt);
   const auto program = ClangDeclHandler.walk(decl, ProgramBuilder, src);
   program->flush(out);
