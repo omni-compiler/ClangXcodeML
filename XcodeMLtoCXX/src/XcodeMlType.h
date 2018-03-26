@@ -501,6 +501,7 @@ TypeRef makeClassType(const DataTypeIdent &dtident,
     const ClassType::Symbols &members,
     const llvm::Optional<ClassType::TemplateArgList> &templateArgs);
 TypeRef makeCXXUnionType(const DataTypeIdent &ident,
+    const llvm::Optional<std::string> nnsident,
     const CodeFragment &unionName,
     const std::vector<ClassType::BaseClass> &bases,
     const ClassType::Symbols &members,
