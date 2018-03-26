@@ -62,6 +62,19 @@ makeNestedNameSpec(const std::string &ident, const SourceInfo &src) {
   return makeNestedNameSpec(*nns, src);
 }
 
+std::vector<XcodeMl::CodeFragment>
+createNodes(xmlNodePtr node,
+    const char *xpath,
+    const CodeBuilder &w,
+    SourceInfo &src) {
+  std::vector<XcodeMl::CodeFragment> vec;
+  const auto targetNodes = findNodes(node, xpath, src.ctxt);
+  for (auto &&targetNode : targetNodes) {
+    vec.push_back(w.walk(targetNode, src));
+  }
+  return vec;
+}
+
 /*!
  * \brief Arguments to be passed to CodeBuilder::Procedure.
  */
@@ -605,6 +618,11 @@ DEFINE_CB(ctorInitProc) {
   const auto expr = findFirst(node, "clangStmt[1]", src.ctxt);
   if (!expr) {
     return member + wrapWithParen(makeVoidNode());
+  }
+  if (auto constructExpr
+      = findFirst(node, "clangStmt[@class='CXXConstructExpr']", src.ctxt)) {
+    const auto constructExprParams = createNodes(constructExpr, "clangStmt", w, src);
+    return member + wrapWithParen(join(",", constructExprParams));
   }
   return member + makeTokenNode("(") + w.walk(expr, src) + makeTokenNode(")");
 }
