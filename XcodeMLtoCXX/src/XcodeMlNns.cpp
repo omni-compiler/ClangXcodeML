@@ -139,6 +139,12 @@ NamespaceNns::makeNestedNameSpec(const TypeTable &, const NnsTable &) const {
   return makeTokenNode(name) + makeTokenNode("::");
 }
 
+CodeFragment
+UnnamedNamespaceNns::makeNestedNameSpec(
+    const TypeTable &, const NnsTable &) const {
+  return CXXCodeGen::makeVoidNode();
+}
+
 OtherNns::OtherNns(const NnsIdent &ident) : Nns(NnsKind::Other, ident) {
 }
 
