@@ -4,14 +4,12 @@
 #include <string>
 #include <vector>
 #include <libxml/tree.h>
-#include <libxml/xpath.h>
 #include "llvm/ADT/Optional.h"
 #include "StringTree.h"
 #include "XcodeMlNns.h"
 #include "XcodeMlType.h"
 #include "XcodeMlName.h"
 #include "XcodeMlTypeTable.h"
-#include "XcodeMlUtil.h"
 #include "llvm/Support/Casting.h"
 
 #include <iostream>
