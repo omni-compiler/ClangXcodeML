@@ -606,10 +606,6 @@ DEFINE_CB(ctorInitProc) {
   if (!expr) {
     return member + wrapWithParen(makeVoidNode());
   }
-  const auto astClass = getPropOrNull(expr, "class");
-  if (astClass.hasValue() && (*astClass == "CXXConstructExpr")) {
-    return member + w.walk(expr, src);
-  }
   return member + makeTokenNode("(") + w.walk(expr, src) + makeTokenNode(")");
 }
 
