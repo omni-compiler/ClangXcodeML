@@ -224,12 +224,30 @@ DEFINE_STMTHANDLER(emitNewArrayExpr) {
 
   const auto size = createNode(node, "clangStmt[1]", w, src);
 
-  const auto initNode = findFirst(node, "clangStmt[2]", src.ctxt);
-  const auto init = initNode
-      ? wrapWithParen(join(",", w.walkChildren(initNode, src)))
-      : CXXCodeGen::makeVoidNode();
+  if (isTrueProp(node, "has_initializer", false)) {
+    const auto initNode = findFirst(node, "clangStmt[2]", src.ctxt);
+    const auto init = initNode
+        ? wrapWithParen(join(",", w.walkChildren(initNode, src)))
+        : CXXCodeGen::makeVoidNode();
 
-  return makeTokenNode("new") + type + wrapWithSquareBracket(size) + init;
+    const auto placementArgs =
+        createNodes(node, "clangStmt[position() > 2]", w, src);
+    const auto placementArgSequence = placementArgs.empty()
+        ? CXXCodeGen::makeVoidNode()
+        : wrapWithParen(join(",", placementArgs));
+
+    return makeTokenNode("new") + placementArgSequence + type
+        + wrapWithSquareBracket(size) + init;
+  } else {
+    const auto placementArgs =
+        createNodes(node, "clangStmt[position() > 1]", w, src);
+    const auto placementArgSequence = placementArgs.empty()
+        ? CXXCodeGen::makeVoidNode()
+        : wrapWithParen(join(",", placementArgs));
+
+    return makeTokenNode("new") + placementArgSequence + type
+        + wrapWithSquareBracket(size);
+  }
 }
 
 DEFINE_STMTHANDLER(CXXNewExprProc) {
@@ -249,11 +267,27 @@ DEFINE_STMTHANDLER(CXXNewExprProc) {
    * new (int);          // OK
    * new ((int));        // error
    */
-  const auto init = findFirst(node, "clangStmt", src.ctxt);
+  if (isTrueProp(node, "has_initializer", false)) {
+    // The first element is initializer
+    const auto init = findFirst(node, "clangStmt[1]", src.ctxt);
+    // Remaining elements are placement arguments
+    const auto placementArgs =
+        createNodes(node, "clangStmt[position() > 1]", w, src);
+    const auto placementArgSequence = placementArgs.empty()
+        ? CXXCodeGen::makeVoidNode()
+        : wrapWithParen(join(",", placementArgs));
 
-  return makeTokenNode("new") + wrapWithXcodeMlIdentity(NewTypeId)
-      + (init ? wrapWithParen(join(",", w.walkChildren(init, src)))
-              : CXXCodeGen::makeVoidNode());
+    return makeTokenNode("new") + placementArgSequence
+        + wrapWithXcodeMlIdentity(NewTypeId)
+        + wrapWithParen(join(",", w.walkChildren(init, src)));
+  } else {
+    const auto placementArgs = createNodes(node, "clangStmt", w, src);
+    const auto placementArgSequence = placementArgs.empty()
+        ? CXXCodeGen::makeVoidNode()
+        : wrapWithParen(join(",", placementArgs));
+    return makeTokenNode("new") + placementArgSequence
+        + wrapWithXcodeMlIdentity(NewTypeId);
+  }
 }
 
 DEFINE_STMTHANDLER(CXXNullPtrLiteralExprProc) {
