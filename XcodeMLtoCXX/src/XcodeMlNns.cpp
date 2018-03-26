@@ -187,6 +187,11 @@ makeNamespaceNns(const NnsIdent &nident, const std::string &name) {
 }
 
 NnsRef
+makeUnnamedNamespaceNns(const NnsIdent &nident, const NnsIdent &parent) {
+  return std::make_shared<UnnamedNamespaceNns>(nident, parent);
+}
+
+NnsRef
 makeNamespaceNns(
     const NnsIdent &nident, const NnsIdent &parent, const std::string &name) {
   return std::make_shared<NamespaceNns>(nident, name, parent);
