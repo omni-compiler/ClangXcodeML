@@ -59,7 +59,7 @@ getUnqualIdFromIdNode(xmlNodePtr idNode, xmlXPathContextPtr ctxt) {
   xmlNodePtr nameNode = findFirst(idNode, "name", ctxt);
   if (!nameNode) {
     return std::make_shared<XcodeMl::UnnamedId>();
-    //throw std::domain_error("name node not found");
+    // throw std::domain_error("name node not found");
   }
   return getUnqualIdFromNameNode(nameNode);
 }
@@ -182,6 +182,12 @@ makeFunctionDeclHead(xmlNodePtr node,
                   src,
                   emitNameSpec && xmlHasProp(node, BAD_CAST "parent_class"));
   return acc;
+}
+
+XcodeMl::CodeFragment
+wrapWithXcodeMlIdentity(const XcodeMl::CodeFragment &type) {
+  using CXXCodeGen::makeTokenNode;
+  return makeTokenNode("__xcodeml_identity<") + type + makeTokenNode(">::t");
 }
 
 bool
