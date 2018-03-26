@@ -201,8 +201,10 @@ DEFINE_STMTHANDLER(CXXCtorExprProc) {
 }
 
 DEFINE_STMTHANDLER(CXXDeleteExprProc) {
+  const auto is_array = isTrueProp(node, "is_array_form", false);
   const auto allocated = findFirst(node, "*", src.ctxt);
-  return makeTokenNode("delete") + w.walk(allocated, src);
+  return makeTokenNode(is_array ? "delete[]" : "delete")
+      + w.walk(allocated, src);
 }
 
 DEFINE_STMTHANDLER(CXXDynamicCastExprProc) {
