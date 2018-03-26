@@ -220,9 +220,11 @@ DEFINE_STMTHANDLER(CXXCtorExprProc) {
 }
 
 DEFINE_STMTHANDLER(CXXDeleteExprProc) {
+  const auto is_global = isTrueProp(node, "is_global_delete", false);
   const auto is_array = isTrueProp(node, "is_array_form", false);
   const auto allocated = findFirst(node, "*", src.ctxt);
-  return makeTokenNode(is_array ? "delete[]" : "delete")
+  return (is_global ? makeTokenNode("::") : CXXCodeGen::makeVoidNode())
+      + makeTokenNode(is_array ? "delete[]" : "delete")
       + w.walk(allocated, src);
 }
 
@@ -234,6 +236,7 @@ DEFINE_STMTHANDLER(CXXDynamicCastExprProc) {
 }
 
 DEFINE_STMTHANDLER(emitNewArrayExpr) {
+  const auto is_global = isTrueProp(node, "is_global_new", false);
   const auto T = src.typeTable.at(getType(node));
   const auto pointeeT =
       llvm::cast<XcodeMl::Pointer>(T.get())->getPointee(src.typeTable);
@@ -255,7 +258,8 @@ DEFINE_STMTHANDLER(emitNewArrayExpr) {
         ? CXXCodeGen::makeVoidNode()
         : wrapWithParen(join(",", placementArgs));
 
-    return makeTokenNode("new") + placementArgSequence + type
+    return (is_global ? makeTokenNode("::") : CXXCodeGen::makeVoidNode())
+        + makeTokenNode("new") + placementArgSequence + type
         + wrapWithSquareBracket(size) + init;
   } else {
     const auto placementArgs =
@@ -264,7 +268,8 @@ DEFINE_STMTHANDLER(emitNewArrayExpr) {
         ? CXXCodeGen::makeVoidNode()
         : wrapWithParen(join(",", placementArgs));
 
-    return makeTokenNode("new") + placementArgSequence + type
+    return (is_global ? makeTokenNode("::") : CXXCodeGen::makeVoidNode())
+        + makeTokenNode("new") + placementArgSequence + type
         + wrapWithSquareBracket(size);
   }
 }
@@ -273,6 +278,8 @@ DEFINE_STMTHANDLER(CXXNewExprProc) {
   if (isTrueProp(node, "is_new_array", false)) {
     return emitNewArrayExpr(node, w, src);
   }
+
+  const auto is_global = isTrueProp(node, "is_global_new", false);
   const auto T = src.typeTable.at(getType(node));
   // FIXME: Support scalar type
   const auto pointeeT =
@@ -296,7 +303,8 @@ DEFINE_STMTHANDLER(CXXNewExprProc) {
         ? CXXCodeGen::makeVoidNode()
         : wrapWithParen(join(",", placementArgs));
 
-    return makeTokenNode("new") + placementArgSequence
+    return (is_global ? makeTokenNode("::") : CXXCodeGen::makeVoidNode())
+        + makeTokenNode("new") + placementArgSequence
         + wrapWithXcodeMlIdentity(NewTypeId)
         + wrapWithParen(join(",", w.walkChildren(init, src)));
   } else {
@@ -304,7 +312,8 @@ DEFINE_STMTHANDLER(CXXNewExprProc) {
     const auto placementArgSequence = placementArgs.empty()
         ? CXXCodeGen::makeVoidNode()
         : wrapWithParen(join(",", placementArgs));
-    return makeTokenNode("new") + placementArgSequence
+    return (is_global ? makeTokenNode("::") : CXXCodeGen::makeVoidNode())
+        + makeTokenNode("new") + placementArgSequence
         + wrapWithXcodeMlIdentity(NewTypeId);
   }
 }
