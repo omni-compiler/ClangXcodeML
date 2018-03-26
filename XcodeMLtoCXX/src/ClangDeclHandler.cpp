@@ -499,7 +499,7 @@ DEFINE_DECLHANDLER(UsingDirectiveProc) {
 CodeFragment
 makeSpecifier(xmlNodePtr node, bool is_in_class_scope) {
   const std::vector<std::tuple<std::string, std::string>> specifiers = {
-      std::make_tuple("is_extern", "extern"),
+      std::make_tuple("has_external_storage", "extern"),
       std::make_tuple("is_register", "register"),
       std::make_tuple("is_static_local", "static"),
       std::make_tuple("is_thread_local", "thread_local"),
