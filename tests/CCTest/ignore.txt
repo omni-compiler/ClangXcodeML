@@ -1,10 +1,4 @@
 guiding_decls_complex_io
-scope01
-templ01
-templ03
-templ04
-templ05
-templ06
 class049
 no_name_union
 union03_mod
