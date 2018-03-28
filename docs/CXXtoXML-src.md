@@ -19,6 +19,8 @@ RecursiveASTvisitor.h を利用したクラスを実装している部分。
 RAVBidirBridge をつかってclass XcodeMlVisitorBase との間で
 双方向に橋渡しをしている。
 
+## XcodeMlNameElem.h, XcodeMlNameElem.cpp
+
 ## DeclarationsVisitor.h, DeclarationsVisitor.cpp
 
 clang の AST からそれに近い形式のXML要素を生成する部分。
