@@ -28,12 +28,12 @@ fi
 
 echo -n "${target}.src.cpp,"
 
-make "${target}.xcodeml" >&2 || abort 'CXXtoXcodeML failed'
+make "${target}.xcodeml" >&2 || abort 'CXXtoXML failed'
 make "${target}.dst.cpp" >&2 || abort 'XcodeMLtoCXX failed'
 
 echo -n 'OK,' # CXX -> XML conversion was correctly done
 
-clang++ ${cxxflags_for_dst} -o "${target}.out" "${target}.dst.cpp" || abort 'Compilation failed'
+clang++ ${cxxflags_for_dst} -o "${target}.out" "${target}.dst.cpp" || abort 'Compile Error'
 
 echo -n 'OK, ' # XML -> C++ conversion was correctly done
 
