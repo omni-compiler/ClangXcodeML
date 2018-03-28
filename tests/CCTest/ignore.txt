@@ -1,4 +1,6 @@
 guiding_decls_complex_io
+templ04
+templ05
 class049
 no_name_union
 union03_mod
