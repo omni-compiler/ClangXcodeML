@@ -39,6 +39,10 @@ check: $(CXXDECOMPTESTOBJECTS)
 clean:
 	rm -rf *.xml *.dst.cpp *.xcodeml *.out
 
+distclean:
+	make clean; \
+	rm -rf *.src.cpp *.h result.csv err.log
+
 clangxml: $(CXXCLANGXMLOBJECTS)
 
 build:
