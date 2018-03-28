@@ -36,10 +36,23 @@ XcodeML における name 要素はデータ型に関する情報を必ずしも
 SymbolMap は C/C++ プログラムを出力する際に変数の型情報を得るのに使われて
 いる。
 
+
+## Util.h
+
+便利なテンプレートを集めたヘッダーファイル。
+
 ## XcodeMlNns.h, XcodeMlNns.cpp
 
 XcoedMl::Nnsクラスを定義している部分。
 XcodeMl::Nnsは、(XcodeML/C++の定義する)NNSを表現する。
+
+## XcodeMlName.h, XcodeMlName.cpp
+
+XcodeMl::Nameクラスを定義している部分。XcodeMl::Nameは、識別子、変換関数ID、コンストラクター名など、C++が定義する各種の名前を表現する。
+
+## XcodeMlOperator.h, XcodeMlOperator.cpp
+
+XcodeMLが定義する演算子名とC++の演算子記号の対応関係を取り扱う部分。
 
 ## XcodeMlType.h, XcodeMlType.cpp
 
@@ -52,6 +65,10 @@ XcodeML で定義されるデータ型を表現する。
 XcodeMl::Environment クラスを定義している部分。
 XcodeMl::Environment は、データ型識別名と実際のデータ型との
 対応関係に関する情報を保存している。
+
+## XcodeMlUtil.h, XcodeMlUtil.cpp
+
+XcodeMLの定義する構造に従ったXMLを解析するために便利な関数を集めたもの。
 
 ## XMLWalker.h
 
@@ -95,6 +112,26 @@ C/C++プログラムにおける宣言(グローバル変数宣言、クラス�
 ## ClangClassHandler.h, ClangClassHandler.cpp
 
 入力されたXML文書に含まれる\<clangStmt\>, \<clangDecl\>要素を解析して
+C/C++プログラムを出力する部分。
+
+## ClangDeclHandler.h, ClangDeclHandler.cpp
+
+入力されたXML文書に含まれる\<clangDecl\>要素を解析して
+C/C++プログラムを出力する部分。
+
+## ClangNestedNameSpecHandler.h, ClangNestedNameSpecHandler.cpp
+
+入力されたXML文書に含まれる\<clangNestedNameSpecifier\>要素を解析して
+C/C++プログラムを出力する部分。
+
+## ClangStmtHandler.h, ClangStmtHandler.cpp
+
+入力されたXML文書に含まれる\<clangStmt\>要素を解析して
+C/C++プログラムを出力する部分。
+
+## ClangTypeLocHandler.h, ClangTypeLocHandler.cpp
+
+入力されたXML文書に含まれる\<clangTypeLoc\>要素を解析して
 C/C++プログラムを出力する部分。
 
 ## CodeBuilder.h, CodeBuilder.cpp
