@@ -37,7 +37,7 @@ check: $(CXXDECOMPTESTOBJECTS)
 	done
 
 clean:
-	rm -rf *.xml *.dst.cpp *.xcodeml
+	rm -rf *.xml *.dst.cpp *.xcodeml *.out
 
 clangxml: $(CXXCLANGXMLOBJECTS)
 
