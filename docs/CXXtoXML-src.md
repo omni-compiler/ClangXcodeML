@@ -3,20 +3,20 @@
 ## XMLVisitorBase.h, XMLVisitorBase.cpp
 
 DeclarationsVisitor.cpp, DeclarationsVisitor.h の実装の基底クラスである
-class XcodeMlVisitorBase を準備している部分。
+class XMLVisitorBase を準備している部分。
 意味的にはこのさらに上位に CRTPパターンで書かれた
 RecursiveASTvisitor クラスを基底に持つのだが、
-RecursiveASTvisitorクラスは大量のメソッドを持つため、
+RecursiveASTVisitorクラスは大量のメソッドを持つため、
 本当にDeclarationsVisitorの基底クラスとして実装すると
 コンパイル時間が何倍にもなるので、
 pimpl イディオム相当の class RAVBidirBridge をつかって、
-下記のXcodeMlRAV のほうに RecursiveASTvisitor の実装の部分を隠蔽している。
+下記のXMLRAV のほうに RecursiveASTvisitor の実装の部分を隠蔽している。
 
 ## XMLRAV.h, XMLRAV.cpp
 
 clang の libtooling ライブラリ内の
 RecursiveASTvisitor.h を利用したクラスを実装している部分。
-RAVBidirBridge をつかってclass XcodeMlVisitorBase との間で
+RAVBidirBridge をつかってclass XMLVisitorBase との間で
 双方向に橋渡しをしている。
 
 ## XcodeMlNameElem.h, XcodeMlNameElem.cpp
@@ -39,7 +39,7 @@ XcodeML のデータ型識別名との対応関係を管理する部分。
 
 ## InheritanceInfo.h, InheritanceInfo.cpp
 
-C++のクラスの継承関係の情報を扱う部分。
+C++のクラスの派生関係・継承関係の情報を扱う部分。
 
 ## NnsTableInfo.h, NnsTableInfo.cpp
 
