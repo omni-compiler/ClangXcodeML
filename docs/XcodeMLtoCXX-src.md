@@ -18,13 +18,13 @@ CXXCodeGen::Streamは、C/C++プログラムを出力するのに便利なスト
 ## StringTree.h, StringTree.cpp
 
 CXXCodeGen::StringTreeクラスを定義している部分。
-CXXCodeGen::StringTreeは、連接が高速にできる文字列のクラスである。
+CXXCodeGen::StringTreeは、文字列の高速な連接機能を提供する。
 
-## SourceInfo.h
+## SourceInfo.h, SourceInfo.cpp
 
-SourceInfo クラスを定義しているヘッダーファイル。
-入力された XcodeML の構造すべてにアクセスできる XPath コンテキスト情報と、
-そこから解析された XcodeML::Environment 情報(後述)・SymbolMap 情報(後述) を
+SourceInfo クラスを定義している部分。
+入力された XML の構造すべてにアクセスできる XPath コンテキスト情報と、
+そこから解析された XcodeMl::TypeTable 情報(後述)・XcodeMl::NnsTable 情報(後述) を
 束ねたデータ構造である。
 
 ## Util.h
@@ -47,13 +47,13 @@ XcodeMLが定義する演算子名とC++の演算子記号の対応関係を取�
 ## XcodeMlType.h, XcodeMlType.cpp
 
 XcodeMl::Type クラスを定義している部分。
-XcodeMl::Type は、後述する XcodeMl::Environment と合わせて
+XcodeMl::Type は、後述する XcodeMl::TypeTable と合わせて
 XcodeML で定義されるデータ型を表現する。
 
-## XcodeMlEnvironment.h, XcodeMlEnvironment.cpp
+## XcodeMlTypeTable.h, XcodeMlTypeTable.cpp
 
-XcodeMl::Environment クラスを定義している部分。
-XcodeMl::Environment は、データ型識別名と実際のデータ型との
+XcodeMl::TypeTable クラスを定義している部分。
+XcodeMl::TypeTable は、データ型識別名と実際のデータ型との
 対応関係に関する情報を保存している。
 
 ## XcodeMlUtil.h, XcodeMlUtil.cpp
@@ -66,26 +66,26 @@ XMLWalker クラステンプレートを定義しているヘッダーファイ�
 XML の各要素を処理する際、
 要素の種類に合わせて別々の処理を行うことが必要になる場合がある。
 XMLWalker はこれを実現する。
-後述する NnsAnalyzer、TypeAnalyzer、CodeBuilder、ClangClassHandler で
-XcodeML の各部分を処理するために使われている。
+後述する NnsAnalyzer、TypeAnalyzer、CodeBuilder で
+XML の各部分を処理するために使われている。
 
 ## AttrProc.h
 
 AttrProc クラステンプレートを定義しているヘッダーファイル。
 AttrProc を使うことで、与えられた XML の各要素に対し、
 その属性(XML attribute)に応じた柔軟な処理を行うことができる。
-後述する SymbolAnalyzer、SymbolBuilder で、
-XcodeML の\<globalSymbols\>部の要素を処理する
-ために使われている。
+後述する ClangDeclHandler、ClangNestedNameSpecHandler、ClangStmtHandler、
+ClangTypeLocHandlerで、
+XMLの各要素を処理する ために使われている。
 
 ## TypeAnalyzer.h, TypeAnalyzer.cpp
 
-XcodeML の\<typeTable\>部を解析して
+XML の\<xcodemlTypeTable\>部を解析して
 データ型識別名と実際のデータ型との対応関係を管理する部分。
 
 ## NnsAnalyzer.h, NnsAnalyzer.cpp
 
-XcodeML の\<nnsTable\>部を解析して
+XML の\<xcodemlNnsTable\>部を解析して
 NNS識別名と実際のNNSとの対応関係を管理する部分。
 
 ## ClangDeclHandler.h, ClangDeclHandler.cpp
@@ -110,12 +110,12 @@ C/C++プログラムを出力する部分。
 
 ## CodeBuilder.h, CodeBuilder.cpp
 
-XcodeML の\<globalDeclarations\>部を解析して
-C/C++プログラムを出力する部分。
+XML の各要素を解析して
+その要素名に応じて適切な C/C++プログラムを出力する部分。
 
 ## XcodeMLtoCXX.cpp
 
 main 関数部分。
 コマンドライン引数として与えられたファイル名が表す
-XcodeML 文書を読み、
-上記各 Walker を用いて C/C++プログラムを出力する。
+XML 文書を読み、
+上記各 Walker、Handler を用いて C/C++プログラムを出力する。
