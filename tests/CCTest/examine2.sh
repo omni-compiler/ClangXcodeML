@@ -26,7 +26,7 @@ if grep -sq \^${target}\$ ignore.txt ; then
   exit 0
 fi
 
-echo -n "${target}.cc,"
+echo -n "${target}.src.cpp,"
 
 make "${target}.xcodeml" >&2 || abort 'CXXtoXcodeML failed'
 make "${target}.dst.cpp" >&2 || abort 'XcodeMLtoCXX failed'
