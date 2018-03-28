@@ -27,16 +27,6 @@ SourceInfo クラスを定義しているヘッダーファイル。
 そこから解析された XcodeML::Environment 情報(後述)・SymbolMap 情報(後述) を
 束ねたデータ構造である。
 
-## Symbol.h
-
-SymbolMap 型を定義しているヘッダーファイル。
-SymbolMap は、XcodeML の表す抽象構文木のある位置から見える名前と、
-その名前が表す変数の型との対応関係に関する情報を保存している。
-XcodeML における name 要素はデータ型に関する情報を必ずしも持たないため、
-SymbolMap は C/C++ プログラムを出力する際に変数の型情報を得るのに使われて
-いる。
-
-
 ## Util.h
 
 便利なテンプレートを集めたヘッダーファイル。
@@ -97,22 +87,6 @@ XcodeML の\<typeTable\>部を解析して
 
 XcodeML の\<nnsTable\>部を解析して
 NNS識別名と実際のNNSとの対応関係を管理する部分。
-
-## SymbolAnalyzer.h, SymbolAnalyzer.cpp
-
-XcodeML の\<globalSymbols\>, \<symbols\>部を解析して
-プログラム中の名前とそのデータ型との対応関係を管理する部分。
-
-## SymbolBuilder.h, SymbolBuilder.cpp
-
-XcodeML の\<globalSymbols\>, \<symbols\>部を解析して
-C/C++プログラムにおける宣言(グローバル変数宣言、クラス・構造体定義など)部を
-出力する部分。
-
-## ClangClassHandler.h, ClangClassHandler.cpp
-
-入力されたXML文書に含まれる\<clangStmt\>, \<clangDecl\>要素を解析して
-C/C++プログラムを出力する部分。
 
 ## ClangDeclHandler.h, ClangDeclHandler.cpp
 
