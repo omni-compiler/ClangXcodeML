@@ -97,17 +97,17 @@ C/C++プログラムを出力する部分。
 
 ## ClangNestedNameSpecHandler.h, ClangNestedNameSpecHandler.cpp
 
-入力されたXML文書に含まれる\<clangNestedNameSpecifier\>要素を解析して
+入力されたXML文書に含まれる`<clangNestedNameSpecifier>`要素を解析して
 C/C++プログラムを出力する部分。
 
 ## ClangStmtHandler.h, ClangStmtHandler.cpp
 
-入力されたXML文書に含まれる\<clangStmt\>要素を解析して
+入力されたXML文書に含まれる`<clangStmt>`要素を解析して
 C/C++プログラムを出力する部分。
 
 ## ClangTypeLocHandler.h, ClangTypeLocHandler.cpp
 
-入力されたXML文書に含まれる\<clangTypeLoc\>要素を解析して
+入力されたXML文書に含まれる`<clangTypeLoc>`要素を解析して
 C/C++プログラムを出力する部分。
 
 ## CodeBuilder.h, CodeBuilder.cpp
