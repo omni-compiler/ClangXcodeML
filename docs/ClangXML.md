@@ -550,6 +550,18 @@ Clang の `clang::Stmt` クラスから派生したクラスのデータを表�
 逆変換では使用しない。
 
 
+## `CStyleCastExpr`: キャスト形式による明示的型変換
+
+<!-- TODO: not written -->
+
+## `CXXConstCastExpr`: `const_cast`式
+
+<!-- TODO: not written -->
+
+## `CXXDynamicCastExpr`: `dynamic_cast`式
+
+<!-- TODO: not written -->
+
 ## `CXXMemberCallExpr`: メンバー関数呼び出し
 
 `<clangStmt class="CXXMemberCallExpr"`  
@@ -575,6 +587,14 @@ Clang の `clang::Stmt` クラスから派生したクラスのデータを表�
 この要素は0個以上ある。
 `clangStmt`要素の順序と実引数の順序は一致しなくてはならない。
 
+
+## `CXXStaticCastExpr`: `static_cast`式
+
+<!-- TODO: not written -->
+
+## `CXXReinterpretCastExpr`: `reinterpret_cast`式
+
+<!-- TODO: not written -->
 
 ## `CXXThisExpr`: `this`ポインター
 
