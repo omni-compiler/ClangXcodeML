@@ -851,7 +851,9 @@ _子要素_ ...
 
 `class`属性の値は文字列で、型の種類を表す。
 
-*型の種類*は、`clang::Type::TypeClass`を表す文字列である。
+*型の種類*は、
+[`clang::Type::TypeClass`](https://clang.llvm.org/doxygen/classclang_1_1Type.html)
+を表す文字列である。
 以下に主要な型の種類を挙げる。
 
 | 型の種類                 | `clang::Type::TypeClass`の値 | 意味                                               |
