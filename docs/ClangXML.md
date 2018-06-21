@@ -95,14 +95,28 @@ _子要素_ ...
 を表す文字列である。
 以下に主要な宣言の種類を挙げる。
 
-| 宣言の種類          | `clang::Decl::Kind`の値 | 意味                 |
-|---------------------|-------------------------|----------------------|
-| `"CXXConstructor"`  | `CXXConstructor`        | コンストラクター宣言 |
-| `"Function"`        | `Function`              | 関数宣言             |
-| `"LinkageSpec"`     | `LinkageSpec`           | リンケージ指定       |
-| `"ParmVar"`         | `ParmVar`               | 仮引数               |
-| `"TranslationUnit"` | `TranslationUnit`       | 翻訳単位             |
-| `"Typedef"`         | `Typedef`               | `typedef`宣言        |
+| 宣言の種類                             | `clang::Decl::Kind`の値              | 意味                             |
+|----------------------------------------|--------------------------------------|----------------------------------|
+| `"AccessSpec"`                         | `AccessSpec`                         | アクセス指定                     |
+| `"ClassTemplate"`                      | `ClassTemplate`                      | クラステンプレート宣言           |
+| `"ClassTemplatePartialSpecialization"` | `ClassTemplatePartialSpecialization` | クラステンプレートの部分的特殊化 |
+| `"ClassTemplateSpecialization"`        | `ClassTemplateSpecialization`        | クラステンプレートの特殊化       |
+| `"CXXConstructor"`                     | `CXXConstructor`                     | コンストラクター宣言             |
+| `"CXXConversion"`                      | `CXXConversion`                      | 型変換関数宣言                   |
+| `"CXXDestructor"`                      | `CXXDestructor`                      | デストラクター宣言               |
+| `"CXXMethod"`                          | `CXXMethod`                          | メンバー関数宣言                 |
+| `"CXXRecord"`                          | `CXXRecord`                          | クラス宣言                       |
+| `"Field"`                              | `Field`                              | データメンバー宣言               |
+| `"Friend"`                             | `Friend`                             | `friend`宣言                     |
+| `"Function"`                           | `Function`                           | 関数宣言                         |
+| `"FunctionTemplate"`                   | `"FunctionTemplate"`                 | 関数テンプレート宣言             |
+| `"LinkageSpec"`                        | `LinkageSpec`                        | リンケージ指定                   |
+| `"ParmVar"`                            | `ParmVar`                            | 仮引数                           |
+| `"TemplateTypeParm"`                   | `TemplateTypeParm`                   | テンプレート型引数               |
+| `"TranslationUnit"`                    | `TranslationUnit`                    | 翻訳単位                         |
+| `"TypeAlias"`                          | `TypeAlias`                          | エイリアステンプレート宣言       |
+| `"Typedef"`                            | `Typedef`                            | `typedef`宣言                    |
+| `"Var"`                                | `Var`                                |                                  |
 
 ## `CXXConstructor`: コンストラクター宣言
 
