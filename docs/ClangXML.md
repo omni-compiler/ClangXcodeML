@@ -118,6 +118,22 @@ _子要素_ ...
 | `"Typedef"`                            | `Typedef`                            | `typedef`宣言                    |
 | `"Var"`                                | `Var`                                |                                  |
 
+## `AccessSpec`: アクセス指定
+
+<!-- TODO: not written -->
+
+## `ClassTemplate`: クラステンプレート宣言
+
+<!-- TODO: not written -->
+
+## `ClassTemplatePartialSpecialization`: クラステンプレートの部分的特殊化
+
+<!-- TODO: not written -->
+
+## `ClassTemplateSpecialization`: クラステンプレートの特殊化
+
+<!-- TODO: not written -->
+
 ## `CXXConstructor`: コンストラクター宣言
 
 `<clangDecl class="CXXConstructor"`  
@@ -150,6 +166,30 @@ clangStmt子要素は関数本体を表現する。
 この要素は、オプションで`is_implicit`属性を利用できる。
 `is_implicit`属性の値は`"true"`, `"false"`, `"1"`, `"0"`のいずれかであり、
 `"true"`または`"1"`のとき関数が暗黙に定義されたことを表す。
+
+## `CXXConversion`: 型変換関数宣言
+
+<!-- TODO: not written -->
+
+## `CXXDestructor`: デストラクター宣言
+
+<!-- TODO: not written -->
+
+## `CXXMethod`: メンバー関数宣言
+
+<!-- TODO: not written -->
+
+## `CXXRecord`: クラス宣言
+
+<!-- TODO: not written -->
+
+## `Field`: データメンバー宣言
+
+<!-- TODO: not written -->
+
+## `Friend`: `friend`宣言
+
+<!-- TODO: not written -->
 
 ## `Function`: 関数宣言
 
@@ -185,9 +225,13 @@ clangStmt子要素は関数本体を表現する。
 `is_implicit`属性の値は`"true"`, `"false"`, `"1"`, `"0"`のいずれかであり、
 `"true"`または`"1"`のとき関数が暗黙に定義されたことを表す。
 
+## `FunctionTemplate`: 関数テンプレート宣言
+
+<!-- TODO: not written -->
 
 ## `LinkageSpec`: リンケージ指定
 
+<!-- TODO: not written -->
 
 ## `ParmVar`: 仮引数
 
@@ -218,6 +262,10 @@ clangStmt子要素は関数本体を表現する。
 この要素は省略されることがある。
 そのとき、デフォルト実引数は指定されていない。
 
+## `TemplateTypeParm`: テンプレート型引数
+
+<!-- TODO: not written -->
+
 ## `TranslationUnit`: 翻訳単位
 
 `<clangDecl class="TranslationUnit"`  
@@ -226,6 +274,9 @@ clangStmt子要素は関数本体を表現する。
   _`clangDecl`要素_ ...  
 `>`  
 
+## `TypeAlias`: エイリアステンプレート宣言
+
+<!-- TODO: not written -->
 
 ## `Typedef`: `typedef`宣言
 
@@ -246,6 +297,10 @@ clangStmt子要素は関数本体を表現する。
 この要素は必須属性として`xcodemlTypedefType`属性をもつ。
 `xcodemlTypedefType`属性の値はデータ型識別名であり、
 `typedef`名が表す型を表現する。
+
+## `Var`: 変数宣言
+
+<!-- TODO: not written -->
 
 # `clangStmt`要素
 
