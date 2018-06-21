@@ -854,10 +854,17 @@ _子要素_ ...
 *型の種類*は、`clang::Type::TypeClass`を表す文字列である。
 以下に主要な型の種類を挙げる。
 
-| 型の種類        | `clang::Type::TypeClass`の値 | 意味   |
-|-----------------|------------------------------|--------|
-| "Builtin"       | `Builtin`                    | 普遍型 |
-| "FunctionProto" | `FunctionProto`              | 関数型 |
+| 型の種類                 | `clang::Type::TypeClass`の値 | 意味                                               |
+|--------------------------|------------------------------|----------------------------------------------------|
+| "Builtin"                | `Builtin`                    | 普遍型                                             |
+| "FunctionProto"          | `FunctionProto`              | 関数型                                             |
+| "Pointer"                | `Pointer`                    | ポインター型                                       |
+| "Record"                 | `Record`                     | Cの構造体型およびC++のクラス型                     |
+| "Paren"                  | `Paren`                      | `clang::ParenType` (括弧に包まれた型情報)          |
+| "Typedef"                | `Typedef`                    | `typedef`された型                                  |
+| "TemplateTypeParm"       | `TemplateTypeParm`           | テンプレート型引数                                 |
+| "TemplateSpecialization" | `TemplateSpecialization`     | テンプレートの特殊化により得られる型               |
+| "Elaborated"             | `Elaborated`                 | 修飾名により指定された型または複雑型指定子を持つ型 |
 
 ## `Builtin`: 普遍型
 
