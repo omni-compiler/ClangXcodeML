@@ -623,7 +623,35 @@ Clang の `clang::Stmt` クラスから派生したクラスのデータを表�
 
 ## `CXXStaticCastExpr`: `static_cast`式
 
-<!-- TODO: not written -->
+`<clangStmt class="CXXStaticCastExpr"`  
+  `clangCastKind` `=` _型変換の種類_  
+  `xcodemlType` `=` _データ型識別名_  
+`>`  
+  _`clangTypeLoc`要素_  
+  _`clangStmt`要素_  
+`</clangStmt>`
+
+必須属性なし
+
+オプショナル：
+
+* `clangCastKind`属性
+* `xcodemlType`属性
+
+`CXXStaticCastExpr`は`static_cast`式を表現する。
+
+第1子要素は`clangTypeLoc`要素で、変換先の型を表現する。
+
+第2子要素は`clangStmt`要素で、変換対象の式を表現する。
+
+この要素は、オプションで`clangCastKind`属性、`xcodemlType`属性を利用できる。
+
+`clangCastKind`属性の値は文字列で、型変換の種類を表す。
+逆変換では使用しない。
+
+`xcodemlType`属性の値はデータ型識別名で、型変換後のデータ型を表す。
+逆変換では使用しない。
+
 
 ## `CXXReinterpretCastExpr`: `reinterpret_cast`式
 
