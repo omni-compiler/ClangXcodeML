@@ -215,7 +215,7 @@ clangStmt子要素は関数本体を表現する。
 第2子要素は`clangDeclarationNameInfo`要素である。逆変換では使用しない。
 
 第3子要素は`clangTypeLoc`要素で、仮引数リストを表現する。
-この要素の`class`属性の値は`FunctionProto`である。
+次の小節で説明する。
 
 第4子要素は`clangStmt`要素で、関数本体を表現する。
 この要素は省略されることがある。このとき関数本体はない。
@@ -224,6 +224,39 @@ clangStmt子要素は関数本体を表現する。
 この要素は、オプションで`is_implicit`属性を利用できる。
 `is_implicit`属性の値は`"true"`, `"false"`, `"1"`, `"0"`のいずれかであり、
 `"true"`または`"1"`のとき関数が暗黙に定義されたことを表す。
+
+
+### `clangTypeLoc`要素 (`clangDecl[@class="Function"]`)
+
+`<clangTypeLoc`  
+  `class` `=` `"FunctionProto"`  
+  `type` `=` _データ型識別名_  
+`>`  
+  _`clangTypeLoc`要素_  
+  _`clangDecl`要素..._  
+`</clangTypeLoc>`  
+
+必須属性:
+
+* `type`属性
+
+オプショナル:
+
+* `class`属性
+
+`Function`を表す`clangDecl`要素は、第3子要素として`clangTypeLoc`要素をもつ。
+
+`clangTypeLoc`要素の第1子要素は`clangTypeLoc`要素で、関数の返り値型を表現する。
+
+第2子要素以降の要素は`clangDecl`要素で、関数の仮引数リストを表現する。
+`clangDecl`要素の順序は仮引数の順序と一致していなくてはならない。
+
+この要素は、必須属性として`type`属性をもつ。
+その値はデータ型識別名で、定義または宣言される関数の型を表す。
+
+この要素は、オプションで`class`属性を利用できる。
+その値は`"FunctionProto"`である。
+
 
 ## `FunctionTemplate`: 関数テンプレート宣言
 
