@@ -981,23 +981,22 @@ Clang の `clang::Stmt` クラスから派生したクラスのデータを表�
 _子要素_ ...  
 `</clangTypeLoc>`  
 
-必須:
-
-* `type`属性
+必須属性なし
 
 オプショナル:
 
+* `type`属性
 * `class`属性
 
-`clangTypeLoc`要素は、C/C++のソースコードに明示的に書かれた型情報を表現する。
+`clangTypeLoc`要素は、
+Clang の `clang::TypeLoc` のデータを表す要素であり、
+C/C++のソースコードに明示的に書かれた型情報を表現する。
 
-この要素は、必須属性として`type`属性をもつ。
-
-`type`属性の値は文字列で、対応するデータ型識別名を表す。
-
-この要素は、オプションで`class`属性をもつ。
+この要素は、オプションで`class`属性、`type`属性を指定できる。
 
 `class`属性の値は文字列で、型の種類を表す。
+
+`type`属性の値は文字列で、対応するデータ型識別名を表す。
 
 *型の種類*は、
 [`clang::Type::TypeClass`](https://clang.llvm.org/doxygen/classclang_1_1Type.html)
