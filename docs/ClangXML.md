@@ -116,7 +116,7 @@ _子要素_ ...
 | `"TranslationUnit"`                    | `TranslationUnit`                    | 翻訳単位                         |
 | `"TypeAlias"`                          | `TypeAlias`                          | エイリアステンプレート宣言       |
 | `"Typedef"`                            | `Typedef`                            | `typedef`宣言                    |
-| `"Var"`                                | `Var`                                |                                  |
+| `"Var"`                                | `Var`                                | 変数宣言                         |
 
 ## `AccessSpec`: アクセス指定
 
