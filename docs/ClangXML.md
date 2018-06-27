@@ -189,7 +189,28 @@ clangStmt子要素は関数本体を表現する。
 
 ## `Friend`: `friend`宣言
 
-<!-- TODO: not written -->
+`Friend`は`friend`宣言を表現する。
+
+### `friend`クラスの宣言
+
+`<clangDecl class="Friend">`  
+  _`clangTypeLoc`要素_  
+`</clangDecl>`
+
+第1子要素は`clangTypeLoc`要素で、`friend`指定するクラスを表現する。
+
+この`clangTypeLoc`要素は、必須属性として`"type"`属性をもつ。
+`"type"`属性の値は文字列で、
+`friend`指定するクラス型に対応するデータ型識別名を表す。
+
+### `friend`関数の宣言
+
+`<clangDecl class="Friend">`  
+  _`clangDecl`要素_  
+`</clangDecl>`  
+
+第1子要素は`clangDecl`要素で、`friend`指定する関数の宣言を表現する。
+この要素の`class`属性の値は`"Function"`である。
 
 ## `Function`: 関数宣言
 
