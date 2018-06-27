@@ -405,9 +405,9 @@ Clang の `clang::Stmt` クラスから派生したクラスのデータを表�
 | `"logNEQExpr"`        | `BO_NE`                         | 等価比較 `!=`                                  |
 | `"bitAndExpr"`        | `BO_And`                        | ビットAND `&`                                  |
 | `"bitXorExpr"`        | `BO_Xor`                        | ビットXOR `^`                                  |
-| `"bitOrExpr"`         | `BO_Or`                         | ビットOR `|`                                   |
+| `"bitOrExpr"`         | `BO_Or`                         | ビットOR &#124;                                |
 | `"logAndExpr"`        | `BO_LAnd`                       | 論理積 `&&`                                    |
-| `"logOrExpr"`         | `BO_LOr`                        | 論理和 `||`                                    |
+| `"logOrExpr"`         | `BO_LOr`                        | 論理和 &#124;&#124;                            |
 | `"assignExpr"`        | `BO_Assign`                     | 代入 `=`                                       |
 | `"commaExpr"`         | `BO_Comma`                      | カンマ演算 `,`                                 |
 
@@ -530,18 +530,18 @@ Clang の `clang::Stmt` クラスから派生したクラスのデータを表�
 *二項演算名*は、`clang::BinaryOperatorKind`を表す文字列である。
 以下に主要な二項演算名を挙げる。
 
-| 二項演算名         | `clang::BinaryOperatorKind`の値 | 意味                         |
-|--------------------|---------------------------------|------------------------------|
-| `"asgMulExpr"`     | `BO_MulAssign`                  | 乗算の複合代入演算 `*=`      |
-| `"asgDivExpr"`     | `BO_DivAssign`                  | 除算の複合代入演算 `/=`      |
-| `"asgModExpr"`     | `BO_RemAssign`                  | 剰余の複合代入演算 `%=`      |
-| `"asgPlusExpr"`    | `BO_AddAssign`                  | 加算の複合代入演算 `+=`      |
-| `"asgMinusExpr"`   | `BO_SubAssign`                  | 減算の複合代入演算 `-=`      |
-| `"asgLshiftExpr"`  | `BO_ShlAssign`                  | 左シフトの複合代入演算 `<<=` |
-| `"asgRshiftExpr"`  | `BO_ShrAssign`                  | 右シフトの複合代入演算 `>>=` |
-| `"asnBitAndExpr"`  | `BO_AndAssign`                  | ビットANDの複合代入演算 `&=` |
-| `"asgBitOrExpr"`   | `BO_OrAssign`                   | ビットORの複合代入演算 `|=`  |
-| `"asgXorExpr"`     | `BO_XorAssign`                  | ビットXORの複合代入演算 `^=` |
+| 二項演算名        | `clang::BinaryOperatorKind`の値 | 意味                             |
+|-------------------|---------------------------------|----------------------------------|
+| `"asgMulExpr"`    | `BO_MulAssign`                  | 乗算の複合代入演算 `*=`          |
+| `"asgDivExpr"`    | `BO_DivAssign`                  | 除算の複合代入演算 `/=`          |
+| `"asgModExpr"`    | `BO_RemAssign`                  | 剰余の複合代入演算 `%=`          |
+| `"asgPlusExpr"`   | `BO_AddAssign`                  | 加算の複合代入演算 `+=`          |
+| `"asgMinusExpr"`  | `BO_SubAssign`                  | 減算の複合代入演算 `-=`          |
+| `"asgLshiftExpr"` | `BO_ShlAssign`                  | 左シフトの複合代入演算 `<<=`     |
+| `"asgRshiftExpr"` | `BO_ShrAssign`                  | 右シフトの複合代入演算 `>>=`     |
+| `"asnBitAndExpr"` | `BO_AndAssign`                  | ビットANDの複合代入演算 `&=`     |
+| `"asgBitOrExpr"`  | `BO_OrAssign`                   | ビットORの複合代入演算 &#124;=   |
+| `"asgXorExpr"`    | `BO_XorAssign`                  | ビットXORの複合代入演算 `^=`     |
 
 ## `CompoundStmt`: 複合文
 
