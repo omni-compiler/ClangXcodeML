@@ -436,7 +436,7 @@ Clang の `clang::Stmt` クラスから派生したクラスのデータを表�
 
 * `xcodemlType`属性
 
-`CallExpr`は関数呼呼び出し式を表現する。
+`CallExpr`は関数呼び出し式を表現する。
 
 第1子要素は`clangStmt`要素で、呼び出される関数を表現する。
 
