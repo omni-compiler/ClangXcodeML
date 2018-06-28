@@ -247,7 +247,7 @@ clangStmt子要素は関数本体を表現する。
 `"true"`または`"1"`のとき関数が暗黙に定義されたことを表す。
 
 
-### `clangTypeLoc`要素 (`clangDecl[@class="Function"]`)
+### `Function`の第3子要素(`clangTypeLoc`要素)
 
 `<clangTypeLoc`  
   `class` `=` `"FunctionProto"`  
