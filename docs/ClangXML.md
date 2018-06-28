@@ -363,7 +363,7 @@ clangStmt子要素は関数本体を表現する。
 # `clangStmt`要素
 
 `<clangStmt`  
-  `class` `=` _属性_  
+  `class` `=` _Stmtの種類(後述)_  
 `>`  
 _子要素_ ...  
 `</clangStmt>`  
@@ -376,7 +376,43 @@ _子要素_ ...
 `clangStmt`要素は
 Clang の `clang::Stmt` クラスから派生したクラスのデータを表す要素であり、
 式や文を表現する。
-`class`属性の値で具体的なクラス名を表す。
+
+この要素は、必須属性として`class`属性をもつ。
+
+`class`属性の値は文字列であり、Stmtの種類を表す。
+
+*Stmtの種類*は、
+[clang::Stmt::StmtClass](https://clang.llvm.org/doxygen/classclang_1_1Stmt.html)
+を表す文字列である。
+以下に主要なStmtの種類を挙げる。
+
+| Stmtの種類                 | `clang::Stmt::StmtClass`の値 | 意味                                    |
+|----------------------------+------------------------------+-----------------------------------------|
+| `"BinaryOperator"`         | BinaryOperatorClass          | 二項演算                                |
+| `"BreakStmt"`              | BreakStmtClass               | `break`文                               |
+| `"CallExpr"`               | CallExprClass                | 関数呼び出し                            |
+| `"CaseStmt"`               | CaseStmtClass                | `case`ラベル                            |
+| `"CharacterLiteral"`       | CharacterLiteralClass        | 文字リテラル                            |
+| `"CompoundAssignOperator"` | CompoundAssignOperatorClass  | 複合代入演算                            |
+| `"CompoundStmt"`           | CompoundStmtClass            | 複合文                                  |
+| `"CStyleCastExpr"`         | CStyleCastExprClass          | Cスタイルキャスト形式による明示的型変換 |
+| `"CXXConstCastExpr"`       | CXXConstCastExprClass        | `const_cast`式                          |
+| `"CXXDynamicCastExpr"`     | CXXDynamicCastExprClass      | `dynamic_cast`式                        |
+| `"CXXMemberCallExpr"`      | CXXMemberCallExprClass       | メンバー関数呼び出し                    |
+| `"CXXStaticCastExpr"`      | CXXStaticCastExprClass       | `static_cast`式                         |
+| `"CXXReinterpretCastExpr"` | CXXReinterpretCastExprClass  | `reinterpret_cast`式                    |
+| `"CXXThisExpr"`            | CXXThisExprClass             | `this`ポインター                        |
+| `"DeclRefExpr"`            | DeclRefExprClass             | 変数参照                                |
+| `"DeclStmt"`               | DeclStmtClass                | 宣言文                                  |
+| `"IfStmt"`                 | IfStmtClass                  | `if`文                                  |
+| `"ImplicitCastExpr"`       | ImplicitCastExprClass        | 暗黙の型変換                            |
+| `"IntegerLiteral"`         | IntegerLiteralClass          | 整数リテラル                            |
+| `"MemberExpr"`             | MemberExprClass              | クラスメンバーアクセス                  |
+| `"ReturnStmt"`             | ReturnStmtClass              | `return`文                              |
+| `"StringLiteral"`          | StringLiteralClass           | 文字列リテラル                          |
+| `"SwitchStmt"`             | SwitchStmtClass              | `switch`文                              |
+| `"UnaryOperator"`          | UnaryOperatorClass           | 単項演算                                |
+
 以下では逆変換に用いる部分について個別に解説する。
 その他については Clang の実装を参照のこと。
 
