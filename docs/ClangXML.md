@@ -643,19 +643,6 @@ Clang の `clang::Stmt` クラスから派生したクラスのデータを表�
 `xcodemlType`属性の値はデータ型識別名で、条件演算式全体の型を表す。
 逆変換では使用しない。
 
-
-## `CStyleCastExpr`: キャスト形式による明示的型変換
-
-<!-- TODO: not written -->
-
-## `CXXConstCastExpr`: `const_cast`式
-
-<!-- TODO: not written -->
-
-## `CXXDynamicCastExpr`: `dynamic_cast`式
-
-<!-- TODO: not written -->
-
 ## `CXXMemberCallExpr`: メンバー関数呼び出し
 
 `<clangStmt class="CXXMemberCallExpr"`  
@@ -681,10 +668,9 @@ Clang の `clang::Stmt` クラスから派生したクラスのデータを表�
 この要素は0個以上ある。
 `clangStmt`要素の順序と実引数の順序は一致しなくてはならない。
 
+## 型変換式
 
-## `CXXStaticCastExpr`: `static_cast`式
-
-`<clangStmt class="CXXStaticCastExpr"`  
+`<clangStmt class=` `"CStyleCastExpr"` | `"CXXConstCastExpr"` | `"CXXDynamicCastExpr"` `"CXXStaticCastExpr"` | `"CXXReinterpretCastExpr"`  
   `clangCastKind` `=` _型変換の種類_  
   `xcodemlType` `=` _データ型識別名_  
 `>`  
@@ -699,7 +685,8 @@ Clang の `clang::Stmt` クラスから派生したクラスのデータを表�
 * `clangCastKind`属性
 * `xcodemlType`属性
 
-`CXXStaticCastExpr`は`static_cast`式を表現する。
+型変換式は`CStyleCastExpr`, `CXXConstCastExpr`, `CXXDynamicCastExpr`,
+`CXXStaticCastExpr`, `CXXReinterpretCastExpr`によって表現する。
 
 第1子要素は`clangTypeLoc`要素で、変換先の型を表現する。
 
@@ -713,10 +700,6 @@ Clang の `clang::Stmt` クラスから派生したクラスのデータを表�
 `xcodemlType`属性の値はデータ型識別名で、型変換後のデータ型を表す。
 逆変換では使用しない。
 
-
-## `CXXReinterpretCastExpr`: `reinterpret_cast`式
-
-<!-- TODO: not written -->
 
 ## `CXXThisExpr`: `this`ポインター
 
