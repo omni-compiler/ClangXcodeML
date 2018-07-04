@@ -120,7 +120,21 @@ _子要素_ ...
 
 ## `AccessSpec`: アクセス指定
 
-<!-- TODO: not written -->
+`<clangDecl class="AccessSpec"`  
+  `access` `=` `"public"` | `"private"` | `"protected"`  
+`/>`
+
+必須属性なし
+
+オプショナル：
+
+* `access`属性
+
+`AccessSpec`は、ソースコード中に明示的に書かれたアクセス指定子を表現する。
+
+逆変換では使用しない。
+代わりに、逆変換では、
+メンバーのアクセス指定を`clangDecl`要素の`access`属性で表現する。
 
 ## `ClassTemplate`: クラステンプレート宣言
 
