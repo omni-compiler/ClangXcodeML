@@ -138,7 +138,33 @@ _子要素_ ...
 
 ## `ClassTemplate`: クラステンプレート宣言
 
-<!-- TODO: not written -->
+`<clangDecl class="ClassTemplate">`  
+  _`name`要素_  
+  _`xcodemlTypeTable`要素_  
+  _`xcodemlNnsTable`要素_  
+  _クラス本体を表す`clangDecl`要素_  
+  _テンプレート仮引数を表す`clangDecl`要素_ ...  
+`</clangDecl>`
+
+`ClassTemplate`はクラステンプレート宣言を表現する。
+
+第1子要素は`name`要素で、宣言するテンプレートの名前を表現する。
+
+第2子要素は`xcodemlTypeTable`要素である。
+`xcodemlTypeTable`要素は、0個以上のデータ型定義要素を子要素としてもつ。
+各データ型定義要素は、このクラステンプレート宣言中で使われるデータ型を定義する。
+
+第3子要素は`xcodemlNnsTable`要素である。
+`xcodemlNnsTable`要素は、0個以上のNNS定義要素を子要素としてもつ。
+各NNS定義要素は、このクラステンプレート宣言中で使われるスコープの情報を定義する。
+
+第4子要素は`clangDecl`要素で、クラス本体を表現する。
+この要素の`class`属性の値は`"CXXRecord"`である。
+
+第5子要素以降の要素は`clangDecl`要素で、テンプレート仮引数宣言を表現する。
+各要素の`class`属性の値は`"TemplateTypeParm"`である。
+この要素は1個以上ある。
+`clangDecl`要素の順序は仮引数の順序と一致している必要がある。
 
 ## `ClassTemplatePartialSpecialization`: クラステンプレートの部分的特殊化
 
