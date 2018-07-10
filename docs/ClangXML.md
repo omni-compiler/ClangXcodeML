@@ -398,7 +398,59 @@ clangStmt子要素は関数本体を表現する。
 
 ## `Var`: 変数宣言
 
-<!-- TODO: not written -->
+`<clangDecl class="Var"`  
+`xcodemlType` `=` _データ型識別名_  
+`has_external_storage` `=` `"true"`  | `"false"` | `"1"` | `"0"`  
+`is_out_of_line` `=` `"true"`  | `"false"` | `"1"` | `"0"`  
+`is_static_data_member` `=` `"true"`  | `"false"` | `"1"` | `"0"`  
+`is_static_local` `=` `"true"`  | `"false"` | `"1"` | `"0"`  
+`>`  
+  _`name`要素_  
+  [ _`clangStmt`要素_ ]  
+`</clangDecl>`  
+
+必須属性:
+
+* `xcodemlType`属性
+
+オプショナル:
+
+* `has_external_storage`属性
+* `is_out_of_line`属性
+* `is_static_data_member`属性
+* `is_static_local`属性
+
+`Var`は変数宣言を表現する。
+
+第1子要素は`name`要素で、変数名を表現する。
+
+第2子要素は`clangStmt`要素で、変数宣言の初期化子を表現する。
+この要素は省略されることがある。
+省略されたとき、その変数宣言は初期化子をもたない。
+
+この要素は、必須属性として`xcodemlType`属性をもつ。
+
+`xcodemlType`属性の値はデータ型識別名で、宣言する変数の型を表す。
+
+この要素は、オプションで
+`has_external_storage`属性、
+`is_static_data_member`属性、
+`is_out_of_line`属性、
+`is_static_local`属性
+を利用できる。
+これらの属性の値は`"true"`, `"false"`, `"1"`, `"0"`のいずれかである。
+
+`has_external_storage`属性の値が`"true"`または`"1"`のとき、
+変数宣言が`extern`指定子をもつことを表す。
+
+`is_out_of_line`属性の値が`"true"`または`"1"`のとき、
+変数宣言が`static`データメンバーのout-of-line定義であることを表す。
+
+`is_static_data_member`属性の値が`"true"`または`"1"`のとき、
+変数宣言が`static`データメンバーに対するものであることを表す。
+
+`is_static_local`属性の値が`"true"`または`"1"`のとき、
+宣言された変数が`static`変数であることを表す。
 
 # `clangStmt`要素
 
