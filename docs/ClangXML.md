@@ -213,7 +213,81 @@ clangStmt子要素は関数本体を表現する。
 
 ## `CXXDestructor`: デストラクター宣言
 
-<!-- TODO: not written -->
+`<clangDecl class="CXXDestructor"`  
+  `is_defaulted` `=` `"true"`  | `"false"` | `"1"` | `"0"`  
+  `is_deleted` `=` `"true"`  | `"false"` | `"1"` | `"0"`  
+  `is_implicit` `=` `"true"`  | `"false"` | `"1"` | `"0"`  
+  `is_pure` `=` `"true"`  | `"false"` | `"1"` | `"0"`  
+  `is_virtual` `=` `"true"`  | `"false"` | `"1"` | `"0"`    
+  `parent_class` `=` _データ型識別名_  
+  `xcodemlType` `=` _データ型識別名_  
+`>`  
+  _`name`要素_  
+  _`clangDeclarationNameInfo`要素_  
+  _`clangTypeLoc`要素_  
+  [ _`clangStmt`要素_ ]  
+`</clangDecl>`
+
+必須：
+
+* `parent_class`属性
+* `xcodemlType`属性
+
+オプショナル：
+
+* `is_defaulted`属性
+* `is_deleted`属性
+* `is_implicit`属性
+* `is_pure`属性
+* `is_virtual`属性
+
+`CXXDestructor`はデストラクター宣言を表現する。
+
+第1子要素は`name`要素で、デストラクターの名前を表現する。
+この要素の`name_kind`属性の値は`"destructor"`である。
+
+第2子要素は`clangDeclarationNameInfo`要素である。
+逆変換では使用しない。
+
+第3子要素は`clangTypeLoc`要素である。
+逆変換では使用しない。
+
+第4子要素は`clangStmt`要素で、デストラクターの本体を表現する。
+この要素は省略されることがある。
+省略された場合、その宣言は本体をもたない。
+
+この要素は、必須属性として`parent_class`属性、`xcodemlType`属性をもつ。
+
+`parent_class`属性の値はデータ型識別名で、
+デストラクターが属するクラスの型を表す。
+
+`xcodemlType`属性の値はデータ型識別名で、
+デストラクターの型を表す。
+
+
+この要素は、オプションで
+`is_defaulted`属性、
+`is_deleted`属性、
+`is_implicit`属性、
+`is_pure`属性、
+`is_virtual`属性
+を指定できる。
+これらの属性の値は`"true"`, `"false"`, `"1"`, `"0"`のいずれかである。
+
+`is_defaulted`属性の値が`"true"`または`"1"`のとき、
+デストラクターが`default`定義されていることを表す。
+
+`is_deleted`属性の値が`"true"`または`"1"`のとき、
+デストラクターが`delete`定義されていることを表す。
+
+`is_implicit`属性の値が`"true"`または`"1"`のとき、
+デストラクターが暗黙に定義されたことを表す。
+
+`is_pure`属性の値が`"true"`または`"1"`のとき、
+純粋`virtual`関数であることを表す。
+
+`is_virtual`属性の値が`"true"`または`"1"`のとき、
+`virtual`関数であることを表す。
 
 ## `CXXMethod`: メンバー関数宣言
 
