@@ -217,7 +217,144 @@ clangStmt子要素は関数本体を表現する。
 
 ## `CXXMethod`: メンバー関数宣言
 
-<!-- TODO: not written -->
+`<clangDecl class="CXXMethod"`  
+  `is_const` `=` `"true"`  | `"false"` | `"1"` | `"0"`  
+  `is_defaulted` `=` `"true"`  | `"false"` | `"1"` | `"0"`  
+  `is_deleted` `=` `"true"`  | `"false"` | `"1"` | `"0"`  
+  `is_function_template_specialization` `=` `"true"`  | `"false"` | `"1"` | `"0"`  
+  `is_implicit` `=` `"true"`  | `"false"` | `"1"` | `"0"`  
+  `is_pure` `=` `"true"`  | `"false"` | `"1"` | `"0"`  
+  `is_static` `=` `"true"`  | `"false"` | `"1"` | `"0"`  
+  `is_variadic` `=` `"true"`  | `"false"` | `"1"` | `"0"`  
+  `is_virtual` `=` `"true"`  | `"false"` | `"1"` | `"0"`    
+  `parent_class` `=` _データ型識別名_  
+  `xcodemlType` `=` _データ型識別名_  
+`>`  
+  _`name`要素_  
+  _`clangDeclarationNameInfo`要素_  
+  _`clangTypeLoc`要素_  
+  [ _`clangStmt`要素_ ]  
+`</clangDecl>`
+
+必須：
+
+* `parent_class`属性
+* `xcodemlType`属性
+
+オプショナル：
+
+* `is_const`属性
+* `is_defaulted`属性
+* `is_deleted`属性
+* `is_function_template_specialization`属性
+* `is_implicit`属性
+* `is_pure`属性
+* `is_static`属性
+* `is_variadic`属性
+* `is_virtual`属性
+
+`CXXMethod`はメンバー関数宣言を表現する。
+
+第1子要素は`name`要素で、
+メンバー名を表現する。
+
+第2子要素は`clangDeclarationNameInfo`要素である。
+逆変換では使用しない。
+
+第3子要素は`clangTypeLoc`要素で、
+仮引数リストを表現する。
+次の小節で説明する。
+
+第4子要素は`clangStmt`要素で、関数本体を表現する。
+この要素は省略されることがある。
+省略された場合、その宣言は関数本体をもたない。
+
+この要素は、必須属性として`parent_class`属性、`xcodemlType`属性をもつ。
+
+`parent_class`属性の値はデータ型識別名で、メンバー関数が所属するクラスの型を表す。
+
+`xcodemlType`属性の値はデータ型識別名で、メンバー関数の型を表す。
+
+この要素は、オプションで
+`is_const`属性、
+`is_defaulted`属性、
+`is_deleted`属性、
+`is_function_template_specialization`属性、
+`is_implicit`属性、
+`is_pure`属性、
+`is_static`属性、
+`is_variadic`属性、
+`is_virtual`属性
+を指定できる。
+これらの属性の値は`"true"`, `"false"`, `"1"`, `"0"`のいずれかである。
+
+`is_const`属性の値が`"true"`または`"1"`のとき、
+`const`メンバー関数であることを表す。
+
+`is_defaulted`属性の値が`"true"`または`"1"`のとき、
+メンバー関数が`default`定義されていることを表す。
+
+`is_deleted`属性の値が`"true"`または`"1"`のとき、
+メンバー関数が`delete`定義されていることを表す。
+
+`is_function_template_specialization`属性の値が`"true"`または`"1"`のとき、
+メンバー関数テンプレートの明示的特殊化であることを表す。
+
+`is_implicit`属性の値が`"true"`または`"1"`のとき、
+メンバー関数が暗黙に定義されたことを表す。
+
+`is_pure`属性の値が`"true"`または`"1"`のとき、
+純粋`virtual`関数であることを表す。
+
+`is_static`属性の値が`"true"`または`"1"`のとき、
+`static`メンバー関数であることを表す。
+
+`is_variadic`属性の値が`"true"`または`"1"`のとき、
+可変長引数をとることを表す。
+
+`is_virtual`属性の値が`"true"`または`"1"`のとき、
+`virtual`関数であることを表す。
+
+### `CXXMethod`の第3子要素(`clangTypeLoc`要素)
+
+`<clangTypeLoc`  
+  `class` `=` `"FunctionProto"`  
+  `type` `=` _データ型識別名_  
+`>`  
+  _`clangTypeLoc`要素_  
+  _`clangDecl`要素_  
+`</clangTypeLoc>`
+
+必須属性なし
+
+オプショナル：
+
+* `class`属性
+* `type`属性
+
+`CXXMethod`を表す`clangDecl`要素は、第3子要素として`clangTypeLoc`要素をもつ。
+
+`clangTypeLoc`要素の第1子要素は`clangTypeLoc`要素で、
+メンバー関数の返り値型を表現する。
+ただし、コンストラクター、デストラクターに対しては、この要素は`void`型を表現する。
+逆変換では使用しない。
+
+第2子要素以降の子要素は`clangDecl`要素で、
+関数の仮引数リストを表現する。
+この要素は0個以上ある。
+この要素の`class`属性の値は`"ParmVar"`である。
+逆変換では、この要素の`name`子要素を使用して仮引数名を出力する。
+`clangDecl`要素の順序は仮引数の順序と一致しなくてはならない。
+
+この要素は、オプションで`class`属性、`type`属性を利用できる。
+
+`class`属性の値は文字列で、
+その値は`"FunctionProto"`である。
+逆変換では使用しない。
+
+`type`属性の値はデータ型識別名で、
+メンバー関数の型を表現する。
+逆変換では使用しない。
 
 ## `CXXRecord`: クラス宣言
 
