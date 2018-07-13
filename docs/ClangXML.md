@@ -432,7 +432,52 @@ clangStmt子要素は関数本体を表現する。
 
 ## `CXXRecord`: クラス宣言
 
-<!-- TODO: not written -->
+`<clangDecl class="CXXRecord"`
+  `is_implicit` `=` `"true"`  | `"false"` | `"1"` | `"0"`  
+  `is_this_declaration_a_definition` `=` `"true"`  | `"false"` | `"1"` | `"0"`  
+  `xcodemlType` `=` _データ型識別名_  
+`>`  
+  _`name`要素_  
+  _`clangTypeLoc`要素_ ...  
+  _`clangDecl`要素_ ...  
+`</clangDecl>`
+
+必須：
+
+* `xcodemlType`属性
+
+オプショナル：
+
+* `is_implicit`属性
+* `is_this_declaration_a_definition`属性
+
+`CXXRecord`はC++のクラス宣言を表現する。
+
+第1子要素は`name`要素で、クラス名を表現する。
+
+第2子要素は`clangTypeLoc`要素である。
+この要素は1個以上ある。
+逆変換では使用しない。
+
+第3子要素以降の子要素は`clangDecl`要素で、
+メンバー指定(クラス内の宣言およびアクセス指定)を表現する。
+この要素は1個以上ある。
+
+この要素は必須属性として`xcodemlType`属性をもつ。
+
+`xcodemlType`属性の値はデータ型識別名で、
+宣言されるクラスの型を表現する。
+
+この要素は、オプションで`is_implicit`属性、
+`is_this_declaration_a_definition`属性を指定できる。
+
+`is_implicit`属性の値は`"true"`, `"false"`, `"1"`, `"0"`のいずれかであり、
+`"true"`または`"1"`のとき関数が暗黙に定義されたことを表す。
+
+`is_this_declaration_a_definition`属性の値は`"true"`, `"false"`, `"1"`, `"0"`のいずれかであり、
+`"true"`または`"1"`のとき宣言がである(クラス本体をもつ)ことを表す。
+そうでないとき、クラス宣言が定義でないことを表す。
+省略時の値は`"false"`である。
 
 ## `Field`: データメンバー宣言
 
