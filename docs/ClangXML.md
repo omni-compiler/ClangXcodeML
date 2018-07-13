@@ -481,7 +481,38 @@ clangStmt子要素は関数本体を表現する。
 
 ## `Field`: データメンバー宣言
 
-<!-- TODO: not written -->
+`<clangDecl class="Field"`  
+  `is_bit_field` `=` `"true"`  | `"false"` | `"1"` | `"0"`  
+  `is_unnamed_bit_field` `=` `"true"`  | `"false"` | `"1"` | `"0"`  
+  `xcodemlType` `=` _データ型識別名_  
+`>`  
+  _`name`要素_  
+  _`clangTypeLoc`要素_  
+  [ _`clangStmt`要素_ ]  
+`</clangDecl>`
+
+`Field`はデータメンバー宣言を表現する。
+
+第1子要素は`name`要素で、フィールド名を表現する。
+
+第2子要素は`clangTypeLoc`要素である。
+逆変換では使用しない。
+
+第3子要素は`clangStmt`要素で、
+ビットフィールドの定数式を表現する。
+この要素は省略されることがある。
+省略された場合、そのメンバーはビットフィールドではない。
+
+この要素は、必須属性として`xcodemlType`属性をもつ。
+
+`xcodemlType`属性の値はデータ型識別名であり、
+データメンバーの型を表す。
+
+`is_bit_field`属性の値は`"true"`, `"false"`, `"1"`, `"0"`のいずれかであり、
+`"true"`または`"1"`のときそのメンバーがビットフィールドであることを表す。
+
+`is_unnamed_bit_field`属性の値は`"true"`, `"false"`, `"1"`, `"0"`のいずれかであり、
+`"true"`または`"1"`のときそのメンバーが無名ビットフィールドであることを表す。
 
 ## `Friend`: `friend`宣言
 
