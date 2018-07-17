@@ -1573,3 +1573,47 @@ C++プログラム中でこのクラスを宣言するのに使われたキー�
 `</clangStmt>`  
 
 
+# `name`要素
+
+`<name`  
+  `name_kind` `=` _名前の種類(後述)_  
+`>`  
+  [ _名前_ ]  
+`</name>`
+
+必須：
+
+* `name_kind`属性
+* その他、以下の小節で必須属性が指定されることがある。
+
+オプショナル属性なし
+(ただし、以下の小節でオプショナル属性が指定されることがある)
+
+`name`要素はC/C++の名前を表現する。
+
+この要素は、必須属性として`name_kind`属性をもつ。
+
+`name_kind`属性の値は文字列であり、名前の種類を表す。
+
+*名前の種類*は、
+[`clang::DeclarationName::NameKind`](https://clang.llvm.org/doxygen/classclang_1_1DeclarationName.html)
+を表す文字列である。
+以下に主要な名前の種類を挙げる。
+
+| 名前の種類      | `clang::DeclarationName::NameKind`の値 | 意味               |
+|-----------------|----------------------------------------|--------------------|
+| `"operator"`    | `CXXOperatorName`                      | 演算子関数ID       |
+| `"conversion"`  | `CXXConversionFunctionName`            | 変換関数ID         |
+| `"constructor"` | `CXXConstructorName`                   | コンストラクター名 |
+| `"destructor"`  | `CXXDestructorName`                    | デストラクター名   |
+| `"name"`        | `Identifier`                           | その他の識別子     |
+
+## `operator`: 演算子関数ID
+
+## `conversion`: 変換関数ID
+
+## `constructor`: コンストラクターを表す名前
+
+## `destructor`: デストラクターを表す名前
+
+## `name`: その他の識別子
