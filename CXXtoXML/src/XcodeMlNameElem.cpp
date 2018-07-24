@@ -24,6 +24,7 @@ getNameKind(const NamedDecl *ND) {
   case NK::CXXConversionFunctionName: return "conversion";
   case NK::CXXConstructorName: return "constructor";
   case NK::CXXDestructorName: return "destructor";
+  case NK::CXXUsingDirective: return "using_directive";
   default: assert(false && "not supported");
   }
 }
@@ -39,7 +40,8 @@ makeIdNode(TypeTableInfo &TTI, const ValueDecl *VD) {
 
 void
 xmlNewBoolProp(xmlNodePtr node, const std::string &name, bool value) {
-  xmlNewProp(node, BAD_CAST(name.c_str()), BAD_CAST(value ? "true" : "false"));
+  if (value)
+    xmlNewProp(node, BAD_CAST(name.c_str()), BAD_CAST "1");
 }
 
 xmlNodePtr
@@ -120,8 +122,13 @@ makeNameNode(TypeTableInfo &TTI, const NamedDecl *ND) {
   if (ND->getDeclName().getNameKind() == NK::CXXOperatorName) {
     // An overloaded operator can be a member function
     // or a non-member function (= CXXMethod).
-    const auto FD = cast<FunctionDecl>(ND);
-    node = makeNameNodeForCXXOperator(TTI, FD);
+    if (const auto FD = dyn_cast<FunctionDecl>(ND)) {
+      node = makeNameNodeForCXXOperator(TTI, FD);
+    } else if (const auto FTD = dyn_cast<FunctionTemplateDecl>(ND)) {
+      node = makeNameNodeForCXXOperator(TTI, FTD->getTemplatedDecl());
+    } else {
+      assert(!"a DeclName with CXXOperatorName is not FunctionDecl or FunctionTemplateDecl");
+    }
   } else if (auto MD = dyn_cast<CXXMethodDecl>(ND)) {
     node = makeNameNodeForCXXMethodDecl(TTI, MD);
   } else {
@@ -155,6 +162,18 @@ makeNameNode(TypeTableInfo &TTI, const DeclRefExpr *DRE) {
 }
 
 xmlNodePtr
+makeNameNode(TypeTableInfo &, const TemplateTypeParmType *TTP) {
+  assert(TTP);
+  const auto nameNode = xmlNewNode(nullptr, BAD_CAST "name");
+  const auto depth = TTP->getDepth();
+  const auto index = TTP->getIndex();
+  const auto name = "__xcodeml_template_type_" + std::to_string(depth) + "_"
+      + std::to_string(index);
+  xmlNodeAddContent(nameNode, BAD_CAST name.c_str());
+  return nameNode;
+}
+
+xmlNodePtr
 makeIdNodeForCXXMethodDecl(TypeTableInfo &TTI, const CXXMethodDecl *method) {
   auto idNode = xmlNewNode(nullptr, BAD_CAST "id");
   xmlNewProp(idNode,
@@ -174,7 +193,7 @@ makeIdNodeForFieldDecl(TypeTableInfo &TTI, const FieldDecl *field) {
   const auto fieldName = field->getIdentifier();
   if (fieldName) {
     /* Emit only if the field has name.
-     * Some field does not have name.
+     * Some fields do not have names.
      *  Example: `struct A { int : 0; }; // unnamed bit field`
      */
     auto nameNode = makeNameNode(TTI, field);

@@ -20,11 +20,10 @@
 #include "XcodeMlName.h"
 #include "XcodeMlType.h"
 #include "XcodeMlUtil.h"
-#include "XcodeMlEnvironment.h"
+#include "XcodeMlTypeTable.h"
 #include "TypeAnalyzer.h"
 
-using TypeAnalyzer =
-    XMLWalker<void, xmlXPathContextPtr, XcodeMl::Environment &>;
+using TypeAnalyzer = XMLWalker<void, xmlXPathContextPtr, XcodeMl::TypeTable &>;
 
 using CXXCodeGen::makeTokenNode;
 using CXXCodeGen::makeVoidNode;
@@ -36,7 +35,7 @@ using CXXCodeGen::makeVoidNode;
   const TypeAnalyzer &w __attribute__((unused)),                              \
       xmlNodePtr node __attribute__((unused)),                                \
       xmlXPathContextPtr ctxt __attribute__((unused)),                        \
-      XcodeMl::Environment &map __attribute__((unused))
+      XcodeMl::TypeTable &map __attribute__((unused))
 /*!
  * \brief Define new TypeAnalyzer::Procedure named \c name.
  */
@@ -66,6 +65,17 @@ DEFINE_TA(pointerTypeProc) {
   pointer->setConst(isTrueProp(node, "is_const", false));
   pointer->setVolatile(isTrueProp(node, "is_volatile", false));
   map[name] = pointer;
+}
+
+DEFINE_TA(memberPointerTypeProc) {
+  const auto dtident = getType(node);
+  const auto ref = getProp(node, "ref");
+  const auto record = getProp(node, "record");
+
+  auto pointer = XcodeMl::makeMemberPointerType(dtident, ref, record);
+  pointer->setConst(isTrueProp(node, "is_const", false));
+  pointer->setVolatile(isTrueProp(node, "is_volatile", false));
+  map[dtident] = pointer;
 }
 
 DEFINE_TA(functionTypeProc) {
@@ -151,9 +161,28 @@ getBases(xmlNodePtr node, xmlXPathContextPtr ctxt) {
   return result;
 }
 
+llvm::Optional<XcodeMl::ClassType::TemplateArgList>
+getTemplateArgs(xmlNodePtr node, xmlXPathContextPtr ctxt) {
+  using namespace XcodeMl;
+  using MaybeList = llvm::Optional<ClassType::TemplateArgList>;
+  const auto targsNode = findFirst(node, "templateArguments", ctxt);
+  if (!targsNode) {
+    return MaybeList();
+  }
+  ClassType::TemplateArgList targs;
+  for (auto &&targNode : findNodes(targsNode, "typeName", ctxt)) {
+    targs.push_back(getProp(targNode, "ref"));
+  }
+  return MaybeList(targs);
+}
+
 DEFINE_TA(classTypeProc) {
   XMLString elemName = xmlGetProp(node, BAD_CAST "type");
+  const auto nameSpelling = getContent(findFirst(node, "name", ctxt));
+  const auto className = nameSpelling.empty() ? XcodeMl::ClassType::ClassName()
+                                              : makeTokenNode(nameSpelling);
   const auto bases = getBases(node, ctxt);
+  const auto targs = getTemplateArgs(node, ctxt);
   XcodeMl::ClassType::Symbols symbols;
   const auto ids = findNodes(node, "symbols/id", ctxt);
   for (auto &idElem : ids) {
@@ -161,23 +190,28 @@ DEFINE_TA(classTypeProc) {
     const auto pName = getUnqualIdFromIdNode(idElem, ctxt);
     symbols.emplace_back(pName, dtident);
   }
+  const auto nnsident = getPropOrNull(node, "nns");
 
   const auto classKind = getProp(node, "cxx_class_kind");
   if (classKind == "union") {
-    map[elemName] = XcodeMl::makeCXXUnionType(elemName, bases, symbols);
+    map[elemName] = XcodeMl::makeCXXUnionType(
+        elemName, nnsident, className, bases, symbols, targs);
   } else {
-    map[elemName] = XcodeMl::makeClassType(elemName, bases, symbols);
+    map[elemName] = XcodeMl::makeClassType(
+        elemName, nnsident, className, bases, symbols, targs);
   }
 }
 
 DEFINE_TA(enumTypeProc) {
-  XMLString dtident = xmlGetProp(node, BAD_CAST "type");
-  map[dtident] = XcodeMl::makeEnumType(dtident);
+  const auto dtident = getType(node);
+  const auto name = getUnqualIdFromIdNode(node, ctxt);
+  map[dtident] = XcodeMl::makeEnumType(dtident, name);
 }
 
 DEFINE_TA(TemplateTypeParmTypeProc) {
   const auto dtident = getProp(node, "type");
-  map[dtident] = XcodeMl::makeTemplateTypeParm(dtident);
+  const auto name = getContent(findFirst(node, "name", ctxt));
+  map[dtident] = XcodeMl::makeTemplateTypeParm(dtident, makeTokenNode(name));
 }
 
 const std::vector<std::string> identicalFndDataTypeIdents = {
@@ -194,6 +228,7 @@ const std::vector<std::string> identicalFndDataTypeIdents = {
     "char32_t",
     "bool",
     "__int128",
+    "nullptr_t",
 };
 
 const std::vector<std::tuple<std::string, std::string>>
@@ -213,8 +248,8 @@ const std::vector<std::tuple<std::string, std::string>>
 /*!
  * \brief Mapping from Data type identifiers to basic data types.
  */
-const XcodeMl::Environment FundamentalDataTypeIdentMap = []() {
-  XcodeMl::Environment map;
+const XcodeMl::TypeTable FundamentalDataTypeIdentMap = []() {
+  XcodeMl::TypeTable map;
   for (std::string key : identicalFndDataTypeIdents) {
     map[key] = XcodeMl::makeReservedType(key, makeTokenNode(key));
   }
@@ -230,27 +265,29 @@ const TypeAnalyzer XcodeMLTypeAnalyzer("TypeAnalyzer",
     {
         std::make_tuple("basicType", basicTypeProc),
         std::make_tuple("pointerType", pointerTypeProc),
+        std::make_tuple("memberPointerType", memberPointerTypeProc),
         std::make_tuple("functionType", functionTypeProc),
         std::make_tuple("arrayType", arrayTypeProc),
         std::make_tuple("structType", structTypeProc),
         std::make_tuple("classType", classTypeProc),
         std::make_tuple("enumType", enumTypeProc),
         std::make_tuple("TemplateTypeParmType", TemplateTypeParmTypeProc),
+        std::make_tuple("injectedClassNameType", classTypeProc),
     });
 
 /*!
  * \brief Traverse an XcodeML document and make mapping from data
  * type identifiers to data types defined in it.
  */
-XcodeMl::Environment
+XcodeMl::TypeTable
 parseTypeTable(xmlNodePtr, xmlXPathContextPtr xpathCtx, std::stringstream &) {
   xmlXPathObjectPtr xpathObj =
       xmlXPathEvalExpression(BAD_CAST "/XcodeProgram/typeTable/*", xpathCtx);
   if (xpathObj == nullptr) {
-    return XcodeMl::Environment();
+    return XcodeMl::TypeTable();
   }
   const size_t len = length(xpathObj);
-  XcodeMl::Environment map(FundamentalDataTypeIdentMap);
+  XcodeMl::TypeTable map(FundamentalDataTypeIdentMap);
   for (size_t i = 0; i < len; ++i) {
     xmlNodePtr node = nth(xpathObj, i);
     XcodeMLTypeAnalyzer.walk(node, xpathCtx, map);
@@ -259,8 +296,8 @@ parseTypeTable(xmlNodePtr, xmlXPathContextPtr xpathCtx, std::stringstream &) {
   return map;
 }
 
-XcodeMl::Environment
-expandEnvironment(const XcodeMl::Environment &env,
+XcodeMl::TypeTable
+expandTypeTable(const XcodeMl::TypeTable &env,
     xmlNodePtr typeTable,
     xmlXPathContextPtr ctxt) {
   auto newEnv = env;

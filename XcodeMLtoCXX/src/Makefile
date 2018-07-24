@@ -1,6 +1,7 @@
 LLVM_CONFIG = /usr/local/bin/llvm-config
 CXX = /usr/local/bin/clang++
 CXXFLAGS = $(OPTIMIZERFLAGS) -g -Wall -Wextra -fno-rtti -std=c++11 -pedantic \
+	-I $(shell $(LLVM_CONFIG) --includedir) \
 	$(PKG_CFLAGS) \
 	-D__STDC_LIMIT_MACROS -D__STDC_CONSTANT_MACROS $(PCHFLAGS)
 
@@ -22,10 +23,13 @@ OBJS = XcodeMlType.o \
 	NnsAnalyzer.o \
 	TypeAnalyzer.o \
 	XMLString.o \
-	XcodeMlEnvironment.o \
+	XcodeMlTypeTable.o \
 	SourceInfo.o \
 	StringTree.o \
-	ClangClassHandler.o \
+	ClangDeclHandler.o \
+	ClangNestedNameSpecHandler.o \
+	ClangStmtHandler.o \
+	ClangTypeLocHandler.o \
 	XcodeMlName.o \
 	XcodeMlNns.o \
 	XcodeMlOperator.o \
@@ -41,7 +45,7 @@ CodeBuilder.o: \
 	XMLString.h \
 	LibXMLUtil.h \
 	XcodeMlType.h \
-	XcodeMlEnvironment.h \
+	XcodeMlTypeTable.h \
 	NnsAnalyzer.o \
 	TypeAnalyzer.h \
 	CodeBuilder.h \
@@ -52,17 +56,17 @@ TypeAnalyzer.o: \
 	XMLString.h \
 	LibXMLUtil.h \
 	XcodeMlType.h \
-	XcodeMlEnvironment.h \
+	XcodeMlTypeTable.h \
 	TypeAnalyzer.h \
 	XMLWalker.h
 XcodeMlNns.o: \
 	StringTree.h \
-	XcodeMlEnvironment.h \
+	XcodeMlTypeTable.h \
 	XcodeMlNns.h \
 	XcodeMlType.h
 XcodeMlType.o: \
 	TypeAnalyzer.h \
-	XcodeMlEnvironment.h
+	XcodeMlTypeTable.h
 
 XcodeMlUtil.o: \
 	XcodeMlUtil.h

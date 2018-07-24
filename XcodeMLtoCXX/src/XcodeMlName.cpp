@@ -6,9 +6,9 @@
 #include "llvm/ADT/Optional.h"
 #include "llvm/Support/Casting.h"
 #include "StringTree.h"
-#include "XcodeMlType.h"
-#include "XcodeMlEnvironment.h"
 #include "XcodeMlNns.h"
+#include "XcodeMlType.h"
+#include "XcodeMlTypeTable.h"
 #include "XcodeMlOperator.h"
 
 #include "XcodeMlName.h"
@@ -19,16 +19,20 @@ using CXXCodeGen::makeVoidNode;
 
 namespace XcodeMl {
 
-Name::Name(
-    const std::shared_ptr<UnqualId> &id_, const std::shared_ptr<Nns> &nns_)
-    : id(id_), nns(nns_) {
+Name::Name(const CodeFragment &spec, const std::shared_ptr<UnqualId> &id_)
+    : nestedNameSpec(spec), id(id_) {
+}
+
+Name::Name(const std::shared_ptr<UnqualId> &id_) : nestedNameSpec(), id(id_) {
 }
 
 CodeFragment
-Name::toString(const Environment &typeTable, const NnsMap &nnsTable) const {
+Name::toString(const TypeTable &typeTable, const NnsTable &nnsTable) const {
   assert(id);
-  return (nns ? nns->makeDeclaration(typeTable, nnsTable) : makeVoidNode())
-      + id->toString(typeTable);
+  if (nestedNameSpec) {
+    return nestedNameSpec + id->toString(typeTable, nnsTable);
+  }
+  return id->toString(typeTable, nnsTable);
 }
 
 std::shared_ptr<UnqualId>
@@ -60,7 +64,7 @@ UIDIdent::clone() const {
 }
 
 CodeFragment
-UIDIdent::toString(const Environment &) const {
+UIDIdent::toString(const TypeTable &, const NnsTable &) const {
   return makeTokenNode(ident);
 }
 
@@ -80,7 +84,7 @@ OpFuncId::clone() const {
 }
 
 CodeFragment
-OpFuncId::toString(const Environment &) const {
+OpFuncId::toString(const TypeTable &, const NnsTable &) const {
   return makeTokenNode("operator") + makeTokenNode(opSpelling);
 }
 
@@ -100,9 +104,10 @@ ConvFuncId::clone() const {
 }
 
 CodeFragment
-ConvFuncId::toString(const Environment &env) const {
+ConvFuncId::toString(const TypeTable &env, const NnsTable &nnsTable) const {
   const auto T = env.at(dtident);
-  return makeTokenNode("operator") + T->makeDeclaration(makeVoidNode(), env);
+  return makeTokenNode("operator")
+      + T->makeDeclaration(makeVoidNode(), env, nnsTable);
 }
 
 bool
@@ -121,12 +126,11 @@ CtorName::clone() const {
 }
 
 CodeFragment
-CtorName::toString(const Environment &env) const {
+CtorName::toString(const TypeTable &env, const NnsTable &) const {
   const auto T = env.at(dtident);
   const auto ClassT = llvm::cast<XcodeMl::ClassType>(T.get());
   const auto name = ClassT->name();
-  assert(name.hasValue() && *name);
-  return *name;
+  return name;
 }
 
 bool
@@ -145,17 +149,34 @@ DtorName::clone() const {
 }
 
 CodeFragment
-DtorName::toString(const Environment &env) const {
+DtorName::toString(const TypeTable &env, const NnsTable &) const {
   const auto T = env.at(dtident);
   const auto ClassT = llvm::cast<XcodeMl::ClassType>(T.get());
   const auto name = ClassT->name();
-  assert(name.hasValue() && *name);
-  return makeTokenNode("~") + (*name);
+  return makeTokenNode("~") + name;
 }
 
 bool
 DtorName::classof(const UnqualId *id) {
   return id->getKind() == UnqualIdKind::Dtor;
+}
+
+UnnamedId::UnnamedId() : UnqualId(UnqualIdKind::Unnamed) {
+}
+
+UnqualId *
+UnnamedId::clone() const {
+  return new UnnamedId();
+}
+
+CodeFragment
+UnnamedId::toString(const TypeTable &env, const NnsTable &) const {
+  return makeTokenNode("");
+}
+
+bool
+UnnamedId::classof(const UnqualId *id) {
+  return id->getKind() == UnqualIdKind::Unnamed;
 }
 
 } // namespace XcodeMl

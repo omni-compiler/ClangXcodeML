@@ -139,10 +139,10 @@ OverloadedOperatorKindToString(
     return param_size == 2 ? "mulExpr" : "pointerRef"
         /*XXX: correct name?*/;
   case OO_Amp:
-    return param_size == 2 ? "logAndExpr" : "varAddr"
+    return param_size == 2 ? "logAndExpr" : "AddrOfExpr"
         /*XXX: correct name?*/;
   case OO_PlusPlus: return param_size == 2 ? "postIncrExpr" : "preIncrExpr";
-  case OO_MinusMinus: return param_size == 2 ? "postDecrExpr" : "preIncrExpr";
+  case OO_MinusMinus: return param_size == 2 ? "postDecrExpr" : "preDecrExpr";
   default: return unique_meaning.at(op);
   }
 }

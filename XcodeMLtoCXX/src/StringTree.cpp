@@ -85,6 +85,67 @@ InnerNode::amend(const StringTreeRef &node) {
       IN->children.begin(), IN->children.end(), std::back_inserter(children));
 }
 
+bool
+NewLineNode::classof(const StringTree *node) {
+  return node->getKind() == StringTreeKind::NewLine;
+}
+
+NewLineNode::NewLineNode() : StringTree(StringTreeKind::NewLine){};
+
+StringTree *
+NewLineNode::clone() const {
+  return (StringTree *)this;
+}
+
+void
+NewLineNode::flush(Stream &ss) const {
+  ss << CXXCodeGen::newline;
+}
+
+InnerNode *
+NewLineNode::lift() const {
+  std::vector<StringTreeRef> v({getsingleton()});
+  InnerNode *node = new InnerNode(v);
+  return node;
+}
+
+static void
+nop(void *) {
+}
+
+StringTreeRef
+NewLineNode::getsingleton() {
+  static NewLineNode singleton;
+  static StringTreeRef singletonptr(&singleton, nop);
+  return singletonptr;
+}
+
+bool
+SourcePosNode::classof(const StringTree *node) {
+  return node->getKind() == StringTreeKind::SourcePos;
+}
+
+SourcePosNode::SourcePosNode(std::string f, size_t l)
+    : StringTree(StringTreeKind::SourcePos), filename(f), lineno(l){};
+
+StringTree *
+SourcePosNode::clone() const {
+  return (StringTree *)this;
+}
+
+void
+SourcePosNode::flush(Stream &ss) const {
+  ss.setLineInfo(filename, lineno);
+}
+
+InnerNode *
+SourcePosNode::lift() const {
+  std::vector<StringTreeRef> v(
+      {std::make_shared<SourcePosNode>(filename, lineno)});
+  InnerNode *node = new InnerNode(v);
+  return node;
+}
+
 StringTreeRef
 makeInnerNode(const std::vector<StringTreeRef> &v) {
   return std::make_shared<InnerNode>(v);
@@ -92,7 +153,7 @@ makeInnerNode(const std::vector<StringTreeRef> &v) {
 
 StringTreeRef
 makeNewLineNode() {
-  return std::make_shared<TokenNode>("\n");
+  return NewLineNode::getsingleton();
 }
 
 StringTreeRef
@@ -143,6 +204,15 @@ separateByBlankLines(const std::vector<StringTreeRef> &strs) {
 }
 
 StringTreeRef
+foldWithSemicolon(const std::vector<StringTreeRef> &stmts) {
+  auto node = makeVoidNode();
+  for (auto &stmt : stmts) {
+    node = node + stmt + makeTokenNode(";") + makeNewLineNode();
+  }
+  return node;
+}
+
+StringTreeRef
 join(const std::string &delim, const std::vector<StringTreeRef> &strs) {
   auto acc = makeVoidNode();
   bool alreadyPrinted = false;
@@ -169,6 +239,11 @@ wrapWithSquareBracket(const StringTreeRef &str) {
 StringTreeRef
 wrapWithBrace(const StringTreeRef &str) {
   return wrapWithStr("{", str, "}");
+}
+
+StringTreeRef
+wrapWithXcodeMlIdentity(const StringTreeRef &type) {
+  return makeTokenNode("__xcodeml_identity<") + type + makeTokenNode(">::t");
 }
 
 } // namespace CXXCodeGen

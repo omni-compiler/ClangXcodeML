@@ -7,9 +7,9 @@
 #include "llvm/ADT/Optional.h"
 #include "llvm/Support/Casting.h"
 #include "StringTree.h"
+#include "XcodeMlNns.h"
 #include "XcodeMlType.h"
-#include "XcodeMlEnvironment.h"
-#include "XcodeMlType.h"
+#include "XcodeMlTypeTable.h"
 
 BOOST_AUTO_TEST_SUITE(xcodeml_type)
 

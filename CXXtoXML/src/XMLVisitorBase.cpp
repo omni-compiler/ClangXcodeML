@@ -27,15 +27,8 @@ OptEmitSourceRange("range", cl::desc("emit 'range'"),
 
 // implementation of XMLVisitorBaseImpl
 
-XMLVisitorBaseImpl::XMLVisitorBaseImpl(MangleContext *MC,
-    xmlNodePtr CurNode,
-    TypeTableInfo *TTI,
-    NnsTableInfo *NTI)
-    : XMLRAVpool(this),
-      mangleContext(MC),
-      curNode(CurNode),
-      typetableinfo(TTI),
-      nnstableinfo(NTI) {
+XMLVisitorBaseImpl::XMLVisitorBaseImpl(MangleContext *MC, xmlNodePtr CurNode)
+    : XMLRAVpool(this), mangleContext(MC), curNode(CurNode) {
 }
 
 xmlNodePtr
@@ -65,7 +58,8 @@ XMLVisitorBaseImpl::newProp(const char *Name, const char *Val, xmlNodePtr N) {
 
 void
 XMLVisitorBaseImpl::newBoolProp(const char *Name, bool Val, xmlNodePtr N) {
-  newProp(Name, Val ? "1" : "0", N);
+  if (Val)
+    newProp(Name, "1", N);
 }
 
 void

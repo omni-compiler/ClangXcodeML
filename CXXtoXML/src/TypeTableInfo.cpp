@@ -1,7 +1,8 @@
 #include "XMLVisitorBase.h"
+#include "TypeTableInfo.h"
+#include "NnsTableInfo.h"
 #include "DeclarationsVisitor.h"
 #include "ClangOperator.h"
-#include "TypeTableInfo.h"
 #include "XcodeMlNameElem.h"
 
 #include <iostream>
@@ -35,8 +36,9 @@ static std::ifstream mapfile;
 static bool map_is_already_set = false;
 static std::map<std::string, std::string> typenamemap;
 
-TypeTableInfo::TypeTableInfo(MangleContext *MC, InheritanceInfo *II)
-    : mangleContext(MC), inheritanceinfo(II) {
+TypeTableInfo::TypeTableInfo(
+    MangleContext *MC, InheritanceInfo *II, NnsTableInfo *NTI)
+    : mangleContext(MC), inheritanceinfo(II), nnstableinfo(NTI) {
   mapFromNameToQualType.clear();
   mapFromQualTypeToName.clear();
   mapFromQualTypeToXmlNodePtr.clear();
@@ -49,6 +51,8 @@ TypeTableInfo::TypeTableInfo(MangleContext *MC, InheritanceInfo *II)
   seqForEnumType = 0;
   seqForClassType = 0;
   seqForTemplateTypeParmType = 0;
+  seqForInjectedClassNameType = 0;
+  seqForMemberPointerType = 0;
   seqForOtherType = 0;
 
   TypeElements.clear();
@@ -75,8 +79,7 @@ TypeTableInfo::registerPointerType(QualType T) {
   case Type::Pointer:
   case Type::BlockPointer:
   case Type::LValueReference:
-  case Type::RValueReference:
-  case Type::MemberPointer: OS << "Pointer" << seqForPointerType++; break;
+  case Type::RValueReference: OS << "Pointer" << seqForPointerType++; break;
   default: abort();
   }
   return mapFromQualTypeToName[T] = OS.str();
@@ -153,6 +156,28 @@ TypeTableInfo::registerTemplateTypeParmType(QualType T) {
 
   raw_string_ostream OS(name);
   OS << "TemplateTypeParm" << seqForTemplateTypeParmType++;
+  return mapFromQualTypeToName[T] = OS.str();
+}
+
+std::string
+TypeTableInfo::registerInjectedClassNameType(QualType T) {
+  assert(T->getTypeClass() == Type::InjectedClassName);
+  std::string name = mapFromQualTypeToName[T];
+  assert(name.empty());
+
+  raw_string_ostream OS(name);
+  OS << "InjectedClassName" << seqForInjectedClassNameType++;
+  return mapFromQualTypeToName[T] = OS.str();
+}
+
+std::string
+TypeTableInfo::registerMemberPointerType(QualType T) {
+  assert(T->getTypeClass() == Type::MemberPointer);
+  std::string name = mapFromQualTypeToName[T];
+  assert(name.empty());
+
+  raw_string_ostream OS(name);
+  OS << "MemberPointer" << seqForMemberPointerType++;
   return mapFromQualTypeToName[T] = OS.str();
 }
 
@@ -274,6 +299,69 @@ makeInheritanceNode(TypeTableInfo &TTI, const CXXRecordDecl *RD) {
   return inheritanceNode;
 }
 
+namespace {
+
+void
+commonSetUpForRecordDecl(
+    xmlNodePtr node, const RecordDecl *RD, TypeTableInfo &TTI) {
+  assert(RD);
+  xmlNewProp(node,
+      BAD_CAST "cxx_class_kind",
+      BAD_CAST getTagKindAsString(RD->getTagKind()));
+  if (RD->isAnonymousStructOrUnion())
+    xmlNewProp(node, BAD_CAST "is_anonymous", BAD_CAST "1");
+
+  const auto className = RD->getName();
+  xmlNewChild(node, nullptr, BAD_CAST "name", BAD_CAST className.data());
+
+  if (const auto CTS = dyn_cast<ClassTemplateSpecializationDecl>(RD)) {
+    xmlNewProp(node, BAD_CAST "is_template_instantiation", BAD_CAST "1");
+    const auto templArgs = xmlNewNode(nullptr, BAD_CAST "templateArguments");
+    for (auto &&arg : CTS->getTemplateArgs().asArray()) {
+      switch (arg.getKind()) {
+      case TemplateArgument::Null:
+        xmlAddChild(templArgs, xmlNewNode(nullptr, BAD_CAST "null"));
+        break;
+      case TemplateArgument::Type: {
+        const auto typeNode = xmlNewNode(nullptr, BAD_CAST "typeName");
+        xmlNewProp(typeNode,
+                   BAD_CAST "ref",
+                   BAD_CAST TTI.getTypeName(arg.getAsType()).c_str());
+        xmlAddChild(templArgs, typeNode);
+        break;
+      }
+      case TemplateArgument::Declaration:
+        xmlAddChild(templArgs, xmlNewNode(nullptr, BAD_CAST "declaration"));
+        break;
+      case TemplateArgument::NullPtr:
+        xmlAddChild(templArgs, xmlNewNode(nullptr, BAD_CAST "nullptr"));
+        break;
+      case TemplateArgument::Integral:
+        xmlAddChild(templArgs, xmlNewNode(nullptr, BAD_CAST "integral"));
+        break;
+      case TemplateArgument::Template:
+        xmlAddChild(templArgs, xmlNewNode(nullptr, BAD_CAST "template"));
+        break;
+      case TemplateArgument::TemplateExpansion:
+        xmlAddChild(templArgs, xmlNewNode(nullptr, BAD_CAST "template_expansion"));
+        break;
+      case TemplateArgument::Expression:
+        xmlAddChild(templArgs, xmlNewNode(nullptr, BAD_CAST "expression"));
+        break;
+      case TemplateArgument::Pack:
+        xmlAddChild(templArgs, xmlNewNode(nullptr, BAD_CAST "pack"));
+        break;
+      }
+    }
+    xmlAddChild(node, templArgs);
+  }
+  if (const auto CRD = dyn_cast<CXXRecordDecl>(RD)) {
+    xmlAddChild(node, makeInheritanceNode(TTI, CRD));
+  }
+}
+
+} // namespace
+
 void
 TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
   bool isQualified = false;
@@ -297,14 +385,16 @@ TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
     return;
   }
 
-  if (T.isConstQualified()) {
-    isQualified = true;
-  }
-  if (T.isVolatileQualified()) {
-    isQualified = true;
-  }
-  if (T.isRestrictQualified()) {
-    isQualified = true;
+  if (!isa<const ArrayType>(T.getTypePtr())) {
+    if (T.isConstQualified()) {
+      isQualified = true;
+    }
+    if (T.isVolatileQualified()) {
+      isQualified = true;
+    }
+    if (T.isRestrictQualified()) {
+      isQualified = true;
+    }
   }
 
   if (isQualified) {
@@ -357,65 +447,57 @@ TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
       break;
 
     case Type::Pointer:
-    case Type::BlockPointer:
-    case Type::MemberPointer: {
-      const PointerType *PT = dyn_cast<const PointerType>(T.getTypePtr());
-      if (PT) {
-        registerType(PT->getPointeeType(), nullptr, nullptr);
-      }
+    case Type::BlockPointer: {
       rawname = registerPointerType(T);
       Node = createNode(T, "pointerType", nullptr);
-      if (PT) {
+      if (const PointerType *PT =
+              dyn_cast<const PointerType>(T.getTypePtr())) {
+        registerType(PT->getPointeeType(), nullptr, nullptr);
         xmlNewProp(Node,
             BAD_CAST "ref",
             BAD_CAST getTypeName(PT->getPointeeType()).c_str());
       }
       pushType(T, Node);
     } break;
-
+    case Type::MemberPointer: {
+      rawname = registerMemberPointerType(T);
+      Node = createNode(T, "memberPointerType", nullptr);
+      const auto MPT = T.getTypePtr()->getAs<MemberPointerType>();
+      assert(MPT);
+      registerType(MPT->getPointeeType(), nullptr, nullptr);
+      xmlNewProp(Node,
+          BAD_CAST "ref",
+          BAD_CAST getTypeName(MPT->getPointeeType()).c_str());
+      const auto parent = QualType(MPT->getClass(), 0);
+      registerType(parent, nullptr, nullptr);
+      xmlNewProp(
+          Node, BAD_CAST "record", BAD_CAST getTypeName(parent).c_str());
+      pushType(T, Node);
+      break;
+    }
     case Type::LValueReference:
     case Type::RValueReference: {
-      const auto RT = dyn_cast<ReferenceType>(T.getTypePtr());
-      const auto Pointee = RT->getPointeeType();
-      if (RT) {
-        registerType(Pointee, nullptr, nullptr);
-      }
       rawname = registerPointerType(T);
       Node = createNode(T, "pointerType", nullptr);
       xmlNewProp(Node,
           BAD_CAST "reference",
           T->getTypeClass() == Type::LValueReference ? BAD_CAST "lvalue"
                                                      : BAD_CAST "rvalue");
-      if (RT) {
+      if (const auto RT = dyn_cast<ReferenceType>(T.getTypePtr())) {
+        const auto Pointee = RT->getPointeeType();
+        registerType(Pointee, nullptr, nullptr);
         xmlNewProp(
             Node, BAD_CAST "ref", BAD_CAST getTypeName(Pointee).c_str());
       }
       pushType(T, Node);
     } break;
 
-    case Type::ConstantArray: {
-      const ConstantArrayType *CAT =
-          dyn_cast<const ConstantArrayType>(T.getTypePtr());
-      if (CAT) {
-        registerType(CAT->getElementType(), nullptr, nullptr);
-      }
-      rawname = registerArrayType(T);
-      Node = createNode(T, "arrayType", nullptr);
-      if (CAT) {
-        xmlNewProp(Node,
-            BAD_CAST "element_type",
-            BAD_CAST getTypeName(CAT->getElementType()).c_str());
-        xmlNewProp(Node,
-            BAD_CAST "array_size",
-            BAD_CAST CAT->getSize().toString(10, false).c_str());
-      }
-      pushType(T, Node);
-    } break;
-
     case Type::IncompleteArray:
     case Type::VariableArray:
-    case Type::DependentSizedArray: {
-      const ArrayType *AT = dyn_cast<const ArrayType>(T.getTypePtr());
+    case Type::DependentSizedArray:
+    case Type::ConstantArray: {
+      ASTContext &CXT = mangleContext->getASTContext();
+      const ArrayType *AT = CXT.getAsArrayType(T);
       if (AT) {
         registerType(AT->getElementType(), nullptr, nullptr);
       }
@@ -425,6 +507,11 @@ TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
         xmlNewProp(Node,
             BAD_CAST "element_type",
             BAD_CAST getTypeName(AT->getElementType()).c_str());
+        const ConstantArrayType *CAT = dyn_cast<const ConstantArrayType>(AT);
+        if (CAT)
+          xmlNewProp(Node,
+                     BAD_CAST "array_size",
+                     BAD_CAST CAT->getSize().toString(10, false).c_str());
       }
       pushType(T, Node);
     } break;
@@ -495,6 +582,8 @@ TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
       rawname = registerOtherType(T);
       // XXX: temporary implementation
       Node = createNode(T, "otherType", nullptr);
+      xmlNewProp(
+          Node, BAD_CAST "clang_type_class", BAD_CAST(T->getTypeClassName()));
       pushType(T, Node);
       break;
 
@@ -502,13 +591,11 @@ TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
       rawname = registerRecordType(T);
       if (auto RD = T->getAsCXXRecordDecl()) {
         Node = createNode(T, "classType", nullptr);
-        xmlNewProp(Node,
-            BAD_CAST "cxx_class_kind",
-            BAD_CAST getTagKindAsString(RD->getTagKind()));
-        xmlNewProp(Node,
-            BAD_CAST "is_anonymous",
-            BAD_CAST(RD->isAnonymousStructOrUnion() ? "true" : "false"));
-        xmlAddChild(Node, makeInheritanceNode(*this, RD));
+        commonSetUpForRecordDecl(Node, RD, *this);
+        const auto DC = RD->getDeclContext();
+        assert(DC);
+        const auto nns = nnstableinfo->getNnsName(DC);
+        xmlNewProp(Node, BAD_CAST "nns", BAD_CAST(nns.c_str()));
         pushType(T, Node);
       } else if (T->isStructureType()) {
         Node = createNode(T, "structType", nullptr);
@@ -533,6 +620,8 @@ TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
       if (!ED) {
         break;
       }
+      const auto nameNode = makeNameNode(*this, ED);
+      xmlAddChild(Node, nameNode);
       auto def = ED->getDefinition();
       if (!def) {
         /* Forward declaration of enum is available in C++11
@@ -566,6 +655,20 @@ TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
       xmlNewProp(Node,
           BAD_CAST "clang_index",
           BAD_CAST std::to_string(TTP->getIndex()).c_str());
+      const auto nameNode = makeNameNode(*this, TTP);
+      xmlAddChild(Node, nameNode);
+      pushType(T, Node);
+      break;
+    }
+    case Type::InjectedClassName: {
+      // The injected class name of a class template
+      // or class template partial specialization
+      rawname = registerInjectedClassNameType(T);
+      Node = createNode(T, "injectedClassNameType", nullptr);
+      const auto ICN = cast<InjectedClassNameType>(T);
+      if (const auto RD = ICN->getDecl()) {
+        commonSetUpForRecordDecl(Node, RD, *this);
+      }
       pushType(T, Node);
       break;
     }
@@ -575,7 +678,6 @@ TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
     case Type::SubstTemplateTypeParmPack:
     case Type::TemplateSpecialization:
     case Type::Auto:
-    case Type::InjectedClassName:
     case Type::DependentName:
     case Type::DependentTemplateSpecialization:
     case Type::PackExpansion:
@@ -586,6 +688,8 @@ TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
       rawname = registerOtherType(T);
       // XXX: temporary implementation
       Node = createNode(T, "otherType", nullptr);
+      xmlNewProp(
+          Node, BAD_CAST "clang_type_class", BAD_CAST(T->getTypeClassName()));
       pushType(T, Node);
       break;
     }
@@ -698,8 +802,6 @@ TypeTableInfo::popTypeTableStack() {
   const auto typeTableNode = std::get<0>(typeTableStack.top());
   const auto latestTypes = std::get<1>(typeTableStack.top());
   for (auto T : latestTypes) {
-    mapFromQualTypeToName.erase(T);
-
     if (TypeElements.find(T) != TypeElements.end()) {
       /*
        * If data type definition element exists,
@@ -710,9 +812,9 @@ TypeTableInfo::popTypeTableStack() {
       xmlAddChild(typeTableNode, TypeElements[T]);
       TypeElements.erase(T);
     }
-
-    const auto name = mapFromQualTypeToName[T];
+    const auto name = mapFromQualTypeToName.at(T);
     mapFromNameToQualType.erase(name);
+    mapFromQualTypeToName.erase(T);
   }
   typeTableStack.pop();
 }

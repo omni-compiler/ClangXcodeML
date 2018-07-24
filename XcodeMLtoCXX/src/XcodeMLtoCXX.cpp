@@ -11,12 +11,11 @@
 #include <memory>
 #include <vector>
 #include "llvm/ADT/Optional.h"
-#include "Stream.h"
 #include "StringTree.h"
 #include "XMLString.h"
 #include "XcodeMlNns.h"
 #include "XcodeMlType.h"
-#include "XcodeMlEnvironment.h"
+#include "XcodeMlTypeTable.h"
 #include "XMLWalker.h"
 #include "TypeAnalyzer.h"
 #include "SourceInfo.h"

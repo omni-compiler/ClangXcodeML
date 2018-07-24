@@ -8,6 +8,7 @@ LLVM_CONFIG = /usr/local/bin/llvm-config
 CXX = /usr/local/bin/clang++
 CXXFLAGS = -O2 -std=c++11 \
 	$(PKG_CFLAGS) \
+	-I $(shell $(LLVM_CONFIG) --includedir) \
 	-I$(XCODEMLTOCXXSRCDIR) \
 	-D__STDC_LIMIT_MACROS -D__STDC_CONSTANT_MACROS $(PCHFLAGS)
 
@@ -30,7 +31,8 @@ OBJNAMES = XcodeMlType.o \
 	StringTree.o \
 	TypeAnalyzer.o \
 	XMLString.o \
-	XcodeMlEnvironment.o \
+	XcodeMlTypeTable.o \
+	XcodeMlNns.o \
 	SymbolAnalyzer.o \
 	SymbolBuilder.o
 
@@ -42,7 +44,9 @@ $(OBJS):
 XcodeMlType: \
 	$(XCODEMLTOCXXSRCDIR)/Stream.o \
 	$(XCODEMLTOCXXSRCDIR)/StringTree.o \
-	$(XCODEMLTOCXXSRCDIR)/XcodeMlEnvironment.o \
+	$(XCODEMLTOCXXSRCDIR)/XcodeMlTypeTable.o \
+	$(XCODEMLTOCXXSRCDIR)/XcodeMlName.o \
+	$(XCODEMLTOCXXSRCDIR)/XcodeMlNns.o \
 	$(XCODEMLTOCXXSRCDIR)/XcodeMlType.o
 
 CXXCodeGenStream: \

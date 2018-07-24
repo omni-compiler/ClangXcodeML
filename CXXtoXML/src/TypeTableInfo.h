@@ -6,12 +6,15 @@
 #include <tuple>
 #include <unordered_map>
 
+class NnsTableInfo;
+
 class TypeTableInfo {
   clang::MangleContext *mangleContext;
+  InheritanceInfo *inheritanceinfo;
+  NnsTableInfo *nnstableinfo;
   std::unordered_map<std::string, clang::QualType> mapFromNameToQualType;
   std::unordered_map<clang::QualType, std::string> mapFromQualTypeToName;
   std::unordered_map<clang::QualType, xmlNodePtr> mapFromQualTypeToXmlNodePtr;
-  InheritanceInfo *inheritanceinfo;
   std::unordered_map<clang::QualType, bool> normalizability;
   std::stack<std::tuple<xmlNodePtr, std::vector<clang::QualType>>>
       typeTableStack;
@@ -25,6 +28,8 @@ class TypeTableInfo {
   int seqForEnumType;
   int seqForClassType;
   int seqForTemplateTypeParmType;
+  int seqForInjectedClassNameType;
+  int seqForMemberPointerType;
   int seqForOtherType;
 
   std::unordered_map<clang::QualType, xmlNodePtr> TypeElements;
@@ -40,6 +45,8 @@ class TypeTableInfo {
   std::string registerRecordType(clang::QualType T); // "S*", "U*", or "C*"
   std::string registerEnumType(clang::QualType T); // "E*"
   std::string registerTemplateTypeParmType(clang::QualType T);
+  std::string registerInjectedClassNameType(clang::QualType T);
+  std::string registerMemberPointerType(clang::QualType T);
   std::string registerOtherType(clang::QualType T); // "O*"
   void pushType(const clang::QualType &, xmlNodePtr);
 
@@ -50,8 +57,9 @@ public:
   TypeTableInfo &operator=(const TypeTableInfo &) = delete;
   TypeTableInfo &operator=(const TypeTableInfo &&) = delete;
 
-  explicit TypeTableInfo(
-      clang::MangleContext *MC, InheritanceInfo *II); // default constructor
+  explicit TypeTableInfo(clang::MangleContext *MC,
+      InheritanceInfo *II,
+      NnsTableInfo *NTI); // default constructor
 
   void registerType(
       clang::QualType T, xmlNodePtr *retNode, xmlNodePtr traversingNode);
