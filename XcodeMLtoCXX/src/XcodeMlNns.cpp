@@ -5,6 +5,10 @@
 #include <vector>
 #include "llvm/ADT/Optional.h"
 #include "llvm/Support/Casting.h"
+#include <libxml/tree.h>
+#include <libxml/parser.h>
+#include <libxml/xpath.h>
+#include <libxml/xpathInternals.h>
 #include "StringTree.h"
 #include "Util.h"
 #include "XcodeMlNns.h"

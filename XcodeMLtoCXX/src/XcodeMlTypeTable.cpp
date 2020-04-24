@@ -4,6 +4,7 @@
 #include <map>
 #include <memory>
 #include <cassert>
+#include <iostream>
 #include <libxml/tree.h>
 #include "llvm/ADT/Optional.h"
 #include "StringTree.h"
@@ -66,7 +67,12 @@ TypeTable::at_or_throw(TypeTable::TypeMap &map,
     throw std::out_of_range(msg);
   }
 }
+void TypeTable::dump()
+{
+  for(const auto &e : map){
 
+  }
+}
 const TypeRef &
 TypeTable::at_or_throw(const TypeTable::TypeMap &map,
     const std::string &key,

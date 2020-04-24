@@ -21,7 +21,10 @@
 #include "XcodeMlType.h"
 #include "XcodeMlUtil.h"
 #include "XcodeMlTypeTable.h"
+#include "AttrProc.h"
 #include "TypeAnalyzer.h"
+#include "CodeBuilder.h"
+#include "ClangDeclHandler.h"
 
 using TypeAnalyzer = XMLWalker<void, xmlXPathContextPtr, XcodeMl::TypeTable &>;
 
@@ -57,6 +60,12 @@ DEFINE_TA(pointerTypeProc) {
   const auto refProp = getPropOrNull(node, "reference");
   if (refProp.hasValue() && (*refProp == "lvalue")) {
     auto reference = XcodeMl::makeLValueReferenceType(name, refName);
+    map[name] = reference;
+    return;
+  }
+
+  if (refProp.hasValue() && (*refProp == "rvalue")) {
+    auto reference = XcodeMl::makeRValueReferenceType(name, refName);
     map[name] = reference;
     return;
   }
@@ -161,21 +170,41 @@ getBases(xmlNodePtr node, xmlXPathContextPtr ctxt) {
   return result;
 }
 
-llvm::Optional<XcodeMl::ClassType::TemplateArgList>
+llvm::Optional<XcodeMl::TemplateArgList>
 getTemplateArgs(xmlNodePtr node, xmlXPathContextPtr ctxt) {
   using namespace XcodeMl;
-  using MaybeList = llvm::Optional<ClassType::TemplateArgList>;
+  using MaybeList = llvm::Optional<TemplateArgList>;
   const auto targsNode = findFirst(node, "templateArguments", ctxt);
   if (!targsNode) {
     return MaybeList();
   }
-  ClassType::TemplateArgList targs;
-  for (auto &&targNode : findNodes(targsNode, "typeName", ctxt)) {
-    targs.push_back(getProp(targNode, "ref"));
+  TemplateArgList targs;
+  for (auto &&targNode : findNodes(targsNode, "*", ctxt)) {
+    TemplateArg arg;
+    if(strcmp((const char *) targNode->name, "typeName")==0){
+      arg.argType = 0;
+      arg.ident = getProp(targNode, "ref");
+    }else if(strcmp((const char *)targNode->name, "integral")==0){
+      arg.argType = 1;
+      arg.ident = getProp(targNode, "value");
+    }else if(strcmp((const char *)targNode->name, "template")==0){
+      arg.argType = 1;
+      arg.ident = getProp(targNode, "name") ; 
+    }else if(strcmp((const char *)targNode->name, "pack") == 0){
+      arg.argType = 1;
+      arg.ident = "...";
+    }else if(strcmp((const char *)targNode->name, "expression")== 0){
+      arg.argType = 1;
+      arg.ident = "expression" ;
+    }else{
+      arg.argType = 1;
+      arg.ident = std::string("/*XXX") + (const char*)targNode->name
+	+ std::string("*/") ;
+    }
+    targs.push_back(arg);
   }
   return MaybeList(targs);
 }
-
 DEFINE_TA(classTypeProc) {
   XMLString elemName = xmlGetProp(node, BAD_CAST "type");
   const auto nameSpelling = getContent(findFirst(node, "name", ctxt));
@@ -183,6 +212,7 @@ DEFINE_TA(classTypeProc) {
                                               : makeTokenNode(nameSpelling);
   const auto bases = getBases(node, ctxt);
   const auto targs = getTemplateArgs(node, ctxt);
+  const auto template_inst = xmlGetProp(node, BAD_CAST "is_template_instantiation");
   XcodeMl::ClassType::Symbols symbols;
   const auto ids = findNodes(node, "symbols/id", ctxt);
   for (auto &idElem : ids) {
@@ -195,10 +225,10 @@ DEFINE_TA(classTypeProc) {
   const auto classKind = getProp(node, "cxx_class_kind");
   if (classKind == "union") {
     map[elemName] = XcodeMl::makeCXXUnionType(
-        elemName, nnsident, className, bases, symbols, targs);
+					      elemName, nnsident, className, bases, symbols, targs, node);
   } else {
     map[elemName] = XcodeMl::makeClassType(
-        elemName, nnsident, className, bases, symbols, targs);
+					   elemName, nnsident, className, bases, symbols, targs, node);
   }
 }
 
@@ -211,7 +241,63 @@ DEFINE_TA(enumTypeProc) {
 DEFINE_TA(TemplateTypeParmTypeProc) {
   const auto dtident = getProp(node, "type");
   const auto name = getContent(findFirst(node, "name", ctxt));
-  map[dtident] = XcodeMl::makeTemplateTypeParm(dtident, makeTokenNode(name));
+  const auto pack = std::stoi(getProp(node, "pack"));
+  //std::cerr <<"Processing"<<dtident<<","<<name<<std::endl;
+  map[dtident] = XcodeMl::makeTemplateTypeParm(dtident, makeTokenNode(name),
+					       pack);
+}
+DEFINE_TA(otherTypeProc){
+  const auto dtident = getProp(node, "type");
+  const auto name = getContent(findFirst(node, "name", ctxt));
+  map[dtident] = XcodeMl::makeOtherType(dtident);
+}
+
+DEFINE_TA(dependentTemplateSpecializationTypeProc){
+  const auto dtident = getProp(node, "type");
+  const auto name = getContent(findFirst(node, "name", ctxt));
+  map[dtident] = XcodeMl::makeDependentTemplateSpecializationType(dtident);
+}
+
+DEFINE_TA(atomicTypeProc){
+  const auto dtident = getProp(node, "type");
+  const auto vident = getProp(node, "valueType");
+  const auto name = getContent(findFirst(node, "name", ctxt));
+  map[dtident] = XcodeMl::makeAtomicType(dtident, vident);
+}
+
+DEFINE_TA(unaryTransformTypeProc){
+  const auto dtident = getProp(node, "type");
+  const auto utype = getProp(node, "Typeparam");
+  const auto name = getContent(findFirst(node, "name", ctxt));
+  map[dtident] = XcodeMl::makeUnaryTransformType(dtident, utype);
+}
+
+DEFINE_TA(packExpansionTypeProc){
+  const auto dtident = getProp(node, "type");
+  const auto name = getContent(findFirst(node, "name", ctxt));
+  const auto pattern = getProp(node, "pattern");
+  map[dtident] = XcodeMl::makePackExpansionType(dtident, pattern);
+}
+
+DEFINE_TA(declTypeProc){
+  const auto dtident = getProp(node, "type");
+  const auto name = getContent(findFirst(node, "name", ctxt));
+  map[dtident] = XcodeMl::makeDeclType(dtident);
+}
+
+DEFINE_TA(DependentNameProc){
+  const auto dtident = getProp(node, "type");
+  const auto name = getContent(findFirst(node, "name", ctxt));
+  const auto dependtype = getProp(node, "dependtype");
+  const auto symbol = getProp(node, "symbol");
+  map[dtident] = XcodeMl::makeDependentNameType(dtident, dependtype, symbol);
+}
+DEFINE_TA(TemplateSpecializationTypeProc){
+  const auto dtident = getProp(node, "type");
+  const auto name = getContent(findFirst(node, "name", ctxt));
+  const auto targs = getTemplateArgs(node, ctxt);
+  map[dtident] =
+    XcodeMl::makeTemplateSpecializationType(dtident, makeTokenNode(name),targs);
 }
 
 const std::vector<std::string> identicalFndDataTypeIdents = {
@@ -272,7 +358,16 @@ const TypeAnalyzer XcodeMLTypeAnalyzer("TypeAnalyzer",
         std::make_tuple("classType", classTypeProc),
         std::make_tuple("enumType", enumTypeProc),
         std::make_tuple("TemplateTypeParmType", TemplateTypeParmTypeProc),
+	std::make_tuple("TemplateSpecializationType", TemplateSpecializationTypeProc),
         std::make_tuple("injectedClassNameType", classTypeProc),
+	std::make_tuple("DependentNameType", DependentNameProc),
+	std::make_tuple("dependentTemplateSpecializationType",
+			dependentTemplateSpecializationTypeProc),
+	std::make_tuple("atomicType", atomicTypeProc),
+	std::make_tuple("unaryTransformType", unaryTransformTypeProc),
+	std::make_tuple("PackExpansionType", packExpansionTypeProc),
+	std::make_tuple("decltypeType", declTypeProc),
+	std::make_tuple("otherType", otherTypeProc),
     });
 
 /*!

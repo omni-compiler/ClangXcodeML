@@ -62,6 +62,7 @@ const std::map<std::string, std::string> opMap = {
     {"deleteArrayExpr", "delete[]"},
     {"AddrOfExpr", "&"},
     {"pointerRef", "*"},
+    {"memberIndirectRef", "::*"},
     {"memberPointerRef", ".*"},
     {"unaryPlusExpr", "+"},
     {"unaryMinusExpr", "-"},

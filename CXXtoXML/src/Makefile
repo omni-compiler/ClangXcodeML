@@ -1,5 +1,5 @@
-LLVM_CONFIG = /usr/local/bin/llvm-config
-CXX = /usr/local/bin/clang++
+LLVM_CONFIG = /usr/local/bin/llvm-config90
+CXX = /usr/local/bin/clang++90
 #LLVM_CONFIG = /usr/bin/llvm-config-3.6
 #CXX = /usr/bin/clang++-3.6
 CXXFLAGS = -O2 -g -Wall -Wextra -Wno-unused-parameter -fno-rtti -std=c++11 -pedantic \

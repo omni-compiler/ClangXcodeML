@@ -18,7 +18,6 @@
 using namespace clang;
 using namespace llvm;
 
-cl::OptionCategory CXX2XMLCategory("CXXtoXML options");
 
 static cl::opt<bool> OptTraceTypeTable("trace-typeTable",
     cl::desc("emit traces on <typeTable>"),
@@ -62,6 +61,8 @@ TypeTableInfo::TypeTableInfo(
   seqForTemplateTypeParmType = 0;
   seqForInjectedClassNameType = 0;
   seqForMemberPointerType = 0;
+  seqForTemplateSpecializationType = 0;
+  seqForDependentNameType = 0;
   seqForOtherType = 0;
 
   TypeElements.clear();
@@ -79,9 +80,20 @@ TypeTableInfo::registerBasicType(QualType T) {
 }
 
 std::string
+TypeTableInfo::registerTemplateSpecializationType(QualType T) {
+  std::string name = mapFromQualTypeToName[T];
+  assert(name.empty());
+
+  raw_string_ostream OS(name);
+  OS << "TemplateSpecialization" << seqForTemplateSpecializationType++;
+  return mapFromQualTypeToName[T] = OS.str();
+}
+
+std::string
 TypeTableInfo::registerPointerType(QualType T) {
   std::string name = mapFromQualTypeToName[T];
   assert(name.empty());
+  using clang::Type;
 
   raw_string_ostream OS(name);
   switch (T->getTypeClass()) {
@@ -96,6 +108,7 @@ TypeTableInfo::registerPointerType(QualType T) {
 
 std::string
 TypeTableInfo::registerFunctionType(QualType T) {
+  using clang::Type;
   assert(T->getTypeClass() == Type::FunctionProto
       || T->getTypeClass() == Type::FunctionNoProto);
   std::string name = mapFromQualTypeToName[T];
@@ -109,6 +122,7 @@ TypeTableInfo::registerFunctionType(QualType T) {
 std::string
 TypeTableInfo::registerArrayType(QualType T) {
   std::string name = mapFromQualTypeToName[T];
+  using clang::Type;
   assert(name.empty());
 
   raw_string_ostream OS(name);
@@ -128,7 +142,7 @@ TypeTableInfo::registerArrayType(QualType T) {
 
 std::string
 TypeTableInfo::registerRecordType(QualType T) {
-  assert(T->getTypeClass() == Type::Record);
+  assert(T->getTypeClass() == clang::Type::Record);
   std::string name = mapFromQualTypeToName[T];
   assert(name.empty());
 
@@ -148,7 +162,7 @@ TypeTableInfo::registerRecordType(QualType T) {
 
 std::string
 TypeTableInfo::registerEnumType(QualType T) {
-  assert(T->getTypeClass() == Type::Enum);
+  assert(T->getTypeClass() == clang::Type::Enum);
   std::string name = mapFromQualTypeToName[T];
   assert(name.empty());
 
@@ -159,7 +173,7 @@ TypeTableInfo::registerEnumType(QualType T) {
 
 std::string
 TypeTableInfo::registerTemplateTypeParmType(QualType T) {
-  assert(T->getTypeClass() == Type::TemplateTypeParm);
+  assert(T->getTypeClass() == clang::Type::TemplateTypeParm);
   std::string name = mapFromQualTypeToName[T];
   assert(name.empty());
 
@@ -170,7 +184,7 @@ TypeTableInfo::registerTemplateTypeParmType(QualType T) {
 
 std::string
 TypeTableInfo::registerInjectedClassNameType(QualType T) {
-  assert(T->getTypeClass() == Type::InjectedClassName);
+  assert(T->getTypeClass() == clang::Type::InjectedClassName);
   std::string name = mapFromQualTypeToName[T];
   assert(name.empty());
 
@@ -181,7 +195,7 @@ TypeTableInfo::registerInjectedClassNameType(QualType T) {
 
 std::string
 TypeTableInfo::registerMemberPointerType(QualType T) {
-  assert(T->getTypeClass() == Type::MemberPointer);
+  assert(T->getTypeClass() == clang::Type::MemberPointer);
   std::string name = mapFromQualTypeToName[T];
   assert(name.empty());
 
@@ -189,7 +203,16 @@ TypeTableInfo::registerMemberPointerType(QualType T) {
   OS << "MemberPointer" << seqForMemberPointerType++;
   return mapFromQualTypeToName[T] = OS.str();
 }
+std::string
+TypeTableInfo::registerDependentNameType(QualType T){
+  assert(T->getTypeClass() == clang::Type::DependentName);
+  std::string name = mapFromQualTypeToName[T];
+  assert(name.empty());
 
+  raw_string_ostream OS(name);
+  OS << "DependentName" << seqForDependentNameType++;
+  return mapFromQualTypeToName[T] = OS.str();
+}
 std::string
 TypeTableInfo::registerOtherType(QualType T) {
   std::string name = mapFromQualTypeToName[T];
@@ -326,6 +349,7 @@ commonSetUpForRecordDecl(
 
   if (const auto CTS = dyn_cast<ClassTemplateSpecializationDecl>(RD)) {
     xmlNewProp(node, BAD_CAST "is_template_instantiation", BAD_CAST "1");
+    auto ST = CTS->getSpecializedTemplate();
     const auto templArgs = xmlNewNode(nullptr, BAD_CAST "templateArguments");
     for (auto &&arg : CTS->getTemplateArgs().asArray()) {
       switch (arg.getKind()) {
@@ -347,16 +371,26 @@ commonSetUpForRecordDecl(
         xmlAddChild(templArgs, xmlNewNode(nullptr, BAD_CAST "nullptr"));
         break;
       case TemplateArgument::Integral:
-        xmlAddChild(templArgs, xmlNewNode(nullptr, BAD_CAST "integral"));
+        {
+        const auto integNode = xmlNewNode(nullptr, BAD_CAST "integral");
+        xmlNewProp(integNode,
+                   BAD_CAST "value",
+                   BAD_CAST arg.getAsIntegral().toString(10).c_str());
+        xmlAddChild(templArgs, integNode);
+        }
         break;
-      case TemplateArgument::Template:
+      case TemplateArgument::Template:{
+        auto tn = arg.getAsTemplate();
         xmlAddChild(templArgs, xmlNewNode(nullptr, BAD_CAST "template"));
         break;
+      }
       case TemplateArgument::TemplateExpansion:
         xmlAddChild(templArgs, xmlNewNode(nullptr, BAD_CAST "template_expansion"));
         break;
-      case TemplateArgument::Expression:
-        xmlAddChild(templArgs, xmlNewNode(nullptr, BAD_CAST "expression"));
+      case TemplateArgument::Expression:{
+        const auto exprNode = xmlAddChild(templArgs, xmlNewNode(nullptr, BAD_CAST "expression"));
+        const auto theExpr = arg.getAsExpr();
+      }
         break;
       case TemplateArgument::Pack:
         xmlAddChild(templArgs, xmlNewNode(nullptr, BAD_CAST "pack"));
@@ -377,6 +411,7 @@ TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
   bool isQualified = false;
   xmlNodePtr Node = nullptr;
   std::string rawname;
+  using clang::Type;
 
   if (T.isNull()) {
     return;
@@ -395,7 +430,7 @@ TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
     return;
   }
 
-  if (!isa<const ArrayType>(T.getTypePtr())) {
+  if (!isa<const clang::ArrayType>(T.getTypePtr())) {
     if (T.isConstQualified()) {
       isQualified = true;
     }
@@ -460,8 +495,8 @@ TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
     case Type::BlockPointer: {
       rawname = registerPointerType(T);
       Node = createNode(T, "pointerType", nullptr);
-      if (const PointerType *PT =
-              dyn_cast<const PointerType>(T.getTypePtr())) {
+      if (const auto *PT =
+            dyn_cast<const clang::PointerType>(T.getTypePtr())) {
         registerType(PT->getPointeeType(), nullptr, nullptr);
         xmlNewProp(Node,
             BAD_CAST "ref",
@@ -507,7 +542,7 @@ TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
     case Type::DependentSizedArray:
     case Type::ConstantArray: {
       ASTContext &CXT = mangleContext->getASTContext();
-      const ArrayType *AT = CXT.getAsArrayType(T);
+      const clang::ArrayType *AT = CXT.getAsArrayType(T);
       if (AT) {
         registerType(AT->getElementType(), nullptr, nullptr);
       }
@@ -537,9 +572,11 @@ TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
 
     case Type::FunctionProto:
     case Type::FunctionNoProto: {
-      const FunctionType *FT = dyn_cast<const FunctionType>(T.getTypePtr());
+      const auto *FT = dyn_cast<const clang::FunctionType>(T.getTypePtr());
       if (FT) {
         registerType(FT->getReturnType(), nullptr, nullptr);
+        if(mapFromQualTypeToName.find(T) != mapFromQualTypeToName.end())
+            break;
       }
       rawname = registerFunctionType(T);
       Node = createNode(T, "functionType", nullptr);
@@ -582,13 +619,31 @@ TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
       Node = createNode(T, "typedefType", nullptr);
       pushType(T, Node);
       break;
-
+    case Type::Decltype:{
+      rawname = registerOtherType(T);
+      Node = createNode(T, "decltypeType", nullptr);
+      auto DT = dyn_cast<DecltypeType>(T);
+      //auto UT = DT->getUnderlyingType();
+      //auto E = DT->getUnderlyingExpr();
+      //UT->dump();
+      //E->dump();
+      pushType(T,Node);
+      break;
+    }
+    case Type::UnaryTransform:{
+      rawname = registerOtherType(T);
+      auto UT = dyn_cast<UnaryTransformType>(T);
+      Node = createNode(T, "unaryTransformType", nullptr);
+      xmlNewProp(Node, BAD_CAST "Typeparam",
+                 BAD_CAST (getTypeName(UT->getBaseType()).c_str()));
+      pushType(T, Node);
+      break;
+    }
     case Type::Adjusted:
     case Type::Decayed:
     case Type::TypeOfExpr:
     case Type::TypeOf:
-    case Type::Decltype:
-    case Type::UnaryTransform:
+
       rawname = registerOtherType(T);
       // XXX: temporary implementation
       Node = createNode(T, "otherType", nullptr);
@@ -667,6 +722,8 @@ TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
       xmlNewProp(Node,
           BAD_CAST "clang_index",
           BAD_CAST std::to_string(TTP->getIndex()).c_str());
+      xmlNewProp(Node, BAD_CAST "pack", (TTP->isParameterPack() ?
+                                         BAD_CAST "1" : BAD_CAST "0"));
       const auto nameNode = makeNameNode(*this, TTP);
       xmlAddChild(Node, nameNode);
       pushType(T, Node);
@@ -685,19 +742,198 @@ TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
       pushType(T, Node);
       break;
     }
+    case Type::TemplateSpecialization:{
+      rawname = registerTemplateSpecializationType(T);
+      //std::cerr << "OTHER TYPE1"<< T->getTypeClassName()<<std::endl;
+      // XXX: temporary implementation
+      Node = createNode(T, "TemplateSpecializationType", nullptr);
+      xmlNewProp(
+                 Node, BAD_CAST "clang_type_class", BAD_CAST(T->getTypeClassName()));
+      auto TST = cast<TemplateSpecializationType>(T);
+      auto TD = TST->getTemplateName().getUnderlying().getAsTemplateDecl();
+
+      //TST->dump();
+      xmlNewChild(Node,
+                  nullptr,
+                  BAD_CAST "name",
+                  BAD_CAST TD->getName().data());
+      const auto templArgs = xmlNewNode(nullptr, BAD_CAST "templateArguments");
+      for(auto arg : *TST){
+        switch (arg.getKind()) {
+        case TemplateArgument::Null:
+          xmlAddChild(templArgs, xmlNewNode(nullptr, BAD_CAST "null"));
+          break;
+        case TemplateArgument::Type: {
+          const auto typeNode = xmlNewNode(nullptr, BAD_CAST "typeName");
+          xmlNewProp(typeNode,
+                     BAD_CAST "ref",
+                     BAD_CAST getTypeName(arg.getAsType()).c_str());
+          xmlAddChild(templArgs, typeNode);
+          break;
+        }
+        case TemplateArgument::Declaration:
+          xmlAddChild(templArgs, xmlNewNode(nullptr, BAD_CAST "declaration"));
+          break;
+        case TemplateArgument::NullPtr:
+          xmlAddChild(templArgs, xmlNewNode(nullptr, BAD_CAST "nullptr"));
+          break;
+        case TemplateArgument::Integral:
+          {
+            const auto integNode = xmlNewNode(nullptr, BAD_CAST "integral");
+            xmlNewProp(integNode,
+                       BAD_CAST "value",
+                       BAD_CAST arg.getAsIntegral().toString(10).c_str());
+            xmlAddChild(templArgs, integNode);
+          }
+          break;
+        case TemplateArgument::Template:{
+          const auto tnode = xmlNewNode(nullptr, BAD_CAST "template");
+          auto tn = arg.getAsTemplate();
+          auto tnt = tn.getAsTemplateDecl();
+          //tnt->dump();
+          //std::cout <<getTypeName(tn) <<std:endl;
+          if(tnt != nullptr){
+            xmlNewProp(tnode,
+                       BAD_CAST "name",
+                       BAD_CAST tnt->getName().str().c_str());
+          }
+          xmlAddChild(templArgs, tnode);
+        }
+          break;
+        case TemplateArgument::TemplateExpansion:
+          xmlAddChild(templArgs, xmlNewNode(nullptr, BAD_CAST "template_expansion"));
+          break;
+        case TemplateArgument::Expression:{
+          
+          xmlAddChild(templArgs, xmlNewNode(nullptr, BAD_CAST "expression"));
+          break;
+        }
+        case TemplateArgument::Pack:
+          xmlAddChild(templArgs, xmlNewNode(nullptr, BAD_CAST "pack"));
+          break;
+        }
+      }
+      xmlAddChild(Node, templArgs);
+      pushType(T, Node);
+      break;
+    }
+    case Type::DependentName:{
+      rawname = registerDependentNameType(T);
+      auto DN =cast<DependentNameType>(T);
+      Node = createNode(T, "DependentNameType", nullptr);
+
+      auto II = DN->getIdentifier();
+      auto NS = DN->getQualifier();
+      StringRef SR;
+      if(NS->getAsNamespace()){
+      }
+      if(NS->getAsNamespaceAlias()){
+      }
+      if(NS->getAsRecordDecl()){
+      }
+      if(auto TT=NS->getAsType()){
+        auto QT = QualType(TT, 0);
+        xmlNewProp( Node, BAD_CAST "dependtype",
+                    BAD_CAST (getTypeName(QT).c_str()));
+      }
+      xmlNewProp(
+                 Node, BAD_CAST "symbol", BAD_CAST(II->getName()).str().c_str());
+      pushType(T, Node);
+      break;
+    }
+    case Type::PackExpansion:{
+      rawname = registerOtherType(T);
+      auto PET = dyn_cast<PackExpansionType>(T);
+      Node = createNode(T, "PackExpansionType", nullptr);
+      xmlNewProp (Node,
+                  BAD_CAST "pattern",
+                  BAD_CAST(getTypeName(PET->getPattern()).c_str()));
+      pushType(T, Node);
+      break;
+    }
+    case Type::DependentTemplateSpecialization:{
+      rawname = registerOtherType(T);
+      auto DTS = dyn_cast<DependentTemplateSpecializationType>(T);
+      //DTS->dump();
+
+      // XXX: temporary implementation
+      Node = createNode(T, "dependentTemplateSpecializationType", nullptr);
+      const auto templArgs = xmlNewNode(nullptr, BAD_CAST "templateArguments");
+      for(auto arg : *DTS){
+        switch (arg.getKind()) {
+        case TemplateArgument::Null:
+          xmlAddChild(templArgs, xmlNewNode(nullptr, BAD_CAST "null"));
+          break;
+        case TemplateArgument::Type: {
+          const auto typeNode = xmlNewNode(nullptr, BAD_CAST "typeName");
+          xmlNewProp(typeNode,
+                     BAD_CAST "ref",
+                     BAD_CAST getTypeName(arg.getAsType()).c_str());
+          xmlAddChild(templArgs, typeNode);
+          break;
+        }
+        case TemplateArgument::Declaration:
+          xmlAddChild(templArgs, xmlNewNode(nullptr, BAD_CAST "declaration"));
+          break;
+        case TemplateArgument::NullPtr:
+          xmlAddChild(templArgs, xmlNewNode(nullptr, BAD_CAST "nullptr"));
+          break;
+        case TemplateArgument::Integral:
+          {
+            const auto integNode = xmlNewNode(nullptr, BAD_CAST "integral");
+            xmlNewProp(integNode,
+                       BAD_CAST "value",
+                       BAD_CAST arg.getAsIntegral().toString(10).c_str());
+            xmlAddChild(templArgs, integNode);
+          }
+          break;
+        case TemplateArgument::Template:{
+          const auto tnode = xmlNewNode(nullptr, BAD_CAST "template");
+          auto tn = arg.getAsTemplate();
+          auto tnt = tn.getAsTemplateDecl();
+          //tnt->dump();
+          //std::cout <<getTypeName(tn) <<std:endl;
+          if(tnt != nullptr){
+            xmlNewProp(tnode,
+                       BAD_CAST "name",
+                       BAD_CAST tnt->getName().str().c_str());
+          }
+          xmlAddChild(templArgs, Node);
+        }
+          break;
+        case TemplateArgument::TemplateExpansion:
+          xmlAddChild(templArgs, xmlNewNode(nullptr, BAD_CAST "template_expansion"));
+          break;
+        case TemplateArgument::Expression:{
+          xmlAddChild(templArgs, xmlNewNode(nullptr, BAD_CAST "expression"));
+          break;
+        }
+        case TemplateArgument::Pack:
+          xmlAddChild(templArgs, xmlNewNode(nullptr, BAD_CAST "pack"));
+          break;
+        }
+      }
+      pushType(T, Node);
+      break;
+    }
+    case Type::Atomic:{
+      rawname = registerOtherType(T);
+      auto AT = dyn_cast<AtomicType>(T);
+      Node = createNode(T, "atomicType", nullptr);
+      xmlNewProp( Node, BAD_CAST "valueType",
+                  BAD_CAST(getTypeName(AT->getValueType()).c_str()));
+      pushType(T, Node);
+      break;
+    }
     case Type::Elaborated:
     case Type::Attributed:
     case Type::SubstTemplateTypeParm:
     case Type::SubstTemplateTypeParmPack:
-    case Type::TemplateSpecialization:
     case Type::Auto:
-    case Type::DependentName:
-    case Type::DependentTemplateSpecialization:
-    case Type::PackExpansion:
     case Type::ObjCObject:
     case Type::ObjCInterface:
     case Type::ObjCObjectPointer:
-    case Type::Atomic:
+
       rawname = registerOtherType(T);
       // XXX: temporary implementation
       Node = createNode(T, "otherType", nullptr);
@@ -705,6 +941,9 @@ TypeTableInfo::registerType(QualType T, xmlNodePtr *retNode, xmlNodePtr) {
           Node, BAD_CAST "clang_type_class", BAD_CAST(T->getTypeClassName()));
       pushType(T, Node);
       break;
+    default:
+      T->dump();
+      abort();
     }
 
   if (retNode != nullptr) {

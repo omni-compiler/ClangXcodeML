@@ -55,7 +55,7 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
 
   newChild("clangStmt");
   newProp("class", S->getStmtClassName());
-  setLocation(S->getLocStart());
+  setLocation(S->getBeginLoc());
 
   if (auto FS = dyn_cast<ForStmt>(S)) {
     const std::vector<std::tuple<const char *, Stmt *>> children = {
@@ -127,8 +127,12 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
   if (auto OCE = dyn_cast<clang::CXXOperatorCallExpr>(S)) {
     newProp("xcodeml_operator_kind",
         OverloadedOperatorKindToString(OCE->getOperator(), OCE->getNumArgs()));
-    const auto is_member = isa<clang::CXXMethodDecl>(OCE->getDirectCallee());
-    newBoolProp("is_member_function", is_member);
+    if (OCE->getDirectCallee() == nullptr) {
+      newBoolProp("is_member_function", false);
+    }else{
+      const auto is_member = isa<clang::CXXMethodDecl>(OCE->getDirectCallee());
+      newBoolProp("is_member_function", is_member);
+    }
   }
 
   if (auto NL = dyn_cast<CXXNewExpr>(S)) {
@@ -193,7 +197,7 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
     newProp("token", spelling.str().c_str());
   }
 
-  if (auto SL = dyn_cast<StringLiteral>(S)) {
+  if (auto SL = dyn_cast<clang::StringLiteral>(S)) {
     StringRef Data = SL->getString();
     std::string literalAsString;
     raw_string_ostream OS(literalAsString);
@@ -231,8 +235,8 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
      * and `SemanticForm`. Do not traverse `SyntacticForm`,
      * otherwise it emits the elements twice.
      */
-    for (Stmt::child_range range = ILE->children(); range; ++range) {
-      TraverseStmt(*range);
+    for (auto &range :  ILE->children()) {
+      TraverseStmt(range);
     }
     return false;
   }
@@ -253,8 +257,10 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
         return false; // already traversed
       }
     }
+    case UETT_PreferredAlignOf:
     case UETT_AlignOf: {
-      newChild("gccAlignOfExpr");
+      newChild((UEOTTE->getKind()==UETT_PreferredAlignOf) ?
+               "gccAlignOfExpr" : "AlignOfExpr");
       TraverseType(static_cast<Expr *>(S)->getType());
       if (UEOTTE->isArgumentType()) {
         newChild("typeName");
@@ -270,7 +276,13 @@ DeclarationsVisitor::PreVisitStmt(Stmt *S) {
       return true;
 
       // case UETT_OpenMPRequiredSimdAlign:
+    case UETT_OpenMPRequiredSimdAlign:
       //  NStmt("UnaryExprOrTypeTraitExpr(UETT_OpenMPRequiredSimdAlign");
+      abort();
+      return true;
+    default:
+      S->dump();
+      abort();
     }
   }
 

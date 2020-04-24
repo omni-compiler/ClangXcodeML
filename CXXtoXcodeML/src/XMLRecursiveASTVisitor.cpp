@@ -2,11 +2,11 @@
 #include "clang/Tooling/Tooling.h"
 #include "clang/Driver/Options.h"
 #include "clang/Lex/Lexer.h"
-
 #include <sstream>
 #include <string>
 #include <type_traits>
 #include <unistd.h>
+#include <iostream>
 
 #include "CXXtoXML.h"
 #include "XMLRecursiveASTVisitor.h"
@@ -48,28 +48,7 @@ XMLRecursiveASTVisitor::VisitStmt(Stmt *S) {
 #endif
   newChild("clangStmt");
   newProp("class", S->getStmtClassName());
-  setLocation(S->getLocStart());
-
-  // for "For" statement
-  if (auto FS = dyn_cast<ForStmt>(S)) {
-    const std::vector<std::tuple<const char *, Stmt *>> children = {
-        std::make_tuple("init", FS->getInit()),
-        std::make_tuple("cond", FS->getCond()),
-        std::make_tuple("iter", FS->getInc()),
-        std::make_tuple("body", FS->getBody()),
-    };
-    for (auto &child : children) {
-      const char *kind;
-      Stmt *stmt;
-      std::tie(kind, stmt) = child;
-      if (stmt) {
-        TraverseStmt(stmt);
-        xmlNewProp(xmlGetLastChild(curNode),
-                   BAD_CAST "for_stmt_kind", BAD_CAST kind);
-      }
-    }
-    return false; // already traversed
-  }
+  setLocation(S->getBeginLoc());
 
   const BinaryOperator *BO = dyn_cast<const BinaryOperator>(S);
   if (BO) {
@@ -108,12 +87,6 @@ XMLRecursiveASTVisitor::VisitStmt(Stmt *S) {
     newProp("bool_value", (BE->getValue() ? "true" : "false"));
   }
 
-  if (const auto CDAE = dyn_cast<CXXDefaultArgExpr>(S)) {
-    const auto E = CDAE->getExpr();
-    TraverseStmt(E);
-    return false;
-  }
-
   if (const auto CDE = dyn_cast<CXXDeleteExpr>(S)) {
     newBoolProp("is_array_form", CDE->isArrayForm());
     newBoolProp("is_global_delete", CDE->isGlobalDelete());
@@ -122,8 +95,12 @@ XMLRecursiveASTVisitor::VisitStmt(Stmt *S) {
   if (auto OCE = dyn_cast<clang::CXXOperatorCallExpr>(S)) {
     newProp("xcodeml_operator_kind",
         OverloadedOperatorKindToString(OCE->getOperator(), OCE->getNumArgs()));
-    const auto is_member = isa<clang::CXXMethodDecl>(OCE->getDirectCallee());
-    newBoolProp("is_member_function", is_member);
+    if (OCE->getDirectCallee() == nullptr) {
+      newBoolProp("is_member_function", false);
+    }else{
+      const auto is_member = isa<clang::CXXMethodDecl>(OCE->getDirectCallee());
+      newBoolProp("is_member_function", is_member);
+    }
   }
 
   if (auto NL = dyn_cast<CXXNewExpr>(S)) {
@@ -138,7 +115,6 @@ XMLRecursiveASTVisitor::VisitStmt(Stmt *S) {
     const auto MD = ME->getMemberDecl();
     auto memberName = makeNameNode(typetableinfo, MD);
     xmlAddChild(curNode, memberName);
-
     if (const auto DRE = dyn_cast<clang::DeclRefExpr>(ME->getBase())) {
       const auto DN = DRE->getNameInfo().getName();
       newBoolProp("is_access_to_anon_record", DN.isEmpty());
@@ -147,9 +123,10 @@ XMLRecursiveASTVisitor::VisitStmt(Stmt *S) {
 
   if (auto DRE = dyn_cast<DeclRefExpr>(S)) {
     const auto kind = DRE->getDecl()->getDeclKindName();
+    const auto RefedDecl = DRE->getDecl();
+    //DRE->getDecl()->dump();
     newProp("declkind", kind);
     auto nameNode = makeNameNode(typetableinfo, DRE);
-
     const auto parent = DRE->getFoundDecl()->getDeclContext();
     assert(parent);
     xmlNewProp(nameNode,
@@ -158,7 +135,15 @@ XMLRecursiveASTVisitor::VisitStmt(Stmt *S) {
 
     xmlAddChild(curNode, nameNode);
   }
-
+  if (auto LE = dyn_cast<LambdaExpr>(S)){
+      for(const auto & cap: LE->captures()){
+          auto kind = cap.getCaptureKind();
+          std::string name;
+          std::string flag;
+          auto capnode = xmlNewNode(nullptr, BAD_CAST "Capture");
+          xmlAddChild(curNode, capnode);
+      }
+  }
   if (auto CL = dyn_cast<CharacterLiteral>(S)) {
     newProp(
         "hexadecimalNotation", unsignedToHexString(CL->getValue()).c_str());
@@ -186,8 +171,7 @@ XMLRecursiveASTVisitor::VisitStmt(Stmt *S) {
         FL->getLocation(), buffer, CXT.getSourceManager(), CXT.getLangOpts());
     newProp("token", spelling.str().c_str());
   }
-
-  if (auto SL = dyn_cast<StringLiteral>(S)) {
+  if (auto SL = dyn_cast<clang::StringLiteral>(S)) {
     StringRef Data = SL->getString();
     std::string literalAsString;
     raw_string_ostream OS(literalAsString);
@@ -220,53 +204,6 @@ XMLRecursiveASTVisitor::VisitStmt(Stmt *S) {
     newProp("stringLiteral", literalAsString.c_str());
   }
 
-  if (auto ILE = dyn_cast<InitListExpr>(S)) {
-    /* `InitListExpr` has two kinds of children, `SyntacticForm`
-     * and `SemanticForm`. Do not traverse `SyntacticForm`,
-     * otherwise it emits the elements twice.
-     */
-    for (Stmt::child_range range = ILE->children(); range; ++range) {
-      TraverseStmt(*range);
-    }
-    return false;
-  }
-
-  UnaryExprOrTypeTraitExpr *UEOTTE = dyn_cast<UnaryExprOrTypeTraitExpr>(S);
-  if (UEOTTE) {
-    // 7.8 sizeof, alignof
-    switch (UEOTTE->getKind()) {
-    case UETT_SizeOf: {
-      newChild("sizeOfExpr");
-      TraverseType(static_cast<Expr *>(S)->getType());
-      if (UEOTTE->isArgumentType()) {
-        newChild("typeName");
-        TraverseType(UEOTTE->getArgumentType());
-        return true;
-      } else {
-        TraverseStmt(UEOTTE->getArgumentExpr());
-        return false; // already traversed
-      }
-    }
-    case UETT_AlignOf: {
-      newChild("gccAlignOfExpr");
-      TraverseType(static_cast<Expr *>(S)->getType());
-      if (UEOTTE->isArgumentType()) {
-        newChild("typeName");
-        TraverseType(UEOTTE->getArgumentType());
-      } else {
-        TraverseStmt(UEOTTE->getArgumentExpr());
-      }
-      return true;
-    }
-    case UETT_VecStep:
-      newChild("clangStmt");
-      newProp("class", "UnaryExprOrTypeTraitExpr_UETT_VecStep");
-      return true;
-
-      // case UETT_OpenMPRequiredSimdAlign:
-      //  NStmt("UnaryExprOrTypeTraitExpr(UETT_OpenMPRequiredSimdAlign");
-    }
-  }
 
   if (const auto LS = dyn_cast<LabelStmt>(S)) {
     newProp("label_name", LS->getName());
@@ -295,7 +232,7 @@ XMLRecursiveASTVisitor::VisitType(QualType T) {
 
   
 
-  return false;
+  return true;
 }
 
 bool
@@ -342,7 +279,7 @@ getLanguageIdAsString(clang::LinkageSpecDecl::LanguageIDs id) {
 } // namespace
 
 bool
-XMLRecursiveASTVisitor::VisitDecl(Decl *D) {
+XMLRecursiveASTVisitor::PreVisitDecl(Decl *D) {
   if (!D) {
     return true;
   }
@@ -441,6 +378,7 @@ XMLRecursiveASTVisitor::VisitDecl(Decl *D) {
     newBoolProp("is_static_local", VD->isStaticLocal());
     newBoolProp("is_static_data_member", VD->isStaticDataMember());
     newBoolProp("is_out_of_line", VD->isOutOfLine());
+    newBoolProp("is_constexpr", VD->isConstexpr());
   }
 
   if (auto FD = dyn_cast<FieldDecl>(D)) {
@@ -494,6 +432,7 @@ XMLRecursiveASTVisitor::VisitDecl(Decl *D) {
     auto nnsTable = addChild("xcodemlNnsTable");
     nnstableinfo.pushNnsTableStack(nnsTable);
   }
+
   return true;
 }
 
@@ -502,6 +441,7 @@ XMLRecursiveASTVisitor::PostVisitDecl(Decl *D) {
   if (!D) {
     return true;
   }
+
   if (isa<TemplateDecl>(D) || isa<ClassTemplatePartialSpecializationDecl>(D)
       || isa<TranslationUnitDecl>(D)) {
     typetableinfo.popTypeTableStack();
@@ -509,7 +449,6 @@ XMLRecursiveASTVisitor::PostVisitDecl(Decl *D) {
   }
   return true;
 }
-
 bool
 XMLRecursiveASTVisitor::VisitDeclarationNameInfo(DeclarationNameInfo NI) {
   DeclarationName DN = NI.getName();
@@ -548,12 +487,20 @@ SpecifierKindToString(clang::NestedNameSpecifier::SpecifierKind kind) {
 } // namespace
 
 bool
-XMLRecursiveASTVisitor::VisitNestedNameSpecifierLoc(NestedNameSpecifierLoc N) {
+XMLRecursiveASTVisitor::TraverseNestedNameSpecifierLoc(NestedNameSpecifierLoc N) {
+  if(!N)
+    return true;
+  auto save = curNode;
+
+  newChild("clangNestedNameSpecifier");
+  if(NestedNameSpecifierLoc Prefix = N.getPrefix())
+    TraverseNestedNameSpecifierLoc(Prefix);
+
   const auto Spec = N.getNestedNameSpecifier();
   if (!Spec) {
     return true;
   }
-  newChild("clangNestedNameSpecifier");
+
   const auto kind = SpecifierKindToString(Spec->getKind());
   newProp("clang_nested_name_specifier_kind", kind.c_str());
 
@@ -571,15 +518,18 @@ XMLRecursiveASTVisitor::VisitNestedNameSpecifierLoc(NestedNameSpecifierLoc N) {
     xmlAddChild(curNode, nameNode);
     break;
   }
+  case NestedNameSpecifier::TypeSpecWithTemplate:
   case NestedNameSpecifier::TypeSpec: {
     const auto T = Spec->getAsType();
     assert(T);
     const auto dtident = typetableinfo.getTypeName(QualType(T, 0));
     newProp("xcodemlType", dtident.c_str());
+    TraverseTypeLoc(N.getTypeLoc());
     break;
   }
   default: break;
   }
+  curNode = save;
   return true;
 }
 
@@ -820,7 +770,7 @@ XMLRecursiveASTVisitor::NameForConstructorInitializer(clang::CXXCtorInitializer 
 bool
 XMLRecursiveASTVisitor::SourceLocForStmt(clang::Stmt *S, clang::SourceLocation &SL) {
   if (S) {
-    SL = S->getLocStart();
+    SL = S->getBeginLoc();
     return true;
   } else {
     return false;
@@ -835,7 +785,7 @@ XMLRecursiveASTVisitor::SourceLocForType(clang::QualType QT, clang::SourceLocati
 
 bool
 XMLRecursiveASTVisitor::SourceLocForTypeLoc(clang::TypeLoc TL, clang::SourceLocation &SL) {
-  SL = TL.getLocStart();
+  SL = TL.getBeginLoc();
   return true;
 }
 
@@ -852,7 +802,7 @@ XMLRecursiveASTVisitor::SourceLocForAttr(clang::Attr *A, clang::SourceLocation &
 bool
 XMLRecursiveASTVisitor::SourceLocForDecl(clang::Decl *D, clang::SourceLocation &SL) {
   if (D) {
-    SL = D->getLocStart();
+    SL = D->getBeginLoc();
     return true;
   } else {
     return false;
@@ -874,7 +824,7 @@ XMLRecursiveASTVisitor::SourceLocForNestedNameSpecifierLoc(clang::NestedNameSpec
 
 bool
 XMLRecursiveASTVisitor::SourceLocForDeclarationNameInfo(clang::DeclarationNameInfo DN, clang::SourceLocation &SL) {
-  SL = DN.getLocStart();
+  SL = DN.getBeginLoc();
   return true;
 }
 

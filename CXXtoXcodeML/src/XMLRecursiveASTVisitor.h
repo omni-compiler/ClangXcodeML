@@ -32,6 +32,7 @@ using namespace clang;
 
 template <typename Derived>
 class ExtendedRecursiveASTVisitor : public RecursiveASTVisitor<Derived> {
+  using BASE = RecursiveASTVisitor<Derived>;
 protected:
   xmlNodePtr curNode; // a candidate of the new chlid.
 public:
@@ -39,16 +40,16 @@ public:
   Derived &getDerived() { return *static_cast<Derived *>(this); }
 
   bool shouldUseDataRecursionFor(Stmt *S) const { return false; }
-
+  bool shouldVisitTemplateInstantiations() const {return false;}
 #define DISPATCHER(NAME, TYPE)					\
 public:                                                         \
   bool Traverse##NAME(TYPE S) {                                 \
     xmlNodePtr save = curNode; \
-    if(debug_flag) printf("*** push curNode=%p\n",(void *)curNode);      \
+    if(CXXtoXML::debug_flag) printf("*** push curNode=%p\n",(void *)curNode); \
     bool ret = RecursiveASTVisitor<Derived>::Traverse##NAME(S); \
     ret &= getDerived().PostVisit##NAME(S);			\
     curNode = save; \
-    if(debug_flag) printf("*** pop curNode=%p\n",(void *)curNode);       \
+    if(CXXtoXML::debug_flag) printf("*** pop curNode=%p\n",(void *)curNode); \
     return ret;                                                 \
   }  \
   bool PostVisit##NAME(TYPE S) {                                \
@@ -59,25 +60,85 @@ public:                                                         \
   DISPATCHER(Stmt, clang::Stmt *);
   DISPATCHER(TypeLoc, clang::TypeLoc);
   DISPATCHER(Attr, clang::Attr *);
-  DISPATCHER(Decl, clang::Decl *);
+    // DISPATCHER(Decl, clang::Decl *);
+  bool PreVisitDecl(clang::Decl *S) {
+    (void) S;
+    return true;
+  }
+  bool TraverseDecl(clang::Decl *S) {
+        xmlNodePtr save = curNode;
+    if(CXXtoXML::debug_flag) printf("*** push curNode=%p\n",(void *)curNode);
+    getDerived().PreVisitDecl(S);
+    bool ret = RecursiveASTVisitor<Derived>::TraverseDecl(S);
+    ret &= getDerived().PostVisitDecl(S);
+    curNode = save;
+    if(CXXtoXML::debug_flag) printf("*** pop curNode=%p\n",(void *)curNode);
+    return ret;
+  }
+  bool PostVisitDecl(clang::Decl *S) {
+    (void) S;
+    return true;
+  }
   DISPATCHER(NestedNameSpecifier, clang::NestedNameSpecifier *);
-  DISPATCHER(NestedNameSpecifierLoc, clang::NestedNameSpecifierLoc);
-  DISPATCHER(DeclarationNameInfo, clang::DeclarationNameInfo);
+    //  DISPATCHER(NestedNameSpecifierLoc, clang::NestedNameSpecifierLoc);
+    //DISPATCHER(DeclarationNameInfo, clang::DeclarationNameInfo);
   DISPATCHER(TemplateName, clang::TemplateName);
-  DISPATCHER(TemplateArgument, const clang::TemplateArgument &);
-  DISPATCHER(TemplateArgumentLoc, const clang::TemplateArgumentLoc &);
-  DISPATCHER(ConstructorInitializer, clang::CXXCtorInitializer *);
+    //DISPATCHER(TemplateArgument, const clang::TemplateArgument &);
+    //DISPATCHER(TemplateArgumentLoc, const clang::TemplateArgumentLoc &);
     // DISPATCHER(Type, clang::QualType);
 #undef DISPATCHER
+    bool VisitConstructorInitializer(clang::CXXCtorInitializer *CI) {
+        return true;
+    }
 
+  bool TraverseConstructorInitializer(clang::CXXCtorInitializer *CI){
+      auto save = curNode;
+      getDerived().VisitConstructorInitializer(CI);
+      RecursiveASTVisitor<Derived>::TraverseConstructorInitializer(CI);
+      curNode = save;
+      return true;
+  }
+    bool VisitTemplateArgumentLoc(clang::TemplateArgumentLoc &AL)
+    {
+        return true;
+    }
+    bool VisitTemplateArgument(clang::TemplateArgument &Arg)
+    {
+        return true;
+    }
+    bool VisitDeclarationNameInfo(clang::DeclarationNameInfo DNI)
+    {
+        return true;
+    }
+    bool TraverseTemplateArgument(const clang::TemplateArgument &TA){
+        auto save = curNode;
+        getDerived().VisitTemplateArgument(TA);
+        BASE::TraverseTemplateArgument(TA);
+        curNode = save;
+        return true;
+    }
+    bool TraverseTemplateArgumentLoc(const clang::TemplateArgumentLoc &ArgLoc){
+        auto save = curNode;
+        getDerived().VisitTemplateArgumentLoc(ArgLoc);
+        BASE::TraverseTemplateArgumentLoc(ArgLoc);
+        curNode = save;
+        return true;
+    }
+    bool TraverseDeclarationNameInfo(clang::DeclarationNameInfo DNI){
+        auto save = curNode;
+        getDerived().VisitDeclarationNameInfo(DNI);
+        BASE::TraverseDeclarationNameInfo(DNI);
+        curNode = save;
+        return true;
+    }
     bool TraverseType(clang::QualType S){
         xmlNodePtr save = curNode;
         bool ret = getDerived().VisitType(S);
         ret &= RecursiveASTVisitor<Derived>::TraverseType(S);
         curNode = save;
-        return ret;
+        return true;
     }
-
+#if 0
     bool TraverseDecl(TranslationUnitDecl *D){
         xmlNodePtr save = curNode;
         bool ret = getDerived().VisitDecl(D);
@@ -88,7 +149,7 @@ public:                                                         \
         curNode = save;
         return ret;
     }
-
+#endif
   // bool TraverseStmt(Stmt *S) {  
   //   xmlNodePtr save = curNode;
   //   // printf("*** push(Stmt) curNode=%p\n",(void *)curNode);
@@ -208,6 +269,91 @@ public:                                                         \
     }                                                           \
     return true;   						\
   }
+  bool TraverseForStmt(ForStmt *S)
+  {
+        xmlNodePtr  save = curNode;
+        WalkUpFromForStmt(S);
+        const std::vector<std::tuple<const char *, Stmt *>>
+            children = {
+                        std::make_tuple("init", S->getInit()),
+                        std::make_tuple("cond", S->getCond()),
+                        std::make_tuple("iter", S->getInc()),
+                        std::make_tuple("body", S->getBody()),
+        };
+        for (auto &child : children) {
+            const char *kind;
+            Stmt *stmt;
+            std::tie(kind, stmt) = child;
+            if (stmt) {
+                TraverseStmt(stmt);
+                xmlNewProp(xmlGetLastChild(curNode),
+                           BAD_CAST "for_stmt_kind", BAD_CAST kind);
+            }
+        }
+        curNode = save;
+        if(CXXtoXML::debug_flag) printf("*** pop curNode=%p\n",(void *)curNode);
+        return true;
+    }
+  bool TraverseInitListExpr(InitListExpr *ILE)
+  {
+    WalkUpFromInitListExpr(ILE);
+    for (auto& range : ILE->children()) {
+          TraverseStmt(range);
+    }
+    return true;
+  }
+  bool TraverseCXXDefaultArgExpr(CXXDefaultArgExpr *CDAE)
+  {
+    WalkUpFromCXXDefaultArgExpr(CDAE);
+    const auto E = CDAE->getExpr();
+    TraverseStmt(E);
+    return true;
+  }
+  bool TraverseUnaryExprOrTypeTraitExpr(UnaryExprOrTypeTraitExpr *UEOTTE)
+  {
+    WalkUpFromUnaryExprOrTypeTraitExpr(UEOTTE);
+    switch (UEOTTE->getKind()) {
+    case UETT_SizeOf: {
+      newChild("sizeOfExpr");
+      TraverseType(static_cast<Expr *>(UEOTTE)->getType());
+      if (UEOTTE->isArgumentType()) {
+        newChild("typeName");
+        TraverseType(UEOTTE->getArgumentType());
+        break;
+      } else {
+        TraverseStmt(UEOTTE->getArgumentExpr());
+        break; // already traversed
+      }
+    }
+    case UETT_PreferredAlignOf:
+    case UETT_AlignOf: {
+        newChild((UEOTTE->getKind()==UETT_PreferredAlignOf) ?
+                 "gccAlignOfExpr" : "AlignOfExpr");
+      TraverseType(static_cast<Expr *>(UEOTTE)->getType());
+      if (UEOTTE->isArgumentType()) {
+        newChild("typeName");
+        TraverseType(UEOTTE->getArgumentType());
+      } else {
+        TraverseStmt(UEOTTE->getArgumentExpr());
+      }
+      break;
+    }
+    case UETT_VecStep:
+      newChild("clangStmt");
+      newProp("class", "UnaryExprOrTypeTraitExpr_UETT_VecStep");
+      break;
+
+    case UETT_OpenMPRequiredSimdAlign:
+      //  NStmt("UnaryExprOrTypeTraitExpr(UETT_OpenMPRequiredSimdAlign");
+    default:
+        UEOTTE->dump();
+        abort();
+    }
+    if(UEOTTE->isArgumentType())
+        TraverseTypeLoc(UEOTTE->getArgumentTypeInfo()->getTypeLoc());
+
+    return true ;
+  }
 
 // DISPATCHER(Stmt, clang::Stmt *);
   bool VisitStmt(clang::Stmt *);
@@ -218,12 +364,11 @@ public:                                                         \
 //  DISPATCHER(Attr, clang::Attr *);
   bool VisitAttr(clang::Attr *);
 //  DISPATCHER(Decl, clang::Decl *);
-  bool VisitDecl(clang::Decl *);
+  bool PreVisitDecl(clang::Decl *);
   bool PostVisitDecl(clang::Decl *);
 //  DISPATCHER(NestedNameSpecifier, clang::NestedNameSpecifier *);
   DEF_VISITOR(NestedNameSpecifier, clang::NestedNameSpecifier *);
-//  DISPATCHER(NestedNameSpecifierLoc, clang::NestedNameSpecifierLoc);
-  bool VisitNestedNameSpecifierLoc(clang::NestedNameSpecifierLoc);
+  bool TraverseNestedNameSpecifierLoc(clang::NestedNameSpecifierLoc);
 //  DISPATCHER(DeclarationNameInfo, clang::DeclarationNameInfo);
   bool VisitDeclarationNameInfo(clang::DeclarationNameInfo);
 
@@ -234,10 +379,9 @@ public:                                                         \
 //  DISPATCHER(TemplateArgumentLoc, const clang::TemplateArgumentLoc &);
   DEF_VISITOR(TemplateArgumentLoc, const clang::TemplateArgumentLoc &);
 
-//  DISPATCHER(ConstructorInitializer, clang::CXXCtorInitializer *);
-  bool VisitConstructorInitializer(clang::CXXCtorInitializer *);
 #undef DEF_ADD_COMMENT
 #undef DEF_VISITOR
+    bool VisitConstructorInitializer(clang::CXXCtorInitializer *);
 
     bool VisitType(Type* S) {
         (void) S;

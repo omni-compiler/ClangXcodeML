@@ -25,7 +25,10 @@ getNameKind(const NamedDecl *ND) {
   case NK::CXXConstructorName: return "constructor";
   case NK::CXXDestructorName: return "destructor";
   case NK::CXXUsingDirective: return "using_directive";
-  default: assert(false && "not supported");
+  case NK::CXXLiteralOperatorName: return "literal_operator";
+    //C++17 fetature
+  case NK::CXXDeductionGuideName:  return "deduction_guide";
+  default: ND->dump();assert(false && "not supported");
   }
 }
 
@@ -126,7 +129,11 @@ makeNameNode(TypeTableInfo &TTI, const NamedDecl *ND) {
       node = makeNameNodeForCXXOperator(TTI, FD);
     } else if (const auto FTD = dyn_cast<FunctionTemplateDecl>(ND)) {
       node = makeNameNodeForCXXOperator(TTI, FTD->getTemplatedDecl());
+    } else if(const auto UUD = dyn_cast<UnresolvedUsingValueDecl>(ND)){
+      //XXX
+      node = xmlNewNode(nullptr, BAD_CAST "name");
     } else {
+      ND->dump();
       assert(!"a DeclName with CXXOperatorName is not FunctionDecl or FunctionTemplateDecl");
     }
   } else if (auto MD = dyn_cast<CXXMethodDecl>(ND)) {

@@ -607,9 +607,13 @@ getCtorInitName(xmlNodePtr node, const XcodeMl::TypeTable &env) {
     return makeTokenNode(*dataMember);
   }
   const auto base = getType(node);
+  // parampack.src.cpp error
   const auto T = env[base];
-  const auto classT = llvm::cast<XcodeMl::ClassType>(T.get());
-  const auto name = classT->name();
+  const auto classT = llvm::dyn_cast<XcodeMl::ClassType>(T.get());
+  XcodeMl::CodeFragment name = makeVoidNode();
+  if(classT)
+    name = name + classT->name();
+  //  const auto name = classT->name();
   return name;
 }
 

@@ -210,6 +210,8 @@ public:                                                                       \
     case clang::DeclarationName::CXXLiteralOperatorName:
       return "CXXLiteralOperatorName";
     case clang::DeclarationName::CXXUsingDirective: return "CXXUsingDirective";
+    default:
+        return "Unknown";
     }
   }
   const char *
@@ -240,7 +242,7 @@ public:                                                                       \
   bool
   SourceLocForStmt(clang::Stmt *S, clang::SourceLocation &SL) {
     if (S) {
-      SL = S->getLocStart();
+      SL = S->getBeginLoc();
       return true;
     } else {
       return false;
@@ -253,7 +255,7 @@ public:                                                                       \
   }
   bool
   SourceLocForTypeLoc(clang::TypeLoc TL, clang::SourceLocation &SL) {
-    SL = TL.getLocStart();
+    SL = TL.getBeginLoc();
     return true;
   }
   bool
@@ -268,7 +270,7 @@ public:                                                                       \
   bool
   SourceLocForDecl(clang::Decl *D, clang::SourceLocation &SL) {
     if (D) {
-      SL = D->getLocStart();
+      SL = D->getBeginLoc();
       return true;
     } else {
       return false;
@@ -290,7 +292,7 @@ public:                                                                       \
   bool
   SourceLocForDeclarationNameInfo(
       clang::DeclarationNameInfo DN, clang::SourceLocation &SL) {
-    SL = DN.getLocStart();
+    SL = DN.getBeginLoc();
     return true;
   }
   bool

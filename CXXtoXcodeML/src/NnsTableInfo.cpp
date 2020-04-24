@@ -118,7 +118,7 @@ namespace {
 
 xmlNodePtr
 makeClassNnsNode(TypeTableInfo &TTI, const clang::DeclContext &DC) {
-  const auto CRD = llvm::cast<clang::CXXRecordDecl>(DC);
+  const auto &CRD = llvm::cast<clang::CXXRecordDecl>(DC);
   const auto node = xmlNewNode(nullptr, BAD_CAST "classNNS");
 
   const auto dtident =
@@ -131,7 +131,7 @@ makeClassNnsNode(TypeTableInfo &TTI, const clang::DeclContext &DC) {
 xmlNodePtr
 makeClassTemplateSpecializationNode(
     TypeTableInfo &TTI, const clang::DeclContext &DC) {
-  const auto CTSD = llvm::cast<clang::ClassTemplateSpecializationDecl>(DC);
+  const auto &CTSD = llvm::cast<clang::ClassTemplateSpecializationDecl>(DC);
   const auto node =
       xmlNewNode(nullptr, BAD_CAST "classTemplateSpecializationNNS");
 
@@ -144,7 +144,7 @@ makeClassTemplateSpecializationNode(
 
 xmlNodePtr
 makeNamespaceNnsNode(const clang::DeclContext &DC) {
-  const auto ND = llvm::cast<clang::NamespaceDecl>(DC);
+  const auto &ND = llvm::cast<clang::NamespaceDecl>(DC);
   const auto node = xmlNewNode(nullptr, BAD_CAST "namespaceNNS");
   if (ND.isAnonymousNamespace()) {
     xmlNewProp(node, BAD_CAST "is_anonymous", BAD_CAST "1");

@@ -33,6 +33,8 @@ class TypeTableInfo {
   int seqForTemplateTypeParmType;
   int seqForInjectedClassNameType;
   int seqForMemberPointerType;
+  int seqForDependentNameType;
+  int seqForTemplateSpecializationType;
   int seqForOtherType;
 
   std::unordered_map<clang::QualType, xmlNodePtr> TypeElements;
@@ -50,6 +52,8 @@ class TypeTableInfo {
   std::string registerTemplateTypeParmType(clang::QualType T);
   std::string registerInjectedClassNameType(clang::QualType T);
   std::string registerMemberPointerType(clang::QualType T);
+  std::string registerDependentNameType(clang::QualType T);
+  std::string registerTemplateSpecializationType(clang::QualType T);
   std::string registerOtherType(clang::QualType T); // "O*"
   void pushType(const clang::QualType &, xmlNodePtr);
 

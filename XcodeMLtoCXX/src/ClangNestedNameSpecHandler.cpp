@@ -3,6 +3,7 @@
 #include <map>
 #include <memory>
 #include <vector>
+#include <string>
 #include <libxml/tree.h>
 #include <libxml/xpath.h>
 #include "llvm/ADT/Optional.h"

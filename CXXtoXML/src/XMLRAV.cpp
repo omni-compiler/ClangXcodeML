@@ -76,4 +76,4 @@ class RAVpoolSizeChecker {
 XMLRAVpool::XMLRAVpool(RAVBidirBridge *bridge)
     : RAVBidirBridge(new (RAVpool) XMLRAV(bridge)){};
 
-cl::OptionCategory CXX2XMLCategory("CXXtoXML options");
+

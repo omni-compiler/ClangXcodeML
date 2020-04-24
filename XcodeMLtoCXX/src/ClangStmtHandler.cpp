@@ -4,6 +4,7 @@
 #include <map>
 #include <cassert>
 #include <vector>
+#include <string>
 #include <libxml/tree.h>
 #include <libxml/xpath.h>
 #include "llvm/ADT/Optional.h"
@@ -24,6 +25,7 @@
 #include "CodeBuilder.h"
 #include "ClangStmtHandler.h"
 #include "XcodeMlUtil.h"
+#include "ClangNestedNameSpecHandler.h"
 
 namespace cxxgen = CXXCodeGen;
 
@@ -48,8 +50,9 @@ createNode(xmlNodePtr node,
   const auto targetNode = findFirst(node, xpath, src.ctxt);
   if (!targetNode) {
     std::cerr << "In createNode" << std::endl
+	      << "Line" << xmlGetLineNo(node) << std::endl
               << "not found: '" << xpath << "'" << std::endl;
-    std::abort();
+    throw(std::runtime_error("Node CreateFailed"));
   }
   return w.walk(targetNode, src);
 }
@@ -110,7 +113,7 @@ DEFINE_STMTHANDLER(BinaryOperatorProc) {
   const auto opName = getProp(node, "binOpName");
   const auto opSpelling = XcodeMl::OperatorNameToSpelling(opName);
   if (!opSpelling.hasValue()) {
-    std::cerr << "Unknown operator name: '" << opName << "'" << std::endl;
+    std::cerr << "Unknown Binary operator name: '" << opName << "'" << xmlGetLineNo(node)<< std::endl;
     std::abort();
   }
   return wrapWithParen(lhs + makeTokenNode(*opSpelling) + rhs);
@@ -206,11 +209,12 @@ DEFINE_STMTHANDLER(CXXCtorExprProc) {
     return w.walk(materializeExpr, src);
   }
   auto child = findFirst(node, "clangStmt", src.ctxt);
-  if (getType(child) == getType(node)
+  if (child && getType(child) == getType(node)
       && !findFirst(node, "clangStmt[position() > 1]", src.ctxt)) {
     // this is a copy (or move) constructor: omit this
     return w.walk(child, src);
   }
+
   const auto T = makeDecl(src.typeTable.at(getType(node)),
       CXXCodeGen::makeVoidNode(),
       src.typeTable,
@@ -354,17 +358,30 @@ DEFINE_STMTHANDLER(CXXTryStmtProc) {
 DEFINE_STMTHANDLER(DeclRefExprProc) {
   const auto name = getQualifiedName(node, src);
 
-  if (const auto TAL = findFirst(node, "TemplateArgumentLoc", src.ctxt)) {
-    const auto templArgNodes = findNodes(TAL, "*", src.ctxt);
+  const auto TAL = findNodes(node, "TemplateArgumentLoc", src.ctxt);
+  if(TAL.size() != 0){
     std::vector<CodeFragment> args;
-    for (auto &&argNode : templArgNodes) {
-      args.push_back(w.walk(argNode, src));
+    for(auto &&talNodes : TAL){
+      const auto templArgNodes = findNodes(talNodes, "*", src.ctxt);
+      for (auto &&argNode : templArgNodes) {
+	args.push_back(w.walk(argNode, src));
+      }
     }
     return name.toString(src.typeTable, src.nnsTable) + makeTokenNode("<")
         + join(",", args) + makeTokenNode(">");
   }
 
   return name.toString(src.typeTable, src.nnsTable);
+}
+DEFINE_STMTHANDLER(DependentScopeDeclRefExprProc) {
+  const auto memberNode = findFirst(node, "clangDeclarationNameInfo[@class='Identifier']", src.ctxt);
+  const auto nsnode = findFirst(node, "clangNestedNameSpecifier",
+				src.ctxt);
+  const auto member = makeTokenNode(getContent(memberNode));
+
+  auto ns =  ClangNestedNameSpecHandler.walk(nsnode, src);
+
+  return ns+member;
 }
 
 DEFINE_STMTHANDLER(DefaultStmtProc) {
@@ -475,12 +492,34 @@ DEFINE_STMTHANDLER(LabelStmtProc) {
   return makeTokenNode(label) + makeTokenNode(":") + body;
 }
 
+DEFINE_STMTHANDLER(CXXDependentScopeMemberExprProc){
+  bool isArrow = false;
+  auto expr = CXXCodeGen::makeVoidNode();
+  if(findFirst(node, "clangStmt", src.ctxt)){
+    expr = expr +  createNode(node, "clangStmt", w, src);
+    isArrow = isTrueProp(node, "is_arrow", false);
+
+  }else {
+    const auto nsnode = findFirst(node, "clangNestedNameSpecifier",
+				  src.ctxt);
+    expr =  expr + ClangNestedNameSpecHandler.walk(nsnode, src);
+  }
+    const auto memberNode = findFirst(node, "clangDeclarationNameInfo[@class='Identifier']", src.ctxt);
+    const auto member = makeTokenNode(getContent(memberNode));
+
+    return expr + makeTokenNode(isArrow ? "->" : ".") + member;
+}
+
 DEFINE_STMTHANDLER(MemberExprProc) {
   const auto expr = createNode(node, "clangStmt", w, src);
   const auto member =
       getQualifiedName(node, src).toString(src.typeTable, src.nnsTable);
   const auto isArrow = isTrueProp(node, "is_arrow", false);
   return expr + makeTokenNode(isArrow ? "->" : ".") + member;
+}
+DEFINE_STMTHANDLER(PackExpansionProc) {
+  const auto expr = makeInnerNode(ProgramBuilder.walkChildren(node, src));
+  return expr + makeTokenNode("...");
 }
 
 DEFINE_STMTHANDLER(ReturnStmtProc) {
@@ -580,6 +619,9 @@ const ClangStmtHandlerType ClangStmtHandler("class",
         std::make_tuple("IntegerLiteral", emitIntegerLiteral),
         std::make_tuple("LabelStmt", LabelStmtProc),
         std::make_tuple("MemberExpr", MemberExprProc),
+	std::make_tuple("PackExpansionExpr", PackExpansionProc),
+	std::make_tuple("CXXDependentScopeMemberExpr", CXXDependentScopeMemberExprProc),
+	std::make_tuple("DependentScopeDeclRefExpr", DependentScopeDeclRefExprProc),
         std::make_tuple("ReturnStmt", ReturnStmtProc),
         std::make_tuple("StringLiteral", StringLiteralProc),
         std::make_tuple("SwitchStmt", SwitchStmtProc),

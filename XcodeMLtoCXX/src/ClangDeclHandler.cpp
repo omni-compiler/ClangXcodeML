@@ -3,6 +3,8 @@
 #include <map>
 #include <memory>
 #include <vector>
+#include <string>
+#include <exception>
 #include <libxml/tree.h>
 #include <libxml/xpath.h>
 #include "llvm/ADT/Optional.h"
@@ -95,10 +97,32 @@ DEFINE_DECLHANDLER(callCodeBuilder) {
   return makeInnerNode(ProgramBuilder.walkChildren(node, src));
 }
 
+  CodeFragment
+makeVariableArraySize(xmlNodePtr node, SourceInfo &src,
+		      const CodeBuilder &w)
+{
+  const auto dtident = getType(node);
+  const auto T = src.typeTable[dtident];
+  auto decl = CXXCodeGen::makeVoidNode();
+  const auto arrayT = llvm::dyn_cast<XcodeMl::Array>(T.get());
+  if(arrayT && !arrayT->isFixedSize()){
+    auto TL = findFirst(node, "clangTypeLoc", src.ctxt);
+    auto STMT = findFirst(TL, "clangStmt", src.ctxt);
+    if(STMT != nullptr){
+      auto arg = w.walk(STMT, src);
+      decl = decl +  wrapWithSquareBracket(arg);
+    }else{
+      CXXCodeGen::makeTokenNode("[*]");
+    }
+  }
+
+  return decl;
+}
+
 CodeFragment
 makeTemplateHead(xmlNodePtr node, const CodeBuilder &w, SourceInfo &src) {
   const auto paramNodes =
-      findNodes(node, "clangDecl[@class='TemplateTypeParm']", src.ctxt);
+      findNodes(node, "clangDecl[@class='TemplateTypeParm' or @class ='NonTypeTemplateParm']", src.ctxt);
   std::vector<CXXCodeGen::StringTreeRef> params;
   for (auto &&paramNode : paramNodes) {
     params.push_back(w.walk(paramNode, src));
@@ -107,21 +131,6 @@ makeTemplateHead(xmlNodePtr node, const CodeBuilder &w, SourceInfo &src) {
       + makeTokenNode(">");
 }
 
-DEFINE_DECLHANDLER(ClassTemplateProc) {
-  if (const auto typeTableNode =
-          findFirst(node, "xcodemlTypeTable", src.ctxt)) {
-    src.typeTable = expandTypeTable(src.typeTable, typeTableNode, src.ctxt);
-  }
-  if (const auto nnsTableNode = findFirst(node, "xcodemlNnsTable", src.ctxt)) {
-    src.nnsTable = expandNnsTable(src.nnsTable, nnsTableNode, src.ctxt);
-  }
-  const auto bodyNode =
-      findFirst(node, "clangDecl[@class='CXXRecord']", src.ctxt);
-
-  const auto head = makeTemplateHead(node, w, src);
-  const auto body = w.walk(bodyNode, src);
-  return head + body;
-}
 
 XcodeMl::CodeFragment
 makeBases(const XcodeMl::ClassType &T, SourceInfo &src) {
@@ -133,12 +142,28 @@ makeBases(const XcodeMl::ClassType &T, SourceInfo &src) {
       std::back_inserter(decls),
       [&src](ClassType::BaseClass base) {
         const auto T = src.typeTable.at(std::get<1>(base));
-        const auto classT = llvm::cast<ClassType>(T.get());
-        assert(classT);
+	//std::cerr <<std::get<0>(base)<<","<<std::get<1>(base)<<std::endl;
+	CodeFragment desc;
+	if(const auto classT = llvm::dyn_cast<ClassType>(T.get())){
+	  desc = classT->getAsTemplateId(src.typeTable, src.nnsTable)
+	    .getValueOr(classT->name());
+	}else if(const auto TS = llvm::dyn_cast<TemplateSpecializationType>(T.get())){
+	  desc = TS->makeDeclaration(CXXCodeGen::makeVoidNode(),
+			     src.typeTable, src.nnsTable);
+	}else if(const auto TT = llvm::dyn_cast<TemplateTypeParm>(T.get())){
+	  desc = TT->makeDeclaration(CXXCodeGen::makeVoidNode(),
+				     src.typeTable, src.nnsTable);
+	}else if(const auto DN = llvm::dyn_cast<DependentNameType>(T.get())){
+	  desc = CXXCodeGen::makeTokenNode("/**/");
+	}else if(const auto DT = llvm::dyn_cast<DeclType>(T.get())){
+	  desc = CXXCodeGen::makeTokenNode("/**/");
+	}else{
+	  throw std::runtime_error("Cannot interpret base");
+	}
+
         return makeTokenNode(std::get<0>(base))
             + makeTokenNode(std::get<2>(base) ? "virtual" : "")
-            + classT->getAsTemplateId(src.typeTable, src.nnsTable)
-                  .getValueOr(classT->name());
+            + desc;
       });
   return decls.empty() ? CXXCodeGen::makeVoidNode()
                        : makeTokenNode(":") + CXXCodeGen::join(",", decls);
@@ -183,7 +208,8 @@ emitClassDefinition(xmlNodePtr node,
       decls.push_back(makeTokenNode(access) + makeTokenNode(":") + decl);
     } else {
       decls.push_back(makeTokenNode(
-          "\n/* Ignored a member with no access specifier */\n"));
+	       "\n/* Ignored a member with no access specifier ") + decl +
+		      makeTokenNode("*/\n"));
     }
   }
 
@@ -194,6 +220,28 @@ emitClassDefinition(xmlNodePtr node,
 
   return classKey + name + makeBases(classType, src)
       + wrapWithBrace(insertNewLines(decls)) + CXXCodeGen::makeNewLineNode();
+}
+
+DEFINE_DECLHANDLER(ClassTemplateProc) {
+  if (const auto typeTableNode =
+          findFirst(node, "xcodemlTypeTable", src.ctxt)) {
+    src.typeTable = expandTypeTable(src.typeTable, typeTableNode, src.ctxt);
+  }
+  if (const auto nnsTableNode = findFirst(node, "xcodemlNnsTable", src.ctxt)) {
+    src.nnsTable = expandNnsTable(src.nnsTable, nnsTableNode, src.ctxt);
+  }
+  const auto bodyNode =
+    findFirst(node, "clangDecl[@class='CXXRecord']", src.ctxt);
+  //const auto bodyNode = records[0];
+
+  const auto head = makeTemplateHead(node, w, src);
+  const auto body = w.walk(bodyNode, src) + makeTokenNode(";");
+  const auto specs = findNodes(node, "clangDecl[@class='ClassTemplateSpecialization']", src.ctxt);
+  auto speccode = CXXCodeGen::makeTokenNode("\n");
+  for(auto && ent : specs){
+    speccode = speccode +  w.walk(ent, src);
+  }
+  return head + body + speccode;
 }
 
 DEFINE_DECLHANDLER(ClassTemplatePartialSpecializationProc) {
@@ -256,8 +304,8 @@ DEFINE_DECLHANDLER(CXXRecordProc) {
 
   const auto T = src.typeTable.at(getType(node));
   auto classT = llvm::dyn_cast<XcodeMl::ClassType>(T.get());
+  //std::cerr <<getType(node)<<classT<<std::endl;
   assert(classT);
-
   setClassName(*classT, src);
   const auto nameSpelling = classT->name(); // now class name must exist
 
@@ -333,10 +381,11 @@ DEFINE_DECLHANDLER(FieldDeclProc) {
   const auto T = src.typeTable.at(dtident);
   auto name = CXXCodeGen::makeVoidNode();
   auto bits = CXXCodeGen::makeVoidNode();
-
   if (isTrueProp(node, "is_bit_field", false)) {
     const auto bitsNode = findFirst(node, "clangStmt", src.ctxt);
     bits = makeTokenNode(":") + w.walk(bitsNode, src);
+  }else{
+    bits = makeVariableArraySize(node, src, w);
   }
   if (!isTrueProp(node, "is_unnamed_bit_field", false)) {
     const auto nameNode = findFirst(node, "name", src.ctxt);
@@ -374,7 +423,8 @@ DEFINE_DECLHANDLER(FunctionProc) {
   return wrapWithLangLink(acc, node, src);
 }
 
-DEFINE_DECLHANDLER(FunctionTemplateProc) {
+DEFINE_DECLHANDLER(FunctionTemplateProc)
+{
   if (const auto typeTableNode =
           findFirst(node, "xcodemlTypeTable", src.ctxt)) {
     src.typeTable = expandTypeTable(src.typeTable, typeTableNode, src.ctxt);
@@ -383,16 +433,21 @@ DEFINE_DECLHANDLER(FunctionTemplateProc) {
     src.nnsTable = expandNnsTable(src.nnsTable, nnsTableNode, src.ctxt);
   }
   const auto paramNodes =
-      findNodes(node, "clangDecl[@class='TemplateTypeParm']", src.ctxt);
-  const auto body = findFirst(node, "clangDecl", src.ctxt);
-
+      findNodes(node, "clangDecl[@class='TemplateTypeParm' or @class ='NonTypeTemplateParm']", src.ctxt);
+  const auto bodyNodes = findNodes(node,
+			      "clangDecl[@class='CXXMethod' or @class ='CXXConstructor' or @class='Function']"
+			      , src.ctxt);
   std::vector<CXXCodeGen::StringTreeRef> params;
   for (auto &&paramNode : paramNodes) {
     params.push_back(w.walk(paramNode, src));
   }
-
+  std::vector<CXXCodeGen::StringTreeRef> bodies;
+  for(auto && bodyNode : bodyNodes){
+    bodies.push_back(w.walk(bodyNode, src));    
+  }
   return makeTokenNode("template") + makeTokenNode("<") + join(",", params)
-      + makeTokenNode(">") + w.walk(body, src);
+    + makeTokenNode(">") + join("\n", bodies );
+
 }
 
 DEFINE_DECLHANDLER(LinkageSpecProc) {
@@ -437,13 +492,24 @@ DEFINE_DECLHANDLER(RecordProc) {
       + wrapWithBrace(foldWithSemicolon(decls));
 }
 
+DEFINE_DECLHANDLER(TemplateTemplateParmProc) {
+  //Temporally impl.
+  if (const auto typeTableNode =
+          findFirst(node, "xcodemlTypeTable", src.ctxt)) {
+    src.typeTable = expandTypeTable(src.typeTable, typeTableNode, src.ctxt);
+  }
+  const auto head = makeTemplateHead(node, w, src);
+  return makeTokenNode("template <") + head +  makeTokenNode(">");
+}
+
 DEFINE_DECLHANDLER(TemplateTypeParmProc) {
   const auto dtident = getType(node);
   auto T = src.typeTable.at(dtident);
   auto TTPT = llvm::cast<XcodeMl::TemplateTypeParm>(T.get());
   const auto nameSpelling = TTPT->getSpelling().getValue();
-
-  return makeTokenNode("typename") + nameSpelling;
+  const auto packstr = TTPT->isPack() ? makeTokenNode("...") :
+    CXXCodeGen::makeVoidNode();
+  return makeTokenNode("typename") + packstr + nameSpelling;
 }
 
 DEFINE_DECLHANDLER(TranslationUnitProc) {
@@ -456,8 +522,28 @@ DEFINE_DECLHANDLER(TranslationUnitProc) {
   }
   return foldDecls(node, w, src);
 }
+DEFINE_DECLHANDLER(TypeAliasTemplateProc){
+  if (const auto typeTableNode =
+          findFirst(node, "xcodemlTypeTable", src.ctxt)) {
+    src.typeTable = expandTypeTable(src.typeTable, typeTableNode, src.ctxt);
+  }
+  if (const auto nnsTableNode = findFirst(node, "xcodemlNnsTable", src.ctxt)) {
+    src.nnsTable = expandNnsTable(src.nnsTable, nnsTableNode, src.ctxt);
+  }
+  const auto paramNodes =
+      findNodes(node, "clangDecl[@class='TemplateTypeParm' or @class='NonTypeTemplateParm']", src.ctxt);
+  const auto body = findFirst(node, "clangDecl[@class='TypeAlias']", src.ctxt);
 
+  std::vector<CXXCodeGen::StringTreeRef> params;
+  for (auto &&paramNode : paramNodes) {
+    params.push_back(w.walk(paramNode, src));
+  }
+
+  return makeTokenNode("template") + makeTokenNode("<") + join(",", params)
+    + makeTokenNode(">") + w.walk(body, src) ;
+}
 DEFINE_DECLHANDLER(TypeAliasProc) {
+
   const auto dtident = getProp(node, "xcodemlTypedefType");
   const auto T = src.typeTable.at(dtident);
   const auto name = getUnqualIdFromIdNode(node, src.ctxt);
@@ -503,6 +589,7 @@ makeSpecifier(xmlNodePtr node, bool is_in_class_scope) {
       std::make_tuple("is_register", "register"),
       std::make_tuple("is_static_local", "static"),
       std::make_tuple("is_thread_local", "thread_local"),
+      std::make_tuple("is_constexpr", "constexpr")
   };
   auto code = CXXCodeGen::makeVoidNode();
   for (auto &&tuple : specifiers) {
@@ -530,9 +617,11 @@ emitVarDecl(xmlNodePtr node,
       getQualifiedName(node, src).toString(src.typeTable, src.nnsTable);
   const auto dtident = getProp(node, "xcodemlType");
   const auto T = src.typeTable.at(dtident);
+  CodeFragment decl;
+  decl = makeSpecifier(node, is_in_class_scope)
+      + T->makeDeclaration(name, src.typeTable, src.nnsTable)
+    + makeVariableArraySize(node, src, w);
 
-  const auto decl = makeSpecifier(node, is_in_class_scope)
-      + T->makeDeclaration(name, src.typeTable, src.nnsTable);
   const auto initializerNode = findFirst(node, "clangStmt", src.ctxt);
   if (!initializerNode) {
     // does not have initalizer: `int x;`
@@ -555,6 +644,9 @@ DEFINE_DECLHANDLER(VarProc) {
 DEFINE_DECLHANDLER(VarProcInClass) {
   return emitVarDecl(node, w, src, true);
 }
+DEFINE_DECLHANDLER(NonTypeTemplateParmProc) {
+  return emitVarDecl(node, w, src, false);
+}
 
 } // namespace
 
@@ -563,19 +655,27 @@ const ClangDeclHandlerType ClangDeclHandlerInClass("class",
     callCodeBuilder,
     {
         std::make_tuple("ClassTemplate", ClassTemplateProc),
+        std::make_tuple(
+            "ClassTemplateSpecialization", ClassTemplateSpecializationProc),
+        std::make_tuple("ClassTemplatePartialSpecialization",
+            ClassTemplatePartialSpecializationProc),
         std::make_tuple("CXXMethod", emitInlineMemberFunction),
         std::make_tuple("CXXConstructor", emitInlineMemberFunction),
         std::make_tuple("CXXConversion", emitInlineMemberFunction),
         std::make_tuple("CXXDestructor", emitInlineMemberFunction),
         std::make_tuple("CXXRecord", CXXRecordProc),
         std::make_tuple("Enum", EnumProc),
+        std::make_tuple("FunctionTemplate", FunctionTemplateProc),
         std::make_tuple("EnumConstant", EnumConstantProc),
         std::make_tuple("Field", FieldDeclProc),
         std::make_tuple("Friend", FriendDeclProc),
         std::make_tuple("Using", UsingProc),
         std::make_tuple("TemplateTypeParm", TemplateTypeParmProc),
+	std::make_tuple("NonTypeTemplateParm", NonTypeTemplateParmProc),
+	std::make_tuple("TemplateTemplateParm", TemplateTemplateParmProc),
         std::make_tuple("TypeAlias", TypeAliasProc),
         std::make_tuple("Typedef", TypedefProc),
+	std::make_tuple("TypeAliasTemplate", TypeAliasTemplateProc),
         std::make_tuple("Var", VarProcInClass),
     });
 
@@ -602,8 +702,11 @@ const ClangDeclHandlerType ClangDeclHandler("class",
         std::make_tuple("Namespace", NamespaceProc),
         std::make_tuple("Record", RecordProc),
         std::make_tuple("TemplateTypeParm", TemplateTypeParmProc),
+	std::make_tuple("NonTypeTemplateParm", NonTypeTemplateParmProc),
+	std::make_tuple("TemplateTemplateParm", TemplateTemplateParmProc),
         std::make_tuple("TranslationUnit", TranslationUnitProc),
         std::make_tuple("TypeAlias", TypeAliasProc),
+	std::make_tuple("TypeAliasTemplate", TypeAliasTemplateProc),
         std::make_tuple("Typedef", TypedefProc),
         std::make_tuple("UsingDirective", UsingDirectiveProc),
         std::make_tuple("Var", VarProc),

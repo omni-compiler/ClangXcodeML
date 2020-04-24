@@ -86,6 +86,10 @@ nth(xmlXPathObjectPtr obj, size_t n) {
  */
 std::string
 getProp(xmlNodePtr node, const std::string &attr) {
+  if (node == nullptr){
+    std::cerr << attr<<std::endl;
+    throw(std::runtime_error("Node is Null"));
+  }
   const auto value = getPropOrNull(node, attr);
   if (!value.hasValue()) {
     std::cerr << "getProp: " << attr << " not found" << std::endl;
@@ -139,6 +143,8 @@ getContent(xmlNodePtr node) {
  */
 std::string
 getName(xmlNodePtr node) {
+  if(!node)
+      throw(std::runtime_error("Node is null"));
   return static_cast<XMLString>(node->name);
 }
 

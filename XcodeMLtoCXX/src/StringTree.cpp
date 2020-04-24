@@ -1,6 +1,6 @@
 #include <memory>
 #include <vector>
-
+#include <string>
 #include "llvm/Support/Casting.h"
 
 #include "Stream.h"

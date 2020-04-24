@@ -3,7 +3,7 @@
 
 make_with_preferences() {
   target=$1
-  make \
+  gmake \
     CXXTOXMLFLAGS=' -- -I. -I/usr/local/lib/clang/3.6.2/include -w' \
     $target >&2
 }
@@ -75,6 +75,6 @@ print_csv() {
   done
 }
 
-make -s clean
+gmake -s clean
 rm -f *.out err.log result.csv
 print_csv < testobjects.txt > result.csv 2> err.log

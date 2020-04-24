@@ -42,8 +42,8 @@ clean:
 clangxml: $(CXXCLANGXMLOBJECTS)
 
 build:
-	(cd $(ROOTDIR)/CXXtoXML/src; make clean; make)
-	(cd $(ROOTDIR)/XcodeMLtoCXX/src; make clean; make)
+	(cd $(ROOTDIR)/CXXtoXML/src; gmake clean; gmake)
+	(cd $(ROOTDIR)/XcodeMLtoCXX/src; gmake clean; gmake)
 
 prepare-cpptest: $(CPPTEST_TARBALL) $(TESTOBJECTS_TXT)
 	tar xvf $(CPPTEST_TARBALL)

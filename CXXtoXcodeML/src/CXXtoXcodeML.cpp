@@ -28,7 +28,7 @@ using namespace llvm;
 static cl::extrahelp CommonHelp(CommonOptionsParser::HelpMessage);
 static std::unique_ptr<opt::OptTable> Options(createDriverOptTable());
 
-namespace {
+namespace CXXtoXML{
 
     bool debug_flag = false;
 
@@ -71,7 +71,7 @@ private:
 public:
   bool
   BeginSourceFileAction(
-      clang::CompilerInstance &CI, StringRef Filename) override {
+      clang::CompilerInstance &CI) override {
     xmlDoc = xmlNewDoc(BAD_CAST "1.0");
     xmlNodePtr rootnode = xmlNewNode(nullptr, BAD_CAST "clangAST");
     xmlDocSetRootElement(xmlDoc, rootnode);
@@ -80,11 +80,12 @@ public:
     time_t t = time(nullptr);
 
     strftime(strftimebuf, sizeof strftimebuf, "%F %T", localtime(&t));
+    auto Filename = getCurrentFile();
 
     xmlNewProp(rootnode, BAD_CAST "source", BAD_CAST Filename.data());
     xmlNewProp(rootnode,
         BAD_CAST "language",
-        BAD_CAST getLanguageString(CI.getLangOpts()));
+        BAD_CAST CXXtoXML::getLanguageString(CI.getLangOpts()));
     xmlNewProp(rootnode, BAD_CAST "time", BAD_CAST strftimebuf);
 
     return true;
@@ -113,7 +114,7 @@ public:
 
 int
 main(int argc, const char **argv) {
-  llvm::sys::PrintStackTraceOnErrorSignal();
+  llvm::sys::PrintStackTraceOnErrorSignal(argv[0]);
   CommonOptionsParser OptionsParser(argc, argv, CXX2XMLCategory);
   ClangTool Tool(
       OptionsParser.getCompilations(), OptionsParser.getSourcePathList());
@@ -125,6 +126,7 @@ main(int argc, const char **argv) {
   return Tool.run(FrontendFactory.get());
 }
 
+cl::OptionCategory CXX2XMLCategory("CXXtoXML options");
 ///
 /// Local Variables:
 /// indent-tabs-mode: nil

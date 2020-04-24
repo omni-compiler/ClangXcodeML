@@ -11,7 +11,7 @@ all: check
 
 ROOTDIR = ../..
 XCODEMLTOCXXDIR = $(ROOTDIR)/XcodeMLtoCXX
-CXXTOXCODEML = $(ROOTDIR)/CXXtoXML/src/CXXtoXML
+CXXTOXCODEML = $(ROOTDIR)/CXXtoXcodeML/src/CXXtoXcodeML
 XCODEMLTOCXX = $(XCODEMLTOCXXDIR)/XcodeMLtoCXX
 DURATION = 5s
 
@@ -22,7 +22,7 @@ DURATION = 5s
 # .src.c -> .src.out -> .src.txt
 # .src.c -> .c.xcodeml -> .dst.c -> .dst.out -> .dst.txt
 
-CC = /usr/local/bin/clang
+CC = /usr/local/bin/clang90
 CFLAGS = -pedantic -fsyntax-only
 CTOXCODEMLFLAGS = -- -I.
 
@@ -46,7 +46,7 @@ CTESTOUTPUTTEXTS = $(CTESTCASES:.src.c=.dst.txt)
 # .src.cpp -> .src.out -> .src.txt
 # .src.cpp -> .cpp.xcodeml -> .dst.cpp -> .dst.out -> .dst.txt
 
-CXX = /usr/local/bin/clang++
+CXX = /usr/local/bin/clang++90
 CXXFLAGS = -pedantic -std=c++11
 CXXTOXCODEMLFLAGS = -- -I. $(CXXFLAGS)
 

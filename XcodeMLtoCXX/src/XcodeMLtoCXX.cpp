@@ -28,11 +28,19 @@ main(int argc, char **argv) {
     return 0;
   }
   std::string filename(argv[1]);
-  xmlDocPtr doc = xmlParseFile(filename.c_str());
+  xmlDocPtr doc = xmlReadFile(filename.c_str(), NULL, XML_PARSE_BIG_LINES);
   xmlNodePtr root = xmlDocGetRootElement(doc);
   xmlXPathContextPtr ctxt = xmlXPathNewContext(doc);
   std::stringstream ss;
-  buildCode(root, ctxt, ss);
+  try{
+    buildCode(root, ctxt, ss);
+  }catch(std::exception &e){
+    std::cerr <<e.what()<<std::endl;
+    exit(-1);
+  }catch(...){
+    std::cerr << "Unknown Error"<<std::endl;
+    exit(-1);
+  }
   std::cout << ss.str() << std::endl;
   xmlXPathFreeContext(ctxt);
   xmlFreeDoc(doc);

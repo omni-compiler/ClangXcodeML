@@ -1,5 +1,9 @@
 #ifndef XCODEMLTYPE_H
 #define XCODEMLTYPE_H
+#include <libxml/tree.h>
+#include <libxml/parser.h>
+#include <libxml/xpath.h>
+#include <libxml/xpathInternals.h>
 
 namespace XcodeMl {
 
@@ -57,6 +61,14 @@ enum class TypeKind {
   Class,
   /*! Template type parameter */
   TemplateTypeParm,
+  /*! Template Specialization */
+  TemplateSpecialization,
+  DependentName,
+  DeclType,
+  DependentTemplateSpecialization,
+  PackExpansion,
+  Atomic,
+  UnaryTransform,
   /*! Other type */
   Other,
 };
@@ -242,6 +254,20 @@ protected:
   LValueReferenceType(const LValueReferenceType &) = default;
 };
 
+class RValueReferenceType : public ReferenceType {
+public:
+  RValueReferenceType(
+      const DataTypeIdent &dtident, const DataTypeIdent &pointee);
+  CodeFragment makeDeclaration(
+      CodeFragment, const TypeTable &, const NnsTable &) override;
+  ~RValueReferenceType() override = default;
+  Type *clone() const override;
+  static bool classof(const Type *);
+
+protected:
+  RValueReferenceType(const RValueReferenceType &) = default;
+};
+
 class ParamList {
 public:
   ParamList() = default;
@@ -322,9 +348,12 @@ public:
   CodeFragment addConstQualifier(CodeFragment) const override;
   CodeFragment addVolatileQualifier(CodeFragment) const override;
   static bool classof(const Type *);
+  CodeFragment makeVsizeDeclaration(
+     CodeFragment, const TypeTable &, const NnsTable &  );
+
   /*! Returns the element type as `XcodeMl::TypeRef`. */
   TypeRef getElemType(const TypeTable &) const;
-
+  bool isFixedSize(){ return (size.kind == Size::Kind::Integer);}
 protected:
   Array(const Array &);
 
@@ -414,13 +443,17 @@ enum class CXXClassKind {
   Struct,
   Union,
 };
+struct TemplateArg {
+  int argType;
+  DataTypeIdent ident;
+};
+using TemplateArgList = std::vector<TemplateArg>;
 
 /*!
  * \brief Converts `XcodeMl::CXXClassKind` to string (`"class"`,
  * `"struct"`, or `"union"`)
  */
 std::string getClassKey(CXXClassKind kind);
-
 /*! \brief Represents (C++-style) class. */
 class ClassType : public Type {
 public:
@@ -428,8 +461,7 @@ public:
   using MemberName = std::shared_ptr<UnqualId>;
   using Symbols = std::vector<std::tuple<MemberName, DataTypeIdent>>;
   using BaseClass = std::tuple<std::string, DataTypeIdent, bool>;
-  using TemplateArg = DataTypeIdent;
-  using TemplateArgList = std::vector<TemplateArg>;
+  //using TemplateArg = DataTypeIdent;
   ClassType(const DataTypeIdent &, const CodeFragment &, const Symbols &);
   ClassType(const DataTypeIdent &,
       CXXClassKind,
@@ -437,7 +469,8 @@ public:
       const CodeFragment &,
       const std::vector<BaseClass> &,
       const Symbols &,
-      const llvm::Optional<TemplateArgList> &);
+	    const llvm::Optional<TemplateArgList> &,
+	    uintptr_t node ) ;
   ClassType(const DataTypeIdent &, const Symbols &);
   CodeFragment makeDeclaration(
       CodeFragment, const TypeTable &, const NnsTable &) override;
@@ -453,7 +486,7 @@ public:
   llvm::Optional<CodeFragment> getAsTemplateId(
       const TypeTable &typeTable, const NnsTable &nnsTable) const;
   static bool classof(const Type *);
-
+  xmlNodePtr getNode(){ return reinterpret_cast<xmlNodePtr>(node);};
 protected:
   ClassType(const ClassType &);
 
@@ -464,11 +497,12 @@ private:
   std::vector<BaseClass> bases_;
   Symbols classScopeSymbols;
   llvm::Optional<TemplateArgList> templateArgs;
+  uintptr_t node;
 };
 
 class TemplateTypeParm : public Type {
 public:
-  TemplateTypeParm(const DataTypeIdent &dtident, const CodeFragment &name);
+  TemplateTypeParm(const DataTypeIdent &dtident, const CodeFragment &name, int pack);
   ~TemplateTypeParm() override = default;
   CodeFragment makeDeclaration(
       CodeFragment, const TypeTable &, const NnsTable &) override;
@@ -476,14 +510,103 @@ public:
   static bool classof(const Type *);
   void setSpelling(CodeFragment);
   llvm::Optional<CodeFragment> getSpelling() const;
-
+  bool isPack(){return pack;}
 protected:
   TemplateTypeParm(const TemplateTypeParm &);
 
 private:
+  bool pack;
   llvm::Optional<CodeFragment> pSpelling;
 };
+class TemplateSpecializationType : public Type {
+  CodeFragment name;
+  llvm::Optional<TemplateArgList> templateArgs;
+public:
+  TemplateSpecializationType(const DataTypeIdent &, const CodeFragment &,const llvm::Optional<TemplateArgList> &);
+  ~TemplateSpecializationType() override = default;
+  CodeFragment makeDeclaration(
+      CodeFragment, const TypeTable &, const NnsTable &) override;
+  Type *clone() const override;
+  static bool classof(const Type *);
+  llvm::Optional<CodeFragment> getSpelling() const;
 
+};
+class DependentNameType: public Type {
+  const DataTypeIdent upper;
+  const DataTypeIdent member;
+
+public:
+  DependentNameType(const DataTypeIdent &, const DataTypeIdent &, const DataTypeIdent &);
+  ~DependentNameType() override = default;
+  CodeFragment makeDeclaration(
+      CodeFragment, const TypeTable &, const NnsTable &) override;
+  Type *clone() const override;
+  static bool classof(const Type *);
+protected:
+  DependentNameType(const DependentNameType &);
+};
+
+class DeclType : public Type{
+public:
+    DeclType(const DataTypeIdent &);
+    ~DeclType() override = default;
+  CodeFragment makeDeclaration(
+      CodeFragment, const TypeTable &, const NnsTable &) override;
+  Type *clone() const override;
+  static bool classof(const Type *);
+
+protected:
+  DeclType(const DeclType &);
+
+};
+
+class PackExpansionType: public Type{
+  const DataTypeIdent pattern;
+public:
+  PackExpansionType(const DataTypeIdent &, const DataTypeIdent &);
+  ~PackExpansionType() override = default;
+  CodeFragment makeDeclaration
+  (CodeFragment, const TypeTable &, const NnsTable &) override;
+  Type *clone() const override;
+  static bool classof(const Type *);
+protected:
+  PackExpansionType(const PackExpansionType&);
+};
+
+class UnaryTransformType : public Type {
+  const DataTypeIdent utype;
+public:
+  UnaryTransformType(const DataTypeIdent &, const DataTypeIdent &);
+  ~UnaryTransformType() override = default;
+  CodeFragment makeDeclaration
+  (CodeFragment, const TypeTable &, const NnsTable &) override;
+  Type *clone() const override;
+  static bool classof(const Type *);
+protected:
+  UnaryTransformType(const UnaryTransformType &);
+};
+
+class AtomicType: public Type{
+  const DataTypeIdent valuetype;
+public:
+  AtomicType(const DataTypeIdent &, const DataTypeIdent &);
+  ~AtomicType() override = default;
+  CodeFragment makeDeclaration
+  (CodeFragment, const TypeTable &, const NnsTable &) override;
+  Type *clone() const override;
+  static bool classof(const Type *);
+protected:
+  AtomicType(const AtomicType &);
+};
+class DependentTemplateSpecializationType: public Type{
+public:
+  DependentTemplateSpecializationType(const DataTypeIdent&);
+  ~DependentTemplateSpecializationType() override = default;
+  CodeFragment makeDeclaration
+  (CodeFragment, const TypeTable &, const NnsTable &) override;
+  Type *clone() const override;
+  static bool classof(const Type *);
+};
 class OtherType : public Type {
 public:
   OtherType(const DataTypeIdent &);
@@ -508,6 +631,7 @@ TypeRef makePointerType(DataTypeIdent, DataTypeIdent);
 TypeRef makeMemberPointerType(
     DataTypeIdent dtident, DataTypeIdent pointee, DataTypeIdent record);
 TypeRef makeLValueReferenceType(const DataTypeIdent &, const DataTypeIdent &);
+TypeRef makeRValueReferenceType(const DataTypeIdent &, const DataTypeIdent &);
 TypeRef makeArrayType(DataTypeIdent, TypeRef, size_t);
 TypeRef makeArrayType(DataTypeIdent, TypeRef, size_t);
 TypeRef makeArrayType(DataTypeIdent, TypeRef, Array::Size);
@@ -521,13 +645,15 @@ TypeRef makeClassType(const DataTypeIdent &dtident,
     const CodeFragment &className,
     const std::vector<ClassType::BaseClass> &bases,
     const ClassType::Symbols &members,
-    const llvm::Optional<ClassType::TemplateArgList> &templateArgs);
+		      const llvm::Optional<TemplateArgList> &templateArgs,
+		      const xmlNodePtr node);
 TypeRef makeCXXUnionType(const DataTypeIdent &ident,
     const llvm::Optional<std::string> nnsident,
     const CodeFragment &unionName,
     const std::vector<ClassType::BaseClass> &bases,
     const ClassType::Symbols &members,
-    const llvm::Optional<ClassType::TemplateArgList> &templateArgs);
+			 const llvm::Optional<TemplateArgList> &templateArgs,
+			 const xmlNodePtr node);
 TypeRef makeFunctionType(const DataTypeIdent &ident,
     const DataTypeIdent &returnType,
     const std::vector<DataTypeIdent> &paramTypes);
@@ -536,12 +662,21 @@ TypeRef makeFunctionType(const DataTypeIdent &ident,
     const std::vector<DataTypeIdent> &paramTypes);
 TypeRef makeStructType(
     const DataTypeIdent &, const CodeFragment &, const Struct::MemberList &);
-TypeRef makeTemplateTypeParm(const DataTypeIdent &, const CodeFragment &);
+  TypeRef makeTemplateTypeParm(const DataTypeIdent &, const CodeFragment &, int);
 TypeRef makeVariadicFunctionType(const DataTypeIdent &ident,
     const DataTypeIdent &returnType,
     const std::vector<DataTypeIdent> &paramTypes);
+TypeRef makeTemplateSpecializationType(const DataTypeIdent& ,
+				       const CodeFragment &,
+				       const llvm::Optional<TemplateArgList> &
+				       );
 TypeRef makeOtherType(const DataTypeIdent &);
-
+TypeRef makeDeclType(const DataTypeIdent &);
+TypeRef makeDependentNameType(const DataTypeIdent &, const DataTypeIdent &, const DataTypeIdent &);
+TypeRef makeDependentTemplateSpecializationType(const DataTypeIdent & );
+TypeRef makeAtomicType(const DataTypeIdent &, const DataTypeIdent &);
+TypeRef makePackExpansionType(const DataTypeIdent &, const DataTypeIdent &);
+TypeRef makeUnaryTransformType(const DataTypeIdent &, const DataTypeIdent &);
 bool hasParen(const TypeRef &, const TypeTable &);
 }
 #endif /* !XCODEMLTYPE_H */

@@ -26,5 +26,9 @@ stringifyLinkage(Linkage l) {
     // external linkage but within unnamed namespace
     return "UniqueExternalLinkage";
   case VisibleNoLinkage: return "VisibleNoLinkage";
+  case ModuleLinkage: return "ModuleLinkage";
+  default:abort();
   }
+
+  return "Unknown";
 }

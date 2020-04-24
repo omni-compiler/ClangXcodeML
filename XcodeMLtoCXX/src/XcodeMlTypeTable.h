@@ -20,7 +20,7 @@ public:
   void setReturnType(const std::string &, const TypeRef &);
   bool exists(const std::string &) const;
   const std::vector<std::string> &getKeys(void) const;
-
+  void dump();
 private:
   using TypeMap = std::map<std::string, TypeRef>;
   TypeRef &at_or_throw(
